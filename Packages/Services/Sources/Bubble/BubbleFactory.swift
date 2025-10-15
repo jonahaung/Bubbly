@@ -1,0 +1,143 @@
+//
+//  BubbleFactory.swift
+//  Services
+//
+//  Created by Aung Ko Min on 17/8/25.
+//
+
+import UIKit
+import Database
+import Core
+
+public final class BubbleFactory: @unchecked Sendable {
+
+	private let minutesForChatMsgGrouping: Int
+	private var bubbleCache = [String: Bubble]()
+
+	public init(_ minutesForChatMsgGrouping: Int = Settings.Layout.minutesForChatMsgGrouping) {
+		self.minutesForChatMsgGrouping = minutesForChatMsgGrouping
+	}
+
+	private func getBubble(
+		msg: MsgSnapshot,
+		previousMsg: MsgSnapshot?,
+		nextMsg: MsgSnapshot?
+	) -> Bubble {
+		if let cached = bubbleCache[msg.uid] {
+			return cached
+		}
+		var bubble = Bubble()
+		bubble.bubbleCorner = resolveCorner(
+			msg: msg,
+			isSent: msg.receiptType == .send,
+			previousMsg: previousMsg,
+			nextMsg: nextMsg
+		)
+		if nextMsg != nil && previousMsg != nil {
+			bubbleCache[msg.uid] = bubble
+		}
+		return bubble
+	}
+
+	// MARK: - Corner resolution
+
+	private func resolveCorner(
+		msg: MsgSnapshot,
+		isSent: Bool,
+		previousMsg: MsgSnapshot?,
+		nextMsg: MsgSnapshot?
+	) -> BubbleCorner {
+		if isSent {
+			return resolveSendingCorner(msg, previousMsg: previousMsg, nextMsg: nextMsg)
+		} else {
+			return resolveReceivingCorner(msg, previousMsg: previousMsg, nextMsg: nextMsg)
+		}
+	}
+
+	private func resolveSendingCorner(
+		_ msg: MsgSnapshot,
+		previousMsg: MsgSnapshot?,
+		nextMsg: MsgSnapshot?
+	) -> BubbleCorner {
+		let canPreviousGroup = previousMsg.map { shouldGroupWithPrevious(msg: msg, previousMsg: $0) } ?? false
+		let canNextGroup = nextMsg.map { shouldGroupWithNext(msg: msg, nextMsg: $0) } ?? false
+
+		switch (previousMsg != nil, nextMsg != nil) {
+		case (true, true):
+			if canPreviousGroup && canNextGroup { return .sendingCenter }
+			if !canPreviousGroup && !canNextGroup { return .all }
+			if canPreviousGroup && !canNextGroup { return .sendingBottom }
+			return .sendingTop
+		case (true, false):
+			return canPreviousGroup ? .sendingBottom : .all
+		case (false, true):
+			return canNextGroup ? .sendingTop : .all
+		case (false, false):
+			return .all
+		}
+	}
+
+	private func resolveReceivingCorner(
+		_ msg: MsgSnapshot,
+		previousMsg: MsgSnapshot?,
+		nextMsg: MsgSnapshot?
+	) -> BubbleCorner {
+		let canPreviousGroup = previousMsg.map { shouldGroupWithPrevious(msg: msg, previousMsg: $0) } ?? false
+		let canNextGroup = nextMsg.map { shouldGroupWithNext(msg: msg, nextMsg: $0) } ?? false
+
+		switch (previousMsg != nil, nextMsg != nil) {
+		case (true, true):
+			if canPreviousGroup && canNextGroup { return .receivingCenter }
+			if !canPreviousGroup && !canNextGroup { return .all }
+			if canPreviousGroup && !canNextGroup { return .receivingBottom }
+			return .receivingTop
+		case (true, false):
+			return canPreviousGroup ? .receivingBottom : .all
+		case (false, true):
+			return canNextGroup ? .receivingTop : .all
+		case (false, false):
+			return .all
+		}
+	}
+
+	// MARK: - Time separator & padding
+
+	public func msgCellLayout(
+		for msg: MsgSnapshot,
+		previous: MsgSnapshot?,
+		next: MsgSnapshot?
+	) -> MsgCellLayout {
+		guard let previous else {
+			return .init(
+				showTimeSeparator: false,
+				showTopPadding: false,
+				bubble: getBubble(msg: msg, previousMsg: nil, nextMsg: next)
+			)
+		}
+
+		let showTimeSeparater = !isSimilierDateTime(of: msg.date, from: previous)
+		let showTopPadding = !showTimeSeparater && (msg.senderID != previous.senderID)
+		let bubble = getBubble(msg: msg, previousMsg: previous, nextMsg: next)
+		return .init(showTimeSeparator: showTimeSeparater, showTopPadding: showTopPadding, bubble: bubble)
+	}
+	// MARK: - Grouping helpers
+
+	private func shouldGroupWithPrevious(msg: MsgSnapshot, previousMsg: MsgSnapshot) -> Bool {
+		isEqual(of: msg, to: previousMsg) &&
+		isSimilierDateTime(of: msg.date, from: previousMsg)
+	}
+
+	private func shouldGroupWithNext(msg: MsgSnapshot, nextMsg: MsgSnapshot) -> Bool {
+		isEqual(of: msg, to: nextMsg) &&
+		isSimilierDateTime(of: msg.date, from: nextMsg)
+	}
+
+	private func isEqual(of thisItem: MsgSnapshot, to msg: MsgSnapshot) -> Bool {
+		thisItem.senderID == msg.senderID
+	}
+
+	private func isSimilierDateTime(of date: Date, from msg: MsgSnapshot) -> Bool {
+		let difference = date.getDifference(from: msg.date, unit: .minute)
+		return abs(difference) < minutesForChatMsgGrouping
+	}
+}

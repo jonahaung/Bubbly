@@ -1,0 +1,833 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		470DEC072E850719005C5863 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 470DEC062E850719005C5863 /* MsgRoomMain */; };
+		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		479C82D12DDE6D1A0019971C /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 479C82D02DDE6D1A0019971C /* MsgRoomMain */; };
+		47B167E72E9AB3530020F282 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		475BAAC62DBE859E007B0876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 475BAAAC2DBE859D007B0876 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 475BAAB32DBE859D007B0876;
+			remoteInfo = Bubbly;
+		};
+		475BAAD02DBE859E007B0876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 475BAAAC2DBE859D007B0876 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 475BAAB32DBE859D007B0876;
+			remoteInfo = Bubbly;
+		};
+		475BAAEC2DBE88CA007B0876 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 475BAAAC2DBE859D007B0876 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 475BAAE62DBE88CA007B0876;
+			remoteInfo = NotificationService;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		475BAAF32DBE88CA007B0876 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		4735A5E12DCEB7F3002854E4 /* FCM_V1 */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FCM_V1; sourceTree = "<group>"; };
+		475BAAB42DBE859D007B0876 /* Bubbly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bubbly.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		475BAAC52DBE859E007B0876 /* BubblyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		475BAACF2DBE859E007B0876 /* BubblyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		475BAAE72DBE88CA007B0876 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		479C830E2DDE71D70019971C /* Crypto */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Crypto; sourceTree = "<group>"; };
+		47A653C52E99B92B005A2E50 /* FirePhoneOTP */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FirePhoneOTP; sourceTree = "<group>"; };
+		47AD343A2DCD650B00C4FA62 /* Core */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Core; sourceTree = "<group>"; };
+		47AD343B2DCD650B00C4FA62 /* Database */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Database; sourceTree = "<group>"; };
+		47AD343C2DCD650B00C4FA62 /* ImageLoader */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ImageLoader; sourceTree = "<group>"; };
+		47AD343D2DCD650B00C4FA62 /* MediaPicker */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MediaPicker; sourceTree = "<group>"; };
+		47AD343F2DCD650B00C4FA62 /* MsgRoomMain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MsgRoomMain; sourceTree = "<group>"; };
+		47AD34402DCD650B00C4FA62 /* Services */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Services; sourceTree = "<group>"; };
+		47AD34442DCD650B00C4FA62 /* XUI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = XUI; sourceTree = "<group>"; };
+		47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		475BAAD72DBE859E007B0876 /* Exceptions for "Bubbly" folder in "Bubbly" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 475BAAB32DBE859D007B0876 /* Bubbly */;
+		};
+		475BAAF22DBE88CA007B0876 /* Exceptions for "NotificationService" folder in "NotificationService" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 475BAAE62DBE88CA007B0876 /* NotificationService */;
+		};
+		4799174B2DE689D800BB70B8 /* Exceptions for "Bubbly" folder in "NotificationService" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"Resources/GoogleService-Info.plist",
+			);
+			target = 475BAAE62DBE88CA007B0876 /* NotificationService */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		475BAAB62DBE859D007B0876 /* Bubbly */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				475BAAD72DBE859E007B0876 /* Exceptions for "Bubbly" folder in "Bubbly" target */,
+				4799174B2DE689D800BB70B8 /* Exceptions for "Bubbly" folder in "NotificationService" target */,
+			);
+			path = Bubbly;
+			sourceTree = "<group>";
+		};
+		475BAAC82DBE859E007B0876 /* BubblyTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BubblyTests;
+			sourceTree = "<group>";
+		};
+		475BAAD22DBE859E007B0876 /* BubblyUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BubblyUITests;
+			sourceTree = "<group>";
+		};
+		475BAAE82DBE88CA007B0876 /* NotificationService */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				475BAAF22DBE88CA007B0876 /* Exceptions for "NotificationService" folder in "NotificationService" target */,
+			);
+			path = NotificationService;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		475BAAB12DBE859D007B0876 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				479C82D12DDE6D1A0019971C /* MsgRoomMain in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAAC22DBE859E007B0876 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAACC2DBE859E007B0876 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAAE42DBE88CA007B0876 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				470DEC072E850719005C5863 /* MsgRoomMain in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		475BAAAB2DBE859D007B0876 = {
+			isa = PBXGroup;
+			children = (
+				47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */,
+				47AD34452DCD650B00C4FA62 /* Packages */,
+				475BAAB62DBE859D007B0876 /* Bubbly */,
+				475BAAC82DBE859E007B0876 /* BubblyTests */,
+				475BAAD22DBE859E007B0876 /* BubblyUITests */,
+				475BAAE82DBE88CA007B0876 /* NotificationService */,
+				475BAB522DBE8D78007B0876 /* Frameworks */,
+				475BAAB52DBE859D007B0876 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		475BAAB52DBE859D007B0876 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				475BAAB42DBE859D007B0876 /* Bubbly.app */,
+				475BAAC52DBE859E007B0876 /* BubblyTests.xctest */,
+				475BAACF2DBE859E007B0876 /* BubblyUITests.xctest */,
+				475BAAE72DBE88CA007B0876 /* NotificationService.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		475BAB522DBE8D78007B0876 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		47AD34452DCD650B00C4FA62 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				47A653C52E99B92B005A2E50 /* FirePhoneOTP */,
+				47AD343A2DCD650B00C4FA62 /* Core */,
+				47AD343B2DCD650B00C4FA62 /* Database */,
+				47AD34402DCD650B00C4FA62 /* Services */,
+				47AD343F2DCD650B00C4FA62 /* MsgRoomMain */,
+				479C830E2DDE71D70019971C /* Crypto */,
+				4735A5E12DCEB7F3002854E4 /* FCM_V1 */,
+				47AD343C2DCD650B00C4FA62 /* ImageLoader */,
+				47AD343D2DCD650B00C4FA62 /* MediaPicker */,
+				47AD34442DCD650B00C4FA62 /* XUI */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		475BAAB32DBE859D007B0876 /* Bubbly */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 475BAAD82DBE859E007B0876 /* Build configuration list for PBXNativeTarget "Bubbly" */;
+			buildPhases = (
+				475BAAB02DBE859D007B0876 /* Sources */,
+				475BAAB12DBE859D007B0876 /* Frameworks */,
+				475BAAB22DBE859D007B0876 /* Resources */,
+				475BAAF32DBE88CA007B0876 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				475BAAED2DBE88CA007B0876 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				475BAAB62DBE859D007B0876 /* Bubbly */,
+			);
+			name = Bubbly;
+			packageProductDependencies = (
+				479C82D02DDE6D1A0019971C /* MsgRoomMain */,
+			);
+			productName = Bubbly;
+			productReference = 475BAAB42DBE859D007B0876 /* Bubbly.app */;
+			productType = "com.apple.product-type.application";
+		};
+		475BAAC42DBE859E007B0876 /* BubblyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 475BAADD2DBE859E007B0876 /* Build configuration list for PBXNativeTarget "BubblyTests" */;
+			buildPhases = (
+				475BAAC12DBE859E007B0876 /* Sources */,
+				475BAAC22DBE859E007B0876 /* Frameworks */,
+				475BAAC32DBE859E007B0876 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				475BAAC72DBE859E007B0876 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				475BAAC82DBE859E007B0876 /* BubblyTests */,
+			);
+			name = BubblyTests;
+			packageProductDependencies = (
+			);
+			productName = BubblyTests;
+			productReference = 475BAAC52DBE859E007B0876 /* BubblyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		475BAACE2DBE859E007B0876 /* BubblyUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 475BAAE02DBE859E007B0876 /* Build configuration list for PBXNativeTarget "BubblyUITests" */;
+			buildPhases = (
+				475BAACB2DBE859E007B0876 /* Sources */,
+				475BAACC2DBE859E007B0876 /* Frameworks */,
+				475BAACD2DBE859E007B0876 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				475BAAD12DBE859E007B0876 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				475BAAD22DBE859E007B0876 /* BubblyUITests */,
+			);
+			name = BubblyUITests;
+			packageProductDependencies = (
+			);
+			productName = BubblyUITests;
+			productReference = 475BAACF2DBE859E007B0876 /* BubblyUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		475BAAE62DBE88CA007B0876 /* NotificationService */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 475BAAEF2DBE88CA007B0876 /* Build configuration list for PBXNativeTarget "NotificationService" */;
+			buildPhases = (
+				475BAAE32DBE88CA007B0876 /* Sources */,
+				475BAAE42DBE88CA007B0876 /* Frameworks */,
+				475BAAE52DBE88CA007B0876 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				475BAAE82DBE88CA007B0876 /* NotificationService */,
+			);
+			name = NotificationService;
+			packageProductDependencies = (
+				470DEC062E850719005C5863 /* MsgRoomMain */,
+			);
+			productName = NotificationService;
+			productReference = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		475BAAAC2DBE859D007B0876 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1630;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					475BAAB32DBE859D007B0876 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+					475BAAC42DBE859E007B0876 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 475BAAB32DBE859D007B0876;
+					};
+					475BAACE2DBE859E007B0876 = {
+						CreatedOnToolsVersion = 16.3;
+						TestTargetID = 475BAAB32DBE859D007B0876;
+					};
+					475BAAE62DBE88CA007B0876 = {
+						CreatedOnToolsVersion = 16.3;
+					};
+				};
+			};
+			buildConfigurationList = 475BAAAF2DBE859D007B0876 /* Build configuration list for PBXProject "Bubbly" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 475BAAAB2DBE859D007B0876;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 475BAAB52DBE859D007B0876 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				475BAAB32DBE859D007B0876 /* Bubbly */,
+				475BAAC42DBE859E007B0876 /* BubblyTests */,
+				475BAACE2DBE859E007B0876 /* BubblyUITests */,
+				475BAAE62DBE88CA007B0876 /* NotificationService */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		475BAAB22DBE859D007B0876 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				47B167E72E9AB3530020F282 /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAAC32DBE859E007B0876 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAACD2DBE859E007B0876 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAAE52DBE88CA007B0876 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		475BAAB02DBE859D007B0876 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAAC12DBE859E007B0876 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAACB2DBE859E007B0876 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		475BAAE32DBE88CA007B0876 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		475BAAC72DBE859E007B0876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 475BAAB32DBE859D007B0876 /* Bubbly */;
+			targetProxy = 475BAAC62DBE859E007B0876 /* PBXContainerItemProxy */;
+		};
+		475BAAD12DBE859E007B0876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 475BAAB32DBE859D007B0876 /* Bubbly */;
+			targetProxy = 475BAAD02DBE859E007B0876 /* PBXContainerItemProxy */;
+		};
+		475BAAED2DBE88CA007B0876 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 475BAAE62DBE88CA007B0876 /* NotificationService */;
+			targetProxy = 475BAAEC2DBE88CA007B0876 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		475BAAD92DBE859E007B0876 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Bubbly/Bubbly.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bubbly/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "TO DO";
+				INFOPLIST_KEY_NSCameraUsageDescription = "TO DO";
+				INFOPLIST_KEY_NSContactsUsageDescription = "TO DO";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TO DO";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "TO DO";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aungkomin.Bubbly;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		475BAADA2DBE859E007B0876 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Bubbly/Bubbly.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Bubbly/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
+				INFOPLIST_KEY_NSAppleMusicUsageDescription = "TO DO";
+				INFOPLIST_KEY_NSCameraUsageDescription = "TO DO";
+				INFOPLIST_KEY_NSContactsUsageDescription = "TO DO";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TO DO";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "TO DO";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aungkomin.Bubbly;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		475BAADB2DBE859E007B0876 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		475BAADC2DBE859E007B0876 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		475BAADE2DBE859E007B0876 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aungkomin.BubblyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bubbly.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Bubbly";
+			};
+			name = Debug;
+		};
+		475BAADF2DBE859E007B0876 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aungkomin.BubblyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Bubbly.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Bubbly";
+			};
+			name = Release;
+		};
+		475BAAE12DBE859E007B0876 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aungkomin.BubblyUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Bubbly;
+			};
+			name = Debug;
+		};
+		475BAAE22DBE859E007B0876 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aungkomin.BubblyUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Bubbly;
+			};
+			name = Release;
+		};
+		475BAAF02DBE88CA007B0876 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aungkomin.Bubbly.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		475BAAF12DBE88CA007B0876 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = NotificationService/NotificationService.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HJ9L53D9PB;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = NotificationService/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = NotificationService;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.aungkomin.Bubbly.NotificationService;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		475BAAAF2DBE859D007B0876 /* Build configuration list for PBXProject "Bubbly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				475BAADB2DBE859E007B0876 /* Debug */,
+				475BAADC2DBE859E007B0876 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		475BAAD82DBE859E007B0876 /* Build configuration list for PBXNativeTarget "Bubbly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				475BAAD92DBE859E007B0876 /* Debug */,
+				475BAADA2DBE859E007B0876 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		475BAADD2DBE859E007B0876 /* Build configuration list for PBXNativeTarget "BubblyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				475BAADE2DBE859E007B0876 /* Debug */,
+				475BAADF2DBE859E007B0876 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		475BAAE02DBE859E007B0876 /* Build configuration list for PBXNativeTarget "BubblyUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				475BAAE12DBE859E007B0876 /* Debug */,
+				475BAAE22DBE859E007B0876 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		475BAAEF2DBE88CA007B0876 /* Build configuration list for PBXNativeTarget "NotificationService" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				475BAAF02DBE88CA007B0876 /* Debug */,
+				475BAAF12DBE88CA007B0876 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		470DEC062E850719005C5863 /* MsgRoomMain */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MsgRoomMain;
+		};
+		479C82D02DDE6D1A0019971C /* MsgRoomMain */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MsgRoomMain;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 475BAAAC2DBE859D007B0876 /* Project object */;
+}
