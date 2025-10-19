@@ -7,6 +7,8 @@
 
 import Foundation
 import XUI
+import FCM_V1
+import Core
 
 @globalActor
 public struct SocketActor {
@@ -18,7 +20,9 @@ public actor Socket {
 	enum SocketError: Error {
 		case encodingFailed
 	}
-
+	let pushNotificationSender = PushNotificationSender(
+		suitName: AppInformation.groupID
+	)
 	public static let shared = Socket()
 	internal let cryptoService =  CryptoService.shared
 	private init() {}

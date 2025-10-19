@@ -8,12 +8,14 @@
 import Foundation
 
 extension MsgsScrollViewLayout {
-	struct Cache {
+	struct Cache: Sendable, Hashable {
+		var totalHeight: CGFloat
 		var layouts: [CellLayout]
+		var boundsWidth: CGFloat
 	}
-	struct CellLayout: Identifiable {
+	struct CellLayout: Sendable, Identifiable, Hashable {
 		let id: String
-		let size: CGSize
+		var size: CGSize
 		var position: CGPoint
 
 		init(_ id: String, _ size: CGSize, _ position: CGPoint) {
@@ -21,5 +23,7 @@ extension MsgsScrollViewLayout {
 			self.size = size
 			self.position = position
 		}
+
+		var frame: CGRect { .init(origin: position, size: size)}
 	}
 }

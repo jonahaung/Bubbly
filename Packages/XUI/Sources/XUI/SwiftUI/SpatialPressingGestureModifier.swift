@@ -27,36 +27,35 @@ struct SpatialPressingGestureModifier: ViewModifier {
 	}
 }
 
-struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
-	final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
+	public final class Coordinator: NSObject, UIGestureRecognizerDelegate {
 		@objc
-		func gestureRecognizer(
+		public func gestureRecognizer(
 			_ gestureRecognizer: UIGestureRecognizer,
 			shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer
 		) -> Bool {
-			true
+			false
 		}
 	}
 
 	@Binding var location: CGPoint?
 
-	func makeCoordinator(converter: CoordinateSpaceConverter) -> Coordinator {
+	public func makeCoordinator(converter: CoordinateSpaceConverter) -> Coordinator {
 		Coordinator()
 	}
 
-	func makeUIGestureRecognizer(context: Context) -> UILongPressGestureRecognizer {
+	public func makeUIGestureRecognizer(context: Context) -> UILongPressGestureRecognizer {
 		let recognizer = UILongPressGestureRecognizer()
-		recognizer.minimumPressDuration = 0
+		recognizer.minimumPressDuration = 0.8
 		recognizer.delegate = context.coordinator
-
 		return recognizer
 	}
 
-	func handleUIGestureRecognizerAction(
+	public func handleUIGestureRecognizerAction(
 		_ recognizer: UIGestureRecognizerType, context: Context) {
 			switch recognizer.state {
 			case .began:
-				location = context.converter.localLocation
+				location = context.converter.location(in: .global)
 			case .ended, .cancelled, .failed:
 				location = nil
 			default:

@@ -22,11 +22,9 @@ struct MsgCellHeader: View {
 	var body: some View {
 		Text(text)
 			.font(.system(size: UIFont.smallSystemFontSize, weight: .medium))
-			.foregroundStyle(.secondary)
 			.padding(.horizontal, 8)
 			.padding(.horizontal, ChatLayoutConstants.Cell.defaultSpacing + 4)
 			.padding(.top, 8)
-			.equatable(by: msg.uid)
 			.id(msg.uid+Self.typeName)
 			.layoutValue(.init(uid: msg.uid+Self.typeName, recipient: msg.receiptType))
 	}
@@ -43,7 +41,6 @@ struct MsgCellFooter: View {
 	var body: some View {
 		Text(text)
 			.font(.system(size: UIFont.smallSystemFontSize, weight: .medium))
-			.foregroundStyle(.secondary)
 			.padding(.horizontal, 8)
 			.padding(.horizontal, ChatLayoutConstants.Cell.defaultSpacing + 4)
 			.padding(.bottom, 8)

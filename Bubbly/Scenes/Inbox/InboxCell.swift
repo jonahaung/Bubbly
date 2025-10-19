@@ -16,41 +16,42 @@ struct InboxCell: View {
 	let item: InboxItem
 
 	var body: some View {
-		Button {
-			ConversationInitializer
-				.start(conID: item.conversation.uid, refetch: false)
-		} label: {
-			HStack {
-				ProfilePhoto(item, size: .custom(50))
-				VStack(alignment: .leading) {
-					HStack {
-						Text(item.title).bold()
-						Spacer()
-					}
-					Text(item.sender.name + " ")
-						.font(.footnote.lowercaseSmallCaps())
-						.foregroundStyle(.secondary)
-					+
-					Text(item.msg.text)
-						.font(
-							Font
-								.system(
-									size: 14,
-									weight: item.msg.incomingStatus != .read && item.msg.receiptType == .receive ? .medium
-									: .regular)
-						)
-						.foregroundStyle(
-							item.msg.incomingStatus != .read && item.msg.receiptType == .receive ? .primary : .secondary
-						)
-
+		HStack {
+			ProfilePhoto(item, size: .custom(50))
+				.equatable(by: item.conversation.uid)
+			VStack(alignment: .leading) {
+				HStack {
+					Text(item.title).bold()
+					Spacer()
 				}
-				.lineLimit(3)
+				Text(item.sender.name + " ")
+					.font(.footnote.lowercaseSmallCaps())
+					.foregroundStyle(.secondary)
+				+
+				Text(item.msg.text)
+					.font(
+						Font
+							.system(
+								size: 14,
+								weight: item.msg.incomingStatus != .read && item.msg.receiptType == .receive ? .medium
+								: .regular)
+					)
+					.foregroundStyle(
+						item.msg.incomingStatus != .read && item.msg.receiptType == .receive ? .primary : .secondary
+					)
 
-				Spacer()
 			}
-			.flexible(.horizontal)
+			.lineLimit(3)
+
+			Spacer()
 		}
-		.foregroundStyle(Color.primary)
-		.transition(.identity)
+		.flexible(.horizontal)
+		.background()
+		.onTapGesture {
+			Task {
+				ConversationInitializer
+					.start(conID: item.conversation.uid, refetch: false)
+			}
+		}
 	}
 }

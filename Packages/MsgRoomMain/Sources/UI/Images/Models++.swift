@@ -13,6 +13,10 @@ import Database
 import ImageLoader
 
 extension ContactSnapshot: ImageViewItem {
+	public var imageID: String {
+		url.lastPathComponent
+	}
+
 	public var url: URL {
 		.init(string: photoURL) ?? DemoImages.demoPhotosURLs.random()!
 	}
@@ -32,6 +36,9 @@ extension AvatarSize: ImageSize {
 }
 
 extension ConversationSnapshot: ImageViewItem {
+	public var imageID: String {
+		url.lastPathComponent
+	}
 	public var url: URL {
 		.init(string: photoURL ?? "") ?? DemoImages.demoPhotosURLs.random()!
 	}

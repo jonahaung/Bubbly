@@ -8,70 +8,57 @@
 import SwiftUI
 
 struct RunningBorderViewModifier: ViewModifier {
+
+	let lineWidth: CGFloat
+	let cornerRadius: CGFloat
 	let animated: Bool
-	@State private var isAnimating = false
+
+	@State private var rotation: Double = 0
 
 	func body(content: Content) -> some View {
 		content
 			.overlay(
-				RoundedRectangle(cornerRadius: 10)
+				RoundedRectangle(cornerRadius: cornerRadius)
 					.strokeBorder(
 						AngularGradient(
 							gradient: Gradient(colors: [.indigo, .blue, .red, .orange, .indigo]),
 							center: .center,
-							startAngle: .degrees(isAnimating ? 360 : 0),
-							endAngle: .degrees(isAnimating ? 720 : 360)
+							startAngle: .degrees(rotation),
+							endAngle: .degrees(rotation + 360)
 						)
-						.opacity(animated ? 0.5 : 0),
-						lineWidth: 1.5
-					)
-					.animation(
-						animated ? .linear(duration: 2).repeatForever(autoreverses: false) : .default,
-						value: isAnimating
+						.opacity(animated ? 0.6 : 0),
+						lineWidth: lineWidth
 					)
 			)
 			.onAppear {
-				if animated {
-					isAnimating = true
+				guard animated else { return }
+				withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
+					rotation = 360
 				}
 			}
 			.onChange(of: animated) { _, newValue in
-				isAnimating = newValue
+				if newValue {
+					rotation = 0
+					withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
+						rotation = 360
+					}
+				} else {
+					rotation = 0
+				}
 			}
 	}
 }
 
 public extension View {
-	func runningBorder(animated: Bool) -> some View {
-		modifier(RunningBorderViewModifier(animated: animated))
-	}
-}
-
-#Preview {
-	@Previewable @State var isAnimated = true
-
-	VStack(spacing: 20) {
-		Text("Not Animated")
-			.padding()
-			.runningBorder(animated: false)
-
-		Text("Animated")
-			.padding()
-			.runningBorder(animated: true)
-
-		Text("Toggle Animation")
-			.padding()
-			.runningBorder(animated: isAnimated)
-			.onTapGesture {
-				withAnimation {
-					isAnimated.toggle()
-				}
-			}
-			.overlay(
-				Text(isAnimated ? "Tap to stop animation" : "Tap to start animation")
-					.font(.caption)
-					.foregroundColor(.secondary)
-					.padding(.top, 50)
-			)
+	func runningBorder(
+		lineWidth: CGFloat = 1.5,
+		cornerRadius: CGFloat = 12,
+		animated: Bool = true
+	) -> some View {
+		modifier(RunningBorderViewModifier(
+			lineWidth: lineWidth,
+			cornerRadius: cornerRadius,
+			animated: animated
+		))
 	}
 }

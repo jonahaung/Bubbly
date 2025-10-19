@@ -18,15 +18,13 @@ struct ChatOverlayView: View {
 
 	@ViewBuilder
 	var body: some View {
-		if let viewModel = manager.cellItems.first(
-			where: { $0.1.id == item.id
-			}) {
+		if let viewModel = manager.cellItems.viewModel(of: item.id) {
 			ZStack {
 				BlurredBackgroundView {
 					manager.eventsManager.updateFocusedFrame(nil)
 				}
 				MsgCellContent(
-					bubbleCorner: manager.msgCellLayoutFor(viewModel.1.msg, 0).bubble.bubbleCorner
+					bubbleCorner: manager.msgCellLayoutFor(viewModel.msg).bubble.bubbleCorner
 				)
 				.frame(size: item.frame.size)
 				.position(.init(x: item.frame.midX, y: item.frame.midY))
@@ -35,7 +33,7 @@ struct ChatOverlayView: View {
 					.position(x: item.frame.midX, y: item.frame.minY)
 			}
 			.statusBarHidden()
-			.environment(viewModel.1)
+			.environment(viewModel)
 		}
 	}
 }

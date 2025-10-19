@@ -21,12 +21,12 @@ struct InboxItem: Sendable, Hashable, Identifiable {
 	var title: String {
 		conversation.name
 	}
-	var photoURL: String? {
-		conversation.photoURL
-	}
 }
 
 extension InboxItem: ImageViewItem {
+	var imageID: String {
+		url.lastPathComponent
+	}
 	var url: URL {
 		.init(string: conversation.photoURL?.string ?? "") ?? DemoImages.demoPhotosURLs[0]
 	}

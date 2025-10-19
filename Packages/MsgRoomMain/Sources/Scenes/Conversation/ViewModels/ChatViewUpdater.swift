@@ -8,13 +8,14 @@
 import SwiftUI
 import Services
 import Database
+import XUI
 
 @MainActor
 protocol ChatViewUpdaterDelegate: AnyObject {
 	var conversation: ConversationSnapshot { get set }
 	var eventsManager: ChatViewEventsManager { get }
 	var scrollManager: ChatScrollManager { get }
-	var cellItems: [(Int, MsgCellViewModel)] { get set }
+	var cellItems: [MsgCellViewModel] { get set }
 }
 
 @MainActor
@@ -31,8 +32,8 @@ final class ChatViewUpdater: ErrorPresenter {
 	}
 
 	private var cellItems: [MsgCellViewModel] {
-		get { delegate?.cellItems.compactMap(\.1) ?? [] }
-		set { delegate?.cellItems = newValue.enumerated }
+		get { delegate?.cellItems ?? [] }
+		set { delegate?.cellItems = newValue }
 	}
 }
 
@@ -68,10 +69,27 @@ extension ChatViewUpdater: ChatDatasourceDelegate {
 		} else {
 			let newModel = MsgCellViewModel(snapshot)
 			let index = cellItems.insertionIndex(for: newModel, by: \.msg.date)
-			if delegate?.scrollManager.scrolledPosition == .atBottom {
-				delegate?.scrollManager.updateLoadingState(.appendingItem(newModel.id, index: index))
+
+			guard let delegate = self.delegate else { return }
+			let scrollManager = delegate.scrollManager
+
+			if scrollManager.canLoadMore == true {
+				ToastPresenter.show(snapshot.text) { [weak self] in
+					guard let self else { return }
+					self.delegate?.scrollManager.scroll(to: .bottom(animated: true, duration: nil))
+				}
+			} else {
+				if delegate.scrollManager.scrolledPosition == .atBottom {
+					delegate.scrollManager.updateLoadingState(.appendingItem(newModel.id, index: index))
+					cellItems.insert(newModel, at: index)
+				} else {
+					cellItems.insert(newModel, at: index)
+					ToastPresenter.show(snapshot.text) { [weak self] in
+						guard let self else { return }
+						self.delegate?.scrollManager.scroll(to: .id(value: snapshot.uid, anchor: .center, animated: true, duration: nil))
+					}
+				}
 			}
-			cellItems.insert(newModel, at: index)
 		}
 	}
 

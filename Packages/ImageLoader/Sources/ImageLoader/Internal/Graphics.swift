@@ -118,6 +118,36 @@ struct ImageProcessingExtensions {
 		}
 		return PlatformImage.make(cgImage: outputCGImage, source: image)
 	}
+
+	func byAddingRoundedCorners(
+		radius: CGFloat,
+		backgroundColor: UIColor? = nil
+	) -> PlatformImage? {
+		guard let cgImage = image.cgImage else { return nil }
+		let size = cgImage.size
+
+		guard let ctx = CGContext.make(cgImage, size: size, alphaInfo: .premultipliedLast) else {
+			return nil
+		}
+
+		let rect = CGRect(origin: .zero, size: size)
+		let path = CGPath(rect: rect, transform: nil)
+
+		// 🟢 Draw colored background first
+		if let backgroundColor {
+			ctx.addPath(path)
+			ctx.setFillColor(backgroundColor.cgColor)
+			ctx.fillPath()
+		}
+
+		// 🖼️ Clip to rounded shape and draw image on top
+		ctx.addPath(path)
+		ctx.clip()
+		ctx.draw(cgImage, in: rect)
+
+		guard let outputCGImage = ctx.makeImage() else { return nil }
+		return PlatformImage.make(cgImage: outputCGImage, source: image)
+	}
 }
 
 extension PlatformImage {

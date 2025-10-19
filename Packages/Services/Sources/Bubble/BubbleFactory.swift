@@ -9,10 +9,9 @@ import UIKit
 import Database
 import Core
 
-public final class BubbleFactory: @unchecked Sendable {
+public struct BubbleFactory {
 
 	private let minutesForChatMsgGrouping: Int
-	private var bubbleCache = [String: Bubble]()
 
 	public init(_ minutesForChatMsgGrouping: Int = Settings.Layout.minutesForChatMsgGrouping) {
 		self.minutesForChatMsgGrouping = minutesForChatMsgGrouping
@@ -23,9 +22,6 @@ public final class BubbleFactory: @unchecked Sendable {
 		previousMsg: MsgSnapshot?,
 		nextMsg: MsgSnapshot?
 	) -> Bubble {
-		if let cached = bubbleCache[msg.uid] {
-			return cached
-		}
 		var bubble = Bubble()
 		bubble.bubbleCorner = resolveCorner(
 			msg: msg,
@@ -33,9 +29,6 @@ public final class BubbleFactory: @unchecked Sendable {
 			previousMsg: previousMsg,
 			nextMsg: nextMsg
 		)
-		if nextMsg != nil && previousMsg != nil {
-			bubbleCache[msg.uid] = bubble
-		}
 		return bubble
 	}
 
@@ -132,8 +125,8 @@ public final class BubbleFactory: @unchecked Sendable {
 		isSimilierDateTime(of: msg.date, from: nextMsg)
 	}
 
-	private func isEqual(of thisItem: MsgSnapshot, to msg: MsgSnapshot) -> Bool {
-		thisItem.senderID == msg.senderID
+	private func isEqual(of thisMsg: MsgSnapshot, to msg: MsgSnapshot) -> Bool {
+		thisMsg.senderID == msg.senderID
 	}
 
 	private func isSimilierDateTime(of date: Date, from msg: MsgSnapshot) -> Bool {

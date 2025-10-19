@@ -16,23 +16,23 @@ struct MsgsScrollView: View {
 	@State var manager: ChatViewManager
 	@Namespace private var namespace
 	@Environment(\.conversation) private var conversation
-
+	@State private var draggedOffset = CGFloat.zero
+	@State private var draggedLimitReached = false
 	var body: some View {
 		ScrollView {
 			MsgsScrollViewLayout(
 				spacing: manager.config.lineSpacing,
-				boundsWidth: manager.currentLayoutWidth(),
-				cache: manager.cache,
-				contentInsets: manager.scrollManager.contentInsets
-			) {
+				boundsWidth: manager.scrollManager.boundsWidth,
+				cacheContainer: manager.cache,
+				contentInsets: manager.config.contentInsets
+			) { heightDiff in
+				print(heightDiff)
+			} {
 				if manager.eventsManager.showContactInfo {
 					ConversationHeaderView()
 				}
-				ForEach(
-					manager.cellItems, id: \.1.id
-				) { index, viewModel  in
-					let layout = manager.msgCellLayoutFor(viewModel.msg, index)
-
+				ForEach(manager.cellItems, id: \.id) { viewModel  in
+					let layout = manager.msgCellLayoutFor(viewModel.msg)
 					if layout.showTimeSeparator {
 						MsgCellTimeSeparaterView(id: viewModel.id, date: viewModel.msg.date)
 					} else if layout.showTopPadding {
@@ -49,19 +49,31 @@ struct MsgsScrollView: View {
 						viewModel: viewModel,
 						bubble: layout.bubble
 					)
+
 					if isSelected {
 						MsgCellFooter(msg: viewModel.msg)
 					}
 				}
 			}
+			.gesture(tapGesture)
 			.scrollTargetLayout()
 			.geometryGroup()
+		}
+		.transformEffect(.init(translationX: draggedOffset, y: 0))
+		.transaction(value: manager.eventsManager.selectedMsg) { value in
+			value.animation = .interactiveSpring
+			value.scrollPositionUpdatePreservesVelocity = true
+			value.scrollContentOffsetAdjustmentBehavior = .disabled
+			value.tracksVelocity = true
 		}
 		.animation(
 			.snappy,
 			value: manager.conversation.seenMembers
 		)
-		.allowsHitTesting(manager.scrollManager.updatingState.isNotUpdating)
+		.onPressingChanged { location in
+			manager.handlePressingChanged(location)
+		}
+		.scrollDisabled(manager.scrollManager.updatingState.isUpdating)
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.scrollManager.handleScrollPhaseChange(oldPhase, newPhase, context)
 		}
@@ -78,8 +90,8 @@ struct MsgsScrollView: View {
 		) { values in
 			manager.handleVisibleIDsChange(values)
 		}
+		.scrollContentBackground(.hidden)
 		.scrollDismissesKeyboard(.immediately)
-		.safeAreaPadding(.all, 0)
 		.defaultScrollAnchor(.bottom, for: .initialOffset)
 		.defaultScrollAnchor(.bottom, for: .sizeChanges)
 		.scrollPosition(.constant(manager.scrollManager.scrollPosition), anchor: .center)
@@ -87,5 +99,13 @@ struct MsgsScrollView: View {
 		.task {
 			await manager.onViewAppear()
 		}
+	}
+
+	private var tapGesture: some Gesture {
+		SpatialTapGesture(count: 2, coordinateSpace: .local)
+			.onEnded { value in
+				manager.handleTappingChanged(value.location)
+			}
+		
 	}
 }

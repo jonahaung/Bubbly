@@ -23,6 +23,7 @@ struct InboxScene: View {
         List {
 			ForEach(viewModel.items) { item in
 				InboxCell(item: item)
+					.equatable(by: item.msg)
             }
 			.onDelete { indexSet in
 				Task {

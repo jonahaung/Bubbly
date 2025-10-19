@@ -48,6 +48,10 @@ extension ImageProcessing where Self == ImageProcessors.Resize {
     public static func resize(height: CGFloat, unit: ImageProcessingOptions.Unit = .points, upscale: Bool = false) -> ImageProcessors.Resize {
         ImageProcessors.Resize(height: height, unit: unit, upscale: upscale)
     }
+
+	public static func sticker() -> ImageProcessors.Sticker {
+		ImageProcessors.Sticker()
+	}
 }
 
 extension ImageProcessing where Self == ImageProcessors.Circle {

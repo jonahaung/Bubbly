@@ -13,7 +13,6 @@ import XUI
 
 private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 	private let currentUser: CurrentUser
-	private let router = Router.shared
 	private let contactStore = ContactStore.shared
 
 	init(user: ContactSnapshot) {
@@ -22,7 +21,6 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 
 	func body(content: Content) -> some View {
 		content
-			.environment(router)
 			.environment(currentUser)
 			.environment(contactStore)
 			.environment(\.invokeMsgRoomAction) { data in

@@ -81,11 +81,9 @@ public extension Socket {
 		guard let encodedString = String(data: encoded, encoding: .utf8) else {
 			throw SocketError.encodingFailed
 		}
-		let pushNotificationSender = PushNotificationSender(
-			suitName: AppInformation.groupID
-		)
-		let results = try await contacts.parallelMap { contact in
-			if let publicKeyString = contact.publicKeyString {
+
+		let results = try await contacts.parallelMap { [pushNotificationSender] contact in
+			if !contact.pushToken.isWhitespace, let publicKeyString = contact.publicKeyString {
 				let encrypted = try await self.encrypt(
 					encodedString,
 					publicKeyString: publicKeyString

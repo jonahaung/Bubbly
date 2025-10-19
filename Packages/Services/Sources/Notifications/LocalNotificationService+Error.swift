@@ -10,14 +10,10 @@ import Foundation
 public protocol ErrorPresenter {}
 
 public extension ErrorPresenter {
-	@MainActor
 	func showError(_ error: Error) async {
-		await LocalNotificationService
-			.post(config: .init(title: "Error", body: error.localizedDescription))
+		await LocalNotificationService.sendAlert(title: error.localizedDescription)
 	}
-	@MainActor
 	func showMessage(_ title: String, _ msg: String) async {
-		await LocalNotificationService
-			.post(config: .init(title: title, body: msg))
+		await LocalNotificationService.sendAlert(title: title, body: msg)
 	}
 }

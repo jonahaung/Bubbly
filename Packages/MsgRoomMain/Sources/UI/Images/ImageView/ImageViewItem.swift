@@ -10,6 +10,6 @@ import Services
 
 public protocol ImageViewItem: Sendable {
 	var url: URL { get }
-	var id: String { get }
+	var imageID: String { get }
 	var type: MediaType { get }
 }

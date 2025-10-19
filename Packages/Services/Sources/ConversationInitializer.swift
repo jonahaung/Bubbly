@@ -5,7 +5,7 @@
 //  Created by Aung Ko Min on 14/7/25.
 //
 
-import Foundation
+import SwiftUI
 import Database
 import Core
 
@@ -19,6 +19,12 @@ public struct ConversationInitializer {
 		public let totalMsgsCount: Int
 		public let canPaginate: Bool
 		public var maxNumberOfMsgsToDisplay: Int { pageSize * 2 }
+		public let contentInsets = EdgeInsets(
+			top: ChatLayoutConstants.topBarHeight,
+			leading: 4,
+			bottom: ChatLayoutConstants.bottomBarHeight,
+			trailing: 4
+		)
 	}
 	public struct PrefetchedData: Sendable {
 		public let conversation: ConversationSnapshot
@@ -80,7 +86,7 @@ public extension ConversationInitializer {
 	}
 
 	static func start(conID: String, refetch: Bool, delay: Double = 0) {
-		Task {
+		Task.detached(priority: .background) {
 			do {
 				let conversation = try await ConversationRepo.getOrCreate(
 					for: conID, refetch: refetch

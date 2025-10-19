@@ -14,13 +14,14 @@ import Database
 struct LandingView: View {
 
 	@Environment(AuthService.self) private var authService
-
+	let router = Router.shared
 	@ViewBuilder
 	var body: some View {
 		switch authService.authState {
 		case .loggedIn(let user):
-			MainTabView()
+			MainTabView(router: router)
 				.msgRoomEntryPoint(user: user)
+				.environment(router)
 		case .loggedOut:
 			FirePhoneOTPLoginView()
 		case .newUser(let user):

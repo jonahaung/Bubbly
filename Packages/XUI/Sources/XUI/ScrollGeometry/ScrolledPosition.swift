@@ -35,9 +35,9 @@ public enum ScrollDirection: Sendable {
 	}
 }
 public enum ScrollPositionItem: Hashable, Sendable {
-	case offset(yPosition: CGFloat, animated: Bool)
-	case id(value: String, anchor: UnitPoint?, animated: Bool)
-	case bottom(animated: Bool)
+	case offset(yPosition: CGFloat, animated: Bool = true, duration: Double? = nil)
+	case id(value: String, anchor: UnitPoint? = nil, animated: Bool = true, duration: Double? = nil)
+	case bottom(animated: Bool = true, duration: Double? = nil)
 }
 public enum ScrolledPosition: Sendable, Hashable {
 	case none
@@ -101,11 +101,6 @@ public extension ScrollPosition {
 	mutating func scrollToBottom(_ scrollGeometry: ScrollGeometry) {
 		scrollTo(y: scrollGeometry.bottomMostOffset, within: scrollGeometry)
 	}
-	mutating func adjust(from oldValue: ScrollGeometry, to newValue: ScrollGeometry, edge: VerticalEdge) {
-		let proposedOffset = newValue.adjustedOffsetY(from: oldValue, edge: edge)
-		self = .init(y: proposedOffset)
-		//		scrollTo(y: proposedOffset, within: newValue)
-	}
 
 	mutating func scrollTo(y: CGFloat, within scrollGeometry: ScrollGeometry) {
 		let clamped = min(max(0, y), scrollGeometry.bottomMostOffset)
@@ -121,15 +116,15 @@ public extension ScrollGeometry {
 	var absContentHeight: CGFloat {
 		contentSize.height - contentInsets.vertical
 	}
-	func adjustedOffsetY(from oldValue: ScrollGeometry, edge: VerticalEdge) -> CGFloat {
+	func adjustedOffsetY(from oldValue: ScrollGeometry) -> CGFloat {
 		guard contentSize.height > 0 else { return contentInsets.top }
 		let diffHeight = (oldValue.contentSize.height - contentSize.height) + (oldValue.contentOffset.y - contentOffset.y)
 		guard diffHeight != 0 else {
-			return contentOffset.y
+			return visibleRect.minY
 		}
-		let offsetY = oldValue.visibleRect.minY - diffHeight
-		let adjustedY = edge == .top ? offsetY - -contentInsets.top : offsetY
-		return adjustedY
+		print("diffHeight: \(diffHeight)")
+		let offsetY = oldValue.visibleRect.minY - diffHeight + contentInsets.top
+		return offsetY
 	}
 
 	func isCloseToBottom(threshold: CGFloat = 0.01) -> Bool {

@@ -13,28 +13,28 @@ import XUI
 
 struct MainTabView: View {
 
-	@Environment(Router.self) private var router
+	@Bindable var router: Router
 
 	var body: some View {
-		TabView(
-			selection: .init(get: { router.tab }, set: { router.tab = $0 })
-		) {
-			ForEach(router.navRouters) { navRuter in
-				NavigationStack(
-					path: .init(
-						get: { navRuter.navPath },
-						set: { navRuter.navPath = $0 })
-				) {
+		@Bindable var router = self.router
+		TabView(selection: $router.tab) {
+			ForEach($router.navRouters, id: \.id) { navRuter in
+				NavigationStack(path: navRuter.navPath) {
 					tabDestination(for: navRuter.id)
+						.equatable(by: navRuter.id)
 						.navigationDestination(for: NavPath.self) { path in
 							navigationDestination(for: path)
+								.equatable(by: path)
 						}
+						.environment(router)
 				}
 				.tabItem {
 					Label(navRuter.id.rawValue, systemSymbol: .house)
 				}
 			}
 		}
+		.equatable(by: router.tab)
+		.toastPresentable()
 	}
 
 	@ViewBuilder private func tabDestination(for tabPath: TabPath) -> some View {

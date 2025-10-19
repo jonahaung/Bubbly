@@ -22,12 +22,13 @@ public struct ProfilePhoto: View {
 		self.size = size
 		self.config = .init(
 			size: size,
-			processors: [.circle()], tapAction: tapAction
+			processors: [.sticker()], tapAction: tapAction
 		)
 	}
 	public
 	var body: some View {
 		ImageView(item, config: config)
-			.equatable(by: item.url)
+			.background(.quinary)
+			.clipShape(.circle)
 	}
 }

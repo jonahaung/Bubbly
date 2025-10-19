@@ -2,18 +2,19 @@ import Foundation
 import Services
 import Database
 
-extension Array where Element == (Int, MsgCellViewModel) {
+extension Array where Element == MsgCellViewModel {
+
 	func viewModel(of id: String) -> MsgCellViewModel? {
-		first(where: { $0.1.id == id })?.1
+		self.first(where: { $0.id == id })
 	}
 	func viewModel(of index: Int) -> MsgCellViewModel? {
-		first(where: { $0.0 == index })?.1
+		self[safe: index]
 	}
 	func msg(of id: String) -> MsgSnapshot? {
 		viewModel(of: id)?.msg
 	}
 	func index(of id: String) -> Int? {
-		firstIndex(where: { $0.1.id == id })
+		firstIndex(where: { $0.id == id })
 	}
 }
 

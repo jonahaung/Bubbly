@@ -16,6 +16,8 @@ public final class MsgCellViewModel: @unchecked Sendable {
 	public let isSender: Bool
 	public var msg: MsgSnapshot
 	public var displayData: MsgCellDisplayData
+	public var canObserveFocusedFrame = false
+	public var msgID: String { id }
 
 	public init(_ msg: MsgSnapshot) {
 		self.msg = msg
@@ -30,8 +32,16 @@ public final class MsgCellViewModel: @unchecked Sendable {
 	}
 
 	public func onAppear() {
+
 	}
 	public func onDisappear() {
+
+	}
+	public func prefetch() {
+
+	}
+	public func cancelPrefetch() {
+		
 	}
 }
 

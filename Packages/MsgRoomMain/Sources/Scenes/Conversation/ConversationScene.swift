@@ -13,22 +13,18 @@ import Core
 
 public struct ConversationScene: View {
 	private let manager: ChatViewManager
-
+	@FocusState private var textViewIsFocused: Bool
 	public init(_ prefetchedData: ConversationInitializer.PrefetchedData) {
 		manager = .init(prefetchedData)
 	}
 
 	public var body: some View {
 		ZStack {
-			if !showFullScreen {
-				Image("adaptive")
-					.resizable()
-					.foregroundStyle(.secondary)
-					.ignoresSafeArea()
-					.layoutPriority(-1)
-					.equatable(by: true)
-			}
-			if manager.currentLayoutWidth() > 0 {
+			Image("adaptive")
+				.resizable(resizingMode: .tile)
+				.foregroundStyle(.secondary)
+				.layoutPriority(-1)
+			if manager.scrollManager.boundsWidth > 0 {
 				MsgsScrollView(manager: manager)
 			}
 			overlayViews
@@ -38,7 +34,6 @@ public struct ConversationScene: View {
 			manager.conversation.theme.background.color,
 			ignoresSafeAreaEdges: .all
 		)
-		.animation(.interpolatingSpring(duration: 0.28), value: showFullScreen)
 		.receiveMsgCellInteraction { action in
 			MainActor.assumeIsolated {
 				handleMsgCellInteraction(action: action)
@@ -47,6 +42,7 @@ public struct ConversationScene: View {
 		.environment(\.eventsManager, manager.eventsManager)
 		.environment(\.conversation, manager.conversation)
 		.environment(manager)
+		.focused($textViewIsFocused)
 		.toolbarVisibility(.hidden, for: .navigationBar, .tabBar)
 	}
 
@@ -70,8 +66,9 @@ public struct ConversationScene: View {
 		.statusBarHidden(showFullScreen)
 		.geometryGroup()
 		.layoutPriority(1)
-	}
 
+	}
+	
 	@ViewBuilder
 	private var focusedItemOverlay: some View {
 		if let focusedItem = manager.eventsManager.focusedFrame {
@@ -101,8 +98,8 @@ public struct ConversationScene: View {
 					fatalError()
 				}
 				await MainActor.run {
-					if let msgCellViewModel = manager.cellItems.first(where: { $0.1.msg.uid == uid }) {
-						msgCellViewModel.1.update(with: msg)
+					if let msgCellViewModel = manager.cellItems.viewModel(of: msg.uid) {
+						msgCellViewModel.update(with: msg)
 					}
 				}
 			} catch {
@@ -118,8 +115,8 @@ public struct ConversationScene: View {
 	}
 
 	private func handleTapAvatar(with id: String) {
-		guard let viewModel = manager.cellItems.first(where: { $0.1.id == id }),
-			  let contact = viewModel.1.sender() else {
+		guard let viewModel = manager.cellItems.first(where: { $0.id == id }),
+			  let contact = viewModel.sender() else {
 			return
 		}
 		Router.shared.push(NavPath.contactDetails(contact))

@@ -35,7 +35,7 @@ private struct PresentFullScreenModifier<Destination: View>: ViewModifier {
 			.onTapGesture {
 				isPresented = true
 			}
-			.fullScreenCover(isPresented: $isPresented, onDismiss: onDismiss) {
+			.sheet(isPresented: $isPresented, onDismiss: onDismiss) {
 				destination()
 			}
 	}
@@ -50,22 +50,20 @@ private struct PresentFullScreenWithTransitionModifier<Destination: View>: ViewM
 	@Namespace private var animation
 
 	public func body(content: Content) -> some View {
-		Button {
-			isPresented = true
-		} label: {
-			content
-		}
-		.matchedTransitionSource(id: id, in: animation)
-		.buttonStyle(.plain)
-		.fullScreenCover(
-			isPresented: $isPresented
-		) {
-			destination()
-				.statusBarHidden()
-				.presentationBackground(.clear)
-				.presentationBackgroundInteraction(.disabled)
-				.navigationTransition(.zoom(sourceID: id, in: animation))
-		}
+		content
+			.onTapGesture {
+				isPresented = true
+			}
+			.matchedTransitionSource(id: id, in: animation)
+			.buttonStyle(.plain)
+			.fullScreenCover(
+				isPresented: $isPresented
+			) {
+				destination()
+					.statusBarHidden()
+					.presentationBackground(.clear)
+					.navigationTransition(.zoom(sourceID: id, in: animation))
+			}
 	}
 }
 

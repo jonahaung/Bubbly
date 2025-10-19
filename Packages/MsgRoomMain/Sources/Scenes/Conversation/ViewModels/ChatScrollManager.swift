@@ -23,41 +23,34 @@ protocol ChatScrollManagerDelegate: AnyObject {
 	func scrollManager(_ manager: ChatScrollManager, finalizeScrollViewUpdate position: ScrolledPosition)
 	func scrollManager(_ manager: ChatScrollManager, loadPrevious msg: MsgSnapshot)
 	func scrollManager(_ manager: ChatScrollManager, loadMore msg: MsgSnapshot)
+	func scrollManager(_ manager: ChatScrollManager, didUpdateBoundsWidth newValue: CGFloat)
 }
 
 @MainActor
 @Observable
 final class ChatScrollManager: ErrorPresenter {
 
-	private(set) var scrollPosition = ScrollPosition()
+	private(set) var scrollPosition = ScrollPosition.userDefined
 	private(set) var scrolledPosition = ScrolledPosition.atBottom
 	private(set) var bottomBarFrame = CGRect.zero
 	private(set) var updatingState = ScrollViewUpdatingState.initial
+	private(set) var isScrollingStopped = false
 	@ObservationIgnored private(set) var scrollPhase = ScrollPhase.idle
 	@ObservationIgnored private(set) var isFirstResponder = false
 	@ObservationIgnored private(set) var scrollDirection = ScrollDirection.none
 	@ObservationIgnored private(set) var scrollGeometry: ScrollGeometry?
 	@ObservationIgnored private(set) var visibleViewIDs = [String]()
-	@ObservationIgnored private let scrollQueue = SerialTaskQueue()
 	@ObservationIgnored private let scrollGeometryPublisher = PassthroughSubject<ScrollGeometry, Never>()
 	@ObservationIgnored private let cancelBag = CancelBag()
-	@ObservationIgnored let contentInsets: EdgeInsets = .init(
-		top: ChatLayoutConstants.topBarHeight,
-		leading: 4,
-		bottom: ChatLayoutConstants.bottomBarHeight,
-		trailing: 4
-	)
 	@ObservationIgnored let config: ConversationInitializer.Configuration
-
-	// Latest known scroll container width (from ScrollGeometry.bounds.width).
-	@ObservationIgnored private(set) var containerWidth: CGFloat = 0
 	@ObservationIgnored weak var delegate: ChatScrollManagerDelegate?
+	private(set) var scrollItemQueue: Deque<ScrollPositionItem> = .init()
 
 	init(config: ConversationInitializer.Configuration) {
 		self.config = config
 		scrollGeometryPublisher
 			.removeDuplicates()
-			.debounce(for: 1, scheduler: DispatchQueue.main)
+			.debounce(for: 0.5, scheduler: DispatchQueue.main)
 			.sink { [weak self] value in
 				guard let self else { return }
 				endScrollViewUpdates(for: value)
@@ -69,6 +62,24 @@ final class ChatScrollManager: ErrorPresenter {
 		cancelBag.cancel()
 		Log("Deinit")
 	}
+
+	var boundsWidth: CGFloat { bottomBarFrame.width }
+	let noAnimation: Transaction = {
+		var transition = Transaction(animation: nil)
+		transition.disablesAnimations = true
+		transition.scrollPositionUpdatePreservesVelocity = false
+		transition.scrollContentOffsetAdjustmentBehavior = .disabled
+		transition.tracksVelocity = false
+		return transition
+	}()
+	private let withAnimation: Transaction = {
+		var transition = Transaction(animation: .spring)
+		transition.disablesAnimations = false
+		transition.scrollPositionUpdatePreservesVelocity = true
+		transition.scrollContentOffsetAdjustmentBehavior = .automatic
+		transition.tracksVelocity = true
+		return transition
+	}()
 }
 // Pagination
 extension ChatScrollManager {
@@ -117,30 +128,27 @@ extension ChatScrollManager {
 	) {
 		scrollPhase = newValue
 		scrollGeometry = context.geometry
+		isScrollingStopped = false
 		if !newValue.isScrolling {
 			scrolledPosition = context.geometry.scrolledPosition
 		}
-		// Update container width from the current geometry
-		containerWidth = context.geometry.bounds.width
-		scrollGeometryPublisher.send(context.geometry)
 	}
 	func handleScrollGeometryChange(_ oldValue: ScrollGeometry, _ newValue: ScrollGeometry) {
-		// Track container width from geometry updates
-		if containerWidth != newValue.bounds.width {
-			containerWidth = newValue.bounds.width
-		}
+		scrollGeometryPublisher.send(newValue)
 		if oldValue.contentSize.width != newValue.contentSize.width {
 			return
 		}
 		if updatingState.isUpdating {
 			guard oldValue.contentSize.height != newValue.contentSize.height else {
+				scrollGeometry = newValue
 				return
 			}
 			switch updatingState {
 			case .insertingItems(let edge):
 				switch edge {
 				case .top:
-					adjustNeqwScrollPosition(newValue, newValue.adjustedOffsetY(from: oldValue, edge: .top))
+					let offsetY = newValue.adjustedOffsetY(from: oldValue)
+					adjustNewScrollPosition(newValue, offsetY, additional: -newValue.contentInsets.top)
 					updateLoadingState(.notLoading)
 				case .bottom:
 					scrolledPosition = oldValue.scrolledPosition
@@ -149,32 +157,44 @@ extension ChatScrollManager {
 			case .removingItems(let edge):
 				switch edge {
 				case .top:
-					adjustNeqwScrollPosition(newValue, newValue.adjustedOffsetY(from: oldValue, edge: .bottom))
+					adjustNewScrollPosition(newValue, newValue.adjustedOffsetY(from: oldValue))
 					updateLoadingState(.notLoading)
 				case .bottom:
-					scrolledPosition = oldValue.scrolledPosition
+					adjustNewScrollPosition(newValue, newValue.visibleRect.minY)
 					updateLoadingState(.notLoading)
 				}
 			case .resetting:
-				adjustNeqwScrollPosition(newValue, newValue.bottomMostOffset)
+				scroll(to: .offset(yPosition: newValue.bottomMostOffset - newValue.contentInsets.bottom, animated: false))
 				updateLoadingState(.notLoading)
 			case .appendingItem:
 				if oldValue.scrolledPosition.isAroundBottom {
-					scroll(to: .offset(yPosition: newValue.bottomMostOffset, animated: true))
+					scroll(to: .bottom(animated: true, duration: 0.15))
 				}
 				updateLoadingState(.notLoading)
 			default:
 				break
 			}
 		} else {
-			loadMsgsIfNeeded(newValue)
+			if scrollPhase == .decelerating {
+				loadMsgsIfNeeded(newValue)
+			}
 		}
 
-		func adjustNeqwScrollPosition(_ newValue: ScrollGeometry, _ offSetY: CGFloat) {
-			var updatedGemotry = newValue
-			updatedGemotry.contentOffset.y = offSetY
-			scrollPosition = .init(y: updatedGemotry.contentOffset.y)
-			scrolledPosition = updatedGemotry.scrolledPosition
+		func adjustNewScrollPosition(_ newValue: ScrollGeometry, _ offSetY: CGFloat, additional: CGFloat? = nil) {
+			var transition = noAnimation
+			if let additional {
+				let newY = offSetY + additional
+				transition.addAnimationCompletion(criteria: .removed) { [self] in
+					var newTransaction = withAnimation
+					newTransaction.animation = .spring
+					withTransaction(newTransaction) {
+						scrollPosition.scrollTo(y: newY)
+					}
+				}
+			}
+			withTransaction(transition) {
+				scrollPosition.scrollTo(y: offSetY)
+			}
 		}
 	}
 	func handleVisibleIDsChange(_ ids: [String]) {
@@ -183,6 +203,12 @@ extension ChatScrollManager {
 	func handleBottomBarFrameChange(_ oldValue: CGRect, _ newValue: CGRect) {
 		guard oldValue != newValue else { return }
 		if bottomBarFrame != newValue {
+			if newValue.width != 0 && bottomBarFrame.width != 0 && newValue.width != bottomBarFrame.width {
+				scrollPosition.reset()
+			}
+			if newValue.width != bottomBarFrame.width {
+				delegate?.scrollManager(self, didUpdateBoundsWidth: newValue.width)
+			}
 			bottomBarFrame = newValue
 		}
 		guard let scrollGeometry, newValue.maxY < oldValue.maxY else {
@@ -199,57 +225,43 @@ extension ChatScrollManager {
 }
 // Scrolling
 extension ChatScrollManager {
-	func scroll(to item: ScrollPositionItem, duration: Double = 0.3) {
+	func queue(to item: ScrollPositionItem) {
+		scrollItemQueue.enqueue(item)
+	}
+	func scroll(to item: ScrollPositionItem) {
 		switch item {
-		case .offset(let yPosition, let animated):
-			scrollQueue.addTask { [weak self] completion in
-				guard let self = self else { return }
-				self.performScroll(animated: animated, duration: duration) {
-					self.scrollPosition.scrollTo(y: yPosition)
-				} completion: {
-					completion()
-				}
+		case .offset(let yPosition, let animated, let duration):
+			performScroll(animated: animated, duration: duration) {
+				self.scrollPosition.scrollTo(y: yPosition)
 			}
-
-		case .id(value: let value, let anchor, animated: let animated):
-			scrollQueue.addTask { [weak self] completion in
-				guard let self = self else { return }
-				self.performScroll(animated: animated, duration: duration) {
-					self.scrollPosition.scrollTo(id: value, anchor: anchor)
-				} completion: {
-					completion()
-				}
+		case .id(value: let value, let anchor, animated: let animated, let duration):
+			performScroll(animated: animated, duration: duration) {
+				self.scrollPosition.scrollTo(id: value, anchor: anchor)
 			}
-		case .bottom(let animated):
-			scrollQueue.addTask { [weak self] completion in
-				guard let self = self else { return }
-				self.performScroll(animated: animated, duration: duration) {
-					self.scrollPosition.scrollTo(edge: .bottom)
-				} completion: {
-					completion()
-				}
+		case .bottom(let animated, let duration):
+			performScroll(animated: animated, duration: duration) {
+				self.scrollPosition.scrollTo(edge: .bottom)
 			}
 		}
 	}
 
 	private func performScroll(
 		animated: Bool,
-		duration: Double = 0.4,
+		duration: Double?,
 		_ action: () -> Void,
 		completion: (@Sendable () -> Void)? = nil
 	) {
-		if animated {
-			withAnimation(.interpolatingSpring(duration: duration)) {
-				action()
-			} completion: {
-				completion?()
+		var transaction: Transaction = animated ? withAnimation : noAnimation
+		if let duration {
+			transaction.animation = transaction.animation?.speed(duration)
+		}
+		if let completion {
+			transaction.addAnimationCompletion(criteria: .removed) {
+				completion()
 			}
-		} else {
+		}
+		withTransaction(transaction) {
 			action()
-			DispatchQueue.delay {
-				completion?()
-			}
-
 		}
 	}
 }
@@ -264,11 +276,30 @@ extension ChatScrollManager {
 		updatingState = .notLoading
 	}
 	func endScrollViewUpdates(for newValue: ScrollGeometry) {
-		// Make sure scrollView is not busy
-		guard scrollGeometry == newValue && updatingState.isNotUpdating && scrollPhase == .idle && !isFirstResponder else {
+		dequeueIfNeeded()
+		scrollGeometry = newValue
+		scrolledPosition = newValue.scrolledPosition
+		isScrollingStopped = true
+		guard updatingState.isNotUpdating && !isFirstResponder else {
 			return
 		}
 		delegate?.scrollManager(self, finalizeScrollViewUpdate: scrolledPosition)
 	}
+	
+	func dequeueIfNeeded() {
+		if let item = scrollItemQueue.dequeue() {
+			scroll(to: item)
+		}
+	}
 }
 
+extension ScrollPosition {
+	public static let userDefined = {
+		var position = ScrollPosition()
+		position.isPositionedByUser = true
+		return position
+	}()
+	mutating func reset() {
+		self = .userDefined
+	}
+}

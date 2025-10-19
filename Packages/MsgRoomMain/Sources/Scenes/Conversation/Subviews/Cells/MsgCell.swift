@@ -63,6 +63,7 @@ struct MsgCell: View {
 							sendMsgCellInteraction?(.onTapAvatar(viewModel.id))
 						}
 					)
+					.equatable(by: sender.uid)
 				}
 			}
 			.frame(width: ChatLayoutConstants.Cell.defaultSpacing + 4)

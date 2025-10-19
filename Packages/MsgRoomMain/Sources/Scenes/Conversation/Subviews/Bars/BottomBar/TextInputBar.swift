@@ -20,7 +20,7 @@ struct TextInputBar: View {
 	@Environment(ChatViewManager.self) private var manager
 	@State var inputManager: ChatInputBarManager
 	@Environment(CurrentUser.self) private var currentUser
-	@FocusState private var textFieldIsFocused: Bool
+//	@FocusState private var textFieldIsFocused: Bool
 	@Environment(\.invokeMsgRoomAction) private var msgRoomAction
 
 	var body: some View {
@@ -42,7 +42,7 @@ struct TextInputBar: View {
 				.lineLimit(30)
 				.padding(6)
 				.padding(.horizontal, 8)
-				.focused($textFieldIsFocused)
+//				.focused($textFieldIsFocused)
 				.lineSpacing(1.4)
 				.textScale(.default)
 				.textFieldStyle(.plain)
@@ -78,5 +78,6 @@ struct TextInputBar: View {
 	private func sendButtonPressed() {
 		Haptics.play(.medium, 0.9)
 		inputManager.send(conversation: manager.conversation)
+		
 	}
 }

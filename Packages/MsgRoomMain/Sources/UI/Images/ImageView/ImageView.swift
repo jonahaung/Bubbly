@@ -17,6 +17,8 @@ public struct ImageView: View {
 	@State private var progress: ImageTask.Progress?
 	@State private var error: Error?
 	@State private var manager: ImageViewManager
+	@State private var fetchImage = FetchImage()
+
 	private let config: ImageViewConfig
 
 	public init(_ item: Item, config: ImageViewConfig) {
@@ -26,55 +28,80 @@ public struct ImageView: View {
 
 	public var body: some View {
 		ZStack {
-			config.backgroundColor
-			LazyImage(url: manager.getURL()) { state in
-				switch state.result {
-				case .success(let image):
-					imageView(for: image.image)
-				case .failure:
-					SystemImage(.exclamationmarkCircleFill)
-						.symbolRenderingMode(.multicolor)
-				case .none:
-					progressView
+			config.backgroundColor?.layoutPriority(-1)
+			if manager.isLocallyCached() {
+				if let image = manager.image {
+					imageView(for: image)
+						.transition(.scale(scale: 0.0, anchor: .center).animation(.interactiveSpring))
+				} else {
+					ProgressView().controlSize(.mini)
+						.task {
+							await manager.onAppear()
+						}
 				}
-			}
-			.processors(processors)
-			.pipeline(.shared)
-			.onCompletion { [self] result in
-				if case .success(let response) = result {
-					saveImage(response.image)
-
+			} else {
+				ZStack {
+					if let image = fetchImage.image{
+						imageView(for: image)
+					} else {
+						switch fetchImage.result {
+						case .success(let response):
+							imageView(for: response.image)
+						case .failure:
+							SystemImageWithShape(.exclamationmark, .circle(.color(.red)))
+						case .none:
+							ProgressView().controlSize(.mini)
+						}
+					}
+				}
+				.onAppear {
+					guard fetchImage.imageContainer?.image == nil else { return }
+					if fetchImage.isLoading {
+						return
+					}
+					let transaction: Transaction = {
+						var transaction = Transaction(animation: .interactiveSpring)
+						transaction.dismissBehavior = .destructive
+						transaction.disablesAnimations = false
+						return transaction
+					}()
+					fetchImage.processors = config.processors
+					fetchImage.transaction = transaction
+					fetchImage.pipeline = .shared
+					fetchImage.onStart = manager.onStart
+					fetchImage.onCompletion = manager.onCompletion(_:)
+					fetchImage.load(manager.getURL())
+				}
+				.onDisappear {
+					fetchImage.cancel()
 				}
 			}
 		}
-		.frame(width: config.size?.width, height: config.size?.height)
-	}
-
-	private func saveImage(_ uiImage: UIImage) {
-		Task {
-			do {
-				try await manager.saveImage(uiImage)
-			} catch {
-				self.error = error
-			}
-		}
+		.frame(size: config.size?.size)
 	}
 }
 
 extension ImageView {
-
 	@ViewBuilder
-	func imageView(for uiImage: UIImage) -> some View {
-		let image = Image(uiImage: uiImage)
-			.resizable()
-			.aspectRatio(contentMode: (config.size?.width == nil && config.size?.height == nil) ? .fit : .fill)
-
+	func imageView(for image: Image) -> some View {
 		switch config.tapAction {
 		case .openPhotoViewer:
-			image.sheetWithZoomTransition { imagerViewerScene }
+			image
+				.resizable()
+				.aspectRatio(contentMode: (config.size?.width == nil && config.size?.height == nil) ? .fit : .fill)
+				.sheetWithZoomTransition { imagerViewerScene }
+				.equatable(by: manager.item.imageID)
 		case .custom(let action):
-			image.onTapGesture(perform: action)
+			image
+				.resizable()
+				.aspectRatio(contentMode: (config.size?.width == nil && config.size?.height == nil) ? .fit : .fill)
+				.onTapGesture(perform: action)
+				.equatable(by: manager.item.imageID)
 		}
+	}
+	@ViewBuilder
+	func imageView(for uiImage: UIImage) -> some View {
+		imageView(for: Image(uiImage: uiImage))
 	}
 
 	@ViewBuilder
@@ -90,9 +117,9 @@ extension ImageView {
 
 	var imagerViewerScene: some View {
 		PhotoViewer(.init(
-			url: MediaManager.shared.url(for: manager.item.id, manager.item.type).absoluteString,
+			url: MediaManager.shared.url(for: manager.item.imageID, manager.item.type).absoluteString,
 			type: .photo,
-			identifier: manager.item.id
+			identifier: manager.item.imageID
 		))
 	}
 

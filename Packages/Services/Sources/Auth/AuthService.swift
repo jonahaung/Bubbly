@@ -24,7 +24,9 @@ public class AuthService {
 	public var authState: AuthState = .unknown
 	private let cancelBag = CancelBag()
 
-	public init() {}
+	public init() {
+		observeAuthState()
+	}
 
 	public func observeAuthState() {
 		authState = determineAuthState()

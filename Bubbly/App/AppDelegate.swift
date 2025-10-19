@@ -33,6 +33,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		didFailToRegisterForRemoteNotificationsWithError error: any Error
 	) {
 		debugPrint(error)
+		fatalError()
 	}
 
 	func application(

@@ -25,10 +25,7 @@ public final class PushNotificationService: NSObject, Sendable {
 				options: [
 					.alert,
 					.badge,
-					.sound,
-					.provisional,
-					.criticalAlert,
-					.providesAppNotificationSettings
+					.sound
 				]
 			) {
 				[weak self] _,
