@@ -18,9 +18,9 @@ public struct BubbleFactory {
 	}
 
 	private func getBubble(
-		msg: MsgSnapshot,
-		previousMsg: MsgSnapshot?,
-		nextMsg: MsgSnapshot?
+		msg: Message,
+		previousMsg: Message?,
+		nextMsg: Message?
 	) -> Bubble {
 		var bubble = Bubble()
 		bubble.bubbleCorner = resolveCorner(
@@ -35,10 +35,10 @@ public struct BubbleFactory {
 	// MARK: - Corner resolution
 
 	private func resolveCorner(
-		msg: MsgSnapshot,
+		msg: Message,
 		isSent: Bool,
-		previousMsg: MsgSnapshot?,
-		nextMsg: MsgSnapshot?
+		previousMsg: Message?,
+		nextMsg: Message?
 	) -> BubbleCorner {
 		if isSent {
 			return resolveSendingCorner(msg, previousMsg: previousMsg, nextMsg: nextMsg)
@@ -48,9 +48,9 @@ public struct BubbleFactory {
 	}
 
 	private func resolveSendingCorner(
-		_ msg: MsgSnapshot,
-		previousMsg: MsgSnapshot?,
-		nextMsg: MsgSnapshot?
+		_ msg: Message,
+		previousMsg: Message?,
+		nextMsg: Message?
 	) -> BubbleCorner {
 		let canPreviousGroup = previousMsg.map { shouldGroupWithPrevious(msg: msg, previousMsg: $0) } ?? false
 		let canNextGroup = nextMsg.map { shouldGroupWithNext(msg: msg, nextMsg: $0) } ?? false
@@ -71,9 +71,9 @@ public struct BubbleFactory {
 	}
 
 	private func resolveReceivingCorner(
-		_ msg: MsgSnapshot,
-		previousMsg: MsgSnapshot?,
-		nextMsg: MsgSnapshot?
+		_ msg: Message,
+		previousMsg: Message?,
+		nextMsg: Message?
 	) -> BubbleCorner {
 		let canPreviousGroup = previousMsg.map { shouldGroupWithPrevious(msg: msg, previousMsg: $0) } ?? false
 		let canNextGroup = nextMsg.map { shouldGroupWithNext(msg: msg, nextMsg: $0) } ?? false
@@ -96,9 +96,9 @@ public struct BubbleFactory {
 	// MARK: - Time separator & padding
 
 	public func msgCellLayout(
-		for msg: MsgSnapshot,
-		previous: MsgSnapshot?,
-		next: MsgSnapshot?
+		for msg: Message,
+		previous: Message?,
+		next: Message?
 	) -> MsgCellLayout {
 		guard let previous else {
 			return .init(
@@ -115,21 +115,21 @@ public struct BubbleFactory {
 	}
 	// MARK: - Grouping helpers
 
-	private func shouldGroupWithPrevious(msg: MsgSnapshot, previousMsg: MsgSnapshot) -> Bool {
+	private func shouldGroupWithPrevious(msg: Message, previousMsg: Message) -> Bool {
 		isEqual(of: msg, to: previousMsg) &&
 		isSimilierDateTime(of: msg.date, from: previousMsg)
 	}
 
-	private func shouldGroupWithNext(msg: MsgSnapshot, nextMsg: MsgSnapshot) -> Bool {
+	private func shouldGroupWithNext(msg: Message, nextMsg: Message) -> Bool {
 		isEqual(of: msg, to: nextMsg) &&
 		isSimilierDateTime(of: msg.date, from: nextMsg)
 	}
 
-	private func isEqual(of thisMsg: MsgSnapshot, to msg: MsgSnapshot) -> Bool {
+	private func isEqual(of thisMsg: Message, to msg: Message) -> Bool {
 		thisMsg.senderID == msg.senderID
 	}
 
-	private func isSimilierDateTime(of date: Date, from msg: MsgSnapshot) -> Bool {
+	private func isSimilierDateTime(of date: Date, from msg: Message) -> Bool {
 		let difference = date.getDifference(from: msg.date, unit: .minute)
 		return abs(difference) < minutesForChatMsgGrouping
 	}

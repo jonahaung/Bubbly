@@ -90,7 +90,7 @@ public struct UserDefault<Value: Equatable>: DynamicProperty {
 
 @MainActor
 @propertyWrapper
-public struct OptionalUserDefault<Value: Equatable>: DynamicProperty, Sendable {
+public struct OptionalUserDefault<Value: Equatable>: DynamicProperty {
 	@State private var value: Value?
 	@State private var cancellable: AnyCancellable?
 

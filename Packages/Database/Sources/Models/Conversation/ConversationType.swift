@@ -9,16 +9,5 @@ import Foundation
 import XUI
 
 public enum ConversationType: Int, Conformable, Codable {
-    case single, group
-}
-
-extension ConversationType: CustomStringConvertible {
-	public var description: String {
-		switch self {
-		case .single:
-			return "single"
-		case .group:
-			return "group"
-		}
-	}
+    case single, group, ai
 }

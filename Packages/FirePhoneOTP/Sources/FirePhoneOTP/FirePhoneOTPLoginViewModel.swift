@@ -12,13 +12,13 @@ import Combine
 
 @MainActor
 class FirePhoneOTPLoginViewModel: ObservableObject {
-    
+
     @Published var viewState = FirePhoneLoginViewState.enterPhoneNumber
     @Published var phoneNumber = PhNumber.locale
     @Published var isLoading = false
     @Published var otp = ""
     private var cancellables = Set<AnyCancellable>()
-    
+
     init() {
         $phoneNumber
             .removeDuplicates(by: { one, two in
@@ -29,7 +29,7 @@ class FirePhoneOTPLoginViewModel: ObservableObject {
                 self?.validatePhoneNumber(value)
             }
             .store(in: &cancellables)
-        
+
         $otp
             .filter { $0.count == 6}
             .debounce(for: 0.5, scheduler: RunLoop.main)
@@ -41,7 +41,7 @@ class FirePhoneOTPLoginViewModel: ObservableObject {
 }
 
 extension FirePhoneOTPLoginViewModel {
-    
+
     func sendCode(phoneNumber: String) {
         guard !isLoading else { return }
         isLoading = true
@@ -58,13 +58,13 @@ extension FirePhoneOTPLoginViewModel {
             }
         }
     }
-    
+
     func verifyCode(code: String) {
         guard !isLoading else { return }
         isLoading = true
         let verificationId = UserDefaults.standard.string(forKey: "verificationId") ?? ""
         let credentials = PhoneAuthProvider.provider().credential(withVerificationID: verificationId, verificationCode: code)
-        
+
         Auth.auth().signIn(with: credentials) { [weak self] (authResult, error) in
             guard let self else { return }
             DispatchQueue.main.async {
@@ -97,7 +97,7 @@ extension FirePhoneOTPLoginViewModel {
             sendCode(phoneNumber: number)
         }
     }
-    
+
     func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
         var pureNumber = stringvar.replacingOccurrences( of: "[^0-9]", with: "", options: .regularExpression)
         for index in 0 ..< pattern.count {

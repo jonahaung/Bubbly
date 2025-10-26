@@ -5,7 +5,6 @@
 //  Created by Aung Ko Min on 27/9/25.
 //
 
-
 import Swift
 import SwiftUI
 
@@ -22,7 +21,7 @@ extension View {
     public func masking<T: View>(_ view: T) -> some View {
         hidden().background(view.mask(self))
     }
-    
+
     /// Masks the given view using the alpha channel of this view.
     @inlinable
     public func masking<T: View>(@ViewBuilder _ view: () -> T) -> some View {

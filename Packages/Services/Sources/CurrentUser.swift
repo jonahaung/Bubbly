@@ -14,19 +14,19 @@ import FirebaseMessaging
 
 @MainActor
 @Observable
-public final class CurrentUser: Sendable {
-	
+public final class CurrentUser {
+
 	public enum XError: Error {
 		case notLoggedIn
 		case noDeviceToken
 	}
-	
-	public var user: ContactSnapshot
-	
-	public init(_ snapshot: ContactSnapshot) {
+
+	public var user: Contact
+
+	public init(_ snapshot: Contact) {
 		user = snapshot
 	}
-	
+
 	public func updateIfNeeded() async throws {
 		let deviceToken = GroupAppStorage.shared.string(
 			for: .device(.deviceToken)
@@ -36,30 +36,39 @@ public final class CurrentUser: Sendable {
 			GroupAppStorage.shared
 				.save(value: deviceToken, for: .device(.deviceToken))
 		}
-		
+
 		let publicKeyString = CryptoService.shared.publicKeyString
 		user.pushToken = deviceToken
 		user.publicKeyString = publicKeyString
-		
+
 		let remoteUser = try? await getRemoteUser()
-		
+
 		if user != remoteUser {
 			try await setOnRemote()
 		}
 	}
-	
+
 	private func setOnRemote() async throws {
 		let reference = Firestore.firestore().collection("users")
 		try await reference
 			.document(user.uid)
 			.setData(user.dictionary, merge: true)
 	}
-	
-	private func getRemoteUser() async throws -> ContactSnapshot {
+
+	private func getRemoteUser() async throws -> Contact {
 		try await Firestore
 			.firestore()
 			.collection("users")
 			.document(user.uid)
-			.getDocument(as: ContactSnapshot.self)
+			.getDocument(as: Contact.self)
+	}
+}
+
+public extension CurrentUser {
+	static var current: Contact? {
+		guard let user = Auth.auth().currentUser else {
+			return nil
+		}
+		return user.snapshot()
 	}
 }

@@ -19,15 +19,15 @@ public struct GroupConversationSettingsScene: View {
 	@Environment(CurrentUser.self) private var currentUser
 	@FocusState private var isFocused: Bool
 
-	public init(_ conversation: ConversationSnapshot) {
-		_viewModel = .init(wrappedValue: .init(conversation: conversation))
+	public init(_ group: Database.Group) {
+		_viewModel = .init(wrappedValue: .init(group: group))
 	}
 
 	public var body: some View {
 		Form {
 			Section {
 				FormCell {
-					TextField("Group Name", text: $viewModel.conversation.name)
+					TextField("Group Name", text: $viewModel.group.name)
 						.textInputAutocapitalization(.words)
 						.focused($isFocused)
 				} right: {
@@ -45,7 +45,7 @@ public struct GroupConversationSettingsScene: View {
 						size: 150,
 						clipShape: Circle()
 					) {
-						ResizableImage(viewModel.conversation.photoURL)
+						ResizableImage(viewModel.group.photoURL)
 					}
 					.padding()
 				}
@@ -56,17 +56,17 @@ public struct GroupConversationSettingsScene: View {
 				XNavPickerBar<BubbleColor>(
 					"Bubble Color",
 					BubbleColor.allCases,
-					$viewModel.conversation.theme.bubbleColor
+					$viewModel.group.theme.bubbleColor
 				)
 				XNavPickerBar<ChatBackground>(
 					"Chat Background",
 					ChatBackground.allCases,
-					$viewModel.conversation.theme.background
+					$viewModel.group.theme.background
 				)
 			}
 			Section {
 				AsyncButton {
-					try await ConversationRepo.deleteMessages(conID: viewModel.conversation.uid)
+					try await ConversationRepo.deleteMessages(conID: viewModel.group.uid)
 				} label: {
 					Text("Delete Messages")
 				} onFinish: {
@@ -76,9 +76,8 @@ public struct GroupConversationSettingsScene: View {
 				}
 			}
 			Section {
-				FormCell("Created", viewModel.conversation.createdDate.formatted(date: .abbreviated, time: .shortened))
-				if let adminID = viewModel.conversation.createdBy,
-				   let admin = adminID == currentUserId ? currentUser.user : contactStore.contact(for: adminID) {
+				FormCell("Created", viewModel.group.createdDate.date.formatted(date: .abbreviated, time: .shortened))
+				if let admin = viewModel.group.createdBy == currentUserId ? currentUser.user : contactStore.contact(for: viewModel.group.createdBy) {
 					FormCell("Admin", admin.name)
 				}
 			}
@@ -96,7 +95,7 @@ public struct GroupConversationSettingsScene: View {
 			}
 
 			Section {
-				Text(viewModel.conversation.preetyPrinted)
+				Text(viewModel.group.preetyPrinted)
 					.font(.system(.caption2, design: .monospaced, weight: .light))
 			}
 		}
@@ -116,8 +115,8 @@ public struct GroupConversationSettingsScene: View {
 					if let image = await viewModel.pickedPhoto?.uiImage {
 						let url = try await viewModel.uploadImage(image: image)
 						await MainActor.run {
-							viewModel.conversation.photoURL = url
-							viewModel.pickedPhoto = nil
+							viewModel.group.photoURL = url
+//							viewModel.pickedPhoto = nil
 						}
 					}
 					try await viewModel.applyUpdate()
@@ -129,7 +128,7 @@ public struct GroupConversationSettingsScene: View {
 					}
 				} onFinish: {
 					Task { @MainActor in
-						viewModel.originalGroup = viewModel.conversation
+						viewModel.originalGroup = viewModel.group
 					}
 				} onError: { error in
 					Task {

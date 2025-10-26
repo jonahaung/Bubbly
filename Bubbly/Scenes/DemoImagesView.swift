@@ -16,7 +16,7 @@ struct DemoImagesView: View {
 		ScrollView {
 			let chunks = DemoImages.demoPhotosURLs.chunked(into: 3)
 			LazyVStack {
-				ForEach(chunks.enumerated, id: \.0) { index, urls in
+				ForEach(chunks.enumerated, id: \.0) { _, urls in
 					Section {
 						ComposedLayout(topColumns: 1, bottomColumns: 2) {
 							ForEach(

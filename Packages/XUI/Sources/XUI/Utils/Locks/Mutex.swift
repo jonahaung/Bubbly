@@ -1,0 +1,53 @@
+//
+//  Mutex.swift
+//  XUI
+//
+//  Created by Aung Ko Min on 20/10/25.
+//
+
+import Foundation
+
+public final class Mutex<T>: @unchecked Sendable {
+    private var _value: T
+    private let lock: os_unfair_lock_t
+
+	public init(_ value: T) {
+        self._value = value
+        self.lock = .allocate(capacity: 1)
+        self.lock.initialize(to: os_unfair_lock())
+    }
+
+    deinit {
+        lock.deinitialize(count: 1)
+        lock.deallocate()
+    }
+
+	public var value: T {
+        get {
+            os_unfair_lock_lock(lock)
+            defer { os_unfair_lock_unlock(lock) }
+            return _value
+        }
+        set {
+            os_unfair_lock_lock(lock)
+            defer { os_unfair_lock_unlock(lock) }
+            _value = newValue
+        }
+    }
+
+	public func withLock<U>(_ closure: (inout T) -> U) -> U {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
+        return closure(&_value)
+    }
+}
+
+public extension Mutex where T: BinaryInteger {
+    func incremented() -> T {
+        withLock {
+            let value = $0
+            $0 += 1
+            return value
+        }
+    }
+}

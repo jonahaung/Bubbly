@@ -9,8 +9,7 @@ import Foundation
 import FirebaseAuth
 import XUI
 
-public enum AnyMsgData: Codable, Sendable {
-
+public enum AnyMsgData: Codable, Sendable, Hashable {
 	case newMsg(rMsg: RMsg)
 	case updatedMsg(rMsg: RMsg)
 	case deleteMsg(rMsg: RMsg)
@@ -18,12 +17,57 @@ public enum AnyMsgData: Codable, Sendable {
 	case typingStatus(status: TypingStatusPayload)
 	case seenStatus(status: SeenStatusPayload)
 
-	// MARK: - Common Properties
-	public var conID: String {
+	enum CodingKeys: String, CodingKey {
+		case newMsg
+		case updatedMsg
+		case deleteMsg
+		case reaction
+		case typingStatus
+		case seenStatus
+	}
+}
+public extension AnyMsgData {
+
+	struct TypingStatusPayload: Sendable, Codable, Hashable {
+		public let isTyping: Bool
+		public let conID: String
+		public let senderID: String
+
+		public init(isTyping: Bool, conID: String, senderID: String) {
+			self.isTyping = isTyping
+			self.conID = conID
+			self.senderID = senderID
+		}
+	}
+	struct ReactionPayload: Sendable, Codable, Hashable {
+		public let reaction: String
+		public let conID: String
+		public let senderID: String
+
+		public init(reaction: String, conID: String, senderID: String) {
+			self.reaction = reaction
+			self.conID = conID
+			self.senderID = senderID
+		}
+	}
+	struct SeenStatusPayload: Sendable, Codable, Hashable {
+		public let msgID: String
+		public let userID: String
+		public let conID: String
+
+		public init(msgID: String, userID: String, conID: String) {
+			self.msgID = msgID
+			self.userID = userID
+			self.conID = conID
+		}
+	}
+}
+public extension AnyMsgData {
+	var conID: String {
 		switch self {
 		case .newMsg(let rMsg),
-			 .updatedMsg(let rMsg),
-			 .deleteMsg(let rMsg):
+				.updatedMsg(let rMsg),
+				.deleteMsg(let rMsg):
 			return rMsg.conID
 		case .typingStatus(let typingStatus):
 			return typingStatus.conID
@@ -34,10 +78,10 @@ public enum AnyMsgData: Codable, Sendable {
 		}
 	}
 
-	public var subtitle: String {
+	var subtitle: String {
 		switch self {
 		case .newMsg(let rMsg),
-			 .updatedMsg(let rMsg):
+				.updatedMsg(let rMsg):
 			return rMsg.text
 		case .deleteMsg(let rMsg):
 			return "Deleted: \(rMsg.text)"
@@ -49,26 +93,15 @@ public enum AnyMsgData: Codable, Sendable {
 			return "Seen"
 		}
 	}
-
-	// MARK: - Codable Keys
-	enum CodingKeys: String, CodingKey {
-		case newMsg
-		case updatedMsg
-		case deleteMsg
-		case reaction
-		case typingStatus
-		case seenStatus
-	}
-}
-
-// MARK: - Push Notification Helpers
-public extension AnyMsgData {
-
-	func pushNotificationTitle(for conversation: ConversationSnapshot) -> String {
-		if conversation.type == .group {
-			return conversation.name
+	func pushNotificationTitle(for conversation: any ConversationRepresentable) -> String {
+		switch conversation.kind {
+		case .contact:
+			return Auth.auth().currentUser?.displayName ?? conversation.name
+		case .group(let group):
+			return group.name
+		case .system(let ai):
+			return ai.name
 		}
-		return Auth.auth().currentUser?.displayName ?? conversation.name
 	}
 
 	var pushNotificationSubtitle: String {
@@ -85,7 +118,7 @@ public extension AnyMsgData {
 	var pushNotificationBody: String {
 		switch self {
 		case .newMsg(let msg),
-			 .updatedMsg(let msg):
+				.updatedMsg(let msg):
 			return msg.text
 		case .deleteMsg:
 			return "Message Deleted"
@@ -95,46 +128,6 @@ public extension AnyMsgData {
 			return typingStatus.isTyping ? "is typing..." : "stopped typing"
 		case .seenStatus(let status):
 			return status.msgID
-		}
-	}
-}
-
-// MARK: - Nested Payloads
-public extension AnyMsgData {
-
-	struct TypingStatusPayload: Sendable, Codable {
-		public let isTyping: Bool
-		public let conID: String
-		public let senderID: String
-
-		public init(isTyping: Bool, conID: String, senderID: String) {
-			self.isTyping = isTyping
-			self.conID = conID
-			self.senderID = senderID
-		}
-	}
-
-	struct ReactionPayload: Sendable, Codable {
-		public let reaction: String
-		public let conID: String
-		public let senderID: String
-
-		public init(reaction: String, conID: String, senderID: String) {
-			self.reaction = reaction
-			self.conID = conID
-			self.senderID = senderID
-		}
-	}
-
-	struct SeenStatusPayload: Sendable, Codable, Hashable {
-		public let msgID: String
-		public let userID: String
-		public let conID: String
-
-		public init(msgID: String, userID: String, conID: String) {
-			self.msgID = msgID
-			self.userID = userID
-			self.conID = conID
 		}
 	}
 }

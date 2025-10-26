@@ -19,20 +19,20 @@ final class CurrentUserProfileViewModel: ErrorPresenter {
 	var pickedPhoto: PickedPhoto?
 	var isLoading = false
 
-	func shouldUpdateDisplayName(for user: ContactSnapshot) -> Bool {
+	func shouldUpdateDisplayName(for user: Contact) -> Bool {
 		Auth
 			.auth().currentUser?.displayName != user.name.trimmed && user.name.isWhitespace == false
 	}
-	func shouldUpdateProfile(for user: ContactSnapshot) -> Bool {
+	func shouldUpdateProfile(for user: Contact) -> Bool {
 		shouldUpdateDisplayName(for: user) || shouldUpdateProfileImage()
 	}
 	func shouldUpdateProfileImage() -> Bool {
 		pickedPhoto != nil
 	}
-	func isProfileComplete(for user: ContactSnapshot) -> Bool {
+	func isProfileComplete(for user: Contact) -> Bool {
 		user.name.isWhitespace == false
 	}
-	func applyUpdates(for snapshot: ContactSnapshot) async throws {
+	func applyUpdates(for snapshot: Contact) async throws {
 		guard let currentUser = Auth.auth().currentUser else {
 			return
 		}

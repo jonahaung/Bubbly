@@ -44,7 +44,7 @@ public struct PhotoPickerButton<Content: View>: View {
 			.frame(width: size, height: size)
 			.onTapGesture { onTap?() }
 			.overlay(alignment: .bottomTrailing) { overlayControl }
-			.onChange(of: viewModel.pickedPhoto) { oldValue, newValue in
+			.onChange(of: viewModel.pickedPhoto) { _, newValue in
 				if newValue != self.pickedPhoto {
 					self.pickedPhoto = newValue
 				}

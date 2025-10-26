@@ -1,103 +1,157 @@
-//
-//  MsgCreater.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 11/10/25.
-//
-
 import UIKit
+import Foundation
 import Database
 import Services
-import Foundation
 import XUI
 
-public struct MsgCreater: Sendable {
+public actor MsgCreator {
 
-	enum Error: Swift.Error {
+	// MARK: - Errors
+	public enum Error: Swift.Error {
 		case noCurrentUserId
+		case imageProcessingFailed(Swift.Error? = nil)
+		case dataConversionFailed
 	}
 
-	func create(text: String, _ conversation: ConversationSnapshot) throws -> MsgSnapshot {
-		guard let currentUserId else { throw Self.Error.noCurrentUserId }
-		let msg = MsgSnapshot(
-			uid: UUID().uuidString.lowercased(),
+	// MARK: - Dependencies
+	private let mediaManager: MediaManager
+	private let currentUserId: String
+
+	// MARK: - Init
+	public init(currentUserId: String?, mediaManager: MediaManager = .shared) throws {
+		guard let userId = currentUserId else {
+			throw Error.noCurrentUserId
+		}
+		self.mediaManager = mediaManager
+		self.currentUserId = userId
+	}
+
+	// MARK: - ✅ Public APIs
+
+	public func create(text: String, in conversation: any ConversationRepresentable) -> Message {
+		Message(
+			uid: Self.generateMessageId(),
 			senderID: currentUserId,
 			conID: conversation.uid,
 			msgKind: .text,
 			text: text,
 			date: .now,
 			incomingStatus: .none,
-			outgoingStatus: try getOutgoingStatus(for: conversation),
+			outgoingStatus: makeOutgoingStatus(for: conversation),
 			attachment: nil
 		)
-		return msg
 	}
 
-	func create(url: URL, _ conversation: ConversationSnapshot) async throws -> MsgSnapshot {
-		guard let currentUserId else { throw Self.Error.noCurrentUserId }
-		if let image = try await LinkData.performFetch(for: url).image {
-			let attachment = try await attachment(for: image, type: .link, url: url.absoluteString)
-			let msg = MsgSnapshot(
-				uid: attachment.uid,
-				senderID: currentUserId,
-				conID: conversation.uid,
-				msgKind: .attachment,
-				text: url.absoluteString,
-				date: .now,
-				incomingStatus: .none,
-				outgoingStatus: try getOutgoingStatus(for: conversation),
-				attachment: attachment
-			)
-			return msg
+	public func create(from url: URL, in conversation: any ConversationRepresentable) async throws -> Message {
+		let linkData = try await LinkData.performFetch(for: url)
+
+		guard let image = linkData.image else {
+			return create(text: url.absoluteString, in: conversation)
 		}
-		return try create(text: url.absoluteString, conversation)
+
+		return try await createImageMessage(
+			image: image,
+			text: linkData.description,
+			urlString: url.absoluteString,
+			type: .link,
+			in: conversation
+		)
 	}
 
-	func create(image: UIImage, _ conversation: ConversationSnapshot) async throws -> MsgSnapshot {
-		guard let currentUserId else { throw Self.Error.noCurrentUserId }
-
-		let attachment = try await attachment(for: image, type: .imageUploading, url: .init())
-		let msg = MsgSnapshot(
-			uid: attachment.uid,
-			senderID: currentUserId,
-			conID: conversation.uid,
-			msgKind: .attachment,
-			text: attachment.attachmentType.description,
-			date: .now,
-			incomingStatus: .none,
-			outgoingStatus: try getOutgoingStatus(for: conversation),
-			attachment: attachment
+	public func create(from image: UIImage, in conversation: any ConversationRepresentable) async throws -> Message {
+		try await createImageMessage(
+			image: image,
+			text: "Image",
+			urlString: "",
+			type: .imageUploading,
+			in: conversation
 		)
-		return msg
 	}
 }
 
-private extension MsgCreater {
-	func getOutgoingStatus(for conversation: ConversationSnapshot) throws -> [String: MsgOutgoingStatus] {
-		guard let currentUserId else { throw Self.Error.noCurrentUserId }
-		var outgoinStatus = [String: MsgOutgoingStatus]()
-		conversation.members.filter{ $0 != currentUserId }.forEach { each in
-			outgoinStatus[each] = .sending
-		}
-		return outgoinStatus
-	}
-	func attachment(for image: UIImage, type: MsgAttachment.AttachMentType, url: String) async throws -> Attachment {
-		let mediaManager = MediaManager.shared
-		let data = try mediaManager.createData(from: image)
-		let thumbnilData = try await mediaManager.createThumbnil(from: image)
+// MARK: - Private Actor Methods
+private extension MsgCreator {
 
-		let msgID = UUID().uuidString.lowercased()
-		let thumbnil = UIImage(data: thumbnilData)!
-		let aspectRatio = thumbnil.size.width / thumbnil.size.height
+	// MARK: - Message Building
 
-		let attachment = Attachment(
-			uid: msgID,
-			url: url,
-			attachMentTypeRaw: type.rawValue,
-			aspectRatio: aspectRatio,
-			data: data,
-			thumbnailData: thumbnilData
+	func createImageMessage(
+		image: UIImage,
+		text: String,
+		urlString: String,
+		type: AttachMentType,
+		in conversation: any ConversationRepresentable
+	) async throws -> Message {
+
+		let id = Self.generateMessageId()
+
+		var message = Message(
+			uid: id,
+			senderID: currentUserId,
+			conID: conversation.uid,
+			msgKind: .attachment,
+			text: text,
+			date: .now,
+			incomingStatus: .none,
+			outgoingStatus: makeOutgoingStatus(for: conversation),
+			attachment: Attachment(uid: id, url: urlString, attachMentTypeRaw: type.rawValue, aspectRatio: 1)
 		)
-		return attachment
+
+		let updatedAttachment = try await processImageAttachment(for: message, original: image, type: type, url: urlString)
+		message.attachment = updatedAttachment
+
+		return message
+	}
+
+	// MARK: - ✅ Background-safe image & file processing
+
+	func processImageAttachment(
+		for message: Message,
+		original image: UIImage,
+		type: AttachMentType,
+		url: String
+	) async throws -> Attachment {
+
+		do {
+			// Image encoding happens inside this actor (safe)
+			let imageData = try mediaManager.createData(from: image)
+			let thumbnailData = try await mediaManager.createThumbnail(from: image)
+
+			guard let thumbnailImage = UIImage(data: thumbnailData) else {
+				throw Error.dataConversionFailed
+			}
+
+			let aspectRatio = thumbnailImage.size.width / max(thumbnailImage.size.height, 1)
+
+			// ✅ Move heavy file I/O off the MainActor/actor to a background queue
+			try await Task.detached(priority: .utility) {
+				try message.file()?.write(imageData)
+				try message.thumbnailFile()?.write(thumbnailData)
+			}.value
+
+			return Attachment(uid: message.uid,
+							  url: url,
+							  attachMentTypeRaw: type.rawValue,
+							  aspectRatio: aspectRatio)
+
+		} catch {
+			throw Error.imageProcessingFailed(error)
+		}
+	}
+
+	// MARK: - Outgoing Status
+	func makeOutgoingStatus(for conversation: any ConversationRepresentable) -> [String: MsgOutgoingStatus] {
+		var dict = [String: MsgOutgoingStatus]()
+		dict.reserveCapacity(conversation.members.count)
+		for member in conversation.members where member != currentUserId {
+			dict[member] = .sending
+		}
+		return dict
+	}
+}
+
+// MARK: - nonisolated Utilities
+private extension MsgCreator {
+	nonisolated static func generateMessageId() -> String {
+		UUID().uuidString.lowercased()
 	}
 }

@@ -40,16 +40,17 @@ struct ChatOverlayView: View {
 
 struct RoomFocesedOverlayBar: View {
 	@Environment(ChatViewManager.self) private var manager
-	@Environment(\.invokeMsgRoomAction) private var msgRoomAction
+	@Environment(\.sendChatRoomAction) private var msgRoomAction
 	@Environment(MsgCellViewModel.self) private var item
 
 	var body: some View {
 		HStack {
 			SystemImageWithShape(.heartFill, .circle(.color(.pink)))
-			Button {
-				let msg = item.msg
-				msgRoomAction?(.deleteMsg(rMsg: RMsg(msg)))
-				manager.eventsManager.updateFocusedFrame(nil)
+			AsyncButton {
+				let msg = await item.msg
+				await manager.eventsManager.updateFocusedFrame(nil)
+				await manager.datasource.delegate?.datasource(didRemove: msg, animated: true)
+				await msgRoomAction?(.deleteMsg(rMsg: RMsg(msg)))
 			} label: {
 				SystemImageWithShape(.trashFill, .circle(.color(.red)))
 			}

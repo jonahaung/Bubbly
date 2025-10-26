@@ -8,10 +8,10 @@
 import SwiftUI
 
 public struct PhoneNumberTextField: View {
-    
+
     private var phoneNumber: Binding<PhNumber>
     @State private var showCountryPicker = false
-    
+
     public init(phoneNumber: Binding<PhNumber>) {
         self.phoneNumber = phoneNumber
     }

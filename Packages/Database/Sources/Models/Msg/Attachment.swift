@@ -8,31 +8,24 @@
 import Foundation
 
 public struct Attachment: Codable, Sendable, Hashable {
-	
 	public let uid: String
 	public var url: String
 	public var attachMentTypeRaw: Int
 	public let aspectRatio: Double
-	public var data: Data?
-	public var thumbnailData: Data?
 
 	public init(uid: String,
 				url: String,
 				attachMentTypeRaw: Int,
-				aspectRatio: Double,
-				data: Data? = nil,
-				thumbnailData: Data? = nil) {
+				aspectRatio: Double) {
 		self.uid = uid
 		self.url = url
 		self.attachMentTypeRaw = attachMentTypeRaw
 		self.aspectRatio = aspectRatio
-		self.data = data
-		self.thumbnailData = thumbnailData
 	}
 }
 
 public extension Attachment {
-	var attachmentType: MsgAttachment.AttachMentType {
+	var attachmentType: AttachMentType {
 		.init(rawValue: attachMentTypeRaw) ?? .image
 	}
 }

@@ -12,6 +12,7 @@ import UIKit
 @Model
 public final class PMsg: CollectionDocument {
 
+	@Attribute(.unique)
 	public var uid = String()
 	public var senderID = String()
 	public var conID = String()
@@ -20,7 +21,7 @@ public final class PMsg: CollectionDocument {
 	public var date = String()
 	public var incomingStatus = MsgIncomingStatus.none.rawValue
 	public var outgoingStatus = [String: MsgOutgoingStatus]()
-	@Attribute(.externalStorage) public var attachment: Attachment?
+	public var attachment: Attachment?
 
 	public init(
 		uid: String = UUID().uuidString,
@@ -45,15 +46,47 @@ public final class PMsg: CollectionDocument {
 	}
 }
 
-extension PMsg {
-	public func update(with snapshot: MsgSnapshot) {
+public extension PMsg {
+	func update(with snapshot: Message) {
 		self.incomingStatus = snapshot.incomingStatus.rawValue
 		self.outgoingStatus = snapshot.outgoingStatus
 		self.attachment = snapshot.attachment
 	}
-	public func update(with rMsg: RMsg) {
+	func update(with rMsg: RMsg) {
 		self.incomingStatus = rMsg.incomingStatus.rawValue
 		self.outgoingStatus = rMsg.outgoingStatus
 		self.attachment = rMsg.attachment
+	}
+}
+extension PMsg: SendableDocument {
+
+	public typealias SendableType = Message
+
+	public convenience init(from snapshot: SendableType) {
+		self.init(
+			uid: snapshot.uid,
+			senderID: snapshot.senderID,
+			conID: snapshot.conID,
+			msgKind: snapshot.msgKind,
+			text: snapshot.text,
+			date: ServerTime(snapshot.date),
+			incomingStatus: snapshot.incomingStatus,
+			outgoingStatus: snapshot.outgoingStatus,
+			attachment: snapshot.attachment
+		)
+	}
+
+	public func toSendable() -> Message {
+		return SendableType(
+			uid: uid,
+			senderID: senderID,
+			conID: conID,
+			msgKind: .init(rawValue: msgKind) ?? .text,
+			text: text,
+			date: ServerTime(date).date,
+			incomingStatus: .init(rawValue: incomingStatus) ?? .none,
+			outgoingStatus: outgoingStatus,
+			attachment: attachment
+		)
 	}
 }

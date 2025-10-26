@@ -11,30 +11,29 @@ import FCM_V1
 import Core
 
 public extension Socket {
-	func send(_ data: AnyMsgData, conversation: ConversationSnapshot) {
+	func send(_ data: AnyMsgData, conversation: any ConversationRepresentable) {
 		switch data {
 		case .newMsg(let rMsg):
 			queue.addOperation { [self] in
-				var msg = MsgSnapshot(rMsg)
+				var msg = Message(rMsg)
 				try await Store.shared.msgStore.insert(msg)
-				notifyMessage(data)
-				let outgoingStatus = try await sendToRemote(
-					.newMsg(rMsg: rMsg.serialized()),
+				await notifyMessage(data)
+				msg.outgoingStatus = try await sendToRemote(
+					.newMsg(rMsg: rMsg),
 					conversation: conversation
 				)
-				msg.outgoingStatus = outgoingStatus
 				try await Store.shared.msgStore.updateAndSave(uid: rMsg.uid) { model in
 					model.update(with: msg)
 				}
-				notifyMessage(.updatedMsg(rMsg: .init(msg: msg)))
+				await notifyMessage(.updatedMsg(rMsg: .init(msg: msg)))
 			}
 		case .updatedMsg(let rMsg):
 			queue.addOperation { [self] in
-				try await sendToRemote(.updatedMsg(rMsg: rMsg.serialized()), conversation: conversation)
+				try await sendToRemote(.updatedMsg(rMsg: rMsg), conversation: conversation)
 				try await Store.shared.msgStore.updateAndSave(uid: rMsg.uid) { model in
 					model.update(with: rMsg)
 				}
-				notifyMessage(data)
+				await notifyMessage(data)
 			}
 		case .typingStatus:
 			queue.addOperation { [self] in
@@ -45,7 +44,7 @@ public extension Socket {
 		case .deleteMsg(rMsg: let rMsg):
 			queue.addOperation { [self] in
 				try await Store.shared.msgStore.delete(uid: rMsg.uid)
-				notifyMessage(data)
+				await notifyMessage(data)
 				try await sendToRemote(data, conversation: conversation)
 			}
 		case .seenStatus(status: let status):
@@ -68,7 +67,7 @@ public extension Socket {
 		}
 	}
 
-	@discardableResult func sendToRemote(_ data: AnyMsgData, conversation: ConversationSnapshot) async throws -> [String: MsgOutgoingStatus] {
+	@discardableResult func sendToRemote(_ data: AnyMsgData, conversation: any ConversationRepresentable) async throws -> [String: MsgOutgoingStatus] {
 		let contacts = await ConversationRepo.getContacts(from: conversation).filter {
 			$0.uid != currentUserId
 		}
@@ -76,33 +75,55 @@ public extension Socket {
 		return try await sendToRemote(data, title: title, contacts: contacts)
 	}
 
-	@discardableResult func sendToRemote(_ data: AnyMsgData, title: String, contacts: [ContactSnapshot]) async throws -> [String: MsgOutgoingStatus] {
+	@discardableResult func sendToRemote(_ data: AnyMsgData, title: String, contacts: [Contact]) async throws -> [String: MsgOutgoingStatus] {
 		let encoded = try JSONEncoder().encode(data)
 		guard let encodedString = String(data: encoded, encoding: .utf8) else {
 			throw SocketError.encodingFailed
 		}
 
-		let results = try await contacts.parallelMap { [pushNotificationSender] contact in
-			if !contact.pushToken.isWhitespace, let publicKeyString = contact.publicKeyString {
-				let encrypted = try await self.encrypt(
-					encodedString,
-					publicKeyString: publicKeyString
-				)
-				let notification = APNSNotification(
-					deviceToken: contact.pushToken,
-					messageContent: encrypted,
-					title: title
-				)
-				let success = try? await pushNotificationSender.send(notification: notification)
-				return (contact, success == nil ? false : true)
+		let results = try await withThrowingTaskGroup(of: (Contact, Bool).self) { group in
+
+			for contact in contacts {
+				group.addTask { [self, pushNotificationSender] in
+					// Skip empty push tokens or missing public keys
+					guard !contact.pushToken.isWhitespace,
+						  let publicKeyString = contact.publicKeyString else {
+						return (contact, false)
+					}
+
+					// Encrypt payload
+					let encrypted = try await self.encrypt(
+						encodedString,
+						publicKeyString: publicKeyString
+					)
+
+					// Build APNs notification
+					let notification = APNSNotification(
+						deviceToken: contact.pushToken,
+						messageContent: encrypted,
+						title: title
+					)
+
+					// Attempt sending
+					let success = try? await pushNotificationSender.send(notification: notification)
+					return (contact, success != nil)
+				}
 			}
-			return (contact, false)
+
+			// Collect results from all tasks
+			var collected = [(Contact, Bool)]()
+			for try await result in group {
+				collected.append(result)
+			}
+			return collected
 		}
 
+		// Convert to outgoing status dictionary
 		var outgoingStatus = [String: MsgOutgoingStatus]()
 		results.forEach { (contact, isSuccess) in
-			outgoingStatus[contact.uid] = isSuccess ? MsgOutgoingStatus.sent : MsgOutgoingStatus.sendingFailed
+			outgoingStatus[contact.uid] = isSuccess ? .sent : .sendingFailed
 		}
+
 		return outgoingStatus
 	}
 
@@ -113,7 +134,7 @@ public extension Socket {
 		)
 		return CryptoService.shared.createPayload(for: encrypted)
 	}
-	func notifyMessage(_ data: AnyMsgData) {
+	@MainActor func notifyMessage(_ data: AnyMsgData) {
 		NotificationCenter.default
 			.post(name: .msgNoti(for: data.conID), object: data)
 	}

@@ -8,6 +8,7 @@
 import SwiftUI
 import Database
 import Core
+import XUI
 
 public struct ConversationInitializer {
 	public struct Configuration: Sendable {
@@ -19,6 +20,7 @@ public struct ConversationInitializer {
 		public let totalMsgsCount: Int
 		public let canPaginate: Bool
 		public var maxNumberOfMsgsToDisplay: Int { pageSize * 2 }
+
 		public let contentInsets = EdgeInsets(
 			top: ChatLayoutConstants.topBarHeight,
 			leading: 4,
@@ -27,13 +29,13 @@ public struct ConversationInitializer {
 		)
 	}
 	public struct PrefetchedData: Sendable {
-		public let conversation: ConversationSnapshot
-		public let msgs: [MsgSnapshot]
+		public let conversation: any ConversationRepresentable
+		public let msgs: [Message]
 		public let configuration: Configuration
 
 		public init(
-			conversation: ConversationSnapshot,
-			msgs: [MsgSnapshot],
+			conversation: any ConversationRepresentable,
+			msgs: [Message],
 			configuration: Configuration
 		) {
 			self.conversation = conversation
@@ -45,7 +47,7 @@ public struct ConversationInitializer {
 
 public extension ConversationInitializer {
 
-	static func createPrefetchedObject(conversation: ConversationSnapshot) async throws -> PrefetchedData {
+	static func createPrefetchedObject(conversation: any ConversationRepresentable) async throws -> PrefetchedData {
 		let conID = conversation.uid
 		let msgsCount = try await ConversationRepo.totalMsgsCount(
 			conID: conID
@@ -73,18 +75,6 @@ public extension ConversationInitializer {
 	}
 }
 public extension ConversationInitializer {
-	static func start(contact: ContactSnapshot, refetch: Bool) {
-		if let currentUserID = GroupAppStorage.shared.string(
-			for: .auth(.currentUserID)
-		) {
-			let conID = ConversationRepo.createConversationID(
-				for: currentUserID,
-				two: contact.uid
-			)
-			start(conID: conID, refetch: refetch)
-		}
-	}
-
 	static func start(conID: String, refetch: Bool, delay: Double = 0) {
 		Task.detached(priority: .background) {
 			do {
@@ -101,8 +91,8 @@ public extension ConversationInitializer {
 		}
 	}
 
-	static func start(conversation: ConversationSnapshot) {
-		Task.detached {
+	static func start(conversation: any ConversationRepresentable) {
+		Task {
 			do {
 				try await initializeAndPush(conversation: conversation)
 			} catch {
@@ -110,7 +100,8 @@ public extension ConversationInitializer {
 			}
 		}
 	}
-	static func initializeAndPush(conversation: ConversationSnapshot) async throws {
+	@concurrent
+	static func initializeAndPush(conversation: any ConversationRepresentable) async throws {
 		let conversationKit = try await createPrefetchedObject(
 			conversation: conversation
 		)

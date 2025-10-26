@@ -14,22 +14,22 @@ import Database
 struct MsgsScrollView: View {
 
 	@State var manager: ChatViewManager
+	let geometry: GeometryProxy
 	@Namespace private var namespace
 	@Environment(\.conversation) private var conversation
-	@State private var draggedOffset = CGFloat.zero
-	@State private var draggedLimitReached = false
+
 	var body: some View {
 		ScrollView {
 			MsgsScrollViewLayout(
-				spacing: manager.config.lineSpacing,
-				boundsWidth: manager.scrollManager.boundsWidth,
-				cacheContainer: manager.cache,
-				contentInsets: manager.config.contentInsets
-			) { heightDiff in
-				print(heightDiff)
-			} {
+				config: .init(
+					manager.config.lineSpacing,
+					manager.config.contentInsets,
+					containerSize: geometry.size),
+				cacheContainer: manager.scrollManager.layoutCache
+			) {
 				if manager.eventsManager.showContactInfo {
 					ConversationHeaderView()
+						.frame(size: geometry.size)
 				}
 				ForEach(manager.cellItems, id: \.id) { viewModel  in
 					let layout = manager.msgCellLayoutFor(viewModel.msg)
@@ -38,42 +38,28 @@ struct MsgsScrollView: View {
 					} else if layout.showTopPadding {
 						MsgCellSpacer(id: viewModel.id)
 					}
-
 					let selectedMsg = manager.eventsManager.selectedMsg
-
 					let isSelected = viewModel.id == selectedMsg?.id
 					if isSelected {
 						MsgCellHeader(msg: viewModel.msg)
 					}
-					MsgCell(
-						viewModel: viewModel,
-						bubble: layout.bubble
-					)
-
+					manager
+						.view(for: viewModel, bubble: layout.bubble)
+						.eraseToAnyView()
 					if isSelected {
 						MsgCellFooter(msg: viewModel.msg)
 					}
 				}
 			}
 			.gesture(tapGesture)
-			.scrollTargetLayout()
 			.geometryGroup()
+			.scrollTargetLayout()
 		}
-		.transformEffect(.init(translationX: draggedOffset, y: 0))
-		.transaction(value: manager.eventsManager.selectedMsg) { value in
-			value.animation = .interactiveSpring
-			value.scrollPositionUpdatePreservesVelocity = true
-			value.scrollContentOffsetAdjustmentBehavior = .disabled
-			value.tracksVelocity = true
-		}
-		.animation(
-			.snappy,
-			value: manager.conversation.seenMembers
-		)
-		.onPressingChanged { location in
-			manager.handlePressingChanged(location)
-		}
-		.scrollDisabled(manager.scrollManager.updatingState.isUpdating)
+		.namespace(namespace)
+		.scrollDismissesKeyboard(.interactively)
+		.defaultScrollAnchor(.bottom, for: .initialOffset)
+		.defaultScrollAnchor(.bottom, for: .sizeChanges)
+		.scrollPosition(.constant(manager.scrollManager.scrollPosition))
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.scrollManager.handleScrollPhaseChange(oldPhase, newPhase, context)
 		}
@@ -90,12 +76,9 @@ struct MsgsScrollView: View {
 		) { values in
 			manager.handleVisibleIDsChange(values)
 		}
-		.scrollContentBackground(.hidden)
-		.scrollDismissesKeyboard(.immediately)
-		.defaultScrollAnchor(.bottom, for: .initialOffset)
-		.defaultScrollAnchor(.bottom, for: .sizeChanges)
-		.scrollPosition(.constant(manager.scrollManager.scrollPosition), anchor: .center)
-		.namespace(namespace)
+		.onPressingChanged(in: .global) { location in
+			manager.handlePressingChanged(location)
+		}
 		.task {
 			await manager.onViewAppear()
 		}
@@ -106,6 +89,6 @@ struct MsgsScrollView: View {
 			.onEnded { value in
 				manager.handleTappingChanged(value.location)
 			}
-		
+
 	}
 }

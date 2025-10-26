@@ -12,32 +12,32 @@ extension Socket {
 		switch data {
 		case .newMsg(let rMsg):
 			queue.addOperation {
-				if try await Store.shared.msgStore.isExisted(uid: rMsg.uid) {
+				if try await Store.shared.msgStore.exists(uid: rMsg.uid) {
 					AudioService.shared.playMessageIncoming()
-					self.notifyMessage(data)
+					await self.notifyMessage(data)
 				}
 			}
 		case .updatedMsg(let rMsg):
 			queue.addOperation {
-				if try await Store.shared.msgStore.isExisted(uid: rMsg.uid) {
-					self.notifyMessage(data)
+				if try await Store.shared.msgStore.exists(uid: rMsg.uid) {
+					await self.notifyMessage(data)
 				}
 			}
 		case .typingStatus:
 			queue.addOperation {
-				self.notifyMessage(data)
+				await self.notifyMessage(data)
 			}
 		case .reaction:
 			queue.addOperation {
-				self.notifyMessage(data)
+				await self.notifyMessage(data)
 			}
 		case .deleteMsg:
 			queue.addOperation {
-				self.notifyMessage(data)
+				await self.notifyMessage(data)
 			}
-		case .seenStatus(status: let status):
+		case .seenStatus(status: _):
 			queue.addOperation {
-				self.notifyMessage(data)
+				await self.notifyMessage(data)
 			}
 		}
 	}

@@ -29,6 +29,9 @@ public class Router {
 		currentNavRouter?.navPath.last
 	}
 
+	public func navRouter(for tab: TabPath) -> NavRouter {
+		navRouters.first(where: { $0.id.id == tab.id })!
+	}
 	private init() {
 		registerForRemoteNotifications()
 	}

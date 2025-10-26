@@ -19,13 +19,13 @@ struct ZoomableModifier: ViewModifier {
 		content
 			.onGeometryChange(for: CGSize.self, of: { proxy in
 				proxy.size
-			}, action: { oldValue, newValue in
+			}, action: { _, newValue in
 				contentSize = newValue
 			})
 			.animatableTransformEffect(transform)
-			.gesture(
+			.simultaneousGesture(
 				dragGesture,
-				including: transform == .identity ? .none : .gesture
+				including: transform == .identity ? .subviews : .gesture
 			)
 			.gesture(doubleTapGesture.exclusively(before: magnificationGesture))
 	}
@@ -92,8 +92,7 @@ struct ZoomableModifier: ViewModifier {
 		let scaleY = transform.scaleY
 
 		if scaleX < minZoomScale
-			|| scaleY < minZoomScale
-		{
+			|| scaleY < minZoomScale {
 			return .identity
 		}
 
@@ -103,8 +102,7 @@ struct ZoomableModifier: ViewModifier {
 		if transform.tx > 0
 			|| transform.tx < -maxX
 			|| transform.ty > 0
-			|| transform.ty < -maxY
-		{
+			|| transform.ty < -maxY {
 			let tx = min(max(transform.tx, -maxX), 0)
 			let ty = min(max(transform.ty, -maxY), 0)
 			var transform = transform

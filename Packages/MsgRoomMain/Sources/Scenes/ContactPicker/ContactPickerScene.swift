@@ -14,10 +14,10 @@ public struct ContactPickerScene: View {
 
 	@Environment(ContactStore.self) private var contactStore
 	@Environment(\.dismiss) private var dismiss
-	@Binding var selection: [ContactSnapshot]
+	@Binding var selection: [Contact]
 	@State private var searchText = ""
 
-	public init(selection: Binding<[ContactSnapshot]>) {
+	public init(selection: Binding<[Contact]>) {
 		self._selection = selection
 	}
 
@@ -28,7 +28,7 @@ public struct ContactPickerScene: View {
 					if contacts.isEmpty {
 						ContentUnavailableView.search
 					} else {
-						ForEach(contacts) { contact in
+						ForEach(contacts, id: \.uid) { contact in
 							let isSelected = selection.contains { $0.uid == contact.uid }
 							SelectableContactCell(
 								contact: contact,
@@ -60,7 +60,7 @@ public struct ContactPickerScene: View {
 		.interactiveDismissDisabled()
 	}
 
-	private var contacts: [ContactSnapshot] {
+	private var contacts: [Contact] {
 		guard !searchText.isWhitespace else {
 			return contactStore.availableContacts
 		}
@@ -69,7 +69,7 @@ public struct ContactPickerScene: View {
 		}
 	}
 
-	private func toggleSelection(for contact: ContactSnapshot) {
+	private func toggleSelection(for contact: Contact) {
 		if let index = selection.firstIndex(where: { $0.uid == contact.uid }) {
 			selection.remove(at: index)
 		} else {

@@ -8,7 +8,8 @@
 import XUI
 import Core
 
-public struct Bubble: Conformable {
+public struct Bubble: Hashable, Equatable, Sendable, Identifiable {
+	public var id: Int { bubbleCorner.id }
 	public var bubbleCorner: BubbleCorner
 	public var showAvatar: Bool { bubbleCorner == .all || bubbleCorner == .receivingBottom }
 

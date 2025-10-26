@@ -9,6 +9,7 @@ import Foundation
 import Database
 import Services
 
-public final class ChatCache: Sendable {
+@MainActor
+public final class ChatCache {
 	let layout = MsgsScrollViewLayoutCache()
 }

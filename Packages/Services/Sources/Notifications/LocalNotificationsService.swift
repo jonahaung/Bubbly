@@ -74,7 +74,7 @@ public protocol NotificationScheduler: Sendable {
 }
 
 extension UNUserNotificationCenter: NotificationScheduler {
-	
+
 	public func add(_ request: UNNotificationRequest) async throws {
 		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
 			self.add(request) { error in

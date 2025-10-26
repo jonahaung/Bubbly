@@ -34,6 +34,9 @@ public extension CGFloat {
     var float: Float {
         Float(self)
     }
+	var half: CGFloat {
+		self/2
+	}
 	func rounded(toPlaces places: Int) -> CGFloat {
 		guard places >= 0 else { return self }
 		let multiplier = pow(10.0, CGFloat(places))

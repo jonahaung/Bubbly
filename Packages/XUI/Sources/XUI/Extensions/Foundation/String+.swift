@@ -84,7 +84,6 @@ public extension String {
     var firstLetterCapitalized: String {
         prefix(1).capitalized + dropFirst()
     }
-
 }
 
 extension String: @retroactive Identifiable {

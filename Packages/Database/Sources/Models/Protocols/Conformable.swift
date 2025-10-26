@@ -6,4 +6,4 @@
 //
 
 import Foundation
-//public protocol Conformable: Hashable, Sendable {}
+// public protocol Conformable: Hashable, Sendable {}

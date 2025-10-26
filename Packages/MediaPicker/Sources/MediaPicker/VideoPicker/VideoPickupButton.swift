@@ -10,7 +10,7 @@ import SwiftUI
 import AVKit
 
 public struct VideoPickupButton<Label: View>: View {
-	
+
     @State private var model = VideoPickerViewModel()
     @Binding private var asset: AVAsset?
 

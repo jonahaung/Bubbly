@@ -15,9 +15,9 @@ public final class AppContainer: Sendable {
 	public init(migrationPlan: (any SchemaMigrationPlan.Type)? = nil) {
 		let schema: Schema = Schema(
 			[
-				PConversation.self,
 				PContact.self,
-				PMsg.self
+				PMsg.self,
+				PGroup.self
 			]
 		)
 		let configuration = ModelConfiguration(

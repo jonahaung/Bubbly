@@ -34,7 +34,7 @@ struct ChatTopBarView: View {
 							weight: .semibold,
 							design: .rounded
 						)
-					)
+					).badgeView(Text(manager.config.totalMsgsCount, format: .number).font(.footnote.italic()))
 			}
 			.onTapGesture {
 				Router.shared

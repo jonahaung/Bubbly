@@ -10,6 +10,7 @@ import SwiftUI
 import XUI
 
 public struct ConversationTheme: Codable, Sendable, Hashable {
+
 	public var bubbleColor: BubbleColor
 	public var background: ChatBackground
 	public var bubbleCornorRadius: CGFloat
@@ -19,6 +20,8 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
 		self.background = background
 		self.bubbleCornorRadius = bubbleCornorRadius
 	}
+
+	public static let `default` = ConversationTheme(bubbleColor: .whatsApp, background: .default, bubbleCornorRadius: 17)
 }
 
 public extension ConversationTheme {
@@ -30,7 +33,7 @@ public extension ConversationTheme {
 		bubbleColor.color
 	}
 	var shadowColor: Color {
-		UITraitCollection.current.userInterfaceStyle == .light ? .init(white: 0.85) : .init(white: 0.0)
+		UITraitCollection.current.userInterfaceStyle == .light ? .init(white: 0.75) : .init(white: 0.0)
 	}
 	var bubblePadding: CGFloat {
 		max(12, bubbleCornorRadius/2)

@@ -13,7 +13,7 @@ enum FirePhoneLoginViewState: Hashable, Identifiable {
     case enterPhoneNumber, verifyOTP
     case loggedIn(user: User, isNewUser: Bool)
     case error(String)
-    
+
     var title: String {
         switch self {
         case .enterPhoneNumber:

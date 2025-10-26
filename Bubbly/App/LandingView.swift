@@ -22,6 +22,7 @@ struct LandingView: View {
 			MainTabView(router: router)
 				.msgRoomEntryPoint(user: user)
 				.environment(router)
+				.modelContext(Store.shared.modelContainer.mainContext)
 		case .loggedOut:
 			FirePhoneOTPLoginView()
 		case .newUser(let user):

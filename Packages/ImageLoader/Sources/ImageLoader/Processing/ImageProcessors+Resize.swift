@@ -10,7 +10,6 @@ import Vision
 import CoreImage.CIFilterBuiltins
 import Accelerate
 import simd
-import SwiftUI
 #if !os(macOS)
 import UIKit
 #else
@@ -138,9 +137,8 @@ extension ImageProcessors {
 
 			guard let result = request.results?.first else { return uiImage }
 
-
 			let maskPixelBuffer = try result.generateScaledMaskForImage(
-				forInstances: IndexSet(result.allInstances.filter{ $0 != 0 }),
+				forInstances: IndexSet(result.allInstances.filter { $0 != 0 }),
 				from: handler
 			)
 			let mask = CIImage(cvPixelBuffer: maskPixelBuffer)
@@ -183,7 +181,6 @@ final class ColorExtractor {
 		}
 	}
 
-
 	private let k = 4
 
 	static let dimension = 256
@@ -199,7 +196,7 @@ final class ColorExtractor {
 
 		let fmt = vImage_CGImageFormat(
 			bitsPerComponent: 8,
-			bitsPerPixel: 8 ,
+			bitsPerPixel: 8,
 			colorSpace: CGColorSpaceCreateDeviceGray(),
 			bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
 			renderingIntent: .defaultIntent)

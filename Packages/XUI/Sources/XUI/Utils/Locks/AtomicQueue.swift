@@ -9,7 +9,7 @@ import Foundation
 
 @propertyWrapper
 public struct AtomicQueue<Value> {
-	
+
     private let queue = DispatchQueue(label: "com.jonahaung.AtomicQueue")
     private var value: Value
 

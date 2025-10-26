@@ -21,8 +21,8 @@ extension AttachmentContent {
 		@State private var uploading = false
 
 		var body: some View {
-			if let data = attachment.data, let thumbnilData = attachment.thumbnailData, let thumbnil = UIImage(data: thumbnilData) {
-				Image(uiImage: thumbnil)
+			if let thumbnilImage = viewModel.msg.thumbnailImage() {
+				Image(uiImage: thumbnilImage)
 					.resizable()
 					.scaledToFit()
 					.overlay {
@@ -37,7 +37,7 @@ extension AttachmentContent {
 						}
 					}
 					.task {
-						guard !uploading, let image = UIImage(data: data) else { return }
+						guard !uploading, let image = viewModel.msg.image() else { return }
 						uploading = true
 						let msgID = viewModel.msg.uid
 						let conID = viewModel.msg.conID
@@ -59,17 +59,17 @@ extension AttachmentContent {
 								}
 							var attachment = self.attachment
 							attachment.url = url
-							attachment.attachMentTypeRaw = MsgAttachment.AttachMentType.image.rawValue
+							attachment.attachMentTypeRaw = AttachMentType.image.rawValue
 							try await Store.shared.msgStore.updateAndSave(uid: msgID, { model in
 								model.attachment?.url = url
-								model.attachment?.attachMentTypeRaw = MsgAttachment.AttachMentType.image.rawValue
+								model.attachment?.attachMentTypeRaw = AttachMentType.image.rawValue
 							})
 							try await sendMessageWithAttachment(attachment)
 						} catch {
 							var attachment = self.attachment
-							attachment.attachMentTypeRaw = MsgAttachment.AttachMentType.image.rawValue
+							attachment.attachMentTypeRaw = AttachMentType.image.rawValue
 							try? await Store.shared.msgStore.updateAndSave(uid: msgID, { model in
-								model.attachment?.attachMentTypeRaw = MsgAttachment.AttachMentType.image.rawValue
+								model.attachment?.attachMentTypeRaw = AttachMentType.image.rawValue
 							})
 							Log(error)
 						}
@@ -82,11 +82,10 @@ extension AttachmentContent {
 		private func sendMessageWithAttachment(_ newAttachment: Attachment) async throws {
 			var msg = viewModel.msg
 			msg.attachment = newAttachment
-			if let conversation = try await Store.shared.conversationStore.fetch(uid: msg.conID) {
-				await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
-				await MainActor.run {
-					self.viewModel.update(with: msg)
-				}
+			let conversation = try await ConversationRepo.getOrCreate(for: msg.conID, refetch: false)
+			await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
+			await MainActor.run {
+				self.viewModel.update(with: msg)
 			}
 		}
 	}

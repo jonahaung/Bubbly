@@ -15,7 +15,7 @@ public struct FirePhoneOTPLoginView: View {
     public var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
-                
+
                 switch viewModel.viewState {
                 case .enterPhoneNumber:
                     PhoneNumberTextField(phoneNumber: $viewModel.phoneNumber)
@@ -44,7 +44,7 @@ public struct FirePhoneOTPLoginView: View {
                         Text("Reset")
 //                            ._borderedProminentLightButtonStyle()
                     }
-                    
+
                 case .loggedIn(let user, isNewUser: let isNewUser):
                     Text(user.phoneNumber ?? "Phone")
                         .badge(isNewUser ? "New" : "Existing")

@@ -8,19 +8,19 @@
 import Foundation
 
 public extension Array {
-	func insertionIndex(
+	func insertionIndex<T: Comparable>(
 		for newElement: Element,
-		by keyPath: KeyPath<Element, Date>
+		by keyPath: KeyPath<Element, T>
 	) -> Int {
-		var low = 0
-		var high = count
+		var low = startIndex
+		var high = endIndex
 
 		let newValue = newElement[keyPath: keyPath]
 
 		while low < high {
-			let mid = (low + high) / 2
+			let mid = index(low, offsetBy: distance(from: low, to: high) / 2)
 			if self[mid][keyPath: keyPath] < newValue {
-				low = mid + 1
+				low = index(after: mid)
 			} else {
 				high = mid
 			}

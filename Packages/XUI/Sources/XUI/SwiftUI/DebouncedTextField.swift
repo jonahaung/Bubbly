@@ -101,7 +101,7 @@ public struct DebouncedTextField: View {
 
 @MainActor
 @Observable
-final class DebouncedTextFieldManager: Sendable {
+final class DebouncedTextFieldManager {
 
 	private let config: DebouncedTextViewConfiguration
 

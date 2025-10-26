@@ -8,6 +8,9 @@
 import SwiftUI
 import XUI
 import Services
+import Database
+
+extension AvatarSize: ImageSize { }
 
 public struct ProfilePhoto: View {
 
@@ -21,14 +24,13 @@ public struct ProfilePhoto: View {
 		self.item = item
 		self.size = size
 		self.config = .init(
-			size: size,
+			size: size as! ImageSize,
 			processors: [.sticker()], tapAction: tapAction
 		)
 	}
-	public
-	var body: some View {
+	public var body: some View {
 		ImageView(item, config: config)
-			.background(.quinary)
+			.background(Color.systemGray6)
 			.clipShape(.circle)
 	}
 }

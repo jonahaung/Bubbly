@@ -5,7 +5,6 @@
 //  Created by Aung Ko Min on 20/9/25.
 //
 
-
 import Foundation
 import UniformTypeIdentifiers
 import LinkPresentation
@@ -27,9 +26,15 @@ public struct LinkData: AsyncFetchingItem {
 		let provider = LPMetadataProvider()
 		let request = URLRequest(url: fechIdentifier, cachePolicy: .reloadIgnoringCacheData)
 		let metadata = try await provider.startFetchingMetadata(for: request)
+		if Task.isCancelled {
+			provider.cancel()
+		}
 		let title = metadata.title
 		let subtitle = metadata.url?.host()
 		let image = try await fetchImage(from: metadata.imageProvider)
+		if Task.isCancelled {
+			provider.cancel()
+		}
 		return .init(image: image, title: title, subtitle: subtitle)
 	}
 
@@ -49,5 +54,13 @@ public struct LinkData: AsyncFetchingItem {
 		default:
 			return nil
 		}
+	}
+
+	public var description: String {
+		var string: String = ""
+		if let subtitle {
+			string.append(subtitle)
+		}
+		return string
 	}
 }

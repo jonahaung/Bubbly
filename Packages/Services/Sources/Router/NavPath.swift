@@ -8,40 +8,41 @@
 import Foundation
 import Database
 
-public enum NavPath: Hashable, Sendable {
-
-	case conversationDetails(ConversationSnapshot)
+public enum NavPath: Hashable, Sendable, Identifiable {
+	case conversationDetails(any ConversationRepresentable)
 	case conversation(ConversationInitializer.PrefetchedData)
-	case contactDetails(ContactSnapshot)
+	case contactDetails(Contact)
 	case currentUserDetails
+	case cachedView(String)
 
 	public var id: String {
-		switch self {
-		case .conversationDetails(let snapshot):
-			return "conversationDetails" + snapshot.uid
-		case .conversation(let data):
-			return "conversation" + data.conversation.uid
-		case .contactDetails(let snapshot):
-			return "contactDetails" + snapshot.uid
-		case .currentUserDetails:
-			return "currentUserDetails"
-		}
+		self.hashValue.description
 	}
 
-	public static func == (lhs: NavPath, rhs: NavPath) -> Bool {
-		lhs.id == rhs.id
-	}
+	// ✅ You don't need to manually implement == — Swift synthesizes it from `hash(into:)`
 	public func hash(into hasher: inout Hasher) {
 		switch self {
 		case .conversationDetails(let snapshot):
-			"conversationDetails".hash(into: &hasher)
-			snapshot.hash(into: &hasher)
+			hasher.combine(0)
+			hasher.combine(snapshot.uid)
+
 		case .conversation(let data):
-			data.conversation.hash(into: &hasher)
+			hasher.combine(1)
+			hasher.combine(data.conversation.uid)
+
 		case .contactDetails(let snapshot):
-			snapshot.hash(into: &hasher)
+			hasher.combine(2)
+			hasher.combine(snapshot.uid)
+
 		case .currentUserDetails:
-			"currentUserDetails".hash(into: &hasher)
+			hasher.combine(3)
+
+		case .cachedView(let id):
+			hasher.combine(4)
+			hasher.combine(id)
 		}
+	}
+	public static func == (lhs: NavPath, rhs: NavPath) -> Bool {
+		lhs.id == rhs.id
 	}
 }

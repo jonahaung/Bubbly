@@ -11,43 +11,58 @@ import Database
 import Services
 import Core
 
-struct MsgCellContent: View {
+@MainActor
+public final class ColorStorage {
 
+	static let shared = ColorStorage()
+
+	var incoming: Color = .blue
+	var outgoing: Color = .blue
+
+
+	func initialize(_ conversation: any ConversationRepresentable) {
+		incoming = conversation.theme.incomingBubbleColor
+		outgoing = conversation.theme.outgoingBubbleColor
+	}
+}
+
+struct MsgCellContent: View {
 	let bubbleCorner: BubbleCorner
 	@Environment(MsgCellViewModel.self) private var viewModel
 	@Environment(\.conversation) private var conversation
-	
+
 	var body: some View {
-		ZStack {
+		ZStack(alignment: .center) {
 			switch viewModel.displayData.content {
 			case .text(let text):
-				bubbleView()
 				TextContent(text: text)
-					.background(color)
-					.padding(.horizontal, conversation.theme.bubblePadding)
-					.padding(.vertical, conversation.theme.bubblePadding/2)
-					.foregroundStyle(viewModel.foregroundStyle)
-					.layoutPriority(1)
+					.padding(.init(top: 6, leading: 12, bottom: 6, trailing: 10))
 			case .markdown(let elements):
 				MarkdownContent(text: viewModel.msg.text, elements: elements)
 			case .attachment(let attachment):
 				AttachmentContent(attachment: attachment)
-					.frame(size: attachment.bestFitSize)
-					.equatable(by: attachment)
 					.clipShape(bubbleShape)
+					.padding(
+						.init(top: 0.1, leading: viewModel.isSender ? 0.5 : 0.2, bottom: 0.5, trailing: viewModel.isSender ? 0.2 : 0.5)
+					)
 			case .emoji(let image):
 				Text(image)
 			}
 		}
+		.background(color.opacity(1))
+		.padding(
+			.init(top: 0.1, leading: viewModel.isSender ? 0.5 : 0.2, bottom: 0.5, trailing: viewModel.isSender ? 0.2 : 0.5)
+		)
+		.background(Color.opaqueSeparator)
+		.foregroundStyle(viewModel.foregroundStyle)
+		.containerShape(bubbleShape)
+		.compositingGroup()
 	}
-	private var bubbleShape: BubbleShape { .init(corner: bubbleCorner, cornerRadius: conversation.theme.bubbleCornorRadius)}
+
+	private var bubbleShape: UnevenRoundedRectangle {
+		bubbleCorner.roundedRectange(cornerRadius: conversation!.theme.bubbleCornorRadius)
+	}
 	private var color: Color {
-		viewModel.isSender ? conversation.theme.outgoingBubbleColor : conversation.theme.incomingBubbleColor
-	}
-	private func bubbleView() -> some View {
-		color
-			.clipShape(bubbleShape)
-			.shadow(color: conversation.theme.shadowColor, radius: 0.5, x: viewModel.isSender ? -0.5 : 0.5, y: 0.5)
-			.padding(.bottom, 0.5)
+		viewModel.isSender ? ColorStorage.shared.outgoing : ColorStorage.shared.incoming
 	}
 }

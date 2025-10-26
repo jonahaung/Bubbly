@@ -11,17 +11,16 @@ import XUI
 import Core
 
 public struct MsgCellDisplayData: Conformable {
-	
+
 	public var content: MsgCellDisplayData.ContentDisplay
-	
-	public init(msg: MsgSnapshot) {
+
+	public init(msg: Message) {
 		content = MsgCellDisplayData.ContentDisplay.create(from: msg)
 	}
-	
 }
 
 public extension MsgCellDisplayData {
-	
+
 //	final
 //	class PrefetchData: Conformable {
 //		public static func == (lhs: MsgCellDisplayData.PrefetchData, rhs: MsgCellDisplayData.PrefetchData) -> Bool {
@@ -61,7 +60,7 @@ public extension MsgCellDisplayData {
 		case attachment(_ attachment: Attachment)
 		case emoji(_ image: String)
 	}
-	
+
 	enum AttachmentDisplay: Conformable {
 		case localImage(_ attachment: Attachment)
 		case remoteImage(_ attachment: Attachment)
@@ -71,7 +70,7 @@ public extension MsgCellDisplayData {
 }
 
 public extension MsgCellDisplayData.ContentDisplay {
-	static func create(from msg: MsgSnapshot) ->  MsgCellDisplayData.ContentDisplay {
+	static func create(from msg: Message) -> MsgCellDisplayData.ContentDisplay {
 		switch msg.msgKind {
 		case .markdown:
 			let markdowns = MarkdownParser.parse(msg.text)

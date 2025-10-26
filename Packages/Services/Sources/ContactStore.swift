@@ -10,17 +10,19 @@ import Core
 import Database
 import SwiftData
 import FirebaseFirestore
+import FirebaseAuth
+import XUI
 
 @Observable
 public final class ContactStore: Sendable, ErrorPresenter {
 
 	public static let shared = ContactStore()
 	@MainActor
-	public var contacts = [ContactSnapshot]()
+	public var contacts = [Contact]()
 	@MainActor
-	public var conversationGroups = [ConversationSnapshot]()
+	public var conversationGroups = [Database.Group]()
 	@MainActor
-	public var availableContacts: [ContactSnapshot] {
+	public var availableContacts: [Contact] {
 		contacts.filter { $0.isChatAvailable && $0.uid != currentUserId }
 	}
 
@@ -29,71 +31,65 @@ public final class ContactStore: Sendable, ErrorPresenter {
 			try? await self?.fetchData()
 		}
 	}
-
+	@concurrent
 	public func fetchData() async throws {
 		try await fetchGroups()
 		try await fetchContacts()
 	}
-
+	@concurrent
 	public func refreshData() async throws {
 		try await Task.sleep(seconds: 1)
 		try await fetchData()
 	}
-
+	@concurrent
 	public func fetchContacts() async throws {
-		let contacts = try await Store.shared.contactStore.fetch()
+		let contacts = try await Store.shared.contactStore.fetchAll()
 		await MainActor.run {
 			self.contacts = contacts
 		}
 	}
 
-	private func fetchGroups() async throws {
-		let groupTypeRawValue = ConversationType.group.rawValue
-		let groupPredicate = #Predicate<PConversation> {
-			$0.type == groupTypeRawValue
-		}
-		let groupDescriptor = FetchDescriptor<PConversation>(
-			predicate: groupPredicate,
-			sortBy: [.init(\.createdDate, order: .forward)]
-		)
-		let groups = try await Store.shared.conversationStore.fetch(
-			groupDescriptor
-		)
+	@concurrent
+	public func fetchGroups() async throws {
+		let groups = try await Store.shared.groupStore.fetchAll()
 		await MainActor.run {
 			self.conversationGroups = groups
 		}
 	}
 
+	@concurrent
 	public func syncGroups() async throws {
-		guard let currentUserId = GroupAppStorage.shared.string(for: .auth(.currentUserID)) else {
-			return
+		guard let currentUserId = Auth.auth().currentUser?.uid else {
+			fatalError("Missing current user ID")
 		}
-		let reference = Firestore.firestore().collection("groups").whereField(
-			"members",
-			arrayContains: currentUserId
-		)
-		let groups: [Group] = try await FirestoreRepo.fetch(
-			query: reference
-		)
-		let remoteGroups = groups.map { ConversationSnapshot(group: $0) }
-		let store = Store.shared.conversationStore
-		await withThrowingTaskGroup(of: Void.self) { group in
-			remoteGroups.forEach { each in
-				return group.addTask {
-					if try await store.isExisted(uid: each.uid) == false {
-						try await Store.shared.conversationStore.insert(each)
+
+		let reference = Firestore.firestore()
+			.collection("groups")
+			.whereField("members", arrayContains: currentUserId)
+
+		let groups: [Group] = try await FirestoreRepo.fetch(query: reference)
+		let store = Store.shared.groupStore
+
+		// Replace parallelEach with a concurrent task group
+		try await withThrowingTaskGroup(of: Void.self) { group in
+			for groupItem in groups {
+				group.addTask {
+					if try await store.exists(uid: groupItem.uid) == false {
+						try await store.insert(groupItem)
 					} else {
-						try await store
-							.updateAndSave(uid: each.uid) { model in
-								model.update(with: each)
-							}
+						try await store.updateAndSave(uid: groupItem.uid) { model in
+							model.update(with: groupItem)
+						}
 					}
 				}
 			}
+			try await group.waitForAll()
 		}
+
+		// Fetch additional data after syncing
 		try await fetchData()
 	}
-
+	@concurrent
 	public func syncContacts() async throws {
 		try Store.shared.contactStore.modelExecutor.modelContext.delete(model: PContact.self)
 		let contacts = try await PhoneContactsService.shared.syncContacts()
@@ -112,7 +108,7 @@ public final class ContactStore: Sendable, ErrorPresenter {
 	}
 
 	@MainActor
-	public func contact(for uid: String) -> ContactSnapshot? {
+	public func contact(for uid: String) -> Contact? {
 		contacts.first(where: { $0.uid == uid })
 	}
 }

@@ -5,7 +5,6 @@
 //  Created by Aung Ko Min on 1/10/25.
 //
 
-
 import Foundation
 import Accelerate
 import simd
@@ -27,7 +26,7 @@ final class ColorExtractor {
 
 		let fmt = vImage_CGImageFormat(
 			bitsPerComponent: 8,
-			bitsPerPixel: 8 ,
+			bitsPerPixel: 8,
 			colorSpace: CGColorSpaceCreateDeviceGray(),
 			bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
 			renderingIntent: .defaultIntent)

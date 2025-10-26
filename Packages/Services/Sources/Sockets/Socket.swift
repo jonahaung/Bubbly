@@ -9,6 +9,7 @@ import Foundation
 import XUI
 import FCM_V1
 import Core
+import Database
 
 @globalActor
 public struct SocketActor {
@@ -28,4 +29,5 @@ public actor Socket {
 	private init() {}
 
 	let queue = AsyncSerialQueue()
+	var procedureQueue = Deque<AnyMsgData>()
 }

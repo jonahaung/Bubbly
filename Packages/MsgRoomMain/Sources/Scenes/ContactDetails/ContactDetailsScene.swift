@@ -9,8 +9,8 @@ import SwiftUI
 import Database
 
 public struct ContactDetailsScene: View {
-	let contact: ContactSnapshot
-	public init(contact: ContactSnapshot) {
+	let contact: Contact
+	public init(contact: Contact) {
 		self.contact = contact
 	}
 	public var body: some View {

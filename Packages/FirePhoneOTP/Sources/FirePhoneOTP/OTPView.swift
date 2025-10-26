@@ -9,21 +9,21 @@ import SwiftUI
 import Combine
 
 struct OTPView: View {
-    //MARK: Fields
+    // MARK: Fields
     enum FocusField: Hashable {
         case field
     }
     @FocusState private var focusedField: FocusField?
     @Binding var otpCode: String
     var otpCodeLength: Int
-    
-    //MARK: Constructor
+
+    // MARK: Constructor
     public init(otpCode: Binding<String>, otpCodeLength: Int) {
         self._otpCode = otpCode
         self.otpCodeLength = otpCodeLength
     }
-    
-    //MARK: Body
+
+    // MARK: Body
     public var body: some View {
         HStack {
             ZStack(alignment: .center) {
@@ -37,8 +37,7 @@ struct OTPView: View {
                     .onReceive(Just(otpCode)) { _ in limitText(otpCodeLength) }
                     .focused($focusedField, equals: .field)
                     .task {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5)
-                        {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                             self.focusedField = .field
                         }
                     }
@@ -60,15 +59,15 @@ struct OTPView: View {
             }
         }
     }
-    
-    //MARK: func
+
+    // MARK: func
     private func getPin(at index: Int) -> String {
         guard self.otpCode.count > index else {
             return ""
         }
         return self.otpCode[index]
     }
-    
+
     private func limitText(_ upper: Int) {
         if otpCode.count > upper {
             otpCode = String(otpCode.prefix(upper))

@@ -5,7 +5,6 @@
 //  Created by Aung Ko Min on 12/8/23.
 //
 
-
 import SwiftUI
 
 public protocol XPickable: Hashable, Identifiable, Sendable, EmptyRepresentable, CaseIterable {

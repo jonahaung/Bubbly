@@ -18,7 +18,6 @@ import FirebaseAuth
 final class InboxViewModel {
 
 	var items = [InboxItem]()
-	var conversations = [ConversationSnapshot]()
 	private let cancelBag = CancelBag()
 
 	init() {
@@ -35,29 +34,24 @@ final class InboxViewModel {
 
 	func fetch() async {
 		guard let user = Auth.auth().currentUser else { return }
+		let predicate = #Predicate<PContact> { $0.lastMsgID != nil }
+		var descriptor = FetchDescriptor<PContact>(predicate: predicate)
+		descriptor.sortBy = [.init(\.lastMsgID, order: .forward)]
+
 		do {
-			let conversations = try await Store.shared.conversationStore.fetch()
+			let contacts = try await Store.shared.contactStore.fetch(descriptor)
 			let items = try await withThrowingTaskGroup(of: InboxItem?.self) { group in
-				conversations.forEach { conversation in
+				contacts.forEach { contact in
+					let conversation = AnyConversation(.contact(contact))
 					return group.addTask {
 						if let msg = try await ConversationRepo.lastMsg(
 							conID: conversation.uid
 						) {
-							let sender: ContactSnapshot
+							let sender: Contact
 							if msg.receiptType == .receive {
-								sender = try await ContactRepo.getOrCreate(
-									for: msg.senderID,
-									refatch: false
-								)
+								sender = contact
 							} else {
-								sender = ContactSnapshot(
-									uid: user.uid,
-									name: "You",
-									mobile: "phone",
-									photoURL: user.photoURL?.absoluteString ?? "",
-									pushToken: "",
-									publicKeyString: ""
-								)
+								sender = user.snapshot()
 							}
 							return InboxItem(
 								conversation: conversation,

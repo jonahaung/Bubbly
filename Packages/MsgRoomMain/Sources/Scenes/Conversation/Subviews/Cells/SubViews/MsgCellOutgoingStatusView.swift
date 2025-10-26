@@ -21,36 +21,50 @@ struct MsgCellOutgoingStatusView: View {
 	var body: some View {
 		if viewModel.isSender, let namespace = namespace.value {
 			VStack(alignment: .leading, spacing: 1) {
-				let seenMembers = self.seenMembers
-				if seenMembers.isEmpty {
-					MsgCellOutgoingStatus(msg: viewModel.msg)
-				} else {
-					ForEach(seenMembers) { seenMember in
-						if let contact = contactStore.contact(
-							for: seenMember.uid
-						) {
-							ProfilePhoto(contact, size: .custom(ChatLayoutConstants.Cell.defaultSpacing-6))
-								.matchedGeometryEffect(
-									id: contact.uid,
-									in: namespace
-								)
-						}
+				if let conversation, viewModel.id == conversation.lastMsgID {
+					switch conversation.kind {
+					case .contact(let contact):
+						ProfilePhoto(contact, size: .custom(ChatLayoutConstants.Cell.defaultSpacing-6))
+							.matchedGeometryEffect(
+								id: contact.uid,
+								in: namespace
+							)
+					case .group(_):
+						MsgCellOutgoingStatus(msg: viewModel.msg)
+					case .system(_):
+						MsgCellOutgoingStatus(msg: viewModel.msg)
 					}
 				}
+//				MsgCellOutgoingStatus(msg: viewModel.msg)
+//				let seenMembers = self.seenMembers
+//				if seenMembers.isEmpty {
+//					MsgCellOutgoingStatus(msg: viewModel.msg)
+//				} else {
+//					ForEach(seenMembers) { seenMember in
+//						if let contact = contactStore.contact(
+//							for: seenMember.uid
+//						) {
+//							ProfilePhoto(contact, size: .custom(ChatLayoutConstants.Cell.defaultSpacing-6))
+//								.matchedGeometryEffect(
+//									id: contact.uid,
+//									in: namespace
+//								)
+//						}
+//					}
+//				}
 			}
 			.frame(width: ChatLayoutConstants.Cell.defaultSpacing-4)
 		}
 	}
-	
+
 	private var seenMembers: [SeenMember] {
-		conversation.seenMembers.filter{
-			$0.msgId == viewModel
-			.id }
+		conversation?.seenMembers.filter {
+			$0.msgId == viewModel.msgID } ?? []
 	}
 }
 struct MsgCellOutgoingStatus: View {
 
-	let msg: MsgSnapshot
+	let msg: Message
 
 	var outgoingStatus: MsgOutgoingStatus {
 		msg.outgoingStatus

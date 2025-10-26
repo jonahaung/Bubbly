@@ -11,27 +11,56 @@ import Services
 import MsgRoomMain
 import XUI
 
-struct InboxItem: Sendable, Hashable, Identifiable {
-	
+struct InboxItem: Sendable, Identifiable {
 	var id: String { msg.uid }
-	let conversation: ConversationSnapshot
-	let msg: MsgSnapshot
-	let sender: ContactSnapshot
-
+	let conversation: any ConversationRepresentable
+	let msg: Message
+	let sender: Contact
 	var title: String {
 		conversation.name
 	}
 }
 
 extension InboxItem: ImageViewItem {
-	var imageID: String {
-		url.lastPathComponent
+	var imageID: String? {
+		switch conversation.kind {
+		case .contact(let contact):
+			return contact.imageID
+		case .group(let group):
+			return group.imageID
+		case .system(let ai):
+			return ai.imageID
+		}
 	}
-	var url: URL {
-		.init(string: conversation.photoURL?.string ?? "") ?? DemoImages.demoPhotosURLs[0]
+	var remoteURL: URL? {
+		switch conversation.kind {
+		case .contact(let contact):
+			return contact.remoteURL
+		case .group(let group):
+			return group.remoteURL
+		case .system(let ai):
+			return ai.remoteURL
+		}
 	}
+	var mediaType: MediaType? {
+		switch conversation.kind {
+		case .contact(let contact):
+			return contact.mediaType
+		case .group(let group):
+			return group.mediaType
+		case .system(let ai):
+			return ai.mediaType
 
-	var type: Services.MediaType {
-		.png
+		}
+	}
+	var subFolderName: String? {
+		switch conversation.kind {
+		case .contact(let contact):
+			return contact.subFolderName
+		case .group(let group):
+			return group.subFolderName
+		case .system(let ai):
+			return ai.subFolderName
+		}
 	}
 }

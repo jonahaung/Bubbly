@@ -31,7 +31,7 @@ public struct Toast: Sendable, Identifiable, Hashable {
 		self.actionTitle = actionTitle
 		self.action = action
 	}
-	
+
 	public static func == (lhs: Toast, rhs: Toast) -> Bool {
 		lhs.id == rhs.id &&
 		lhs.message == rhs.message &&

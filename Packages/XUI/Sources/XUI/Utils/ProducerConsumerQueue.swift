@@ -19,7 +19,7 @@ public final class ProducerConsumerQueue<T> {
 	public init(capacity: Int = 1024) {
 		// Round up capacity to nearest power of 2 for efficient wrapping
 		let cap = max(2, capacity.nextPowerOfTwo)
-		self.buffer = Array<T?>(repeating: nil, count: cap)
+		self.buffer = [T?](repeating: nil, count: cap)
 	}
 
 	/// Adds an item to the end of the queue and signals any waiting consumer.
@@ -62,7 +62,7 @@ public final class ProducerConsumerQueue<T> {
 	/// Removes all items from the queue.
 	public func removeAll() {
 		lock.lock()
-		buffer = Array<T?>(repeating: nil, count: buffer.count)
+		buffer = [T?](repeating: nil, count: buffer.count)
 		head = 0
 		tail = 0
 		count = 0
@@ -88,7 +88,7 @@ public final class ProducerConsumerQueue<T> {
 
 	private func grow() {
 		let newCap = buffer.count * 2
-		var newBuffer = Array<T?>(repeating: nil, count: newCap)
+		var newBuffer = [T?](repeating: nil, count: newCap)
 		for i in 0..<count {
 			newBuffer[i] = buffer[(head + i) & (buffer.count - 1)]
 		}

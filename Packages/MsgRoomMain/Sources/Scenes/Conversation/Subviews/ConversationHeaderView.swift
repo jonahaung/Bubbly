@@ -14,29 +14,29 @@ import Core
 struct ConversationHeaderView: View {
 
 	@Environment(ChatViewManager.self) private var manager
-	
+
 	var body: some View {
-		ZStack {
-			RoundedRectangle(cornerRadius: 12)
-				.fill(Color.secondarySystemGroupedBackground)
-			VStack(alignment: .center) {
-				ProfilePhoto(
-					manager.conversation,
-					size: .original
-				)
-				.frame(square: 250)
-				VStack(alignment: .leading) {
-					Text(Self.typeName)
-					Text(
-						manager.conversation
-							.name)
-					.font(.headline)
-					Text(manager.conversation.preetyPrinted)
-						.font(.footnote)
+		ZStack(alignment: .bottom) {
+			VStack {
+				Text(manager.conversation.name)
+					.bold()
+				Group {
+					switch manager.conversation.kind {
+					case .contact(let contact):
+						Text(.init(contact.preetyPrinted))
+					case .group(let group):
+						Text(.init(group.preetyPrinted))
+					case .system(let ai):
+						Text(ai.name)
+					}
 				}
+				.font(.system(.subheadline, design: .serif))
 			}
+			.flexible(.horizontal)
 			.padding()
+			.background(Color.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
 		}
+		.padding(.horizontal)
 		.id(Self.typeName)
 		.layoutValue(.init(uid: Self.typeName, recipient: .none))
 	}

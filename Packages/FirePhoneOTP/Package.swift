@@ -9,7 +9,7 @@ let package = Package(
     products: [
         .library(
             name: "FirePhoneOTP",
-            targets: ["FirePhoneOTP"]),
+            targets: ["FirePhoneOTP"])
     ],
     dependencies: [
         .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.4.0"),
@@ -26,6 +26,6 @@ let package = Package(
             ]),
         .testTarget(
             name: "FirePhoneOTPTests",
-            dependencies: ["FirePhoneOTP"]),
+            dependencies: ["FirePhoneOTP"])
     ]
 )

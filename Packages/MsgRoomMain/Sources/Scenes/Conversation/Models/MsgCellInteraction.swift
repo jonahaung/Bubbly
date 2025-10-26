@@ -12,7 +12,7 @@ struct MsgCellInteraction: Sendable {
 
 	enum Action: Equatable, Hashable, Sendable {
 		case onTapMsg(String?)
-		case onMarkMsg(MsgSnapshot)
+		case onMarkMsg(Message)
 		case onTapAvatar(String)
 		case onFocusMsgBubble(_ item: ChatOverlayView.Item)
 	}

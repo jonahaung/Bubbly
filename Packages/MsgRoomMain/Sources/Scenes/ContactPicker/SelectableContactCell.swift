@@ -12,7 +12,7 @@ import XUI
 
 struct SelectableContactCell: View {
 
-	let contact: ContactSnapshot
+	let contact: Contact
 	let isSelected: Bool
 	let onSelected: (Bool) -> Void
 

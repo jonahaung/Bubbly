@@ -12,7 +12,7 @@ public struct XAttachment: Hashable, Codable, Identifiable, Sendable, Equatable 
 	public enum XAttachmentKind: String, Codable, CaseIterable, Sendable {
 		case photo, video
 	}
-	
+
 	public var id: String { urlString }
 	public var urlString: String
 	public var type: XAttachmentKind

@@ -9,6 +9,6 @@ import SwiftUI
 
 public extension LayoutSubviews {
 	func values<T: LayoutValueKey>(key: T.Type) -> [T.Value] {
-		self.map{ $0[key] }
+		self.map { $0[key] }
 	}
 }

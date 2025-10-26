@@ -15,7 +15,7 @@ public protocol ScrollViewPrefetcherDelegate: AnyObject {
 }
 
 @MainActor
-public final class ScrollViewPrefetcher: Sendable {
+public final class ScrollViewPrefetcher {
 
 	// MARK: - Properties
 

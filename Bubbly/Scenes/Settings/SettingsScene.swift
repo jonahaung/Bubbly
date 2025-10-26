@@ -78,19 +78,18 @@ struct SettingsScene: View {
 				FormCell {
 					Text("File System")
 				} right: {
-					Text("\(try! MediaManager.shared.totalSize())")
+					if let path = Folder.documents?.path {
+						Text(path)
+					}
+				}._tapToPush {
+					if let documents = Folder.documents {
+						Text(documents.description)
+					}
 				}
-
 
 			} footer: {
 				AsyncButton {
-					await withThrowingTaskGroup(of: Void.self) { group in
-						await ContactStore.shared.contacts.forEach { each in
-							group.addTask {
-								try MediaManager.shared.remove(for: each.uid, .png)
-							}
-						}
-					}
+					try Folder.documents?.delete()
 				} label: {
 					Text("Clean Up File System")
 				} onError: { error in
@@ -152,7 +151,7 @@ struct SettingsScene: View {
 				AsyncButton { @MainActor in
 					let context = Store.shared.modelContainer.mainContext
 					try context.transaction {
-						let descriptor = FetchDescriptor<PConversation>()
+						let descriptor = FetchDescriptor<PGroup>()
 						do {
 							let msgs = try context.fetch(descriptor)
 							msgs.forEach { each in

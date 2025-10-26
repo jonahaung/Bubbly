@@ -18,7 +18,7 @@ public final class PhoneContactsService {
 
 	private var isSyncing = false
 
-	public func fetchContacts() async throws -> [ContactSnapshot] {
+	public func fetchContacts() async throws -> [Contact] {
 		let contactStore = CNContactStore()
 		let keysToFetch: [CNKeyDescriptor] = [
 			CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
@@ -36,18 +36,17 @@ public final class PhoneContactsService {
 		}
 
 		let contacts = results
-			.compactMap { ContactSnapshot(cnContact: $0) }
+			.compactMap { Contact(cnContact: $0) }
 			.removeDuplicates { $0.mobile == $1.mobile }
 
 		return contacts
 	}
 
-	public func syncContacts() async throws -> sending [ContactSnapshot] {
+	public func syncContacts() async throws -> sending [Contact] {
 		let phoneContacts = try await fetchContacts()
 		let phoneNumberKit = PhoneNumberKit()
 		let dbContact = Store.shared.contactStore
 		let userRef = Firestore.firestore().collection("users")
-
 		let contacts = try await AsyncOrderedStream.mapOrdered(inputs: phoneContacts) { phoneContact in
 			let parsedNumber = try phoneNumberKit.parse(phoneContact.mobile)
 			let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
@@ -57,18 +56,16 @@ public final class PhoneContactsService {
 				.getDocuments()
 				.documents
 				.first?
-				.data(as: ContactSnapshot.self)
+				.data(as: Contact.self)
 
 			if var remoteContact {
 				remoteContact.name = phoneContact.name
 				try await dbContact.insert(remoteContact)
 				return remoteContact
 			} else {
-				try await dbContact.insert(phoneContact)
-				return phoneContact
+				return phoneContact 
 			}
 		}
-
-		return contacts
+		return contacts.compactMap{ $0 }
 	}
 }

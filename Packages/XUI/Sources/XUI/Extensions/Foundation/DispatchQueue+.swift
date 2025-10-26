@@ -20,7 +20,7 @@ public extension DispatchQueue {
 public extension DispatchQueue {
 	static func delay(
 		_ time: TimeInterval = 0.2,
-		_ completion: @Sendable @escaping () -> Void
+		_ completion: @escaping () -> Void
 	) {
 		Self.global(qos: .background).asyncAfter(deadline: .now() + time) {
 			DispatchQueue.main.async {

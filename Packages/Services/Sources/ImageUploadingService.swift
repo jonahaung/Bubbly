@@ -114,7 +114,7 @@ extension UIImage {
 		)
 
 		let renderer = UIGraphicsImageRenderer(size: targetSize)
-		return renderer.image { context in
+		return renderer.image { _ in
 			let origin = CGPoint(
 				x: (targetSize.width - scaledSize.width) * 0.5,
 				y: (targetSize.height - scaledSize.height) * 0.5

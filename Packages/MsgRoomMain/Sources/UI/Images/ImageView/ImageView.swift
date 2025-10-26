@@ -9,19 +9,18 @@ import SwiftUI
 import ImageLoader
 import XUI
 import Services
+import Database
 
 public struct ImageView: View {
 
 	public typealias Item = any ImageViewItem
-
-	@State private var progress: ImageTask.Progress?
 	@State private var error: Error?
 	@State private var manager: ImageViewManager
 	@State private var fetchImage = FetchImage()
 
 	private let config: ImageViewConfig
 
-	public init(_ item: Item, config: ImageViewConfig) {
+	public init(_ item: any ImageViewItem, config: ImageViewConfig) {
 		self.manager = ImageViewManager(item: item)
 		self.config = config
 	}
@@ -29,51 +28,48 @@ public struct ImageView: View {
 	public var body: some View {
 		ZStack {
 			config.backgroundColor?.layoutPriority(-1)
-			if manager.isLocallyCached() {
-				if let image = manager.image {
-					imageView(for: image)
-						.transition(.scale(scale: 0.0, anchor: .center).animation(.interactiveSpring))
-				} else {
-					ProgressView().controlSize(.mini)
-						.task {
-							await manager.onAppear()
-						}
-				}
+			if let image = manager.image {
+				imageView(for: image)
 			} else {
-				ZStack {
-					if let image = fetchImage.image{
-						imageView(for: image)
-					} else {
-						switch fetchImage.result {
-						case .success(let response):
-							imageView(for: response.image)
-						case .failure:
-							SystemImageWithShape(.exclamationmark, .circle(.color(.red)))
-						case .none:
-							ProgressView().controlSize(.mini)
+				if manager.isLocallyCached() {
+					progressView
+						.task {
+							manager.image = manager.item.image()
+						}
+				} else {
+					ZStack {
+						if fetchImage.isLoading {
+							progressView
+						} else {
+							if let image = fetchImage.image {
+								imageView(for: image)
+							} else {
+								switch fetchImage.result {
+								case .success(let response):
+									imageView(for: response.image)
+								case .failure:
+									SystemImageWithShape(.exclamationmark, .circle(.color(.red)))
+								case .none:
+									ProgressView().controlSize(.mini)
+								}
+							}
 						}
 					}
-				}
-				.onAppear {
-					guard fetchImage.imageContainer?.image == nil else { return }
-					if fetchImage.isLoading {
-						return
+					.onAppear {
+						guard fetchImage.imageContainer?.image == nil else { return }
+						if fetchImage.isLoading {
+							return
+						}
+						fetchImage.processors = config.processors
+						fetchImage.transaction = .withoutAnimation
+						fetchImage.pipeline = .shared
+						fetchImage.onStart = manager.onStart
+						fetchImage.onCompletion = manager.onCompletion(_:)
+						fetchImage.load(manager.getURL())
 					}
-					let transaction: Transaction = {
-						var transaction = Transaction(animation: .interactiveSpring)
-						transaction.dismissBehavior = .destructive
-						transaction.disablesAnimations = false
-						return transaction
-					}()
-					fetchImage.processors = config.processors
-					fetchImage.transaction = transaction
-					fetchImage.pipeline = .shared
-					fetchImage.onStart = manager.onStart
-					fetchImage.onCompletion = manager.onCompletion(_:)
-					fetchImage.load(manager.getURL())
-				}
-				.onDisappear {
-					fetchImage.cancel()
+					.onDisappear {
+						fetchImage.cancel()
+					}
 				}
 			}
 		}
@@ -106,7 +102,7 @@ extension ImageView {
 
 	@ViewBuilder
 	var progressView: some View {
-		if let progress {
+		if let progress = manager.progress {
 			ProgressView(value: CGFloat(progress.completed), total: CGFloat(progress.total))
 				.progressViewStyle(.circular)
 				.controlSize(.mini)
@@ -115,12 +111,14 @@ extension ImageView {
 		}
 	}
 
-	var imagerViewerScene: some View {
-		PhotoViewer(.init(
-			url: MediaManager.shared.url(for: manager.item.imageID, manager.item.type).absoluteString,
-			type: .photo,
-			identifier: manager.item.imageID
-		))
+	@ViewBuilder var imagerViewerScene: some View {
+		if let url = manager.item.file()?.url {
+			PhotoViewer(.init(
+				url: url.absoluteString,
+				type: .photo,
+				identifier: manager.item.imageID
+			))
+		}
 	}
 
 	var processors: [ImageProcessing] {

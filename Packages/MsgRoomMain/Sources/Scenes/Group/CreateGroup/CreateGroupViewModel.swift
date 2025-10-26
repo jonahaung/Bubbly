@@ -14,10 +14,10 @@ import MediaPicker
 
 @MainActor
 @Observable
-final class CreateGroupViewModel: Sendable {
+final class CreateGroupViewModel {
 
 	var groupName: String = ""
-	var selection = [ContactSnapshot]()
+	var selection = [Contact]()
 	var pickedPhoto: PickedPhoto?
 	var uploadedURL: URL?
 	var isLoading: Bool = false
@@ -26,7 +26,7 @@ final class CreateGroupViewModel: Sendable {
 		!groupName.isEmpty && !selection.isEmpty && pickedPhoto != nil
 	}
 
-	func onSelect(contact: ContactSnapshot) {
+	func onSelect(contact: Contact) {
 		if let index = selection.firstIndex(where: { $0.uid == contact.uid }) {
 			selection.remove(at: index)
 		} else {
@@ -53,14 +53,15 @@ final class CreateGroupViewModel: Sendable {
 			createdDate: .init(.now),
 			photoURL: url,
 			members: memberIDs,
-			createdBy: currentUserID
+			createdBy: currentUserID,
+			lastMsgID: nil
 		)
 		try await FirestoreRepo
 			.add(
 				group,
 				to: Firestore.firestore().collection("groups").document(groupID)
 			)
-		try await Store.shared.conversationStore.insert(.init(group: group))
+		try await Store.shared.groupStore.insert(group)
 		try await Task.sleep(seconds: 2)
 		setLoading(false)
 	}

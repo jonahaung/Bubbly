@@ -12,10 +12,10 @@ import XUI
 
 struct ContactCell: View {
 
-	let contact: ContactSnapshot
+	let contact: Contact
 	var onTap: (() -> Void)?
-	
-	init(_ contact: ContactSnapshot, onTap: (() -> Void)? = nil) {
+
+	init(_ contact: Contact, onTap: (() -> Void)? = nil) {
 		self.contact = contact
 		self.onTap = onTap
 	}

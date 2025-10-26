@@ -76,5 +76,5 @@ final class NotificationService: UNNotificationServiceExtension {
 			}
 		}
 	}
-	
+
 }

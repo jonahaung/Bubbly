@@ -19,10 +19,10 @@ extension KMBFormatter {
 public final class KMBFormatter: Sendable {
 
     public static var shared: KMBFormatter {
-        get { _shared.wrappedValue }
-        set { _shared.wrappedValue = newValue }
+		get { _shared.value }
+		set { _shared.value = newValue }
     }
-	nonisolated(unsafe) private static var _shared = Atomic(wrappedValue: KMBFormatter())
+	nonisolated(unsafe) private static var _shared = Mutex(KMBFormatter())
     private let numberFormatter = NumberFormatter()
     private let unitSize: [Unit: Double] = [.none: 1,
                                             .thousands: 1000,

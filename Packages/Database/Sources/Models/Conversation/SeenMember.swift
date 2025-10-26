@@ -22,7 +22,7 @@ public struct SeenMember: Codable, Sendable, Hashable {
 
 extension SeenMember: Identifiable {
 	public var id: String {
-		uid
+		uid + msgId
 	}
 }
 extension SeenMember: Comparable {

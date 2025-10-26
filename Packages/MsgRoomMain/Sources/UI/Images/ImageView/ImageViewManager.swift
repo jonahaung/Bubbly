@@ -9,26 +9,30 @@ import SwiftUI
 import Services
 import ImageLoader
 import XUI
+import Database
 
 @MainActor
 @Observable
 final class ImageViewManager {
-	
-	let item: ImageView.Item
-	private let mediaManager = MediaManager.shared
-	var image: UIImage?
 
-	init(item: ImageView.Item) {
+	let item: any ImageViewItem
+	var image: UIImage?
+	var progress: ImageTask.Progress?
+
+	init(item: any ImageViewItem) {
 		self.item = item
 	}
 
 	func isLocallyCached() -> Bool {
-		mediaManager.fileExist(for: item.imageID, .png)
+		item.fileExist()
 	}
-	@concurrent
-	func onAppear() async {
-//		guard await image == nil else { return }
-		if let image = UIImage(contentsOfFile: mediaManager.path(for: item.imageID, .png)) {
+
+	@concurrent func loadLocalImage() async {
+		guard await image == nil else {
+			return
+		}
+		guard await isLocallyCached() else { return }
+		if let image = item.thumbnailImage() {
 			await MainActor.run {
 				self.image = image
 			}
@@ -39,24 +43,34 @@ final class ImageViewManager {
 		switch result {
 		case .success(let success):
 			Task {
-				try? await saveImage(success.image)
+				do {
+					try await self.saveImage(success.image)
+					await loadLocalImage()
+				} catch {
+					Log(error)
+				}
 			}
 		case .failure:
 			break
 		}
 	}
 	func onStart(_ imageTask: ImageTask) {
-		print(imageTask)
+		Task {
+			for await progress in imageTask.progress {
+				self.progress = progress
+			}
+		}
 	}
-	func getURL() -> URL {
-		return item.url
+	func getURL() -> URL? {
+		return item.remoteURL
 	}
 
 	@concurrent
 	func saveImage(_ uiImage: UIImage) async throws {
+		let mediaManager = MediaManager.shared
 		let data = try mediaManager.createData(from: uiImage)
-		try mediaManager.save(item.imageID, data: data, .png)
+		try item.file()?.write(data)
 		let thumbData = try mediaManager.createData(from: uiImage)
-		try mediaManager.saveThumbnil(item.imageID, data: thumbData, .png)
+		try item.thumbnailFile()?.write(thumbData)
 	}
 }

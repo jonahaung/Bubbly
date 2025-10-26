@@ -44,8 +44,11 @@ extension MsgsScrollViewLayoutCache {
 extension MsgsScrollViewLayoutCache {
 
 	func layout(for location: CGPoint) -> MsgsScrollViewLayout.CellLayout? {
-		let searchRect = createSearchRect(around: location, size: CacheConstants.searchRectSize)
-		return cachedLayout.layouts.first { $0.frame.intersects(searchRect) }
+//		let searchRect = createSearchRect(around: location, size: CacheConstants.searchRectSize)
+		return cachedLayout.layouts.first { $0.frame.contains(location) }
+	}
+	func layout(for id: String) -> MsgsScrollViewLayout.CellLayout? {
+		return cachedLayout.layouts.last { $0.id == id }
 	}
 
 	func cache(for boundsWidth: CGFloat) -> MsgsScrollViewLayout.Cache? {

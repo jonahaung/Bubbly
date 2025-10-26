@@ -7,7 +7,8 @@
 
 import Foundation
 import FirebaseAuth
+import Core
 
 public var currentUserId: String? {
-	Auth.auth().currentUser?.uid
+	GroupAppStorage.shared.string(for: .auth(.currentUserID)) ?? Auth.auth().currentUser?.uid
 }

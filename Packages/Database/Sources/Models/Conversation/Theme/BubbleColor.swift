@@ -19,7 +19,7 @@ public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Iden
 	public var value: Color {
 		return BubbleColor.colorMap[self] ?? Color.gray
 	}
-	
+
 	private static let colorMap: [BubbleColor: Color] = [
 		.default: Color(red: 1.0, green: 0.98, blue: 0.80),
 		.whatsApp: Color(red: 0.85, green: 1.0, blue: 0.85),

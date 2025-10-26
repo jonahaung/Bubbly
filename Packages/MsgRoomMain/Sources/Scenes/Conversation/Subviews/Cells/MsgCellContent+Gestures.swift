@@ -23,31 +23,8 @@ struct MsgCellContentGesturesView<Content: View>: View {
 
 	var body: some View {
 		msgCellContent()
-//			.offset(x: draggedOffset)
-			.background {
-				if viewModel.canObserveFocusedFrame {
-					Color.clear
-						.hidden()
-						.onGeometryChange(
-							for: CGRect.self,
-							of: { proxy in
-								proxy.frame(in: .global)
-							},
-							action: {
-								oldValue,
-								newValue in
-								Task { @MainActor in
-									viewModel.canObserveFocusedFrame = false
-									sendMsgCellInteraction?(
-										.onFocusMsgBubble(
-											.init(id: viewModel.id, frame: newValue)
-										)
-									)
-								}
-							})
-				}
-			}
-//			.gesture(dragGesture, isEnabled: manager.scrollManager.isScrollingStopped)
+			.offset(x: draggedOffset)
+			.gesture(dragGesture, isEnabled: !viewModel.isSender)
 	}
 }
 
@@ -55,9 +32,8 @@ private extension MsgCellContentGesturesView {
 	private var dragGesture: some Gesture {
 		DragGesture(minimumDistance: 50, coordinateSpace: .local)
 			.onChanged { value in
-				print(value.translation.width)
-				let width = value.translation.width.rounded(.towardZero)
-				let isValid = viewModel.isSender ? width < 0 : width > 0
+				let width = value.translation.width
+				let isValid = viewModel.isSender ? width < -10 : width > 10
 				guard isValid else { return }
 				let absWidth = abs(width)
 				if !draggedLimitReached && absWidth > 170 {
@@ -70,52 +46,10 @@ private extension MsgCellContentGesturesView {
 			.onEnded { _ in
 				draggedLimitReached = false
 				guard draggedOffset != 0 else { return }
-				withAnimation(.interactiveSpring) {
+				withTransaction(.init(animation: .interactiveSpring)) {
 					draggedOffset = 0
-				} completion: {
-					Haptics.play(.soft, 0.5)
 				}
+				Haptics.play(.soft, 0.5)
 			}
-	}
-}
-import Combine
-
-public struct PressGestureViewModifier: ViewModifier {
-	@GestureState private var startTimestamp: Date?
-	@State private var timePublisher: Publishers.Autoconnect<Timer.TimerPublisher>
-	private var onPressing: (TimeInterval) -> Void
-	private var onEnded: () -> Void
-
-	public init(interval: TimeInterval = 0.016, onPressing: @escaping (TimeInterval) -> Void, onEnded: @escaping () -> Void) {
-		_timePublisher = State(wrappedValue: Timer.publish(every: interval, tolerance: nil, on: .current, in: .common).autoconnect())
-		self.onPressing = onPressing
-		self.onEnded = onEnded
-	}
-
-	public func body(content: Content) -> some View {
-		content
-			.gesture(
-				DragGesture(minimumDistance: 0, coordinateSpace: .local)
-					.updating($startTimestamp, body: { _, current, _ in
-						if current == nil {
-							current = Date()
-						}
-					})
-					.onEnded { _ in
-						onEnded()
-					}
-			)
-			.onReceive(timePublisher, perform: { timer in
-				if let startTimestamp = startTimestamp {
-					let duration = timer.timeIntervalSince(startTimestamp)
-					onPressing(duration)
-				}
-			})
-	}
-}
-
-public extension View {
-	func onPress(interval: TimeInterval = 0.016, onPressing: @escaping (TimeInterval) -> Void, onEnded: @escaping () -> Void) -> some View {
-		modifier(PressGestureViewModifier(interval: interval, onPressing: onPressing, onEnded: onEnded))
 	}
 }

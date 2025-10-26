@@ -104,9 +104,9 @@ public struct SoftShadow: ViewModifier {
         let opacity: Double
         let xOffset: CGFloat
         let yOffset: CGFloat
-        
+
         private let additionalBlur: CGFloat = 2
-        
+
         /// Calculates the final y-offset including dynamic adjustments.
         private var calculatedYOffset: CGFloat {
             yOffset + ((yOffset >= 0 ? 1 : -1) * radius) + ShadowConstants.additionalBlur
@@ -123,8 +123,6 @@ public struct SoftShadow: ViewModifier {
         }
     }
 }
-import SwiftUI
-
 public extension View {
 	/// Applies a realistic, multi-layered shadow effect that provides better depth perception than SwiftUI's native shadow.
 	///

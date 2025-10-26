@@ -31,18 +31,18 @@ extension View {
 struct SetLocalizedErrorHandler: ViewModifier {
     private struct _ErrorHandler: LocalizedErrorHandler {
         let handleErrorImpl: (LocalizedError) -> Void
-        
+
         func handle(_ error: LocalizedError) {
             handleErrorImpl(error)
         }
     }
-    
+
     private let errorHandler: _ErrorHandler
-    
+
     init(handleLocalizedError: @escaping (LocalizedError) -> Void) {
         errorHandler = .init(handleErrorImpl: handleLocalizedError)
     }
-    
+
     func body(content: Content) -> some View {
         content
             .environment(\.localizedErrorHandler, errorHandler)
@@ -58,7 +58,7 @@ private struct DefaultLocalizedErrorHandler: LocalizedErrorHandler {
 /// Provides functionality for handling a localized error.
 public struct HandleLocalizedErrorAction {
     fileprivate let base: LocalizedErrorHandler
-    
+
     public func callAsFunction(_ error: LocalizedError) {
         base.handle(error)
     }
@@ -68,7 +68,7 @@ extension EnvironmentValues {
 	private struct LocalizedErrorHandlerKey: @preconcurrency EnvironmentKey {
 		@MainActor static let defaultValue: LocalizedErrorHandler = DefaultLocalizedErrorHandler()
     }
-    
+
     var localizedErrorHandler: LocalizedErrorHandler {
         get {
             self[LocalizedErrorHandlerKey.self]
@@ -76,7 +76,7 @@ extension EnvironmentValues {
             self[LocalizedErrorHandlerKey.self] = newValue
         }
     }
-    
+
     public var handleLocalizedError: HandleLocalizedErrorAction {
         .init(base: localizedErrorHandler)
     }

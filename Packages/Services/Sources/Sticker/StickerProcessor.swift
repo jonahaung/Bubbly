@@ -32,7 +32,7 @@ public nonisolated struct StickerProcessor: Sendable {
 		let colorExtractor = ColorExtractor()
 		return colorExtractor.extractColors(from: data) ?? .init(colors: [])
 	}
-	
+
 	public func extractSticker(from data: Data) throws -> UIImage {
 		guard let uiImage = UIImage(data: data) else { fatalError("Failed to create UIImage from data") }
 		guard let image = CIImage(data: data) else { return uiImage }
@@ -44,9 +44,8 @@ public nonisolated struct StickerProcessor: Sendable {
 
 		guard let result = request.results?.first else { return uiImage }
 
-		
 		let maskPixelBuffer = try result.generateScaledMaskForImage(
-			forInstances: IndexSet(result.allInstances.filter{ $0 != 0 }),
+			forInstances: IndexSet(result.allInstances.filter { $0 != 0 }),
 			from: handler
 		)
 		let mask = CIImage(cvPixelBuffer: maskPixelBuffer)

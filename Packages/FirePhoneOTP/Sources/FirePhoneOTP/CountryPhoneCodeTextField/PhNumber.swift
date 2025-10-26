@@ -10,7 +10,7 @@ import PhoneNumberKit
 
 @Observable
 public class PhNumber {
-    
+
     public var id: String { countryCode.country + rawString }
     public var countryCode: CountryCode
     public var rawString: String
@@ -18,11 +18,11 @@ public class PhNumber {
         phoneNumberKit.getFormattedExampleNumber(forCountry: countryCode.country) ?? "Phone Number"
     }
     private let phoneNumberKit = PhoneNumberKit()
-    
+
     public var isValid: Bool {
         phoneNumberKit.isValidPhoneNumber(rawString)
     }
-    
+
     public var formattedNumber: String? {
         do {
             let phoneNumber = try phoneNumberKit.parse(rawString)
@@ -36,14 +36,14 @@ public class PhNumber {
             }
         }
     }
-    
+
 	@MainActor public static let locale = PhNumber(countryCode: .current)
-    
+
     public init(countryCode: CountryCode) {
         self.countryCode = countryCode
         self.rawString = ""
     }
-    
+
     public func validate() {
         guard isValid else {
             return

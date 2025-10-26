@@ -14,19 +14,21 @@ import Services
 
 @MainActor
 @Observable
-final class ChatInputBarManager: Sendable {
+final class ChatInputBarManager {
 
 	var text: String = ""
 	var imagePicker = ImagePickerViewModel()
+	let msgCreater: MsgCreator
 
-
-	init() {}
+	init() throws {
+		msgCreater = try .init(currentUserId: currentUserId)
+	}
 
 	var hasContent: Bool {
 		text.isWhitespace == false || imagePicker.selections.isEmpty == false
 	}
 
-	func send(conversation: ConversationSnapshot) {
+	func send(conversation: any ConversationRepresentable) {
 		if imagePicker.processedPhotos.isEmpty == false {
 			sendImages(conversation: conversation)
 		} else {
@@ -34,36 +36,43 @@ final class ChatInputBarManager: Sendable {
 		}
 	}
 
-	func sendImages(conversation: ConversationSnapshot) {
+	func sendImages(conversation: any ConversationRepresentable) {
 		Task.detached(priority: .background) { [self] in
-			let msgCreater = MsgCreater()
 			do {
-				try await imagePicker.processedPhotos.parallelEach { [self] id, image in
-					await imagePicker.remove(for: id)
-					let msg = try await msgCreater.create(image: image, conversation)
-					try await Task.sleep(seconds: 2)
-					await Socket.shared.notifyMessage(.newMsg(rMsg: .init(msg: msg)))
+				try await withThrowingTaskGroup(of: Void.self) { group in
+					for (id, image) in await imagePicker.processedPhotos {
+						group.addTask { [self] in
+							await imagePicker.remove(for: id)
+							let msg = try await msgCreater.create(from: image, in: conversation)
+							try await Task.sleep(seconds: 2)
+
+							// Notify UI
+							await Socket.shared.notifyMessage(.newMsg(rMsg: .init(msg: msg)))
+						}
+					}
+
+					// Wait for all image tasks to finish
+					try await group.waitForAll()
 				}
 			} catch {
 				Log(error)
 			}
 		}
 	}
-	func sendText(conversation: ConversationSnapshot) {
+	func sendText(conversation: any ConversationRepresentable) {
 		let string = text
 		text.removeAll()
 		if string.isWhitespace {
 			text = Lorem.random
 			return
 		}
-		Task.detached(priority: .background) {
-			let msgCreater = MsgCreater()
+		Task {
 			do {
 				if let url = URL(string: string), url.host() != nil {
-					let msg = try await msgCreater.create(url: url, conversation)
+					let msg = try await self.msgCreater.create(from: url, in: conversation)
 					await Socket.shared.send(.newMsg(rMsg: .init(msg: msg)), conversation: conversation)
 				} else {
-					let msg = try msgCreater.create(text: string, conversation)
+					let msg = await msgCreater.create(text: string, in: conversation)
 					await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
 				}
 			} catch {

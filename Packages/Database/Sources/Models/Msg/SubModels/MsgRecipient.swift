@@ -8,7 +8,7 @@
 import SwiftUI
 import XUI
 
-public enum MsgRecipient: Int, Conformable, CaseIterable, Codable {
+public enum MsgRecipient: Int, Codable, Sendable, Hashable, CaseIterable {
     case send
     case receive
 	case none

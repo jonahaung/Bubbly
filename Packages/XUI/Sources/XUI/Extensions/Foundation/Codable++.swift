@@ -16,13 +16,29 @@ public extension Encodable {
     }
     var jsonData: Data? {
         let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+		encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 		encoder.keyEncodingStrategy = .convertToSnakeCase
+		encoder.dateEncodingStrategy = .millisecondsSince1970
         return try? encoder.encode(self)
     }
     var preetyPrinted: String {
         if let jsonData {
-            return String(data: jsonData, encoding: .utf8) ?? "Error"
+            let preety = String(data: jsonData, encoding: .utf8) ?? "Error"
+			var lines = [String]()
+			let s =
+"""
+"
+"""
+			preety.lines().forEach { line in
+				let parts = line.components(separatedBy: ":")
+				if parts.count == 2 {
+					let key = parts[0]
+					let value = parts[1]
+					let newLine = "-\(key)\n\(value)".replace(s, with: "").trimmed
+					lines.append(newLine)
+				}
+			}
+			return lines.sorted().joined(separator: "\n")
         }
         return "Error"
     }

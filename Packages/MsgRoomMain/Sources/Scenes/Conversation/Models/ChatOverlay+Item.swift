@@ -10,7 +10,7 @@ import Database
 import Services
 
 extension ChatOverlayView {
-	public struct Item: Equatable, Hashable, Sendable {
+	public struct Item: Equatable, Hashable, Sendable, Identifiable {
 		public let id: String
 		public var frame: CGRect
 

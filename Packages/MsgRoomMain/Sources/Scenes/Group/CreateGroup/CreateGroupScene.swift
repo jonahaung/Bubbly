@@ -44,7 +44,7 @@ public struct CreateGroupScene: View {
 			.buttonStyle(.borderless)
 
 			Section {
-				ForEach(viewModel.selection) { contact in
+				ForEach(viewModel.selection, id: \.uid) { contact in
 					HStack(spacing: 20) {
 						ProfilePhoto(contact)
 							.frame(square: 30)
@@ -80,20 +80,24 @@ public struct CreateGroupScene: View {
 		.ignoresSafeArea(.keyboard)
 		.toolbar {
 			ToolbarItem(placement: .topBarTrailing) {
-				AsyncButton {
+				AsyncButton(hapticFeedbackEnabled: true, action: {
 					await setFocus(false)
 					try await Task.sleep(seconds: 1)
 					try await viewModel.createGroup()
 					try await contactStore.syncGroups()
-				} label: {
+				}, label: {
 					if viewModel.isLoading {
 						ProgressView().controlSize(.mini)
 					} else {
 						Text("Create")
 					}
-				} onFinish: {
-					await dismiss()
-				}
+				}, onFinish: {
+					MainActor.assumeIsolated {
+						dismiss()
+					}
+				}, onError: { error in
+					Log(error)
+				})
 				.disabled(
 					!viewModel.canCreateGroup
 				)

@@ -26,11 +26,7 @@ public struct ConversationRepo {
 	public static func getOrCreate(
 		for conID: String,
 		refetch: Bool
-	) async throws -> ConversationSnapshot {
-
-		if !refetch, let existig = try await Store.shared.conversationStore.fetch(uid: conID) {
-			return existig
-		}
+	) async throws -> any ConversationRepresentable {
 		switch indentifyConversationType(for: conID) {
 		case .single:
 			guard let currentUserID = GroupAppStorage.shared.string(
@@ -38,41 +34,37 @@ public struct ConversationRepo {
 			) else {
 				throw XError.noCurrentUserID
 			}
-			let components = conID.components(separatedBy: "|")
-			guard components.count == 2,
-				  let contactID = components.first(
-					where: { $0 != currentUserID }
-				  ) else {
-				throw XError.invalidConversationID
-			}
+			let contactID = conID.replace(currentUserId ?? "", with: "")
 			return try await getOrCreate(
 				contactID: contactID,
 				currentUserID: currentUserID,
 				refetch: refetch
 			)
 		case .group:
+			if !refetch, let existig: PGroup.SendableType = try await Store.shared.groupStore.fetch(uid: conID){
+				return AnyConversation(.group(existig))
+			}
 			let reference = Firestore.firestore().collection("groups").whereField(
 				"uid",
 				isEqualTo: conID
 			)
-			let group: Group? = try await FirestoreRepo.fetchSingle(
+			let group: Database.Group? = try await FirestoreRepo.fetchSingle(
 				query: reference
 			)
 			guard let group else {
 				throw XError.noConversationGroupFound
 			}
-			let conversation = ConversationSnapshot(group: group)
-			if try await Store.shared.conversationStore
-				.isExisted(uid: conID) == false {
-				try await Store.shared.conversationStore.insert(conversation)
-			}
-			return conversation
+			return AnyConversation(.group(group))
+		case .ai:
+			return AnyConversation(.system(AI.system))
 		}
 	}
 
 	public static func indentifyConversationType(for conID: String) -> ConversationType {
-		let components = conID.components(separatedBy: "|")
-		return components.count > 1 ? .single : .group
+		if conID == "AI" {
+			return .ai
+		}
+		return conID.contains("|") ? .single : .group
 	}
 }
 
@@ -84,64 +76,61 @@ public extension ConversationRepo {
 		contactID: String,
 		currentUserID: String,
 		refetch: Bool
-	) async throws -> ConversationSnapshot {
+	) async throws -> any ConversationRepresentable {
 		let contact = try await ContactRepo.getOrCreate(
 			for: contactID,
 			refatch: refetch
 		)
-		return try await getOrCreate(
-			for: contact,
-			currentUserID: currentUserID
-		)
-	}
-	static func getOrCreate(
-		for contact: ContactSnapshot,
-		currentUserID: String
-	) async throws -> ConversationSnapshot {
-		let conversationID = createConversationID(
-			for: contact.uid,
-			two: currentUserID
-		)
-		if let existig = try await Store.shared.conversationStore.fetch(uid: conversationID) {
-			try await Store.shared.conversationStore
-				.updateAndSave(uid: conversationID) { model in
-					model.update(with: contact)
-				}
-			return existig
-		}
-		let snapshot = ConversationSnapshot(
-			uid: conversationID,
-			name: contact.name,
-			type: .single,
-			createdDate: .now,
-			photoURL: contact.photoURL,
-			members: [contact.uid]
-		)
-		try await Store.shared.conversationStore.insert(snapshot)
-		return snapshot
+		return AnyConversation(.contact(contact))
 	}
 }
 
 public extension ConversationRepo {
 	@MainActor
-	static func get(conID: String) -> ConversationSnapshot? {
+	static func get(conID: String) -> (any ConversationRepresentable)? {
 		let context = Store.shared.appContainer.modelContainer.mainContext
-		var descriptor = FetchDescriptor<PConversation>(
-			predicate: #Predicate<PConversation> { $0.uid == conID }
-		)
-		descriptor.fetchLimit = 1
-		descriptor.includePendingChanges = false
-		let model = try? context.fetch(descriptor).first
-		guard let model else {
-			return nil
+
+		switch indentifyConversationType(for: conID) {
+		case .group:
+			var descriptor = FetchDescriptor<PGroup>(
+				predicate: #Predicate<PGroup> { $0.uid == conID }
+			)
+			descriptor.fetchLimit = 1
+			descriptor.includePendingChanges = true
+			let model = try? context.fetch(descriptor).first
+			guard let model else {
+				return nil
+			}
+			let group = model.toSendable()
+			return AnyConversation(.group(group))
+		case .single:
+			guard let currentUserID = GroupAppStorage.shared.string(
+				for: .auth(.currentUserID)
+			) else {
+				return nil
+			}
+			let contactID = conID.replace(currentUserID, with: "")
+			var descriptor = FetchDescriptor<PContact>(
+				predicate: #Predicate<PContact> { $0.uid == contactID }
+			)
+			descriptor.fetchLimit = 1
+			descriptor.includePendingChanges = true
+			let model = try? context.fetch(descriptor).first
+			guard let model else {
+				return nil
+			}
+			let contact = model.toSendable()
+			return AnyConversation(.contact(contact))
+		case .ai:
+			let ai = AI.system
+			return AnyConversation(.system(ai))
 		}
-		return .init(model: model)
 	}
 	static func fetchMessages(
 		conID: String,
 		offset: Int? = nil,
 		limit: Int? = nil
-	) async throws -> [MsgSnapshot] {
+	) async throws -> [Message] {
 		let predicate = #Predicate<PMsg> { $0.conID == conID }
 		var descriptor = FetchDescriptor<PMsg>(predicate: predicate)
 		descriptor.sortBy = [.init(\.date, order: .reverse)]
@@ -160,9 +149,9 @@ public extension ConversationRepo {
 		conID: String
 	) async throws {
 		let predicate = #Predicate<PMsg> { $0.conID == conID }
-		try await Store.shared.msgStore.delete(predicate)
+		try await Store.shared.msgStore.delete(where: predicate)
 	}
-	static func lastMsg(conID: String) async throws -> MsgSnapshot? {
+	static func lastMsg(conID: String) async throws -> Message? {
 		let predicate = #Predicate<PMsg> { $0.conID == conID }
 		var descriptor = FetchDescriptor<PMsg>(predicate: predicate)
 		descriptor.sortBy = [.init(\.date, order: .reverse)]
@@ -171,7 +160,7 @@ public extension ConversationRepo {
 			descriptor
 		).first
 	}
-	static func firstMsg(conID: String) async throws -> MsgSnapshot? {
+	static func firstMsg(conID: String) async throws -> Message? {
 		let predicate = #Predicate<PMsg> { $0.conID == conID }
 		var descriptor = FetchDescriptor<PMsg>(predicate: predicate)
 		descriptor.sortBy = [.init(\.date, order: .forward)]
@@ -184,59 +173,66 @@ public extension ConversationRepo {
 		let predicate = #Predicate<PMsg> { $0.conID == conID }
 		let descriptor = FetchDescriptor<PMsg>(predicate: predicate)
 		return try await Store.shared.msgStore
-			.fetchCount(descriptor: descriptor)
+			.fetchCount(descriptor)
 	}
 
 	@MainActor
-	static func getContacts(from conversation: ConversationSnapshot) -> [ContactSnapshot] {
-		let store = ContactStore.shared
-		return conversation.members
-			.map { store.contact(for: $0 )}
-			.compactMap { $0 }
+	static func getContacts(from conversation: any ConversationRepresentable) -> [Contact] {
+		switch conversation.kind {
+		case .contact(let contact):
+			return [contact]
+		case .group(_):
+			let store = ContactStore.shared
+			return conversation.members
+				.map { store.contact(for: $0 )}
+				.compactMap { $0 }
+		case .system(let conversation):
+			let store = ContactStore.shared
+			return conversation.members
+				.map { store.contact(for: $0 )}
+				.compactMap { $0 }
+		}
+
 	}
 }
 
 public extension ConversationRepo {
-	static func performUpdate(_ conversation: ConversationSnapshot) async throws -> ConversationSnapshot {
-		guard let currentUserID = GroupAppStorage.shared.string(
-			for: .auth(.currentUserID)
-		) else {
-			throw XError.noCurrentUserID
+	static func performUpdate(_ conversation: any ConversationRepresentable) async throws -> any ConversationRepresentable {
+		switch conversation.kind {
+		case .contact(let contact):
+			return AnyConversation(.contact(try await ContactRepo.getOrCreate(for: contact.uid, refatch: false)))
+		case .group(let group):
+			try await ContactRepo.getOrCreate(for: group.members, refatch: false)
+			return conversation
+		case .system(var thisConversation):
+//			_ = try await ContactRepo.getOrCreate(for: Array(conversation.members), refatch: true)
+//
+//			switch conversation.kind {
+//			case .contact(let contact):
+//				thisConversation.update(with: contact)
+//			case .group(_):
+//				let reference = Firestore.firestore().collection("groups").whereField(
+//					"uid",
+//					isEqualTo: conversation.uid
+//				)
+//				let group: Group? = try await FirestoreRepo.fetchSingle(
+//					query: reference
+//				)
+//				if let group = group {
+//					thisConversation.update(with: group)
+//				}
+//			case .system(_):
+//				break
+//			}
+//			try await ContactStore.shared.fetchData()
+			return conversation
 		}
-		var thisConversation = conversation
-		let contacts = try await ContactRepo.getOrCreate(for: Array(conversation.members), refatch: true)
-
-		switch conversation.type {
-		case .single:
-			if let contact = contacts.first(
-				where: { $0.uid
-					!= currentUserID }) {
-				thisConversation.update(with: contact)
-				try await Store.shared.conversationStore
-					.updateAndSave(uid: conversation.uid) { model in
-						model.update(with: contact)
-					}
-			}
-		case .group:
-			let reference = Firestore.firestore().collection("groups").whereField(
-				"uid",
-				isEqualTo: conversation.uid
-			)
-			let group: Group? = try await FirestoreRepo.fetchSingle(
-				query: reference
-			)
-			if let group = group {
-				thisConversation.update(with: group)
-			}
-		}
-		try await ContactStore.shared.fetchData()
-		return thisConversation
 	}
 }
 
 public extension ConversationRepo {
 
-	static func updateReceiveMsgs (for conID: String) async throws -> [MsgSnapshot] {
+	static func updateReceiveMsgs (for conID: String) async throws -> [Message] {
 		guard let currentUserID = GroupAppStorage.shared.string(
 			for: .auth(.currentUserID)
 		) else {
@@ -262,7 +258,7 @@ public extension ConversationRepo {
 			descriptor
 		)
 		let msgStore = Store.shared.msgStore
-		let msgs = try await withThrowingTaskGroup(of: MsgSnapshot.self) { group in
+		let msgs = try await withThrowingTaskGroup(of: Message.self) { group in
 			for var msg in unreadMsgs {
 				group.addTask {
 					msg.incomingStatus = .read
@@ -272,7 +268,7 @@ public extension ConversationRepo {
 					return msg
 				}
 			}
-			var result = [MsgSnapshot]()
+			var result = [Message]()
 			for try await msg in group {
 				result.append(msg)
 			}

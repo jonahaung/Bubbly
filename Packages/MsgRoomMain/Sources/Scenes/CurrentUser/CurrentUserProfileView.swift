@@ -38,7 +38,7 @@ public struct CurrentUserProfileView: View {
 		.toolbar { toolbarContent }
 	}
 
-	private var user: Binding<ContactSnapshot> {
+	private var user: Binding<Contact> {
 		Binding(
 			get: { currentUser.user },
 			set: { currentUser.user = $0 }

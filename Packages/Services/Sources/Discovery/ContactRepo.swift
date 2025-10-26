@@ -18,7 +18,7 @@ public struct ContactRepo {
 		case noContactFound
 	}
 
-	public static func getOrCreate(for uid: String, refatch: Bool) async throws -> ContactSnapshot {
+	public static func getOrCreate(for uid: String, refatch: Bool) async throws -> Contact {
 		let localValue = try await Store.shared.contactStore.fetch(uid: uid)
 
 		if let localValue, !refatch {
@@ -45,7 +45,8 @@ public struct ContactRepo {
 		return serverValue
 	}
 
-	public static func getOrCreate(for uids: [String], refatch: Bool) async throws -> [ContactSnapshot] {
+	@discardableResult
+	public static func getOrCreate(for uids: [String], refatch: Bool) async throws -> [Contact] {
 		guard let currentUserID = GroupAppStorage.shared.string(
 			for: .auth(.currentUserID)
 		) else {
@@ -54,7 +55,7 @@ public struct ContactRepo {
 		let memberIDs = uids.filter {
 			!$0.isWhitespace && $0 != currentUserID
 		}
-		return try await withThrowingTaskGroup(of: ContactSnapshot.self) { group -> [ContactSnapshot] in
+		return try await withThrowingTaskGroup(of: Contact.self) { group -> [Contact] in
 			memberIDs.forEach { uid in
 				group.addTask {
 					return try await ContactRepo.getOrCreate(
@@ -67,11 +68,11 @@ public struct ContactRepo {
 		}
 	}
 
-	public static func getServerContact(for uid: String) async throws -> ContactSnapshot? {
+	public static func getServerContact(for uid: String) async throws -> Contact? {
 		try await Firestore.firestore()
 			.collection("users")
 			.whereField("uid", isEqualTo: uid)
 			.getDocuments().documents.first?
-			.data(as: ContactSnapshot.self)
+			.data(as: Contact.self)
 	}
 }

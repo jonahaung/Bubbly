@@ -89,7 +89,7 @@ public struct LazyImage<Content: View>: View {
 		}
 		.onAppear { onAppear() }
 		.onDisappear { onDisappear() }
-		.onChange(of: context) { oldValue, newValue in
+		.onChange(of: context) { _, newValue in
 			viewModel.load(newValue?.request)
 		}
 	}

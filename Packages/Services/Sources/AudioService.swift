@@ -16,11 +16,11 @@ public final class AudioService: Sendable {
 	private var soundIDs: [String: SystemSoundID] = [:]
 
 	public static var shared: AudioService {
-		get { sharedValue.wrappedValue }
-		set { sharedValue.wrappedValue = newValue }
+		get { sharedValue.value }
+		set { sharedValue.value = newValue }
 	}
-	nonisolated(unsafe) static let sharedValue = Atomic(
-		wrappedValue: AudioService()
+	static let sharedValue = Mutex(
+		AudioService()
 	)
 
 	private var supportsHaptics: Bool {

@@ -23,10 +23,10 @@ import XUI
 // MARK: - Delegate Protocol
 
 protocol ChatDatasourceDelegate: AnyObject {
-	func datasource(didInsert snapshot: MsgSnapshot) async
-	func datasource(didReceiveMsg snapshot: MsgSnapshot) async
-	func datasource(didRemove snapshot: MsgSnapshot, animated: Bool) async
-	func datasource(didUpdate snapshot: MsgSnapshot, animated: Bool) async
+	func datasource(didInsert snapshot: Message) async
+	func datasource(didReceiveMsg snapshot: Message) async
+	func datasource(didRemove snapshot: Message, animated: Bool) async
+	func datasource(didUpdate snapshot: Message, animated: Bool) async
 	func datasource(didReceive status: AnyMsgData.SeenStatusPayload) async
 	func datasource(didReceive typingStatus: AnyMsgData.TypingStatusPayload) async
 	func datasource(didRecieveError: Error) async
@@ -54,18 +54,15 @@ actor ChatDatasource {
 	// MARK: - Public Methods
 
 	@concurrent
-	func reset(conID: String) async throws -> [MsgSnapshot] {
+	func reset(conID: String) async throws -> [Message] {
 		try await ConversationRepo.fetchMessages(
 			conID: conID,
 			limit: configuration.pageSize
 		)
 	}
 
-	func onViewAppear() {
-		setupNotificationObserver()
-	}
 	@concurrent
-	func loadPrevious(before date: String, conID: String) async throws -> [MsgSnapshot] {
+	func loadPrevious(before date: String, conID: String) async throws -> [Message] {
 		var descriptor = FetchDescriptor<PMsg>(
 			predicate: Self.makePredicate(
 				conID: conID,
@@ -82,7 +79,7 @@ actor ChatDatasource {
 	}
 
 	@concurrent
-	func loadMore(after date: String, conID: String) async throws -> [MsgSnapshot] {
+	func loadMore(after date: String, conID: String) async throws -> [Message] {
 		var descriptor = FetchDescriptor<PMsg>(
 			predicate: Self.makePredicate(
 				conID: conID,
@@ -95,11 +92,6 @@ actor ChatDatasource {
 
 		return try await Store.shared.msgStore.fetch(descriptor)
 	}
-}
-
-// MARK: - Private Methods
-
-private extension ChatDatasource {
 
 	func setupNotificationObserver() {
 		NotificationCenter.default
@@ -114,10 +106,15 @@ private extension ChatDatasource {
 			.store(in: cancelBag)
 	}
 
+}
+
+// MARK: - Private Methods
+
+private extension ChatDatasource {
 	func performUpdate(_ data: AnyMsgData) async throws {
 		switch data {
 		case .newMsg(let rMsg):
-			let msg = MsgSnapshot(rMsg)
+			let msg = Message(rMsg)
 			await delegate?.datasource(didInsert: msg)
 			await delegate?.datasource(didReceiveMsg: msg)
 
@@ -133,7 +130,7 @@ private extension ChatDatasource {
 		case .deleteMsg(let rMsg):
 			try await Store.shared.msgStore.delete(uid: rMsg.uid)
 			await delegate?.datasource(didRemove: .init(rMsg), animated: true)
-			
+
 		case .seenStatus(let status):
 			await delegate?.datasource(didReceive: status)
 		}

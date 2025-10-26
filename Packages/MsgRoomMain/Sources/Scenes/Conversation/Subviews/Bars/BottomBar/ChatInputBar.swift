@@ -14,7 +14,7 @@ import Database
 
 struct ChatInputBar: View {
 
-	@State private var inputManager = ChatInputBarManager()
+	@State private var inputManager = try! ChatInputBarManager()
 	@Environment(ChatViewManager.self) private var manager
 
 	var body: some View {

@@ -8,7 +8,7 @@
 import Foundation
 import XUI
 
-public struct MsgReaction: RawRepresentable, Conformable, ExpressibleByStringLiteral, Codable {
+public struct MsgReaction: RawRepresentable, Codable, Sendable, Hashable, ExpressibleByStringLiteral {
 
     public let rawValue: String
 

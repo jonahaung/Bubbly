@@ -8,7 +8,7 @@
 import SwiftUI
 
 public struct TextAvatarView: View {
-	
+
     private let text: String
     private let color: Color
 

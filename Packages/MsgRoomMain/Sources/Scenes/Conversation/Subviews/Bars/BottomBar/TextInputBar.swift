@@ -20,8 +20,8 @@ struct TextInputBar: View {
 	@Environment(ChatViewManager.self) private var manager
 	@State var inputManager: ChatInputBarManager
 	@Environment(CurrentUser.self) private var currentUser
-//	@FocusState private var textFieldIsFocused: Bool
-	@Environment(\.invokeMsgRoomAction) private var msgRoomAction
+	@Environment(\.sendChatRoomAction) private var msgRoomAction
+	@Environment(\.focusState) private var focusState
 
 	var body: some View {
 		HStack(alignment: .bottom, spacing: 4) {
@@ -38,26 +38,29 @@ struct TextInputBar: View {
 						.background(Color.accentColor.gradient, in: .circle)
 				}
 			}
-			TextField("Text ..", text: $inputManager.text, axis: .vertical)
-				.lineLimit(30)
-				.padding(6)
-				.padding(.horizontal, 8)
-//				.focused($textFieldIsFocused)
-				.lineSpacing(1.4)
-				.textScale(.default)
-				.textFieldStyle(.plain)
-				.layoutPriority(2)
-				.keyboardType(.twitter)
-				.font(.callout)
-				.allowsTightening(true)
+			if let focused = focusState?.value {
+				TextField("Text ..", text: $inputManager.text, axis: .vertical)
+					.focused(focused)
+					.lineLimit(30)
+					.padding(6)
+					.padding(.horizontal, 8)
+					.lineSpacing(1.4)
+					.textScale(.default)
+					.textFieldStyle(.automatic)
+					.layoutPriority(2)
+					.keyboardType(.twitter)
+					.font(.callout)
+					.allowsTightening(true)
+			}
 
-			Button {
-				sendButtonPressed()
+			AsyncButton {
+				await sendButtonPressed()
 			} label: {
 				Image(systemSymbol: .arrowshapeUpFill)
 					.font(.headline)
 					.foregroundStyle(Color.white.gradient)
 					.padding(10)
+					.background(Color.accentColor.gradient, in: .circle)
 					.rotationEffect(
 						inputManager.hasContent ?
 							.degrees(0) : .degrees(-90)
@@ -68,16 +71,14 @@ struct TextInputBar: View {
 						),
 						value: inputManager.text.isWhitespace
 					)
-
 			}
-			.background(Color.accentColor.gradient, in: .circle)
 		}
 		.padding(.horizontal, 8)
 		.padding(.bottom, 4)
-	}
-	private func sendButtonPressed() {
-		Haptics.play(.medium, 0.9)
-		inputManager.send(conversation: manager.conversation)
 		
+	}
+	
+	private func sendButtonPressed() async {
+		inputManager.send(conversation: manager.conversation)
 	}
 }

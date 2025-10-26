@@ -8,6 +8,7 @@
 import SwiftUI
 import Services
 import FirebaseAuth
+import SwiftData
 
 @main
 struct BubblyApp: App {

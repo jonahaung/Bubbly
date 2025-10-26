@@ -13,22 +13,28 @@ import FirebaseFirestore
 
 @MainActor
 @Observable
-final class ContactsViewModel {
+final class ContactsViewModel: ErrorPresenter {
 
 	var loading: Bool = false
-	var groups = [(String, [ContactSnapshot])]()
+	var groups = [(String, [Contact])]()
 
 	init() {}
 
-	func syncContacts(store: ContactStore) async throws {
-		setLoading(true)
-		try await store.syncContacts()
-		let contacts = store.contacts
-		createSections(from: contacts)
-		setLoading(false)
+	@concurrent
+	func syncContacts(store: ContactStore) async {
+		await setLoading(true)
+		do {
+			try await store.syncContacts()
+			let contacts = await store.contacts
+			await createSections(from: contacts)
+			await setLoading(false)
+		} catch {
+			await showError(error)
+			await setLoading(false)
+		}
 	}
 
-	@MainActor func createSections(from contacts: [ContactSnapshot]) {
+	@MainActor func createSections(from contacts: [Contact]) {
 		let group = contacts.groupByKey(keyPath: \.firstCharacter)
 		let items = group.map { ($0.key, $0.value)}
 		groups = items.sorted(by: { lhs, rhs in
@@ -41,7 +47,7 @@ final class ContactsViewModel {
 	}
 }
 
-public extension ContactSnapshot {
+public extension Contact {
 	var firstCharacter: String {
 		if let first = name.first {
 			return String(first).uppercased()

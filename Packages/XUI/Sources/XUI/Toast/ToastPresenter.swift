@@ -8,9 +8,6 @@
 import SwiftUI
 import QuartzCore
 
-import SwiftUI
-import QuartzCore
-
 @MainActor
 @Observable
 public final class ToastPresenter {
@@ -48,10 +45,10 @@ public final class ToastPresenter {
 
 	// MARK: - Shared Singleton
 	public static var shared: ToastPresenter {
-		get { _shared.wrappedValue }
-		set { _shared.wrappedValue = newValue }
+		get { _shared.value }
+		set { _shared.value = newValue }
 	}
-	private static var _shared = Atomic(wrappedValue: ToastPresenter())
+	private static var _shared = Mutex(ToastPresenter())
 }
 
 // MARK: - Queue Processing

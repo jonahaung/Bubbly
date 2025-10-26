@@ -11,12 +11,12 @@ import Services
 import XUI
 
 struct ConversationGroupCell: View {
-	
-	let group: ConversationSnapshot
-	
+
+	let group: Database.Group
+
 	var body: some View {
 		Button {
-			ConversationInitializer.start(conversation: group)
+			ConversationInitializer.start(conversation: AnyConversation(.group(group)))
 		} label: {
 			HStack(spacing: 20) {
 				ProfilePhoto(

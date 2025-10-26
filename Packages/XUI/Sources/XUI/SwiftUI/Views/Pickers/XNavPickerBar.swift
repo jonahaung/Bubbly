@@ -78,7 +78,9 @@ private struct XPickerView<Item: XPickable>: View {
 								}
 							}
 						} onFinish: {
-							await dismiss()
+							MainActor.assumeIsolated {
+								dismiss()
+							}
 						}
 						.buttonStyle(.borderless)
 					}

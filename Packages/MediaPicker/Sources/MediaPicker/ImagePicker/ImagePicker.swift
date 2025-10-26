@@ -98,7 +98,7 @@ public final class InlinePhotoPickerViewModel {
 							return (item.identifier, photo)
 		                }
 		            }
-		
+
 		            for await result in group {
 						processedPhotos[result.0] = result.1
 		            }

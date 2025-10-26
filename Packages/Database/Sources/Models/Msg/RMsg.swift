@@ -8,17 +8,17 @@
 import Foundation
 import XUI
 
-public struct RMsg: Codable, Conformable {
+public struct RMsg: Codable, Sendable, Hashable {
 
-	public var uid: String
-	public var conID: String
-	public var msgKind: MsgKind
-	public var senderID: String
-	public var date: String
-	public var text: String
-	public var incomingStatus: MsgIncomingStatus
+	public let uid: String
+	public let conID: String
+	public let msgKind: MsgKind
+	public let senderID: String
+	public let date: String
+	public let text: String
+	public let incomingStatus: MsgIncomingStatus
 	public var outgoingStatus = [String: MsgOutgoingStatus]()
-	public var attachment: Attachment?
+	public let attachment: Attachment?
 
 	public init(
 		uid: String,
@@ -42,23 +42,7 @@ public struct RMsg: Codable, Conformable {
 		self.attachment = attachment
 	}
 
-	public init(_ msg: MsgSnapshot) {
-		var attachment = msg.attachment
-		attachment?.data = nil
-		attachment?.thumbnailData = nil
-		self.init(
-			uid: msg.uid,
-			conID: msg.conID,
-			msgKind: msg.msgKind,
-			senderID: msg.senderID,
-			date: .init(msg.date),
-			text: msg.text,
-			incomingStatus: msg.incomingStatus,
-			outgoingStatus: msg.outgoingStatus,
-			attachment: attachment
-		)
-	}
-	public init(msg: MsgSnapshot) {
+	public init(_ msg: Message) {
 		self.init(
 			uid: msg.uid,
 			conID: msg.conID,
@@ -71,11 +55,17 @@ public struct RMsg: Codable, Conformable {
 			attachment: msg.attachment
 		)
 	}
-
-	public func serialized() -> Self {
-		var copy = self
-		copy.attachment?.data = nil
-		copy.attachment?.thumbnailData = nil
-		return copy
+	public init(msg: Message) {
+		self.init(
+			uid: msg.uid,
+			conID: msg.conID,
+			msgKind: msg.msgKind,
+			senderID: msg.senderID,
+			date: .init(msg.date),
+			text: msg.text,
+			incomingStatus: msg.incomingStatus,
+			outgoingStatus: msg.outgoingStatus,
+			attachment: msg.attachment
+		)
 	}
 }

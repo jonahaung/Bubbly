@@ -15,7 +15,7 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 	private let currentUser: CurrentUser
 	private let contactStore = ContactStore.shared
 
-	init(user: ContactSnapshot) {
+	init(user: Contact) {
 		currentUser = .init(user)
 	}
 
@@ -23,12 +23,12 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 		content
 			.environment(currentUser)
 			.environment(contactStore)
-			.environment(\.invokeMsgRoomAction) { data in
+			.environment(\.sendChatRoomAction) { data in
 				Task.detached {
 					do {
 						let conversation = try await ConversationRepo.getOrCreate(
 							for: data.conID, refetch: false)
-						await Socket.shared
+						try await Socket.shared
 							.send(data, conversation: conversation)
 					} catch {
 						Log(error)
@@ -43,7 +43,7 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 }
 
 public extension View {
-	func msgRoomEntryPoint(user: ContactSnapshot) -> some View {
+	func msgRoomEntryPoint(user: Contact) -> some View {
 		ModifiedContent(
 			content: self,
 			modifier: MsgRoomEntryPointModifier(

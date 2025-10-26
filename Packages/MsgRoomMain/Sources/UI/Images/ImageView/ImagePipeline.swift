@@ -9,7 +9,7 @@ import Foundation
 import ImageLoader
 
 public extension ImagePipeline {
-	
+
 	static let `default` = ImagePipeline {
 		$0.dataLoader = {
 			let config = URLSessionConfiguration.default

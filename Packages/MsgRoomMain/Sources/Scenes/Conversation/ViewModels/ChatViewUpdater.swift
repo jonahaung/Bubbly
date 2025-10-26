@@ -12,7 +12,7 @@ import XUI
 
 @MainActor
 protocol ChatViewUpdaterDelegate: AnyObject {
-	var conversation: ConversationSnapshot { get set }
+	var conversation: any ConversationRepresentable { get set }
 	var eventsManager: ChatViewEventsManager { get }
 	var scrollManager: ChatScrollManager { get }
 	var cellItems: [MsgCellViewModel] { get set }
@@ -23,7 +23,7 @@ final class ChatViewUpdater: ErrorPresenter {
 
 	weak var delegate: ChatViewUpdaterDelegate?
 
-	private var conversation: ConversationSnapshot? {
+	private var conversation: (any ConversationRepresentable)? {
 		get { delegate?.conversation }
 		set {
 			guard let newValue else { return }
@@ -38,7 +38,7 @@ final class ChatViewUpdater: ErrorPresenter {
 }
 
 extension ChatViewUpdater {
-	func insert(msgs: [MsgSnapshot]) {
+	func insert(msgs: [Message]) {
 		var newItems = cellItems
 		msgs.forEach { each in
 			if let existing = newItems.first(where: { $0.id == each.uid }) {
@@ -63,27 +63,24 @@ extension ChatViewUpdater: ChatDatasourceDelegate {
 		delegate?.eventsManager.updateTypingStatus(typingStatus)
 	}
 
-	func datasource(didInsert snapshot: MsgSnapshot) async {
+	func datasource(didInsert snapshot: Message) async {
+		conversation?.lastMsgID = snapshot.uid
 		if let existingModel = cellItems.first(where: { $0.msg.uid == snapshot.uid }) {
 			existingModel.update(with: snapshot)
 		} else {
-			let newModel = MsgCellViewModel(snapshot)
-			let index = cellItems.insertionIndex(for: newModel, by: \.msg.date)
-
-			guard let delegate = self.delegate else { return }
+			guard let delegate else { return }
 			let scrollManager = delegate.scrollManager
-
-			if scrollManager.canLoadMore == true {
+			if scrollManager.canLoadMore {
 				ToastPresenter.show(snapshot.text) { [weak self] in
 					guard let self else { return }
 					self.delegate?.scrollManager.scroll(to: .bottom(animated: true, duration: nil))
 				}
 			} else {
-				if delegate.scrollManager.scrolledPosition == .atBottom {
-					delegate.scrollManager.updateLoadingState(.appendingItem(newModel.id, index: index))
-					cellItems.insert(newModel, at: index)
-				} else {
-					cellItems.insert(newModel, at: index)
+				let newModel = MsgCellViewModel(snapshot)
+				let index = cellItems.insertionIndex(for: newModel, by: \.msg.date)
+				scrollManager.updateLoadingState(.appendingItem(newModel.id))
+				cellItems.insert(newModel, at: index)
+				if !delegate.scrollManager.scrolledPosition.nearBottom {
 					ToastPresenter.show(snapshot.text) { [weak self] in
 						guard let self else { return }
 						self.delegate?.scrollManager.scroll(to: .id(value: snapshot.uid, anchor: .center, animated: true, duration: nil))
@@ -93,38 +90,34 @@ extension ChatViewUpdater: ChatDatasourceDelegate {
 		}
 	}
 
-	func datasource(didReceiveMsg snapshot: MsgSnapshot) async {
+	func datasource(didReceiveMsg snapshot: Message) async {
 		updateReceiveMsgs()
 	}
 
-	func datasource(didUpdate snapshot: MsgSnapshot, animated: Bool) async {
+	func datasource(didUpdate snapshot: Message, animated: Bool) async {
 		guard let viewModel = cellItems.first(where: { $0.id == snapshot.id }) else { return }
 		performUpdate(animated: animated) {
 			viewModel.update(with: snapshot)
 		}
 	}
 
-	func datasource(didRemove snapshot: MsgSnapshot, animated: Bool) async {
-		guard let index = cellItems.firstIndex(where: { $0.id == snapshot.id }) else { return }
+	func datasource(didRemove snapshot: Message, animated: Bool) async {
+		guard let index = cellItems.firstIndex(where: { $0.id == snapshot.uid }) else { return }
 		performUpdate(animated: animated) { [weak self] in
 			self?.cellItems.remove(at: index)
 		}
 	}
 
 	func datasource(didReceive status: Database.AnyMsgData.SeenStatusPayload) async {
-		await reloadConversation()
+		try? await reloadConversation()
 	}
 }
 
 // MARK: - Updates
 extension ChatViewUpdater {
 
-	func reloadConversation() async {
-		guard let conID = conversation?.uid,
-			  let newConversation = ConversationRepo.get(conID: conID) else {
-			return
-		}
-		conversation = newConversation
+	func reloadConversation() async throws {
+		try await conversation?.reload()
 	}
 
 	func updateConversation() async {
@@ -132,16 +125,17 @@ extension ChatViewUpdater {
 			assertionFailure("Missing conversation")
 			return
 		}
-		Task.detached { [self] in
+		Task.detached { [weak self] in
+			guard let self else { return }
 			do {
 				let updatedConversation = try await ConversationRepo.performUpdate(conversation)
 
 				await MainActor.run {
 					self.conversation = updatedConversation
-					updateReceiveMsgs()
+					self.updateReceiveMsgs()
 				}
 			} catch {
-				await showError(error)
+				await self.showError(error)
 			}
 		}
 	}

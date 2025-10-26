@@ -18,7 +18,7 @@ import Core
 public class AuthService {
 
 	public enum AuthState: Sendable {
-		case loggedIn(user: ContactSnapshot), loggedOut, newUser(user: ContactSnapshot), unknown
+		case loggedIn(user: Contact), loggedOut, newUser(user: Contact), unknown
 	}
 
 	public var authState: AuthState = .unknown
@@ -63,7 +63,7 @@ public class AuthService {
 }
 
 public extension User {
-	func snapshot() -> ContactSnapshot {
+	func snapshot() -> Contact {
 		return .init(
 			uid: self.uid,
 			name: self.displayName ?? "",
@@ -72,7 +72,7 @@ public extension User {
 			pushToken: GroupAppStorage.shared
 				.string(for: .device(.deviceToken)) ?? "",
 			publicKeyString: GroupAppStorage.shared
-				.string(for: .security(.publicKey(id: self.uid))) ?? ""
+				.string(for: .security(.publicKey(id: self.uid))) ?? "", theme: nil, lastMsgID: nil
 		)
 	}
 }

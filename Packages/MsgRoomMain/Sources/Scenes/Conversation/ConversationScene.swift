@@ -12,48 +12,55 @@ import XUI
 import Core
 
 public struct ConversationScene: View {
-	private let manager: ChatViewManager
-	@FocusState private var textViewIsFocused: Bool
+
+	@LazyState private var manager: ChatViewManager
+	@FocusState private var isFieldFocused: Bool
+
 	public init(_ prefetchedData: ConversationInitializer.PrefetchedData) {
-		manager = .init(prefetchedData)
+		_manager = .init(wrappedValue: .init(prefetchedData))
 	}
 
 	public var body: some View {
-		ZStack {
-			Image("adaptive")
-				.resizable(resizingMode: .tile)
-				.foregroundStyle(.secondary)
-				.layoutPriority(-1)
-			if manager.scrollManager.boundsWidth > 0 {
-				MsgsScrollView(manager: manager)
+		GeometryReader { geometry in
+			ZStack {
+				background
+				if !manager.scrollManager.isHidden {
+					MsgsScrollView(manager: manager, geometry: geometry)
+						.frame(size: geometry.size)
+				}
+				overlayViews
+					.fullScreenCover(item: $manager.eventsManager.focusedFrame) { frame in
+						ChatOverlayView(item: frame)
+							.ignoresSafeArea()
+							.environment(manager)
+							.presentationBackground(.clear)
+							.presentationBackgroundInteraction(.enabled)
+					}
 			}
-			overlayViews
-			focusedItemOverlay
-		}
-		.background(
-			manager.conversation.theme.background.color,
-			ignoresSafeAreaEdges: .all
-		)
-		.receiveMsgCellInteraction { action in
-			MainActor.assumeIsolated {
-				handleMsgCellInteraction(action: action)
+			.receiveMsgCellInteraction { action in
+				MainActor.assumeIsolated {
+					handleMsgCellInteraction(action: action)
+				}
 			}
+			.background(
+				manager.conversation.theme.background.color,
+				ignoresSafeAreaEdges: .all
+			)
+			.environment(\.eventsManager, manager.eventsManager)
+			.environment(\.conversation, manager.conversation)
+			.environment(\.attachmentFetcher, manager.attachmentFetcher)
+			.environment(manager)
+			.environment(\.focusState, SharedFocusState($isFieldFocused))
+			.toolbarVisibility(.hidden, for: .navigationBar, .tabBar)
 		}
-		.environment(\.eventsManager, manager.eventsManager)
-		.environment(\.conversation, manager.conversation)
-		.environment(manager)
-		.focused($textViewIsFocused)
-		.toolbarVisibility(.hidden, for: .navigationBar, .tabBar)
 	}
 
-	private var showFullScreen: Bool {
-		manager.eventsManager.focusedFrame != nil
-	}
 	private var overlayViews: some View {
-		VStack {
+		VStack(spacing: 0) {
 			ChatTopBarView()
 			FloatingDateView()
 			Spacer()
+				.hidden()
 			ChatToastView()
 			ChatInputBar()
 				.onGeometryChange(for: CGRect.self) { geometry in
@@ -62,21 +69,13 @@ public struct ConversationScene: View {
 					manager.scrollManager.handleBottomBarFrameChange(oldValue, newValue)
 				}
 		}
-		.opacity(showFullScreen ? 0 : 1)
-		.statusBarHidden(showFullScreen)
-		.geometryGroup()
 		.layoutPriority(1)
+		.flexible(.all)
+	}
 
-	}
-	
-	@ViewBuilder
-	private var focusedItemOverlay: some View {
-		if let focusedItem = manager.eventsManager.focusedFrame {
-			ChatOverlayView(item: focusedItem)
-				.ignoresSafeArea()
-				.environment(manager)
-		}
-	}
+	private let background: some View = Image("adaptive")
+		.resizable(resizingMode: .tile)
+		.foregroundStyle(.secondary)
 
 	private func handleMsgCellInteraction(action: MsgCellInteraction.Action) {
 		switch action {
@@ -122,7 +121,7 @@ public struct ConversationScene: View {
 		Router.shared.push(NavPath.contactDetails(contact))
 	}
 
-	private func handleMarkMsg(with msg: MsgSnapshot) {
+	private func handleMarkMsg(with msg: Message) {
 		manager.eventsManager.updateToast(.message(msg))
 	}
 

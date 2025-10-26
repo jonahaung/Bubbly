@@ -49,8 +49,7 @@ struct InboxCell: View {
 		.background()
 		.onTapGesture {
 			Task {
-				ConversationInitializer
-					.start(conID: item.conversation.uid, refetch: false)
+				ConversationInitializer.start(conversation: item.conversation)
 			}
 		}
 	}

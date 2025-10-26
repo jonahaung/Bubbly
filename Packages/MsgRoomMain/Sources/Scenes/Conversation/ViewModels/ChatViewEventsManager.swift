@@ -15,13 +15,14 @@ import XUI
 @Observable
 final class ChatViewEventsManager {
 
-    private(set) var focusedFrame: ChatOverlayView.Item?
+    var focusedFrame: ChatOverlayView.Item?
     private(set) var toastItem: ChatToastItem = .none
     private(set) var selectedMsg: SelectedMsg?
     private(set) var typingStatusText: String?
     private(set) var floatingDateString: String?
     private(set) var showContactInfo: Bool
-	
+	var canShowScrollButton = false
+
     init(config: ConversationInitializer.Configuration) {
         showContactInfo = !config.canPaginate
     }
@@ -33,7 +34,9 @@ final class ChatViewEventsManager {
 
     func updateFocusedFrame(_ item: ChatOverlayView.Item?) {
         playHaptic(style: .rigid, intensity: 0.7)
-        focusedFrame = item
+		withTransaction(.withoutAnimation) {
+			focusedFrame = item
+		}
     }
 
     func updateShowContactInfo(_ show: Bool) {
@@ -44,7 +47,11 @@ final class ChatViewEventsManager {
 		if item != nil {
 			playHaptic(style: .rigid, intensity: 0.7)
 		}
-		selectedMsg = item
+		var transaction = animated ? Transaction.withAnimation : .withoutAnimation
+		transaction.animation = .interactiveSpring(response: 0.2, dampingFraction: 0.7, blendDuration: 0.25)
+		withTransaction(transaction) {
+			selectedMsg = item
+		}
     }
 
     func updateTypingStatus(_ status: AnyMsgData.TypingStatusPayload) {
@@ -63,7 +70,7 @@ final class ChatViewEventsManager {
     private func playHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle, intensity: CGFloat) {
         Haptics.play(style, intensity)
     }
-	
+
     private static func formattedFloatingDate(from date: Date) -> String {
         switch true {
         case date.isInToday:

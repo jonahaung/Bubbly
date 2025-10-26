@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct Group: Codable, Sendable, UIdentifiable {
+public struct Group: Codable, Sendable, Hashable, UIdentifiable {
 
 	public var uid: String
 	public var name: String
@@ -16,6 +16,8 @@ public struct Group: Codable, Sendable, UIdentifiable {
 	public var members: [String]
 	public var createdBy: String
 	public var theme: ConversationTheme = .init()
+	public var seenMembers: [SeenMember]? = nil
+	public var lastMsgID: String? = nil
 
 	public init(
 		uid: String,
@@ -24,7 +26,9 @@ public struct Group: Codable, Sendable, UIdentifiable {
 		photoURL: String?,
 		members: [String],
 		createdBy: String,
-		theme: ConversationTheme = .init()
+		theme: ConversationTheme = .init(),
+		seenMembers: [SeenMember] = [],
+		lastMsgID: String? = nil
 	) {
 		self.uid = uid
 		self.name = name
@@ -33,19 +37,7 @@ public struct Group: Codable, Sendable, UIdentifiable {
 		self.members = members
 		self.createdBy = createdBy
 		self.theme = theme
-	}
-
-	public init(snapshot: ConversationSnapshot) {
-		self.init(
-			uid: snapshot.uid,
-			name: snapshot.name,
-			createdDate: .init(
-				snapshot.createdDate
-			),
-			photoURL: snapshot.photoURL,
-			members: Array(snapshot.members),
-			createdBy: snapshot.createdBy ?? "",
-			theme: snapshot.theme
-		)
+		self.seenMembers = seenMembers
+		self.lastMsgID = lastMsgID
 	}
 }

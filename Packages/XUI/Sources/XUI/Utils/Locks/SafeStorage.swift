@@ -8,7 +8,7 @@
 import Foundation
 
 public final class SafeStorage<T>: @unchecked Sendable {
-	
+
 	private let lock = NSRecursiveLock()
 	private var stored: T
 

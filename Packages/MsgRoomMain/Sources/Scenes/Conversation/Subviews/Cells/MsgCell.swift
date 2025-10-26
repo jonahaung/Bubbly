@@ -13,22 +13,23 @@ import Core
 
 struct MsgCell: View {
 
-	let viewModel: MsgCellViewModel
 	let bubble: Bubble
+	@Environment(MsgCellViewModel.self) private var viewModel
 	@Environment(\.sendMsgCellInteraction) private var sendMsgCellInteraction
 	@Environment(\.eventsManager) private var eventsManager
 
+	init(_ bubble: Bubble) {
+		self.bubble = bubble
+	}
 	var body: some View {
 		HStack(alignment: .bottom, spacing: 0) {
 			leftView()
-			MsgCellContentGesturesView {
-				MsgCellContent(bubbleCorner: bubbleCorner)
-			}
+			MsgCellContent(bubbleCorner: bubbleCorner)
 			MsgCellOutgoingStatusView()
 		}
-		.environment(viewModel)
 		.id(viewModel.id)
 		.layoutValue(viewModel.msg.layoutValue)
+		.compositingGroup()
 	}
 
 	private var bubbleCorner: BubbleCorner {
@@ -59,7 +60,7 @@ struct MsgCell: View {
 					ProfilePhoto(
 						sender,
 						size: .custom(ChatLayoutConstants.Cell.defaultSpacing),
-						tapAction: .custom{
+						tapAction: .custom {
 							sendMsgCellInteraction?(.onTapAvatar(viewModel.id))
 						}
 					)
@@ -67,6 +68,7 @@ struct MsgCell: View {
 				}
 			}
 			.frame(width: ChatLayoutConstants.Cell.defaultSpacing + 4)
+
 		}
 	}
 }

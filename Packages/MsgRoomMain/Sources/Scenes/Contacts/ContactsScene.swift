@@ -64,17 +64,10 @@ public struct ContactsScene: View {
 			case .chat, .all:
 				ForEach(viewModel.groups, id: \.0) { group in
 					Section {
-						ForEach(group.1) { contact in
+						ForEach(group.1, id: \.uid) { contact in
 							ContactCell(contact) {
-								if contact.isChatAvailable && contact.uid != currentUserId {
-									ConversationInitializer.start(contact: contact, refetch: false)
-								} else {
-									router.push(contact.uid == currentUserId ? .currentUserDetails : .contactDetails(contact))
-								}
+								ConversationInitializer.start(conversation: AnyConversation(.contact(contact)))
 							}
-						}
-						.onDelete { indexSet in
-							delete(at: indexSet, group.1)
 						}
 					}
 				}
@@ -97,7 +90,7 @@ public struct ContactsScene: View {
 				} else {
 					Button {
 						Task.detached(priority: .background) {
-							try? await viewModel
+							await viewModel
 								.syncContacts(store: contactStore)
 						}
 					} label: {
@@ -113,7 +106,7 @@ public struct ContactsScene: View {
 			case .chat:
 				viewModel
 					.createSections(
-						from: contactStore.contacts.filter{ $0.isChatAvailable }
+						from: contactStore.contacts.filter { $0.isChatAvailable }
 					)
 			case .group:
 				break
@@ -124,7 +117,7 @@ public struct ContactsScene: View {
 		}
 	}
 
-	private func delete(at offsets: IndexSet, _ contacts: [ContactSnapshot]) {
+	private func delete(at offsets: IndexSet, _ contacts: [Contact]) {
 		Task {
 			await withThrowingTaskGroup(of: Void.self) { group in
 				for index in offsets {

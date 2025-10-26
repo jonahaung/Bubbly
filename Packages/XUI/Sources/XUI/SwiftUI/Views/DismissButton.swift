@@ -39,3 +39,12 @@ public struct DismissButton: View {
 		}
 	}
 }
+public struct CancelButton: View {
+	@Environment(\.presentationMode) var presentationMode
+	public init() {}
+	public var body: some View {
+		Button(role: .cancel) {
+			presentationMode.wrappedValue.dismiss()
+		}
+	}
+}
