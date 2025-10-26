@@ -32,7 +32,11 @@ public struct AnyConversation: ConversationRepresentable {
 			theme = contact.theme ?? .default
 			members = [contact.uid]
 			lastMsgID = contact.lastMsgID
-			seenMembers = []
+			if let lastMsgID = contact.lastMsgID {
+				seenMembers = [.init(uid: contact.uid, msgId: lastMsgID, date: ServerTime.now.value)]
+			} else {
+				seenMembers = []
+			}
 		case .group(let group):
 			uid = group.uid
 			name = group.name

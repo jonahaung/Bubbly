@@ -24,8 +24,8 @@ public struct ProfilePhoto: View {
 		self.item = item
 		self.size = size
 		self.config = .init(
-			size: size as! ImageSize,
-			processors: [.sticker()], tapAction: tapAction
+			size: size,
+			processors: [], tapAction: tapAction
 		)
 	}
 	public var body: some View {

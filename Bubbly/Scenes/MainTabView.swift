@@ -31,6 +31,7 @@ struct MainTabView: View {
 				}
 			}
 		}
+		.equatable(by: router.tab)
 		.environment(router)
 		.toastPresentable()
 	}

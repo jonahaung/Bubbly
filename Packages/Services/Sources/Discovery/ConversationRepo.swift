@@ -200,9 +200,9 @@ public extension ConversationRepo {
 	static func performUpdate(_ conversation: any ConversationRepresentable) async throws -> any ConversationRepresentable {
 		switch conversation.kind {
 		case .contact(let contact):
-			return AnyConversation(.contact(try await ContactRepo.getOrCreate(for: contact.uid, refatch: false)))
+			return AnyConversation(.contact(try await ContactRepo.getOrCreate(for: contact.uid, refatch: true)))
 		case .group(let group):
-			try await ContactRepo.getOrCreate(for: group.members, refatch: false)
+			try await ContactRepo.getOrCreate(for: group.members, refatch: true)
 			return conversation
 		case .system(var thisConversation):
 //			_ = try await ContactRepo.getOrCreate(for: Array(conversation.members), refatch: true)

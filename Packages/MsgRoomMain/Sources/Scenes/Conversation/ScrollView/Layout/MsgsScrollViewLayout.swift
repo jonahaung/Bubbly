@@ -16,7 +16,7 @@ private enum LayoutConstants {
 	static let minimumContainerWidth: CGFloat = 1.0
 }
 
-struct MsgsScrollViewLayoutConfiguration {
+struct MsgsScrollViewLayoutConfiguration: Sendable {
 	let spacing: CGFloat
 	let contentInsets: EdgeInsets
 	let containerSize: CGSize
@@ -164,7 +164,7 @@ private extension MsgsScrollViewLayout {
 	func calculateOptimalSize(for subview: LayoutSubview) -> CGSize {
 		let targetWidth =  config.containerWidth * LayoutConstants.bubbleWidthRatio
 		let proposedViewSize = ProposedViewSize(width: targetWidth, height: nil)
-		let sizeThatFit = subview.sizeThatFits(proposedViewSize)
+		let sizeThatFit = subview.dimensions(in: proposedViewSize)
 		return .init(width: sizeThatFit.width, height: sizeThatFit.height)
 	}
 }

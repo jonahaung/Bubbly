@@ -89,7 +89,7 @@ public struct ContactsScene: View {
 					ProgressView().controlSize(.mini)
 				} else {
 					Button {
-						Task.detached(priority: .background) {
+						Task {
 							await viewModel
 								.syncContacts(store: contactStore)
 						}
@@ -99,18 +99,8 @@ public struct ContactsScene: View {
 				}
 			}
 		}
-		.task(id: defaultContactDisplay) {
-			switch defaultContactDisplay {
-			case .all:
-				viewModel.createSections(from: contactStore.contacts)
-			case .chat:
-				viewModel
-					.createSections(
-						from: contactStore.contacts.filter { $0.isChatAvailable }
-					)
-			case .group:
-				break
-			}
+		.task {
+			await viewModel.fetch()
 		}
 		.refreshable {
 			try? await contactStore.refreshData()

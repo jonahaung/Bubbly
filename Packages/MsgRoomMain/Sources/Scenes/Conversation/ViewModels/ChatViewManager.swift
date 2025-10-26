@@ -23,14 +23,13 @@ final class ChatViewManager: ChatViewUpdaterDelegate, ErrorPresenter {
 	@ObservationIgnored private var viewCache = [String: _opaque_View]()
 	@ObservationIgnored let bubbleFactory: BubbleFactory
 	@ObservationIgnored let prefetcher: ScrollViewPrefetcher
-	var conversation: any ConversationRepresentable
+	@ObservationIgnored var conversation: any ConversationRepresentable
 	var cellItems = [MsgCellViewModel]()
-	var config: ConversationInitializer.Configuration
+	@ObservationIgnored var config: ConversationInitializer.Configuration
 	@ObservationIgnored let attachmentAPI = AttachmentDataAPI()
 	@ObservationIgnored var attachmentFetcher: AsyncFetcher<AttachmentData>?
 
 	init(_ data: ConversationInitializer.PrefetchedData) {
-		ColorStorage.shared.initialize(data.conversation)
 		config = data.configuration
 		datasource = .init(config: data.configuration)
 		scrollManager = .init()
@@ -60,7 +59,7 @@ final class ChatViewManager: ChatViewUpdaterDelegate, ErrorPresenter {
 extension ChatViewManager: ChatScrollManagerDelegate {
 	func view(for viewModel: MsgCellViewModel, bubble: Bubble) -> _opaque_View {
 		if let cached = viewCache[viewModel.id] {
-			return cached._opaque_environment(viewModel)
+			return cached
 		}
 		let view =  MsgCell(bubble).opaqueView()._opaque_environment(viewModel)
 		if viewModel.id != cellItems.last?.id {
@@ -148,27 +147,18 @@ extension ChatViewManager: ChatScrollManagerDelegate {
 			scrollManager.scroll(to: .bottom(animated: true, duration: nil))
 			return
 		}
-
-		guard let lastId = cellItems.last?.id else {
-			return
-		}
 		eventsManager.canShowScrollButton = false
 		scrollManager.updateLoadingState(.resetting)
-		scrollManager.scroll(to: lastId, animated: true) { [weak self] in
-			MainActor.assumeIsolated {
-				guard let self else { return }
-				Task {
-					do {
-						let msgs = try await self.datasource.reset(conID: self.config.conID)
-						self.setCellItems(msgs)
-						self.scrollManager.setScrollPosition(to: .init(edge: .bottom))
-					} catch {
-						await self.showError(error)
-					}
-				}
+		viewCache.removeAll()
+		Task {
+			do {
+				let msgs = try await datasource.reset(conID: config.conID)
+				setCellItems(msgs)
+				scrollManager.setScrollPosition(to: .init(edge: .bottom))
+			} catch {
+				await self.showError(error)
 			}
 		}
-
 	}
 
 	func scrollManager(_ manager: ChatScrollManager, finalizeScrollViewUpdate position: XUI.ScrolledPosition) {
@@ -176,6 +166,7 @@ extension ChatViewManager: ChatScrollManagerDelegate {
 		case .atBottom:
 			eventsManager.canShowScrollButton = false
 			if manager.updatingState.isNotUpdating && !canLoadMore && cellItems.count > config.pageSize + 5 {
+				viewCache.removeAll()
 				cellItems = cellItems.takingSuffix(config.pageSize)
 				manager.setScrollPosition(to: .init(edge: .bottom))
 			}
@@ -247,13 +238,6 @@ extension ChatViewManager {
 				UIApplication.shared.endEditing()
 			}
 			scrollManager.layoutCache.layout.invalidateLayout()
-			if let newValue, newValue.id == scrollManager.visibleViewIDs.first || newValue.id == scrollManager.visibleViewIDs.last {
-				DispatchQueue.delay {
-					MainActor.assumeIsolated {
-						self.scrollManager.scroll(to: newValue.id+MsgCellFooter.typeName)
-					}
-				}
-			}
 		}
 	}
 }
@@ -263,9 +247,6 @@ extension ChatViewManager {
 	func onViewAppear() async {
 		if await scrollManager.updatingState.hasViewLoaded {
 			try? await viewUpdater.reloadConversation()
-			await MainActor.run {
-				ColorStorage.shared.initialize(conversation)
-			}
 		} else {
 			await datasource.setupNotificationObserver()
 			await scrollManager.setHasViewUpdated()

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct FilesError<Reason>: Error {
+public struct FilesError<Reason: Sendable>: Error {
     public var path: String
     public var reason: Reason
 
@@ -26,7 +26,7 @@ extension FilesError: CustomStringConvertible {
     }
 }
 
-public enum LocationErrorReason {
+public enum LocationErrorReason: Sendable{
     case missing
     case emptyFilePath
     case cannotRenameRoot
@@ -40,7 +40,7 @@ public enum LocationErrorReason {
     )
 }
 
-public enum WriteErrorReason {
+public enum WriteErrorReason: Sendable{
     case emptyPath
     case folderCreationFailed(Error)
     case fileCreationFailed
@@ -48,7 +48,7 @@ public enum WriteErrorReason {
     case stringEncodingFailed(String)
 }
 
-public enum ReadErrorReason {
+public enum ReadErrorReason: Sendable{
     case readFailed(Error)
     case stringDecodingFailed
     case notAnInt(String)

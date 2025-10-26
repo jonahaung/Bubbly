@@ -24,7 +24,7 @@ struct MsgCellContentGesturesView<Content: View>: View {
 	var body: some View {
 		msgCellContent()
 			.offset(x: draggedOffset)
-			.gesture(dragGesture, isEnabled: !viewModel.isSender)
+			.gesture(dragGesture)
 	}
 }
 

@@ -45,6 +45,14 @@ final class ContactsViewModel: ErrorPresenter {
 	@MainActor private func setLoading(_ isLoading: Bool) {
 		self.loading = isLoading
 	}
+	@concurrent func fetch() async {
+		do {
+			let contacts = try await Store.shared.contactStore.fetchAll()
+			await createSections(from: contacts)
+		} catch {
+			Log(error)
+		}
+	}
 }
 
 public extension Contact {

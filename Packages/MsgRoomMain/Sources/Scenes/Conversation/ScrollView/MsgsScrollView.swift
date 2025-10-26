@@ -56,9 +56,12 @@ struct MsgsScrollView: View {
 			.scrollTargetLayout()
 		}
 		.namespace(namespace)
-		.scrollDismissesKeyboard(.interactively)
+		.transaction {
+			$0.disablesAnimations = true
+		}
+		.scrollDismissesKeyboard(.immediately)
 		.defaultScrollAnchor(.bottom, for: .initialOffset)
-		.defaultScrollAnchor(.bottom, for: .sizeChanges)
+		.defaultScrollAnchor(manager.scrollManager.scrolledPosition == .atBottom ? .bottom : .top, for: .sizeChanges)
 		.scrollPosition(.constant(manager.scrollManager.scrollPosition))
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.scrollManager.handleScrollPhaseChange(oldPhase, newPhase, context)

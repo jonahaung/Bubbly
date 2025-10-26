@@ -28,7 +28,7 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 					do {
 						let conversation = try await ConversationRepo.getOrCreate(
 							for: data.conID, refetch: false)
-						try await Socket.shared
+						await Socket.shared
 							.send(data, conversation: conversation)
 					} catch {
 						Log(error)

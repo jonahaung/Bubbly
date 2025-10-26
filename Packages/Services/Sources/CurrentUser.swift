@@ -55,12 +55,14 @@ public final class CurrentUser {
 			.setData(user.dictionary, merge: true)
 	}
 
-	private func getRemoteUser() async throws -> Contact {
-		try await Firestore
+	private func getRemoteUser() async throws -> Contact? {
+		let query = Firestore
 			.firestore()
 			.collection("users")
-			.document(user.uid)
-			.getDocument(as: Contact.self)
+			.whereField("uid", isEqualTo: user.uid)
+
+		let model: Contact? = try await FirestoreRepo.fetchSingle(query: query)
+		return model
 	}
 }
 

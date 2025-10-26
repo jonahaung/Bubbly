@@ -29,9 +29,9 @@ protocol ChatScrollManagerDelegate: AnyObject {
 @Observable
 final class ChatScrollManager: ErrorPresenter {
 
-	private(set) var scrollPosition = ScrollPosition(idType: String.self)
+	private(set) var scrollPosition = ScrollPosition.userDefined
 	private(set) var isHidden = true
-	@ObservationIgnored private(set) var updatingState = ScrollViewUpdateingState.initial
+	private(set) var updatingState = ScrollViewUpdateingState.initial
 	@ObservationIgnored private(set) var isFirstResponder = false
 	@ObservationIgnored private(set) var visibleViewIDs = [String]()
 	private(set) var scrolledPosition = ScrolledPosition.atBottom
@@ -46,7 +46,7 @@ final class ChatScrollManager: ErrorPresenter {
 		layoutCache = .init()
 		geometryPublisher
 			.removeDuplicates()
-			.debounce(for: 0.3, scheduler: RunLoop.current)
+			.debounce(for: 0.3, scheduler: RunLoop.main)
 			.sink { [weak self] value in
 				guard let self else { return }
 				MainActor.assumeIsolated {
@@ -99,14 +99,12 @@ extension ChatScrollManager {
 		_ context: ScrollPhaseChangeContext
 	) {
 		scrollPhase = newValue
+
 	}
 	func getScrollGeometry() -> ScrollGeometry {
 		scrollGeometry
 	}
 	func handleScrollGeometryChange(_ oldValue: ScrollGeometry, _ newValue: ScrollGeometry) {
-		guard oldValue != newValue else { return }
-		scrollGeometry = newValue
-		scrolledPosition = newValue.scrolledPosition
 		geometryPublisher.send(newValue)
 		if updatingState.isUpdating {
 			guard oldValue.contentSize.height != newValue.contentSize.height else {
@@ -143,7 +141,6 @@ extension ChatScrollManager {
 					updateLoadingState(.notLoading)
 				}
 			case .resetting:
-				scrollPosition.scrollTo(y: newValue.bottomMostOffset)
 				updateLoadingState(.notLoading)
 			default:
 				break
@@ -203,6 +200,7 @@ extension ChatScrollManager {
 		}
 	}
 	func scroll(to item: ScrollPositionItem, completion: (@Sendable () -> Void)? = nil) {
+
 		switch item {
 		case .offset(let yPosition, let animated, let duration):
 			performScroll(animated: animated, duration: duration) {
@@ -262,6 +260,8 @@ extension ChatScrollManager {
 		updatingState = .notLoading
 	}
 	private func endScrollViewUpdates(for newValue: ScrollGeometry) {
+		scrollGeometry = newValue
+		scrolledPosition = newValue.scrolledPosition
 		updateLoadingState(.notLoading)
 		delegate?.scrollManager(self, finalizeScrollViewUpdate: scrolledPosition)
 	}

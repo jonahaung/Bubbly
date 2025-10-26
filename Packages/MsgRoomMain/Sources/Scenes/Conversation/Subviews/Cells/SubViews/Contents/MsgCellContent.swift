@@ -11,20 +11,20 @@ import Database
 import Services
 import Core
 
-@MainActor
-public final class ColorStorage {
-
-	static let shared = ColorStorage()
-
-	var incoming: Color = .blue
-	var outgoing: Color = .blue
-
-
-	func initialize(_ conversation: any ConversationRepresentable) {
-		incoming = conversation.theme.incomingBubbleColor
-		outgoing = conversation.theme.outgoingBubbleColor
-	}
-}
+//@MainActor
+//public final class ColorStorage {
+//
+//	static let shared = ColorStorage()
+//
+//	var incoming: Color = .blue
+//	var outgoing: Color = .blue
+//
+//
+//	func initialize(_ conversation: any ConversationRepresentable) {
+//		incoming = conversation.theme.incomingBubbleColor
+//		outgoing = conversation.theme.outgoingBubbleColor
+//	}
+//}
 
 struct MsgCellContent: View {
 	let bubbleCorner: BubbleCorner
@@ -63,6 +63,6 @@ struct MsgCellContent: View {
 		bubbleCorner.roundedRectange(cornerRadius: conversation!.theme.bubbleCornorRadius)
 	}
 	private var color: Color {
-		viewModel.isSender ? ColorStorage.shared.outgoing : ColorStorage.shared.incoming
+		return (viewModel.isSender ? conversation?.theme.outgoingBubbleColor : conversation?.theme.incomingBubbleColor) ?? .clear
 	}
 }

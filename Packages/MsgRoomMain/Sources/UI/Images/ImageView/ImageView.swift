@@ -34,7 +34,7 @@ public struct ImageView: View {
 				if manager.isLocallyCached() {
 					progressView
 						.task {
-							manager.image = manager.item.image()
+							manager.image = manager.item.thumbnailImage()
 						}
 				} else {
 					ZStack {

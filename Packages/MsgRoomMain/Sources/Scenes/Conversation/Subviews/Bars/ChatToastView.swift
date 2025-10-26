@@ -15,8 +15,8 @@ struct ChatToastView: View {
 
 	public var body: some View {
 		HStack(alignment: .bottom) {
-			Text(manager.scrollManager.scrolledPosition.description)
-				.font(.caption.bold())
+//			Text(manager.scrollManager.scrolledPosition.description)
+//				.font(.caption.bold())
 //			if let geometry = manager.scrollManager.scrollGeometry {
 //				Text("\(geometry.debugDescription)")
 //					.font(.caption.bold())

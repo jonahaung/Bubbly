@@ -20,12 +20,13 @@ public extension DispatchQueue {
 public extension DispatchQueue {
 	static func delay(
 		_ time: TimeInterval = 0.2,
-		_ completion: @escaping () -> Void
+		_ completion: @escaping @MainActor @Sendable () -> Void
 	) {
-		Self.global(qos: .background).asyncAfter(deadline: .now() + time) {
-			DispatchQueue.main.async {
+		Task.detached(priority: .background) {
+			try? await Task.sleep(nanoseconds: UInt64(time * 1_000_000_000))
+			await MainActor.run {
 				completion()
 			}
-        }
-    }
+		}
+	}
 }

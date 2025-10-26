@@ -11,7 +11,7 @@ import XUI
 import Database
 import ImageLoader
 
-extension Contact: ImageViewItem {
+extension Contact: @retroactive ImageViewItem {
 	public var remoteURL: URL? {
 		.init(string: photoURL) ?? DemoImages.demoPhotosURLs.random()!
 	}
@@ -31,7 +31,7 @@ extension Contact: ImageViewItem {
 
 extension AI: @retroactive ImageViewItem {
 	public var remoteURL: URL? {
-		.init(string: photoURL ?? "") ?? DemoImages.demoPhotosURLs.random()!
+		.init(string: photoURL) ?? DemoImages.demoPhotosURLs.random()!
 	}
 
 	public var subFolderName: String? {
@@ -44,7 +44,7 @@ extension AI: @retroactive ImageViewItem {
 		.png
 	}
 }
-extension Database.Group: ImageViewItem {
+extension Database.Group: @retroactive ImageViewItem {
 	public var remoteURL: URL? {
 		.init(string: photoURL ?? "") ?? DemoImages.demoPhotosURLs.random()!
 	}
@@ -59,7 +59,7 @@ extension Database.Group: ImageViewItem {
 		.png
 	}
 }
-extension Message: ImageViewItem {
+extension Message: @retroactive ImageViewItem {
 	public var remoteURL: URL? {
 		guard let string = attachment?.url else { return nil }
 		return .init(string: string)
