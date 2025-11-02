@@ -29,7 +29,7 @@ public final class PGroup {
 		members: [String],
 		createdBy: String,
 		theme: ConversationTheme = ConversationTheme(),
-		seenMembers: [SeenMember] = [],
+		seenMembers: [SeenMember],
 		lastMsgID: String?
 	) {
 		self.uid = uid
@@ -57,8 +57,31 @@ extension PGroup: CollectionDocument, UIdentifiable {
 		if theme != group.theme {
 			theme = group.theme
 		}
-		if lastMsgID != group.lastMsgID {
-			lastMsgID = lastMsgID
+		if group.lastMsgID != nil && lastMsgID != group.lastMsgID {
+			lastMsgID = group.lastMsgID
+		}
+		if seenMembers != group.seenMembers {
+			seenMembers = group.seenMembers ?? []
+		}
+	}
+	public func update(with conversation: any ConversationRepresentable) {
+		if name != conversation.name {
+			name = conversation.name
+		}
+		if photoURL != conversation.photoURL {
+			photoURL = conversation.photoURL
+		}
+		if members.sorted() != conversation.members.sorted() {
+			members = conversation.members
+		}
+		if theme != conversation.theme {
+			theme = conversation.theme
+		}
+		if lastMsgID != conversation.lastMsgID {
+			lastMsgID = conversation.lastMsgID
+		}
+		if seenMembers != conversation.seenMembers {
+			seenMembers = conversation.seenMembers
 		}
 	}
 }
@@ -73,7 +96,9 @@ extension PGroup: SendableDocument {
 			createdDate: snapshot.createdDate.value,
 			photoURL: snapshot.photoURL ?? "",
 			members: snapshot.members,
-			createdBy: snapshot.createdBy, lastMsgID: snapshot.lastMsgID)
+			createdBy: snapshot.createdBy,
+			seenMembers: snapshot.seenMembers ?? [],
+			lastMsgID: snapshot.lastMsgID)
 	}
 
 	public func toSendable() -> SendableType {
@@ -84,6 +109,8 @@ extension PGroup: SendableDocument {
 			photoURL: photoURL,
 			members: members,
 			createdBy: createdBy,
-			theme: theme, lastMsgID: lastMsgID)
+			theme: theme,
+			seenMembers: seenMembers,
+			lastMsgID: lastMsgID)
 	}
 }

@@ -10,25 +10,26 @@ import Database
 import Core
 import Services
 import XUI
+import FirebaseAuth
 
 private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
-	private let currentUser: CurrentUser
-	private let contactStore = ContactStore.shared
 
-	init(user: Contact) {
-		currentUser = .init(user)
+	@LazyState private var currentUser: CurrentUser
+
+	init(_ user: User) {
+		_currentUser = .init(wrappedValue: .init(user))
 	}
 
 	func body(content: Content) -> some View {
 		content
-			.environment(currentUser)
-			.environment(contactStore)
+			.environment(\.currentUser, currentUser.model)
+			.environment(ContactStore.shared)
 			.environment(\.sendChatRoomAction) { data in
-				Task.detached {
+				Task {
 					do {
 						let conversation = try await ConversationRepo.getOrCreate(
 							for: data.conID, refetch: false)
-						await Socket.shared
+						try await Socket.shared
 							.send(data, conversation: conversation)
 					} catch {
 						Log(error)
@@ -36,19 +37,21 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 				}
 			}
 			.task {
-				try? await currentUser.updateIfNeeded()
-				try? await contactStore.syncGroups()
+				do {
+					currentUser.start()
+					try await ContactStore.shared.fetchData()
+				} catch {
+					Log(error)
+				}
 			}
 	}
 }
 
 public extension View {
-	func msgRoomEntryPoint(user: Contact) -> some View {
+	func msgRoomEntryPoint(_ user: User) -> some View {
 		ModifiedContent(
 			content: self,
-			modifier: MsgRoomEntryPointModifier(
-				user: user
-			)
+			modifier: MsgRoomEntryPointModifier(user)
 		)
 	}
 }

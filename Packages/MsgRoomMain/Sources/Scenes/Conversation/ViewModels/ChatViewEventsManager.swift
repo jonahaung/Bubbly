@@ -15,74 +15,67 @@ import XUI
 @Observable
 final class ChatViewEventsManager {
 
-    var focusedFrame: ChatOverlayView.Item?
-    private(set) var toastItem: ChatToastItem = .none
-    private(set) var selectedMsg: SelectedMsg?
-    private(set) var typingStatusText: String?
-    private(set) var floatingDateString: String?
-    private(set) var showContactInfo: Bool
+	var overlayItem: ChatOverlayView.Item?
+	private(set) var toastItem: ChatToastItem = .none
+	private(set) var selectedMsg: SelectedMsg?
+	private(set) var typingStatusText: String?
+	private(set) var floatingDateString: String?
+	private(set) var showContactInfo: Bool
 	var canShowScrollButton = false
+	@ObservationIgnored private let dateCache = ExpiringCache<String>()
 
-    init(config: ConversationInitializer.Configuration) {
-        showContactInfo = !config.canPaginate
-    }
+	init(config: ConversationInitializer.Configuration) {
+		showContactInfo = !config.canPaginate
+	}
 
-    func updateToast(_ item: ChatToastItem) {
-        playHaptic(style: .rigid, intensity: 0.7)
-        toastItem = item
-    }
+	func updateToast(_ item: ChatToastItem) {
+		toastItem = item
+	}
 
-    func updateFocusedFrame(_ item: ChatOverlayView.Item?) {
-        playHaptic(style: .rigid, intensity: 0.7)
+	func updateFocusedFrame(_ item: ChatOverlayView.Item?) {
 		withTransaction(.withoutAnimation) {
-			focusedFrame = item
+			overlayItem = item
 		}
-    }
+	}
 
-    func updateShowContactInfo(_ show: Bool) {
-        showContactInfo = show
-    }
+	func updateShowContactInfo(_ show: Bool) {
+		showContactInfo = show
+	}
 
-	func updateSelectedMsg(_ item: SelectedMsg?, animated: Bool) {
-		if item != nil {
-			playHaptic(style: .rigid, intensity: 0.7)
-		}
-		var transaction = animated ? Transaction.withAnimation : .withoutAnimation
-		transaction.animation = .interactiveSpring(response: 0.2, dampingFraction: 0.7, blendDuration: 0.25)
-		withTransaction(transaction) {
-			selectedMsg = item
-		}
-    }
+	func updateSelectedMsg(_ item: SelectedMsg?) {
+		selectedMsg = item
+	}
 
-    func updateTypingStatus(_ status: AnyMsgData.TypingStatusPayload) {
-        playHaptic(style: .light, intensity: 0.8)
-        if status.isTyping, let contact = ContactStore.shared.contact(for: status.senderID) {
-            typingStatusText = "\(contact.name) is typing..."
-        } else {
+	func updateTypingStatus(_ status: AnyMsgData.TypingStatusPayload) {
+		if status.isTyping, let contact = ContactStore.shared.contact(for: status.senderID) {
+			typingStatusText = "\(contact.name) is typing..."
+		} else {
 			typingStatusText = nil
-        }
-    }
+		}
+	}
 
-    func updateFloatingDate(_ date: Date) {
-        floatingDateString = Self.formattedFloatingDate(from: date)
-    }
+	func updateFloatingDate(_ date: Date) {
+		floatingDateString = formattedFloatingDate(from: date)
+	}
 
-    private func playHaptic(style: UIImpactFeedbackGenerator.FeedbackStyle, intensity: CGFloat) {
-        Haptics.play(style, intensity)
-    }
-
-    private static func formattedFloatingDate(from date: Date) -> String {
-        switch true {
-        case date.isInToday:
-            return date.formatted(.dateTime.hour().minute())
-        case date.isInYesterday:
-            return "Yesterday " + date.formatted(.dateTime.hour().minute())
-        case date.isInThisWeek:
-            return date.formatted(.dateTime.weekday(.short).hour().minute())
-        case date.isInThisMonth:
-            return date.formatted(.dateTime.day().hour().minute())
-        default:
-            return date.formatted(.dateTime.day().month(.abbreviated).hour().minute())
-        }
-    }
+	private func formattedFloatingDate(from date: Date) -> String {
+		if let cached = dateCache.value(forKey: date) {
+			return cached
+		}
+		let string: String
+		switch true {
+		case date.isInToday:
+			string = date.formatted(.dateTime.hour().minute())
+		case date.isInYesterday:
+			string = "Yesterday " + date.formatted(.dateTime.hour().minute())
+		case date.isInThisWeek:
+			string = date.formatted(.dateTime.weekday(.short).hour().minute())
+		case date.isInThisMonth:
+			string = date.formatted(.dateTime.day().hour().minute())
+		default:
+			string = date.formatted(.dateTime.day().month(.abbreviated).hour().minute())
+		}
+		dateCache.setValue(string, forKey: date)
+		return string
+	}
 }

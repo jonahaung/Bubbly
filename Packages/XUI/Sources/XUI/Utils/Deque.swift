@@ -7,6 +7,9 @@
 
 import Foundation
 
+/// A high-performance FIFO queue backed by a circular buffer.
+/// Enqueue adds elements to the back; dequeue removes from the front.
+@frozen
 public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
 
 	// MARK: - Storage
@@ -17,17 +20,33 @@ public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
 
 	// MARK: - Initialization
 
+	/// Creates an empty queue with an optional initial capacity.
 	public init(_ capacity: Int = 10) {
 		array = Array(repeating: nil, count: Swift.max(1, capacity))
 	}
 
+	/// Creates a queue from a sequence of elements.
+	public init<S: Sequence>(_ sequence: S) where S.Element == Element {
+		let elements = Array(sequence)
+		array = Array(repeating: nil, count: Swift.max(1, elements.count))
+		for e in elements { enqueue(e) }
+	}
+
+	// MARK: - Properties
+
 	public var isEmpty: Bool { count == 0 }
 	public var isFull: Bool { count == array.count }
-
 	public var capacity: Int { array.count }
 	public var utilization: Double { Double(count) / Double(capacity) }
 
-	// MARK: - Indexing (for Collection)
+	public var front: Element? { peek() }
+	public var back: Element? {
+		guard !isEmpty else { return nil }
+		let tailIndex = (head + count - 1) % array.count
+		return array[tailIndex]
+	}
+
+	// MARK: - Indexing (Collection)
 
 	public var startIndex: Int { 0 }
 	public var endIndex: Int { count }
@@ -35,40 +54,41 @@ public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
 	public func index(after i: Int) -> Int { i + 1 }
 
 	public subscript(position: Int) -> Element {
+		precondition(position >= 0 && position < count, "Index out of range")
 		let index = (head + position) % array.count
-		return array[index]! // Valid because position < count
+		return array[index]! // Safe after precondition check
 	}
 
-	// MARK: - Printing
+	// MARK: - Description
 
 	public var description: String {
-		return "[" + self.map({ "\($0)" }).joined(separator: ", ") + "]"
+		"[" + self.map { "\($0)" }.joined(separator: ", ") + "]"
 	}
 
-	// MARK: - Helper (circular movement)
+	// MARK: - Internal Helpers
 
-	@inline(__always) private func nextIndex(_ i: Int) -> Int {
-		(i + 1) % array.count
-	}
+	@inline(__always)
+	private func nextIndex(_ i: Int) -> Int { (i + 1) % array.count }
 
-	@inline(__always) private func prevIndex(_ i: Int) -> Int {
-		(i - 1 + array.count) % array.count
-	}
+	// MARK: - Resizing
 
-	// Resize buffer when full
 	private mutating func resize() {
 		let newSize = array.count * 2
 		var newArray = [Element?](repeating: nil, count: newSize)
 
-		for i in 0..<count {
-			newArray[i] = self[i]
+		let rightCount = Swift.min(array.count - head, count)
+		newArray[0..<rightCount] = array[head..<head + rightCount]
+		if count > rightCount {
+			newArray[rightCount..<count] = array[0..<count - rightCount]
 		}
+
 		head = 0
 		array = newArray
 	}
 
 	// MARK: - Core Operations
 
+	/// Adds an element to the back of the queue.
 	public mutating func enqueue(_ element: Element) {
 		if isFull { resize() }
 		let tailIndex = (head + count) % array.count
@@ -76,13 +96,7 @@ public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
 		count += 1
 	}
 
-	public mutating func enqueueFront(_ element: Element) {
-		if isFull { resize() }
-		head = prevIndex(head)
-		array[head] = element
-		count += 1
-	}
-
+	/// Removes and returns the element at the front of the queue.
 	@discardableResult
 	public mutating func dequeue() -> Element? {
 		guard !isEmpty else { return nil }
@@ -93,31 +107,19 @@ public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
 		return element
 	}
 
-	@discardableResult
-	public mutating func dequeueBack() -> Element? {
-		guard !isEmpty else { return nil }
-		let tailIndex = (head + count - 1) % array.count
-		let element = array[tailIndex]
-		array[tailIndex] = nil
-		count -= 1
-		return element
-	}
-
-	// MARK: - Peek
-
-	public func peekFront() -> Element? { isEmpty ? nil : array[head] }
-
-	public func peekBack() -> Element? {
-		isEmpty ? nil : array[(head + count - 1) % array.count]
+	/// Returns the front element without removing it.
+	public func peek() -> Element? {
+		isEmpty ? nil : array[head]
 	}
 
 	// MARK: - Utility
 
+	/// Removes all elements from the queue.
 	public mutating func removeAll(keepingCapacity: Bool = false) {
 		if keepingCapacity {
 			array = Array(repeating: nil, count: array.count)
 		} else {
-			array = Array(repeating: nil, count: 1)
+			array = Array(repeating: nil, count: Swift.max(1, array.count / 2))
 		}
 		head = 0
 		count = 0

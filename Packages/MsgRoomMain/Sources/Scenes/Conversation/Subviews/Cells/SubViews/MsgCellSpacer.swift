@@ -9,9 +9,7 @@ import SwiftUI
 import Core
 
 struct MsgCellSpacer: View {
-
 	let id: String
-
 	var body: some View {
 		Color.primary.hidden()
 			.frame(height: ChatLayoutConstants.Cell.sectionSpacing)

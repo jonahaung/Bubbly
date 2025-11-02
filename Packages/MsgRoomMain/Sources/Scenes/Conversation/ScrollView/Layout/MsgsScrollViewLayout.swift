@@ -32,15 +32,15 @@ struct MsgsScrollViewLayout: Layout {
 
 	// MARK: - Properties
 	private let config: MsgsScrollViewLayoutConfiguration
-	private let cacheContainer: ChatCache
+	private let layoutCache: MsgsScrollViewLayoutCache
 
 	// MARK: - Initialization
 	init(
 		config: MsgsScrollViewLayoutConfiguration,
-		cacheContainer: ChatCache
+		layoutCache: MsgsScrollViewLayoutCache
 	) {
 		self.config = config
-		self.cacheContainer = cacheContainer
+		self.layoutCache = layoutCache
 	}
 }
 
@@ -58,7 +58,7 @@ extension MsgsScrollViewLayout {
 	) -> CGSize {
 
 		guard config.containerWidth >= LayoutConstants.minimumContainerWidth else {
-			return .zeroSize
+			return .zero
 		}
 
 		guard !cache.layouts.isEmpty else {
@@ -112,14 +112,14 @@ private extension MsgsScrollViewLayout {
 		let newCache = Cache(
 			totalHeight: totalHeight,
 			layouts: layouts,
-			boundsWidth:  config.boundsWidth
+			boundsWidth: config.boundsWidth
 		)
-		cacheContainer.layout.setCache(newCache)
+		layoutCache.setCache(newCache)
 		return newCache
 	}
 
 	func getValidCachedLayout(for subviews: Subviews) -> Cache? {
-		guard let cachedLayout = cacheContainer.layout.cache(for:  config.boundsWidth),
+		guard let cachedLayout = layoutCache.cache(for: config.boundsWidth),
 			  cachedLayout.layouts.count == subviews.count else {
 			return nil
 		}
@@ -129,10 +129,9 @@ private extension MsgsScrollViewLayout {
 	func calculateCellLayouts(for subviews: Subviews) -> ([CellLayout], CGFloat) {
 		var layouts: [CellLayout] = []
 		layouts.reserveCapacity(subviews.count)
-		let subviewValues = subviews.map{ ($0, $0[MsgLayoutValueKey.self]) }
-		let subviewValueSizes = subviewValues.map{ ($0.0, $0.1, getOrCalculateSize(for: $0.1.uid, subview: $0.0)) }
+		let subviewValues = subviews.map { ($0, $0[MsgLayoutValueKey.self]) }
+		let subviewValueSizes = subviewValues.map { ($0.0, $0.1, getOrCalculateSize(for: $0.1.uid, subview: $0.0)) }
 		let totalheight = calculateTotalHeight(sizes: subviewValueSizes.map(\.2))
-
 		var currentY = config.contentInsets.top
 		for (subview, value, size) in subviewValueSizes {
 			let layout = calculateCellLayout(for: subview, value: value, size: size, currentY: currentY)
@@ -152,19 +151,19 @@ private extension MsgsScrollViewLayout {
 private extension MsgsScrollViewLayout {
 
 	func getOrCalculateSize(for messageID: String, subview: LayoutSubview) -> CGSize {
-		if let cachedSize = cacheContainer.layout.size(for: messageID) {
+		if let cachedSize = layoutCache.size(for: messageID) {
 			return cachedSize
 		}
 
 		let calculatedSize = calculateOptimalSize(for: subview)
-		cacheContainer.layout.setSize(calculatedSize, for: messageID)
+		layoutCache.setSize(calculatedSize, for: messageID)
 		return calculatedSize
 	}
 
 	func calculateOptimalSize(for subview: LayoutSubview) -> CGSize {
 		let targetWidth =  config.containerWidth * LayoutConstants.bubbleWidthRatio
 		let proposedViewSize = ProposedViewSize(width: targetWidth, height: nil)
-		let sizeThatFit = subview.dimensions(in: proposedViewSize)
+		let sizeThatFit = subview.sizeThatFits(proposedViewSize)
 		return .init(width: sizeThatFit.width, height: sizeThatFit.height)
 	}
 }
@@ -196,14 +195,7 @@ private extension MsgsScrollViewLayout {
 	}
 }
 
-// MARK: - Height Calculation
 private extension MsgsScrollViewLayout {
-
-//	func calculateTotalHeight(layouts: [CellLayout], subviewCount: Int) -> CGFloat {
-//		let contentHeight = layouts.reduce(0) { $0 + $1.size.height }
-//		let totalSpacing =  config.spacing * CGFloat(max(0, subviewCount - 1))
-//		return  max(config.minSize.height, config.contentInsets.vertical + contentHeight + totalSpacing)
-//	}
 
 	func calculateTotalHeight(sizes: [CGSize]) -> CGFloat {
 		let contentHeight = sizes.reduce(0) { $0 + $1.height }
@@ -212,7 +204,6 @@ private extension MsgsScrollViewLayout {
 	}
 }
 
-// MARK: - Subview Placement
 private extension MsgsScrollViewLayout {
 
 	func placeSubview(_ subview: LayoutSubview, with layout: CellLayout) {
@@ -224,7 +215,6 @@ private extension MsgsScrollViewLayout {
 	}
 }
 
-// MARK: - Cache Extension
 extension MsgsScrollViewLayout.Cache {
 
 	static func empty(boundsWidth: CGFloat, contentInsets: EdgeInsets) -> Self {
@@ -234,9 +224,4 @@ extension MsgsScrollViewLayout.Cache {
 			boundsWidth: boundsWidth
 		)
 	}
-}
-
-// MARK: - CGSize Extension
-private extension CGSize {
-	static var zeroSize: CGSize { .init(width: 0, height: 0) }
 }

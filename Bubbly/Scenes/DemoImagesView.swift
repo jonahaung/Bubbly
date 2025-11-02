@@ -21,10 +21,10 @@ struct DemoImagesView: View {
 						ComposedLayout(topColumns: 1, bottomColumns: 2) {
 							ForEach(
 								urls.enumerated,
-								id: \.0
-							) { i, url in
+id: \.0
+							) { index, url in
 								LinkPreviewView(url)
-									.id(i)
+.id(index)
 							}
 						}
 						.cornerRadius(12)

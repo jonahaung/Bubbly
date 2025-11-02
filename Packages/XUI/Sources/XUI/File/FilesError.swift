@@ -26,7 +26,7 @@ extension FilesError: CustomStringConvertible {
     }
 }
 
-public enum LocationErrorReason: Sendable{
+public enum LocationErrorReason: Sendable {
     case missing
     case emptyFilePath
     case cannotRenameRoot
@@ -40,7 +40,7 @@ public enum LocationErrorReason: Sendable{
     )
 }
 
-public enum WriteErrorReason: Sendable{
+public enum WriteErrorReason: Sendable {
     case emptyPath
     case folderCreationFailed(Error)
     case fileCreationFailed
@@ -48,7 +48,7 @@ public enum WriteErrorReason: Sendable{
     case stringEncodingFailed(String)
 }
 
-public enum ReadErrorReason: Sendable{
+public enum ReadErrorReason: Sendable {
     case readFailed(Error)
     case stringDecodingFailed
     case notAnInt(String)

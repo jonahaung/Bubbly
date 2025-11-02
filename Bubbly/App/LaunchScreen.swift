@@ -9,39 +9,47 @@ import SwiftUI
 import Services
 import XUI
 import Core
+import FirebaseMessaging
 
 struct LaunchScreen: View {
 
 	@Environment(AuthService.self) private var authService
-	@State private var deviceToken: String?
-	private let cancelBag = CancelBag()
+	@State private var tokenObserver: NSObjectProtocol?
 
 	var body: some View {
 		ZStack {
 			VStack {
-				if deviceToken != nil {
-					SystemImage(.sparkle, 40)
-						.transition(.scale.animation(.default))
-						.onAppear {
-							authService.observeAuthState()
-						}
-				} else {
-					ProgressView().controlSize(.small)
-						.onAppear {
-							observeDeviceToken()
-						}
+				SystemImage(.sparkle, 40)
+					.transition(.scale.animation(.default))
+				Button("Start") {
+					GroupAppStorage.shared.save(value: "", for: .device(.deviceToken))
+					NotificationCenter.default.post(name: .receiveDeviceToken, object: "")
+				}
+			}
+			.onAppear(perform: observeDeviceToken)
+			.onDisappear(perform: removeDeviceTokenObserver)
+		}
+	}
+
+	private func observeDeviceToken() {
+		tokenObserver = NotificationCenter.default.addObserver(
+			forName: .receiveDeviceToken,
+			object: nil,
+			queue: .main
+		) { notification in
+			MainActor.assumeIsolated {
+				if notification.object is String {
+					authService.observeAuthState()
 				}
 			}
 		}
 	}
 
-	private func observeDeviceToken() {
-		deviceToken = "Nil"
-		NotificationCenter.default.publisher(for: .receiveDeviceToken)
-			.receive(on: RunLoop.main)
-			.sink { notification in
-				deviceToken = notification.object as? String
-			}
-			.store(in: cancelBag)
+	private func removeDeviceTokenObserver() {
+		if let observer = tokenObserver {
+			NotificationCenter.default.removeObserver(observer)
+			tokenObserver = nil
+			Log("🧹 Removed device token observer")
+		}
 	}
 }

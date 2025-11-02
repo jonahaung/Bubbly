@@ -13,26 +13,20 @@ import XUI
 
 struct MainTabView: View {
 
-	@Bindable var router: Router
+	@Environment(Router.self) private var router
 
 	var body: some View {
-		TabView(selection: $router.tab) {
-			ForEach($router.navRouters, id: \.id) { navRuter in
-				NavigationStack(path: navRuter.navPath) {
-					tabDestination(for: navRuter.id)
-						.equatable(by: navRuter.id)
-						.navigationDestination(for: NavPath.self) { path in
-							LazyView(navigationDestination(for: path))
-								.equatable(by: path)
-						}
+		@Bindable var bindableRouter = self.router
+		TabView(selection: $bindableRouter.tab) {
+			ForEach(router.navRouters, id: \.id) { navRouter in
+				MainNavView(navRouter: navRouter) {
+					tabDestination(for: navRouter.id)
 				}
 				.tabItem {
-					Label(navRuter.id.rawValue, systemSymbol: .house)
+					Label(navRouter.id.rawValue, systemSymbol: .house)
 				}
 			}
 		}
-		.equatable(by: router.tab)
-		.environment(router)
 		.toastPresentable()
 	}
 
@@ -46,27 +40,6 @@ struct MainTabView: View {
 			ContactsScene()
 		case .html:
 			SettingsScene()
-		}
-	}
-	@ViewBuilder private func navigationDestination(for navPath: NavPath) -> some View {
-		switch navPath {
-		case .conversationDetails(let conversation):
-			switch conversation.kind {
-			case .contact(let contact):
-				ContactSettingsScene(contact)
-			case .group(let group):
-				GroupConversationSettingsScene(group)
-			case .system(let ai):
-				Text(ai.preetyPrinted)
-			}
-		case .conversation(let prefetchedData):
-			ConversationScene(prefetchedData)
-		case .contactDetails(let contact):
-			ContactDetailsScene(contact: contact)
-		case .currentUserDetails:
-			CurrentUserProfileView()
-		case .cachedView(let id):
-			AnyViewCache.shared.view(for: id)?.eraseToAnyView()
 		}
 	}
 }

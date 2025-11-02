@@ -6,23 +6,21 @@
 //
 
 import SwiftUI
+import XUI
 import Services
 import FirebaseAuth
-import SwiftData
 
 @main
 struct BubblyApp: App {
-
 	@UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-
 	var body: some Scene {
 		WindowGroup {
 			LandingView()
+				.environment(appDelegate.router)
 				.environment(appDelegate.authService)
 				.onOpenURL { url in
-					// Forward to Firebase Auth if it can handle the URL (e.g., OAuth, phone auth, etc.)
+					Log(url)
 					_ = Auth.auth().canHandle(url)
-					// If you need additional app-specific URL handling, do it here.
 				}
 		}
 	}

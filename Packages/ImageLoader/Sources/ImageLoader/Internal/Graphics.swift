@@ -373,14 +373,7 @@ enum Screen {
 	static let scale: CGFloat = 1
 #endif
 }
-
-#if os(macOS)
-typealias Color = NSColor
-#else
-typealias Color = UIColor
-#endif
-
-extension Color {
+public extension UIColor {
 	/// Returns a hex representation of the color, e.g. "#FFFFAA".
 	var hex: String {
 		var (r, g, b, a) = (CGFloat(0), CGFloat(0), CGFloat(0), CGFloat(0))

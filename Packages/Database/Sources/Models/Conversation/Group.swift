@@ -8,7 +8,6 @@
 import Foundation
 
 public struct Group: Codable, Sendable, Hashable, UIdentifiable {
-
 	public var uid: String
 	public var name: String
 	public var createdDate: ServerTime
@@ -16,8 +15,8 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
 	public var members: [String]
 	public var createdBy: String
 	public var theme: ConversationTheme = .init()
-	public var seenMembers: [SeenMember]? = nil
-	public var lastMsgID: String? = nil
+	public var seenMembers: [SeenMember]?
+	public var lastMsgID: String?
 
 	public init(
 		uid: String,
@@ -26,9 +25,9 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
 		photoURL: String?,
 		members: [String],
 		createdBy: String,
-		theme: ConversationTheme = .init(),
-		seenMembers: [SeenMember] = [],
-		lastMsgID: String? = nil
+		theme: ConversationTheme,
+		seenMembers: [SeenMember],
+		lastMsgID: String?
 	) {
 		self.uid = uid
 		self.name = name
@@ -39,5 +38,16 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
 		self.theme = theme
 		self.seenMembers = seenMembers
 		self.lastMsgID = lastMsgID
+	}
+
+	enum CodingKeys: String, CodingKey {
+		case uid
+		case name
+		case createdDate
+		case photoURL
+		case members
+		case createdBy
+		case theme
+		case seenMembers
 	}
 }

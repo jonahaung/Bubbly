@@ -19,6 +19,12 @@ final class ChatInputBarManager {
 	var text: String = ""
 	var imagePicker = ImagePickerViewModel()
 	let msgCreater: MsgCreator
+	var languageManaager: LanguageManager = .init()
+
+	func applyProgrammaticUpdate(_ newText: String) {
+		guard newText != text else { return }
+		text = newText
+	}
 
 	init() throws {
 		msgCreater = try .init(currentUserId: currentUserId)
@@ -29,13 +35,51 @@ final class ChatInputBarManager {
 	}
 
 	func send(conversation: any ConversationRepresentable) {
-		if imagePicker.processedPhotos.isEmpty == false {
-			sendImages(conversation: conversation)
-		} else {
+		switch conversation.kind {
+		case .contact, .group:
+			if imagePicker.processedPhotos.isEmpty == false {
+				sendImages(conversation: conversation)
+			}
 			sendText(conversation: conversation)
+		case .system:
+			sendToAI(conversation: conversation)
 		}
 	}
+	let openAIClient = OpenAIClient()
+	func sendToAI(conversation: any ConversationRepresentable) {
+		guard !text.isWhitespace else { return }
+		let string = text.trimmed
+		applyProgrammaticUpdate(String())
 
+		Task {
+			var msg = await msgCreater.create(text: string, in: conversation)
+			msg.outgoingStatus = [AI.contact.uid: MsgOutgoingStatus.sent]
+			do {
+				try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
+
+				let chatCompletionResponse = try await openAIClient.request(.ask(input: string))
+				_ =  try await AsyncOrderedStream.mapOrdered(inputs: chatCompletionResponse.choices) { choice in
+					let replyText = choice.message.content.trimmed
+					let role = choice.message.role
+					let reply = RMsg.init(
+						uid: UUID().uuidString,
+						conID: conversation.uid,
+						msgKind: replyText.isMarkdown ? .markdown : .text,
+						senderID: AI.contact.uid,
+						date: ServerTime.now.value,
+						text: "\(role): \(replyText)",
+						incomingStatus: .read,
+						outgoingStatus: .init(),
+						attachment: nil
+					)
+					try await Socket.shared.send(.newMsg(rMsg: reply), conversation: conversation)
+				}
+
+			} catch {
+				Log(error)
+			}
+		}
+	}
 	func sendImages(conversation: any ConversationRepresentable) {
 		Task.detached(priority: .background) { [self] in
 			do {
@@ -47,7 +91,7 @@ final class ChatInputBarManager {
 							try await Task.sleep(seconds: 2)
 
 							// Notify UI
-							await Socket.shared.notifyMessage(.newMsg(rMsg: .init(msg: msg)))
+							await Socket.shared.notifyMessage(.newMsg(rMsg: .init(msg)))
 						}
 					}
 
@@ -61,45 +105,36 @@ final class ChatInputBarManager {
 	}
 	func sendText(conversation: any ConversationRepresentable) {
 		let string = text
-		text.removeAll()
+		applyProgrammaticUpdate(String())
 		if string.isWhitespace {
-			text = Lorem.random
+			applyProgrammaticUpdate(Lorem.random)
 			return
 		}
 		Task {
 			do {
 				if let url = URL(string: string), url.host() != nil {
 					let msg = try await self.msgCreater.create(from: url, in: conversation)
-					await Socket.shared.send(.newMsg(rMsg: .init(msg: msg)), conversation: conversation)
+					try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
 				} else {
 					let msg = await msgCreater.create(text: string, in: conversation)
-					await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
+					try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
 				}
 			} catch {
 				Log(error)
 			}
 		}
 	}
-
-	func askAI(text: String) {
-		//		let request = text.trimmed.contains("?") ? OpenAIPrompt.ask(input: text) : OpenAIPrompt.correct(
-		//			input: text3
-		//		)
-		//		Task.detached(priority: .background) {
-		//            if let result = try? await client.request(request) {
-		//                UIPasteboard.general.string = result.trimmedText
-		//				let msg = await MsgSnapshot.init(
-		//					uid: UUID().uuidString,
-		//					senderID: "OpenAIClient.chatContactId",
-		//					conID: viewModel.conversation.uid,
-		//					msgKind: .markdown,
-		//					text: result.trimmedText,
-		//					date: .now,
-		//					deliveryStatus: .received
-		//				)
-		//				await viewModel.datasource(didInsert: msg)
-		//				await msgRoomAction?(.newMsg(rMsg: .init(msg)))
-		//            }
-		//        }
+}
+extension String {
+	var isMarkdown: Bool {
+		let markdownPatterns = [
+			#"(^|\s)[*_]{1,2}.+[*_]{1,2}($|\s)"#,  // *italic* or **bold**
+			#"\[.+\]\(.+\)"#,                      // [text](link)
+			#"^#{1,6}\s"#,                         // # Heading
+			#"^\s*[-*+]\s"#,                       // - List item
+			#"!\[.*\]\(.+\)"#,                     // ![alt](img)
+			#"`[^`]+`"#                            // `code`
+		]
+		return markdownPatterns.contains { self.range(of: $0, options: .regularExpression) != nil }
 	}
 }

@@ -18,7 +18,8 @@ import ImageLoader
 public struct CurrentUserProfileView: View {
 
 	@Environment(AuthService.self) private var authService
-	@Environment(CurrentUser.self) private var currentUser
+	@State private var currentUser = CurrentUserModel.empty
+	@Environment(\.currentUser) private var originalCurrentUser
 	@Environment(\.dismiss) private var dismiss
 	@State private var viewModel = CurrentUserProfileViewModel()
 	@FocusState private var isFocused: Bool
@@ -32,17 +33,40 @@ public struct CurrentUserProfileView: View {
 			signOutSection
 			resetSection
 		}
-		.buttonStyle(.borderless)
+		.refreshable {
+			try? await Task.sleep(seconds: 1)
+			if let remote: CurrentUserModel = try? await FirestoreRepo.getModel(for: currentUser.uid, collection: .users, field: .uid) {
+				currentUser = remote
+			}
+		}
 		.navigationTitle("Profile")
 		.scrollDismissesKeyboard(.immediately)
-		.toolbar { toolbarContent }
-	}
-
-	private var user: Binding<Contact> {
-		Binding(
-			get: { currentUser.user },
-			set: { currentUser.user = $0 }
-		)
+		.toolbar {
+			if hasChanges {
+				ToolbarItem(placement: .topBarTrailing) {
+					Button {
+						setFocus(false)
+						viewModel.setLoading(true)
+						Task.detached(priority: .utility) {
+							do {
+								try await saveProfile()
+							} catch {
+								await viewModel.showError(error)
+							}
+						}
+					} label: {
+						if viewModel.isLoading {
+							ProgressView().controlSize(.mini)
+						} else {
+							Text("Save")
+						}
+					}
+				}
+			}
+		}
+		.task {
+			currentUser = originalCurrentUser
+		}
 	}
 
 	private var profilePhotoSection: some View {
@@ -53,33 +77,31 @@ public struct CurrentUserProfileView: View {
 					size: 200,
 					clipShape: Circle()
 				) {
-					ResizableImage(currentUser.user.photoURL)
+					ResizableImage(currentUser.photoURL)
 				}
 			}
 			.flexible(.horizontal)
 		} footer: {
-			Text(currentUser.user.photoURL)
+			Text(currentUser.photoURL)
 				.textSelection(.enabled)
 		}
 		.listRowBackground(Color.clear)
-		.task {
-			print(currentUser.user.photoURL)
-		}
+
 	}
 	private var profileSection: some View {
 		Section {
-			TextField("Enter Display Name", text: user.name)
+			TextField("Enter Display Name", text: $currentUser.name)
 				.focused($isFocused)
 				.textContentType(.name)
 				.textInputAutocapitalization(.words)
 
-			Text("Phone").badge(currentUser.user.mobile)
+			Text("Phone").badge(currentUser.mobile)
 
-			if let privateKey = GroupAppStorage.shared.string(for: .security(.privateKey(id: currentUser.user.uid))) {
+			if let privateKey = GroupAppStorage.shared.string(for: .security(.privateKey(id: currentUser.uid))) {
 				Text(privateKey)
 			}
 
-			if let publicKey = GroupAppStorage.shared.string(for: .security(.publicKey(id: currentUser.user.uid))) {
+			if let publicKey = GroupAppStorage.shared.string(for: .security(.publicKey(id: currentUser.uid))) {
 				Text(publicKey)
 			}
 		}
@@ -98,52 +120,29 @@ public struct CurrentUserProfileView: View {
 
 	private var resetSection: some View {
 		Group {
-			if viewModel.shouldUpdateProfile(for: currentUser.user) {
+			if hasChanges {
 				Section {
 					Button("Reset") {
 						viewModel.pickedPhoto = nil
-						currentUser.user.name = Auth.auth().currentUser?.displayName ?? ""
+						currentUser = originalCurrentUser
 					}
 				}
 			}
 		}
 	}
-
-	private var toolbarContent: some ToolbarContent {
-		ToolbarItem(placement: .topBarTrailing) {
-			if viewModel.isLoading {
-				ProgressView().controlSize(.mini)
-			} else {
-				AsyncButton {
-					await saveProfile()
-				} label: {
-					Text("Save")
-				}
-				.disabled(!viewModel.shouldUpdateProfile(for: currentUser.user))
-			}
-		}
+	private var hasChanges: Bool {
+		currentUser != originalCurrentUser
 	}
-
-	private func saveProfile() async {
-		isFocused = false
-		viewModel.setLoading(true)
-		Task.detached(priority: .background) {
-			do {
-				if let image = await viewModel.pickedPhoto?.uiImage {
-					let url = try await viewModel.uploadImage(image: image)
-					await MainActor.run {
-						currentUser.user.photoURL = url
-						viewModel.pickedPhoto = nil
-					}
-				}
-				try await viewModel.applyUpdates(for: currentUser.user)
-				try await currentUser.updateIfNeeded()
-				await viewModel.setLoading(false)
-				await authService.handleAuthStateChange()
-			} catch {
-				await viewModel.setLoading(false)
-				await viewModel.showError(error)
-			}
+	private func saveProfile() async throws {
+		if let image = viewModel.pickedPhoto?.uiImage {
+			let url = try await viewModel.uploadImage(image: image)
+			currentUser.photoURL = url
+			viewModel.pickedPhoto = nil
 		}
+		try await viewModel.applyUpdates(for: currentUser)
+		CurrentUser.reload()
+	}
+	public func setFocus(_ isFocused: Bool) {
+		self.isFocused = isFocused
 	}
 }

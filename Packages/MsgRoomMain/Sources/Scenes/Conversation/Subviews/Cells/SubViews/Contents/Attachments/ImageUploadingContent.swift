@@ -83,7 +83,7 @@ extension AttachmentContent {
 			var msg = viewModel.msg
 			msg.attachment = newAttachment
 			let conversation = try await ConversationRepo.getOrCreate(for: msg.conID, refetch: false)
-			await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
+			try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
 			await MainActor.run {
 				self.viewModel.update(with: msg)
 			}

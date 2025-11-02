@@ -15,9 +15,12 @@ extension Socket {
 	func handleReceive(_ data: AnyMsgData) async throws {
 		switch data {
 		case .newMsg(let rMsg):
-			try await ConversationRepo.getOrCreate(
+			var conversation = try await ConversationRepo.getOrCreate(
 				for: rMsg.conID, refetch: false
 			)
+			conversation.lastMsgID = rMsg.uid
+			try await conversation.saveChanges()
+
 			try await Store.shared.msgStore.insert(Message(rMsg))
 		case .updatedMsg(let rMsg):
 			try await Store.shared.msgStore.updateAndSave(uid: rMsg.uid) { pMsg in
@@ -35,19 +38,9 @@ extension Socket {
 				msgId: status.msgID,
 				date: ServerTime.now.value
 			)
-			let conversation = try await ConversationRepo.getOrCreate(for: status.conID, refetch: false)
-			switch conversation.kind {
-			case .contact(_):
-				fatalError()
-			case .group(let group):
-				try await Store.shared.groupStore
-					.updateAndSave(uid: group.uid) { model in
-						model.seenMembers.replace(seenMember)
-					}
-			case .system( _):
-				fatalError()
-			}
-
+			var conversation = try await ConversationRepo.getOrCreate(for: status.conID, refetch: false)
+			conversation.seenMembers = [seenMember]
+			try await conversation.saveChanges()
 		}
 	}
 }

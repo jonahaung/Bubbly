@@ -9,7 +9,6 @@ import SwiftUI
 import FirebaseAuth
 import XUI
 import FirePhoneOTP
-import FirebaseFirestore
 import FirebaseMessaging
 import Services
 import MsgRoomMain
@@ -21,7 +20,7 @@ import ImageLoader
 struct SettingsScene: View {
 
 	@Environment(AuthService.self) private var authService
-	@Environment(CurrentUser.self) private var currentUser
+	@Environment(\.currentUser) private var currentUser
 
 	@AppStorage(
 		StorageKeys.layout(.chatMsgSpacing).value,
@@ -42,10 +41,11 @@ struct SettingsScene: View {
 		Form {
 			profilePhotoSection
 			Section(header: Text("Sign Out")) {
-				NavigationLink(
-					value: NavPath.currentUserDetails) {
-						Text("Profile").badge(currentUser.user.name)
-					}
+				Button {
+					Router.shared.push(.currentUserDetails)
+				} label: {
+					Text("Profile").badge(currentUser.name)
+				}
 				AsyncButton {
 					try Auth.auth().signOut()
 				} label: {
@@ -112,7 +112,7 @@ struct SettingsScene: View {
 				Toggle(isOn: $askChatGPT) {
 					Text("Ask Chat GPT")
 				}
-				Text(currentUser.user.preetyPrinted)
+				Text(currentUser.preetyPrinted)
 
 			}
 			Section {
@@ -167,18 +167,17 @@ struct SettingsScene: View {
 			}
 		}
 		.formStyle(.grouped)
-		.navigationTitle("Settings")
 	}
 
 	private var profilePhotoSection: some View {
 		Section {
 			VStack {
-				ResizableImage(currentUser.user.photoURL, processors: [.circle()])
+				ResizableImage(currentUser.photoURL, processors: [.circle()])
 					.frame(square: 200)
 					.sheetWithZoomTransition {
 						PhotoViewer(
-							.init(url: currentUser.user.photoURL, type: .photo),
-							title: currentUser.user.name
+							.init(url: currentUser.photoURL, type: .photo),
+							title: currentUser.name
 						)
 					}
 			}

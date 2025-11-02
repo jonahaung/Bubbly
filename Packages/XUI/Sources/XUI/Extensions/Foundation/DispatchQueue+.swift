@@ -6,17 +6,6 @@
 //
 
 import Foundation
-
-public extension DispatchQueue {
-    static func safeAsync(execute work: () -> Void) {
-        if Thread.isMainThread {
-            work()
-        } else {
-            DispatchQueue.main.sync(execute: work)
-        }
-    }
-}
-
 public extension DispatchQueue {
 	static func delay(
 		_ time: TimeInterval = 0.2,

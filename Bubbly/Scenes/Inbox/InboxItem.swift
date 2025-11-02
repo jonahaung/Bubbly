@@ -12,10 +12,10 @@ import MsgRoomMain
 import XUI
 
 struct InboxItem: Sendable, Identifiable {
-	var id: String { msg.uid }
+	var id: String { msg.uid + sender.uid }
 	let conversation: any ConversationRepresentable
 	let msg: Message
-	let sender: Contact
+	let sender: any ContactRepresentable
 	var title: String {
 		conversation.name
 	}

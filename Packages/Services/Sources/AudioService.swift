@@ -100,7 +100,6 @@ public extension AudioService {
 	func playMessageIncoming() {
 		playBundledSound(named: "rckit_incoming")
 	}
-
 	func playMessageOutgoing() {
 		playBundledSound(named: "rckit_outgoing")
 	}

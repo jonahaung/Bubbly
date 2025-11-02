@@ -24,30 +24,36 @@ public struct ConversationScene: View {
 		GeometryReader { geometry in
 			ZStack {
 				background
+					.frame(size: geometry.size)
 				if !manager.scrollManager.isHidden {
 					MsgsScrollView(manager: manager, geometry: geometry)
 						.frame(size: geometry.size)
 				}
 				overlayViews
-					.fullScreenCover(item: $manager.eventsManager.focusedFrame) { frame in
-						ChatOverlayView(item: frame)
-							.ignoresSafeArea()
-							.environment(manager)
-							.presentationBackground(.clear)
-							.presentationBackgroundInteraction(.enabled)
+					.fullScreenCover(item: $manager.eventsManager.overlayItem) { frame in
+						if let viewModel = manager.cellItems.viewModel(of: frame.id) {
+							ChatOverlayView(item: frame, viewModel: viewModel)
+								.ignoresSafeArea(.container)
+								.environment(manager)
+								.presentationBackground(.clear)
+								.presentationBackgroundInteraction(.enabled)
+						}
 					}
 			}
+			.sensoryFeedback(.selection, trigger: manager.eventsManager.overlayItem)
+			.sensoryFeedback(.selection, trigger: manager.eventsManager.selectedMsg)
+			.sensoryFeedback(.selection, trigger: manager.eventsManager.toastItem)
 			.receiveMsgCellInteraction { action in
 				MainActor.assumeIsolated {
 					handleMsgCellInteraction(action: action)
 				}
 			}
+			.clipped()
 			.background(
 				manager.conversation.theme.background.color,
 				ignoresSafeAreaEdges: .all
 			)
-			.environment(\.eventsManager, manager.eventsManager)
-			.environment(\.conversation, manager.conversation)
+			.environment(\.conversationTheme, .init(manager.conversation))
 			.environment(\.attachmentFetcher, manager.attachmentFetcher)
 			.environment(manager)
 			.environment(\.focusState, SharedFocusState($isFieldFocused))
@@ -72,10 +78,6 @@ public struct ConversationScene: View {
 		.layoutPriority(1)
 		.flexible(.all)
 	}
-
-	private let background: some View = Image("adaptive")
-		.resizable(resizingMode: .tile)
-		.foregroundStyle(.secondary)
 
 	private func handleMsgCellInteraction(action: MsgCellInteraction.Action) {
 		switch action {
@@ -128,4 +130,9 @@ public struct ConversationScene: View {
 	private func handleFocusMsgBubble(with item: ChatOverlayView.Item) {
 		manager.eventsManager.updateFocusedFrame(item)
 	}
+
+	private let background: some View = Image("adaptive")
+		.resizable(resizingMode: .tile)
+		.foregroundStyle(.secondary)
+		.equatable(by: true)
 }

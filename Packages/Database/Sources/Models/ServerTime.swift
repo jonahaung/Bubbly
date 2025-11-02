@@ -9,27 +9,33 @@ import Foundation
 
 public struct ServerTime: Codable, Hashable, Sendable, Comparable {
 
+	// Use UTC for all encoding/decoding
 	nonisolated(unsafe)
-	public static var sgFormatter: ISO8601DateFormatter = {
-		$0.formatOptions = [.withDay, .withYear, .withMonth, .withTime, .withFractionalSeconds, .withTimeZone]
-		$0.timeZone = .init(abbreviation: "SGT")!
-		return $0
-	}(ISO8601DateFormatter())
+	public static var utcFormatter: ISO8601DateFormatter = {
+		let formatter = ISO8601DateFormatter()
+		formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+		formatter.timeZone = TimeZone(secondsFromGMT: 0)
+		return formatter
+	}()
+
+	// Optional — for UI/local display purposes only
 	nonisolated(unsafe)
-	public static var currentFormatterFormatter: ISO8601DateFormatter = {
-		$0.formatOptions = [.withDay, .withYear, .withMonth, .withTime, .withFractionalSeconds, .withTimeZone]
-		$0.timeZone = .current
-		return $0
-	}(ISO8601DateFormatter())
+	public static var localFormatter: ISO8601DateFormatter = {
+		let formatter = ISO8601DateFormatter()
+		formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+		formatter.timeZone = .current
+		return formatter
+	}()
 
 	public let value: String
 
+	// Always decode using UTC (same as encoding)
 	public var date: Date {
-		Self.currentFormatterFormatter.date(from: value) ?? .now
+		Self.localFormatter.date(from: value) ?? .now
 	}
 
 	public init(_ date: Date = .now) {
-		value = Self.sgFormatter.string(from: date)
+		value = Self.utcFormatter.string(from: date)
 	}
 
 	public init(_ isoDate: String) {

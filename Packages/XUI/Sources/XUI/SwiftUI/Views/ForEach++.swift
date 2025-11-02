@@ -12,7 +12,7 @@
 import Swift
 import SwiftUI
 
-//extension ForEach {
+// extension ForEach {
 //	public var isEmpty: Bool {
 //		data.isEmpty
 //	}
@@ -20,9 +20,9 @@ import SwiftUI
 //	public var count: Int {
 //		data.count
 //	}
-//}
+// }
 //
-//extension ForEach where Content: View {
+// extension ForEach where Content: View {
 //	public init<_Element>(
 //		_ data: Data,
 //		@ViewBuilder content: @escaping (_Element) -> Content
@@ -80,9 +80,9 @@ import SwiftUI
 //			rowContent($0.offset, $0.element)
 //		}
 //	}
-//}
+// }
 //
-//extension ForEach where Data.Element: Identifiable, Content: View, ID == Data.Element.ID {
+// extension ForEach where Data.Element: Identifiable, Content: View, ID == Data.Element.ID {
 //	public func interleave<Separator: View>(with separator: Separator) -> some View {
 //		let data = self.data.enumerated().map({ _IdentifiableElementOffsetPair(element: $0.element, offset: $0.offset) })
 //
@@ -96,9 +96,9 @@ import SwiftUI
 //			}
 //		}
 //	}
-//}
+// }
 //
-//extension ForEach where Data.Element: Identifiable, Content: View, ID == Data.Element.ID {
+// extension ForEach where Data.Element: Identifiable, Content: View, ID == Data.Element.ID {
 //	public func interdivided() -> some View {
 //		let data = self.data.enumerated().map({ _IdentifiableElementOffsetPair(element: $0.element, offset: $0.offset) })
 //
@@ -112,9 +112,9 @@ import SwiftUI
 //			}
 //		}
 //	}
-//}
+// }
 //
-//extension ForEach where Data.Element: Identifiable, Content: View, ID == Data.Element.ID {
+// extension ForEach where Data.Element: Identifiable, Content: View, ID == Data.Element.ID {
 //	@MainActor
 //	public func interspaced() -> some View {
 //		let data = self.data.enumerated().map({ _IdentifiableElementOffsetPair(element: $0.element, offset: $0.offset) })
@@ -129,9 +129,9 @@ import SwiftUI
 //			}
 //		}
 //	}
-//}
+// }
 //
-//extension ForEach where ID: CaseIterable & Hashable, ID.AllCases: RandomAccessCollection, Content: View, Data == ID.AllCases {
+// extension ForEach where ID: CaseIterable & Hashable, ID.AllCases: RandomAccessCollection, Content: View, Data == ID.AllCases {
 //	/// Creates an instance that uniquely identifies and creates views over `ID.allCases`.
 //	public init(
 //		_ type: ID.Type,
@@ -139,9 +139,9 @@ import SwiftUI
 //	) {
 //		self.init(ID.allCases, id: \.self, content: content)
 //	}
-//}
+// }
 //
-//extension ForEach where Content: View {
+// extension ForEach where Content: View {
 //	@_disfavoredOverload
 //	public init<_Data: MutableCollection & Sendable>(
 //		_ data: Binding<_Data>,
@@ -172,9 +172,9 @@ import SwiftUI
 //			content($0)
 //		}
 //	}
-//}
+// }
 //
-//extension ForEach where Content: View {
+// extension ForEach where Content: View {
 //	public init<Key: Comparable, Value>(
 //		sorting dictionary: [Key: Value],
 //		id: KeyPath<Key, ID>,
@@ -217,11 +217,11 @@ import SwiftUI
 //
 //		self.init(data, id: keyPath, content: content)
 //	}
-//}
+// }
 //
 //// MARK: - Auxiliary
 //
-//extension Binding {
+// extension Binding {
 //	fileprivate struct _BindingIdentifiableKeyPathAdaptor {
 //		let base: Binding<Value>
 //
@@ -233,18 +233,18 @@ import SwiftUI
 //	fileprivate var _bindingIdentifiableKeyPathAdaptor: _BindingIdentifiableKeyPathAdaptor {
 //		.init(base: self)
 //	}
-//}
+// }
 //
-//extension RandomAccessCollection {
+// extension RandomAccessCollection {
 //	public func elements<ID>(
 //		identifiedBy id: KeyPath<Element, ID>
 //	) -> AnyRandomAccessCollection<_KeyPathHashIdentifiableValue<Element, ID>> {
 //		.init(lazy.map({ _KeyPathHashIdentifiableValue(value: $0, keyPath: id) }))
 //	}
-//}
+// }
 //
-//@_documentation(visibility: internal)
-//public struct _IdentifiableElementOffsetPair<Element: Identifiable, Offset>: Identifiable {
+// @_documentation(visibility: internal)
+// public struct _IdentifiableElementOffsetPair<Element: Identifiable, Offset>: Identifiable {
 //	let element: Element
 //	let offset: Offset
 //
@@ -256,16 +256,16 @@ import SwiftUI
 //		self.element = element
 //		self.offset = offset
 //	}
-//}
+// }
 //
-//@_documentation(visibility: internal)
-//public struct _OffsetIdentifiedElementOffsetPair<Element, Offset> {
+// @_documentation(visibility: internal)
+// public struct _OffsetIdentifiedElementOffsetPair<Element, Offset> {
 //	let element: Element
 //	let offset: Offset
-//}
+// }
 //
-//@_documentation(visibility: internal)
-//public struct _KeyPathIdentifiableElementOffsetPair<Element, Offset, ID: Hashable>: Identifiable {
+// @_documentation(visibility: internal)
+// public struct _KeyPathIdentifiableElementOffsetPair<Element, Offset, ID: Hashable>: Identifiable {
 //	let element: Element
 //	let offset: Offset
 //	let keyPathToID: KeyPath<Element, ID>
@@ -279,4 +279,4 @@ import SwiftUI
 //		self.offset = offset
 //		self.keyPathToID = id
 //	}
-//}
+// }

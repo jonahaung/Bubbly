@@ -11,25 +11,11 @@ import Database
 import Services
 import Core
 
-//@MainActor
-//public final class ColorStorage {
-//
-//	static let shared = ColorStorage()
-//
-//	var incoming: Color = .blue
-//	var outgoing: Color = .blue
-//
-//
-//	func initialize(_ conversation: any ConversationRepresentable) {
-//		incoming = conversation.theme.incomingBubbleColor
-//		outgoing = conversation.theme.outgoingBubbleColor
-//	}
-//}
-
 struct MsgCellContent: View {
-	let bubbleCorner: BubbleCorner
+
 	@Environment(MsgCellViewModel.self) private var viewModel
-	@Environment(\.conversation) private var conversation
+	@Environment(\.conversationTheme) private var theme
+	private var layout: MsgCellLayout { viewModel.layout }
 
 	var body: some View {
 		ZStack(alignment: .center) {
@@ -49,20 +35,40 @@ struct MsgCellContent: View {
 				Text(image)
 			}
 		}
-		.background(color.opacity(1))
+		.background(bubbleColor)
 		.padding(
 			.init(top: 0.1, leading: viewModel.isSender ? 0.5 : 0.2, bottom: 0.5, trailing: viewModel.isSender ? 0.2 : 0.5)
 		)
-		.background(Color.opaqueSeparator)
-		.foregroundStyle(viewModel.foregroundStyle)
+		.background(theme.shadowColor)
+		.foregroundStyle(viewModel.isSender ? theme.outgoingForegroundColor : theme.incomingForegroundColor)
 		.containerShape(bubbleShape)
-		.compositingGroup()
 	}
 
 	private var bubbleShape: UnevenRoundedRectangle {
-		bubbleCorner.roundedRectange(cornerRadius: conversation!.theme.bubbleCornorRadius)
+		if bubbleCorner == .none {
+			return .init()
+		}
+		return bubbleCorner.roundedRectange(cornerRadius: theme.bubbleCornorRadius)
 	}
-	private var color: Color {
-		return (viewModel.isSender ? conversation?.theme.outgoingBubbleColor : conversation?.theme.incomingBubbleColor) ?? .clear
+	private var bubbleColor: Color {
+		viewModel.isSender ? theme.outgoingBubbleColor : theme.incomingBubbbleColor
+	}
+
+	private var bubbleCorner: BubbleCorner {
+		let isSelected = layout.isSelected
+		if isSelected {
+			return .all
+		}
+//		var corner = bubble.bubbleCorner
+//
+//		if id == selected.previous?.id {
+//			corner.append(.bottom)
+//			return corner
+//		}
+//		if id == selected.next?.id {
+//			corner.append(.top)
+//			return corner
+//		}
+		return layout.bubble.bubbleCorner
 	}
 }

@@ -25,7 +25,7 @@ public struct RMsg: Codable, Sendable, Hashable {
 		conID: String,
 		msgKind: MsgKind,
 		senderID: String,
-		date: ServerTime,
+		date: String,
 		text: String,
 		incomingStatus: MsgIncomingStatus,
 		outgoingStatus: [String: MsgOutgoingStatus],
@@ -35,7 +35,7 @@ public struct RMsg: Codable, Sendable, Hashable {
 		self.conID = conID
 		self.msgKind = msgKind
 		self.senderID = senderID
-		self.date = date.value
+		self.date = date
 		self.text = text
 		self.incomingStatus = incomingStatus
 		self.outgoingStatus = outgoingStatus
@@ -48,20 +48,7 @@ public struct RMsg: Codable, Sendable, Hashable {
 			conID: msg.conID,
 			msgKind: msg.msgKind,
 			senderID: msg.senderID,
-			date: .init(msg.date),
-			text: msg.text,
-			incomingStatus: msg.incomingStatus,
-			outgoingStatus: msg.outgoingStatus,
-			attachment: msg.attachment
-		)
-	}
-	public init(msg: Message) {
-		self.init(
-			uid: msg.uid,
-			conID: msg.conID,
-			msgKind: msg.msgKind,
-			senderID: msg.senderID,
-			date: .init(msg.date),
+			date: ServerTime(msg.date).value,
 			text: msg.text,
 			incomingStatus: msg.incomingStatus,
 			outgoingStatus: msg.outgoingStatus,

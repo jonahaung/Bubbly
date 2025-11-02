@@ -19,7 +19,7 @@ struct MsgCellTimeSeparaterView: View {
 				date.formatted(.dateTime.day().weekday(.abbreviated).hour().minute())
 			)
 		}
-		.foregroundStyle(.gray)
+		.foregroundStyle(.primary)
 		.font(.subheadline.uppercaseSmallCaps())
 		.frame(height: 50, alignment: .center)
 		.equatable(by: id)

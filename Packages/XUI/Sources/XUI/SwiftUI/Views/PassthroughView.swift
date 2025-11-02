@@ -9,24 +9,6 @@ import Combine
 import Swift
 import SwiftUI
 
-// Shared cache (you can optimize with LRU or custom map)
-public final class AnyViewCache {
-	@MainActor public static let shared = AnyViewCache()
-	private var cache = [AnyHashable: _opaque_View]()
-
-	public func view(for key: AnyHashable) -> _opaque_View? {
-		cache[key]
-	}
-
-	public func setView(_ view: _opaque_View, for key: AnyHashable) {
-		cache[key] = view
-	}
-
-	@MainActor public func cachedView(for id: String) -> _opaque_View? {
-		Self.shared.view(for: id)
-	}
-}
-
 @frozen
 @_documentation(visibility: internal)
 public struct PassthroughView<Content: View>: @preconcurrency _opaque_View, View {
@@ -57,7 +39,6 @@ public protocol _opaque_View {
 	func _opaque_getViewName() -> AnyHashable?
 
 	func eraseToAnyView() -> AnyView
-	func eraseToCachedAnyView(for id: String) -> _opaque_View
 }
 
 extension _opaque_View where Self: View {
@@ -89,19 +70,9 @@ extension _opaque_View where Self: View {
 	public func eraseToAnyView() -> AnyView {
 		AnyView(self)
 	}
-	@inlinable
-	@MainActor public func eraseToCachedAnyView(for id: String) -> _opaque_View {
-		if let cached = AnyViewCache.shared.view(for: id) {
-			return cached
-		}
-		let v = self
-		AnyViewCache.shared.setView(v, for: id)
-		return v
-	}
 }
 
 extension ModifiedContent: @preconcurrency _opaque_View where Content: View, Modifier: ViewModifier {
-
 }
 public protocol _opaque_DiffableView: _opaque_View {
 	func isVisuallyEqual(to other: _opaque_DiffableView) -> Bool
@@ -116,11 +87,6 @@ extension _opaque_DiffableView where Self: Equatable, Self: View {
 public extension View {
 	func opaqueView() -> _opaque_View {
 		PassthroughView { self }
-	}
-}
-public extension View {
-	func opaqueCachedView(for id: String) -> _opaque_View {
-		PassthroughView { self }.eraseToCachedAnyView(for: id)
 	}
 }
 // MARK: - Custom Environment Key for `_opaque_environment`

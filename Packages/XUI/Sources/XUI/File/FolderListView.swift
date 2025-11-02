@@ -92,7 +92,7 @@ private struct FilePreviewView: View {
 				if let string = try? file.readAsString() {
 					Text(string)
 						.padding()
-				} else if let int = try? file.readAsInt()  {
+				} else if let int = try? file.readAsInt() {
 					Text("\(int)")
 						.padding()
 				} else {

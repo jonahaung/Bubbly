@@ -73,6 +73,7 @@ public struct ContactSettingsScene: View {
 					try await Store.shared.contactStore
 						.updateAndSave(uid: newValue.uid) { model in
 							model.update(with: newValue)
+							model.theme = newValue.theme
 						}
 					try await Task.sleep(seconds: 0.5)
 					await MainActor.run {

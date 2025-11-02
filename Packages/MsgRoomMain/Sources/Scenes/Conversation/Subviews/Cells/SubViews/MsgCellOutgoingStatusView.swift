@@ -13,8 +13,7 @@ import Core
 struct MsgCellOutgoingStatusView: View {
 
 	@Environment(MsgCellViewModel.self) private var viewModel
-	@Environment(ContactStore.self) private var contactStore
-	@Environment(\.conversation) private var conversation
+	@Environment(ChatViewManager.self) private var manager
 	@Environment(\.namespace) private var namespace
 
 	@ViewBuilder
@@ -41,7 +40,7 @@ struct MsgCellOutgoingStatusView: View {
 					MsgCellOutgoingStatus(msg: viewModel.msg)
 				} else {
 					ForEach(seenMembers) { seenMember in
-						if let contact = contactStore.contact(
+						if let contact = ContactStore.shared.contact(
 							for: seenMember.uid
 						) {
 							ProfilePhoto(contact, size: .custom(ChatLayoutConstants.Cell.defaultSpacing-6))
@@ -58,8 +57,8 @@ struct MsgCellOutgoingStatusView: View {
 	}
 
 	private var seenMembers: [SeenMember] {
-		conversation?.seenMembers.filter {
-			$0.msgId == viewModel.msgID } ?? []
+		manager.conversation.seenMembers.filter {
+			$0.msgId == viewModel.id }
 	}
 }
 struct MsgCellOutgoingStatus: View {

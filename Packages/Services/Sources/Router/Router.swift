@@ -20,7 +20,6 @@ public class Router {
 	private let cancelBag = CancelBag()
 
 	public var tab: TabPath = .inbox
-
 	public var navRouters = TabPath.allCases.map { NavRouter($0) }
 	public var currentNavRouter: NavRouter? {
 		navRouters.first(where: { $0.id == tab })
@@ -36,10 +35,10 @@ public class Router {
 		registerForRemoteNotifications()
 	}
 
-	public func push(_ path: sending NavPath) {
+	public func push(_ path: NavPath) {
 		currentNavRouter?.push(path)
 	}
-	public func replace(_ paths: sending [NavPath]) {
+	public func replace(_ paths: [NavPath]) {
 		currentNavRouter?.replace(paths)
 	}
 
@@ -57,7 +56,7 @@ private extension Router {
 				guard let data = AnyMsgData(userInfo: userInfo) else {
 					return
 				}
-				ConversationInitializer.start(conID: data.conID, refetch: true)
+				ConversationInitializer.start(conID: data.conID, refetch: false, delay: 1)
 			}
 			.store(in: cancelBag)
 	}

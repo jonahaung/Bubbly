@@ -26,10 +26,10 @@ public struct PressGestureViewModifier: ViewModifier {
 		content
 			.gesture(
 				DragGesture(minimumDistance: 0, coordinateSpace: .local)
-					.onChanged { value in
+					.onChanged { _ in
 						startDisplayLinkIfNeeded()
 					}
-					.onEnded { value in
+					.onEnded { _ in
 						stopDisplayLinkIfNeeded()
 					}
 //					.updating($startTimestamp, body: { _, current, _ in

@@ -5,10 +5,9 @@
 //  Created by Aung Ko Min on 24/8/25.
 //
 
-import Foundation
+import UIKit
 import Database
 import Services
-import FirebaseFirestore
 import MediaPicker
 
 @MainActor
@@ -65,14 +64,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
 			.updateAndSave(uid: originalGroup.uid) { model in
 				model.update(with: group)
 			}
-		try await FirestoreRepo
-			.update(
-				group,
-				to: Firestore
-					.firestore()
-					.collection("groups")
-					.document(group.uid)
-			)
+		try await FirestoreRepo.add(group, collectionPath: .groups, documentID: group.uid)
 		setLoading(false)
 	}
 }

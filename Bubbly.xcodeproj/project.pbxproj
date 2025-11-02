@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		470DEC072E850719005C5863 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 470DEC062E850719005C5863 /* MsgRoomMain */; };
 		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		479C82D12DDE6D1A0019971C /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 479C82D02DDE6D1A0019971C /* MsgRoomMain */; };
 		47B167E72E9AB3530020F282 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */; };
+		47BA967C2EB537360019FE94 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47BA967B2EB537360019FE94 /* MsgRoomMain */; };
+		47BA967E2EB537410019FE94 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47BA967D2EB537410019FE94 /* MsgRoomMain */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,7 +128,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				479C82D12DDE6D1A0019971C /* MsgRoomMain in Frameworks */,
+				47BA967C2EB537360019FE94 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -150,7 +150,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				470DEC072E850719005C5863 /* MsgRoomMain in Frameworks */,
+				47BA967E2EB537410019FE94 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,7 +228,7 @@
 			);
 			name = Bubbly;
 			packageProductDependencies = (
-				479C82D02DDE6D1A0019971C /* MsgRoomMain */,
+				47BA967B2EB537360019FE94 /* MsgRoomMain */,
 			);
 			productName = Bubbly;
 			productReference = 475BAAB42DBE859D007B0876 /* Bubbly.app */;
@@ -297,7 +297,7 @@
 			);
 			name = NotificationService;
 			packageProductDependencies = (
-				470DEC062E850719005C5863 /* MsgRoomMain */,
+				47BA967D2EB537410019FE94 /* MsgRoomMain */,
 			);
 			productName = NotificationService;
 			productReference = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */;
@@ -819,11 +819,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		470DEC062E850719005C5863 /* MsgRoomMain */ = {
+		47BA967B2EB537360019FE94 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MsgRoomMain;
 		};
-		479C82D02DDE6D1A0019971C /* MsgRoomMain */ = {
+		47BA967D2EB537410019FE94 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MsgRoomMain;
 		};

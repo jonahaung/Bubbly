@@ -62,9 +62,9 @@ public struct ContactPickerScene: View {
 
 	private var contacts: [Contact] {
 		guard !searchText.isWhitespace else {
-			return contactStore.availableContacts
+			return contactStore.contacts
 		}
-		return contactStore.availableContacts.filter {
+		return contactStore.contacts.filter {
 			$0.name.lowercased().contains(searchText.lowercased())
 		}
 	}

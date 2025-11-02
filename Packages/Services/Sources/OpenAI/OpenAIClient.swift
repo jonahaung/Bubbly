@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Database
 
 // MARK: - OpenAIClient
 public struct OpenAIClient {
@@ -26,3 +27,34 @@ public struct OpenAIClient {
     }
 }
 extension OpenAIClient: Sendable {}
+public protocol NetworkClient: Sendable {
+	func sendRequest<T: Decodable>(to endpoint: URL, with body: Data) async throws -> T
+}
+
+public struct URLSessionNetworkClient: NetworkClient {
+	private let session: URLSession
+
+	public init(session: URLSession = .shared) {
+		self.session = session
+	}
+
+	public func sendRequest<T: Decodable>(to endpoint: URL, with body: Data) async throws -> T {
+		var request = URLRequest(url: endpoint)
+		request.httpMethod = "POST"
+		request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+		request.httpBody = body
+		request.timeoutInterval = 30
+
+
+		let (data, response) = try await NetworkManager.shared.request(request)
+
+		guard let httpResponse = response as? HTTPURLResponse,
+			  httpResponse.statusCode == 200 else {
+			throw URLError(.badServerResponse)
+		}
+
+		let decoder = JSONDecoder()
+		return try decoder.decode(T.self, from: data)
+	}
+}
+extension URLSessionNetworkClient: Sendable {}

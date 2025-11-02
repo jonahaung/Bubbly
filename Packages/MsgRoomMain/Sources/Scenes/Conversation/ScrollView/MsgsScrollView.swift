@@ -16,53 +16,42 @@ struct MsgsScrollView: View {
 	@State var manager: ChatViewManager
 	let geometry: GeometryProxy
 	@Namespace private var namespace
-	@Environment(\.conversation) private var conversation
+	@Environment(\.focusState) private var focusState
 
 	var body: some View {
-		ScrollView {
+		ScrollView(.vertical, showsIndicators: true) {
 			MsgsScrollViewLayout(
 				config: .init(
 					manager.config.lineSpacing,
 					manager.config.contentInsets,
 					containerSize: geometry.size),
-				cacheContainer: manager.scrollManager.layoutCache
+				layoutCache: manager.scrollManager.layoutCache
 			) {
 				if manager.eventsManager.showContactInfo {
 					ConversationHeaderView()
 						.frame(size: geometry.size)
 				}
 				ForEach(manager.cellItems, id: \.id) { viewModel  in
-					let layout = manager.msgCellLayoutFor(viewModel.msg)
+					let layout = viewModel.layout
 					if layout.showTimeSeparator {
 						MsgCellTimeSeparaterView(id: viewModel.id, date: viewModel.msg.date)
 					} else if layout.showTopPadding {
 						MsgCellSpacer(id: viewModel.id)
 					}
-					let selectedMsg = manager.eventsManager.selectedMsg
-					let isSelected = viewModel.id == selectedMsg?.id
-					if isSelected {
+					if layout.isSelected {
 						MsgCellHeader(msg: viewModel.msg)
 					}
-					manager
-						.view(for: viewModel, bubble: layout.bubble)
-						.eraseToAnyView()
-					if isSelected {
+					MsgCell()
+						.environment(viewModel)
+					if layout.isSelected {
 						MsgCellFooter(msg: viewModel.msg)
 					}
 				}
 			}
-			.gesture(tapGesture)
 			.geometryGroup()
 			.scrollTargetLayout()
+			.equatable(by: manager.cellItems.count.value + (manager.eventsManager.selectedMsg?.id ?? ""))
 		}
-		.namespace(namespace)
-		.transaction {
-			$0.disablesAnimations = true
-		}
-		.scrollDismissesKeyboard(.immediately)
-		.defaultScrollAnchor(.bottom, for: .initialOffset)
-		.defaultScrollAnchor(manager.scrollManager.scrolledPosition == .atBottom ? .bottom : .top, for: .sizeChanges)
-		.scrollPosition(.constant(manager.scrollManager.scrollPosition))
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.scrollManager.handleScrollPhaseChange(oldPhase, newPhase, context)
 		}
@@ -75,23 +64,19 @@ struct MsgsScrollView: View {
 		)
 		.onScrollTargetVisibilityChange(
 			idType: String.self,
-			threshold: 0.001
+			threshold: 0.01
 		) { values in
 			manager.handleVisibleIDsChange(values)
 		}
-		.onPressingChanged(in: .global) { location in
-			manager.handlePressingChanged(location)
-		}
+		.scrollClipDisabled(true)
+		.scrollDismissesKeyboard(.immediately)
+		.defaultScrollAnchor(.bottom, for: .initialOffset)
+		.defaultScrollAnchor(.bottom, for: .sizeChanges)
+		.scrollPosition(.constant(manager.scrollManager.scrollPosition))
+		.scrollContentBackground(.hidden)
+		.namespace(namespace)
 		.task {
 			await manager.onViewAppear()
 		}
-	}
-
-	private var tapGesture: some Gesture {
-		SpatialTapGesture(count: 2, coordinateSpace: .local)
-			.onEnded { value in
-				manager.handleTappingChanged(value.location)
-			}
-
 	}
 }

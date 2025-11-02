@@ -124,12 +124,12 @@ extension ImageView {
 	var processors: [ImageProcessing] {
 		var array: [ImageProcessing] = []
 		if let size = config.size {
-			if let w = size.width, let h = size.height {
-				array.append(.resize(size: .init(width: w, height: h)))
-			} else if let w = size.width {
-				array.append(.resize(width: w))
-			} else if let h = size.height {
-				array.append(.resize(height: h))
+if let width = size.width, let height = size.height {
+array.append(.resize(size: .init(width: width, height: height)))
+} else if let width = size.width {
+array.append(.resize(width: width))
+} else if let height = size.height {
+array.append(.resize(height: height))
 			}
 		}
 		return array + config.processors

@@ -15,7 +15,6 @@ struct MarkdownContent: View {
 		MarkdownView(elements: elements, text: text)
 			.padding(.horizontal, 12)
 			.padding(.vertical, 6)
-			.fixedSize(horizontal: false, vertical: true)
 			.equatable(by: text)
 	}
 }

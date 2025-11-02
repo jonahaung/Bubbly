@@ -26,44 +26,45 @@ public struct MarkdownView: View {
 			}
 		}
 		.allowsTightening(true)
-		.tint(.blue)
+		.compositingGroup()
 		.equatable(by: markdownText)
 	}
 
 	@ViewBuilder
 	private func renderElement(_ element: MarkdownElement) -> some View {
 		switch element {
-			case .heading(let level, let text):
-				HeadingView(level: level, text: text)
-					.padding(.top, CGFloat(level))
-					.textScale(.secondary)
-			case .paragraph(let text):
-				ParagraphView(text: text)
-			case .codeBlock(let language, let content):
-				CodeBlockView(language: language, content: content)
-			case .listItem(let text):
-				ListItemView(text: text)
-			case .blockquote(let text):
-				BlockquoteView(text: text)
-			case .horizontalRule:
-				EmptyView()
-			case .unknown(let text):
-				Text(text)
-					.font(.body)
-					.foregroundColor(.gray)
-        case .orderedListItem(index: let index, text: let text):
-            OrderedListItemView(index: index, text: text)
-        case .mention(username: let username):
-            Text("@\(username)")
-                .font(.system(.subheadline, design: .rounded, weight: .medium))
-                .underline()
-                .foregroundStyle(Color.indigo)
-        case .hashtag(topic: let topic):
-            Text("#\(topic)")
-                .font(.system(.subheadline, design: .rounded, weight: .medium))
-                .underline()
-                .foregroundStyle(Color.indigo )
-        }
+		case .heading(let level, let text):
+			HeadingView(level: level, text: text)
+				.padding(.top, CGFloat(level))
+				.textScale(.secondary)
+		case .paragraph(let text):
+			ParagraphView(text: text)
+		case .codeBlock(let language, let content):
+			CodeBlockView(language: language, content: content)
+				.textScale(.secondary)
+		case .listItem(let text):
+			ListItemView(text: text)
+		case .blockquote(let text):
+			BlockquoteView(text: text)
+		case .horizontalRule:
+			EmptyView()
+		case .unknown(let text):
+			Text(text)
+				.font(.body)
+				.foregroundColor(.gray)
+		case .orderedListItem(index: let index, text: let text):
+			OrderedListItemView(index: index, text: text)
+		case .mention(username: let username):
+			Text("@\(username)")
+				.font(.system(.subheadline, design: .rounded, weight: .medium))
+				.underline()
+				.foregroundStyle(Color.indigo)
+		case .hashtag(topic: let topic):
+			Text("#\(topic)")
+				.font(.system(.subheadline, design: .rounded, weight: .medium))
+				.underline()
+				.foregroundStyle(Color.indigo )
+		}
 	}
 }
 
@@ -75,26 +76,26 @@ private struct HeadingView: View {
 
 	var body: some View {
 		switch level {
-			case 1:
-				Text(text)
-					.font(.largeTitle)
-					.bold()
-			case 2:
-				Text(text)
-					.font(.title)
-					.bold()
-			case 3:
-				Text(text)
-					.font(.title2)
-					.bold()
-			case 4:
-				Text(text)
-					.font(.title3)
-					.bold()
-			default:
-				Text(text)
-					.font(.headline)
-					.bold()
+		case 1:
+			Text(text)
+				.font(.largeTitle)
+				.bold()
+		case 2:
+			Text(text)
+				.font(.title)
+				.bold()
+		case 3:
+			Text(text)
+				.font(.title2)
+				.bold()
+		case 4:
+			Text(text)
+				.font(.title3)
+				.bold()
+		default:
+			Text(text)
+				.font(.headline)
+				.bold()
 		}
 	}
 }
@@ -117,19 +118,24 @@ private struct CodeBlockView: View {
 		VStack(alignment: .leading, spacing: 0) {
 			if let language = language {
 				Text(language.capitalized)
-					.font(.caption2)
+					.font(.system(size: 11, weight: .medium, design: .rounded))
 					.underline()
 			}
-			ScrollView(.horizontal, showsIndicators: false) {
-				LazyHStack {
+			ZStack {
+				HStack(spacing: 0) {
 					Text(content)
-						.font(.system(size: 14, weight: .medium, design: .monospaced))
+						.font(.system(size: 10, weight: .medium, design: .monospaced))
 						.foregroundStyle(.white)
+
+					Spacer()
 				}
 			}
-			.background(RoundedRectangle(cornerRadius: 4).fill(Color(white: 0.2)))
-			.contentMargins(16, for: .scrollContent)
+			.padding(8)
+			.padding(.vertical, 8)
+			.background(RoundedRectangle(cornerRadius: 8).fill(Color(white: 0.2)))
+
 		}
+		.flexible(.horizontal)
 	}
 }
 
@@ -137,18 +143,18 @@ private struct ListItemView: View {
 	let text: String
 
 	var body: some View {
-		Text(.init(" ●    \(text)"))
+		Text(.init("✦ \(text)"))
 			.font(.system(.callout, design: .default, weight: .regular))
 	}
 }
 private struct OrderedListItemView: View {
-    let index: Int
-    let text: String
+	let index: Int
+	let text: String
 
-    var body: some View {
-        Text(.init(" \(index)    \(text)"))
-            .font(.system(.callout, design: .default, weight: .regular))
-    }
+	var body: some View {
+		Text(.init(" **\(index)**    \(text)"))
+			.font(.system(.callout, design: .default, weight: .regular))
+	}
 }
 private struct BlockquoteView: View {
 	let text: String
@@ -240,10 +246,10 @@ Here are some useful links:
 
 ```python
 def fibonacci(n):
-	if n <= 1:
-		return n
-	else:
-		return fibonacci(n-1) + fibonacci(n-2)
+ if n <= 1:
+  return n
+ else:
+  return fibonacci(n-1) + fibonacci(n-2)
 
 print(fibonacci(10))
 """

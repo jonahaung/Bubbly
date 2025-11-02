@@ -4,40 +4,46 @@
 //
 
 import Foundation
-extension UserDefaults {
-	nonisolated(unsafe) public static let shared = UserDefaults(suiteName: AppInformation.groupID)!
-}
+
 public struct GroupAppStorage {
 
-	nonisolated(unsafe) public static var shared = GroupAppStorage()
-	public let store = UserDefaults.shared
+	nonisolated(unsafe)
+	public static let shared = GroupAppStorage()
+	public let store = UserDefaults(suiteName: AppInformation.groupID)!
 
 	private init() {}
 
 	public func delete(for key: StorageKeys) {
 		store.set(nil, forKey: key.value)
+		store.synchronize()
 	}
 	public func save(value: String?, for key: StorageKeys) {
+		guard string(for: key) != value else { return }
 		store.set(value, forKey: key.value)
 		store.synchronize()
 	}
 	public func save(value: Int?, for key: StorageKeys) {
+		guard integer(for: key) != value else { return }
 		store.set(value, forKey: key.value)
 		store.synchronize()
 	}
 	public func save(value: Float?, for key: StorageKeys) {
+		guard float(for: key) != value else { return }
 		store.set(value, forKey: key.value)
 		store.synchronize()
 	}
 	public func save(value: Double?, for key: StorageKeys) {
+		guard double(for: key) != value else { return }
 		store.set(value, forKey: key.value)
 		store.synchronize()
 	}
 	public func save(value: Bool?, for key: StorageKeys) {
+		guard bool(for: key) != value else { return }
 		store.set(value, forKey: key.value)
 		store.synchronize()
 	}
 	public func save(value: Any?, for key: StorageKeys) {
+		delete(for: key)
 		store.set(value, forKey: key.value)
 		store.synchronize()
 	}

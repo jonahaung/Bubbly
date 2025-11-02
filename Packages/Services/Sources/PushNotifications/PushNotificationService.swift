@@ -9,38 +9,38 @@ import UIKit
 import UserNotifications
 import XUI
 import FirebaseMessaging
+import FirebaseAuth
+//import FirebaseFirestore
 import Database
 import Core
 
 public final class PushNotificationService: NSObject, Sendable {
 
-	public override init() {
+	public static let shared = PushNotificationService()
+
+	private override init() {
 		super.init()
 	}
 
-	public func register() {
-		UNUserNotificationCenter
-			.current()
-			.requestAuthorization(
-				options: [
-					.alert,
-					.badge,
-					.sound
-				]
-			) {
-				[weak self] _,
-				error in
-				guard let self else { return }
-				DispatchQueue.main.async {
-					if let error {
-						Log(error)
-					} else {
-						UIApplication.shared.registerForRemoteNotifications()
-						UNUserNotificationCenter.current().delegate = self
-						Messaging.messaging().delegate = self
-					}
+	public func registerForPushNotifications(
+		completion: @escaping @Sendable @MainActor () -> Void
+	) {
+		UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
+			if let error {
+				Log(error)
+			} else if success {
+				Task { @MainActor in
+					UIApplication.shared.registerForRemoteNotifications()
+					Messaging.messaging().delegate = self
+					UNUserNotificationCenter.current().delegate = self
+					completion()
 				}
+				return
 			}
+			Task { @MainActor in
+				completion()
+			}
+		}
 	}
 }
 
@@ -60,7 +60,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
 		}
 		switch currentNavPath {
 		case .conversation(let conversationKit):
-			if data.conID == conversationKit.conversation.uid {
+			if data.conID == conversationKit.configuration.conID {
 				await Socket.shared.receive(data)
 				return []
 			} else {
@@ -92,8 +92,27 @@ extension PushNotificationService: MessagingDelegate {
 		_ messaging: Messaging,
 		didReceiveRegistrationToken fcmToken: String?
 	) {
+		PushNotificationService.shared.uploadTokenToFirestore(fcmToken)
+	}
+}
+public extension PushNotificationService {
+	func uploadTokenToFirestore(_ fcmToken: String?) {
 		GroupAppStorage.shared.save(value: fcmToken, for: .device(.deviceToken))
 		NotificationCenter.default
 			.post(name: .receiveDeviceToken, object: fcmToken)
+//		guard
+//			let fcmToken,
+//			!fcmToken.isEmpty,
+//			let user = Auth.auth().currentUser
+//		else {
+//			debugPrint("⚠️ Skipping Firestore upload — no token or user.")
+//			return
+//		}
+//		do {
+//			try await FirestoreRepo.update(value: [Contact.CodingKeys.pushToken.rawValue: fcmToken], collectionPath: .users, to: user.uid)
+//			Log("Updated fcmToken (\(fcmToken) to Firestore for user: \(user.displayName ?? user.uid)")
+//		} catch {
+//			Log(error)
+//		}
 	}
 }

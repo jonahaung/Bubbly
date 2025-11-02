@@ -33,6 +33,7 @@ public final class ToastPresenter {
 		shared.show(value)
 	}
 
+	@MainActor
 	public static func show(_ text: String, action: (@MainActor @Sendable () -> Void)? = nil) {
 		shared.show(.init(message: text, action: action))
 	}
@@ -56,6 +57,7 @@ private extension ToastPresenter {
 	func processQueue() {
 		// If no current toast and queue has items
 		guard toast == nil, !queue.isEmpty else { return }
+		Haptics.shared.generateNotificationFeedback(style: .success)
 		let next = queue.removeFirst()
 		toast = next
 		startTracking()

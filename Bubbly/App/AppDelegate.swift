@@ -12,19 +12,30 @@ import FirebaseAuth
 import FirebaseMessaging
 import Database
 import Core
+import XUI
+
 
 @MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
 
-	let pushNotificationService = PushNotificationService()
-	lazy var authService = AuthService()
+	let pushNotificationService = PushNotificationService.shared
+	let authService = AuthService.shared
+	let router = Router.shared
 
 	func application(
 		_ application: UIApplication,
 		didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
 	) -> Bool {
 		FirebaseApp.configure()
-		pushNotificationService.register()
+		FirebaseConfiguration.shared.setLoggerLevel(.error)
+		Auth.auth().shareAuthStateAcrossDevices = true
+		try? Auth.auth().useUserAccessGroup(AppInformation.groupID)
+		pushNotificationService.registerForPushNotifications { [weak self] in
+			MainActor.assumeIsolated {
+				debugPrint("1️⃣ Registered for push notifications")
+				self?.authService.start()
+			}
+		}
 		return true
 	}
 

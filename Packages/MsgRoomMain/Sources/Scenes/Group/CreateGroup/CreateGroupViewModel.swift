@@ -9,7 +9,6 @@ import SwiftUI
 import Database
 import XUI
 import Services
-import FirebaseFirestore
 import MediaPicker
 
 @MainActor
@@ -54,13 +53,11 @@ final class CreateGroupViewModel {
 			photoURL: url,
 			members: memberIDs,
 			createdBy: currentUserID,
-			lastMsgID: nil
+			theme: .init(),
+			seenMembers: [],
+			lastMsgID: nil,
 		)
-		try await FirestoreRepo
-			.add(
-				group,
-				to: Firestore.firestore().collection("groups").document(groupID)
-			)
+		try await FirestoreRepo.add(group, collectionPath: .groups, documentID: group.uid)
 		try await Store.shared.groupStore.insert(group)
 		try await Task.sleep(seconds: 2)
 		setLoading(false)

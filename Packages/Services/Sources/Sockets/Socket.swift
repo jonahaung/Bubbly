@@ -17,17 +17,20 @@ public struct SocketActor {
 	public static let shared = SocketActor()
 }
 
-public actor Socket {
-	enum SocketError: Error {
-		case encodingFailed
-	}
-	let pushNotificationSender = PushNotificationSender(
-		suitName: AppInformation.groupID
-	)
-	public static let shared = Socket()
-	internal let cryptoService =  CryptoService.shared
+@SocketActor
+public final class Socket: Sendable {
+
+	@SocketActor public static let shared = Socket()
+
+	let cryptoService =  CryptoService.shared
+	let pushNotificationSender = PushNotificationSender(suitName: AppInformation.groupID)
+
 	private init() {}
 
 	let queue = AsyncSerialQueue()
-	var procedureQueue = Deque<AnyMsgData>()
+	var sendingQueue = Deque<AnyMsgData>()
+
+	enum SocketError: Error {
+		case encodingFailed
+	}
 }

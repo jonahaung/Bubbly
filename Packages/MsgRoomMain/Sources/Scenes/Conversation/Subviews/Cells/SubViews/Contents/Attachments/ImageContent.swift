@@ -90,6 +90,7 @@ extension AttachmentContent {
 			if let image = viewModel.msg.thumbnailImage() {
 				await MainActor.run {
 					self.viewModel.attachment.thumbnail = image
+					self.viewModel.updateUI()
 				}
 			} else {
 				await loadAttachmentData()
@@ -118,7 +119,7 @@ extension AttachmentContent {
 				}
 			}
 		}
-		
+
 		public func onImageLoaded(_ image: UIImage) {
 			let msg = viewModel.msg
 			Task.detached {

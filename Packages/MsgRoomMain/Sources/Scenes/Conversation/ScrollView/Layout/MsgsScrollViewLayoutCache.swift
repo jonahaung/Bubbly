@@ -10,22 +10,18 @@ import Database
 import Services
 import XUI
 
-// MARK: - Cache Types
 private enum CacheConstants {
 	static let searchRectSize = CGSize(width: 20, height: 20)
 }
 
-// MARK: - Main Cache Class
 final class MsgsScrollViewLayoutCache: @unchecked Sendable {
 
 	private var msgCellLayouts: [String: MsgCellLayout] = [:]
 	private var cachedLayout = MsgsScrollViewLayout.Cache.empty(boundsWidth: 0, contentInsets: .init())
 
-	// MARK: - Initialization
 	init() {}
 }
 
-// MARK: - Size Management
 extension MsgsScrollViewLayoutCache {
 
 	func size(for msgID: String) -> CGSize? {
@@ -40,11 +36,9 @@ extension MsgsScrollViewLayoutCache {
 	}
 }
 
-// MARK: - Layout Management
 extension MsgsScrollViewLayoutCache {
 
 	func layout(for location: CGPoint) -> MsgsScrollViewLayout.CellLayout? {
-//		let searchRect = createSearchRect(around: location, size: CacheConstants.searchRectSize)
 		return cachedLayout.layouts.first { $0.frame.contains(location) }
 	}
 	func layout(for id: String) -> MsgsScrollViewLayout.CellLayout? {
@@ -68,10 +62,10 @@ extension MsgsScrollViewLayoutCache {
 		cachedLayout.layouts.removeAll()
 		cachedLayout.boundsWidth = 0
 		cachedLayout.totalHeight = 0
+		msgCellLayouts.removeAll()
 	}
 }
 
-// MARK: - MsgCellLayout Management
 extension MsgsScrollViewLayoutCache {
 
 	func msgCellLayout(for id: String) -> MsgCellLayout? {
@@ -83,7 +77,6 @@ extension MsgsScrollViewLayoutCache {
 	}
 }
 
-// MARK: - Private Helpers
 private extension MsgsScrollViewLayoutCache {
 
 	func createSearchRect(around point: CGPoint, size: CGSize) -> CGRect {

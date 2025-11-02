@@ -5,7 +5,7 @@ public protocol AsyncFetchingItem: Sendable {
 	static func performFetch(for id: ID) async throws -> Self
 }
 
-public actor AsyncAwaitFetcher <Item: AsyncFetchingItem>{
+public actor AsyncAwaitFetcher <Item: AsyncFetchingItem> {
 	private var cache = [Item.ID: Item]()
 	private var tasks: [Item.ID: Task<Item, Error>] = [:]
 

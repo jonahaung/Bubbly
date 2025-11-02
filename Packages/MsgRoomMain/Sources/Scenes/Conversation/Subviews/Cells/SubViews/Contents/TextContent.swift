@@ -15,6 +15,6 @@ struct TextContent: View {
 			.multilineTextAlignment(.leading)
 			.allowsTightening(true)
 			.equatable(by: text)
-			.fixedSize(horizontal: false, vertical: true)
+//			.fixedSize(horizontal: false, vertical: true)
     }
 }

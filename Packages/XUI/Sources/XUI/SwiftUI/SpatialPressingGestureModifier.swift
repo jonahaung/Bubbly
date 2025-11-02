@@ -8,73 +8,128 @@
 import SwiftUI
 
 struct SpatialPressingGestureModifier: ViewModifier {
-	var onPressingChanged: (CGPoint?) -> Void
+	let onPressingChanged: @Sendable (CGPoint?) -> Void
+	let coordinateSpace: CoordinateSpaceProtocol
+	let minimumPressDuration: TimeInterval
+	let allowableMovement: CGFloat
 
-	@State var currentLocation: CGPoint?
-	let coordinateSpace: CoordinateSpace
-
-	init(coordinateSpace: CoordinateSpace, action: @escaping (CGPoint?) -> Void) {
+	init(coordinateSpace: CoordinateSpaceProtocol,
+		 minimumPressDuration: TimeInterval,
+		 allowableMovement: CGFloat,
+		 action: @escaping @Sendable (CGPoint?) -> Void) {
 		self.onPressingChanged = action
 		self.coordinateSpace = coordinateSpace
+		self.minimumPressDuration = minimumPressDuration
+		self.allowableMovement = allowableMovement
 	}
-
 	func body(content: Content) -> some View {
-		let gesture = SpatialPressingGesture(location: $currentLocation, coordinateSpace: coordinateSpace)
-		content
-			.gesture(gesture)
-			.onChange(of: currentLocation, { oldValue, newValue in
-				if let newValue {
-					onPressingChanged(newValue)
-				}
-			})
+		let gesture = SpatialPressingGesture(
+			coordinateSpace: coordinateSpace,
+			minimumPressDuration: minimumPressDuration,
+			allowableMovement: allowableMovement,
+			onChange: onPressingChanged
+		)
+
+		content.gesture(gesture)
 	}
 }
 
+@MainActor
 public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
+
+	public typealias UIGestureRecognizerType = UILongPressGestureRecognizer
+
 	public final class Coordinator: NSObject, UIGestureRecognizerDelegate {
-		@objc
+		var onChange: (@Sendable (CGPoint?) -> Void)?
+		var coordinateSpace: CoordinateSpaceProtocol?
+		var converter: CoordinateSpaceConverter?
+
+		@objc func handle(_ recognizer: UILongPressGestureRecognizer) {
+			switch recognizer.state {
+			case .began:
+				if let converter, let coordinateSpace {
+					onChange?(converter.location(in: coordinateSpace))
+				}
+			case .ended, .cancelled, .failed:
+				onChange?(nil)
+			case .recognized:
+				break
+			case .changed:
+				break
+			default:
+				break
+			}
+		}
 		public func gestureRecognizer(
 			_ gestureRecognizer: UIGestureRecognizer,
 			shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer
 		) -> Bool {
 			false
 		}
-		public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+		public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool {
 			true
+		}
+		public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+			false
 		}
 	}
 
-	@Binding var location: CGPoint?
-	let coordinateSpace: CoordinateSpace
+	let coordinateSpace: CoordinateSpaceProtocol
+	let minimumPressDuration: TimeInterval
+	let allowableMovement: CGFloat
+	let onChange: @Sendable (CGPoint?) -> Void
+
+	public init(
+		coordinateSpace: some CoordinateSpaceProtocol,
+		minimumPressDuration: TimeInterval,
+		allowableMovement: CGFloat,
+		onChange: @escaping @Sendable (CGPoint?) -> Void
+	) {
+		self.coordinateSpace = coordinateSpace
+		self.minimumPressDuration = minimumPressDuration
+		self.allowableMovement = allowableMovement
+		self.onChange = onChange
+	}
 
 	public func makeCoordinator(converter: CoordinateSpaceConverter) -> Coordinator {
-		Coordinator()
+		let coordinator = Coordinator()
+		coordinator.converter = converter
+		return coordinator
 	}
 
 	public func makeUIGestureRecognizer(context: Context) -> UILongPressGestureRecognizer {
-		let recognizer = UILongPressGestureRecognizer()
-		recognizer.minimumPressDuration = 0.5
+		let recognizer = UILongPressGestureRecognizer(
+			target: context.coordinator,
+			action: #selector(Coordinator.handle(_:))
+		)
+		recognizer.minimumPressDuration = minimumPressDuration
+		recognizer.allowableMovement = allowableMovement
 		recognizer.delegate = context.coordinator
 		return recognizer
 	}
 
-	public func handleUIGestureRecognizerAction(
-		_ recognizer: UIGestureRecognizerType, context: Context) {
-			switch recognizer.state {
-			case .began:
-				location = context.converter.location(in: .global)
-			case .ended:
-				break
-			case .cancelled, .failed:
-				location = nil
-			default:
-				break
-			}
-		}
+	public func updateUIGestureRecognizer(_ recognizer: UILongPressGestureRecognizer, context: Context) {
+		recognizer.minimumPressDuration = minimumPressDuration
+		recognizer.allowableMovement = allowableMovement
+		context.coordinator.onChange = onChange
+		context.coordinator.coordinateSpace = coordinateSpace
+	}
 }
 
 public extension View {
-	func onPressingChanged(in coordinateSpace: CoordinateSpace, _ action: @escaping (CGPoint?) -> Void) -> some View {
-		modifier(SpatialPressingGestureModifier(coordinateSpace: coordinateSpace, action: action))
+	func onPressingChanged(
+		in coordinateSpace: CoordinateSpaceProtocol,
+		minimumPressDuration: TimeInterval = 0.5,
+		allowableMovement: CGFloat = 0,
+		_ action: sending @escaping @Sendable (CGPoint?) -> Void
+	) -> some View {
+		modifier(
+			SpatialPressingGestureModifier(
+				coordinateSpace: coordinateSpace,
+				minimumPressDuration: minimumPressDuration,
+				allowableMovement: allowableMovement,
+				action: action
+			)
+		)
 	}
 }

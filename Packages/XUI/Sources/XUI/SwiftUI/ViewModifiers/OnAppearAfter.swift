@@ -27,7 +27,7 @@ private struct OnAppearAfterModifier: ViewModifier {
 }
 
 public extension View {
-    func _onAppear(after timeout: TimeInterval, _ perform: @escaping () -> Void) -> some View {
+    func onAppear(after timeout: TimeInterval, _ perform: @escaping () -> Void) -> some View {
         modifier(OnAppearAfterModifier(timeout: timeout, perform: perform))
     }
 }

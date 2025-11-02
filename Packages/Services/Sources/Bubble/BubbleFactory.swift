@@ -9,7 +9,7 @@ import UIKit
 import Database
 import Core
 
-public struct BubbleFactory {
+public struct BubbleFactory: Sendable {
 
 	private let minutesForChatMsgGrouping: Int
 

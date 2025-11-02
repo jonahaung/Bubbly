@@ -8,6 +8,18 @@
 import Foundation
 
 public extension Encodable {
+	func asDictionary() throws -> [String: Any] {
+		let data = try JSONEncoder().encode(self)
+		let object = try JSONSerialization.jsonObject(with: data, options: [])
+		guard let dict = object as? [String: Any] else {
+			throw NSError(
+				domain: "Encodable+Dictionary",
+				code: 1,
+				userInfo: [NSLocalizedDescriptionKey: "Top-level JSON is not a dictionary."]
+			)
+		}
+		return dict
+	}
     var dictionary: [String: Any] {
 		let encoder = JSONEncoder()
 		encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -16,29 +28,13 @@ public extension Encodable {
     }
     var jsonData: Data? {
         let encoder = JSONEncoder()
-		encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-		encoder.keyEncodingStrategy = .convertToSnakeCase
-		encoder.dateEncodingStrategy = .millisecondsSince1970
+		encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
         return try? encoder.encode(self)
     }
     var preetyPrinted: String {
         if let jsonData {
             let preety = String(data: jsonData, encoding: .utf8) ?? "Error"
-			var lines = [String]()
-			let s =
-"""
-"
-"""
-			preety.lines().forEach { line in
-				let parts = line.components(separatedBy: ":")
-				if parts.count == 2 {
-					let key = parts[0]
-					let value = parts[1]
-					let newLine = "-\(key)\n\(value)".replace(s, with: "").trimmed
-					lines.append(newLine)
-				}
-			}
-			return lines.sorted().joined(separator: "\n")
+			return preety
         }
         return "Error"
     }

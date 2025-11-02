@@ -25,7 +25,7 @@ public extension StorageKeys {
 		case deviceToken
 	}
 	enum Auth: String {
-		case currentUserID
+		case currentUserID, authToken
 	}
 	enum Layout: String {
 		case chatMsgSpacing

@@ -9,16 +9,13 @@ import SwiftUI
 import Database
 
 struct MsgCellInteraction: Sendable {
-
 	enum Action: Equatable, Hashable, Sendable {
 		case onTapMsg(String?)
 		case onMarkMsg(Message)
 		case onTapAvatar(String)
 		case onFocusMsgBubble(_ item: ChatOverlayView.Item)
 	}
-
 	let action: @Sendable (Action) -> Void
-
 	func callAsFunction(_ data: Action) {
 		action(data)
 	}

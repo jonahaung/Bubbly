@@ -20,7 +20,7 @@ public actor PushNotificationSender {
 
 	private enum Constants {
 		static let fcmSendPath = "/v1/projects/%@/messages:send"
-		static let fcmBaseURL = "https://fcm.googleapis.com"
+		static let baseURL = "https://fcm.googleapis.com"
 		static let authorizationHeader = "Authorization"
 		static let contentTypeHeader = "Content-Type"
 		static let jsonContentType = "application/json"
@@ -59,7 +59,7 @@ public actor PushNotificationSender {
 		for notification: APNSNotification,
 		authToken: String
 	) throws -> URLRequest {
-		let urlString = Constants.fcmBaseURL + String(
+		let urlString = Constants.baseURL + String(
 			format: Constants.fcmSendPath,
 			accessTokenService.credentials.projectID
 		)

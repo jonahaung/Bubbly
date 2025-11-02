@@ -13,12 +13,3 @@ public extension Task where Success == Never, Failure == Never {
         try await Task.sleep(nanoseconds: duration)
     }
 }
-
-public var isOnMainThread: Bool {
-    return Thread.isMainThread
-}
-public func isOnMainThreadOrDie() {
-    if !isOnMainThread {
-        fatalError("This function must be called on the main thread.")
-    }
-}

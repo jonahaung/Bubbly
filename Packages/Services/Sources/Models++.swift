@@ -28,22 +28,6 @@ extension Contact: @retroactive ImageViewItem {
 		.png
 	}
 }
-
-extension AI: @retroactive ImageViewItem {
-	public var remoteURL: URL? {
-		.init(string: photoURL) ?? DemoImages.demoPhotosURLs.random()!
-	}
-
-	public var subFolderName: String? {
-		"Conversations"
-	}
-	public var imageID: String? {
-		uid
-	}
-	public var mediaType: Database.MediaType? {
-		.png
-	}
-}
 extension Database.Group: @retroactive ImageViewItem {
 	public var remoteURL: URL? {
 		.init(string: photoURL ?? "") ?? DemoImages.demoPhotosURLs.random()!

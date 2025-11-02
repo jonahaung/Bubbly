@@ -9,14 +9,6 @@ import UIKit
 import SwiftUI
 
 public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
-	public static let allShape = BubbleCorner.all.roundedRectange(cornerRadius: 17)
-	public static let receivingTopShape = BubbleCorner.receivingTop.roundedRectange(cornerRadius: 17)
-	public static let receivingCenterShape = BubbleCorner.receivingCenter.roundedRectange(cornerRadius: 17)
-	public static let receivingBottomShape = BubbleCorner.receivingBottom.roundedRectange(cornerRadius: 17)
-	public static let sendingTopShape = BubbleCorner.sendingTop.roundedRectange(cornerRadius: 17)
-	public static let sendingCenterShape = BubbleCorner.sendingCenter.roundedRectange(cornerRadius: 17)
-	public static let sendingBottomShape = BubbleCorner.sendingBottom.roundedRectange(cornerRadius: 17)
-	public static let noneShape = BubbleCorner.none.roundedRectange(cornerRadius: 17)
 
 	public var id: Int { rawValue }
 	case all, receivingTop, receivingCenter, receivingBottom, sendingTop, sendingCenter, sendingBottom, none
@@ -112,7 +104,6 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
 		}
 	}
 
-
 	public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle {
 		UnevenRoundedRectangle(
 			topLeadingRadius: topLeadingRadius ? cornerRadius: 0,
@@ -122,29 +113,6 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
 			style: .continuous
 		)
 	}
-
-	public var shape: UnevenRoundedRectangle {
-		switch self {
-		case .all:
-			Self.allShape
-		case .receivingTop:
-			Self.receivingTopShape
-		case .receivingCenter:
-			Self.receivingCenterShape
-		case .receivingBottom:
-			Self.receivingBottomShape
-		case .sendingTop:
-			Self.sendingTopShape
-		case .sendingCenter:
-			Self.sendingCenterShape
-		case .sendingBottom:
-			Self.sendingBottomShape
-		case .none:
-			Self.noneShape
-		}
-	}
-
-//	topLeadingRadius: corn, bottomLeadingRadius: , bottomTrailingRadius: , topTrailingRadius: ,
 }
 
 public extension BubbleCorner {

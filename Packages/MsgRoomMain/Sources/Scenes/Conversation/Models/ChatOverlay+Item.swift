@@ -10,15 +10,13 @@ import Database
 import Services
 
 extension ChatOverlayView {
-	public struct Item: Equatable, Hashable, Sendable, Identifiable {
+	public struct Item: Hashable, Sendable, Identifiable {
 		public let id: String
 		public var frame: CGRect
-
 		public init(id: String, frame: CGRect) {
 			self.id = id
 			self.frame = frame
 		}
-
 		public func hash(into hasher: inout Hasher) {
 			id.hash(into: &hasher)
 		}

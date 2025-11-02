@@ -18,8 +18,8 @@ import PhotosUI
 struct TextInputBar: View {
 
 	@Environment(ChatViewManager.self) private var manager
-	@State var inputManager: ChatInputBarManager
-	@Environment(CurrentUser.self) private var currentUser
+	@Bindable var inputManager: ChatInputBarManager
+	@Environment(\.currentUser) private var currentUser
 	@Environment(\.sendChatRoomAction) private var msgRoomAction
 	@Environment(\.focusState) private var focusState
 
@@ -42,6 +42,7 @@ struct TextInputBar: View {
 				TextField("Text ..", text: $inputManager.text, axis: .vertical)
 					.focused(focused)
 					.lineLimit(30)
+					.autocorrectionDisabled(true)
 					.padding(6)
 					.padding(.horizontal, 8)
 					.lineSpacing(1.4)
@@ -51,6 +52,7 @@ struct TextInputBar: View {
 					.keyboardType(.twitter)
 					.font(.callout)
 					.allowsTightening(true)
+					.equatable(by: inputManager.text)
 			}
 
 			AsyncButton {
@@ -75,9 +77,9 @@ struct TextInputBar: View {
 		}
 		.padding(.horizontal, 8)
 		.padding(.bottom, 4)
-		
+
 	}
-	
+
 	private func sendButtonPressed() async {
 		inputManager.send(conversation: manager.conversation)
 	}

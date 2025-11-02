@@ -20,123 +20,124 @@ import Services
 import SwiftData
 import XUI
 
-// MARK: - Delegate Protocol
-
+@MainActor
 protocol ChatDatasourceDelegate: AnyObject {
-	func datasource(didInsert snapshot: Message) async
-	func datasource(didReceiveMsg snapshot: Message) async
-	func datasource(didRemove snapshot: Message, animated: Bool) async
-	func datasource(didUpdate snapshot: Message, animated: Bool) async
-	func datasource(didReceive status: AnyMsgData.SeenStatusPayload) async
-	func datasource(didReceive typingStatus: AnyMsgData.TypingStatusPayload) async
-	func datasource(didRecieveError: Error) async
+	func datasource(didInsert snapshot: Message)
+	func datasource(didReceiveMsg snapshot: Message)
+	func datasource(didRemove snapshot: Message, animated: Bool)
+	func datasource(didUpdate snapshot: Message, animated: Bool)
+	func datasource(didReceive status: AnyMsgData.SeenStatusPayload)
+	func datasource(didReceive typingStatus: AnyMsgData.TypingStatusPayload)
+	func datasource(didRecieveError error: Error)
 }
 
-// MARK: - Main Actor
+@MainActor
+final class ChatDatasource {
 
-actor ChatDatasource {
-
-	// MARK: - Properties
-
-	nonisolated(unsafe) weak var delegate: ChatDatasourceDelegate?
-
+	weak var delegate: ChatDatasourceDelegate?
 	private let cancelBag = CancelBag()
-	private let socketQueue = AsyncSerialQueue()
-	private let configuration: ConversationInitializer.Configuration
-
-	// MARK: - Initialization
+	private let pageSize: Int
+	private let msgStore = Store.shared.msgStore
+	private let queue = SerialTaskQueue()
 
 	init(config: ConversationInitializer.Configuration, delegate: ChatDatasourceDelegate? = nil) {
-		self.configuration = config
+		self.pageSize = config.pageSize
 		self.delegate = delegate
+
+		NotificationCenter
+			.default
+			.publisher(for: .msgNoti(for: config.conID))
+			.compactMap { $0.anyMsgData }
+			.receive(on: RunLoop.main)
+			.sink { [weak self] data in
+				guard let self else { return }
+				queue.addTask { [weak self] completion in
+					guard let self else { return }
+					Task { @ChatActor in
+						await self.performUpdate(data)
+						try await Task.sleep(seconds: 0.5)
+						completion()
+					}
+				}
+			}
+			.store(in: cancelBag)
 	}
 
-	// MARK: - Public Methods
+	deinit {
+		cancelBag.cancel()
+	}
 
 	@concurrent
 	func reset(conID: String) async throws -> [Message] {
 		try await ConversationRepo.fetchMessages(
 			conID: conID,
-			limit: configuration.pageSize
+			limit: pageSize
 		)
 	}
-
 	@concurrent
 	func loadPrevious(before date: String, conID: String) async throws -> [Message] {
-		var descriptor = FetchDescriptor<PMsg>(
-			predicate: Self.makePredicate(
+		var descriptor = await FetchDescriptor<PMsg>(
+			predicate: makePredicate(
 				conID: conID,
 				date: date,
 				comparison: .lessThan
 			)
 		)
 		descriptor.sortBy = [.init(\.date, order: .reverse)]
-		descriptor.fetchLimit = configuration.pageSize-10
+		descriptor.fetchLimit = pageSize
 
-		let snapshots = try await Store.shared.msgStore.fetch(descriptor)
+		let snapshots = try await msgStore.fetch(descriptor)
 		let ordered = Array(snapshots.reversed())
 		return ordered
 	}
 
 	@concurrent
 	func loadMore(after date: String, conID: String) async throws -> [Message] {
-		var descriptor = FetchDescriptor<PMsg>(
-			predicate: Self.makePredicate(
+		var descriptor = await FetchDescriptor<PMsg>(
+			predicate: makePredicate(
 				conID: conID,
 				date: date,
 				comparison: .greaterThan
 			)
 		)
 		descriptor.sortBy = [.init(\.date, order: .forward)]
-		descriptor.fetchLimit = configuration.pageSize-10
+		descriptor.fetchLimit = pageSize
 
-		return try await Store.shared.msgStore.fetch(descriptor)
+		return try await msgStore.fetch(descriptor)
 	}
-
-	func setupNotificationObserver() {
-		NotificationCenter.default
-			.publisher(for: .msgNoti(for: configuration.conID))
-			.compactMap { $0.anyMsgData }
-			.sink { [weak self] data in
-				guard let self else { return }
-				socketQueue.addOperation {
-					try await self.performUpdate(data)
-				}
-			}
-			.store(in: cancelBag)
-	}
-
 }
 
 // MARK: - Private Methods
 
 private extension ChatDatasource {
-	func performUpdate(_ data: AnyMsgData) async throws {
+	func performUpdate(_ data: AnyMsgData) async {
 		switch data {
 		case .newMsg(let rMsg):
 			let msg = Message(rMsg)
-			await delegate?.datasource(didInsert: msg)
-			await delegate?.datasource(didReceiveMsg: msg)
-
+			delegate?.datasource(didInsert: msg)
+			//			delegate?.datasource(didReceiveMsg: msg)
 		case .updatedMsg(let rMsg):
-			await delegate?.datasource(didUpdate: .init(rMsg), animated: false)
-
+			delegate?.datasource(didUpdate: .init(rMsg), animated: false)
 		case .reaction(let reaction):
 			Log(reaction)
-
 		case .typingStatus(let status):
-			await delegate?.datasource(didReceive: status)
+			delegate?.datasource(didReceive: status)
 
 		case .deleteMsg(let rMsg):
-			try await Store.shared.msgStore.delete(uid: rMsg.uid)
-			await delegate?.datasource(didRemove: .init(rMsg), animated: true)
-
+			Task {
+				do {
+					try await msgStore.delete(uid: rMsg.uid)
+					delegate?.datasource(didRemove: .init(rMsg), animated: true)
+				} catch {
+					delegate?.datasource(didRecieveError: error)
+				}
+			}
 		case .seenStatus(let status):
-			await delegate?.datasource(didReceive: status)
+			delegate?.datasource(didReceive: status)
 		}
 	}
 
-	static func makePredicate(
+	private func makePredicate(
 		conID: String,
 		date: String,
 		comparison: PredicateExpressions.ComparisonOperator

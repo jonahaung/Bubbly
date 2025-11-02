@@ -29,7 +29,7 @@ public final class PMsg: CollectionDocument {
 		conID: String,
 		msgKind: MsgKind,
 		text: String,
-		date: ServerTime,
+		date: String,
 		incomingStatus: MsgIncomingStatus,
 		outgoingStatus: [String: MsgOutgoingStatus],
 		attachment: Attachment?
@@ -39,7 +39,7 @@ public final class PMsg: CollectionDocument {
 		self.conID = conID
 		self.msgKind = msgKind.rawValue
 		self.text = text
-		self.date = date.value
+		self.date = date
 		self.incomingStatus = incomingStatus.rawValue
 		self.outgoingStatus = outgoingStatus
 		self.attachment = attachment
@@ -69,7 +69,7 @@ extension PMsg: SendableDocument {
 			conID: snapshot.conID,
 			msgKind: snapshot.msgKind,
 			text: snapshot.text,
-			date: ServerTime(snapshot.date),
+			date: ServerTime(snapshot.date).value,
 			incomingStatus: snapshot.incomingStatus,
 			outgoingStatus: snapshot.outgoingStatus,
 			attachment: snapshot.attachment

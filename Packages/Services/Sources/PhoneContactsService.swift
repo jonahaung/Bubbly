@@ -7,7 +7,6 @@
 
 import Foundation
 import Contacts
-import FirebaseFirestore
 import Database
 import XUI
 @preconcurrency import PhoneNumberKit
@@ -42,30 +41,24 @@ public final class PhoneContactsService {
 		return contacts
 	}
 
+	@discardableResult
+	@concurrent
 	public func syncContacts() async throws -> sending [Contact] {
 		let phoneContacts = try await fetchContacts()
 		let phoneNumberKit = PhoneNumberKit()
 		let dbContact = Store.shared.contactStore
-		let userRef = Firestore.firestore().collection("users")
-		let contacts = try await AsyncOrderedStream.mapOrdered(inputs: phoneContacts) { phoneContact in
+		let contacts: [Contact?] = try await AsyncOrderedStream.mapOrdered(inputs: phoneContacts) { phoneContact in
 			let parsedNumber = try phoneNumberKit.parse(phoneContact.mobile)
 			let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
-
-			let query = userRef.whereField("mobile", isEqualTo: formattedNumber)
-			let remoteContact = try await query
-				.getDocuments()
-				.documents
-				.first?
-				.data(as: Contact.self)
-
+			let remoteContact: Contact? = try await FirestoreRepo.getModel(for: formattedNumber, collection: .users, field: .mobile)
 			if var remoteContact {
 				remoteContact.name = phoneContact.name
 				try await dbContact.insert(remoteContact)
 				return remoteContact
 			} else {
-				return phoneContact 
+				return nil
 			}
 		}
-		return contacts.compactMap{ $0 }
+		return contacts.compactMap { $0 }
 	}
 }

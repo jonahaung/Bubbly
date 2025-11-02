@@ -172,11 +172,11 @@ extension ImageProcessors {
 	}
 
 }
-final class ColorExtractor {
+public final class ColorExtractor {
 	public struct PhotoColorScheme: @unchecked Sendable {
-		public let colors: [Color]
+		public let colors: [UIColor]
 
-		public init(colors: [Color]) {
+		public init(colors: [UIColor]) {
 			self.colors = colors
 		}
 	}
@@ -252,7 +252,7 @@ final class ColorExtractor {
 	private var iterationCount = 0
 
 	/// - Tag: Life cycle
-	init() {
+	public init() {
 		redBuffer = vImage.PixelBuffer<vImage.PlanarF>(
 			data: redStorage.baseAddress!,
 			width: ColorExtractor.dimension,
@@ -310,7 +310,7 @@ final class ColorExtractor {
 	}
 
 	/// Calculates k-means for the selected thumbnail.
-	func extractColors(from data: Data) -> PhotoColorScheme? {
+	public func extractColors(from data: Data) -> PhotoColorScheme? {
 		guard let image = cgImage(from: data) else { return nil }
 
 		allocateDistancesBuffer()
@@ -335,7 +335,8 @@ final class ColorExtractor {
 		}
 
 		return .init(colors: centroids.map {
-			Color(red: CGFloat($0.red), green: CGFloat($0.green), blue: CGFloat($0.blue), alpha: 1)
+
+			UIColor(red: CGFloat($0.red), green: CGFloat($0.green), blue: CGFloat($0.blue), alpha: 1)
 		})
 	}
 }

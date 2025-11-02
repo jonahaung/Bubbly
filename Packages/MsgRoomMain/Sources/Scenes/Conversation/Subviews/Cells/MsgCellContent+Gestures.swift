@@ -12,28 +12,55 @@ import Services
 
 struct MsgCellContentGesturesView<Content: View>: View {
 
-	@ViewBuilder var msgCellContent: () -> Content
-
 	@Environment(MsgCellViewModel.self) private var viewModel
 	@Environment(ChatViewManager.self) private var manager
 	@Environment(\.sendMsgCellInteraction) private var sendMsgCellInteraction
-	@Environment(\.conversation) private var conversation
 	@State private var draggedLimitReached = false
 	@State private var draggedOffset: CGFloat =  .zero
+	@State private var isLongPressActive = false
+
+	private let content: Content
+
+	init(_ content: Content) {
+		self.content = content
+	}
 
 	var body: some View {
-		msgCellContent()
+		content
 			.offset(x: draggedOffset)
-			.gesture(dragGesture)
+			.gesture(dragGesture.exclusively(before: tapGesture), including: .gesture)
+			.background{
+				if isLongPressActive {
+					Color.clear.hidden()
+						.onGeometryChange(for: CGRect.self) { proxy in
+							proxy.frame(in: .global)
+						} action: { newValue in
+							isLongPressActive = false
+							sendMsgCellInteraction?(.onFocusMsgBubble(.init(id: viewModel.id, frame: newValue)))
+						}
+
+				}
+			}
+			.onPressingChanged(in: .local) { point in
+				MainActor.assumeIsolated {
+					isLongPressActive = true
+				}
+			}
 	}
 }
 
 private extension MsgCellContentGesturesView {
+	private var tapGesture: some Gesture {
+		TapGesture(count: 2)
+			.onEnded { value in
+				sendMsgCellInteraction?(.onTapMsg(viewModel.id))
+			}
+	}
 	private var dragGesture: some Gesture {
-		DragGesture(minimumDistance: 50, coordinateSpace: .local)
+		DragGesture(minimumDistance: 80, coordinateSpace: .local)
 			.onChanged { value in
 				let width = value.translation.width
-				let isValid = viewModel.isSender ? width < -10 : width > 10
+				let isValid = viewModel.isSender ? width < -80 : width > 80
 				guard isValid else { return }
 				let absWidth = abs(width)
 				if !draggedLimitReached && absWidth > 170 {
@@ -49,7 +76,6 @@ private extension MsgCellContentGesturesView {
 				withTransaction(.init(animation: .interactiveSpring)) {
 					draggedOffset = 0
 				}
-				Haptics.play(.soft, 0.5)
 			}
 	}
 }

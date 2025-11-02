@@ -19,20 +19,21 @@ final class CurrentUserProfileViewModel: ErrorPresenter {
 	var pickedPhoto: PickedPhoto?
 	var isLoading = false
 
-	func shouldUpdateDisplayName(for user: Contact) -> Bool {
+	func shouldUpdateDisplayName(for user: CurrentUserModel) -> Bool {
 		Auth
 			.auth().currentUser?.displayName != user.name.trimmed && user.name.isWhitespace == false
 	}
-	func shouldUpdateProfile(for user: Contact) -> Bool {
+	func shouldUpdateProfile(for user: CurrentUserModel) -> Bool {
 		shouldUpdateDisplayName(for: user) || shouldUpdateProfileImage()
 	}
 	func shouldUpdateProfileImage() -> Bool {
 		pickedPhoto != nil
 	}
-	func isProfileComplete(for user: Contact) -> Bool {
+	func isProfileComplete(for user: CurrentUserModel) -> Bool {
 		user.name.isWhitespace == false
 	}
-	func applyUpdates(for snapshot: Contact) async throws {
+	@concurrent
+	func applyUpdates(for snapshot: CurrentUserModel) async throws {
 		guard let currentUser = Auth.auth().currentUser else {
 			return
 		}
@@ -41,6 +42,7 @@ final class CurrentUserProfileViewModel: ErrorPresenter {
 		try await request.commitChanges()
 	}
 
+	@concurrent
 	func uploadImage(image: UIImage) async throws -> String {
 		guard
 			let currentUser = Auth.auth().currentUser

@@ -13,40 +13,67 @@ import XUI
 @Observable
 public final class MsgCellViewModel: Sendable {
 
-	public let id: String
-	public let isSender: Bool
-	public var msg: Message
-	public var displayData: MsgCellDisplayData
-	public var msgID: String { id }
+	public private(set) var msg: Message
+	public private(set) var displayData: MsgCellDisplayData
 	public private(set) var isVisible = false
+	public private(set) var layout = MsgCellLayout()
+	public private(set) var isLongPressActive = false
+	public private(set) var updateTag = 0
 	public let attachment: MsgCellAttachmentViewModel = .init()
 
 	public init(_ msg: Message) {
 		self.msg = msg
-		self.id = msg.uid
-		self.isSender = msg.isSender
 		self.displayData = .init(msg: msg)
 	}
 	public func update(with msg: Message) {
 		guard self.msg != msg else { return }
 		self.msg = msg
 		self.displayData.content = MsgCellDisplayData.ContentDisplay.create(from: msg)
+		updateUI()
 	}
-
+	public func update(layout: MsgCellLayout) {
+		guard self.layout != layout else { return }
+		self.layout = layout
+		updateUI()
+	}
+	public func resetLayout() {
+		update(layout: .init())
+	}
 	public func setVisibility(_ isVisible: Bool) {
 		guard self.isVisible != isVisible else { return }
 		self.isVisible = isVisible
 	}
+	public func updateUI() {
+		updateTag += 1
+	}
+
+	public func setSelected(_ isSelected: Bool) {
+		var layout = self.layout
+		layout.isSelected = isSelected
+		var transaction = Transaction()
+		transaction.animation = .interactiveSpring
+		withTransaction(transaction) {
+			update(layout: layout)
+		}
+	}
+
+	public func setLongPressActive(_ isActive: Bool) {
+		guard isLongPressActive != isActive else { return }
+		isLongPressActive = isActive
+		updateUI()
+	}
 }
 
 public extension MsgCellViewModel {
+	var id: String { msg.uid }
+	var isSender: Bool { msg.isSender }
 	var foregroundStyle: Color {
 		isSender ? .black : .primary
 	}
 	var horizontalAlignment: HorizontalAlignment {
 		isSender ? .trailing : .leading
 	}
-	@MainActor func sender() -> Contact? {
+	func sender() -> Contact? {
 		ContactStore.shared.contact(for: msg.senderID)
 	}
 }

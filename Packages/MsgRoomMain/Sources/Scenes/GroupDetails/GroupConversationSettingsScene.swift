@@ -16,7 +16,7 @@ public struct GroupConversationSettingsScene: View {
 
 	@State private var viewModel: GroupDetailsViewModel
 	@Environment(ContactStore.self) private var contactStore
-	@Environment(CurrentUser.self) private var currentUser
+	@Environment(\.currentUser) private var currentUser
 	@FocusState private var isFocused: Bool
 
 	public init(_ group: Database.Group) {
@@ -77,7 +77,9 @@ public struct GroupConversationSettingsScene: View {
 			}
 			Section {
 				FormCell("Created", viewModel.group.createdDate.date.formatted(date: .abbreviated, time: .shortened))
-				if let admin = viewModel.group.createdBy == currentUserId ? currentUser.user : contactStore.contact(for: viewModel.group.createdBy) {
+				if let admin: (any ContactRepresentable) = viewModel.group.createdBy == currentUserId ? currentUser : contactStore.contact(
+					for: viewModel.group.createdBy
+				) {
 					FormCell("Admin", admin.name)
 				}
 			}
@@ -120,17 +122,16 @@ public struct GroupConversationSettingsScene: View {
 						}
 					}
 					try await viewModel.applyUpdate()
+					Task { @MainActor in
+						viewModel.originalGroup = viewModel.group
+					}
 				} label: {
 					if viewModel.isLoading {
 						ProgressView().controlSize(.mini)
 					} else {
 						Text("Save")
 					}
-				} onFinish: {
-					Task { @MainActor in
-						viewModel.originalGroup = viewModel.group
-					}
-				} onError: { error in
+				}onError: { error in
 					Task {
 						await viewModel.setLoading(false)
 						await viewModel.showError(error)

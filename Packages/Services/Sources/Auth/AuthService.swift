@@ -8,7 +8,6 @@
 import SwiftUI
 import FirebaseAuth
 import FirebaseMessaging
-import FirebaseFirestore
 import XUI
 import Database
 import Core
@@ -17,62 +16,58 @@ import Core
 @Observable
 public class AuthService {
 
-	public enum AuthState: Sendable {
-		case loggedIn(user: Contact), loggedOut, newUser(user: Contact), unknown
+	public enum AuthState {
+		case loggedIn(_ user: User), loggedOut, newUser(_ user: User), initial, unknown
 	}
 
-	public var authState: AuthState = .unknown
-	private let cancelBag = CancelBag()
+	@MainActor
+	public static let shared = AuthService()
+	private init() {}
 
-	public init() {
+	public var authState: AuthState = .unknown
+	@ObservationIgnored private let cancelBag = CancelBag()
+
+	public func start() {
+		authState = determineAuthState()
 		observeAuthState()
+		debugPrint("2️⃣ AuthService starting...")
 	}
 
 	public func observeAuthState() {
-		authState = determineAuthState()
 		NotificationCenter.default
 			.publisher(
 				for: NSNotification.Name.AuthStateDidChange,
 				object: Auth.auth()
 			)
-			.debounce(for: 0.3, scheduler: RunLoop.main)
+			.subscribe(on: RunLoop.main)
 			.sink { [weak self] _ in
 				guard let self else { return }
 				self.handleAuthStateChange()
 			}
 			.store(in: cancelBag)
+		debugPrint("3️⃣ AuthService observeAuthState \(authState)")
 	}
-
-	public func handleAuthStateChange() {
+	private func handleAuthStateChange() {
 		authState = determineAuthState()
 	}
-
-	private func determineAuthState() -> AuthState {
+	private func handleLoggedIn(with user: User) -> AuthState {
 		let storage = GroupAppStorage.shared
-		guard let user = Auth.auth().currentUser else {
-			storage.delete(for: .auth(.currentUserID))
-			return .loggedOut
-		}
 		if storage.string(for: .auth(.currentUserID)) != user.uid {
 			storage.save(value: user.uid, for: .auth(.currentUserID))
 		}
-		let currentUser = user.snapshot()
-		return user.displayName == nil ? .newUser(user: currentUser) :
-			.loggedIn(user: currentUser)
+		return user.displayName == nil ? .newUser(user) : .loggedIn(user)
 	}
-}
-
-public extension User {
-	func snapshot() -> Contact {
-		return .init(
-			uid: self.uid,
-			name: self.displayName ?? "",
-			mobile: self.phoneNumber ?? "",
-			photoURL: self.photoURL?.absoluteString ?? "",
-			pushToken: GroupAppStorage.shared
-				.string(for: .device(.deviceToken)) ?? "",
-			publicKeyString: GroupAppStorage.shared
-				.string(for: .security(.publicKey(id: self.uid))) ?? "", theme: nil, lastMsgID: nil
-		)
+	private func handleLoggaedOut() -> AuthState {
+		let storage = GroupAppStorage.shared
+		storage.delete(for: .auth(.currentUserID))
+		storage.delete(for: .auth(.authToken))
+		storage.delete(for: .device(.deviceToken))
+		return .loggedOut
+	}
+	private func determineAuthState() -> AuthState {
+		if let user = Auth.auth().currentUser {
+			return handleLoggedIn(with: user)
+		}
+		return handleLoggaedOut()
 	}
 }

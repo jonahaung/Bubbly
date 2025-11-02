@@ -14,6 +14,6 @@ public extension ScrollPosition {
 		return position
 	}()
 	mutating func reset() {
-		self = .userDefined
+		self = .init()
 	}
 }

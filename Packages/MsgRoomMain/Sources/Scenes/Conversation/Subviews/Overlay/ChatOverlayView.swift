@@ -10,31 +10,27 @@ import XUI
 import Database
 import Services
 import UIKit
+import Core
 
 struct ChatOverlayView: View {
 
 	let item: ChatOverlayView.Item
+	let viewModel: MsgCellViewModel
 	@Environment(ChatViewManager.self) private var manager
-
-	@ViewBuilder
 	var body: some View {
-		if let viewModel = manager.cellItems.viewModel(of: item.id) {
-			ZStack {
-				BlurredBackgroundView {
-					manager.eventsManager.updateFocusedFrame(nil)
-				}
-				MsgCellContent(
-					bubbleCorner: manager.msgCellLayoutFor(viewModel.msg).bubble.bubbleCorner
-				)
-				.frame(size: item.frame.size)
-				.position(.init(x: item.frame.midX, y: item.frame.midY))
-
-				RoomFocesedOverlayBar()
-					.position(x: item.frame.midX, y: item.frame.minY)
+		ZStack {
+			BlurredBackgroundView {
+				manager.eventsManager.updateFocusedFrame(nil)
 			}
-			.statusBarHidden()
-			.environment(viewModel)
+			MsgCellContent()
+				.frame(size: item.frame.size)
+				.position(x: item.frame.midX, y: item.frame.midY)
+
+			RoomFocesedOverlayBar()
+				.position(x: item.frame.midX, y: item.frame.minY)
 		}
+		.statusBarHidden()
+		.environment(viewModel)
 	}
 }
 
@@ -48,9 +44,8 @@ struct RoomFocesedOverlayBar: View {
 			SystemImageWithShape(.heartFill, .circle(.color(.pink)))
 			AsyncButton {
 				let msg = await item.msg
-				await manager.eventsManager.updateFocusedFrame(nil)
-				await manager.datasource.delegate?.datasource(didRemove: msg, animated: true)
 				await msgRoomAction?(.deleteMsg(rMsg: RMsg(msg)))
+				await manager.eventsManager.updateFocusedFrame(nil)
 			} label: {
 				SystemImageWithShape(.trashFill, .circle(.color(.red)))
 			}

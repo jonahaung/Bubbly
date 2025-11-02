@@ -8,9 +8,10 @@
 import Foundation
 
 public extension TimeInterval {
-    static let oneYear: Self = .init(60 * 60 * 24 * 365)
-    static let oneWeek: Self = .init(60 * 60 * 24 * 7)
-    static let oneDay: Self = .init(60 * 60 * 24)
-    static let oneHour: Self = .init(60 * 60)
-    static let oneSecond: Self = .init(60)
+	static let oneSecond: Self = 1
+	static let oneMinute: Self = 60
+	static let oneHour: Self = 60 * oneMinute
+	static let oneDay: Self = 24 * oneHour
+	static let oneWeek: Self = 7 * oneDay
+	static let oneYear: Self = 365 * oneDay
 }

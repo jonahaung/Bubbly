@@ -9,17 +9,15 @@ import Foundation
 import Database
 
 public enum NavPath: Hashable, Sendable, Identifiable {
-	case conversationDetails(any ConversationRepresentable)
-	case conversation(ConversationInitializer.PrefetchedData)
-	case contactDetails(Contact)
+	case conversationDetails(_ conversation: any ConversationRepresentable)
+	case conversation(_ prefatchData: ConversationInitializer.PrefetchedData)
+	case contactDetails(_ contact: Contact)
 	case currentUserDetails
-	case cachedView(String)
 
 	public var id: String {
 		self.hashValue.description
 	}
 
-	// ✅ You don't need to manually implement == — Swift synthesizes it from `hash(into:)`
 	public func hash(into hasher: inout Hasher) {
 		switch self {
 		case .conversationDetails(let snapshot):
@@ -36,10 +34,6 @@ public enum NavPath: Hashable, Sendable, Identifiable {
 
 		case .currentUserDetails:
 			hasher.combine(3)
-
-		case .cachedView(let id):
-			hasher.combine(4)
-			hasher.combine(id)
 		}
 	}
 	public static func == (lhs: NavPath, rhs: NavPath) -> Bool {

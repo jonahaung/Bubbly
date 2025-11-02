@@ -48,6 +48,5 @@ public struct FolderExplorer: View {
 				Text("Temporary")
 			}
 		}
-		.navigationTitle("Folder Explorer")
 	}
 }

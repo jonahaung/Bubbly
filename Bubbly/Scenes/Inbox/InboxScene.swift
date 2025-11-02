@@ -16,16 +16,16 @@ import Database
 struct InboxScene: View {
 
 	@Environment(Router.self) private var router
+	@Environment(\.currentUser) private var currentUser
 
 	@LazyState private var viewModel = InboxViewModel()
 
 	var body: some View {
 		List {
-			ForEach(viewModel.items) { item in
+			ForEach(viewModel.items, id: \.msg) { item in
 				InboxCell(item: item)
-					.equatable(by: item.msg)
 			}
-			.onDelete { indexSet in
+			.onDelete { _ in
 //				Task {
 //					await withThrowingTaskGroup(of: Void.self) { group in
 //						for index in indexSet {
@@ -42,18 +42,25 @@ struct InboxScene: View {
 			}
 
 		}
-		.animation(.bouncy, value: viewModel.items.count)
-		.listStyle(.inset)
-		.navigationTitle("MsgRoom")
+		.transaction(value: viewModel.items.first?.msg, { transactions in
+			transactions.disablesAnimations = false
+			transactions.animation = .snappy
+		})
 		.toolbar {
 			ToolbarItem(placement: .topBarTrailing) {
 				Button("Ask AI") {
-					ConversationInitializer.start(conversation: AnyConversation(.system(AI.system)))
+					ConversationInitializer.start(conversation: AnyConversation(.system(AI.contact)))
 				}
 			}
 		}
-//		.task {
-//			await viewModel.fetch()
-//		}
+		.task {
+			await viewModel.task(currentUser: currentUser)
+		}
+		.refreshable {
+			await viewModel.task(currentUser: currentUser)
+		}
+		.onDisappear {
+			viewModel.ondisappear()
+		}
 	}
 }

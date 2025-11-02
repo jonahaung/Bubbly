@@ -20,10 +20,10 @@ extension ScrollViewUpdateingState: Equatable {
 		case (.notLoading, .notLoading),
 			(.initial, .initial):
 			return true
-		case let (.insertingItems(a), .insertingItems(b)):
-			return a == b
-		case let (.removingItems(a), .removingItems(b)):
-			return a == b
+case let (.insertingItems(lhs), .insertingItems(rhs)):
+return lhs == rhs
+case let (.removingItems(lhs), .removingItems(rhs)):
+return lhs == rhs
 		default:
 			return false
 		}
