@@ -60,7 +60,12 @@ public extension Array where Element: Identifiable {
 		return duplicates
 	}
 }
-
+public extension Array {
+	var middleElement: Element? {
+		guard !isEmpty else { return nil }
+		return self[(count - 1) / 2]
+	}
+}
 public extension Array where Element: Equatable {
 	mutating func appendUnique(_ newElement: Element) {
 		if !contains(newElement) {

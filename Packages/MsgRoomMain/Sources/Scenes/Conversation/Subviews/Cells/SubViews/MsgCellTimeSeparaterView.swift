@@ -9,18 +9,15 @@ import SwiftUI
 import XUI
 
 struct MsgCellTimeSeparaterView: View {
-
 	let id: String
 	let date: Date
 
 	var body: some View {
-		VStack {
-			Text(
-				date.formatted(.dateTime.day().weekday(.abbreviated).hour().minute())
-			)
-		}
+		Text(
+			date.formatted(.dateTime.day().weekday(.abbreviated).hour().minute())
+		)
 		.foregroundStyle(.primary)
-		.font(.subheadline.uppercaseSmallCaps())
+		.font(.footnote)
 		.frame(height: 50, alignment: .center)
 		.equatable(by: id)
 		.id(id+Self.typeName)

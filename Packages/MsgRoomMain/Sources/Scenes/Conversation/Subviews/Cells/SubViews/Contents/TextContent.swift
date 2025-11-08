@@ -12,9 +12,12 @@ struct TextContent: View {
     let text: String
     var body: some View {
 		Text(.init(text))
-			.multilineTextAlignment(.leading)
-			.allowsTightening(true)
-			.equatable(by: text)
-//			.fixedSize(horizontal: false, vertical: true)
     }
+}
+
+struct MarkdownTextContent: View {
+	let text: AttributedString
+	var body: some View {
+		Text(text)
+	}
 }

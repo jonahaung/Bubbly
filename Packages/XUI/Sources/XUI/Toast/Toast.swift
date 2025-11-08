@@ -8,6 +8,7 @@
 import Foundation
 
 public struct Toast: Sendable, Identifiable, Hashable {
+
 	public var id: UUID = UUID()
 	public var message: String
 	public var duration: Double

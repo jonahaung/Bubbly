@@ -6,6 +6,8 @@
 //
 import Foundation
 import SwiftData
+import CoreImage
+import Core
 
 public struct Message: Codable, Sendable, Hashable, UIdentifiable {
 

@@ -10,6 +10,7 @@ import Database
 import XUI
 import Services
 import MediaPicker
+import Core
 
 @MainActor
 @Observable

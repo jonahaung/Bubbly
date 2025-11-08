@@ -10,14 +10,15 @@ import Foundation
 import CryptoKit
 import Database
 import Core
+import FirebaseAuth
 
 public final class CryptoService: Sendable {
 
 	public static let shared = CryptoService()
 
 	public var privateKey: Curve25519.KeyAgreement.PrivateKey {
-		let storage = GroupAppStorage.shared
-		guard let currentUserId = storage.string(for: .auth(.currentUserID)) else { fatalError() }
+		let storage = GroupStorage.shared
+		guard let currentUserId else { fatalError() }
 		if let string = storage.string(
 			for: .security(.privateKey(id: currentUserId))
 		) {
@@ -28,12 +29,12 @@ public final class CryptoService: Sendable {
 		let newKeyPair = Crypto.newPrivateKeyInstance()
 		storage
 			.save(
-				value: Crypto.base64String(with: newKeyPair),
+				Crypto.base64String(with: newKeyPair),
 				for: .security(.privateKey(id: currentUserId))
 			)
 		storage
 			.save(
-				value: Crypto.base64String(with: newKeyPair.publicKey),
+				Crypto.base64String(with: newKeyPair.publicKey),
 				for: .security(.publicKey(id: currentUserId))
 			)
 		return newKeyPair
@@ -59,7 +60,13 @@ public final class CryptoService: Sendable {
 		salt.base64EncodedString() + ":" + publicKeyString + ":" + encryptedDataString
 	}
 
-	public func parsePayload(_ payloadString: String) -> (salt64: String, publicKeyString: String, encryptedDataString: String)? {
+	public func parsePayload(
+		_ payloadString: String
+	) -> (
+		salt64: String,
+		publicKeyString: String,
+		encryptedDataString: String
+	)? {
 		let components = payloadString.components(separatedBy: ":")
 		guard components.count == 3 else { return nil }
 		return (components[0], components[1], components[2])

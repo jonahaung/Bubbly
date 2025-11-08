@@ -132,7 +132,7 @@ private extension AttachmentContent.LinkContent {
 		if let image = viewModel.msg.thumbnailImage() {
 			await MainActor.run {
 				self.viewModel.attachment.thumbnail = image
-				self.viewModel.updateUI()
+				self.viewModel.layoutIfNeeded()
 			}
 		} else {
 			await loadAttachmentData()

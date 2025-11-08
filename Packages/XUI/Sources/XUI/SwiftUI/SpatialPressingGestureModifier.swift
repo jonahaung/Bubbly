@@ -119,8 +119,8 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
 public extension View {
 	func onPressingChanged(
 		in coordinateSpace: CoordinateSpaceProtocol,
-		minimumPressDuration: TimeInterval = 0.5,
-		allowableMovement: CGFloat = 0,
+		minimumPressDuration: TimeInterval = 1,
+		allowableMovement: CGFloat = 10,
 		_ action: sending @escaping @Sendable (CGPoint?) -> Void
 	) -> some View {
 		modifier(

@@ -14,12 +14,11 @@ import Database
 import Core
 import XUI
 
-
 @MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
 
 	let pushNotificationService = PushNotificationService.shared
-	let authService = AuthService.shared
+	let authService = AuthService()
 	let router = Router.shared
 
 	func application(

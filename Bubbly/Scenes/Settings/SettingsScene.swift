@@ -23,17 +23,17 @@ struct SettingsScene: View {
 	@Environment(\.currentUser) private var currentUser
 
 	@AppStorage(
-		StorageKeys.layout(.chatMsgSpacing).value,
-		store: GroupAppStorage.shared.store
+		GroupStorageKey.layout(.chatMsgSpacing).value,
+		store: GroupStorage.shared.store
 	) var chatCellVerticalSpacing: Int = Settings.Layout.chatMsgSpacing
 	@AppStorage(
-		StorageKeys.limit(.paginationPageSize).value,
-		store: GroupAppStorage.shared.store
+		GroupStorageKey.limit(.paginationPageSize).value,
+		store: GroupStorage.shared.store
 	) var paginationPageSize: Int = 50
 
 	@AppStorage(
-		StorageKeys.limit(.minutesForChatMsgGrouping).value,
-		store: GroupAppStorage.shared.store
+		GroupStorageKey.limit(.minutesForChatMsgGrouping).value,
+		store: GroupStorage.shared.store
 	) var minutesForChatMsgGrouping: Int = 15
 	@AppStorage("askChatGPT") private var askChatGPT: Bool = false
 
@@ -92,8 +92,6 @@ struct SettingsScene: View {
 					try Folder.documents?.delete()
 				} label: {
 					Text("Clean Up File System")
-				} onError: { error in
-					Log(error)
 				}
 				.buttonStyle(.roundedButtonStyle)
 			}

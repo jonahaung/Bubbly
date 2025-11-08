@@ -10,6 +10,7 @@ import SwiftUI
 public struct ToastBanner: View {
 
 	@Bindable private var presenter: ToastPresenter = .shared
+	@State private var offsetY: CGFloat = -300
 	let toast: Toast
 
 	public init(toast: Toast) {
@@ -22,19 +23,28 @@ public struct ToastBanner: View {
 				.font(.callout)
 				.padding(.horizontal)
 				.padding(.vertical, 8)
-				.glassEffect(.regular.tint(.systemBackground).interactive(), in: RoundedRectangle(cornerRadius: 10))
-				.runningBorder()
-				.padding(.horizontal)
-				.transition(.move(edge: .top))
-				.onTapGesture {
-					if let action = toast.action {
-						action()
-					}
-					presenter.dismiss()
-				}
 		}
+		.background {
+			RoundedRectangle(cornerRadius: 12)
+				.fill(Color.systemBackground)
+				.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+				.runningBorder()
+		}
+		.padding(.horizontal)
 		.flexible(.horizontal)
 		.allowsHitTesting(presenter.toast != nil)
 		.statusBarHidden()
+		.offset(y: offsetY)
+		.onAppear {
+			withAnimation(.easeOut.delay(1)) {
+				offsetY = 0
+			}
+		}
+		.onTapGesture {
+			if let action = toast.action {
+				action()
+			}
+			presenter.dismiss()
+		}
 	}
 }

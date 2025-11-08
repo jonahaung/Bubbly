@@ -10,15 +10,6 @@ import Database
 import Services
 import XUI
 
-//private struct ConversationSnapshotKey: EnvironmentKey {
-//	static let defaultValue: (any ConversationRepresentable)? = nil
-//}
-//extension EnvironmentValues {
-//	var conversation: (any ConversationRepresentable)? {
-//		get { self[ConversationSnapshotKey.self] }
-//		set { self[ConversationSnapshotKey.self] = newValue }
-//	}
-//}
 private struct ConversationThemeKey: EnvironmentKey {
 	static let defaultValue: ConversationTheme = .empty
 }

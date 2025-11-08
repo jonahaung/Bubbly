@@ -39,43 +39,11 @@ extension AttachmentContent {
 							}
 						}
 					}
-
-//				if viewModel.msg.fileExist() {
-//
-//				} else {
-//					LazyImage(
-//						url: .init(string: attachment.url)
-//					) { state in
-//						switch state.result {
-//						case .success(let image):
-//							imageView(for: image.image)
-//						case .failure:
-//							SystemImage(.exclamationmarkCircleFill)
-//								.symbolRenderingMode(.multicolor)
-//						case .none:
-//							ProgressView().controlSize(.mini)
-//						}
-//					}
-//					.onCompletion { result in
-//						switch result {
-//						case .success(let imageResponse):
-//							onImageLoaded(imageResponse.image)
-//						case .failure(let error):
-//							print(error)
-//						}
-//					}
-//					.onDisappear(.cancel)
-//				}
 			}
 		}
-
 		func loadAttachmentIfNeeded() async {
 			guard viewModel.isVisible else { return }
-
-			// Check if we already have a thumbnail
 			if viewModel.attachment.thumbnail != nil { return }
-
-			// Check if file exists locally first
 			if await hasLocalFile() {
 				await loadLocalFile()
 			} else {
@@ -83,14 +51,13 @@ extension AttachmentContent {
 			}
 		}
 		func hasLocalFile() async -> Bool {
-			// Implement local file existence check
 			return viewModel.msg.fileExist()
 		}
 		func loadLocalFile() async {
 			if let image = viewModel.msg.thumbnailImage() {
 				await MainActor.run {
 					self.viewModel.attachment.thumbnail = image
-					self.viewModel.updateUI()
+					self.viewModel.layoutIfNeeded()
 				}
 			} else {
 				await loadAttachmentData()

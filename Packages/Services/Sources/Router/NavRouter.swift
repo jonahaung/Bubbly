@@ -14,6 +14,7 @@ import Core
 public class NavRouter: Identifiable {
 
 	public let id: TabPath
+
 	public var navPath = [NavPath]()
 
 	public init(_ tab: TabPath) {

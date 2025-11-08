@@ -56,6 +56,7 @@ public struct ScrollLocation: Hashable {
 public indirect enum ScrollPositionItem: Hashable {
 	case offset(yPosition: CGFloat, animated: Bool = true, duration: Double? = nil)
 	case id(value: String, anchor: UnitPoint? = nil, animated: Bool = true, duration: Double? = nil)
+	case layoutID(value: String, anchor: UnitPoint? = nil, animated: Bool = true, duration: Double? = nil)
 	case bottom(animated: Bool = true, duration: Double? = nil)
 }
 

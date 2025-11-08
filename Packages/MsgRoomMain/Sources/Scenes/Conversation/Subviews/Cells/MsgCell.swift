@@ -24,7 +24,7 @@ struct MsgCell: View {
 			MsgCellOutgoingStatusView()
 		}
 		.allowsTightening(true)
-		.equatable(by: viewModel.updateTag)
+		.equatable(by: viewModel.reloadID)
 		.id(viewModel.id)
 		.layoutValue(viewModel.msg.layoutValue)
 	}

@@ -10,7 +10,7 @@ import UserNotifications
 import XUI
 import FirebaseMessaging
 import FirebaseAuth
-//import FirebaseFirestore
+// import FirebaseFirestore
 import Database
 import Core
 
@@ -25,7 +25,17 @@ public final class PushNotificationService: NSObject, Sendable {
 	public func registerForPushNotifications(
 		completion: @escaping @Sendable @MainActor () -> Void
 	) {
-		UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { success, error in
+		UNUserNotificationCenter
+			.current()
+			.requestAuthorization(
+				options: [
+					.alert,
+					.badge,
+					.sound
+				]
+			) {
+				success,
+				error in
 			if let error {
 				Log(error)
 			} else if success {
@@ -97,7 +107,7 @@ extension PushNotificationService: MessagingDelegate {
 }
 public extension PushNotificationService {
 	func uploadTokenToFirestore(_ fcmToken: String?) {
-		GroupAppStorage.shared.save(value: fcmToken, for: .device(.deviceToken))
+		GroupStorage.shared.save(fcmToken, for: .device(.deviceToken))
 		NotificationCenter.default
 			.post(name: .receiveDeviceToken, object: fcmToken)
 //		guard

@@ -20,6 +20,9 @@ public class Router {
 	private let cancelBag = CancelBag()
 
 	public var tab: TabPath = .inbox
+	public var fullScreen: NavPath?
+	public var sheet: NavPath?
+
 	public var navRouters = TabPath.allCases.map { NavRouter($0) }
 	public var currentNavRouter: NavRouter? {
 		navRouters.first(where: { $0.id == tab })
@@ -38,10 +41,16 @@ public class Router {
 	public func push(_ path: NavPath) {
 		currentNavRouter?.push(path)
 	}
-	public func replace(_ paths: [NavPath]) {
-		currentNavRouter?.replace(paths)
+	public func presentFullScreen(_ path: NavPath?) {
+		self.fullScreen = path
+	}
+	public func presentSheet(_ path: NavPath?) {
+		self.sheet = path
 	}
 
+	public var tabBarVisibility: Visibility {
+		currentNavRouter?.navPath.count == 0 ? .visible : .hidden
+	}
 }
 
 private extension Router {

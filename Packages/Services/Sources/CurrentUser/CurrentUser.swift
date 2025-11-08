@@ -31,14 +31,23 @@ public final class CurrentUser {
 		guard let firUser = Auth.auth().currentUser else {
 			throw XError.notLoggedIn
 		}
-		let storage = GroupAppStorage.shared
+		let storage = GroupStorage.shared
 
 		let newModel = CurrentUserModel(firUser)
-		storage.save(value: newModel.pushToken, for: .device(.deviceToken))
+		storage.save(newModel.pushToken, for: .device(.deviceToken))
 
-		let remoteModel: CurrentUserModel? = try? await FirestoreRepo.getModel(for: newModel.uid, collection: .users, field: .uid)
+		let remoteModel: CurrentUserModel? = try? await FirestoreRepo.getModel(
+			for: newModel.uid,
+			collection: .users,
+			field: .uid
+		)
 		if newModel != remoteModel {
-			try await FirestoreRepo.update(value: newModel.dictionary, collectionPath: .users, to: newModel.uid)
+			try await FirestoreRepo
+				.update(
+					value: newModel.dictionary,
+					collectionPath: .users,
+					to: newModel.uid
+				)
 			await ToastPresenter.show("Profile Updated")
 		}
 		await updateModelOnMain(newModel)

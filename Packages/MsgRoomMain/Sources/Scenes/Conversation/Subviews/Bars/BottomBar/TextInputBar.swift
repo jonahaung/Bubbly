@@ -5,6 +5,13 @@
 //  Created by Aung Ko Min on 26/6/24.
 //
 
+//
+//  TextInputBar.swift
+//  MsgRoom
+//
+//  Created by Aung Ko Min on 26/6/24.
+//
+
 import SwiftUI
 import XUI
 import MediaPicker
@@ -14,70 +21,56 @@ import Database
 import Services
 import PhotosUI
 
-@MainActor
 struct TextInputBar: View {
 
 	@Environment(ChatViewManager.self) private var manager
-	@Bindable var inputManager: ChatInputBarManager
-	@Environment(\.currentUser) private var currentUser
+	@Environment(ChatInputBarManager.self) private var inputManager
 	@Environment(\.sendChatRoomAction) private var msgRoomAction
 	@Environment(\.focusState) private var focusState
+	@Environment(\.screenSize) private var screenSize
 
 	var body: some View {
-		HStack(alignment: .bottom, spacing: 4) {
-			ZStack(alignment: .bottomLeading) {
-				var imageName: String { inputManager.imagePicker.selections.isEmpty ? "plus" : "\(inputManager.imagePicker.selections.count).circle.fill" }
-				PhotosPicker(
-					selection: $inputManager.imagePicker.photoPickerItems,
-					matching: .images,
-				) {
-					Image(systemName: imageName)
-						.font(.headline)
-						.padding(8)
-						.foregroundStyle(Color.white.gradient)
-						.background(Color.accentColor.gradient, in: .circle)
-				}
+		HStack(alignment: .bottom, spacing: 8) {
+
+			// MARK: Image Picker Button
+			PhotosPicker(
+				selection: .init(
+					get: { inputManager.imagePicker.photoPickerItems },
+					set: { inputManager.imagePicker.photoPickerItems = $0 }
+				),
+				matching: .images
+			) {
+				Image(systemName: "plus")
+					.font(.headline)
+					.frame(width: 35, height: 35)
+					.foregroundStyle(.white)
+					.background(Color.accentColor.gradient, in: .circle)
 			}
-			if let focused = focusState?.value {
-				TextField("Text ..", text: $inputManager.text, axis: .vertical)
-					.focused(focused)
-					.lineLimit(30)
-					.autocorrectionDisabled(true)
-					.padding(6)
-					.padding(.horizontal, 8)
-					.lineSpacing(1.4)
-					.textScale(.default)
-					.textFieldStyle(.automatic)
-					.layoutPriority(2)
-					.keyboardType(.twitter)
-					.font(.callout)
-					.allowsTightening(true)
-					.equatable(by: inputManager.text)
+
+			// MARK: Debounced Text Field
+			ChatTextField(
+				text: .constant(inputManager.text)
+			) { newValue in
+				inputManager.text = newValue
 			}
+			.scrollDisabled(true)
+			.layoutPriority(5)
+			.frame(minHeight: 35)
+			.geometryGroup()
 
 			AsyncButton {
 				await sendButtonPressed()
-			} label: {
+			} label: { _ in
 				Image(systemSymbol: .arrowshapeUpFill)
 					.font(.headline)
-					.foregroundStyle(Color.white.gradient)
-					.padding(10)
+					.foregroundStyle(.white)
+					.frame(square: 35)
 					.background(Color.accentColor.gradient, in: .circle)
-					.rotationEffect(
-						inputManager.hasContent ?
-							.degrees(0) : .degrees(-90)
-					)
-					.animation(
-						.bouncy(
-							extraBounce: 0.2
-						),
-						value: inputManager.text.isWhitespace
-					)
 			}
 		}
-		.padding(.horizontal, 8)
-		.padding(.bottom, 4)
-
+		.padding(.horizontal, 12)
+		.padding(.bottom, 8)
+		.frame(width: screenSize.width, alignment: .bottom)
 	}
 
 	private func sendButtonPressed() async {

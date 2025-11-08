@@ -32,7 +32,7 @@ public extension AnyConversation {
 	}
 
 	init(_ kind: ConversationKind) {
-		guard let currentUserID = GroupAppStorage.shared.string(for: .auth(.currentUserID)) else {
+		guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
 			preconditionFailure("Missing currentUserID in GroupAppStorage")
 		}
 		self.kind = kind

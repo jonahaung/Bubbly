@@ -24,15 +24,15 @@ public extension View {
             self
         }
     }
-
+	@inlinable
     func frame(size: CGSize?) -> some View {
 		self.frame(width: size?.width, height: size?.height)
     }
-
+	@inlinable
     func frame(square: CGFloat?) -> some View {
         self.frame(width: square, height: square)
     }
-
+	@inlinable
     func map(_ closure: (inout Self) -> Void) -> Self {
         var copy = self
         closure(&copy)

@@ -12,20 +12,20 @@ import Services
 import SwiftUI
 import XUI
 
-@MainActor
 @Observable
-final class ChatViewManager: ErrorPresenter {
+final class ChatViewManager: ErrorPresenter, ViewReloadable {
 
 	@ObservationIgnored let datasource: ChatDatasource
 	@ObservationIgnored var scrollManager: ChatScrollManager
 	@ObservationIgnored var eventsManager: ChatViewEventsManager
 	@ObservationIgnored let bubbleFactory: BubbleFactory
 	@ObservationIgnored let prefetcher: ScrollViewPrefetcher
-	var conversation: any ConversationRepresentable
 	@ObservationIgnored var config: ConversationInitializer.Configuration
 	@ObservationIgnored let attachmentAPI = AttachmentDataAPI()
 	@ObservationIgnored var attachmentFetcher: AsyncFetcher<AttachmentData>?
+	var conversation: any ConversationRepresentable
 	var cellItems = [MsgCellViewModel]()
+	var reloadID: Int = 0
 
 	init(_ data: ConversationInitializer.PrefetchedData) {
 		config = data.configuration
@@ -35,11 +35,9 @@ final class ChatViewManager: ErrorPresenter {
 		bubbleFactory = .init()
 		prefetcher = .init(windowSize: 5)
 		conversation = data.conversation
-		prefetcher.delegate = self
-		scrollManager.delegate = self
-		datasource.delegate = self
+
 		let items = createCellItems(for: data.msgs, forceReset: true)
-		performUpdate(to: items)
+		setCellItems(items)
 		attachmentFetcher = AsyncFetcher(fetch: { [weak self] id in
 			guard let self else { throw CancellationError() }
 			guard let msg = await self.cellItems.viewModel(of: id)?.msg else {
@@ -47,70 +45,92 @@ final class ChatViewManager: ErrorPresenter {
 			}
 			return try await self.attachmentAPI.fetchAttachmentData(for: msg)
 		})
+		trackItemsChanges()
+		prefetcher.delegate = self
+		scrollManager.delegate = self
+		datasource.delegate = self
 	}
 	deinit {
 		Log("Deinit")
 	}
+
+	func trackItemsChanges() {
+		withObservationTracking {
+			_ = cellItems.count
+			_ = eventsManager.selectedMsg
+		} onChange: { [weak self] in
+			guard let self else { return }
+			Task { @MainActor in
+				layoutIfNeeded()
+				trackItemsChanges()
+			}
+		}
+	}
 }
 
 extension ChatViewManager: ChatScrollManagerDelegate {
+	var lastMessage: Database.Message? {
+		cellItems.last?.msg
+	}
+
+	var firstMessage: Database.Message? {
+		cellItems.first?.msg
+	}
+
 	var canLoadPrevious: Bool {
 		guard let firstMsgID = config.firstMsgID else { return false }
-		guard cellItems.isEmpty == false else { return false }
+		guard !cellItems.isEmpty else { return false }
 		return !cellItems.contains(where: { $0.id == firstMsgID })
 	}
 	var canLoadMore: Bool {
 		guard let lastMsgID = config.lastMsgID else { return false }
-		guard cellItems.isEmpty == false else { return false }
+		guard !cellItems.isEmpty else { return false }
 		return !cellItems.contains(where: { $0.id == lastMsgID })
 	}
-	var lastMsg: Message? { cellItems.last?.msg }
-	var firstMsg: Message? { cellItems.first?.msg }
 
-	func scrollManager(_ manager: ChatScrollManager, removeItemsAt edge: VerticalEdge, itemCount: Int) {
-		let items: [MsgCellViewModel]
+	func scrollManager(
+		_ manager: ChatScrollManager,
+		removeItemsAt edge: VerticalEdge,
+		itemCount: Int
+	) {
 		switch edge {
 		case .top:
-			items = cellItems.removingPrefix(itemCount)
+			cellItems = cellItems.removingPrefix(itemCount)
 		case .bottom:
-			items = cellItems.removingSuffix(itemCount)
+			cellItems = cellItems.removingSuffix(itemCount)
 		}
-		performUpdate(to: items)
 	}
 
-	func scrollManager(_ manager: ChatScrollManager, loadPrevious msg: Database.Message) {
+	func scrollManager(_ manager: ChatScrollManager, loadPrevious msg: Message) {
 		manager.updateLoadingState(.removingItems(.bottom))
 		let pageSize = max(1, config.pageSize)
 		let trimCount = pageSize >= 2 ? pageSize - pageSize/2 : 1
-		let items: [MsgCellViewModel]
 		if cellItems.count >= pageSize * 2 {
-			items = cellItems.takingPrefix(pageSize)
+			cellItems = cellItems.takingPrefix(pageSize)
 		} else {
-			items = cellItems.takingPrefix(trimCount)
+			cellItems = cellItems.takingPrefix(trimCount)
 		}
-		cellItems = items
-		items.first?.resetLayout()
-		items.last?.resetLayout()
+		layoutIfNeeded()
 		Task {
-			scrollManager.updateLoadingState(.insertingItems(.top))
 			let query = ServerTime(msg.date).value
+			scrollManager.updateLoadingState(.insertingItems(.top))
 			do {
 				let msgs = try await datasource.loadPrevious(before: query, conID: msg.conID)
 				let cellItems = createCellItems(for: msgs, forceReset: false)
-				performUpdate(to: cellItems)
+				setCellItems(cellItems)
 			} catch {
 				self.scrollManager.updateLoadingState(.notLoading)
 				await self.showError(error)
 			}
 		}
 	}
-	func scrollManager(_ manager: ChatScrollManager, loadMore msg: Database.Message) {
+	func scrollManager(_ manager: ChatScrollManager, loadMore msg: Message) {
 		Task {
 			let query = ServerTime(msg.date).value
 			do {
 				let msgs = try await self.datasource.loadMore(after: query, conID: msg.conID)
 				let cellItems = createCellItems(for: msgs, forceReset: false)
-				performUpdate(to: cellItems, animated: manager.isScrolling)
+				setCellItems(cellItems, animated: manager.isScrolling)
 			} catch {
 				self.scrollManager.updateLoadingState(.notLoading)
 				await self.showError(error)
@@ -121,36 +141,41 @@ extension ChatViewManager: ChatScrollManagerDelegate {
 		canLoadMore
 	}
 	func resetDatasource() {
-		eventsManager.canShowScrollButton = false
 		guard canResetDatasource else {
-			scrollManager.scroll(to: .bottom(animated: true))
+			scrollManager.scroll(to: .bottom())
 			return
 		}
-		scrollManager.updateLoadingState(.resetting)
 		Task {
+			scrollManager.updateLoadingState(.resetting)
 			do {
 				let msgs = try await datasource.reset(conID: config.conID)
+				if let middle = msgs.middleElement {
+					scrollManager.setScrollPosition(to: .init(id: middle.uid, anchor: .top))
+				}
 				let cellItems = createCellItems(for: msgs, forceReset: true)
-				performUpdate(to: cellItems)
-				scrollManager.setScrollPosition(to: .init(edge: .bottom))
+				setCellItems(cellItems)
 			} catch {
 				await self.showError(error)
 			}
 		}
 	}
 
-	func scrollManager(_ manager: ChatScrollManager, finalizeScrollViewUpdate position: XUI.ScrolledPosition) {
+	func scrollManager(
+		_ manager: ChatScrollManager,
+		finalizeScrollViewUpdate position: XUI.ScrolledPosition
+	) {
 		switch position {
 		case .atBottom:
 			eventsManager.canShowScrollButton = false
-			if manager.updatingState.isNotUpdating && !canLoadMore && cellItems.count > config.pageSize + 5 {
-				let items = cellItems.takingSuffix(config.pageSize)
-				performUpdate(to: items)
-				manager.setScrollPosition(to: .init(edge: .bottom))
+			if manager.updatingState.isNotUpdating && !canLoadMore && cellItems.count > config.pageSize + 10 {
+				cellItems = cellItems.takingSuffix(config.pageSize)
 			}
 		default:
 			eventsManager.canShowScrollButton = true
 		}
+	}
+	func scrollManager(reloadScrollView manager: ChatScrollManager) {
+		layoutIfNeeded()
 	}
 }
 
@@ -160,7 +185,9 @@ extension ChatViewManager {
 	}
 	func msgCellLayoutFor(_ msg: Message, cellItems: [MsgCellViewModel]) -> MsgCellLayout {
 		guard let index = cellItems.index(of: msg.uid) else { return MsgCellLayout() }
-		if index > 0 && index < cellItems.count-1, let cached = scrollManager.layoutCache.msgCellLayout(for: msg.uid) {
+		if index > 0 && index < cellItems.count-1, let cached = scrollManager.layoutCache.msgCellLayout(
+			for: msg.uid
+		) {
 			return cached
 		}
 		let next = cellItems[safe: index + 1]?.msg
@@ -179,19 +206,20 @@ extension ChatViewManager {
 		guard let index = cellItems.firstIndex(where: { $0.id == uid }) else { return }
 		let next = cellItems[safe: index + 1]?.msg
 		let previous = cellItems[safe: index - 1]?.msg
-		let newValue: SelectedMsg? = oldValue?.id == uid ? nil : SelectedMsg(id: uid, previous: previous?.uid, next: next?.uid)
-		eventsManager.updateSelectedMsg(newValue)
-		var transaction = Transaction()
-		transaction.animation = .interactiveSpring
-
+		let newValue: SelectedMsg? = oldValue?.id == uid ? nil : SelectedMsg(
+			id: uid,
+			previous: previous?.uid,
+			next: next?.uid
+		)
 		if let newValue, let item = cellItems.viewModel(of: newValue.id) {
 			item.setSelected(true)
-		} else {
-			if let oldValue, let item = cellItems.viewModel(of: oldValue.id) {
+		}
+		if let oldValue, let item = self.cellItems.viewModel(of: oldValue.id) {
+			DispatchQueue.delay {
 				item.setSelected(false)
 			}
 		}
-
+		eventsManager.updateSelectedMsg(newValue)
 	}
 }
 
@@ -204,7 +232,7 @@ extension ChatViewManager {
 				}
 			}
 		} else {
-			scrollManager.setHasViewUpdated()
+
 			if let reloaded = try? await conversation.reload(refetch: true) {
 				await MainActor.run {
 					self.conversation = reloaded
@@ -217,7 +245,7 @@ extension ChatViewManager {
 
 extension ChatViewManager: ScrollViewPrefetcherDelegate {
 	func handleVisibleIDsChange(_ uids: [String]) {
-		let differences = uids.difference(from: scrollManager.visibleViewIDs)
+		let differences = uids.difference(from: scrollManager.visibleIDs)
 		var inserts = [String]()
 		for difference in differences {
 			switch difference {
@@ -225,16 +253,21 @@ extension ChatViewManager: ScrollViewPrefetcherDelegate {
 				if let index = cellItems.index(of: id) {
 					if let viewModel = cellItems.viewModel(of: index) {
 						viewModel.setVisibility(true)
+						if viewModel.msg.msgKind.shouldPrefatchData {
+							prefetcher.onAppear(index)
+						}
 					}
-					prefetcher.onAppear(index)
+
 				}
 				inserts.append(id)
 			case .remove(_, let id, _):
 				if let index = cellItems.index(of: id) {
 					if let viewModel = cellItems.viewModel(of: index) {
 						viewModel.setVisibility(false)
+						if viewModel.msg.msgKind.shouldPrefatchData {
+							prefetcher.onDisappear(index)
+						}
 					}
-					prefetcher.onDisappear(index)
 				}
 			}
 		}

@@ -64,8 +64,9 @@ private struct XPickerView<Item: XPickable>: View {
 							isSelected ? Color.accentColor : .quaternaryLabel
 						)
 						AsyncButton {
-							await update(item)
+							update(item)
 							try await Task.sleep(for: .seconds(0.15))
+							dismiss()
 						} label: {
 							HStack {
 								Text(item.title)
@@ -76,10 +77,6 @@ private struct XPickerView<Item: XPickable>: View {
 										.fill(item.color)
 										.frame(width: 20, height: 20)
 								}
-							}
-						} onFinish: {
-							MainActor.assumeIsolated {
-								dismiss()
 							}
 						}
 						.buttonStyle(.borderless)

@@ -39,7 +39,6 @@ public struct CurrentUserProfileView: View {
 				currentUser = remote
 			}
 		}
-		.navigationTitle("Profile")
 		.scrollDismissesKeyboard(.immediately)
 		.toolbar {
 			if hasChanges {
@@ -97,11 +96,11 @@ public struct CurrentUserProfileView: View {
 
 			Text("Phone").badge(currentUser.mobile)
 
-			if let privateKey = GroupAppStorage.shared.string(for: .security(.privateKey(id: currentUser.uid))) {
+			if let privateKey = GroupStorage.shared.string(for: .security(.privateKey(id: currentUser.uid))) {
 				Text(privateKey)
 			}
 
-			if let publicKey = GroupAppStorage.shared.string(for: .security(.publicKey(id: currentUser.uid))) {
+			if let publicKey = GroupStorage.shared.string(for: .security(.publicKey(id: currentUser.uid))) {
 				Text(publicKey)
 			}
 		}

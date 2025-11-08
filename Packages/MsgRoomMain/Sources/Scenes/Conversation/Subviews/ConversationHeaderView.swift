@@ -34,7 +34,12 @@ struct ConversationHeaderView: View {
 			}
 			.flexible(.horizontal)
 			.padding()
-			.background(Color.secondarySystemGroupedBackground, in: RoundedRectangle(cornerRadius: 12))
+			.background(
+				Color.secondarySystemGroupedBackground,
+				in: RoundedRectangle(
+					cornerRadius: 12
+				)
+			)
 		}
 		.padding(.horizontal)
 		.id(Self.typeName)

@@ -20,7 +20,11 @@ public struct ProfilePhoto: View {
 	let size: AvatarSize
 	let config: ImageViewConfig
 
-	public init(_ item: Item, size: AvatarSize = .small, tapAction: ImageViewTapAction = .openPhotoViewer) {
+	public init(
+		_ item: Item,
+		size: AvatarSize = .small,
+		tapAction: ImageViewTapAction = .openPhotoViewer
+	) {
 		self.item = item
 		self.size = size
 		self.config = .init(

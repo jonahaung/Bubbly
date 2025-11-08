@@ -15,13 +15,15 @@ struct BubblyApp: App {
 	@UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 	var body: some Scene {
 		WindowGroup {
-			LandingView()
-				.environment(appDelegate.router)
-				.environment(appDelegate.authService)
-				.onOpenURL { url in
-					Log(url)
-					_ = Auth.auth().canHandle(url)
-				}
+			GeometryReader { proxy in
+				LandingView()
+					.environment(\.screenSize, proxy.size)
+					.environment(appDelegate.router)
+					.environment(appDelegate.authService)
+					.onOpenURL { url in
+						_ = Auth.auth().canHandle(url)
+					}
+			}
 		}
 	}
 }

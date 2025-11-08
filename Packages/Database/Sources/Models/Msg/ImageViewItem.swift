@@ -42,7 +42,6 @@ public extension ImageViewItem {
 			return nil
 		}
 	}
-
 	func thumbnailFile() -> File? {
 		guard let thumbnailFileName = thumbnailFileName() else { return nil }
 		do {
@@ -52,9 +51,6 @@ public extension ImageViewItem {
 			return nil
 		}
 	}
-
-	// MARK: - File Name
-
 	func fileName() -> String? {
 		guard let imageID, let mediaType else { return nil }
 		return imageID + mediaType.fileExtension
@@ -65,14 +61,10 @@ public extension ImageViewItem {
 		return "thumbnail_\(name)"
 	}
 
-	// MARK: - File Checks
-
 	func fileExist() -> Bool {
 		guard let fileName = fileName() else { return false }
 		return folder()?.containsFile(named: fileName) == true
 	}
-
-	// MARK: - Data
 
 	func data() -> Data? {
 		do {
@@ -92,8 +84,6 @@ public extension ImageViewItem {
 		}
 	}
 
-	// MARK: - Images
-
 	func image() -> UIImage? {
 		guard let data = data() else { return nil }
 		return UIImage(data: data)
@@ -103,8 +93,6 @@ public extension ImageViewItem {
 		guard let data = thumbnailData() else { return nil }
 		return UIImage(data: data)
 	}
-
-	// MARK: - URL
 
 	func localURL() -> URL? {
 		file()?.url

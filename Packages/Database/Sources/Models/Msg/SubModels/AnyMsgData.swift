@@ -93,7 +93,9 @@ public extension AnyMsgData {
 			return "Seen"
 		}
 	}
-	func pushNotificationTitle(for conversation: any ConversationRepresentable) -> String {
+	func pushNotificationTitle(
+		for conversation: any ConversationRepresentable
+	) -> String {
 		switch conversation.kind {
 		case .contact:
 			return Auth.auth().currentUser?.displayName ?? conversation.name

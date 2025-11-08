@@ -21,6 +21,18 @@ public extension ScrollGeometry {
 		guard contentSize.height > 0 else {
 			return 0
 		}
-		return min(contentSize.height, max(0, contentSize.height - bounds.height))
+		return contentSize.height + contentInsets.bottom - bounds.height
+	}
+
+	func targetOffsetYForRect(target rect: CGRect) -> CGFloat {
+		let targetY = rect.maxY + contentInsets.bottom - bounds.height
+		let minOffsetY = contentInsets.top
+		let maxOffsetY = bottomMostOffset
+		let newOffsetY = min(max(targetY, minOffsetY), maxOffsetY)
+		return newOffsetY
+	}
+
+	var isScrolledAtBottom: Bool {
+		(bottomMostOffset-contentInsets.vertical).rounded() == contentOffset.y.rounded()
 	}
 }

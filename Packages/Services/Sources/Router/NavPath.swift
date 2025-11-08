@@ -7,8 +7,9 @@
 
 import Foundation
 import Database
+import XUI
 
-public enum NavPath: Hashable, Sendable, Identifiable {
+public enum NavPath: Hashable, Sendable, Identifiable, CaseNameReflectable {
 	case conversationDetails(_ conversation: any ConversationRepresentable)
 	case conversation(_ prefatchData: ConversationInitializer.PrefetchedData)
 	case contactDetails(_ contact: Contact)

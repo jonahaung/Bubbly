@@ -42,7 +42,10 @@ public actor MsgCreator {
 		)
 	}
 
-	public func create(from url: URL, in conversation: any ConversationRepresentable) async throws -> Message {
+	public func create(
+		from url: URL,
+		in conversation: any ConversationRepresentable
+	) async throws -> Message {
 		let linkData = try await LinkData.performFetch(for: url)
 
 		guard let image = linkData.image else {
@@ -58,7 +61,10 @@ public actor MsgCreator {
 		)
 	}
 
-	public func create(from image: UIImage, in conversation: any ConversationRepresentable) async throws -> Message {
+	public func create(
+		from image: UIImage,
+		in conversation: any ConversationRepresentable
+	) async throws -> Message {
 		try await createImageMessage(
 			image: image,
 			text: "Image",
@@ -96,7 +102,12 @@ private extension MsgCreator {
 			attachment: Attachment(uid: id, url: urlString, attachMentTypeRaw: type.rawValue, aspectRatio: 1)
 		)
 
-		let updatedAttachment = try await processImageAttachment(for: message, original: image, type: type, url: urlString)
+		let updatedAttachment = try await processImageAttachment(
+			for: message,
+			original: image,
+			type: type,
+			url: urlString
+		)
 		message.attachment = updatedAttachment
 
 		return message
@@ -139,7 +150,9 @@ private extension MsgCreator {
 	}
 
 	// MARK: - Outgoing Status
-	func makeOutgoingStatus(for conversation: any ConversationRepresentable) -> [String: MsgOutgoingStatus] {
+	func makeOutgoingStatus(
+		for conversation: any ConversationRepresentable
+	) -> [String: MsgOutgoingStatus] {
 		var dict = [String: MsgOutgoingStatus]()
 		dict.reserveCapacity(conversation.members.count)
 		for member in conversation.members where member != currentUserId {

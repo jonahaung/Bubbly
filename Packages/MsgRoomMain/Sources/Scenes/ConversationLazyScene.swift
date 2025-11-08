@@ -29,7 +29,9 @@ public struct ConversationLazyScene: View {
 	private func loadConversation() async {
 		do {
 			let conversation = try await ConversationRepo.getOrCreate(for: conID, refetch: false)
-			let data = try await ConversationInitializer.createPrefetchedObject(conversation: conversation)
+			let data = try await ConversationInitializer.createPrefetchedObject(
+				conversation: conversation
+			)
 			await MainActor.run {
 				Router.shared.currentNavRouter?.replace([NavPath.conversation(data)])
 			}

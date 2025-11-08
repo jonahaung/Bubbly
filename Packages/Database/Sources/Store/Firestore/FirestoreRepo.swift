@@ -9,13 +9,14 @@ import Foundation
 import Core
 import XUI
 
+@NetworkActor
 public enum FirestoreRepo {
 
-	nonisolated(unsafe) static let client = FirestoreRESTClient()
+	@NetworkActor static let client = FirestoreRESTClient()
 
 	public static func add<T: Codable & Sendable>(
 		_ item: T,
-		collectionPath: CollectionPath,
+		collectionPath: FirestoreCollectionPath,
 		documentID: String
 	) async throws {
 		try await client.createDocument(
@@ -27,7 +28,7 @@ public enum FirestoreRepo {
 
 	public static func update(
 		value: sending [String: Any],
-		collectionPath: CollectionPath,
+		collectionPath: FirestoreCollectionPath,
 		to documentID: String
 	) async throws {
 		try await client.update(value: value, collectionPath: collectionPath.rawValue, to: documentID)
@@ -35,8 +36,8 @@ public enum FirestoreRepo {
 
 	public static func getModels<T: Codable & Sendable>(
 		for uid: String,
-		collection: CollectionPath,
-		field: FieldPath
+		collection: FirestoreCollectionPath,
+		field: FirestoreDocumentPath
 	) async throws -> [T] {
 		let filter = FirestoreFilter(
 			field: field.rawValue,
@@ -48,8 +49,8 @@ public enum FirestoreRepo {
 
 	public static func getModel<T: Codable & Sendable>(
 		for uid: String,
-		collection: CollectionPath,
-		field: FieldPath
+		collection: FirestoreCollectionPath,
+		field: FirestoreDocumentPath
 	) async throws -> T? {
 		let filter = FirestoreFilter(
 			field: field.rawValue,
@@ -59,9 +60,9 @@ public enum FirestoreRepo {
 		let items: [T] = try await client.query(collection: collection, filter: filter)
 		return items.first
 	}
-	
+
 	public static func query<T: Codable & Sendable>(
-		collection: CollectionPath,
+		collection: FirestoreCollectionPath,
 		filters: sending [FirestoreFilter],
 		orderBy: [String]? = nil,
 		limit: Int? = nil

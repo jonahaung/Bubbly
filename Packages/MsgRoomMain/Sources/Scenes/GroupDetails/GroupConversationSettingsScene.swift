@@ -11,6 +11,7 @@ import Services
 import XUI
 import MediaPicker
 import ImageLoader
+import Core
 
 public struct GroupConversationSettingsScene: View {
 
@@ -67,12 +68,9 @@ public struct GroupConversationSettingsScene: View {
 			Section {
 				AsyncButton {
 					try await ConversationRepo.deleteMessages(conID: viewModel.group.uid)
+					Router.shared.currentNavRouter?.navPath.removeAll()
 				} label: {
 					Text("Delete Messages")
-				} onFinish: {
-					Task { @MainActor in
-						Router.shared.currentNavRouter?.navPath.removeAll()
-					}
 				}
 			}
 			Section {
@@ -101,7 +99,6 @@ public struct GroupConversationSettingsScene: View {
 					.font(.system(.caption2, design: .monospaced, weight: .light))
 			}
 		}
-		.navigationTitle("Settings")
 		.toolbar {
 			if viewModel.hasChanges {
 				ToolbarItem(placement: .topBarLeading) {
@@ -114,7 +111,7 @@ public struct GroupConversationSettingsScene: View {
 			}
 			ToolbarItem(placement: .topBarTrailing) {
 				AsyncButton {
-					if let image = await viewModel.pickedPhoto?.uiImage {
+					if let image = viewModel.pickedPhoto?.uiImage {
 						let url = try await viewModel.uploadImage(image: image)
 						await MainActor.run {
 							viewModel.group.photoURL = url
@@ -130,11 +127,6 @@ public struct GroupConversationSettingsScene: View {
 						ProgressView().controlSize(.mini)
 					} else {
 						Text("Save")
-					}
-				}onError: { error in
-					Task {
-						await viewModel.setLoading(false)
-						await viewModel.showError(error)
 					}
 				}
 				.disabled(!viewModel.hasChanges)

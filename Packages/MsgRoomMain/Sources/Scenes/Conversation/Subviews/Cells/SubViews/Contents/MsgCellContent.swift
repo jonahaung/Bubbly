@@ -23,8 +23,9 @@ struct MsgCellContent: View {
 			case .text(let text):
 				TextContent(text: text)
 					.padding(.init(top: 6, leading: 12, bottom: 6, trailing: 10))
-			case .markdown(let elements):
-				MarkdownContent(text: viewModel.msg.text, elements: elements)
+			case .markdown(let attributedString):
+				MarkdownTextContent(text: attributedString)
+					.padding(.init(top: 6, leading: 12, bottom: 6, trailing: 10))
 			case .attachment(let attachment):
 				AttachmentContent(attachment: attachment)
 					.clipShape(bubbleShape)

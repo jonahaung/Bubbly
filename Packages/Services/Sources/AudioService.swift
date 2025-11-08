@@ -110,7 +110,13 @@ public extension AudioService {
 		playBundledSound(named: "tapp")
 	}
 	private func playBundledSound(named name: String) {
-		guard let path = Bundle.main.path(forResource: name, ofType: "aiff") ?? Bundle.main.path(forResource: name, ofType: "wav") else {
+		guard let path = Bundle.main.path(
+			forResource: name,
+			ofType: "aiff"
+		) ?? Bundle.main.path(
+			forResource: name,
+			ofType: "wav"
+		) else {
 			return
 		}
 		playSound(path)

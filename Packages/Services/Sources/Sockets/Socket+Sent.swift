@@ -12,7 +12,10 @@ import Core
 import XUI
 
 public extension Socket {
-	func send(_ data: AnyMsgData, conversation: any ConversationRepresentable) async throws {
+	func send(
+		_ data: AnyMsgData,
+		conversation: any ConversationRepresentable
+	) async throws {
 		switch data {
 		case .newMsg(let rMsg):
 			let msg = Message(rMsg)
@@ -102,8 +105,17 @@ public extension Socket {
 		}
 	}
 
-	@discardableResult func sendToRemote(_ data: AnyMsgData, conversation: any ConversationRepresentable) async throws -> [String: MsgOutgoingStatus] {
-		let contacts = try await getContacts(from: conversation).filter { $0.uid != currentUserId && isValidDeviceToken($0.pushToken) }
+	@discardableResult func sendToRemote(
+		_ data: AnyMsgData,
+		conversation: any ConversationRepresentable
+	) async throws -> [String: MsgOutgoingStatus] {
+		let contacts = try await getContacts(
+			from: conversation
+		).filter {
+			$0.uid != currentUserId && isValidDeviceToken(
+				$0.pushToken
+			)
+		}
 		let title = data.pushNotificationTitle(for: conversation)
 		return try await sendToRemote(data, title: title, contacts: contacts)
 	}
@@ -118,7 +130,11 @@ public extension Socket {
 			return []
 		}
 	}
-	@discardableResult func sendToRemote(_ data: AnyMsgData, title: String, contacts: [Contact]) async throws -> [String: MsgOutgoingStatus] {
+	@discardableResult func sendToRemote(
+		_ data: AnyMsgData,
+		title: String,
+		contacts: [Contact]
+	) async throws -> [String: MsgOutgoingStatus] {
 		let encoded = try JSONEncoder().encode(data)
 		guard let encodedString = String(data: encoded, encoding: .utf8) else {
 			throw SocketError.encodingFailed

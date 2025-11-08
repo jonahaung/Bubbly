@@ -11,14 +11,12 @@ import XUI
 
 @MainActor
 @Observable
-public final class MsgCellViewModel: Sendable {
-
+public final class MsgCellViewModel: ViewReloadable {
 	public private(set) var msg: Message
 	public private(set) var displayData: MsgCellDisplayData
 	public private(set) var isVisible = false
 	public private(set) var layout = MsgCellLayout()
-	public private(set) var isLongPressActive = false
-	public private(set) var updateTag = 0
+	public var reloadID: Int = 0
 	public let attachment: MsgCellAttachmentViewModel = .init()
 
 	public init(_ msg: Message) {
@@ -29,12 +27,12 @@ public final class MsgCellViewModel: Sendable {
 		guard self.msg != msg else { return }
 		self.msg = msg
 		self.displayData.content = MsgCellDisplayData.ContentDisplay.create(from: msg)
-		updateUI()
+		layoutIfNeeded()
 	}
 	public func update(layout: MsgCellLayout) {
 		guard self.layout != layout else { return }
 		self.layout = layout
-		updateUI()
+		layoutIfNeeded()
 	}
 	public func resetLayout() {
 		update(layout: .init())
@@ -42,9 +40,6 @@ public final class MsgCellViewModel: Sendable {
 	public func setVisibility(_ isVisible: Bool) {
 		guard self.isVisible != isVisible else { return }
 		self.isVisible = isVisible
-	}
-	public func updateUI() {
-		updateTag += 1
 	}
 
 	public func setSelected(_ isSelected: Bool) {
@@ -55,12 +50,6 @@ public final class MsgCellViewModel: Sendable {
 		withTransaction(transaction) {
 			update(layout: layout)
 		}
-	}
-
-	public func setLongPressActive(_ isActive: Bool) {
-		guard isLongPressActive != isActive else { return }
-		isLongPressActive = isActive
-		updateUI()
 	}
 }
 

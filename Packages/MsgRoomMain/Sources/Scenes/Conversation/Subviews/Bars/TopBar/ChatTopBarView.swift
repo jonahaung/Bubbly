@@ -17,7 +17,8 @@ struct ChatTopBarView: View {
 
 	var body: some View {
 		HStack {
-			Button {
+			AsyncButton {
+				await saveConversation()
 				dismiss()
 			} label: {
 				SystemImage(.chevronLeft)
@@ -34,7 +35,14 @@ struct ChatTopBarView: View {
 							weight: .semibold,
 							design: .rounded
 						)
-					).badgeView(Text(manager.config.totalMsgsCount, format: .number).font(.footnote.italic()))
+					).badgeView(
+						Text(
+							manager.config.totalMsgsCount,
+							format: .number
+						).font(
+							.footnote.italic()
+						)
+					)
 			}
 			.onTapGesture {
 				Router.shared
@@ -54,5 +62,11 @@ struct ChatTopBarView: View {
 		.background {
 			manager.conversation.theme.background.color.ignoresSafeArea(edges: .top)
 		}
+	}
+
+	private func saveConversation() async {
+		var conversation = manager.conversation
+		conversation.lastMsgID = manager.cellItems.last?.id
+		try? await conversation.saveChanges()
 	}
 }

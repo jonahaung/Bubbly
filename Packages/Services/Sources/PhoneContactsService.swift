@@ -29,8 +29,13 @@ public final class PhoneContactsService {
 		var results: [CNContact] = []
 
 		for container in allContainers {
-			let fetchPredicate = CNContact.predicateForContactsInContainer(withIdentifier: container.identifier)
-			let containerResults = try contactStore.unifiedContacts(matching: fetchPredicate, keysToFetch: keysToFetch)
+			let fetchPredicate = CNContact.predicateForContactsInContainer(
+				withIdentifier: container.identifier
+			)
+			let containerResults = try contactStore.unifiedContacts(
+				matching: fetchPredicate,
+				keysToFetch: keysToFetch
+			)
 			results.append(contentsOf: containerResults)
 		}
 
@@ -50,7 +55,11 @@ public final class PhoneContactsService {
 		let contacts: [Contact?] = try await AsyncOrderedStream.mapOrdered(inputs: phoneContacts) { phoneContact in
 			let parsedNumber = try phoneNumberKit.parse(phoneContact.mobile)
 			let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
-			let remoteContact: Contact? = try await FirestoreRepo.getModel(for: formattedNumber, collection: .users, field: .mobile)
+			let remoteContact: Contact? = try await FirestoreRepo.getModel(
+				for: formattedNumber,
+				collection: .users,
+				field: .mobile
+			)
 			if var remoteContact {
 				remoteContact.name = phoneContact.name
 				try await dbContact.insert(remoteContact)

@@ -9,61 +9,74 @@ import SwiftUI
 import Services
 import Database
 import XUI
+import Core
 
 extension ChatViewManager: ChatDatasourceDelegate {
-	func datasource(didRecieveError: any Error) {
-		Task {
-			await showError(didRecieveError)
-		}
+
+	func datasource(didRecieveError: any Error) async {
+		await showError(didRecieveError)
 	}
 
 	func datasource(didReceive typingStatus: Database.AnyMsgData.TypingStatusPayload) {
 		eventsManager.updateTypingStatus(typingStatus)
 	}
 
-	func datasource(didInsert snapshot: Message) {
-		conversation.lastMsgID = snapshot.uid
-		if let existingModel = cellItems.first(where: { $0.msg.uid == snapshot.uid }) {
-			existingModel.update(with: snapshot)
+	func datasource(didInsert msg: Message) {
+		if let existingModel = cellItems.first(where: { $0.msg.uid == msg.uid }) {
+			existingModel.update(with: msg)
 		} else {
-			if canLoadMore {
-				ToastPresenter.show(snapshot.text) { [weak self] in
+			if canResetDatasource {
+				ToastPresenter.show(msg.text) { [weak self] in
 					guard let self else { return }
-					self.scrollManager.scroll(to: .bottom())
+					resetDatasource()
 				}
 			} else {
-				scrollManager.updateLoadingState(.appendingItem(snapshot.uid))
-				let newModel = MsgCellViewModel(snapshot)
+
+				let newModel = MsgCellViewModel(msg)
 				let index = cellItems.insertionIndex(for: newModel, by: \.msg.date)
 				let previousItem = cellItems[safe: index-1]
 				let nextItem = cellItems[safe: index+1]
-				let layout = bubbleFactory.msgCellLayout(for: snapshot, previous: previousItem?.msg, next: nextItem?.msg)
+
+				if scrollManager.scrolledPosition.nearBottom {
+					scrollManager.updateLoadingState(.appendingItem(msg.uid))
+				} else {
+					ToastPresenter.show(msg.text) { [weak self] in
+						guard let self else { return }
+						self.scrollManager
+							.scroll(
+								to: .layoutID(
+									value: msg.uid,
+									anchor: scrollManager.isFirstResponder ? .top : .bottom
+								)
+							)
+					}
+				}
+
+				let layout = bubbleFactory.msgCellLayout(
+					for: msg,
+					previous: previousItem?.msg,
+					next: nextItem?.msg
+				)
 				newModel.update(layout: layout)
 				cellItems.insert(newModel, at: index)
 				if let previousItem {
 					previousItem.update(layout: msgCellLayoutFor(previousItem.msg, cellItems: cellItems))
 				}
-				if scrollManager.scrolledPosition != .atBottom {
-					ToastPresenter.show(snapshot.text) { [weak self] in
-						guard let self else { return }
-						self.scrollManager.scroll(to: .id(value: snapshot.uid, anchor: .center))
-					}
+				if let nextItem {
+					nextItem.update(layout: msgCellLayoutFor(nextItem.msg, cellItems: cellItems))
 				}
 			}
 		}
-		Task.detached { [weak self] in
-			guard let self else { return }
-			try? await self.conversation.saveChanges()
+		Task {
+			try? await conversation.saveChanges()
 		}
 	}
 
-	func datasource(didReceiveMsg snapshot: Message) {
+	func datasource(didReceiveMsg msg: Message) async {
 		updateReceiveMsgs()
-		conversation.lastMsgID = snapshot.uid
-		Task.detached { [weak self] in
-			guard let self else { return }
-			try? await self.conversation.saveChanges()
-		}
+		conversation.lastMsgID = msg.uid
+		conversation.lastMsgID = msg.uid
+		try? await conversation.saveChanges()
 	}
 
 	func datasource(didUpdate snapshot: Message, animated: Bool) {
@@ -79,16 +92,13 @@ extension ChatViewManager: ChatDatasourceDelegate {
 		}
 	}
 
-	func datasource(didReceive status: Database.AnyMsgData.SeenStatusPayload) {
-		Task {
-			try? await reloadConversation()
-		}
+	func datasource(didReceive status: Database.AnyMsgData.SeenStatusPayload) async {
+		try? await reloadConversation()
 	}
 }
 
-// MARK: - Updates
 extension ChatViewManager {
-	func performUpdate(to items: [MsgCellViewModel], animated: Bool = false) {
+	func setCellItems(_ items: [MsgCellViewModel], animated: Bool = false) {
 		items.forEach { cellItem in
 			if cellItem.layout.isEmpty {
 				let layout = msgCellLayoutFor(cellItem.msg, cellItems: items)

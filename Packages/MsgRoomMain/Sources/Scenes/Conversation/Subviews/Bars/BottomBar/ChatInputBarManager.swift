@@ -11,6 +11,7 @@ import PhotosUI
 import MediaPicker
 import Database
 import Services
+import Core
 
 @MainActor
 @Observable
@@ -19,7 +20,7 @@ final class ChatInputBarManager {
 	var text: String = ""
 	var imagePicker = ImagePickerViewModel()
 	let msgCreater: MsgCreator
-	var languageManaager: LanguageManager = .init()
+	var languageManaager: LanguageModelService = .init(role: .friend)
 
 	func applyProgrammaticUpdate(_ newText: String) {
 		guard newText != text else { return }
@@ -45,7 +46,6 @@ final class ChatInputBarManager {
 			sendToAI(conversation: conversation)
 		}
 	}
-	let openAIClient = OpenAIClient()
 	func sendToAI(conversation: any ConversationRepresentable) {
 		guard !text.isWhitespace else { return }
 		let string = text.trimmed
@@ -56,25 +56,19 @@ final class ChatInputBarManager {
 			msg.outgoingStatus = [AI.contact.uid: MsgOutgoingStatus.sent]
 			do {
 				try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
-
-				let chatCompletionResponse = try await openAIClient.request(.ask(input: string))
-				_ =  try await AsyncOrderedStream.mapOrdered(inputs: chatCompletionResponse.choices) { choice in
-					let replyText = choice.message.content.trimmed
-					let role = choice.message.role
-					let reply = RMsg.init(
-						uid: UUID().uuidString,
-						conID: conversation.uid,
-						msgKind: replyText.isMarkdown ? .markdown : .text,
-						senderID: AI.contact.uid,
-						date: ServerTime.now.value,
-						text: "\(role): \(replyText)",
-						incomingStatus: .read,
-						outgoingStatus: .init(),
-						attachment: nil
-					)
-					try await Socket.shared.send(.newMsg(rMsg: reply), conversation: conversation)
-				}
-
+				let response = try await languageManaager.respond(to: string).trimmed.replace("\n\n", with: "\n ")
+				let replyMsg = RMsg.init(
+					uid: UUID().uuidString,
+					conID: conversation.uid,
+					msgKind: response.isMarkdown ? .markdown : .text,
+					senderID: AI.contact.uid,
+					date: ServerTime.now.value,
+					text: response,
+					incomingStatus: .read,
+					outgoingStatus: .init(),
+					attachment: nil
+				)
+				try await Socket.shared.send(.newMsg(rMsg: replyMsg), conversation: conversation)
 			} catch {
 				Log(error)
 			}
@@ -89,13 +83,9 @@ final class ChatInputBarManager {
 							await imagePicker.remove(for: id)
 							let msg = try await msgCreater.create(from: image, in: conversation)
 							try await Task.sleep(seconds: 2)
-
-							// Notify UI
 							await Socket.shared.notifyMessage(.newMsg(rMsg: .init(msg)))
 						}
 					}
-
-					// Wait for all image tasks to finish
 					try await group.waitForAll()
 				}
 			} catch {

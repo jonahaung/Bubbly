@@ -47,7 +47,9 @@ public struct ConversationInitializer {
 
 public extension ConversationInitializer {
 
-	static func createPrefetchedObject(conversation: any ConversationRepresentable) async throws -> PrefetchedData {
+	static func createPrefetchedObject(
+		conversation: any ConversationRepresentable
+	) async throws -> PrefetchedData {
 		let conID = conversation.uid
 		let msgsCount = try await ConversationRepo.totalMsgsCount(
 			conID: conID

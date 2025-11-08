@@ -11,6 +11,7 @@ import FirebaseFirestore
 import Core
 import XUI
 
+@NetworkActor
 public final class FirestoreRESTClient {
 
 	public enum FirestoreError: Error {
@@ -26,6 +27,7 @@ public final class FirestoreRESTClient {
 	private let database: String
 	private let baseURL: String
 	private let decoder: JSONDecoder
+	private let netWorkManager = NetworkManager()
 
 	public init(projectId: String = AppInformation.firebaseProjectID, database: String = "(default)") {
 		self.projectId = projectId
@@ -35,7 +37,13 @@ public final class FirestoreRESTClient {
 		self.decoder.dateDecodingStrategy = .iso8601
 	}
 
-	private func performRequest(url: URL, method: String, body: [String: Any]? = nil, retry: Bool = false, token: String? = nil) async throws -> [String: Any] {
+	private func performRequest(
+		url: URL,
+		method: String,
+		body: [String: Any]? = nil,
+		retry: Bool = false,
+		token: String? = nil
+	) async throws -> [String: Any] {
 		var request = URLRequest(url: url)
 		request.httpMethod = method
 		if let token {
@@ -47,7 +55,7 @@ public final class FirestoreRESTClient {
 			request.httpBody = try JSONSerialization.data(withJSONObject: body)
 		}
 
-		let (data, response) = try await NetworkManager.shared.request(request)
+		let (data, response) = try await netWorkManager.request(request)
 		guard let http = response as? HTTPURLResponse else { throw FirestoreError.invalidResponse }
 
 		switch http.statusCode {
@@ -74,7 +82,18 @@ public final class FirestoreRESTClient {
 	}
 
 	public func createDocument<T: Codable>(in collectionPath: String, documentID: String, data: T) async throws {
-		try await Firestore.firestore().collection(collectionPath).document(documentID).setData(data.dictionary, merge: false)
+		try await Firestore
+			.firestore()
+			.collection(
+				collectionPath
+			)
+			.document(
+				documentID
+			)
+			.setData(
+				data.dictionary,
+				merge: false
+			)
 	}
 	public func update(
 		value: [String: Any],
@@ -94,7 +113,7 @@ public final class FirestoreRESTClient {
 		retry: Bool = true,
 		token: String? = nil
 	) async throws -> [T] {
-		let url = URL(string: "https://firestore.googleapis.com/v1/projects/\(projectId)/databases/\(database)/documents:runQuery")!
+		let url = URL(string: "\(baseURL):runQuery")!
 
 		var structuredQuery: [String: Any] = [
 			"from": [["collectionId": collection]]
@@ -124,7 +143,7 @@ public final class FirestoreRESTClient {
 		request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 		request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
-		let (data, response) = try await NetworkManager.shared.request(request)
+		let (data, response) = try await netWorkManager.request(request)
 		guard let http = response as? HTTPURLResponse else { throw FirestoreError.invalidResponse }
 
 		switch http.statusCode {
@@ -142,14 +161,21 @@ public final class FirestoreRESTClient {
 			}
 		case 401 where retry:
 			let token = try await getValidAuthToken(forceRefresh: true)
-			return try await runQuery(collection: collection, filters: filters, orderBy: orderBy, limit: limit, as: type, token: token)
+			return try await runQuery(
+				collection: collection,
+				filters: filters,
+				orderBy: orderBy,
+				limit: limit,
+				as: type,
+				token: token
+			)
 		default:
 			throw FirestoreError.serverError(String(data: data, encoding: .utf8) ?? "Unknown server error")
 		}
 	}
 
 	private func getValidAuthToken(forceRefresh: Bool = false) async throws -> String {
-		let cached = GroupAppStorage.shared.string(for: .auth(.authToken))
+		let cached = GroupStorage.shared.string(for: .auth(.authToken))
 		if !forceRefresh, let cached {
 			return cached
 		}
@@ -157,7 +183,7 @@ public final class FirestoreRESTClient {
 			throw FirestoreError.notAuthenticated
 		}
 		let token = try await user.getIDTokenResult(forcingRefresh: forceRefresh).token
-		GroupAppStorage.shared.save(value: token, for: .auth(.authToken))
+		GroupStorage.shared.save(token, for: .auth(.authToken))
 		return token
 	}
 
@@ -212,7 +238,7 @@ public extension FirestoreRESTClient {
 		filters.map { $0.firestoreRepresentation }
 	}
 	func query<T: Codable & Sendable>(
-		collection: CollectionPath,
+		collection: FirestoreCollectionPath,
 		filters: [FirestoreFilter],
 		orderBy: [String]? = nil,
 		limit: Int? = nil
@@ -226,7 +252,7 @@ public extension FirestoreRESTClient {
 		)
 	}
 	func query<T: Codable & Sendable>(
-		collection: CollectionPath,
+		collection: FirestoreCollectionPath,
 		filter: FirestoreFilter,
 		orderBy: [String]? = nil,
 		limit: Int? = nil

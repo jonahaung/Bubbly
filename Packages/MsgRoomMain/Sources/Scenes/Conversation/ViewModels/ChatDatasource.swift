@@ -23,12 +23,12 @@ import XUI
 @MainActor
 protocol ChatDatasourceDelegate: AnyObject {
 	func datasource(didInsert snapshot: Message)
-	func datasource(didReceiveMsg snapshot: Message)
+	func datasource(didReceiveMsg snapshot: Message) async
 	func datasource(didRemove snapshot: Message, animated: Bool)
 	func datasource(didUpdate snapshot: Message, animated: Bool)
-	func datasource(didReceive status: AnyMsgData.SeenStatusPayload)
+	func datasource(didReceive status: AnyMsgData.SeenStatusPayload) async
 	func datasource(didReceive typingStatus: AnyMsgData.TypingStatusPayload)
-	func datasource(didRecieveError error: Error)
+	func datasource(didRecieveError error: Error) async
 }
 
 @MainActor
@@ -40,7 +40,10 @@ final class ChatDatasource {
 	private let msgStore = Store.shared.msgStore
 	private let queue = SerialTaskQueue()
 
-	init(config: ConversationInitializer.Configuration, delegate: ChatDatasourceDelegate? = nil) {
+	init(
+		config: ConversationInitializer.Configuration,
+		delegate: ChatDatasourceDelegate? = nil
+	) {
 		self.pageSize = config.pageSize
 		self.delegate = delegate
 
@@ -122,18 +125,15 @@ private extension ChatDatasource {
 			Log(reaction)
 		case .typingStatus(let status):
 			delegate?.datasource(didReceive: status)
-
 		case .deleteMsg(let rMsg):
-			Task {
-				do {
-					try await msgStore.delete(uid: rMsg.uid)
-					delegate?.datasource(didRemove: .init(rMsg), animated: true)
-				} catch {
-					delegate?.datasource(didRecieveError: error)
-				}
+			do {
+				try await msgStore.delete(uid: rMsg.uid)
+				delegate?.datasource(didRemove: .init(rMsg), animated: true)
+			} catch {
+				await delegate?.datasource(didRecieveError: error)
 			}
 		case .seenStatus(let status):
-			delegate?.datasource(didReceive: status)
+			await delegate?.datasource(didReceive: status)
 		}
 	}
 

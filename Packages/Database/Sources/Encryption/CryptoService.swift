@@ -1,74 +1,69 @@
-//
-//  CryptoService.swift
-//  Services
-//
-//  Created by Aung Ko Min on 16/6/25.
-//
-
 import Crypto
 import Foundation
 import CryptoKit
 import Core
+import FirebaseAuth
 
 public final class CryptoService: Sendable {
 
 	public static let shared = CryptoService()
 
-	public var privateKey: Curve25519.KeyAgreement.PrivateKey {
-		let storage = GroupAppStorage.shared
-		guard let currentUserId = storage.string(for: .auth(.currentUserID)) else { fatalError() }
-		if let string = storage.string(
-			for: .security(.privateKey(id: currentUserId))
-		) {
-			if let privateKey = Crypto.privateKey(with: string) {
-				return privateKey
-			}
+	nonisolated(unsafe)
+	private let storage = GroupStorage.shared
+	private let salt: Data = Crypto.generateSalt()
+
+	private init() {}
+}
+
+// MARK: - Key Management
+public extension CryptoService {
+
+	var privateKey: Curve25519.KeyAgreement.PrivateKey {
+		guard let currentUserId else {
+			fatalError("No current user ID found")
 		}
-		let newKeyPair = Crypto.newPrivateKeyInstance()
-		storage
-			.save(
-				value: Crypto.base64String(with: newKeyPair),
-				for: .security(.privateKey(id: currentUserId))
-			)
-		storage
-			.save(
-				value: Crypto.base64String(with: newKeyPair.publicKey),
-				for: .security(.publicKey(id: currentUserId))
-			)
-		return newKeyPair
+
+		if let storedKeyString = storage.string(for: .security(.privateKey(id: currentUserId))),
+		   let privateKey = Crypto.privateKey(with: storedKeyString) {
+			return privateKey
+		}
+
+		return generateAndStoreNewKeyPair(for: currentUserId)
 	}
 
-	public var publicKey: Curve25519.KeyAgreement.PublicKey {
+	var publicKey: Curve25519.KeyAgreement.PublicKey {
 		privateKey.publicKey
 	}
 
-	public var privateKeyString: String {
+	var privateKeyString: String {
 		Crypto.base64String(with: privateKey)
 	}
 
-	public var publicKeyString: String {
+	var publicKeyString: String {
 		Crypto.base64String(with: publicKey)
 	}
+}
 
-	private init() {}
+// MARK: - Payload Handling
+public extension CryptoService {
 
-	private let salt: Data = Crypto.generateSalt()
-
-	public func createPayload(for encryptedDataString: String) -> String {
-		salt.base64EncodedString() + ":" + publicKeyString + ":" + encryptedDataString
+	func createPayload(for encryptedDataString: String) -> String {
+		[salt.base64EncodedString(), publicKeyString, encryptedDataString].joined(separator: ":")
 	}
 
-	public func parsePayload(_ payloadString: String) -> (salt64: String, publicKeyString: String, encryptedDataString: String)? {
+	func parsePayload(_ payloadString: String) -> (salt64: String, publicKeyString: String, encryptedDataString: String)? {
 		let components = payloadString.components(separatedBy: ":")
 		guard components.count == 3 else { return nil }
 		return (components[0], components[1], components[2])
 	}
 }
 
+// MARK: - Encryption & Decryption
 public extension CryptoService {
+
 	func encrypt(dataString: String, publicKeyString: String) -> String {
 		guard let foreignPublicKey = Crypto.publicKey(with: publicKeyString),
-			  let symmetricKey = Crypto.generateSymmetricKeyBetween(privateKey, and: foreignPublicKey, salt: salt),
+			  let symmetricKey = generateSymmetricKey(with: foreignPublicKey),
 			  let data = Crypto.humanFriendlyPlainMessageToDataPlainMessage(dataString),
 			  let encryptedData = Crypto.encrypt(data: data, using: symmetricKey) else {
 			return dataString
@@ -79,11 +74,35 @@ public extension CryptoService {
 	func decrypt(dataString: String, publicKeyString: String, base64Salt: String) -> String {
 		guard let foreignPublicKey = Crypto.publicKey(with: publicKeyString),
 			  let salt = Data(base64Encoded: base64Salt),
-			  let symmetricKey = Crypto.generateSymmetricKeyBetween(privateKey, and: foreignPublicKey, salt: salt),
-			  let data = Crypto.decodeFromNetworkTransport(string: dataString) else {
+			  let symmetricKey = generateSymmetricKey(with: foreignPublicKey, salt: salt),
+			  let encryptedData = Crypto.decodeFromNetworkTransport(string: dataString) else {
 			return dataString
 		}
-		let decryptedData = Crypto.decrypt(encryptedData: data, using: symmetricKey)
+
+		let decryptedData = Crypto.decrypt(encryptedData: encryptedData, using: symmetricKey)
 		return Crypto.dataPlainMessageToHumanFriendlyPlainMessage(decryptedData) ?? dataString
+	}
+}
+
+// MARK: - Private Helpers
+private extension CryptoService {
+
+	func generateAndStoreNewKeyPair(for userId: String) -> Curve25519.KeyAgreement.PrivateKey {
+		let newKeyPair = Crypto.newPrivateKeyInstance()
+
+		storage.save(
+			Crypto.base64String(with: newKeyPair),
+			for: .security(.privateKey(id: userId))
+		)
+		storage.save(
+			Crypto.base64String(with: newKeyPair.publicKey),
+			for: .security(.publicKey(id: userId))
+		)
+
+		return newKeyPair
+	}
+
+	func generateSymmetricKey(with foreignPublicKey: Curve25519.KeyAgreement.PublicKey, salt: Data? = nil) -> SymmetricKey? {
+		Crypto.generateSymmetricKeyBetween(privateKey, and: foreignPublicKey, salt: salt ?? self.salt)
 	}
 }

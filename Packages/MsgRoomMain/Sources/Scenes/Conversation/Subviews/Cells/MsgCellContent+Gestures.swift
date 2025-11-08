@@ -28,31 +28,50 @@ struct MsgCellContentGesturesView<Content: View>: View {
 	var body: some View {
 		content
 			.offset(x: draggedOffset)
-			.gesture(dragGesture.exclusively(before: tapGesture), including: .gesture)
-			.background{
+			.gesture(
+				dragGesture.exclusively(
+					before: tapGesture
+				),
+				including: .gesture
+			)
+			.background {
 				if isLongPressActive {
 					Color.clear.hidden()
 						.onGeometryChange(for: CGRect.self) { proxy in
 							proxy.frame(in: .global)
 						} action: { newValue in
 							isLongPressActive = false
-							sendMsgCellInteraction?(.onFocusMsgBubble(.init(id: viewModel.id, frame: newValue)))
+							sendMsgCellInteraction?(
+								.onFocusMsgBubble(
+									.init(
+										id: viewModel.id,
+										frame: newValue
+									)
+								)
+							)
 						}
 
 				}
 			}
-			.onPressingChanged(in: .local) { point in
+			.onPressingChanged(in: .local) { _ in
 				MainActor.assumeIsolated {
 					isLongPressActive = true
 				}
 			}
+			.sensoryFeedback(
+				.impact(
+					flexibility: .rigid,
+					intensity: 0.5
+				),
+				trigger: isLongPressActive
+			)
 	}
 }
 
 private extension MsgCellContentGesturesView {
 	private var tapGesture: some Gesture {
 		TapGesture(count: 2)
-			.onEnded { value in
+			.onEnded { _ in
 				sendMsgCellInteraction?(.onTapMsg(viewModel.id))
 			}
 	}

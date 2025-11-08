@@ -31,7 +31,11 @@ extension EnvironmentValues {
 }
 extension View {
 	@MainActor
-	func receiveMsgCellInteraction(_ action: @Sendable @escaping (MsgCellInteraction.Action) -> Void) -> some View {
+	func receiveMsgCellInteraction(
+		_ action: @Sendable @escaping (
+			MsgCellInteraction.Action
+		) -> Void
+	) -> some View {
 		self.environment(\.sendMsgCellInteraction, MsgCellInteraction(action: action))
 	}
 }

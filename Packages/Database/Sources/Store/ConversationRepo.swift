@@ -27,7 +27,8 @@ public enum ConversationRepo {
 
 	public static func getConversationKind(for conID: String, refetch: Bool) async throws -> ConversationKind {
 		if conID == AnyConversation(.system(AI.contact)).uid {
-			return .system(AI.contact)
+			let contact = try await ContactRepo.getOrCreate(for: AI.contact.uid, refetch: false)
+			return .system(contact)
 		}
 
 		if conID.contains("|") {
@@ -58,7 +59,7 @@ public enum ConversationRepo {
 
 	static func resolveContactID(from conID: String) throws -> String {
 		var components = conID.components(separatedBy: "|")
-		guard let currentUserID = GroupAppStorage.shared.string(for: .auth(.currentUserID)) else {
+		guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
 			throw XError.noCurrentUserID
 		}
 		components.removeAll(where: { $0 == currentUserID })
@@ -119,7 +120,7 @@ public enum ConversationRepo {
 	}
 
 	public static func updateReceiveMsgs(for conID: String) async throws -> [Message] {
-		guard let currentUserID = GroupAppStorage.shared.string(for: .auth(.currentUserID)) else {
+		guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
 			throw XError.noCurrentUserID
 		}
 

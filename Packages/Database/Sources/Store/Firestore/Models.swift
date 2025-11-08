@@ -41,9 +41,9 @@ public struct FirestoreFilter {
 	}
 }
 
-public enum CollectionPath: String, Sendable {
+public enum FirestoreCollectionPath: String, Sendable {
 	case users, groups
 }
-public enum FieldPath: String, Sendable {
+public enum FirestoreDocumentPath: String, Sendable {
 	case uid, members, mobile
 }

@@ -57,7 +57,6 @@ public struct ContactSettingsScene: View {
 					.textSelection(.enabled)
 			}
 		}
-		.navigationTitle("Settings")
 		.navigationBarBackButtonHidden(isSaving)
 		.toolbar {
 			if isSaving {

@@ -9,6 +9,7 @@ import SwiftUI
 import Database
 import Services
 import XUI
+import Core
 
 struct ContactCell: View {
 

@@ -13,8 +13,8 @@ import Database
 
 struct MsgsScrollView: View {
 
-	@State var manager: ChatViewManager
-	let geometry: GeometryProxy
+	let manager: ChatViewManager
+	@Environment(\.screenSize) var screenSize
 	@Namespace private var namespace
 	@Environment(\.focusState) private var focusState
 
@@ -24,12 +24,12 @@ struct MsgsScrollView: View {
 				config: .init(
 					manager.config.lineSpacing,
 					manager.config.contentInsets,
-					containerSize: geometry.size),
+					containerSize: screenSize),
 				layoutCache: manager.scrollManager.layoutCache
 			) {
 				if manager.eventsManager.showContactInfo {
 					ConversationHeaderView()
-						.frame(size: geometry.size)
+						.frame(size: screenSize)
 				}
 				ForEach(manager.cellItems, id: \.id) { viewModel  in
 					let layout = viewModel.layout
@@ -50,21 +50,20 @@ struct MsgsScrollView: View {
 			}
 			.geometryGroup()
 			.scrollTargetLayout()
-			.equatable(by: manager.cellItems.count.value + (manager.eventsManager.selectedMsg?.id ?? ""))
 		}
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.scrollManager.handleScrollPhaseChange(oldPhase, newPhase, context)
 		}
 		.onScrollGeometryChange(
-			for: ScrollGeometry.self,
-			of: { $0 },
+			for: VScrollGeometry.self,
+			of: { .init($0) },
 			action: { oldValue, newValue in
 				manager.scrollManager.handleScrollGeometryChange(oldValue, newValue)
 			}
 		)
 		.onScrollTargetVisibilityChange(
 			idType: String.self,
-			threshold: 0.01
+			threshold: 0.9
 		) { values in
 			manager.handleVisibleIDsChange(values)
 		}
@@ -72,10 +71,11 @@ struct MsgsScrollView: View {
 		.scrollDismissesKeyboard(.immediately)
 		.defaultScrollAnchor(.bottom, for: .initialOffset)
 		.defaultScrollAnchor(.bottom, for: .sizeChanges)
-		.scrollPosition(.constant(manager.scrollManager.scrollPosition))
 		.scrollContentBackground(.hidden)
 		.namespace(namespace)
-		.task {
+		.equatable(by: manager.reloadID)
+		.scrollPosition(.constant(manager.scrollManager.scrollPosition))
+		.task(priority: .background) {
 			await manager.onViewAppear()
 		}
 	}

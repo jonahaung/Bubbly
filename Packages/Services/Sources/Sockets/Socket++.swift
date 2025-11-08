@@ -21,7 +21,7 @@ extension Socket {
 				}
 			}
 
-		case .updatedMsg(let rMsg):
+		case .updatedMsg:
 			Task { [weak self] in
 				guard let self else { return }
 				await self.queue.addOperation {

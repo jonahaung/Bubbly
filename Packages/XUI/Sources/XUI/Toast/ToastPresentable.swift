@@ -8,20 +8,16 @@
 import SwiftUI
 
 private struct ToastPresentableodifier: ViewModifier {
-
 	@State private var toastPresenter = ToastPresenter.shared
-
 	public func body(content: Content) -> some View {
 		ZStack(alignment: .top) {
 			content
-				.layoutPriority(1)
 			if let toast = toastPresenter.toast {
 				ToastBanner(toast: toast)
 			}
 		}
 	}
 }
-
 public extension View {
 	func toastPresentable() -> some View {
 		modifier(ToastPresentableodifier())

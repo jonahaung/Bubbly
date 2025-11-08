@@ -51,8 +51,8 @@ struct RunningBorderViewModifier: ViewModifier {
 
 public extension View {
 	func runningBorder(
-		lineWidth: CGFloat = 1.5,
-		cornerRadius: CGFloat = 12,
+		lineWidth: CGFloat = 1,
+		cornerRadius: CGFloat = 10,
 		animated: Bool = true
 	) -> some View {
 		modifier(RunningBorderViewModifier(

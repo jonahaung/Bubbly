@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 public struct Contact: ContactRepresentable {
 	public let uid: String
 	public var name: String

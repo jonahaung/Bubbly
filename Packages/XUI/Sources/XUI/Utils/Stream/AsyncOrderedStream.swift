@@ -8,6 +8,7 @@
 import Foundation
 
 public enum AsyncOrderedStream {
+	@discardableResult
 	public static func mapOrdered<Input: Sendable, Output: Sendable>(
 		inputs: [Input],
 		maxConcurrentTasks: Int = ProcessInfo.processInfo.activeProcessorCount,

@@ -59,7 +59,11 @@ public extension ContactStore {
 		guard let currentUserId else {
 			fatalError("Missing current user ID")
 		}
-		let groups: [Group] = try await FirestoreRepo.getModels(for: currentUserId, collection: .groups, field: .members)
+		let groups: [Group] = try await FirestoreRepo.getModels(
+			for: currentUserId,
+			collection: .groups,
+			field: .members
+		)
 
 		let store = Store.shared.groupStore
 

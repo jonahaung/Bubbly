@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import QuartzCore
 
 @MainActor
 @Observable
@@ -20,8 +19,6 @@ public final class ToastPresenter {
 	private var startTime: CFTimeInterval?
 	@ObservationIgnored
 	private var elapsedTime: TimeInterval = 0.0
-
-	// MARK: - Public API
 
 	public func show(_ value: Toast?) {
 		guard let value else { return }
@@ -44,7 +41,6 @@ public final class ToastPresenter {
 		processQueue()
 	}
 
-	// MARK: - Shared Singleton
 	public static var shared: ToastPresenter {
 		get { _shared.value }
 		set { _shared.value = newValue }
@@ -52,12 +48,11 @@ public final class ToastPresenter {
 	private static var _shared = Mutex(ToastPresenter())
 }
 
-// MARK: - Queue Processing
 private extension ToastPresenter {
 	func processQueue() {
 		// If no current toast and queue has items
 		guard toast == nil, !queue.isEmpty else { return }
-		Haptics.shared.generateNotificationFeedback(style: .success)
+		UIImpactFeedbackGenerator(style: .rigid).impactOccurred(intensity: 0.8)
 		let next = queue.removeFirst()
 		toast = next
 		startTracking()

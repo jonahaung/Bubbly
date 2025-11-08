@@ -7,7 +7,7 @@
 
 import Foundation
 
-public protocol ContactRepresentable: Codable, Sendable, Hashable, UIdentifiable {
+public protocol ContactRepresentable: Codable, Sendable, Hashable, UIdentifiable, StringMergable {
 	var uid: String { get }
 	var name: String { get set }
 	var mobile: String { get }
@@ -20,14 +20,10 @@ public extension ContactRepresentable {
 	func merging(from source: any ContactRepresentable) -> Self {
 		guard source.uid == uid else { return self }
 		var copy = self
-		func merged(_ current: String, _ incoming: String) -> String {
-			let trimmed = incoming.trimmingCharacters(in: .whitespacesAndNewlines)
-			return trimmed.isEmpty ? current : trimmed
-		}
-		copy.name = merged(copy.name, source.name)
-		copy.photoURL = merged(copy.photoURL, source.photoURL)
-		copy.pushToken = merged(copy.pushToken, source.pushToken)
-		copy.publicKeyString = merged(copy.publicKeyString, source.publicKeyString)
+		copy.name = mergedString(current: copy.name, incoming: source.name)
+		copy.photoURL = mergedString(current: copy.photoURL, incoming: source.photoURL)
+		copy.pushToken = mergedString(current: copy.pushToken, incoming: source.pushToken)
+		copy.publicKeyString = mergedString(current: copy.publicKeyString, incoming: source.publicKeyString)
 		return copy
 	}
 }

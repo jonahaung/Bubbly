@@ -24,7 +24,7 @@ struct InboxCell: View {
 					Text(item.title).bold()
 					Spacer()
 				}
-				Text(item.sender.name + " ")
+				Text("\(item.sender.name) ")
 					.font(.footnote.lowercaseSmallCaps())
 					.foregroundStyle(.secondary)
 				+
@@ -48,9 +48,7 @@ struct InboxCell: View {
 		.flexible(.horizontal)
 		.background()
 		.onTapGesture {
-			Task {
-				ConversationInitializer.start(conversation: item.conversation)
-			}
+			ConversationInitializer.start(conversation: item.conversation)
 		}
 	}
 }

@@ -36,17 +36,30 @@ class LocationAlwaysHandler: NSObject, CLLocationManagerDelegate {
 	func requestPermission(_ completionHandler: @escaping () -> Void) {
 		self.completionHandler = completionHandler
 
-		let status = CLLocationManager.authorizationStatus()
+		let status: CLAuthorizationStatus
+		if #available(iOS 14.0, *) {
+			status = locationManager.authorizationStatus
+		} else {
+			status = CLLocationManager.authorizationStatus()
+		}
 
 		switch status {
 		case .notDetermined:
 			locationManager.delegate = self
 			locationManager.requestAlwaysAuthorization()
-		case .authorizedWhenInUse:
+
+		case .authorizedAlways:
+			// Already granted
+			completionHandler()
+
+		case .authorizedWhenInUse, .denied, .restricted:
+			// Handle according to your app’s policy (perhaps prompt UI)
+			// You might still call requestAlwaysAuthorization() if appropriate
 			locationManager.delegate = self
 			locationManager.requestAlwaysAuthorization()
-		default:
-			self.completionHandler()
+
+		@unknown default:
+			break
 		}
 	}
 

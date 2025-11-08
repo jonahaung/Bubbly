@@ -12,8 +12,8 @@ public extension Transaction {
 	static let withAnimation: Transaction = {
 		var transition = Transaction(animation: .interpolatingSpring(.smooth, initialVelocity: 0.1))
 		transition.disablesAnimations = false
-		transition.scrollPositionUpdatePreservesVelocity = true
-		transition.scrollContentOffsetAdjustmentBehavior = .automatic
+		transition.scrollPositionUpdatePreservesVelocity = false
+		transition.scrollContentOffsetAdjustmentBehavior = .disabled
 		transition.tracksVelocity = true
 		return transition
 	}()

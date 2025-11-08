@@ -37,7 +37,7 @@ extension ScrollViewUpdateingState {
 	}
 	var isUpdating: Bool {
 		switch self {
-		case .insertingItems, .removingItems, .appendingItem:
+		case .insertingItems, .removingItems, .appendingItem, .resetting:
 			return true
 		default:
 			return false

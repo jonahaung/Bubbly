@@ -58,7 +58,7 @@ final class InboxViewModel: ErrorPresenter {
 
 	@concurrent
 	private func fetchInboxItems(_ conversations: [any ConversationRepresentable], currentUser: CurrentUserModel) async throws -> [InboxItem] {
-		var items: [InboxItem?] = try await AsyncOrderedStream.mapOrdered(inputs: conversations) { conversation in
+		let items: [InboxItem?] = try await AsyncOrderedStream.mapOrdered(inputs: conversations) { conversation in
 			if let lastMsgID = conversation.lastMsgID, let msg = try await Store.shared.msgStore.fetch(uid: lastMsgID) {
 				let sender: any ContactRepresentable
 				if msg.receiptType == .receive {

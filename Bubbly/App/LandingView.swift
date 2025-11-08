@@ -28,6 +28,7 @@ struct LandingView: View {
 				CurrentUserProfileView()
 			}
 			.environment(\.currentUser, .init(user))
+			.environment(authService)
 		case .unknown:
 			ProgressView().controlSize(.mini)
 		case .initial:

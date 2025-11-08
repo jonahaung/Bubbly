@@ -56,11 +56,6 @@ extension MsgsScrollViewLayout {
 		subviews: Subviews,
 		cache: inout Cache
 	) -> CGSize {
-
-		guard config.containerWidth >= LayoutConstants.minimumContainerWidth else {
-			return .zero
-		}
-
 		guard !cache.layouts.isEmpty else {
 			return CGSize(width: config.containerSize.width, height: config.contentInsets.vertical)
 		}
@@ -141,7 +136,12 @@ private extension MsgsScrollViewLayout {
 		return (layouts, totalheight)
 	}
 
-	func calculateCellLayout(for subview: LayoutSubview, value: MsgLayoutValue, size: CGSize, currentY: CGFloat) -> CellLayout {
+	func calculateCellLayout(
+		for subview: LayoutSubview,
+		value: MsgLayoutValue,
+		size: CGSize,
+		currentY: CGFloat
+	) -> CellLayout {
 		let position = calculatePosition(for: value, size: size, currentY: currentY)
 		return CellLayout(value.uid, size, position)
 	}

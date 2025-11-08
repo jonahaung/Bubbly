@@ -25,7 +25,7 @@ public struct ContactsScene: View {
 	}
 	@AppStorage(
 		"DefaultContactDisplayType",
-		store: GroupAppStorage.shared.store
+		store: GroupStorage.shared.store
 	) private var defaultContactDisplay: DefaultContactDisplayType = .chat
 
 	public init() {}

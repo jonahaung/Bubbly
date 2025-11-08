@@ -14,7 +14,7 @@ import Database
 
 struct ChatInputBar: View {
 
-	@State private var inputManager = try! ChatInputBarManager()
+	private let inputManager = try! ChatInputBarManager()
 	@Environment(ChatViewManager.self) private var manager
 
 	var body: some View {
@@ -22,13 +22,13 @@ struct ChatInputBar: View {
 			if inputManager.imagePicker.selections.isEmpty == false {
 				imageAttachmentView
 			}
-			TextInputBar(inputManager: inputManager)
+			TextInputBar()
+				.environment(inputManager)
 				.padding(.top, 4)
 				.background {
 					manager.conversation.theme.background.color.ignoresSafeArea(edges: .bottom)
 				}
 		}
-		.environment(inputManager)
 	}
 
 	private var imageAttachmentView: some View {

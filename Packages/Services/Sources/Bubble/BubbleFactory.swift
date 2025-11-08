@@ -13,7 +13,9 @@ public struct BubbleFactory: Sendable {
 
 	private let minutesForChatMsgGrouping: Int
 
-	public init(_ minutesForChatMsgGrouping: Int = Settings.Layout.minutesForChatMsgGrouping) {
+	public init(
+		_ minutesForChatMsgGrouping: Int = Settings.Layout.minutesForChatMsgGrouping
+	) {
 		self.minutesForChatMsgGrouping = minutesForChatMsgGrouping
 	}
 
@@ -52,8 +54,18 @@ public struct BubbleFactory: Sendable {
 		previousMsg: Message?,
 		nextMsg: Message?
 	) -> BubbleCorner {
-		let canPreviousGroup = previousMsg.map { shouldGroupWithPrevious(msg: msg, previousMsg: $0) } ?? false
-		let canNextGroup = nextMsg.map { shouldGroupWithNext(msg: msg, nextMsg: $0) } ?? false
+		let canPreviousGroup = previousMsg.map {
+			shouldGroupWithPrevious(
+				msg: msg,
+				previousMsg: $0
+			)
+		} ?? false
+		let canNextGroup = nextMsg.map {
+			shouldGroupWithNext(
+				msg: msg,
+				nextMsg: $0
+			)
+		} ?? false
 
 		switch (previousMsg != nil, nextMsg != nil) {
 		case (true, true):
@@ -75,8 +87,18 @@ public struct BubbleFactory: Sendable {
 		previousMsg: Message?,
 		nextMsg: Message?
 	) -> BubbleCorner {
-		let canPreviousGroup = previousMsg.map { shouldGroupWithPrevious(msg: msg, previousMsg: $0) } ?? false
-		let canNextGroup = nextMsg.map { shouldGroupWithNext(msg: msg, nextMsg: $0) } ?? false
+		let canPreviousGroup = previousMsg.map {
+			shouldGroupWithPrevious(
+				msg: msg,
+				previousMsg: $0
+			)
+		} ?? false
+		let canNextGroup = nextMsg.map {
+			shouldGroupWithNext(
+				msg: msg,
+				nextMsg: $0
+			)
+		} ?? false
 
 		switch (previousMsg != nil, nextMsg != nil) {
 		case (true, true):
@@ -111,7 +133,11 @@ public struct BubbleFactory: Sendable {
 		let showTimeSeparater = !isSimilierDateTime(of: msg.date, from: previous)
 		let showTopPadding = !showTimeSeparater && (msg.senderID != previous.senderID)
 		let bubble = getBubble(msg: msg, previousMsg: previous, nextMsg: next)
-		return .init(showTimeSeparator: showTimeSeparater, showTopPadding: showTopPadding, bubble: bubble)
+		return .init(
+			showTimeSeparator: showTimeSeparater,
+			showTopPadding: showTopPadding,
+			bubble: bubble
+		)
 	}
 	// MARK: - Grouping helpers
 
