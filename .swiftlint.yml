@@ -4,18 +4,9 @@
 #  Created: 2025-11-09
 # ---------------------------------------------------------
 
-# Only lint your source folders (skip generated or vendor files)
 included:
   - Bubbly
   - Packages
-
-disabled_rules:
-  - identifier_name
-  - line_length
-  - function_body_length
-  - cyclomatic_complexity
-  - nesting
-  - force_try
 
 excluded:
   - Pods
@@ -27,7 +18,25 @@ excluded:
   - "**/R.generated.swift"
   - "**/*.g.swift"
 
-# Use modern SwiftLint settings
+disabled_rules:
+  - todo
+  - line_length
+  - file_length
+  - function_body_length
+  - type_body_length
+  - cyclomatic_complexity
+  - identifier_name
+  - force_try
+  - force_unwrapping
+  - nesting
+  - function_parameter_count
+#  - switch_case_alignment
+  - attributes
+#  - let_var_whitespace
+  - empty_count
+  - type_name
+  - trailing_closure
+
 opt_in_rules:
   - anyobject_protocol
   - array_init
@@ -59,21 +68,6 @@ opt_in_rules:
   - unneeded_parentheses_in_closure_argument
   - vertical_parameter_alignment_on_call
 
-# Disable rules that are too noisy for big SwiftUI projects
-disabled_rules:
-  - todo
-  - line_length
-  - file_length
-  - function_body_length
-  - type_body_length
-  - cyclomatic_complexity
-  - identifier_name
-  - force_unwrapping
-  - nesting
-  - function_parameter_count
-  - switch_case_alignment
-
-# Rule customizations
 line_length:
   warning: 120
   error: 180
@@ -111,4 +105,4 @@ cyclomatic_complexity:
   warning: 12
   error: 20
 
-reporter: "xcode"  # options: xcode, json, emoji, sonarqube
+reporter: "xcode"

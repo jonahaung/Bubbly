@@ -8,72 +8,72 @@
 import Foundation
 
 public enum GroupStorageKey: Hashable, Sendable {
-    case device(Device)
-    case auth(GroupStorageKey.Auth)
-    case layout(Layout)
-    case security(Security)
-    case limit(Limit)
-    case custom(String)
-    case router(Router)
+	case device(Device)
+	case auth(GroupStorageKey.Auth)
+	case layout(Layout)
+	case security(Security)
+	case limit(Limit)
+	case custom(String)
+	case router(Router)
 }
 
-public extension GroupStorageKey {
-    enum Router: String, Hashable, Sendable {
-        case targetedDeepLinkPath
-    }
+extension GroupStorageKey {
+	public enum Router: String, Hashable, Sendable {
+		case targetedDeepLinkPath
+	}
 
-    enum Device: String, Hashable, Sendable {
-        case deviceToken
-    }
+	public enum Device: String, Hashable, Sendable {
+		case deviceToken
+	}
 
-    enum Auth: String, Hashable, Sendable {
-        case currentUserID, authToken
-    }
+	public enum Auth: String, Hashable, Sendable {
+		case currentUserID, authToken
+	}
 
-    enum Layout: String, Hashable, Sendable {
-        case chatMsgSpacing
-    }
+	public enum Layout: String, Hashable, Sendable {
+		case chatMsgSpacing
+	}
 
-    enum Limit: String, Hashable, Sendable {
-        case paginationPageSize
-        case minutesForChatMsgGrouping
-    }
+	public enum Limit: String, Hashable, Sendable {
+		case paginationPageSize
+		case minutesForChatMsgGrouping
+	}
 
-    enum Security: Hashable, Sendable, CustomStringConvertible {
-        case privateKey(id: String)
-        case publicKey(id: String)
+	public enum Security: Hashable, Sendable, CustomStringConvertible {
+		case privateKey(id: String)
+		case publicKey(id: String)
 
-        public var description: String {
-            switch self {
-            case let .privateKey(id):
-                "privateKey.\(id)"
-            case let .publicKey(id):
-                "publicKey.\(id)"
-            }
-        }
-    }
+		public var description: String {
+			switch self {
+			case .privateKey(let id):
+				"privateKey.\(id)"
+			case .publicKey(let id):
+				"publicKey.\(id)"
+			}
+		}
+	}
 }
 
-public extension GroupStorageKey {
-    var value: String {
-        var key: String {
-            switch self {
-            case let .layout(layout):
-                layout.rawValue
-            case let .security(security):
-                security.description
-            case let .device(device):
-                device.rawValue
-            case let .auth(auth):
-                auth.rawValue
-            case let .custom(key):
-                key
-            case let .limit(limit):
-                limit.rawValue
-            case let .router(router):
-                router.rawValue
-            }
-        }
-        return AppInformation.appID + "." + key
-    }
+extension GroupStorageKey {
+	public var value: String {
+		var key: String {
+			switch self {
+			case .layout(let layout):
+				layout.rawValue
+			case .security(let security):
+				security.description
+			case .device(let device):
+				device.rawValue
+			case .auth(let auth):
+				auth.rawValue
+			case .custom(let key):
+				key
+			case .limit(let limit):
+				limit.rawValue
+			case .router(let router):
+				router.rawValue
+			}
+		}
+		return AppInformation.appID + "." + key
+	}
 }

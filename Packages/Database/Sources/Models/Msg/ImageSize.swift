@@ -8,15 +8,15 @@
 import Foundation
 
 public protocol ImageSize {
-    var width: CGFloat? { get }
-    var height: CGFloat? { get }
+	var width: CGFloat? { get }
+	var height: CGFloat? { get }
 }
 
-public extension ImageSize {
-    var size: CGSize? {
-        guard let width, let height else {
-            return nil
-        }
-        return .init(width: width, height: height)
-    }
+extension ImageSize {
+	public var size: CGSize? {
+		guard let width, let height else {
+			return nil
+		}
+		return .init(width: width, height: height)
+	}
 }

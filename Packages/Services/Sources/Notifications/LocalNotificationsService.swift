@@ -126,7 +126,8 @@ public actor DefaultNotificationService: NotificationService {
 			if request.authorizationOptions
 				.contains(
 					.alert
-				), settings.alertSetting != .enabled {
+				), settings.alertSetting != .enabled
+			{
 				print(
 					"Alert notifications are not enabled"
 				)
@@ -135,7 +136,8 @@ public actor DefaultNotificationService: NotificationService {
 			if request.authorizationOptions
 				.contains(
 					.badge
-				), settings.badgeSetting != .enabled {
+				), settings.badgeSetting != .enabled
+			{
 				print(
 					"Badge notifications are not enabled"
 				)
@@ -144,7 +146,8 @@ public actor DefaultNotificationService: NotificationService {
 			if request.authorizationOptions
 				.contains(
 					.sound
-				), settings.soundSetting != .enabled {
+				), settings.soundSetting != .enabled
+			{
 				print(
 					"Sound notifications are not enabled"
 				)
@@ -240,8 +243,8 @@ public struct DefaultNotificationSettingsProvider: NotificationSettingsProvider 
 
 // MARK: - Convenience Extensions
 
-public extension NotificationRequest {
-	static func immediate(
+extension NotificationRequest {
+	public static func immediate(
 		title: String,
 		body: String,
 		sound: UNNotificationSound? = .default,
@@ -256,7 +259,7 @@ public extension NotificationRequest {
 		return NotificationRequest(content: content)
 	}
 
-	static func timed(
+	public static func timed(
 		interval: TimeInterval,
 		title: String,
 		body: String,

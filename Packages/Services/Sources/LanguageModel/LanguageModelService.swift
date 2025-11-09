@@ -10,45 +10,45 @@ import SwiftUI
 @MainActor
 @Observable
 public final class LanguageModelService {
-    private let availabilityChecker = SystemModelAvailabilityChecker()
-    private let model: SystemLanguageModel = .default
-    public private(set) var session: LanguageModelSession
-    public let tool: ExampleTool
-    public var streamingEnabled = true
-    public var error: (any Error)?
-    public var isReady: Bool {
-        !session.isResponding && error == nil
-    }
+	private let availabilityChecker = SystemModelAvailabilityChecker()
+	private let model: SystemLanguageModel = .default
+	public private(set) var session: LanguageModelSession
+	public let tool: ExampleTool
+	public var streamingEnabled = true
+	public var error: (any Error)?
+	public var isReady: Bool {
+		!session.isResponding && error == nil
+	}
 
-    public init(
-        role: LanguageModelRole
-    ) {
-        let tool = ExampleTool()
-        session = Self.makeSession(model, tools: [tool], role: role)
-        self.tool = tool
-    }
+	public init(
+		role: LanguageModelRole
+	) {
+		let tool = ExampleTool()
+		session = Self.makeSession(model, tools: [tool], role: role)
+		self.tool = tool
+	}
 
-    private static func makeSession(
-        _ model: SystemLanguageModel,
-        tools: [any Tool],
-        role: LanguageModelRole
-    ) -> LanguageModelSession {
-        LanguageModelSession(
-            model: model,
-            tools: tools,
-            instructions: role.modelInstructions
-        )
-    }
+	private static func makeSession(
+		_ model: SystemLanguageModel,
+		tools: [any Tool],
+		role: LanguageModelRole
+	) -> LanguageModelSession {
+		LanguageModelSession(
+			model: model,
+			tools: tools,
+			instructions: role.modelInstructions
+		)
+	}
 }
 
-public extension LanguageModelService {
-    func respond(to prompt: String) async throws -> String {
-        try await session.respond(to: prompt).content
-    }
+extension LanguageModelService {
+	public func respond(to prompt: String) async throws -> String {
+		try await session.respond(to: prompt).content
+	}
 
-    func stream(
-        to prompt: String
-    ) async -> LanguageModelSession.ResponseStream<String>? {
-        session.streamResponse(to: prompt, generating: String.self)
-    }
+	public func stream(
+		to prompt: String
+	) async -> LanguageModelSession.ResponseStream<String>? {
+		session.streamResponse(to: prompt, generating: String.self)
+	}
 }
