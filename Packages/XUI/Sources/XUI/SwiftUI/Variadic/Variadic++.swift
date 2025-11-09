@@ -21,6 +21,7 @@ public extension View {
         }
     }
 }
+
 private struct Helper<Result: View>: _VariadicView_MultiViewRoot {
     var _body: (_VariadicView.Children) -> Result
 
@@ -28,14 +29,16 @@ private struct Helper<Result: View>: _VariadicView_MultiViewRoot {
         _body(children)
     }
 }
+
 public extension View {
-    func variadic<R: View>(@ViewBuilder process: @escaping (_VariadicView.Children) -> R) -> some View {
+    func variadic(@ViewBuilder process: @escaping (_VariadicView.Children) -> some View) -> some View {
         _VariadicView.Tree(Helper(_body: process), content: { self })
     }
 }
+
 public extension View {
     @ViewBuilder
-    func intersperse<V: View>(@ViewBuilder _ divider: () -> V) -> some View {
+    func intersperse(@ViewBuilder _ divider: () -> some View) -> some View {
         let el = divider()
         variadic { children in
             if let c = children.first {

@@ -8,24 +8,23 @@
 import Foundation
 
 public enum MediaPickerLoadingState<T>: Equatable, Sendable where T: Sendable {
-
     case empty
     case loading(Progress)
     case success(T)
     case failure(Error)
 
-    static public func == (lhs: MediaPickerLoadingState, rhs: MediaPickerLoadingState) -> Bool {
+    public static func == (lhs: MediaPickerLoadingState, rhs: MediaPickerLoadingState) -> Bool {
         switch (lhs, rhs) {
         case (.empty, .empty):
-            return true
+            true
         case (.loading(_), .loading(_)):
-            return true
+            true
         case (.success(_), .success(_)):
-            return true
+            true
         case (.failure(_), .failure(_)):
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }

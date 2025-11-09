@@ -8,18 +8,19 @@
 import SwiftUI
 
 public struct TextAvatarView: View {
-
     private let text: String
     private let color: Color
 
     public init(text: String) {
-        self.text = text.words().compactMap { $0.first }.prefix(2).map { String($0).uppercased() }.joined()
-		self.color = .gray
+        self.text = text.words().compactMap(\.first).prefix(2).map { String($0).uppercased() }.joined()
+        color = .gray
     }
+
     public init(fullText: String) {
-        self.text = fullText
-        self.color = text.color
+        text = fullText
+        color = text.color
     }
+
     public var body: some View {
         GeometryReader { geo in
             Circle()

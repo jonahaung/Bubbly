@@ -13,7 +13,7 @@ public struct AssetType: ExpressibleByStringLiteral, Hashable, Sendable {
     }
 
     public init(stringLiteral value: String) {
-        self.rawValue = value
+        rawValue = value
     }
 
     public static let png: AssetType = "public.png"

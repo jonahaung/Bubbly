@@ -19,7 +19,6 @@ public struct SeededRandomGenerator: RandomNumberGenerator {
 }
 
 public struct ColorData: Codable {
-
     public var hue: Double
     public var saturation: Double
     public var brightness: Double
@@ -41,7 +40,7 @@ public struct ColorData: Codable {
         return copy
     }
 
-    public func interpolate(to other: ColorData, percent: Double, clamped: Bool = true) -> ColorData {
+    public func interpolate(to _: ColorData, percent _: Double, clamped _: Bool = true) -> ColorData {
         fatalError()
 //        ColorData(
 //            hue: Angle.degrees(hue * 360).interpolate(to: Angle.degrees(other.hue * 360), percent: percent).degrees / 360,
@@ -83,7 +82,7 @@ public struct ColorData: Codable {
 //            value = min(max(valueToClamp, 0), 1)
 //        }
 //    }
-//    
+//
 //    init(wrappedValue value: Double, wraps: Bool = false) {
 //        self.value = value
 //        self.wraps = wraps

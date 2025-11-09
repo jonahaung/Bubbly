@@ -8,18 +8,17 @@
 import SwiftUI
 
 private struct SplashView<SplashContent: View>: ViewModifier {
-
     private let timeout: TimeInterval
     private let splashContent: () -> SplashContent
 
     @State private var isActive = true
 
-    public init(timeout: TimeInterval, @ViewBuilder splashContent: @escaping () -> SplashContent) {
+    init(timeout: TimeInterval, @ViewBuilder splashContent: @escaping () -> SplashContent) {
         self.timeout = timeout
         self.splashContent = splashContent
     }
 
-    public func body(content: Content) -> some View {
+    func body(content: Content) -> some View {
         if isActive {
             splashContent()
                 .task {
@@ -37,7 +36,7 @@ private struct SplashView<SplashContent: View>: ViewModifier {
 }
 
 public extension View {
-    func splashView<SplashContent: View>(timeout: TimeInterval = 2.5, @ViewBuilder splashContent: @escaping () -> SplashContent) -> some View {
+    func splashView(timeout: TimeInterval = 2.5, @ViewBuilder splashContent: @escaping () -> some View) -> some View {
         modifier(SplashView(timeout: timeout, splashContent: splashContent))
     }
 }

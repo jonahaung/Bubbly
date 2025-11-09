@@ -9,17 +9,16 @@ import Foundation
 
 @propertyWrapper
 public struct AtomicQueue<Value> {
-
     private let queue = DispatchQueue(label: "com.jonahaung.AtomicQueue")
     private var value: Value
 
     public init(wrappedValue: Value) {
-        self.value = wrappedValue
+        value = wrappedValue
     }
 
     public var wrappedValue: Value {
         get {
-            return queue.sync { value }
+            queue.sync { value }
         }
         set {
             queue.sync { value = newValue }

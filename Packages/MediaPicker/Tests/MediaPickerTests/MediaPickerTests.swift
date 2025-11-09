@@ -1,5 +1,5 @@
-import XCTest
 @testable import MediaPicker
+import XCTest
 
 final class MediaPickerTests: XCTestCase {
     func testExample() throws {

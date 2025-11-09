@@ -2,23 +2,23 @@
 //  Created by Aung Ko Min on 10/01/2021.
 //
 
-import Foundation
-@preconcurrency import CryptoKit
 @preconcurrency import Crypto
+@preconcurrency import CryptoKit
+import Foundation
 
 private struct TestVars {
-    private init() { }
+    private init() {}
 
     struct AliceSender {
-        private init() { }
+        private init() {}
         static let privateKey = Crypto.newPrivateKeyInstance()
-        static let publicKey  = privateKey.publicKey
+        static let publicKey = privateKey.publicKey
     }
 
     struct BobReceiver {
-        private init() { }
+        private init() {}
         static let privateKey = Crypto.newPrivateKeyInstance()
-        static let publicKey  = privateKey.publicKey
+        static let publicKey = privateKey.publicKey
     }
 
     static let salt = "6beab91f-4a1a-4449-96cb-b6e0edb30776".data(using: .utf8)!
@@ -27,23 +27,21 @@ private struct TestVars {
 }
 
 extension Crypto {
-
     //
     // Encrypt and decrypt using shared symmetric key
     //
     static func sampleUsage1() -> Bool {
-
         print("\n\n\n\n\n\n")
         struct AliceSender {
-            private init() { }
+            private init() {}
             static let privateKey = Crypto.newPrivateKeyInstance()
-            static let publicKey  = privateKey.publicKey
+            static let publicKey = privateKey.publicKey
         }
 
         struct BobReceiver {
-            private init() { }
+            private init() {}
             static let privateKey = Crypto.newPrivateKeyInstance()
-            static let publicKey  = privateKey.publicKey
+            static let publicKey = privateKey.publicKey
         }
 
         let salt = "6beab91f-4a1a-4449-96cb-b6e0edb30776".data(using: .utf8)!
@@ -54,11 +52,11 @@ extension Crypto {
 
         // Sender: Generating symmetric key and encrpting data USING shared symmetric key
         let senderSymmetricKey = Crypto.generateSymmetricKeyBetween(AliceSender.privateKey, and: BobReceiver.publicKey, salt: salt)!
-        let encryptedData      = Crypto.encrypt(data: aliceSecretData!, using: senderSymmetricKey)!
+        let encryptedData = Crypto.encrypt(data: aliceSecretData!, using: senderSymmetricKey)!
 
         // Receiver: Generating symmetric key and decrypting data USING shared symmetric key
         let reveiverSymmetricKey = Crypto.generateSymmetricKeyBetween(BobReceiver.privateKey, and: AliceSender.publicKey, salt: salt)!
-        let decryptedData        = Crypto.decrypt(encryptedData: encryptedData, using: reveiverSymmetricKey)
+        let decryptedData = Crypto.decrypt(encryptedData: encryptedData, using: reveiverSymmetricKey)
 
         let bobSecret = String(data: decryptedData!, encoding: .utf8)!
         print("bobSecret: \(bobSecret)\n")
@@ -71,14 +69,13 @@ extension Crypto {
     // Encrypt and decrypt using shared symmetric key
     //
     static func sampleUsageX() -> Bool {
-
         // Sender: Generating symmetric key and encrpting data USING shared symmetric key
         let senderSymmetricKey = Crypto.generateSymmetricKeyBetween(TestVars.AliceSender.privateKey, and: TestVars.BobReceiver.publicKey, salt: TestVars.salt)!
-        let encryptedData      = Crypto.encrypt(data: TestVars.secretPlainData, using: senderSymmetricKey)!
+        let encryptedData = Crypto.encrypt(data: TestVars.secretPlainData, using: senderSymmetricKey)!
 
         // Receiver: Generating symmetric key and decrypting data USING shared symmetric key
         let reveiverSymmetricKey = Crypto.generateSymmetricKeyBetween(TestVars.BobReceiver.privateKey, and: TestVars.AliceSender.publicKey, salt: TestVars.salt)!
-        let decryptedData        = Crypto.decrypt(encryptedData: encryptedData, using: reveiverSymmetricKey)
+        let decryptedData = Crypto.decrypt(encryptedData: encryptedData, using: reveiverSymmetricKey)
 
         // The decripted data, should be equals with the secret
         return Crypto.dataPlainMessageToHumanFriendlyPlainMessage(decryptedData) == TestVars.secretPlain
@@ -88,18 +85,17 @@ extension Crypto {
     // Encrypt and decrypt using shared public and private keys
     //
     static func sampleUsage2() -> Bool {
-
         // Sender: Generating symmetric key and encrpting data USING public and private keys
         let encryptedData = Crypto.encrypt(data: TestVars.secretPlainData,
-                                              sender: TestVars.AliceSender.privateKey,
-                                              receiver: TestVars.BobReceiver.publicKey,
-                                              salt: TestVars.salt)!
+                                           sender: TestVars.AliceSender.privateKey,
+                                           receiver: TestVars.BobReceiver.publicKey,
+                                           salt: TestVars.salt)!
 
         // Receiver: Generating symmetric key and decrypting data USING public and private keys
         let decryptedData = Crypto.decrypt(encryptedData: encryptedData,
-                                              receiver: TestVars.BobReceiver.privateKey,
-                                              sender: TestVars.AliceSender.publicKey,
-                                              salt: TestVars.salt)
+                                           receiver: TestVars.BobReceiver.privateKey,
+                                           sender: TestVars.AliceSender.publicKey,
+                                           salt: TestVars.salt)
 
         // The decripted data, should be equals with the secret
         return Crypto.dataPlainMessageToHumanFriendlyPlainMessage(decryptedData) ?? "" == TestVars.secretPlain
@@ -109,31 +105,30 @@ extension Crypto {
     // Test same symetric keys generation with Alice and Bob public and private keys
     //
     static func testSymetricKeysGeneration() -> Bool {
-        let senderSymmetricKey   = Crypto.generateSymmetricKeyBetween(TestVars.AliceSender.privateKey, and: TestVars.BobReceiver.publicKey, salt: TestVars.salt)!
+        let senderSymmetricKey = Crypto.generateSymmetricKeyBetween(TestVars.AliceSender.privateKey, and: TestVars.BobReceiver.publicKey, salt: TestVars.salt)!
         let reveiverSymmetricKey = Crypto.generateSymmetricKeyBetween(TestVars.BobReceiver.privateKey, and: TestVars.AliceSender.publicKey, salt: TestVars.salt)!
         return senderSymmetricKey == reveiverSymmetricKey
     }
 
     //
-    // Test 
+    // Test
     //
     static func testDataToStringConversions() -> Bool {
-
         let plainSecretUtf8Data = Crypto.humanFriendlyPlainMessageToDataPlainMessage(TestVars.secretPlain)
 
         let aliceEncryptedData = Crypto.encrypt(data: plainSecretUtf8Data!,
-                                                   sender: TestVars.AliceSender.privateKey,
-                                                   receiver: TestVars.BobReceiver.publicKey,
-                                                   salt: TestVars.salt)!
+                                                sender: TestVars.AliceSender.privateKey,
+                                                receiver: TestVars.BobReceiver.publicKey,
+                                                salt: TestVars.salt)!
 
         let aliceEncryptedDataOverTheNetwork = Crypto.encondeForNetworkTransport(encrypted: aliceEncryptedData)
 
         guard let bobEncryptedData = Crypto.decodeFromNetworkTransport(string: aliceEncryptedDataOverTheNetwork) else { return false }
 
         let bobDecryptedData = Crypto.decrypt(encryptedData: bobEncryptedData,
-                                                 receiver: TestVars.BobReceiver.privateKey,
-                                                 sender: TestVars.AliceSender.publicKey,
-                                                 salt: TestVars.salt)
+                                              receiver: TestVars.BobReceiver.privateKey,
+                                              sender: TestVars.AliceSender.publicKey,
+                                              salt: TestVars.salt)
 
         let secretPlain = Crypto.dataPlainMessageToHumanFriendlyPlainMessage(bobDecryptedData)
         return secretPlain == TestVars.secretPlain
@@ -149,7 +144,6 @@ extension Crypto {
     }
 
     static func testPublicKeysHotStorage() -> Bool {
-
         let userId = "\(UUID())"
         let publicKey = Crypto.newPrivateKeyInstance().publicKey
 
@@ -170,5 +164,4 @@ extension Crypto {
 
         return true
     }
-
 }

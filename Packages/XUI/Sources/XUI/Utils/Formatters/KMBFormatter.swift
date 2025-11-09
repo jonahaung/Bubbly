@@ -1,5 +1,5 @@
 //
-//  KBMFormatter.swift
+//  KMBFormatter.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 2/4/23.
@@ -17,12 +17,12 @@ extension KMBFormatter {
 }
 
 public final class KMBFormatter: Sendable {
-
     public static var shared: KMBFormatter {
-		get { _shared.value }
-		set { _shared.value = newValue }
+        get { _shared.value }
+        set { _shared.value = newValue }
     }
-	nonisolated(unsafe) private static var _shared = Mutex(KMBFormatter())
+
+    private nonisolated(unsafe) static var _shared = Mutex(KMBFormatter())
     private let numberFormatter = NumberFormatter()
     private let unitSize: [Unit: Double] = [.none: 1,
                                             .thousands: 1000,
@@ -51,11 +51,11 @@ public final class KMBFormatter: Sendable {
         } else {
             if number == 1 || number == -1 {
                 return formatNumberFor(number: number, unit: .none)
-            } else if number < unitSize[.thousands]! && number > -unitSize[.thousands]! {
+            } else if number < unitSize[.thousands]!, number > -unitSize[.thousands]! {
                 return divide(number, by: unitSize, for: .none)
-            } else if number < unitSize[.millions]! && number > -unitSize[.millions]! {
+            } else if number < unitSize[.millions]!, number > -unitSize[.millions]! {
                 return divide(number, by: unitSize, for: .thousands)
-            } else if number < unitSize[.billions]! && number > -unitSize[.billions]! {
+            } else if number < unitSize[.billions]!, number > -unitSize[.billions]! {
                 return divide(number, by: unitSize, for: .millions)
             } else {
                 return divide(number, by: unitSize, for: .billions)
@@ -67,12 +67,11 @@ public final class KMBFormatter: Sendable {
         guard let numberSizeUnit = unitSize[unit] else {
             fatalError("Cannot find value \(unit)")
         }
-        let result = number/numberSizeUnit
+        let result = number / numberSizeUnit
         return formatNumberFor(number: result, unit: unit)
     }
 
     private func formatNumberFor(number: Double, unit: Unit) -> String {
-
         switch unit {
         case .none, .thousands:
             numberFormatter.minimumFractionDigits = 0
@@ -88,7 +87,7 @@ public final class KMBFormatter: Sendable {
             let result: String
             numberFormatter.minimumFractionDigits = 0
             numberFormatter.maximumFractionDigits = 3
-            if number < 0 && false {
+            if number < 0, false {
                 let negNumber = round(number * 100) / 100
                 result = numberFormatter.string(from: NSNumber(value: negNumber))!
             } else {
@@ -96,14 +95,13 @@ public final class KMBFormatter: Sendable {
             }
             return partsToIncludeFor(value: result, unit: unit)
         }
-
     }
 
     private func partsToIncludeFor(value: String, unit: Unit) -> String {
         if value == "Zero" {
-            return "0\(unit.rawValue)"
+            "0\(unit.rawValue)"
         } else {
-            return "\(value)\(unit.rawValue)"
+            "\(value)\(unit.rawValue)"
         }
     }
 

@@ -12,9 +12,9 @@ final class Mutex<T>: @unchecked Sendable {
     private let lock: os_unfair_lock_t
 
     init(_ value: T) {
-        self._value = value
-        self.lock = .allocate(capacity: 1)
-        self.lock.initialize(to: os_unfair_lock())
+        _value = value
+        lock = .allocate(capacity: 1)
+        lock.initialize(to: os_unfair_lock())
     }
 
     deinit {

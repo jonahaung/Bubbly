@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  InsetGroupSection.swift
 //
 //
 //  Created by Aung Ko Min on 16/7/23.
@@ -8,10 +8,9 @@
 import SwiftUI
 
 public struct InsetGroupSection<Content: View, Header: View, Footer: View>: View {
-
     @ViewBuilder private var content: () -> Content
-    @ViewBuilder private var header: (() -> Header)
-    @ViewBuilder private var footer: (() -> Footer)
+    @ViewBuilder private var header: () -> Header
+    @ViewBuilder private var footer: () -> Footer
     private let padding: CGFloat
 
     public init(_ padding: CGFloat = 0, content: @escaping () -> Content, @ViewBuilder header: @escaping (() -> Header) = { Group {} }, @ViewBuilder footer: @escaping (() -> Footer) = { Group {} }) {
@@ -36,6 +35,7 @@ public struct InsetGroupSection<Content: View, Header: View, Footer: View>: View
         }
     }
 }
+
 struct TableCellStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -48,6 +48,6 @@ struct TableCellStyle: ViewModifier {
 
 public extension View {
     func tableCellStyle() -> some View {
-        self.modifier(TableCellStyle())
+        modifier(TableCellStyle())
     }
 }

@@ -5,12 +5,11 @@
 //  Created by Aung Ko Min on 2024/04/22.
 //
 
-import SwiftUI
-@preconcurrency import PhotosUI
 import AVKit
+@preconcurrency import PhotosUI
+import SwiftUI
 
 public struct VideoPickupButton<Label: View>: View {
-
     @State private var model = VideoPickerViewModel()
     @Binding private var asset: AVAsset?
 
@@ -18,25 +17,25 @@ public struct VideoPickupButton<Label: View>: View {
 
     public init(pickedVideo asset: Binding<AVAsset?>, @ViewBuilder label: @escaping (MediaPickerLoadingState<AVAsset>) -> Label) {
         self.label = label
-        self._asset = asset
+        _asset = asset
     }
+
     public var body: some View {
         PhotosPicker(selection: $model.selection, matching: .videos, photoLibrary: .shared()) {
             label(model.loadState)
         }
         .onChange(of: model.loadState) { _, newValue in
             switch newValue {
-            case .success(let asset):
+            case let .success(asset):
                 self.asset = asset
             default:
-                self.asset = nil
+                asset = nil
             }
         }
     }
 }
 
 struct GalleryView: View {
-
     struct Movie: Transferable {
         let url: URL
         static var transferRepresentation: some TransferRepresentation {
@@ -48,7 +47,7 @@ struct GalleryView: View {
                     try FileManager.default.removeItem(at: copy)
                 }
                 try FileManager.default.copyItem(at: received.file, to: copy)
-                return Self.init(url: copy)
+                return Self(url: copy)
             }
         }
     }

@@ -7,17 +7,17 @@
 
 import Foundation
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 
-public extension File {
-    func open() {
-        NSWorkspace.shared.openFile(path)
+    public extension File {
+        func open() {
+            NSWorkspace.shared.openFile(path)
+        }
     }
-}
 #endif
 
 public struct Folder: Location {
-	public var id: String { self.path }
+    public var id: String { path }
 
     public let storage: Storage<Folder>
 
@@ -27,21 +27,22 @@ public struct Folder: Location {
 }
 
 public extension Folder {
-	struct ChildSequence<Child: Location>: Sequence, Identifiable {
-		public var id: String { folder.path }
+    struct ChildSequence<Child: Location>: Sequence, Identifiable {
+        public var id: String { folder.path }
         fileprivate let folder: Folder
         fileprivate let fileManager: FileManager
         fileprivate var isRecursive: Bool
         fileprivate var includeHidden: Bool
 
-		internal init(folder: Folder, fileManager: FileManager, isRecursive: Bool, includeHidden: Bool) {
-			self.folder = folder
-			self.fileManager = fileManager
-			self.isRecursive = isRecursive
-			self.includeHidden = includeHidden
-		}
+        init(folder: Folder, fileManager: FileManager, isRecursive: Bool, includeHidden: Bool) {
+            self.folder = folder
+            self.fileManager = fileManager
+            self.isRecursive = isRecursive
+            self.includeHidden = includeHidden
+        }
+
         public func makeIterator() -> ChildIterator<Child> {
-            return ChildIterator(
+            ChildIterator(
                 folder: folder,
                 fileManager: fileManager,
                 isRecursive: isRecursive,
@@ -61,11 +62,12 @@ public extension Folder {
         private var index = 0
         private var nestedIterators = [ChildIterator<Child>]()
 
-		internal init(folder: Folder,
-                         fileManager: FileManager,
-                         isRecursive: Bool,
-                         includeHidden: Bool,
-                         reverseTopLevelTraversal: Bool) {
+        init(folder: Folder,
+             fileManager: FileManager,
+             isRecursive: Bool,
+             includeHidden: Bool,
+             reverseTopLevelTraversal: Bool)
+        {
             self.folder = folder
             self.fileManager = fileManager
             self.isRecursive = isRecursive
@@ -104,7 +106,7 @@ public extension Folder {
                     storage: Storage(path: childPath, fileManager: fileManager)
                 ))
 
-                if let childFolder = childFolder {
+                if let childFolder {
                     let nested = ChildIterator(
                         folder: childFolder,
                         fileManager: fileManager,
@@ -130,7 +132,7 @@ public extension Folder {
 
 extension Folder.ChildSequence: CustomStringConvertible {
     public var description: String {
-        return lazy.map({ $0.description }).joined(separator: "\n")
+        lazy.map(\.description).joined(separator: "\n")
     }
 }
 
@@ -148,11 +150,11 @@ public extension Folder.ChildSequence {
     }
 
     func count() -> Int {
-        return reduce(0) { count, _ in count + 1 }
+        reduce(0) { count, _ in count + 1 }
     }
 
     func names() -> [String] {
-        return map { $0.name }
+        map(\.name)
     }
 
     func last() -> Child? {
@@ -191,116 +193,118 @@ public extension Folder.ChildSequence {
 
 public extension Folder {
     static var kind: LocationKind {
-        return .folder
+        .folder
     }
 
     static var current: Folder {
-        return try! Folder(path: "")
+        try! Folder(path: "")
     }
 
     static var root: Folder {
-        return try! Folder(path: "/")
+        try! Folder(path: "/")
     }
 
     static var home: Folder {
-        return try! Folder(path: "~")
+        try! Folder(path: "~")
     }
 
     static var temporary: Folder {
-        return try! Folder(path: NSTemporaryDirectory())
+        try! Folder(path: NSTemporaryDirectory())
     }
 
     var subfolders: ChildSequence<Folder> {
-        return storage.makeChildSequence()
+        storage.makeChildSequence()
     }
 
     var files: ChildSequence<File> {
-        return storage.makeChildSequence()
+        storage.makeChildSequence()
     }
 
     func subfolder(at path: String) throws -> Folder {
-        return try storage.subfolder(at: path)
+        try storage.subfolder(at: path)
     }
 
     func subfolder(named name: String) throws -> Folder {
-        return try storage.subfolder(at: name)
+        try storage.subfolder(at: name)
     }
 
     func containsSubfolder(at path: String) -> Bool {
-        return (try? subfolder(at: path)) != nil
+        (try? subfolder(at: path)) != nil
     }
 
     func containsSubfolder(named name: String) -> Bool {
-        return (try? subfolder(named: name)) != nil
+        (try? subfolder(named: name)) != nil
     }
 
     @discardableResult
     func createSubfolder(at path: String) throws -> Folder {
-        return try storage.createSubfolder(at: path)
+        try storage.createSubfolder(at: path)
     }
 
     @discardableResult
     func createSubfolder(named name: String) throws -> Folder {
-        return try storage.createSubfolder(at: name)
+        try storage.createSubfolder(at: name)
     }
 
     @discardableResult
     func createSubfolderIfNeeded(at path: String) throws -> Folder {
-        return try (try? subfolder(at: path)) ?? createSubfolder(at: path)
+        try (try? subfolder(at: path)) ?? createSubfolder(at: path)
     }
 
     @discardableResult
     func createSubfolderIfNeeded(withName name: String) throws -> Folder {
-        return try (try? subfolder(named: name)) ?? createSubfolder(named: name)
+        try (try? subfolder(named: name)) ?? createSubfolder(named: name)
     }
 
     func file(at path: String) throws -> File {
-        return try storage.file(at: path)
+        try storage.file(at: path)
     }
 
     func file(named name: String) throws -> File {
-        return try storage.file(at: name)
+        try storage.file(at: name)
     }
 
     func containsFile(at path: String) -> Bool {
-        return (try? file(at: path)) != nil
+        (try? file(at: path)) != nil
     }
 
     func containsFile(named name: String) -> Bool {
-        return (try? file(named: name)) != nil
+        (try? file(named: name)) != nil
     }
 
     @discardableResult
     func createFile(at path: String, contents: Data? = nil) throws -> File {
-        return try storage.createFile(at: path, contents: contents)
+        try storage.createFile(at: path, contents: contents)
     }
 
     @discardableResult
     func createFile(named fileName: String, contents: Data? = nil) throws -> File {
-        return try storage.createFile(at: fileName, contents: contents)
+        try storage.createFile(at: fileName, contents: contents)
     }
 
     @discardableResult
     func createFileIfNeeded(at path: String,
-                            contents: @autoclosure () -> Data? = nil) throws -> File {
-        return try (try? file(at: path)) ?? createFile(at: path, contents: contents())
+                            contents: @autoclosure () -> Data? = nil) throws -> File
+    {
+        try (try? file(at: path)) ?? createFile(at: path, contents: contents())
     }
 
     @discardableResult
     func createFileIfNeeded(withName name: String,
-                            contents: @autoclosure () -> Data? = nil) throws -> File {
-        return try (try? file(named: name)) ?? createFile(named: name, contents: contents())
+                            contents: @autoclosure () -> Data? = nil) throws -> File
+    {
+        try (try? file(named: name)) ?? createFile(named: name, contents: contents())
     }
 
     func contains<T: Location>(_ location: T) -> Bool {
         switch T.kind {
-        case .file: return containsFile(named: location.name)
-        case .folder: return containsSubfolder(named: location.name)
+        case .file: containsFile(named: location.name)
+        case .folder: containsSubfolder(named: location.name)
         }
     }
 
     func moveContents(to folder: Folder, includeHidden: Bool = false) throws {
-        var files = self.files
+        var files = files
         files.includeHidden = includeHidden
         try files.move(to: folder)
 
@@ -310,7 +314,7 @@ public extension Folder {
     }
 
     func empty(includingHidden includeHidden: Bool = false) throws {
-        var files = self.files
+        var files = files
         files.includeHidden = includeHidden
         try files.delete()
 
@@ -320,7 +324,7 @@ public extension Folder {
     }
 
     func isEmpty(includingHidden includeHidden: Bool = false) -> Bool {
-        var files = self.files
+        var files = files
         files.includeHidden = includeHidden
 
         if files.first != nil {
@@ -334,49 +338,49 @@ public extension Folder {
 }
 
 #if os(iOS) || os(tvOS) || os(macOS)
-public extension Folder {
-    static func matching(
-        _ searchPath: FileManager.SearchPathDirectory,
-        in domain: FileManager.SearchPathDomainMask = .userDomainMask,
-        resolvedBy fileManager: FileManager = .default
-    ) throws -> Folder {
-        let urls = fileManager.urls(for: searchPath, in: domain)
+    public extension Folder {
+        static func matching(
+            _ searchPath: FileManager.SearchPathDirectory,
+            in domain: FileManager.SearchPathDomainMask = .userDomainMask,
+            resolvedBy fileManager: FileManager = .default
+        ) throws -> Folder {
+            let urls = fileManager.urls(for: searchPath, in: domain)
 
-        guard let match = urls.first else {
-            throw LocationError(
-                path: "",
-                reason: .unresolvedSearchPath(searchPath, domain: domain)
-            )
+            guard let match = urls.first else {
+                throw LocationError(
+                    path: "",
+                    reason: .unresolvedSearchPath(searchPath, domain: domain)
+                )
+            }
+
+            return try Folder(storage: Storage(
+                path: match.relativePath,
+                fileManager: fileManager
+            ))
         }
 
-        return try Folder(storage: Storage(
-            path: match.relativePath,
-            fileManager: fileManager
-        ))
-    }
+        static var documents: Folder? {
+            return try? .matching(.documentDirectory)
+        }
 
-    static var documents: Folder? {
-        return try? .matching(.documentDirectory)
+        static var library: Folder? {
+            return try? .matching(.libraryDirectory)
+        }
     }
-
-    static var library: Folder? {
-        return try? .matching(.libraryDirectory)
-    }
-}
 #endif
-internal extension String {
-	func removingPrefix(_ prefix: String) -> String {
-		guard hasPrefix(prefix) else { return self }
-		return String(dropFirst(prefix.count))
-	}
+extension String {
+    func removingPrefix(_ prefix: String) -> String {
+        guard hasPrefix(prefix) else { return self }
+        return String(dropFirst(prefix.count))
+    }
 
-	func removingSuffix(_ suffix: String) -> String {
-		guard hasSuffix(suffix) else { return self }
-		return String(dropLast(suffix.count))
-	}
+    func removingSuffix(_ suffix: String) -> String {
+        guard hasSuffix(suffix) else { return self }
+        return String(dropLast(suffix.count))
+    }
 
-	func appendingSuffixIfNeeded(_ suffix: String) -> String {
-		guard !hasSuffix(suffix) else { return self }
-		return appending(suffix)
-	}
+    func appendingSuffixIfNeeded(_ suffix: String) -> String {
+        guard !hasSuffix(suffix) else { return self }
+        return appending(suffix)
+    }
 }

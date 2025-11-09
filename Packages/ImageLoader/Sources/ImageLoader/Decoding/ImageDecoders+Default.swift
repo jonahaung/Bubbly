@@ -3,16 +3,15 @@
 // Copyright (c) 2015-2024 Alexander Grebenyuk (github.com/kean).
 
 #if !os(macOS)
-import UIKit
+    import UIKit
 #else
-import Cocoa
+    import Cocoa
 #endif
 
 /// A namespace with all available decoders.
 public enum ImageDecoders {}
 
-extension ImageDecoders {
-
+public extension ImageDecoders {
     /// A decoder that supports all of the formats natively supported by the system.
     ///
     /// - note: The decoder automatically sets the scale of the decoded images to
@@ -20,7 +19,7 @@ extension ImageDecoders {
     ///
     /// - note: The default decoder supports progressive JPEG. It produces a new
     /// preview every time it encounters a new full frame.
-    public final class Default: ImageDecoding, @unchecked Sendable {
+    final class Default: ImageDecoding, @unchecked Sendable {
         // Number of scans that the decoder has found so far. The last scan might be
         // incomplete at this point.
         var numberOfScans: Int { scanner.numberOfScans }
@@ -33,15 +32,15 @@ extension ImageDecoders {
 
         public var isAsynchronous: Bool { thumbnail != nil }
 
-        public init() { }
+        public init() {}
 
         /// Returns `nil` if progressive decoding is not allowed for the given
         /// content.
         public init?(context: ImageDecodingContext) {
-            self.scale = context.request.scale.map { CGFloat($0) }
-            self.thumbnail = context.request.thumbnail
+            scale = context.request.scale.map { CGFloat($0) }
+            thumbnail = context.request.thumbnail
 
-            if !context.isCompleted && !isProgressiveDecodingAllowed(for: context.data) {
+            if !context.isCompleted, !isProgressiveDecodingAllowed(for: context.data) {
                 return nil // Progressive decoding not allowed for this image
             }
         }
@@ -90,7 +89,7 @@ extension ImageDecoders {
             guard let endOfScan = scanner.scan(data), endOfScan > 0 else {
                 return nil
             }
-            guard let image = ImageDecoders.Default._decode(data[0...endOfScan], scale: scale) else {
+            guard let image = ImageDecoders.Default._decode(data[0 ... endOfScan], scale: scale) else {
                 return nil
             }
             return ImageContainer(image: image, type: assetType, isPreview: true, userInfo: [.scanNumberKey: numberOfScans])
@@ -99,21 +98,21 @@ extension ImageDecoders {
 }
 
 private func isProgressiveDecodingAllowed(for data: Data) -> Bool {
-   let assetType = AssetType(data)
+    let assetType = AssetType(data)
 
-   // Determined whether the image supports progressive decoding or not
-   // (only proressive JPEG is allowed for now, but you can add support
-   // for other formats by implementing your own decoder).
-   if assetType == .jpeg, ImageProperties.JPEG(data)?.isProgressive == true {
-       return true
-   }
+    // Determined whether the image supports progressive decoding or not
+    // (only proressive JPEG is allowed for now, but you can add support
+    // for other formats by implementing your own decoder).
+    if assetType == .jpeg, ImageProperties.JPEG(data)?.isProgressive == true {
+        return true
+    }
 
-   // Generate one preview for GIF.
-   if assetType == .gif {
-       return true
-   }
+    // Generate one preview for GIF.
+    if assetType == .gif {
+        return true
+    }
 
-   return false
+    return false
 }
 
 private struct ProgressiveJPEGScanner: Sendable {
@@ -133,7 +132,7 @@ private struct ProgressiveJPEGScanner: Sendable {
 
         // Start scanning from the where it left off previous time.
         var index = (scannedIndex + 1)
-        var numberOfScans = self.numberOfScans
+        var numberOfScans = numberOfScans
         while index < (data.count - 1) {
             scannedIndex = index
             // 0xFF, 0xDA - Start Of Scan
@@ -153,7 +152,7 @@ private struct ProgressiveJPEGScanner: Sendable {
         // `> 1` checks that we've received a first scan (SOS) and then received
         // and also received a second scan (SOS). This way we know that we have
         // at least one full scan available.
-        guard numberOfScans > 1 && lastStartOfScan > 0 else {
+        guard numberOfScans > 1, lastStartOfScan > 0 else {
             return nil
         }
 
@@ -163,11 +162,11 @@ private struct ProgressiveJPEGScanner: Sendable {
 
 extension ImageDecoders.Default {
     private static func _decode(_ data: Data, scale: CGFloat?) -> PlatformImage? {
-#if os(macOS)
-        return NSImage(data: data)
-#else
-        return UIImage(data: data, scale: scale ?? 1)
-#endif
+        #if os(macOS)
+            return NSImage(data: data)
+        #else
+            return UIImage(data: data, scale: scale ?? 1)
+        #endif
     }
 }
 

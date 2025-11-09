@@ -1,12 +1,12 @@
 //
-//  FirePhoneLoginView.swift
+//  FirePhoneOTPLoginView.swift
 //  FirebasePhoneLogin
 //
 //  Created by Aung Ko Min on 21/4/24.
 //
 
-import SwiftUI
 import PhoneNumberKit
+import SwiftUI
 
 public struct FirePhoneOTPLoginView: View {
     @StateObject private var viewModel = FirePhoneOTPLoginViewModel()
@@ -15,7 +15,6 @@ public struct FirePhoneOTPLoginView: View {
     public var body: some View {
         NavigationStack {
             VStack(alignment: .leading) {
-
                 switch viewModel.viewState {
                 case .enterPhoneNumber:
                     PhoneNumberTextField(phoneNumber: $viewModel.phoneNumber)
@@ -24,7 +23,7 @@ public struct FirePhoneOTPLoginView: View {
                         .padding(.horizontal)
                         .focused($focused, equals: .enterPhoneNumber)
                         .onAppear {
-							if viewModel.phoneNumber.rawString.isEmpty {
+                            if viewModel.phoneNumber.rawString.isEmpty {
                                 focused = .enterPhoneNumber
                             }
                         }
@@ -32,7 +31,7 @@ public struct FirePhoneOTPLoginView: View {
                 case .verifyOTP:
                     OTPView(otpCode: $viewModel.otp, otpCodeLength: 6)
                         .padding()
-                case .error(let error):
+                case let .error(error):
                     OTPView(otpCode: $viewModel.otp, otpCodeLength: 6)
                         .padding()
                     Text(error)
@@ -42,10 +41,8 @@ public struct FirePhoneOTPLoginView: View {
                         viewModel.reset()
                     } label: {
                         Text("Reset")
-//                            ._borderedProminentLightButtonStyle()
                     }
-
-                case .loggedIn(let user, isNewUser: let isNewUser):
+                case let .loggedIn(user, isNewUser: isNewUser):
                     Text(user.phoneNumber ?? "Phone")
                         .badge(isNewUser ? "New" : "Existing")
                 }
@@ -57,10 +54,10 @@ public struct FirePhoneOTPLoginView: View {
                     if viewModel.isLoading {
                         ProgressView()
                             .padding()
-							.onAppear {
-								DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-									focused = nil
-								}
+                            .onAppear {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    focused = nil
+                                }
                             }
                     }
                 }
@@ -68,4 +65,8 @@ public struct FirePhoneOTPLoginView: View {
             .navigationTitle(viewModel.phoneNumber.countryCode.name)
         }
     }
+}
+
+#Preview {
+    FirePhoneOTPLoginView()
 }

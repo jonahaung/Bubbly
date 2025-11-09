@@ -1,5 +1,5 @@
 //
-//  BackgroundParallaxHeader.swift
+//  StretchyHeaderModifier.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 28/5/24.
@@ -17,12 +17,13 @@ private struct StretchyHeaderModifier<Header: View>: ViewModifier {
         _ scrollViewOffset: Binding<CGFloat>,
         height: CGFloat,
         multiplier: CGFloat = 0.5,
-        @ViewBuilder header: @escaping () -> Header) {
-            self._scrollViewOffset = scrollViewOffset
-            self.height = height
-            self.multiplier = multiplier
-            self.header = header
-        }
+        @ViewBuilder header: @escaping () -> Header
+    ) {
+        _scrollViewOffset = scrollViewOffset
+        self.height = height
+        self.multiplier = multiplier
+        self.header = header
+    }
 
     func body(content: Content) -> some View {
         ZStack(alignment: .top) {
@@ -34,18 +35,21 @@ private struct StretchyHeaderModifier<Header: View>: ViewModifier {
         }
     }
 }
+
 public extension View {
-    func stretchyHeader<Header: View>(
+    func stretchyHeader(
         _ scrollViewOffset: Binding<CGFloat>,
         height: CGFloat,
         multiplier: CGFloat = 1,
-        @ViewBuilder header: @escaping () -> Header) -> some View {
-            self.modifier(
-                StretchyHeaderModifier(
-                    scrollViewOffset,
-                    height: height,
-                    multiplier: multiplier,
-                    header: header)
+        @ViewBuilder header: @escaping () -> some View
+    ) -> some View {
+        modifier(
+            StretchyHeaderModifier(
+                scrollViewOffset,
+                height: height,
+                multiplier: multiplier,
+                header: header
             )
-        }
+        )
+    }
 }

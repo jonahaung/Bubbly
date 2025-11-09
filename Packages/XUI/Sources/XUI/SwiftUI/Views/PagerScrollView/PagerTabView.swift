@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  PagerTabView.swift
 //  UI
 //
 //  Created by Aung Ko Min on 13/12/24.
@@ -9,7 +9,6 @@ import SwiftUI
 
 @available(iOS 18.0, *)
 public struct PagerTabView<Page, Content, TabButton>: View where Page: Sendable & Equatable & Hashable & Identifiable, Content: View, TabButton: View {
-
     private let items: [Page]
     private let content: (Page) -> Content
     private let tab: (Page, Bool) -> TabButton

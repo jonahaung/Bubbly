@@ -8,92 +8,84 @@
 import Foundation
 
 public struct APNSNotification: Codable {
-	public let validateOnly: Bool
-	public let message: Message
+    public let validateOnly: Bool
+    public let message: Message
 
-	// MARK: - Message
-	public struct Message: Codable {
-		public let token: String
-		public let data: DataPayload
-		public let apns: APNS
-	}
+    public struct Message: Codable {
+        public let token: String
+        public let data: DataPayload
+        public let apns: APNS
+    }
 
-	// MARK: - DataPayload
-	public struct DataPayload: Codable {
-		public let message: String
-	}
+    public struct DataPayload: Codable {
+        public let message: String
+    }
 
-	// MARK: - APNS
-	public struct APNS: Codable {
-		public let payload: Payload
-	}
+    public struct APNS: Codable {
+        public let payload: Payload
+    }
 
-	// MARK: - Payload
-	public struct Payload: Codable {
-		public let aps: APS
-	}
+    public struct Payload: Codable {
+        public let aps: APS
+    }
 
-	// MARK: - APS
-	public struct APS: Codable {
-		public let mutableContent: Int
-		public let contentAvailable: Int
-		public let sound: String
-		public let badge: Int
-		public let alert: Alert
+    public struct APS: Codable {
+        public let mutableContent: Int
+        public let contentAvailable: Int
+        public let sound: String
+        public let badge: Int
+        public let alert: Alert
 
-		enum CodingKeys: String, CodingKey {
-			case mutableContent = "mutable-content"
-			case contentAvailable = "content-available"
-			case sound, badge, alert
-		}
+        enum CodingKeys: String, CodingKey {
+            case mutableContent = "mutable-content"
+            case contentAvailable = "content-available"
+            case sound, badge, alert
+        }
 
-		public init(
-			mutableContent: Bool = true,
-			contentAvailable: Bool = true,
-			sound: String = "default",
-			badge: Int = 1,
-			alert: Alert
-		) {
-			self.mutableContent = mutableContent ? 1 : 0
-			self.contentAvailable = contentAvailable ? 1 : 0
-			self.sound = sound
-			self.badge = badge
-			self.alert = alert
-		}
-	}
+        public init(
+            mutableContent: Bool = true,
+            contentAvailable: Bool = true,
+            sound: String = "default",
+            badge: Int = 1,
+            alert: Alert
+        ) {
+            self.mutableContent = mutableContent ? 1 : 0
+            self.contentAvailable = contentAvailable ? 1 : 0
+            self.sound = sound
+            self.badge = badge
+            self.alert = alert
+        }
+    }
 
-	// MARK: - Alert
-	public struct Alert: Codable {
-		public let title: String
-	}
+    public struct Alert: Codable {
+        public let title: String
+    }
 
-	// MARK: - Initializer
-	public init(
-		validateOnly: Bool = false,
-		deviceToken: String,
-		messageContent: String,
-		title: String
-	) {
-		self.validateOnly = validateOnly
-		self.message = Message(
-			token: deviceToken,
-			data: DataPayload(message: messageContent),
-			apns: APNS(
-				payload: Payload(
-					aps: APS(
-						alert: Alert(title: title)
-					)
-				)
-			)
-		)
-	}
+    public init(
+        validateOnly: Bool = false,
+        deviceToken: String,
+        messageContent: String,
+        title: String
+    ) {
+        self.validateOnly = validateOnly
+        message = Message(
+            token: deviceToken,
+            data: DataPayload(message: messageContent),
+            apns: APNS(
+                payload: Payload(
+                    aps: APS(
+                        alert: Alert(title: title)
+                    )
+                )
+            )
+        )
+    }
 
-	// MARK: - Encoding
-	public func data(prettyPrinted: Bool = true) throws -> Data {
-		let encoder = JSONEncoder()
-		if prettyPrinted {
-			encoder.outputFormatting = .prettyPrinted
-		}
-		return try encoder.encode(self)
-	}
+    public func data(prettyPrinted: Bool = true) throws -> Data {
+        let encoder = JSONEncoder()
+        if prettyPrinted {
+            encoder.outputFormatting = .prettyPrinted
+        }
+        return try encoder.encode(self)
+    }
 }

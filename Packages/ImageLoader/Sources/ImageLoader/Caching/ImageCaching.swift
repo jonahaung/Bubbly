@@ -9,7 +9,7 @@ import Foundation
 /// The implementation must be thread safe.
 public protocol ImageCaching: AnyObject, Sendable {
     /// Access the image cached for the given request.
-    subscript(key: ImageCacheKey) -> ImageContainer? { get set }
+    subscript(_: ImageCacheKey) -> ImageContainer? { get set }
 
     /// Removes all caches items.
     func removeAll()
@@ -32,6 +32,6 @@ public struct ImageCacheKey: Hashable, Sendable {
     }
 
     public init(request: ImageRequest) {
-        self.key = .default(MemoryCacheKey(request))
+        key = .default(MemoryCacheKey(request))
     }
 }

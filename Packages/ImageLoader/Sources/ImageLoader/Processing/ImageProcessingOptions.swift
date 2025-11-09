@@ -5,24 +5,23 @@
 import Foundation
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 /// A namespace with shared image processing options.
 public enum ImageProcessingOptions: Sendable {
-
     public enum Unit: CustomStringConvertible, Sendable {
         case points
         case pixels
 
         public var description: String {
             switch self {
-            case .points: return "points"
-            case .pixels: return "pixels"
+            case .points: "points"
+            case .pixels: "pixels"
             }
         }
     }
@@ -37,29 +36,29 @@ public enum ImageProcessingOptions: Sendable {
     public struct Border: Hashable, CustomStringConvertible, @unchecked Sendable {
         public let width: CGFloat
 
-#if canImport(UIKit)
-        public let color: UIColor
+        #if canImport(UIKit)
+            public let color: UIColor
 
-        /// - parameters:
-        ///   - color: Border color.
-        ///   - width: Border width.
-        ///   - unit: Unit of the width.
-        public init(color: UIColor, width: CGFloat = 1, unit: Unit = .points) {
-            self.color = color
-            self.width = width.converted(to: unit)
-        }
-#else
-        public let color: NSColor
+            /// - parameters:
+            ///   - color: Border color.
+            ///   - width: Border width.
+            ///   - unit: Unit of the width.
+            public init(color: UIColor, width: CGFloat = 1, unit: Unit = .points) {
+                self.color = color
+                self.width = width.converted(to: unit)
+            }
+        #else
+            public let color: NSColor
 
-        /// - parameters:
-        ///   - color: Border color.
-        ///   - width: Border width.
-        ///   - unit: Unit of the width.
-        public init(color: NSColor, width: CGFloat = 1, unit: Unit = .points) {
-            self.color = color
-            self.width = width.converted(to: unit)
-        }
-#endif
+            /// - parameters:
+            ///   - color: Border color.
+            ///   - width: Border width.
+            ///   - unit: Unit of the width.
+            public init(color: NSColor, width: CGFloat = 1, unit: Unit = .points) {
+                self.color = color
+                self.width = width.converted(to: unit)
+            }
+        #endif
 
         public var description: String {
             "Border(color: \(color.hex), width: \(width) pixels)"
@@ -78,8 +77,8 @@ public enum ImageProcessingOptions: Sendable {
 
         public var description: String {
             switch self {
-            case .aspectFill: return ".aspectFill"
-            case .aspectFit: return ".aspectFit"
+            case .aspectFill: ".aspectFill"
+            case .aspectFit: ".aspectFit"
             }
         }
     }

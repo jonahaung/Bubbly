@@ -11,14 +11,16 @@ final class ColorExtractor {
         let buffer = vImage.PixelBuffer(
             pixelValues: [0],
             size: .init(width: 1, height: 1),
-            pixelFormat: vImage.Planar8.self)
+            pixelFormat: vImage.Planar8.self
+        )
 
         let fmt = vImage_CGImageFormat(
             bitsPerComponent: 8,
             bitsPerPixel: 8,
             colorSpace: CGColorSpaceCreateDeviceGray(),
             bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.none.rawValue),
-            renderingIntent: .defaultIntent)
+            renderingIntent: .defaultIntent
+        )
 
         return buffer.makeCGImage(cgImageFormat: fmt!)!
     }()
@@ -29,8 +31,9 @@ final class ColorExtractor {
         colorSpace: CGColorSpaceCreateDeviceRGB(),
         bitmapInfo: CGBitmapInfo(
             rawValue: kCGBitmapByteOrder32Host.rawValue |
-            CGBitmapInfo.floatComponents.rawValue |
-            CGImageAlphaInfo.none.rawValue))!
+                CGBitmapInfo.floatComponents.rawValue |
+                CGImageAlphaInfo.none.rawValue)
+    )!
 
     private var distances: UnsafeMutableBufferPointer<Float>!
 
@@ -62,42 +65,49 @@ final class ColorExtractor {
             data: redStorage.baseAddress!,
             width: ColorExtractor.dimension,
             height: ColorExtractor.dimension,
-            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride)
+            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride
+        )
 
         greenBuffer = vImage.PixelBuffer<vImage.PlanarF>(
             data: greenStorage.baseAddress!,
             width: ColorExtractor.dimension,
             height: ColorExtractor.dimension,
-            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride)
+            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride
+        )
 
         blueBuffer = vImage.PixelBuffer<vImage.PlanarF>(
             data: blueStorage.baseAddress!,
             width: ColorExtractor.dimension,
             height: ColorExtractor.dimension,
-            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride)
+            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride
+        )
 
         redQuantizedBuffer = vImage.PixelBuffer<vImage.PlanarF>(
             data: redQuantizedStorage.baseAddress!,
             width: ColorExtractor.dimension,
             height: ColorExtractor.dimension,
-            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride)
+            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride
+        )
 
         greenQuantizedBuffer = vImage.PixelBuffer<vImage.PlanarF>(
             data: greenQuantizedStorage.baseAddress!,
             width: ColorExtractor.dimension,
             height: ColorExtractor.dimension,
-            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride)
+            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride
+        )
 
         blueQuantizedBuffer = vImage.PixelBuffer<vImage.PlanarF>(
             data: blueQuantizedStorage.baseAddress!,
             width: ColorExtractor.dimension,
             height: ColorExtractor.dimension,
-            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride)
+            byteCountPerRow: ColorExtractor.dimension * MemoryLayout<Float>.stride
+        )
 
         // Each pixel gets an index [0, k)
         centroidIndicesDescriptor = BNNSNDArrayDescriptor.allocateUninitialized(
             scalarType: Int32.self,
-            shape: .vector(ColorExtractor.dimension * ColorExtractor.dimension))
+            shape: .vector(ColorExtractor.dimension * ColorExtractor.dimension)
+        )
 
         allocateDistancesBuffer()
     }
@@ -121,7 +131,8 @@ final class ColorExtractor {
 
         guard let rgbSources: [vImage.PixelBuffer<vImage.PlanarF>] = try? vImage.PixelBuffer<vImage.InterleavedFx3>(
             cgImage: sourceImage,
-            cgImageFormat: &rgbImageFormat).planarBuffers() else { return nil }
+            cgImageFormat: &rgbImageFormat
+        ).planarBuffers() else { return nil }
 
         rgbSources[0].scale(destination: redBuffer)
         rgbSources[1].scale(destination: greenBuffer)
@@ -132,7 +143,7 @@ final class ColorExtractor {
         var converged = false
         var iterationCount = 0
 
-        while !converged && iterationCount < maximumIterations {
+        while !converged, iterationCount < maximumIterations {
             converged = updateCentroids()
             iterationCount += 1
         }
@@ -163,11 +174,13 @@ private extension ColorExtractor {
         centroids.append(Centroid(
             red: redStorage[randomIndex],
             green: greenStorage[randomIndex],
-            blue: blueStorage[randomIndex]))
+            blue: blueStorage[randomIndex]
+        ))
 
         let tmp = UnsafeMutableBufferPointer(
             start: distances.baseAddress!,
-            count: ColorExtractor.dimension * ColorExtractor.dimension)
+            count: ColorExtractor.dimension * ColorExtractor.dimension
+        )
 
         for i in 1 ..< k {
             distanceSquared(
@@ -175,18 +188,20 @@ private extension ColorExtractor {
                 y0: blueStorage.baseAddress!, y1: centroids[i - 1].blue,
                 z0: redStorage.baseAddress!, z1: centroids[i - 1].red,
                 n: greenStorage.count,
-                result: tmp.baseAddress!)
+                result: tmp.baseAddress!
+            )
 
             let randomIndex = weightedRandomIndex(tmp)
             centroids.append(Centroid(
                 red: redStorage[randomIndex],
                 green: greenStorage[randomIndex],
-                blue: blueStorage[randomIndex]))
+                blue: blueStorage[randomIndex]
+            ))
         }
     }
 
     func updateCentroids() -> Bool {
-        let pixelCounts = centroids.map { $0.pixelCount }
+        let pixelCounts = centroids.map(\.pixelCount)
         populateDistances()
         guard let centroidIndices = makeCentroidIndices() else { return false }
 
@@ -210,7 +225,7 @@ private extension ColorExtractor {
             }
         }
 
-        return pixelCounts.elementsEqual(centroids.map { $0.pixelCount }) { a, b in
+        return pixelCounts.elementsEqual(centroids.map(\.pixelCount)) { a, b in
             abs(a - b) < ColorExtractor.tolerance
         }
     }
@@ -222,14 +237,16 @@ private extension ColorExtractor {
                 y0: blueStorage.baseAddress!, y1: centroid.element.blue,
                 z0: redStorage.baseAddress!, z1: centroid.element.red,
                 n: greenStorage.count,
-                result: distances.baseAddress!.advanced(by: ColorExtractor.dimension * ColorExtractor.dimension * centroid.offset))
+                result: distances.baseAddress!.advanced(by: ColorExtractor.dimension * ColorExtractor.dimension * centroid.offset)
+            )
         }
     }
 
     func makeCentroidIndices() -> [Int32]? {
         guard let distancesDescriptor = BNNSNDArrayDescriptor(
             data: distances,
-            shape: .matrixRowMajor(ColorExtractor.dimension * ColorExtractor.dimension, k)) else { return nil }
+            shape: .matrixRowMajor(ColorExtractor.dimension * ColorExtractor.dimension, k)
+        ) else { return nil }
 
         // Perform the reduction in-place into the output descriptor,
         // then read back the results from the output.
@@ -249,11 +266,13 @@ private extension ColorExtractor {
     func weightedRandomIndex(_ weights: UnsafeMutableBufferPointer<Float>) -> Int {
         var outputDescriptor = BNNSNDArrayDescriptor.allocateUninitialized(
             scalarType: Float.self,
-            shape: .vector(1))
+            shape: .vector(1)
+        )
 
         var probabilities = BNNSNDArrayDescriptor(
             data: weights,
-            shape: .vector(weights.count))!
+            shape: .vector(weights.count)
+        )!
 
         let randomGenerator = BNNSCreateRandomGenerator(BNNSRandomGeneratorMethodAES_CTR, nil)
         BNNSRandomFillCategoricalFloat(randomGenerator, &outputDescriptor, &probabilities, false)

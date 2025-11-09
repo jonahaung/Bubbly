@@ -5,23 +5,22 @@
 //  Created by Aung Ko Min on 1/10/25.
 //
 
-import SwiftUI
 import Services
+import SwiftUI
 
 struct StickerView: View {
-
     init(_ processedPhoto: Sticker?) {
-        self.sticker = processedPhoto?.sticker
+        sticker = processedPhoto?.sticker
     }
 
-	let sticker: UIImage?
+    let sticker: UIImage?
 
     var body: some View {
         Group {
             if let sticker {
-				Image(uiImage: sticker)
+                Image(uiImage: sticker)
                     .resizable()
-					.scaledToFit()
+                    .scaledToFit()
             } else {
                 errorSticker
             }

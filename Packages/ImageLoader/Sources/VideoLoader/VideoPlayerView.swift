@@ -1,5 +1,5 @@
 //
-//  ImageLoader.swift
+//  VideoPlayerView.swift
 //
 //
 //  Created by Aung Ko Min on 29/6/24.
@@ -9,9 +9,9 @@
 import Foundation
 
 #if os(macOS)
-public typealias _PlatformBaseView = NSView
+    public typealias _PlatformBaseView = NSView
 #else
-public typealias _PlatformBaseView = UIView
+    public typealias _PlatformBaseView = UIView
 #endif
 
 @MainActor
@@ -49,12 +49,12 @@ public final class VideoPlayerView: _PlatformBaseView {
             return layer
         }
         let playerLayer = AVPlayerLayer()
-#if os(macOS)
-        wantsLayer = true
-        self.layer?.addSublayer(playerLayer)
-#else
-        self.layer.addSublayer(playerLayer)
-#endif
+        #if os(macOS)
+            wantsLayer = true
+            layer?.addSublayer(playerLayer)
+        #else
+            layer.addSublayer(playerLayer)
+        #endif
         playerLayer.frame = bounds
         playerLayer.videoGravity = videoGravity
         _playerLayer = playerLayer
@@ -63,25 +63,26 @@ public final class VideoPlayerView: _PlatformBaseView {
 
     private var _playerLayer: AVPlayerLayer?
 
-#if os(iOS) || os(tvOS) || os(visionOS)
-    override public func layoutSubviews() {
-        super.layoutSubviews()
+    #if os(iOS) || os(tvOS) || os(visionOS)
+        override public func layoutSubviews() {
+            super.layoutSubviews()
 
-        CATransaction.begin()
-        CATransaction.setDisableActions(!animatesFrameChanges)
-        _playerLayer?.frame = bounds
-        CATransaction.commit()
-    }
-#elseif os(macOS)
-    override public func layout() {
-        super.layout()
+            CATransaction.begin()
+            CATransaction.setDisableActions(!animatesFrameChanges)
+            _playerLayer?.frame = bounds
+            CATransaction.commit()
+        }
 
-        CATransaction.begin()
-        CATransaction.setDisableActions(!animatesFrameChanges)
-        _playerLayer?.frame = bounds
-        CATransaction.commit()
-    }
-#endif
+    #elseif os(macOS)
+        override public func layout() {
+            super.layout()
+
+            CATransaction.begin()
+            CATransaction.setDisableActions(!animatesFrameChanges)
+            _playerLayer?.frame = bounds
+            CATransaction.commit()
+        }
+    #endif
 
     // MARK: Private
 
@@ -117,14 +118,14 @@ public final class VideoPlayerView: _PlatformBaseView {
             object: player?.currentItem
         )
 
-#if os(iOS) || os(tvOS) || os(visionOS)
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(applicationWillEnterForeground),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
-#endif
+        #if os(iOS) || os(tvOS) || os(visionOS)
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(applicationWillEnterForeground),
+                name: UIApplication.willEnterForegroundNotification,
+                object: nil
+            )
+        #endif
     }
 
     public func restart() {
@@ -140,11 +141,11 @@ public final class VideoPlayerView: _PlatformBaseView {
         let playerItem = AVPlayerItem(asset: asset)
         let player = AVQueuePlayer(playerItem: playerItem)
         player.isMuted = true
-#if os(visionOS)
+        #if os(visionOS)
             player.preventsAutomaticBackgroundingDuringVideoPlayback = false
-#else
+        #else
             player.preventsDisplaySleepDuringVideoPlayback = false
-#endif
+        #endif
         player.actionAtItemEnd = isLooping ? .none : .pause
         self.player = player
 
@@ -176,18 +177,18 @@ public final class VideoPlayerView: _PlatformBaseView {
         }
     }
 
-#if os(iOS) || os(tvOS) || os(visionOS)
-    override public func willMove(toWindow newWindow: UIWindow?) {
-        if newWindow != nil && shouldResumeOnInterruption {
-            player?.play()
+    #if os(iOS) || os(tvOS) || os(visionOS)
+        override public func willMove(toWindow newWindow: UIWindow?) {
+            if newWindow != nil, shouldResumeOnInterruption {
+                player?.play()
+            }
         }
-    }
-#endif
+    #endif
 
     private var shouldResumeOnInterruption: Bool {
-        return player?.nowPlaying == false &&
-        player?.status == .readyToPlay &&
-        isLooping
+        player?.nowPlaying == false &&
+            player?.status == .readyToPlay &&
+            isLooping
     }
 }
 

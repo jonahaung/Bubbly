@@ -8,16 +8,15 @@
 import SwiftUI
 
 private struct OnAppearAfterModifier: ViewModifier {
-
     private let timeout: TimeInterval
     private let perform: () -> Void
 
-    public init(timeout: TimeInterval, perform: @escaping () -> Void) {
+    init(timeout: TimeInterval, perform: @escaping () -> Void) {
         self.timeout = timeout
         self.perform = perform
     }
 
-    public func body(content: Content) -> some View {
+    func body(content: Content) -> some View {
         content
             .task {
                 try? await Task.sleep(for: .seconds(timeout))

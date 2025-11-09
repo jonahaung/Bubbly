@@ -8,17 +8,17 @@
 import Foundation
 
 public enum PermissionStatus: Int, CustomStringConvertible {
-	case authorized
-	case denied
-	case notDetermined
-	case notSupported
+    case authorized
+    case denied
+    case notDetermined
+    case notSupported
 
-	public var description: String {
-		switch self {
-		case .authorized: return "authorized"
-		case .denied: return "denied"
-		case .notDetermined: return "not determined"
-		case .notSupported: return "not supported"
-		}
-	}
+    public var description: String {
+        switch self {
+        case .authorized: "authorized"
+        case .denied: "denied"
+        case .notDetermined: "not determined"
+        case .notSupported: "not supported"
+        }
+    }
 }

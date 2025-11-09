@@ -1,5 +1,5 @@
-import XCTest
 @testable import FirePhoneOTP
+import XCTest
 
 final class FirePhoneOTPTests: XCTestCase {
     func testExample() throws {

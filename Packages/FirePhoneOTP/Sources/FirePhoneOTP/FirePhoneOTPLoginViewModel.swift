@@ -1,18 +1,17 @@
 //
-//  FirePhoneLoginViewModel.swift
+//  FirePhoneOTPLoginViewModel.swift
 //  FirebasePhoneLogin
 //
 //  Created by Aung Ko Min on 21/4/24.
 //
 
-import Foundation
-import FirebaseAuth
-import PhoneNumberKit
 import Combine
+import FirebaseAuth
+import Foundation
+import PhoneNumberKit
 
 @MainActor
 class FirePhoneOTPLoginViewModel: ObservableObject {
-
     @Published var viewState = FirePhoneLoginViewState.enterPhoneNumber
     @Published var phoneNumber = PhNumber.locale
     @Published var isLoading = false
@@ -31,7 +30,7 @@ class FirePhoneOTPLoginViewModel: ObservableObject {
             .store(in: &cancellables)
 
         $otp
-            .filter { $0.count == 6}
+            .filter { $0.count == 6 }
             .debounce(for: 0.5, scheduler: RunLoop.main)
             .sink { [weak self] value in
                 self?.verifyCode(code: value)
@@ -41,13 +40,12 @@ class FirePhoneOTPLoginViewModel: ObservableObject {
 }
 
 extension FirePhoneOTPLoginViewModel {
-
     func sendCode(phoneNumber: String) {
         guard !isLoading else { return }
         isLoading = true
-        PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { [weak self] (verificationId, error) in
+        PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { [weak self] verificationId, error in
             guard let self else { return }
-			DispatchQueue.main.async {
+            DispatchQueue.main.async {
                 self.isLoading = false
                 if let error {
                     self.viewState = .error(error.localizedDescription)
@@ -65,7 +63,7 @@ extension FirePhoneOTPLoginViewModel {
         let verificationId = UserDefaults.standard.string(forKey: "verificationId") ?? ""
         let credentials = PhoneAuthProvider.provider().credential(withVerificationID: verificationId, verificationCode: code)
 
-        Auth.auth().signIn(with: credentials) { [weak self] (authResult, error) in
+        Auth.auth().signIn(with: credentials) { [weak self] authResult, error in
             guard let self else { return }
             DispatchQueue.main.async {
                 self.isLoading = false
@@ -74,14 +72,15 @@ extension FirePhoneOTPLoginViewModel {
                     return
                 }
                 guard let authResult else {
-                    self.viewState =  .error("Unknown Error")
+                    self.viewState = .error("Unknown Error")
                     return
                 }
                 let user = authResult.user
-                self.viewState = .loggedIn(user: user, isNewUser: authResult.additionalUserInfo?.isNewUser ==  true)
+                self.viewState = .loggedIn(user: user, isNewUser: authResult.additionalUserInfo?.isNewUser == true)
             }
         }
     }
+
     func reset() {
         isLoading = false
         otp = ""
@@ -89,6 +88,7 @@ extension FirePhoneOTPLoginViewModel {
         viewState = .enterPhoneNumber
     }
 }
+
 extension FirePhoneOTPLoginViewModel {
     private func validatePhoneNumber(_ phoneNumber: PhNumber) {
         phoneNumber.validate()
@@ -99,7 +99,7 @@ extension FirePhoneOTPLoginViewModel {
     }
 
     func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
-        var pureNumber = stringvar.replacingOccurrences( of: "[^0-9]", with: "", options: .regularExpression)
+        var pureNumber = stringvar.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
         for index in 0 ..< pattern.count {
             guard index < pureNumber.count else {
                 stringvar = pureNumber

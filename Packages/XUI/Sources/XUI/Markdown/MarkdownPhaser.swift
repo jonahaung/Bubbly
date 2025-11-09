@@ -18,14 +18,13 @@ public enum MarkdownElement: Sendable, Hashable {
     case blockquote(text: String)
     case horizontalRule
     case mention(username: String) // New: Mention element
-    case hashtag(topic: String)    // New: Hashtag element
+    case hashtag(topic: String) // New: Hashtag element
     case unknown(text: String)
 }
 
 // MARK: - Markdown Parser
 
-public struct MarkdownParser {
-
+public enum MarkdownParser {
     private static let orderedListItemRegex: NSRegularExpression = {
         do {
             return try NSRegularExpression(pattern: "^(\\d+)\\.\\s+(.+)$")

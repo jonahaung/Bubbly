@@ -9,7 +9,6 @@ import SwiftUI
 
 @available(iOS 18.0, *)
 public struct StretchyHeaderScrollView<Content: View, Header: View>: View {
-
     private let showsIndicators: Bool
     private let headerHeight: CGFloat
     private let multiplier: CGFloat
@@ -27,7 +26,7 @@ public struct StretchyHeaderScrollView<Content: View, Header: View>: View {
     ) {
         self.showsIndicators = showsIndicators
         self.headerHeight = headerHeight
-        self.multiplier = multipliter
+        multiplier = multipliter
         self.content = content
         self.header = header
     }
@@ -41,7 +40,7 @@ public struct StretchyHeaderScrollView<Content: View, Header: View>: View {
                 content()
             }
             .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
-                return (geometry.contentOffset.y + geometry.contentInsets.top)
+                geometry.contentOffset.y + geometry.contentInsets.top
             }, action: { oldValue, newValue in
                 guard oldValue != newValue else { return }
                 scrollViewOffset = newValue

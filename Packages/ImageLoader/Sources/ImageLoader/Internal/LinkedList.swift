@@ -9,7 +9,7 @@ import Foundation
 /// A doubly linked list.
 public final class LinkedList<Element> {
     // first <-> node <-> ... <-> last
-	public private(set) var first: Node?
+    public private(set) var first: Node?
     public private(set) var last: Node?
 
     deinit {
@@ -18,24 +18,24 @@ public final class LinkedList<Element> {
         removeAllElements()
     }
 
-	public init(first: Node? = nil, last: Node? = nil) {
-		self.first = first
-		self.last = last
-	}
-	public var isEmpty: Bool {
+    public init(first: Node? = nil, last: Node? = nil) {
+        self.first = first
+        self.last = last
+    }
+
+    public var isEmpty: Bool {
         last == nil
     }
 
     /// Adds an element to the end of the list.
-    @discardableResult public
-    func append(_ element: Element) -> Node {
+    @discardableResult public func append(_ element: Element) -> Node {
         let node = Node(value: element)
         append(node)
         return node
     }
 
     /// Adds a node to the end of the list.
-	public func append(_ node: Node) {
+    public func append(_ node: Node) {
         if let last {
             last.next = node
             node.previous = last
@@ -46,7 +46,7 @@ public final class LinkedList<Element> {
         }
     }
 
-	public func remove(_ node: Node) {
+    public func remove(_ node: Node) {
         node.next?.previous = node.previous // node.previous is nil if node=first
         node.previous?.next = node.next // node.next is nil if node=last
         if node === last {
@@ -59,7 +59,7 @@ public final class LinkedList<Element> {
         node.previous = nil
     }
 
-	public func removeAllElements() {
+    public func removeAllElements() {
         // avoid recursive Nodes deallocation
         var node = first
         while let next = node?.next {
@@ -71,12 +71,12 @@ public final class LinkedList<Element> {
         first = nil
     }
 
-	public final class Node {
-		public let value: Element
+    public final class Node {
+        public let value: Element
         fileprivate var next: Node?
         fileprivate var previous: Node?
 
-		public init(value: Element) {
+        public init(value: Element) {
             self.value = value
         }
     }

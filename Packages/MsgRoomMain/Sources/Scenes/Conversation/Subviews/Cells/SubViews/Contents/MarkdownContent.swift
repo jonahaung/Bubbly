@@ -9,12 +9,12 @@ import SwiftUI
 import XUI
 
 struct MarkdownContent: View {
-	let text: String
-	let elements: [MarkdownElement]
-	var body: some View {
-		MarkdownView(elements: elements, text: text)
-			.padding(.horizontal, 12)
-			.padding(.vertical, 6)
-			.equatable(by: text)
-	}
+    let text: String
+    let elements: [MarkdownElement]
+    var body: some View {
+        MarkdownView(elements: elements, text: text)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .equatable(by: text)
+    }
 }

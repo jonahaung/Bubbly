@@ -10,13 +10,11 @@ import UserNotifications
 
 public extension Permission {
     static func notification(_ access: Set<PermissionKind.NotificationAccess> = [.alert, .badge, .sound]) -> NotificationPermission {
-        return NotificationPermission(access: access)
+        NotificationPermission(access: access)
     }
-
 }
 
 public final class NotificationPermission: Permission {
-
     public let access: Set<PermissionKind.NotificationAccess>
     public var kind: PermissionKind { .notification(access: access) }
 
@@ -25,9 +23,7 @@ public final class NotificationPermission: Permission {
     }
 
     public var status: PermissionStatus {
-        get {
-            return getStatus()
-        }
+        getStatus()
     }
 
     private func getStatus() -> PermissionStatus {
@@ -76,8 +72,7 @@ public final class NotificationPermission: Permission {
         center
             .requestAuthorization(
                 options: UNAuthorizationOptions(
-                    access.map { $0.userNotifcationAuthorizationOptions
-                    })
+                    access.map(\.userNotifcationAuthorizationOptions))
             ) { _, _ in
                 DispatchQueue.main.async {
                     completion()

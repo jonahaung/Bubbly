@@ -5,183 +5,180 @@
 //  Created by Aung Ko Min on 16/5/25.
 //
 
-import SwiftUI
-import FirebaseAuth
-import XUI
-import FirePhoneOTP
-import FirebaseMessaging
-import Services
-import MsgRoomMain
-import Database
-import SwiftData
 import Core
+import Database
+import FirebaseAuth
+import FirebaseMessaging
+import FirePhoneOTP
 import ImageLoader
+import MsgRoomMain
+import Services
+import SwiftData
+import SwiftUI
+import XUI
 
 struct SettingsScene: View {
+    @Environment(AuthService.self) private var authService
+    @Environment(\.currentUser) private var currentUser
 
-	@Environment(AuthService.self) private var authService
-	@Environment(\.currentUser) private var currentUser
+    @AppStorage(
+        GroupStorageKey.layout(.chatMsgSpacing).value,
+        store: GroupStorage.shared.store
+    ) var chatCellVerticalSpacing: Int = Settings.Layout.chatMsgSpacing
+    @AppStorage(
+        GroupStorageKey.limit(.paginationPageSize).value,
+        store: GroupStorage.shared.store
+    ) var paginationPageSize: Int = 50
 
-	@AppStorage(
-		GroupStorageKey.layout(.chatMsgSpacing).value,
-		store: GroupStorage.shared.store
-	) var chatCellVerticalSpacing: Int = Settings.Layout.chatMsgSpacing
-	@AppStorage(
-		GroupStorageKey.limit(.paginationPageSize).value,
-		store: GroupStorage.shared.store
-	) var paginationPageSize: Int = 50
+    @AppStorage(
+        GroupStorageKey.limit(.minutesForChatMsgGrouping).value,
+        store: GroupStorage.shared.store
+    ) var minutesForChatMsgGrouping: Int = 15
+    @AppStorage("askChatGPT") private var askChatGPT: Bool = false
 
-	@AppStorage(
-		GroupStorageKey.limit(.minutesForChatMsgGrouping).value,
-		store: GroupStorage.shared.store
-	) var minutesForChatMsgGrouping: Int = 15
-	@AppStorage("askChatGPT") private var askChatGPT: Bool = false
+    var body: some View {
+        Form {
+            profilePhotoSection
+            Section(header: Text("Sign Out")) {
+                Button {
+                    Router.shared.push(.currentUserDetails)
+                } label: {
+                    Text("Profile").badge(currentUser.name)
+                }
+                AsyncButton {
+                    try Auth.auth().signOut()
+                } label: {
+                    Text("Sign Out")
+                }
+            }
+            Section {
+                Stepper(value: $chatCellVerticalSpacing) {
+                    Text(
+                        "Chat Cell Vertical Spacing: \(chatCellVerticalSpacing)"
+                    )
+                }
 
-	var body: some View {
-		Form {
-			profilePhotoSection
-			Section(header: Text("Sign Out")) {
-				Button {
-					Router.shared.push(.currentUserDetails)
-				} label: {
-					Text("Profile").badge(currentUser.name)
-				}
-				AsyncButton {
-					try Auth.auth().signOut()
-				} label: {
-					Text("Sign Out")
-				}
-			}
-			Section {
-				Stepper.init(value: $chatCellVerticalSpacing) {
-					Text(
-						"Chat Cell Vertical Spacing: \(chatCellVerticalSpacing)"
-					)
-				}
+                Stepper(
+                    value: $paginationPageSize,
+                    in: 20 ... 100,
+                    step: 10
+                ) {
+                    Text("Pagination Page Size: \(paginationPageSize)")
+                }
+                Stepper(
+                    value: $minutesForChatMsgGrouping,
+                    in: 2 ... 180,
+                    step: 2
+                ) {
+                    Text(
+                        "Minutes For Chat Msg Grouping: \(minutesForChatMsgGrouping)"
+                    )
+                }
+                FormCell {
+                    Text("File System")
+                } right: {
+                    if let path = Folder.documents?.path {
+                        Text(path)
+                    }
+                }._tapToPush {
+                    if let documents = Folder.documents {
+                        Text(documents.description)
+                    }
+                }
 
-				Stepper.init(
-					value: $paginationPageSize,
-					in: 20...100,
-					step: 10
-				) {
-					Text("Pagination Page Size: \(paginationPageSize)")
-				}
-				Stepper.init(
-					value: $minutesForChatMsgGrouping,
-					in: 2...180,
-					step: 2
-				) {
-					Text(
-						"Minutes For Chat Msg Grouping: \(minutesForChatMsgGrouping)"
-					)
-				}
-				FormCell {
-					Text("File System")
-				} right: {
-					if let path = Folder.documents?.path {
-						Text(path)
-					}
-				}._tapToPush {
-					if let documents = Folder.documents {
-						Text(documents.description)
-					}
-				}
+            } footer: {
+                AsyncButton {
+                    try Folder.documents?.delete()
+                } label: {
+                    Text("Clean Up File System")
+                }
+                .buttonStyle(.roundedButtonStyle)
+            }
+            Section {
+                PermissionView(.notification(access: [.alert, .badge, .sound]))
+                PermissionView(.contacts)
+                PermissionView(.camera)
+                PermissionView(.mediaLibrary)
+                PermissionView(.photoLibrary)
+                PermissionView(.microphone)
+            } header: {
+                Text("Permissions")
+            }
+            Section {
+                Toggle(isOn: $askChatGPT) {
+                    Text("Ask Chat GPT")
+                }
+                Text(currentUser.preetyPrinted)
+            }
+            Section {
+                AsyncButton { @MainActor in
+                    let context = Store.shared.modelContainer.mainContext
+                    try context.transaction {
+                        let descriptor = FetchDescriptor<PMsg>()
+                        do {
+                            let msgs = try context.fetch(descriptor)
+                            for each in msgs {
+                                context.delete(each)
+                            }
+                        } catch {
+                            Log(error)
+                        }
+                    }
+                } label: {
+                    Text("Delete Messages")
+                }
+                AsyncButton { @MainActor in
+                    let context = Store.shared.modelContainer.mainContext
+                    try context.transaction {
+                        let descriptor = FetchDescriptor<PContact>()
+                        do {
+                            let msgs = try context.fetch(descriptor)
+                            for each in msgs {
+                                context.delete(each)
+                            }
+                        } catch {
+                            Log(error)
+                        }
+                    }
+                } label: {
+                    Text("Delete Contacts")
+                }
+                AsyncButton { @MainActor in
+                    let context = Store.shared.modelContainer.mainContext
+                    try context.transaction {
+                        let descriptor = FetchDescriptor<PGroup>()
+                        do {
+                            let msgs = try context.fetch(descriptor)
+                            for each in msgs {
+                                context.delete(each)
+                            }
+                        } catch {
+                            Log(error)
+                        }
+                    }
+                } label: {
+                    Text("Delete Conversations")
+                }
+            }
+        }
+        .formStyle(.grouped)
+    }
 
-			} footer: {
-				AsyncButton {
-					try Folder.documents?.delete()
-				} label: {
-					Text("Clean Up File System")
-				}
-				.buttonStyle(.roundedButtonStyle)
-			}
-			Section {
-				PermissionView(.notification(access: [.alert, .badge, .sound]))
-				PermissionView(.contacts)
-				PermissionView(.camera)
-				PermissionView(.mediaLibrary)
-				PermissionView(.photoLibrary)
-				PermissionView(.microphone)
-			} header: {
-				Text("Permissions")
-			}
-			Section {
-
-				Toggle(isOn: $askChatGPT) {
-					Text("Ask Chat GPT")
-				}
-				Text(currentUser.preetyPrinted)
-
-			}
-			Section {
-				AsyncButton { @MainActor in
-					let context = Store.shared.modelContainer.mainContext
-					try context.transaction {
-						let descriptor = FetchDescriptor<PMsg>()
-						do {
-							let msgs = try context.fetch(descriptor)
-							msgs.forEach { each in
-								context.delete(each)
-							}
-						} catch {
-							Log(error)
-						}
-					}
-				} label: {
-					Text("Delete Messages")
-				}
-				AsyncButton { @MainActor in
-					let context = Store.shared.modelContainer.mainContext
-					try context.transaction {
-						let descriptor = FetchDescriptor<PContact>()
-						do {
-							let msgs = try context.fetch(descriptor)
-							msgs.forEach { each in
-								context.delete(each)
-							}
-						} catch {
-							Log(error)
-						}
-					}
-				} label: {
-					Text("Delete Contacts")
-				}
-				AsyncButton { @MainActor in
-					let context = Store.shared.modelContainer.mainContext
-					try context.transaction {
-						let descriptor = FetchDescriptor<PGroup>()
-						do {
-							let msgs = try context.fetch(descriptor)
-							msgs.forEach { each in
-								context.delete(each)
-							}
-						} catch {
-							Log(error)
-						}
-					}
-				} label: {
-					Text("Delete Conversations")
-				}
-			}
-		}
-		.formStyle(.grouped)
-	}
-
-	private var profilePhotoSection: some View {
-		Section {
-			VStack {
-				ResizableImage(currentUser.photoURL, processors: [.circle()])
-					.frame(square: 200)
-					.sheetWithZoomTransition {
-						PhotoViewer(
-							.init(url: currentUser.photoURL, type: .photo),
-							title: currentUser.name
-						)
-					}
-			}
-			.flexible(.horizontal)
-		}
-		.listRowInsets(.init())
-		.listRowBackground(Color.clear.hidden())
-	}
+    private var profilePhotoSection: some View {
+        Section {
+            VStack {
+                ResizableImage(currentUser.photoURL, processors: [.circle()])
+                    .frame(square: 200)
+                    .sheetWithZoomTransition {
+                        PhotoViewer(
+                            .init(url: currentUser.photoURL, type: .photo),
+                            title: currentUser.name
+                        )
+                    }
+            }
+            .flexible(.horizontal)
+        }
+        .listRowInsets(.init())
+        .listRowBackground(Color.clear.hidden())
+    }
 }

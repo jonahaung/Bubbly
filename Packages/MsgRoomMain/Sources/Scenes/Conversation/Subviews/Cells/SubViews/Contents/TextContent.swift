@@ -11,13 +11,13 @@ import XUI
 struct TextContent: View {
     let text: String
     var body: some View {
-		Text(.init(text))
+        Text(.init(text))
     }
 }
 
 struct MarkdownTextContent: View {
-	let text: AttributedString
-	var body: some View {
-		Text(text)
-	}
+    let text: AttributedString
+    var body: some View {
+        Text(text)
+    }
 }

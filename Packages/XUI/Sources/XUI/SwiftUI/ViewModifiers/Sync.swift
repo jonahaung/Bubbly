@@ -1,15 +1,14 @@
 //
-//  Synchronizer.swift
+//  Sync.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 24/4/23.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 private struct LazySynchronizer<Value: Equatable>: ViewModifier {
-
     @Binding var original: Value
     @Binding var changed: Value
 
@@ -23,8 +22,8 @@ private struct LazySynchronizer<Value: Equatable>: ViewModifier {
             }
     }
 }
-private struct DebounceSync<Value: Equatable>: ViewModifier {
 
+private struct DebounceSync<Value: Equatable>: ViewModifier {
     @Binding var original: Value
     @Binding var changed: Value
     let seconds: Double
@@ -56,10 +55,12 @@ private struct DebounceSync<Value: Equatable>: ViewModifier {
             }
     }
 }
+
 public extension View {
     func debounceSync<Value: Equatable>(_ original: Binding<Value>, _ changed: Binding<Value>, _ seconds: Double = 0.5) -> some View {
         ModifiedContent(content: self, modifier: DebounceSync(original: original, changed: changed, seconds: seconds))
     }
+
     func lazySync<Value: Equatable>(_ original: Binding<Value>, _ changed: Binding<Value>) -> some View {
         ModifiedContent(content: self, modifier: LazySynchronizer(original: original, changed: changed))
     }

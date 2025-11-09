@@ -7,9 +7,9 @@
 
 import Foundation
 
-public func Log<T>(_ object: T?, filename: String = #file, line: Int = #line, funcname: String = #function) {
-#if DEBUG
-    guard let object = object else { return }
-    print("\(filename.components(separatedBy: "/").last ?? ""), \(line)\t\t\t\t\t\t\t\t\t\t\t\t\t\(object)")
-#endif
+public func Log(_ object: (some Any)?, filename: String = #file, line: Int = #line, funcname _: String = #function) {
+    #if DEBUG
+        guard let object else { return }
+        print("\(filename.components(separatedBy: "/").last ?? ""), \(line)\t\t\t\t\t\t\t\t\t\t\t\t\t\(object)")
+    #endif
 }

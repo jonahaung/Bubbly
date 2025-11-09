@@ -1,5 +1,5 @@
 //
-//  provides.swift
+//  LocalizedErrorHandler.swift
 //  XUI
 //
 //  Created by Aung Ko Min on 22/9/25.
@@ -17,11 +17,11 @@ public protocol LocalizedErrorHandler {
 
 // MARK: - API
 
-extension View {
+public extension View {
     /// Sets a localized error handler for this view.
     ///
     /// - parameter handler: The action to perform on the propagation of a localized error.
-    public func onLocalizedError(_ handler: @escaping (LocalizedError) -> Void) -> some View {
+    func onLocalizedError(_ handler: @escaping (LocalizedError) -> Void) -> some View {
         modifier(SetLocalizedErrorHandler(handleLocalizedError: handler))
     }
 }
@@ -65,8 +65,8 @@ public struct HandleLocalizedErrorAction {
 }
 
 extension EnvironmentValues {
-	private struct LocalizedErrorHandlerKey: @preconcurrency EnvironmentKey {
-		@MainActor static let defaultValue: LocalizedErrorHandler = DefaultLocalizedErrorHandler()
+    private struct LocalizedErrorHandlerKey: @preconcurrency EnvironmentKey {
+        @MainActor static let defaultValue: LocalizedErrorHandler = DefaultLocalizedErrorHandler()
     }
 
     var localizedErrorHandler: LocalizedErrorHandler {

@@ -1,5 +1,5 @@
 //
-//  File.swift
+//  BorderedProminentButtonStyle.swift
 //
 //
 //  Created by Aung Ko Min on 20/2/23.
@@ -13,6 +13,7 @@ private struct BorderedProminentButtonStyle: ViewModifier {
             .buttonStyle(.roundedButtonStyle)
     }
 }
+
 public struct RoundedButtonStyle: ButtonStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -24,6 +25,7 @@ public struct RoundedButtonStyle: ButtonStyle {
             .contentShape(Capsule())
     }
 }
+
 public extension ButtonStyle where Self == RoundedButtonStyle {
     static var roundedButtonStyle: RoundedButtonStyle {
         RoundedButtonStyle()
@@ -53,6 +55,7 @@ public extension View {
         ModifiedContent(content: self, modifier: BorderedProminentLightButtonStyle())
     }
 }
+
 private struct OverlayLightButtonStyle: ViewModifier {
     func body(content: Content) -> some View {
         content
@@ -66,6 +69,7 @@ public extension View {
         ModifiedContent(content: self, modifier: OverlayLightButtonStyle())
     }
 }
+
 private struct NavigationLinkStyle: ViewModifier {
     func body(content: Content) -> some View {
         HStack(spacing: 0) {
@@ -87,7 +91,6 @@ public extension View {
 }
 
 private struct BorderStyle: ViewModifier {
-
     let shape: AnyShape
     let color: Color
     let lineWidth: CGFloat

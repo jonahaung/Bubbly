@@ -14,7 +14,8 @@ public struct WrappedGridLayout: Layout {
         self.alignment = alignment
         self.spacing = spacing
     }
-    public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
+
+    public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout Void) -> CGSize {
         let result = FlowResult(
             in: proposal.replacingUnspecifiedDimensions().width,
             subviews: subviews,
@@ -24,7 +25,7 @@ public struct WrappedGridLayout: Layout {
         return result.bounds
     }
 
-    public func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) {
+    public func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache _: inout Void) {
         let result = FlowResult(
             in: proposal.replacingUnspecifiedDimensions().width,
             subviews: subviews,
@@ -36,7 +37,7 @@ public struct WrappedGridLayout: Layout {
             for index in row.range {
                 let xPos = rowXOffset + row.frame.minX + row.xOffsets[index - row.range.lowerBound] + bounds.minX
                 let rowYAlignment = (row.frame.height - subviews[index].sizeThatFits(.unspecified).height) *
-                alignment.vertical.percent
+                    alignment.vertical.percent
                 let yPos = row.frame.minY + rowYAlignment + bounds.minY
                 subviews[index].place(at: CGPoint(x: xPos, y: yPos), anchor: .topLeading, proposal: .unspecified)
             }
@@ -53,7 +54,7 @@ public struct WrappedGridLayout: Layout {
             var frame: CGRect
         }
 
-        init(in maxPossibleWidth: Double, subviews: Subviews, alignment: Alignment, spacing: CGFloat?) {
+        init(in maxPossibleWidth: Double, subviews: Subviews, alignment _: Alignment, spacing: CGFloat?) {
             var itemsInRow = 0
             var remainingWidth = maxPossibleWidth.isFinite ? maxPossibleWidth : .greatestFiniteMagnitude
             var rowMinY = 0.0
@@ -61,7 +62,7 @@ public struct WrappedGridLayout: Layout {
             var xOffsets: [Double] = []
             for (index, subview) in zip(subviews.indices, subviews) {
                 let idealSize = subview.sizeThatFits(.unspecified)
-                if index != 0 && widthInRow(index: index, idealWidth: idealSize.width) > remainingWidth {
+                if index != 0, widthInRow(index: index, idealWidth: idealSize.width) > remainingWidth {
                     finalizeRow(index: max(index - 1, 0), idealSize: idealSize)
                 }
                 addToRow(index: index, idealSize: idealSize)
@@ -89,7 +90,7 @@ public struct WrappedGridLayout: Layout {
                 itemsInRow += 1
             }
 
-            func finalizeRow(index: Int, idealSize: CGSize) {
+            func finalizeRow(index: Int, idealSize _: CGSize) {
                 let rowWidth = maxPossibleWidth - remainingWidth
                 rows.append(
                     Row(
@@ -114,9 +115,9 @@ public struct WrappedGridLayout: Layout {
 private extension HorizontalAlignment {
     var percent: Double {
         switch self {
-        case .leading: return 0
-        case .trailing: return 1
-        default: return 0.5
+        case .leading: 0
+        case .trailing: 1
+        default: 0.5
         }
     }
 }
@@ -124,9 +125,9 @@ private extension HorizontalAlignment {
 private extension VerticalAlignment {
     var percent: Double {
         switch self {
-        case .top: return 0
-        case .bottom: return 1
-        default: return 0.5
+        case .top: 0
+        case .bottom: 1
+        default: 0.5
         }
     }
 }

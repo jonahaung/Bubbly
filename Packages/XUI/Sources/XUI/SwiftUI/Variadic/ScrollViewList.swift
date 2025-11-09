@@ -1,5 +1,5 @@
 //
-//  ValuePicker.swift
+//  ScrollViewList.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 11/6/24.
@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct ScrollViewList<Content: View>: View {
-
     private let content: Content
 
     @State private var innerPadding: CGFloat
@@ -35,12 +34,14 @@ public struct ScrollViewList<Content: View>: View {
         .flexible(.horizontal)
     }
 }
+
 public extension ScrollViewList {
     func outerPadding(_ value: CGFloat) -> ScrollViewList {
         let result = self
         result.outerPadding = value
         return result
     }
+
     func innerPadding(_ value: CGFloat) -> ScrollViewList {
         let result = self
         result.innerPadding = value
@@ -57,11 +58,13 @@ private struct VInsetGroupListSection: _VariadicView.MultiViewRoot {
         }
     }
 }
+
 private struct VInsetGroupListCell<Content: View>: View {
     private let content: Content
     init(@ViewBuilder _ content: () -> Content) {
         self.content = content()
     }
+
     var body: some View {
         content
             .frame(maxWidth: .infinity, alignment: .leading)

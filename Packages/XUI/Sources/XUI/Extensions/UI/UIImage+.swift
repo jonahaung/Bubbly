@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  UIImage+.swift
+//
 //
 //  Created by Aung Ko Min on 18/7/23.
 //
@@ -8,15 +8,14 @@
 import SwiftUI
 
 public extension UIImage {
-
-	@MainActor func resizedImage(maxSize: CGFloat) -> UIImage? {
+    @MainActor func resizedImage(maxSize: CGFloat) -> UIImage? {
         let maxSizePixels = maxSize * UIScreen.main.scale
         let originalWidth = size.width
         let originalHeight = size.height
         let aspectRatio = originalWidth / originalHeight
 
         // Check if resizing is actually needed
-        if originalWidth <= maxSizePixels && originalHeight <= maxSizePixels {
+        if originalWidth <= maxSizePixels, originalHeight <= maxSizePixels {
             return self
         }
 
@@ -25,10 +24,10 @@ public extension UIImage {
         var targetHeight: CGFloat
 
         // Calculate the scaling factor and new dimensions
-        if originalWidth > originalHeight && originalWidth > maxSizePixels {
+        if originalWidth > originalHeight, originalWidth > maxSizePixels {
             targetWidth = maxSizePixels
             targetHeight = targetWidth / aspectRatio
-        } else if originalHeight > originalWidth && originalHeight > maxSizePixels {
+        } else if originalHeight > originalWidth, originalHeight > maxSizePixels {
             targetHeight = maxSizePixels
             targetWidth = targetHeight * aspectRatio
         } else {

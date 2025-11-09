@@ -1,6 +1,6 @@
 //
-//  SwiftUIView.swift
-//  
+//  Checkbox.swift
+//
 //
 //  Created by Aung Ko Min on 19/7/23.
 //
@@ -12,20 +12,20 @@ struct Checkbox<Label: View>: View {
     let label: () -> Label
 
     var body: some View {
-#if os(iOS)
-        Button(action: { isOn.toggle() }) {
-            HStack {
-                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
-                    .font(.body)
-                    .foregroundColor(isOn ? .blue : .secondary)
-                label()
-                Spacer()
-            }
-            .contentShape(Rectangle())
-        }.buttonStyle(.plain)
-#else
-        Toggle(isOn: $isOn, label: label)
-#endif
+        #if os(iOS)
+            Button(action: { isOn.toggle() }) {
+                HStack {
+                    Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                        .font(.body)
+                        .foregroundColor(isOn ? .blue : .secondary)
+                    label()
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+            }.buttonStyle(.plain)
+        #else
+            Toggle(isOn: $isOn, label: label)
+        #endif
     }
 }
 

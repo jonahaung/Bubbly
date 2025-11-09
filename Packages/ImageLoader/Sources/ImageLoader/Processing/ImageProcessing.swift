@@ -5,9 +5,9 @@
 import Foundation
 
 #if !os(macOS)
-import UIKit
+    import UIKit
 #else
-import AppKit
+    import AppKit
 #endif
 
 /// Performs image processing.
@@ -56,10 +56,10 @@ public protocol ImageProcessing: Sendable {
     var hashableIdentifier: AnyHashable { get }
 }
 
-extension ImageProcessing {
+public extension ImageProcessing {
     /// The default implementation simply calls the basic
     /// `process(_ image: PlatformImage) -> PlatformImage?` method.
-    public func process(_ container: ImageContainer, context: ImageProcessingContext) throws -> ImageContainer {
+    func process(_ container: ImageContainer, context _: ImageProcessingContext) throws -> ImageContainer {
         guard let output = process(container.image) else {
             throw ImageProcessingError.unknown
         }
@@ -69,11 +69,11 @@ extension ImageProcessing {
     }
 
     /// The default impleemntation simply returns `var identifier: String`.
-    public var hashableIdentifier: AnyHashable { identifier }
+    var hashableIdentifier: AnyHashable { identifier }
 }
 
-extension ImageProcessing where Self: Hashable {
-    public var hashableIdentifier: AnyHashable { self }
+public extension ImageProcessing where Self: Hashable {
+    var hashableIdentifier: AnyHashable { self }
 }
 
 /// Image processing context used when selecting which processor to use.

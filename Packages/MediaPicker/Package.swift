@@ -9,13 +9,15 @@ let package = Package(
     products: [
         .library(
             name: "MediaPicker",
-            targets: ["MediaPicker"])
+            targets: ["MediaPicker"]
+        ),
     ],
     targets: [
         .target(
             name: "MediaPicker"),
         .testTarget(
             name: "MediaPickerTests",
-            dependencies: ["MediaPicker"])
+            dependencies: ["MediaPicker"]
+        ),
     ]
 )

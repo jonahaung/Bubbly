@@ -5,19 +5,19 @@
 import Foundation
 
 #if !os(macOS)
-import UIKit
+    import UIKit
 #else
-import AppKit
+    import AppKit
 #endif
 
-extension ImageProcessors {
+public extension ImageProcessors {
     /// Processed an image using a specified closure.
-    public struct Anonymous: ImageProcessing, CustomStringConvertible {
+    struct Anonymous: ImageProcessing, CustomStringConvertible {
         public let identifier: String
         private let closure: @Sendable (PlatformImage) -> PlatformImage?
 
         public init(id: String, _ closure: @Sendable @escaping (PlatformImage) -> PlatformImage?) {
-            self.identifier = id
+            identifier = id
             self.closure = closure
         }
 

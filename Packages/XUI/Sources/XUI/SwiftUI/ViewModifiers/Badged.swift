@@ -1,5 +1,5 @@
 //
-//  XBadgedModifier.swift
+//  Badged.swift
 //  Device Monitor
 //
 //  Created by Aung Ko Min on 23/9/22.

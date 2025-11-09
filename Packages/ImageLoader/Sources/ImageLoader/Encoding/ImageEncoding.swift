@@ -3,11 +3,11 @@
 // Copyright (c) 2015-2024 Alexander Grebenyuk (github.com/kean).
 
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 #if canImport(AppKit)
-import AppKit
+    import AppKit
 #endif
 
 import ImageIO
@@ -16,25 +16,25 @@ import ImageIO
 
 /// An image encoder.
 public protocol ImageEncoding: Sendable {
-	/// Encodes the given image.
-	func encode(_ image: PlatformImage) -> Data?
+    /// Encodes the given image.
+    func encode(_ image: PlatformImage) -> Data?
 
-	/// An optional method which encodes the given image container.
-	func encode(_ container: ImageContainer, context: ImageEncodingContext) -> Data?
+    /// An optional method which encodes the given image container.
+    func encode(_ container: ImageContainer, context: ImageEncodingContext) -> Data?
 }
 
-extension ImageEncoding {
-	public func encode(_ container: ImageContainer, context: ImageEncodingContext) -> Data? {
-		if container.type == .gif {
-			return container.data
-		}
-		return self.encode(container.image)
-	}
+public extension ImageEncoding {
+    func encode(_ container: ImageContainer, context _: ImageEncodingContext) -> Data? {
+        if container.type == .gif {
+            return container.data
+        }
+        return encode(container.image)
+    }
 }
 
 /// Image encoding context used when selecting which encoder to use.
 public struct ImageEncodingContext: Sendable {
-	public let request: ImageRequest
-	public let image: PlatformImage
-	public let urlResponse: URLResponse?
+    public let request: ImageRequest
+    public let image: PlatformImage
+    public let urlResponse: URLResponse?
 }

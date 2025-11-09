@@ -12,24 +12,22 @@
 import Swift
 import SwiftUI
 
-public protocol _HashIdentifiable: Hashable, Identifiable where Self.ID == Int {
-
-}
+public protocol _HashIdentifiable: Hashable, Identifiable where Self.ID == Int {}
 
 // MARK: - Implementation
 
-extension _HashIdentifiable {
+public extension _HashIdentifiable {
     @inlinable
-    public var id: Int {
+    var id: Int {
         hashValue
     }
 }
 
 // MARK: - API
 
-extension Hashable {
+package extension Hashable {
     @inlinable
-    package var hashIdentifiable: _HashIdentifiableValue<Self> {
+    var hashIdentifiable: _HashIdentifiableValue<Self> {
         _HashIdentifiableValue(self)
     }
 }
@@ -106,13 +104,13 @@ public struct _ArbitrarilyIdentifiedValue<Value, ID: Hashable>: CustomStringConv
     @_transparent
     public init(value: Value, id: @escaping (Value) -> ID) {
         self.value = value
-        self._id = id
+        _id = id
     }
 
     @_transparent
     public init(value: Value, id: ID) {
         self.value = value
-        self._id = { _ in id }
+        _id = { _ in id }
     }
 }
 

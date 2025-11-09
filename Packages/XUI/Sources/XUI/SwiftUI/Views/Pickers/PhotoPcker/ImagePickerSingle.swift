@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  ImagePickerSingle.swift
+//
 //
 //  Created by Aung Ko Min on 18/7/23.
 //
@@ -8,9 +8,8 @@
 import SwiftUI
 
 public class DirUtil: NSObject {
-
     class func application() -> String? {
-        return Bundle.main.resourcePath
+        Bundle.main.resourcePath
     }
 
     class func application(_ component: String) -> String? {
@@ -28,12 +27,12 @@ public class DirUtil: NSObject {
 
 public extension DirUtil {
     class func document() -> String? {
-        return NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first
+        NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first
     }
 
     class func document(_ components: [String]) -> String? {
         guard var path = document() else { return nil }
-        components.forEach { component in
+        for component in components {
             path = (path as NSString).appendingPathComponent(component)
         }
         createIntermediate(path)
@@ -45,6 +44,7 @@ public extension DirUtil {
     class func cache() -> String? {
         NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first
     }
+
     class func cache(_ component: String) -> String? {
         guard var path = cache() else { return nil }
         path = (path as NSString).appendingPathComponent(component)
@@ -65,20 +65,20 @@ public extension DirUtil {
         do {
             try FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true, attributes: nil)
         } catch {
-			debugPrint("Failed to create directory at \(directory): \(error.localizedDescription)")
+            debugPrint("Failed to create directory at \(directory): \(error.localizedDescription)")
         }
     }
 
     private class func exist(_ path: String) -> Bool {
-        return FileManager.default.fileExists(atPath: path)
+        FileManager.default.fileExists(atPath: path)
     }
 }
 
-public struct FileUtil {
-
+public enum FileUtil {
     public static var documentDirectory: URL? {
         url(for: .documentDirectory)
     }
+
     public static var cachesDirectory: URL? {
         url(for: .cachesDirectory)
     }
@@ -91,7 +91,7 @@ public struct FileUtil {
         do {
             return try FileManager.default.url(for: searchPathDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
         } catch {
-			debugPrint("Failed to get URL for directory \(searchPathDirectory): \(error.localizedDescription)")
+            debugPrint("Failed to get URL for directory \(searchPathDirectory): \(error.localizedDescription)")
             return nil
         }
     }
@@ -103,14 +103,14 @@ public struct FileUtil {
     }
 
     public static func exist(_ path: String) -> Bool {
-        return FileManager.default.fileExists(atPath: path)
+        FileManager.default.fileExists(atPath: path)
     }
 
     public static func remove(_ path: String) {
         do {
             try FileManager.default.removeItem(at: URL(fileURLWithPath: path))
         } catch {
-			debugPrint("Failed to remove item at \(path): \(error.localizedDescription)")
+            debugPrint("Failed to remove item at \(path): \(error.localizedDescription)")
         }
     }
 
@@ -120,16 +120,17 @@ public struct FileUtil {
             do {
                 try FileManager.default.copyItem(atPath: source, toPath: dest)
             } catch {
-				debugPrint("Failed to copy item from \(source) to \(dest): \(error.localizedDescription)")
+                debugPrint("Failed to copy item from \(source) to \(dest): \(error.localizedDescription)")
             }
         }
     }
+
     public static func created(_ path: String) -> Date? {
         do {
             let attributes = try FileManager.default.attributesOfItem(atPath: path)
             return attributes[.creationDate] as? Date
         } catch {
-			debugPrint("Failed to get creation date of \(path): \(error.localizedDescription)")
+            debugPrint("Failed to get creation date of \(path): \(error.localizedDescription)")
             return nil
         }
     }
@@ -139,7 +140,7 @@ public struct FileUtil {
             let attributes = try FileManager.default.attributesOfItem(atPath: path)
             return attributes[.modificationDate] as? Date
         } catch {
-			debugPrint("Failed to get modification date of \(path): \(error.localizedDescription)")
+            debugPrint("Failed to get modification date of \(path): \(error.localizedDescription)")
             return nil
         }
     }
@@ -149,7 +150,7 @@ public struct FileUtil {
             let attributes = try FileManager.default.attributesOfItem(atPath: path)
             return attributes[.size] as? Int64
         } catch {
-			debugPrint("Failed to get size of \(path): \(error.localizedDescription)")
+            debugPrint("Failed to get size of \(path): \(error.localizedDescription)")
             return nil
         }
     }
@@ -168,16 +169,19 @@ public struct FileUtil {
             return nil
         }
     }
+
     public static func getURL(for directory: FileManager.SearchPathDirectory) -> URL? {
-        return FileManager.default.urls(for: directory, in: .userDomainMask).first
+        FileManager.default.urls(for: directory, in: .userDomainMask).first
     }
+
     public static func fileExists(_ fileName: String, in directory: FileManager.SearchPathDirectory) -> Bool {
         guard let directoryURL = getURL(for: directory) else { return false }
         let url = directoryURL.appendingPathComponent(fileName, isDirectory: false)
         return FileManager.default.fileExists(atPath: url.path)
     }
+
     public static func convert(remoteURL: URL, directory: FileManager.SearchPathDirectory = .documentDirectory) -> URL? {
-        guard let directoryURL = Self.getURL(for: directory) else { return nil }
+        guard let directoryURL = getURL(for: directory) else { return nil }
         return directoryURL.appendingPathComponent(remoteURL.lastPathComponent)
     }
 }

@@ -1,5 +1,5 @@
 //
-//  JumpAndFallWithKeyframes.swift
+//  ChatOverlayMenuBar.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 3/11/25.
@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ChatOverlayMenuBar: View {
-
     @State private var heartReactionCount = 0
     @State private var upReactionCount = 0
     @State private var downReactionCount = 0
@@ -51,7 +50,7 @@ struct ChatOverlayMenuBar: View {
                 Image(.wutReaction)
             }
             .reactionAnimation(trigger: $wutReactionCount)
-		}
-		.tint(Color.darkGray)
+        }
+        .tint(Color.darkGray)
     }
 }

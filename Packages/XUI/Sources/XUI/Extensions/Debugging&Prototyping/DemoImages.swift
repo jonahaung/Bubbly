@@ -1,17 +1,15 @@
 //
-//  File.swift
-//  
+//  DemoImages.swift
+//
 //
 //  Created by Aung Ko Min on 19/7/23.
 //
 
 import Foundation
 
-public struct DemoImages {
-
+public enum DemoImages {
     private static let host = "https://cloud.githubusercontent.com/assets"
     public static let demoPhotosURLs = [
-
         URL(string: "\(host)/1567433/9781832/0719dd5e-57a1-11e5-9324-9764de25ed47.jpg")!,
         URL(string: "\(host)/1567433/9781833/09021316-57a1-11e5-817b-85b57a2a8a77.jpg")!,
 
@@ -82,9 +80,9 @@ public struct DemoImages {
         URL(string: "\(host)/1567433/9782130/5483fee2-57a3-11e5-8928-e7706c765016.jpg")!,
         URL(string: "\(host)/1567433/9782133/54dd0c62-57a3-11e5-85ee-a02c1b9dd223.jpg")!,
         URL(string: "\(host)/1567433/9782131/54872b30-57a3-11e5-8903-db1f81ea1abb.jpg")!,
-		URL(string: "\(host)/1567433/9781895/83b7f3fa-57a1-11e5-8579-e2fd6098052d.jpg")!,
-		URL(string: "\(host)/1567433/9781834/0931ad74-57a1-11e5-9080-c8f6ecea19ce.jpg")!,
-		URL(string: "\(host)/1567433/9781817/ecb16e82-57a0-11e5-9b43-6b4f52659997.jpg")!,
-        URL(string: "\(host)/1567433/9782132/548a3b9a-57a3-11e5-8228-8ee523e7809e.jpg")!
+        URL(string: "\(host)/1567433/9781895/83b7f3fa-57a1-11e5-8579-e2fd6098052d.jpg")!,
+        URL(string: "\(host)/1567433/9781834/0931ad74-57a1-11e5-9080-c8f6ecea19ce.jpg")!,
+        URL(string: "\(host)/1567433/9781817/ecb16e82-57a0-11e5-9b43-6b4f52659997.jpg")!,
+        URL(string: "\(host)/1567433/9782132/548a3b9a-57a3-11e5-8228-8ee523e7809e.jpg")!,
     ]
 }

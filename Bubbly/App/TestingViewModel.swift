@@ -11,10 +11,9 @@ import XUI
 @MainActor
 @Observable
 final class TestingViewModel {
+    var text = String()
 
-	var text = String()
-
-	deinit {
-		Log("Deinit")
-	}
+    deinit {
+        Log("Deinit")
+    }
 }

@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct XRadioPicker<Item: XPickable>: View {
-
     private let items: [Item]
     private var selection: Binding<Item>
 
@@ -21,7 +20,7 @@ public struct XRadioPicker<Item: XPickable>: View {
         Group {
             ForEach(items) { item in
                 AsyncButton {
-					Haptics.play(.rigid, 0.9)
+                    Haptics.play(.rigid, 0.9)
                     selection.wrappedValue = item
                 } label: {
                     HStack {

@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  ReorderableForEach.swift
+//
 //
 //  Created by Aung Ko Min on 8/5/23.
 //
@@ -8,8 +8,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-public struct ReorderableForEach<Data, Content>: View where Data: Hashable&Identifiable, Content: View {
-
+public struct ReorderableForEach<Data, Content>: View where Data: Hashable & Identifiable, Content: View {
     @Binding var data: [Data]
     @Binding var allowReordering: Bool
     private let content: (Data, Bool) -> Content
@@ -19,7 +18,8 @@ public struct ReorderableForEach<Data, Content>: View where Data: Hashable&Ident
 
     public init(_ data: Binding<[Data]>,
                 allowReordering: Binding<Bool>,
-                @ViewBuilder content: @escaping (Data, Bool) -> Content) {
+                @ViewBuilder content: @escaping (Data, Bool) -> Content)
+    {
         _data = data
         _allowReordering = allowReordering
         self.content = content
@@ -30,7 +30,7 @@ public struct ReorderableForEach<Data, Content>: View where Data: Hashable&Ident
             if allowReordering {
                 content(item, hasChangedLocation && draggedItem == item)
                     .onDrag {
-						Haptics.play(.light, 0.8)
+                        Haptics.play(.light, 0.8)
                         draggedItem = item
                         return NSItemProvider(object: "\(item.id)" as NSString)
                     }
@@ -38,7 +38,8 @@ public struct ReorderableForEach<Data, Content>: View where Data: Hashable&Ident
                         item: item,
                         data: $data,
                         draggedItem: $draggedItem,
-                        hasChangedLocation: $hasChangedLocation))
+                        hasChangedLocation: $hasChangedLocation
+                    ))
             } else {
                 content(item, false)
             }
@@ -51,7 +52,7 @@ public struct ReorderableForEach<Data, Content>: View where Data: Hashable&Ident
         @Binding var draggedItem: Item?
         @Binding var hasChangedLocation: Bool
 
-        func dropEntered(info: DropInfo) {
+        func dropEntered(info _: DropInfo) {
             guard item != draggedItem,
                   let current = draggedItem,
                   let from = data.firstIndex(of: current),
@@ -63,15 +64,15 @@ public struct ReorderableForEach<Data, Content>: View where Data: Hashable&Ident
             if data[to] != current {
                 data.move(fromOffsets: IndexSet(integer: from),
                           toOffset: (to > from) ? to + 1 : to)
-				Haptics.play(.light, 0.8)
+                Haptics.play(.light, 0.8)
             }
         }
 
-        func dropUpdated(info: DropInfo) -> DropProposal? {
+        func dropUpdated(info _: DropInfo) -> DropProposal? {
             DropProposal(operation: .move)
         }
 
-        func performDrop(info: DropInfo) -> Bool {
+        func performDrop(info _: DropInfo) -> Bool {
             hasChangedLocation = false
             draggedItem = nil
             return true

@@ -1,5 +1,5 @@
 //
-//  ComfirmButton.swift
+//  ConfirmButton.swift
 //
 //
 //  Created by Aung Ko Min on 20/2/23.
@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct ComfirmButton<Content: View>: View {
-
     private let message: String
     private let action: () -> Void
     private let label: () -> Content
@@ -18,6 +17,7 @@ public struct ComfirmButton<Content: View>: View {
         self.action = action
         self.label = label
     }
+
     @State private var isShown = false
 
     public var body: some View {

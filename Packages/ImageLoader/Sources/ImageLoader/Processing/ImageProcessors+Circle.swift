@@ -5,16 +5,15 @@
 import Foundation
 
 #if !os(macOS)
-import UIKit
+    import UIKit
 #else
-import AppKit
+    import AppKit
 #endif
 
-extension ImageProcessors {
-
+public extension ImageProcessors {
     /// Rounds the corners of an image into a circle. If the image is not a square,
     /// crops it to a square first.
-    public struct Circle: ImageProcessing, Hashable, CustomStringConvertible {
+    struct Circle: ImageProcessing, Hashable, CustomStringConvertible {
         private let border: ImageProcessingOptions.Border?
 
         /// - parameter border: `nil` by default.

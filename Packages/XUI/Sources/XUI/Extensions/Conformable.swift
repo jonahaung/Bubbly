@@ -1,5 +1,5 @@
 //
-//  Comformable.swift
+//  Conformable.swift
 //  MsgRoom
 //
 //  Created by Aung Ko Min on 24/6/24.

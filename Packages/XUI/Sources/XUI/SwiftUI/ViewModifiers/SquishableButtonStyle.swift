@@ -15,18 +15,20 @@ public struct SquishableButtonStyle: ButtonStyle {
         self.fadeOnPress = fadeOnPress
         self.scale = scale
     }
+
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .opacity(configuration.isPressed && fadeOnPress ? 0.75 : 1)
             .scaleEffect(configuration.isPressed ? scale : 1)
     }
 }
+
 public extension ButtonStyle where Self == SquishableButtonStyle {
-	static var squishable: SquishableButtonStyle {
+    static var squishable: SquishableButtonStyle {
         SquishableButtonStyle()
     }
 
-	static func squishable(fadeOnPress: Bool = true, scale: CGFloat = 0.98) -> SquishableButtonStyle {
+    static func squishable(fadeOnPress: Bool = true, scale: CGFloat = 0.98) -> SquishableButtonStyle {
         SquishableButtonStyle(fadeOnPress: fadeOnPress, scale: scale)
     }
 }

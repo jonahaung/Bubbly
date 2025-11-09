@@ -8,5 +8,5 @@
 import Foundation
 
 public enum PhotoPickerError: Error {
-	case importFailed
+    case importFailed
 }

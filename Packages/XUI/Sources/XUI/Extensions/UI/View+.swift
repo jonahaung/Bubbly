@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  View+.swift
+//
 //
 //  Created by Aung Ko Min on 10/6/23.
 //
@@ -8,8 +8,7 @@
 import SwiftUI
 
 public extension View {
-
-    @ViewBuilder func `if` <Content: View>(_ condition: Bool, _ transform: (Self) -> Content) -> some View {
+    @ViewBuilder func `if`(_ condition: Bool, _ transform: (Self) -> some View) -> some View {
         if condition {
             transform(self)
         } else {
@@ -17,22 +16,25 @@ public extension View {
         }
     }
 
-    @ViewBuilder func if_let <Content: View, T>(_ optional: T?, _ transform: (T, Self) -> Content) -> some View {
+    @ViewBuilder func if_let<T>(_ optional: T?, _ transform: (T, Self) -> some View) -> some View {
         if let optional {
             transform(optional, self)
         } else {
             self
         }
     }
-	@inlinable
+
+    @inlinable
     func frame(size: CGSize?) -> some View {
-		self.frame(width: size?.width, height: size?.height)
+        frame(width: size?.width, height: size?.height)
     }
-	@inlinable
+
+    @inlinable
     func frame(square: CGFloat?) -> some View {
-        self.frame(width: square, height: square)
+        frame(width: square, height: square)
     }
-	@inlinable
+
+    @inlinable
     func map(_ closure: (inout Self) -> Void) -> Self {
         var copy = self
         closure(&copy)

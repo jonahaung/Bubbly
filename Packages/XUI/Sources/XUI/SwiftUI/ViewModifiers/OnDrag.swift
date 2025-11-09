@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  OnDrag.swift
+//
 //
 //  Created by Aung Ko Min on 10/5/23.
 //
@@ -8,32 +8,30 @@
 import SwiftUI
 
 public enum DragDirection: Hashable {
-
     case left, right, scrollUp, down
 
     @available(iOS 13.0, *)
     func isValid(value: DragGesture.Value, distance: CGFloat) -> Bool {
         switch self {
         case .left:
-            return value.startLocation.x - value.location.x > distance
+            value.startLocation.x - value.location.x > distance
         case .right:
-            return value.location.x - value.startLocation.x > distance
+            value.location.x - value.startLocation.x > distance
         case .scrollUp:
-            return value.startLocation.y - value.location.y > distance
+            value.startLocation.y - value.location.y > distance
         case .down:
-            return value.location.y - value.startLocation.y > distance
+            value.location.y - value.startLocation.y > distance
         }
     }
 }
 
 private struct _OnDragModifier: ViewModifier {
-
     let direction: DragDirection
     let distance: CGFloat
     let perform: () -> Void
     @State private var offset = CGPoint.zero
 
-    public func body(content: Content) -> some View {
+    func body(content: Content) -> some View {
         content
             .transformEffect(.init(translationX: offset.x, y: offset.y))
             .gesture(
@@ -59,10 +57,10 @@ private struct _OnDragModifier: ViewModifier {
     private func handleDrag(_ value: DragGesture.Value) {
         offset = .zero
         if direction.isValid(value: value, distance: distance) {
-			Haptics.play(.soft, 0.8)
-			DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-				perform()
-			}
+            Haptics.play(.soft, 0.8)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                perform()
+            }
         }
     }
 }

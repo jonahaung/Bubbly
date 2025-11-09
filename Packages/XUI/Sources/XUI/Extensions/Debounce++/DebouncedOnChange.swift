@@ -23,13 +23,14 @@ private struct DebouncedOnChangeViewModifier<Value>: ViewModifier where Value: E
         }
     }
 }
-extension View {
-    public func onChange<Value>(
+
+public extension View {
+    func onChange<Value>(
         of value: Value,
         debounceTime: Duration,
         perform action: @Sendable @escaping ((Value, Value)) async -> Void
     ) -> some View where Value: Equatable {
-        self.modifier(DebouncedOnChangeViewModifier(value: value, action: action) {
+        modifier(DebouncedOnChangeViewModifier(value: value, action: action) {
             try await Task.sleep(for: debounceTime)
         })
     }

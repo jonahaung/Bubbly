@@ -7,11 +7,11 @@
 import Foundation
 
 public enum PushNotificationError: Error {
-	case serviceAccountNotFound
-	case invalidPrivateKey
-	case invalidTokenURL
-	case invalidURL
-	case noDataReceived
-	case tokenGenerationFailed
-	case tokenDecodingFailed
+    case serviceAccountNotFound
+    case invalidPrivateKey
+    case invalidTokenURL
+    case invalidURL
+    case noDataReceived
+    case tokenGenerationFailed
+    case tokenDecodingFailed
 }

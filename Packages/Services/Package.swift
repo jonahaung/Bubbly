@@ -9,20 +9,22 @@ let package = Package(
     products: [
         .library(
             name: "Services",
-            targets: ["Services"])
+            targets: ["Services"]
+        ),
     ],
     dependencies: [
-        .package(name: "Database", path: "../Database")
+        .package(name: "Database", path: "../Database"),
     ],
     targets: [
         .target(
             name: "Services",
             dependencies: [
-                .product(name: "Database", package: "Database")
+                .product(name: "Database", package: "Database"),
             ]
         ),
         .testTarget(
             name: "ServicesTests",
-            dependencies: ["Services"])
+            dependencies: ["Services"]
+        ),
     ]
 )

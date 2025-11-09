@@ -1,7 +1,6 @@
 import Foundation
 
 struct AnyLocalizedError: LocalizedError {
-
     let errorDescription: String?
 
     let failureReason: String?

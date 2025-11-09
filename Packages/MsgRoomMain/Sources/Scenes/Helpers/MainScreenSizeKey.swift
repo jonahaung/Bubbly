@@ -1,5 +1,5 @@
 //
-//  MainWindowSizeKey.swift
+//  MainScreenSizeKey.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 6/11/25.

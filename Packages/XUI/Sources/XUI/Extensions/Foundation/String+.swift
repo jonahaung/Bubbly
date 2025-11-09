@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  String+.swift
+//
 //
 //  Created by Aung Ko Min on 10/6/23.
 //
@@ -8,19 +8,22 @@
 import SwiftUI
 
 public extension String {
-
     var remove_: String {
         replace("_", with: " ")
     }
+
     func replace(_ target: String, with string: String) -> String {
-        self.replacingOccurrences(of: target, with: string, options: NSString.CompareOptions.literal, range: nil)
+        replacingOccurrences(of: target, with: string, options: NSString.CompareOptions.literal, range: nil)
     }
+
     var trimmed: String {
         trimmingCharacters(in: .whitespacesAndNewlines)
     }
+
     var withoutSpacesAndNewLines: String {
         trimmed.replace(" ", with: "")
     }
+
     func toCurrencyFormat() -> String {
         if let intValue = Int(self) {
             let numberFormatter = NumberFormatter()
@@ -34,16 +37,17 @@ public extension String {
     var isWhitespace: Bool {
         trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
+
     var notEmpty: Bool { !isWhitespace }
 
     func nsRange(from range: Range<String.Index>) -> NSRange {
         NSRange(range, in: self)
     }
 
-    var language: String { NSLinguisticTagger.dominantLanguage(for: self) ?? ""}
+    var language: String { NSLinguisticTagger.dominantLanguage(for: self) ?? "" }
 
     var nonLineBreak: String {
-        self.replacingOccurrences(of: " ", with: "\u{00a0}")
+        replacingOccurrences(of: " ", with: "\u{00a0}")
     }
 
     func contains(_ string: String, caseSensitive: Bool = true) -> Bool {
@@ -67,7 +71,7 @@ public extension String {
     }
 
     func nsRange() -> NSRange {
-        NSRange.init(self.startIndex..<self.endIndex, in: self)
+        NSRange(startIndex ..< endIndex, in: self)
     }
 
     var localizedKey: LocalizedStringKey {
@@ -81,6 +85,7 @@ public extension String {
         }
         return (nil, self)
     }
+
     var firstLetterCapitalized: String {
         prefix(1).capitalized + dropFirst()
     }

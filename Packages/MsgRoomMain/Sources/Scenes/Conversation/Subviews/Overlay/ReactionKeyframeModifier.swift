@@ -21,7 +21,7 @@ public struct ReactionKeyframeModifier: ViewModifier {
     @Binding public var trigger: Int
 
     public init(trigger: Binding<Int>) {
-        self._trigger = trigger
+        _trigger = trigger
     }
 
     public func body(content: Content) -> some View {
@@ -37,7 +37,6 @@ public struct ReactionKeyframeModifier: ViewModifier {
                     .scaleEffect(y: value.verticalStretch)
                     .offset(y: value.verticalTranslation)
             } keyframes: { _ in
-
                 KeyframeTrack(\.rotation) {
                     CubicKeyframe(.zero, duration: 0.58)
                     CubicKeyframe(.degrees(16), duration: 0.125)
@@ -80,8 +79,9 @@ public struct ReactionKeyframeModifier: ViewModifier {
             }
     }
 }
+
 public extension View {
     func reactionAnimation(trigger: Binding<Int>) -> some View {
-        self.modifier(ReactionKeyframeModifier(trigger: trigger))
+        modifier(ReactionKeyframeModifier(trigger: trigger))
     }
 }

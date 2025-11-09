@@ -9,15 +9,16 @@ import UIKit
 import XUI
 
 public enum MsgKind: Int, Codable, Sendable, Hashable {
-	case text, markdown, image, video, location, emoji, attachment, voice
+    case text, markdown, image, video, location, emoji, attachment, voice
 }
+
 public extension MsgKind {
-	var shouldPrefatchData: Bool {
-		switch self {
-		case .image, .video, .location, .attachment:
-			return true
-		default:
-			return false
-		}
-	}
+    var shouldPrefatchData: Bool {
+        switch self {
+        case .image, .video, .location, .attachment:
+            true
+        default:
+            false
+        }
+    }
 }

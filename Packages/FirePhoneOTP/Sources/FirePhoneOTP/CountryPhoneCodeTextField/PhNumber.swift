@@ -1,5 +1,5 @@
 //
-//  PhoneNumber.swift
+//  PhNumber.swift
 //  CountryPhoneCodePicker
 //
 //  Created by Aung Ko Min on 31/10/22.
@@ -10,13 +10,13 @@ import PhoneNumberKit
 
 @Observable
 public class PhNumber {
-
     public var id: String { countryCode.country + rawString }
     public var countryCode: CountryCode
     public var rawString: String
     public var plceHolder: String {
         phoneNumberKit.getFormattedExampleNumber(forCountry: countryCode.country) ?? "Phone Number"
     }
+
     private let phoneNumberKit = PhoneNumberKit()
 
     public var isValid: Bool {
@@ -37,11 +37,11 @@ public class PhNumber {
         }
     }
 
-	@MainActor public static let locale = PhNumber(countryCode: .current)
+    @MainActor public static let locale = PhNumber(countryCode: .current)
 
     public init(countryCode: CountryCode) {
         self.countryCode = countryCode
-        self.rawString = ""
+        rawString = ""
     }
 
     public func validate() {

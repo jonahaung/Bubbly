@@ -1,5 +1,5 @@
 //
-//  ContactLinkButton.swift
+//  LinkButton.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 1/4/23.
@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct LinkButton<Label: View>: View {
-
     public enum LinkType {
         case phoneCall(String)
         case sms(String)
@@ -30,25 +29,25 @@ public struct LinkButton<Label: View>: View {
     @ViewBuilder
     public var body: some View {
         switch linkType {
-        case .phoneCall(let phoneNumber):
+        case let .phoneCall(phoneNumber):
             if let url = URL(string: "tel://\(phoneNumber.withoutSpacesAndNewLines)") {
                 Link(destination: url, label: label)
             }
-        case .sms(let phoneNumber):
+        case let .sms(phoneNumber):
             if let url = URL(string: "sms://\(phoneNumber.withoutSpacesAndNewLines)") {
                 Link(destination: url, label: label)
             }
-        case .email(let email):
+        case let .email(email):
             if let url = URL(string: "mailto:\(email.withoutSpacesAndNewLines)") {
                 Link(destination: url, label: label)
             }
-        case .url(let urlString):
+        case let .url(urlString):
             if let url = URL(string: urlString) {
                 Link(destination: url, label: label)
             }
-        case .whatsapp(let phoneNumber, let text):
+        case let .whatsapp(phoneNumber, text):
             whatsappButton(phone: phoneNumber, msg: text)
-        case .appleMap(let lattitide, let longitude):
+        case let .appleMap(lattitide, longitude):
             if let url = URL(string: "maps://?saddr=&daddr=\(lattitide),\(longitude)") {
                 Link(destination: url, label: label)
             }
@@ -64,7 +63,8 @@ public struct LinkButton<Label: View>: View {
             var characterSet = CharacterSet.urlQueryAllowed
             characterSet.insert(charactersIn: "?&")
             guard let urlString = urlWhats.addingPercentEncoding(withAllowedCharacters: characterSet),
-                  let url = URL(string: urlString) else {
+                  let url = URL(string: urlString)
+            else {
                 return nil
             }
             return url

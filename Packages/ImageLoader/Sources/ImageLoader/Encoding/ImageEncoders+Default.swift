@@ -7,15 +7,15 @@
 import Foundation
 
 #if !os(macOS)
-import UIKit
+    import UIKit
 #else
-import AppKit
+    import AppKit
 #endif
 
-extension ImageEncoders {
+public extension ImageEncoders {
     /// A default adaptive encoder which uses best encoder available depending
     /// on the input image and its configuration.
-    public struct Default: ImageEncoding {
+    struct Default: ImageEncoding {
         public var compressionQuality: Float
 
         /// Set to `true` to switch to HEIF when it is available on the current hardware.
@@ -30,15 +30,14 @@ extension ImageEncoders {
             guard let cgImage = image.cgImage else {
                 return nil
             }
-            let type: AssetType
-            if cgImage.isOpaque {
-                if isHEIFPreferred && ImageEncoders.ImageIO.isSupported(type: .heic) {
-                    type = .heic
+            let type: AssetType = if cgImage.isOpaque {
+                if isHEIFPreferred, ImageEncoders.ImageIO.isSupported(type: .heic) {
+                    .heic
                 } else {
-                    type = .jpeg
+                    .jpeg
                 }
             } else {
-                type = .png
+                .png
             }
             let encoder = ImageEncoders.ImageIO(type: type, compressionRatio: compressionQuality)
             return encoder.encode(image)

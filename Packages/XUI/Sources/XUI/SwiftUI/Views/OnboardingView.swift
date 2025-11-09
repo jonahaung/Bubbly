@@ -1,5 +1,5 @@
 //
-//  OnBoardingView.swift
+//  OnboardingView.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 24/4/23.
@@ -11,13 +11,14 @@ public enum Onboarding {
     static let key = "com.jonahaung.hasShownOnboarding"
     public static var hasShown: Bool {
         get {
-            UserDefaults.standard.bool(forKey: Self.key)
+            UserDefaults.standard.bool(forKey: key)
         }
         set {
-            UserDefaults.standard.setValue(newValue, forKey: Self.key)
+            UserDefaults.standard.setValue(newValue, forKey: key)
         }
     }
 }
+
 public struct OnboardingItem: Identifiable, Hashable {
     public let id = UUID()
     public let title: String
@@ -30,9 +31,9 @@ public struct OnboardingItem: Identifiable, Hashable {
         self.imageName = imageName
     }
 }
+
 @available(iOS 18.0, *)
 public struct OnboardingView: View {
-
     @State private var selection = 0
     private let items: [OnboardingItem]
     private let onClose: (() -> Void)?
@@ -45,7 +46,7 @@ public struct OnboardingView: View {
 
     public var body: some View {
         TabView(selection: $selection) {
-            ForEach(0..<items.count, id: \.self) { i in
+            ForEach(0 ..< items.count, id: \.self) { i in
                 if let item = items[safe: i] {
                     OnboardingCell(item: item, index: i)
                         .tag(i)
@@ -63,7 +64,7 @@ public struct OnboardingView: View {
         VStack {
             HStack {
                 Spacer()
-                if self.hasNext {
+                if hasNext {
                     Button {
                         skip()
                     } label: {
@@ -74,7 +75,7 @@ public struct OnboardingView: View {
             }
             Spacer()
             HStack {
-                if self.hasNext {
+                if hasNext {
                     XPhotoPageControl(selection: $selection, length: items.count, size: 13)
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -102,7 +103,7 @@ public struct OnboardingView: View {
         .padding()
     }
 
-    private var hasNext: Bool { selection+1 < items.count  }
+    private var hasNext: Bool { selection + 1 < items.count }
     private var hasPrevious: Bool { selection > 0 }
 
     private func next() {
@@ -116,21 +117,22 @@ public struct OnboardingView: View {
             selection -= 1
         }
     }
+
     private func skip() {
         if hasNext {
-            selection = items.count-1
+            selection = items.count - 1
         }
     }
 }
+
 @available(iOS 18.0, *)
 private struct OnboardingCell: View {
-
     let item: OnboardingItem
     let index: Int
 
     var body: some View {
         GeometryReader { geo in
-            let height = geo.size.height/2
+            let height = geo.size.height / 2
             StretchyHeaderScrollView(headerHeight: height, multipliter: 1) {
                 VStack(alignment: .leading) {
                     ZStack {

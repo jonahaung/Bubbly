@@ -8,17 +8,17 @@
 import Foundation
 
 public enum OpaqueValue: Equatable {
-	public struct PropertyKey: CodingKey, Hashable {
-		public var stringValue: String
-		public var intValue: Int?
+    public struct PropertyKey: CodingKey, Hashable {
+        public var stringValue: String
+        public var intValue: Int?
 
-		public init?(stringValue: String) {
+        public init?(stringValue: String) {
             self.stringValue = stringValue
         }
 
-		public init?(intValue: Int) {
+        public init?(intValue: Int) {
             self.intValue = intValue
-            self.stringValue = String(intValue)
+            stringValue = String(intValue)
         }
     }
 
@@ -31,30 +31,30 @@ public enum OpaqueValue: Equatable {
 }
 
 extension OpaqueValue: Encodable {
-	public func encode(to encoder: any Encoder) throws {
+    public func encode(to encoder: any Encoder) throws {
         switch self {
-            case .object(let values):
-                var container = encoder.container(keyedBy: PropertyKey.self)
-                for (key, value) in values {
-                    try container.encode(value, forKey: key)
-                }
-            case .array(let values):
-                var container = encoder.unkeyedContainer()
-                for value in values {
-                    try container.encode(value)
-                }
-            case .string(let value):
-                var container = encoder.singleValueContainer()
+        case let .object(values):
+            var container = encoder.container(keyedBy: PropertyKey.self)
+            for (key, value) in values {
+                try container.encode(value, forKey: key)
+            }
+        case let .array(values):
+            var container = encoder.unkeyedContainer()
+            for value in values {
                 try container.encode(value)
-            case .number(let value):
-                var container = encoder.singleValueContainer()
-                try container.encode(value)
-            case .boolean(let value):
-                var container = encoder.singleValueContainer()
-                try container.encode(value)
-            case .null:
-                var container = encoder.singleValueContainer()
-                try container.encodeNil()
+            }
+        case let .string(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .number(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case let .boolean(value):
+            var container = encoder.singleValueContainer()
+            try container.encode(value)
+        case .null:
+            var container = encoder.singleValueContainer()
+            try container.encodeNil()
         }
     }
 }
@@ -62,7 +62,7 @@ extension OpaqueValue: Encodable {
 // MARK: OpaqueValue+Decodable
 
 extension OpaqueValue: Decodable {
-	public init(from decoder: any Decoder) throws {
+    public init(from decoder: any Decoder) throws {
         if let container = try? decoder.container(keyedBy: PropertyKey.self) {
             var values: [PropertyKey: OpaqueValue] = [:]
             for key in container.allKeys {
@@ -72,7 +72,7 @@ extension OpaqueValue: Decodable {
         } else if var container = try? decoder.unkeyedContainer() {
             var values: [OpaqueValue] = []
             while !container.isAtEnd {
-                values.append(try container.decode(OpaqueValue.self))
+                try values.append(container.decode(OpaqueValue.self))
             }
             self = .array(values)
         } else {
@@ -92,8 +92,9 @@ extension OpaqueValue: Decodable {
         }
     }
 }
+
 /// *
-// 
+//
 // // Sample JSON-like data represented using OpaqueValue
 // let data: OpaqueValue = .object([
 //     "name": .string("Alice"),

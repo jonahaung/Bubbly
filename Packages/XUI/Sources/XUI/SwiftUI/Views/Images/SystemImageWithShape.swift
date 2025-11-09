@@ -5,11 +5,10 @@
 //  Created by Aung Ko Min on 20/6/24.
 //
 
-import SwiftUI
 import SFSafeSymbols
+import SwiftUI
 
 public struct SystemImageWithShape: View {
-
     private let icon: SFSymbol
     private let scale: CGFloat
     private let iconStyle: IconStyle
@@ -23,7 +22,7 @@ public struct SystemImageWithShape: View {
     @ViewBuilder
     public var body: some View {
         switch iconStyle {
-        case .plain(let bgStyle):
+        case let .plain(bgStyle):
             switch bgStyle {
             case .plain:
                 SystemImage(icon, 20 * scale)
@@ -34,7 +33,7 @@ public struct SystemImageWithShape: View {
                     .padding(2 * scale)
                     .foregroundStyle(Color.gray.gradient)
                     .symbolVariant(.fill)
-            case .color(let color):
+            case let .color(color):
                 SystemImage(icon, 20 * scale)
                     .padding(2 * scale)
                     .foregroundStyle(color.gradient)
@@ -45,7 +44,7 @@ public struct SystemImageWithShape: View {
                     .foregroundStyle(icon.rawValue.color.gradient)
                     .symbolVariant(.fill)
             }
-        case .square(let bgStyle):
+        case let .square(bgStyle):
             switch bgStyle {
             case .plain:
                 SystemImage(icon, 15 * scale)
@@ -68,7 +67,7 @@ public struct SystemImageWithShape: View {
                     .containerShape(RoundedRectangle(cornerRadius: 8 * scale))
                     .compositingGroup()
                     .symbolVariant(.fill)
-            case .color(let color):
+            case let .color(color):
                 SystemImage(icon, 15 * scale)
                     .foregroundStyle(Color(uiColor: .systemBackground).gradient)
                     .padding(6 * scale)
@@ -91,7 +90,7 @@ public struct SystemImageWithShape: View {
                     .compositingGroup()
                     .symbolVariant(.fill)
             }
-        case .circle(let bgStyle):
+        case let .circle(bgStyle):
             switch bgStyle {
             case .plain:
                 SystemImage(icon, 15 * scale)
@@ -114,7 +113,7 @@ public struct SystemImageWithShape: View {
                     .containerShape(Circle())
                     .compositingGroup()
                     .symbolVariant(.fill)
-            case .color(let color):
+            case let .color(color):
                 SystemImage(icon, 15 * scale)
                     .foregroundStyle(Color(uiColor: .systemBackground).gradient)
                     .padding(6 * scale)

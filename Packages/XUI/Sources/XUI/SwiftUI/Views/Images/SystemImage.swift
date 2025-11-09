@@ -5,11 +5,10 @@
 //  Created by Aung Ko Min on 10/6/23.
 //
 
-import SwiftUI
 import SFSafeSymbols
+import SwiftUI
 
 public struct SystemImage: View {
-
     private let systemName: String
     private let size: CGFloat?
     private var color: Color = .init(uiColor: .secondaryLabel)

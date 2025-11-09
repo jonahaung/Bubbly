@@ -5,67 +5,67 @@
 //  Created by Aung Ko Min on 21/4/24.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 struct OTPView: View {
-    // MARK: Fields
     enum FocusField: Hashable {
         case field
     }
+
     @FocusState private var focusedField: FocusField?
     @Binding var otpCode: String
     var otpCodeLength: Int
 
-    // MARK: Constructor
-    public init(otpCode: Binding<String>, otpCodeLength: Int) {
-        self._otpCode = otpCode
+    init(otpCode: Binding<String>, otpCodeLength: Int) {
+        _otpCode = otpCode
         self.otpCodeLength = otpCodeLength
     }
 
-    // MARK: Body
-    public var body: some View {
-        HStack {
-            ZStack(alignment: .center) {
+    var body: some View {
+        VStack {
+            HStack(spacing: 2) {
+                ForEach(0 ..< otpCodeLength, id: \.self) { index in
+                    ZStack {
+                        Image(systemName: "circle")
+                            .resizable()
+                            .scaledToFit()
+                            .foregroundStyle(.gray.opacity(0.3))
+                        if otpCode.count > index {
+                            Image(systemName: "\(getPin(at: index)).circle.fill")
+                                .resizable()
+                        }
+                    }
+                    .frame(width: 30, height: 30, alignment: .center)
+                }
+            }
+            .frame(height: 50)
+            .background {
                 TextField("", text: $otpCode)
                     .frame(width: 0, height: 0, alignment: .center)
                     .font(Font.system(size: 0))
                     .accentColor(.clear)
                     .foregroundColor(.clear)
+                    .textContentType(.oneTimeCode)
                     .multilineTextAlignment(.center)
                     .keyboardType(.numberPad)
                     .onReceive(Just(otpCode)) { _ in limitText(otpCodeLength) }
                     .focused($focusedField, equals: .field)
                     .task {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            self.focusedField = .field
+                            focusedField = .field
                         }
                     }
-                    .padding()
-                HStack {
-                    ForEach(0..<otpCodeLength, id: \.self) { index in
-                        ZStack {
-                            Text(self.getPin(at: index))
-                                .font(Font.system(size: 30))
-                                .fontWeight(.semibold)
-                            Rectangle()
-                                .frame(height: 2)
-                                .padding(.trailing, 5)
-                                .padding(.leading, 5)
-                                .opacity(self.otpCode.count <= index ? 1 : 0)
-                        }
-                    }
-                }
             }
         }
+        .foregroundStyle(.secondary)
     }
 
-    // MARK: func
     private func getPin(at index: Int) -> String {
-        guard self.otpCode.count > index else {
+        guard otpCode.count > index else {
             return ""
         }
-        return self.otpCode[index]
+        return otpCode[index]
     }
 
     private func limitText(_ upper: Int) {
@@ -74,8 +74,13 @@ struct OTPView: View {
         }
     }
 }
-extension String {
+
+public extension String {
     subscript(idx: Int) -> String {
         String(self[index(startIndex, offsetBy: idx)])
     }
+}
+
+#Preview {
+    OTPView(otpCode: .constant("62"), otpCodeLength: 4)
 }

@@ -8,7 +8,7 @@
 import Foundation
 
 public struct File: Location, Identifiable {
-	public var id: String { self.path }
+    public var id: String { path }
 
     public let storage: Storage<File>
 
@@ -19,7 +19,7 @@ public struct File: Location, Identifiable {
 
 public extension File {
     static var kind: LocationKind {
-        return .file
+        .file
     }
 
     func write(_ data: Data) throws {
@@ -80,17 +80,17 @@ public extension File {
     }
 }
 
-internal extension FileManager {
-	func locationExists(at path: String, kind: LocationKind) -> Bool {
-		var isFolder: ObjCBool = false
+extension FileManager {
+    func locationExists(at path: String, kind: LocationKind) -> Bool {
+        var isFolder: ObjCBool = false
 
-		guard fileExists(atPath: path, isDirectory: &isFolder) else {
-			return false
-		}
+        guard fileExists(atPath: path, isDirectory: &isFolder) else {
+            return false
+        }
 
-		switch kind {
-		case .file: return !isFolder.boolValue
-		case .folder: return isFolder.boolValue
-		}
-	}
+        switch kind {
+        case .file: return !isFolder.boolValue
+        case .folder: return isFolder.boolValue
+        }
+    }
 }

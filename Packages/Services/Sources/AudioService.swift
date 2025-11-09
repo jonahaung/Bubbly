@@ -1,124 +1,131 @@
 //
-//  RCAudioPlayer.swift
+//  AudioService.swift
 //  MsgRoom
 //
 //  Created by Aung Ko Min on 7/4/24.
 //
 
-import Foundation
 import AVFoundation
 import CoreHaptics
+import Foundation
 import XUI
 
 public final class AudioService: Sendable {
+    private nonisolated(unsafe) var soundIDs: [String: SystemSoundID] = [:]
 
-	nonisolated(unsafe)
-	private var soundIDs: [String: SystemSoundID] = [:]
+    public static var shared: AudioService {
+        get { sharedValue.value }
+        set { sharedValue.value = newValue }
+    }
 
-	public static var shared: AudioService {
-		get { sharedValue.value }
-		set { sharedValue.value = newValue }
-	}
-	static let sharedValue = Mutex(
-		AudioService()
-	)
+    static let sharedValue = Mutex(
+        AudioService()
+    )
 
-	private var supportsHaptics: Bool {
-		return CHHapticEngine.capabilitiesForHardware().supportsHaptics
-	}
+    private var supportsHaptics: Bool {
+        CHHapticEngine.capabilitiesForHardware().supportsHaptics
+    }
 
-	private init() {}
+    private init() {}
 
-	// MARK: - Public Methods
-	public func playSound(_ path: String) {
-		guard !path.isEmpty else { return }
-		playSound(path, isAlert: false)
-	}
+    // MARK: - Public Methods
 
-	public func playAlert(_ path: String) {
-		guard !path.isEmpty else { return }
-		playSound(path, isAlert: true)
-	}
+    public func playSound(_ path: String) {
+        guard !path.isEmpty else { return }
+        playSound(path, isAlert: false)
+    }
 
-	public func playVibrateSound() {
-		AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-	}
+    public func playAlert(_ path: String) {
+        guard !path.isEmpty else { return }
+        playSound(path, isAlert: true)
+    }
 
-	public func stopAllSounds() {
-		unloadAllSounds()
-	}
+    public func playVibrateSound() {
+        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+    }
 
-	public func stopSound(_ path: String) {
-		guard !path.isEmpty else { return }
-		unloadSound(path)
-	}
+    public func stopAllSounds() {
+        unloadAllSounds()
+    }
 
-	// MARK: - Sound Management
-	public func playSound(_ path: String, isAlert: Bool) {
-		let soundID = loadSoundID(for: path)
+    public func stopSound(_ path: String) {
+        guard !path.isEmpty else { return }
+        unloadSound(path)
+    }
 
-		guard soundID != 0 else { return }
+    // MARK: - Sound Management
 
-		if isAlert {
-			AudioServicesPlayAlertSound(soundID)
-		} else {
-			AudioServicesPlaySystemSound(soundID)
-		}
-	}
+    public func playSound(_ path: String, isAlert: Bool) {
+        let soundID = loadSoundID(for: path)
 
-	public func unloadAllSounds() {
-		soundIDs.keys.forEach(unloadSound)
-	}
+        guard soundID != 0 else { return }
 
-	public func unloadSound(_ path: String) {
-		guard let soundID = soundIDs[path] else { return }
+        if isAlert {
+            AudioServicesPlayAlertSound(soundID)
+        } else {
+            AudioServicesPlaySystemSound(soundID)
+        }
+    }
 
-		AudioServicesDisposeSystemSoundID(soundID)
-		soundIDs.removeValue(forKey: path)
-	}
+    public func unloadAllSounds() {
+        soundIDs.keys.forEach(unloadSound)
+    }
 
-	// MARK: - Private Helpers
-	private func loadSoundID(for path: String) -> SystemSoundID {
-		if let existingID = soundIDs[path] {
-			return existingID
-		}
+    public func unloadSound(_ path: String) {
+        guard let soundID = soundIDs[path] else { return }
 
-		let url = URL(fileURLWithPath: path) as CFURL
-		var soundID: SystemSoundID = 0
-		AudioServicesCreateSystemSoundID(url, &soundID)
+        AudioServicesDisposeSystemSoundID(soundID)
+        soundIDs.removeValue(forKey: path)
+    }
 
-		if soundID != 0 {
-			soundIDs[path] = soundID
-		}
+    // MARK: - Private Helpers
 
-		return soundID
-	}
+    private func loadSoundID(for path: String) -> SystemSoundID {
+        if let existingID = soundIDs[path] {
+            return existingID
+        }
+
+        let url = URL(fileURLWithPath: path) as CFURL
+        var soundID: SystemSoundID = 0
+        AudioServicesCreateSystemSoundID(url, &soundID)
+
+        if soundID != 0 {
+            soundIDs[path] = soundID
+        }
+
+        return soundID
+    }
 }
 
 // MARK: - Message Sounds
+
 public extension AudioService {
-	func playMessageIncoming() {
-		playBundledSound(named: "rckit_incoming")
-	}
-	func playMessageOutgoing() {
-		playBundledSound(named: "rckit_outgoing")
-	}
-	func playNotification() {
-		playBundledSound(named: "notification")
-	}
-	func playTap() {
-		playBundledSound(named: "tapp")
-	}
-	private func playBundledSound(named name: String) {
-		guard let path = Bundle.main.path(
-			forResource: name,
-			ofType: "aiff"
-		) ?? Bundle.main.path(
-			forResource: name,
-			ofType: "wav"
-		) else {
-			return
-		}
-		playSound(path)
-	}
+    func playMessageIncoming() {
+        playBundledSound(named: "rckit_incoming")
+    }
+
+    func playMessageOutgoing() {
+        playBundledSound(named: "rckit_outgoing")
+    }
+
+    func playNotification() {
+        playBundledSound(named: "notification")
+    }
+
+    func playTap() {
+        playBundledSound(named: "tapp")
+    }
+
+    private func playBundledSound(named name: String) {
+        guard let path = Bundle.main.path(
+            forResource: name,
+            ofType: "aiff"
+        ) ?? Bundle.main.path(
+            forResource: name,
+            ofType: "wav"
+        ) else {
+            return
+        }
+        playSound(path)
+    }
 }

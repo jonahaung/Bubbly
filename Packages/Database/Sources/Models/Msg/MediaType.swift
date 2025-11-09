@@ -8,23 +8,24 @@
 import Foundation
 
 public enum MediaType: Hashable, CaseIterable {
-	case png, video, audio, data
-	public var fileExtension: String {
-		switch self {
-		case .png: return ".png"
-		case .video: return ".mp4"
-		case .audio: return ".m4a"
-		case .data:
-			return ""
-		}
-	}
-	public var directory: String {
-		switch self {
-		case .png: return "photos"
-		case .video: return "videos"
-		case .audio: return "audios"
-		case .data:
-			return "data"
-		}
-	}
+    case png, video, audio, data
+    public var fileExtension: String {
+        switch self {
+        case .png: ".png"
+        case .video: ".mp4"
+        case .audio: ".m4a"
+        case .data:
+            ""
+        }
+    }
+
+    public var directory: String {
+        switch self {
+        case .png: "photos"
+        case .video: "videos"
+        case .audio: "audios"
+        case .data:
+            "data"
+        }
+    }
 }

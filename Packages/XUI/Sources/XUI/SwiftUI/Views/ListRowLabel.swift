@@ -1,15 +1,14 @@
 //
-//  TextIconRow.swift
+//  ListRowLabel.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 28/7/23.
 //
 
-import SwiftUI
 import SFSafeSymbols
+import SwiftUI
 
 public struct ListRowLabel: View {
-
     private let icon: SFSymbol?
     private let iconStyle: SystemImageWithShape.IconStyle
     private let text: String

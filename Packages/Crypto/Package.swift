@@ -5,11 +5,12 @@ import PackageDescription
 
 let package = Package(
     name: "Crypto",
-	platforms: [.iOS(.v18)],
+    platforms: [.iOS(.v18)],
     products: [
         .library(
             name: "Crypto",
-            targets: ["Crypto"])
+            targets: ["Crypto"]
+        ),
     ],
     targets: [
         .target(
@@ -17,6 +18,6 @@ let package = Package(
         .testTarget(
             name: "CryptoTests",
             dependencies: ["Crypto"]
-        )
+        ),
     ]
 )

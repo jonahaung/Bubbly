@@ -1,5 +1,5 @@
 //
-//  XFormRow.swift
+//  VFormRow.swift
 //  RoomRentalDemo
 //
 //  Created by Aung Ko Min on 19/1/23.
@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct VFormRow<Content: View>: View {
-
     private let title: String
     private let isEmpty: Bool
     private let content: () -> Content

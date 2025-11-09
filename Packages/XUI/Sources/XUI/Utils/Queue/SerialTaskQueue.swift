@@ -8,59 +8,56 @@
 import Foundation
 
 public protocol SerialTaskQueueProtocol {
-	func addTask(_ task: sending @escaping SerialTaskQueue.TaskClosure)
-	func start()
-	func stop()
-	func flushQueue()
-	var isEmpty: Bool { get }
-	var isStopped: Bool { get }
+    func addTask(_ task: sending @escaping SerialTaskQueue.TaskClosure)
+    func start()
+    func stop()
+    func flushQueue()
+    var isEmpty: Bool { get }
+    var isStopped: Bool { get }
 }
 
 public final class SerialTaskQueue: SerialTaskQueueProtocol, Sendable {
-	public typealias TaskClosure = (_ completion: @Sendable @escaping () -> Void) -> Void
+    public typealias TaskClosure = (_ completion: @Sendable @escaping () -> Void) -> Void
 
-	nonisolated(unsafe)
-    public private(set) var isBusy = false
-	nonisolated(unsafe)
-    public private(set) var isStopped = true
-	nonisolated(unsafe)
-    private var tasksQueue = [TaskClosure]()
+    public private(set) nonisolated(unsafe) var isBusy = false
+    public private(set) nonisolated(unsafe) var isStopped = true
+    private nonisolated(unsafe) var tasksQueue = [TaskClosure]()
 
     public init() {
-		start()
-	}
+        start()
+    }
 
     public func addTask(_ task: @escaping TaskClosure) {
-        self.tasksQueue.append(task)
-        self.maybeExecuteNextTask()
+        tasksQueue.append(task)
+        maybeExecuteNextTask()
     }
 
     public func start() {
-        self.isStopped = false
-        self.maybeExecuteNextTask()
+        isStopped = false
+        maybeExecuteNextTask()
     }
 
     public func stop() {
-        self.isStopped = true
+        isStopped = true
     }
 
     public func flushQueue() {
-        self.tasksQueue.removeAll()
+        tasksQueue.removeAll()
     }
 
     public var isEmpty: Bool {
-        return self.tasksQueue.isEmpty
+        tasksQueue.isEmpty
     }
 
     private func maybeExecuteNextTask() {
-        if !self.isStopped && !self.isBusy {
-            if !self.isEmpty {
-                let firstTask = self.tasksQueue.removeFirst()
-                self.isBusy = true
-                firstTask({ [weak self] () in
+        if !isStopped, !isBusy {
+            if !isEmpty {
+                let firstTask = tasksQueue.removeFirst()
+                isBusy = true
+                firstTask { [weak self] () in
                     self?.isBusy = false
                     self?.maybeExecuteNextTask()
-                })
+                }
             }
         }
     }

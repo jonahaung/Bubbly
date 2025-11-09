@@ -15,8 +15,8 @@ public struct LoadingIndicator: View {
             .tint(Color.secondary)
     }
 }
-private struct LoadingViewModifier: ViewModifier {
 
+private struct LoadingViewModifier: ViewModifier {
     let isLoading: Bool
     func body(content: Content) -> some View {
         content
@@ -27,6 +27,7 @@ private struct LoadingViewModifier: ViewModifier {
             }
     }
 }
+
 public extension View {
     func showLoading(_ isLoading: Bool) -> some View {
         modifier(LoadingViewModifier(isLoading: isLoading))

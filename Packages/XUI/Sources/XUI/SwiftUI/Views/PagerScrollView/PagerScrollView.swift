@@ -1,27 +1,27 @@
 //
-//  PageTabView.swift
+//  PagerScrollView.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 26/4/23.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 @available(iOS 18.0, *)
 public struct PagerScrollView<Page, Content>: View
-where Page: Sendable & Equatable & Hashable & Identifiable, Content: View {
-
+    where Page: Sendable & Equatable & Hashable & Identifiable, Content: View
+{
     private let items: [Page]
     private let content: (Page) -> Content
-    @Binding private  var selection: Page
+    @Binding private var selection: Page
     @State private var position: ScrollPosition = .init()
     private var targetPublisher = PassthroughSubject<Page, Never>()
 
     public init(items: [Page], selection: Binding<Page>, content: @escaping (Page) -> Content) {
         self.items = items
         self.content = content
-        self._selection = selection
+        _selection = selection
     }
 
     public var body: some View {
@@ -53,7 +53,7 @@ where Page: Sendable & Equatable & Hashable & Identifiable, Content: View {
                 let scrollView = context.geometry
                 guard scrollView.contentSize.width > geometry.size.width else { return }
                 let totalWidth = scrollView.contentSize.width - (scrollView.contentInsets.leading + scrollView.contentInsets.trailing)
-                let value = ((scrollView.contentOffset.x+scrollView.bounds.width/2) * count/totalWidth).int
+                let value = ((scrollView.contentOffset.x + scrollView.bounds.width / 2) * count / totalWidth).int
                 if let target = items[safe: value], selection != target {
                     selection = target
                 }

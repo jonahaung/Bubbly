@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct WaterfallLayout: Layout {
-
     private let columnCount: Int
     private let spacing: CGFloat
 
@@ -16,7 +15,8 @@ public struct WaterfallLayout: Layout {
         self.columnCount = columnCount
         self.spacing = spacing
     }
-    public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+
+    public func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
         let result = Waterfall(
             columnCount: columnCount,
             origin: .zero,
@@ -27,7 +27,7 @@ public struct WaterfallLayout: Layout {
         return result.bounds.size
     }
 
-    public func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+    public func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) {
         let result = Waterfall(
             columnCount: columnCount,
             origin: bounds.origin,
@@ -36,7 +36,7 @@ public struct WaterfallLayout: Layout {
             subviews: subviews
         )
         result.columns
-            .flatMap { $0 }
+            .flatMap(\.self)
             .forEach { subview, frame in
                 subview.place(at: frame.origin, proposal: .init(width: frame.width, height: frame.height))
             }
@@ -74,9 +74,9 @@ public struct WaterfallLayout: Layout {
                     partialResult.append((subview, frame))
                 }
             }
-            let columns = (0..<columnCount).map(column(index:))
+            let columns = (0 ..< columnCount).map(column(index:))
             self.columns = columns
-            self.bounds = columns.compactMap(\.last?.1).reduce(into: .zero) { $0 = $0.union($1) }
+            bounds = columns.compactMap(\.last?.1).reduce(into: .zero) { $0 = $0.union($1) }
         }
     }
 }

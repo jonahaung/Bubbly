@@ -8,7 +8,6 @@
 import Foundation
 
 public struct CountryCode: Equatable, Identifiable, Sendable {
-
     public var id: String { country }
     public let country: String
     public let phoneCode: String
@@ -16,10 +15,10 @@ public struct CountryCode: Equatable, Identifiable, Sendable {
     public let flag: String
 
     public init(code: String) {
-        self.country = code
-        self.phoneCode = "+"+(CountryCode.countryCodesRaw[code] ?? "65")
-        self.name = Locale.current.localizedString(forRegionCode: code) ?? "NA"
-        self.flag = code.flag()
+        country = code
+        phoneCode = "+" + (CountryCode.countryCodesRaw[code] ?? "65")
+        name = Locale.current.localizedString(forRegionCode: code) ?? "NA"
+        flag = code.flag()
     }
 
     public static let allCodes: [CountryCode] = CountryCode.countryCodesRaw.map { CountryCode(code: $0.key) }.sorted { $0.name < $1.name }
@@ -34,9 +33,9 @@ public struct CountryCode: Equatable, Identifiable, Sendable {
 
 private extension String {
     func flag() -> String {
-        let base: UInt32 = 127397
+        let base: UInt32 = 127_397
         var s = String()
-        for v in self.uppercased().unicodeScalars {
+        for v in uppercased().unicodeScalars {
             if let x = UnicodeScalar(base + v.value) {
                 s.unicodeScalars.append(x)
             }

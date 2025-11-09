@@ -5,8 +5,8 @@
 //  Created by Aung Ko Min on 21/4/24.
 //
 
-import Foundation
 import FirebaseAuth
+import Foundation
 
 enum FirePhoneLoginViewState: Hashable, Identifiable {
     var id: FirePhoneLoginViewState { self }
@@ -17,25 +17,26 @@ enum FirePhoneLoginViewState: Hashable, Identifiable {
     var title: String {
         switch self {
         case .enterPhoneNumber:
-            return "Mobile Number"
+            "Mobile Number"
         case .verifyOTP:
-            return "OTP"
+            "OTP"
         case .error:
-            return "Error"
+            "Error"
         case .loggedIn:
-            return "Success"
+            "Success"
         }
     }
+
     var subtitle: String {
         switch self {
         case .enterPhoneNumber:
-            return "Please enter the mobile number"
+            "Please enter the mobile number"
         case .verifyOTP:
-            return "Please enter the one-time-password that sent via sms"
-        case .error(let error):
-            return error
-        case .loggedIn(let user, _):
-            return user.displayName ?? user.phoneNumber ?? user.uid
+            "Please enter the one-time-password that sent via sms"
+        case let .error(error):
+            error
+        case let .loggedIn(user, _):
+            user.displayName ?? user.phoneNumber ?? user.uid
         }
     }
 }

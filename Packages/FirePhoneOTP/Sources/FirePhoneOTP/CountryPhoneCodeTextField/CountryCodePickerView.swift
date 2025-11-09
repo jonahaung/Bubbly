@@ -8,17 +8,17 @@
 import SwiftUI
 
 public struct CountryCodePickerView: View {
-
     public var countryCode: Binding<CountryCode>
 
     @State private var searchText = ""
     private var displayedCodes: [CountryCode] {
         if searchText.isEmpty {
-            return CountryCode.allCodes
+            CountryCode.allCodes
         } else {
-            return CountryCode.allCodes.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            CountryCode.allCodes.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
+
     @Environment(\.dismiss) private var dismiss
 
     public var body: some View {

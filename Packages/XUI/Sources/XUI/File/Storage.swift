@@ -8,10 +8,10 @@
 import Foundation
 
 public final class Storage<LocationType: Location> {
-	internal private(set) var path: String
+    private(set) var path: String
     private let fileManager: FileManager
 
-	internal init(path: String, fileManager: FileManager) throws {
+    init(path: String, fileManager: FileManager) throws {
         self.path = path
         self.fileManager = fileManager
         try validatePath()
@@ -50,9 +50,9 @@ public final class Storage<LocationType: Location> {
     }
 }
 
-internal extension Storage {
+extension Storage {
     var attributes: [FileAttributeKey: Any] {
-        return (try? fileManager.attributesOfItem(atPath: path)) ?? [:]
+        (try? fileManager.attributesOfItem(atPath: path)) ?? [:]
     }
 
     func makeParentPath(for path: String) -> String? {
@@ -64,7 +64,8 @@ internal extension Storage {
     }
 
     func move(to newPath: String,
-              errorReasonProvider: (Error) -> LocationErrorReason) throws {
+              errorReasonProvider: (Error) -> LocationErrorReason) throws
+    {
         do {
             try fileManager.moveItem(atPath: path, toPath: newPath)
 
@@ -98,9 +99,9 @@ internal extension Storage {
     }
 }
 
-internal extension Storage where LocationType == Folder {
+extension Storage where LocationType == Folder {
     func makeChildSequence<T: Location>() -> Folder.ChildSequence<T> {
-        return Folder.ChildSequence(
+        Folder.ChildSequence(
             folder: Folder(storage: self),
             fileManager: fileManager,
             isRecursive: false,
@@ -159,7 +160,8 @@ internal extension Storage where LocationType == Folder {
         }
 
         guard fileManager.createFile(atPath: filePath, contents: contents),
-              let storage = try? Storage<File>(path: filePath, fileManager: fileManager) else {
+              let storage = try? Storage<File>(path: filePath, fileManager: fileManager)
+        else {
             throw WriteError(path: filePath, reason: .fileCreationFailed)
         }
 

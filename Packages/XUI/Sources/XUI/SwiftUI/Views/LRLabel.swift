@@ -1,15 +1,14 @@
 //
-//  _Label.swift
+//  LRLabel.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 24/3/23.
 //
 
-import SwiftUI
 import SFSafeSymbols
+import SwiftUI
 
 public struct LRLabel<Left, Right>: View where Left: View, Right: View {
-
     private let spacing: CGFloat
     private var left: () -> Left
     private var right: () -> Right
@@ -29,7 +28,6 @@ public struct LRLabel<Left, Right>: View where Left: View, Right: View {
 }
 
 public struct LRIconLabel: View {
-
     private let spacing: CGFloat
     private var icon: String
     private var title: String

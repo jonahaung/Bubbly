@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  Collection+.swift
+//
 //
 //  Created by Aung Ko Min on 10/6/23.
 //
@@ -17,21 +17,20 @@ public extension Array where Element: Hashable {
 
 public extension Collection where Indices.Iterator.Element == Index {
     subscript(safe index: Index) -> Iterator.Element? {
-        return (startIndex <= index && index < endIndex) ? self[index] : nil
+        (startIndex <= index && index < endIndex) ? self[index] : nil
     }
 }
 
 public extension Array {
-
     mutating func shuffle() {
         if count == 0 {
             return
         }
 
-        for index in 0..<(count - 1) {
-            let randomIndex = Int.random(in: index..<count)
+        for index in 0 ..< (count - 1) {
+            let randomIndex = Int.random(in: index ..< count)
             if randomIndex != index {
-                self.swapAt(index, randomIndex)
+                swapAt(index, randomIndex)
             }
         }
     }
@@ -42,13 +41,15 @@ public extension Array {
 
         return list
     }
+
     func random() -> Element? {
-        return (count > 0) ? self.shuffled()[0] : nil
+        (count > 0) ? shuffled()[0] : nil
     }
+
     func random(_ count: Int = 1) -> [Element] {
         let result = shuffled()
 
-        return (count > result.count) ? result : Array(result[0..<count])
+        return (count > result.count) ? result : Array(result[0 ..< count])
     }
 
     func removeDuplicates(by predicate: (Element, Element) -> Bool) -> Self {
@@ -58,9 +59,11 @@ public extension Array {
         }
         return result
     }
+
     func removeDuplicates(by keyPath: KeyPath<Element, String>) -> Self {
         removeDuplicates(by: { $0[keyPath: keyPath] == $1[keyPath: keyPath] })
     }
+
     func removeDuplicates() -> Self where Element: Equatable {
         removeDuplicates(by: ==)
     }
@@ -73,11 +76,11 @@ public extension Array {
 }
 
 public extension BidirectionalCollection where Iterator.Element: Equatable {
-	func nextElement(_ item: Self.Iterator.Element, loop: Bool = false) -> Self.Iterator.Element? {
-        if let itemIndex = self.firstIndex(of: item) {
+    func nextElement(_ item: Self.Iterator.Element, loop: Bool = false) -> Self.Iterator.Element? {
+        if let itemIndex = firstIndex(of: item) {
             let lastItem: Bool = (index(after: itemIndex) == endIndex)
-            if loop && lastItem {
-                return self.first
+            if loop, lastItem {
+                return first
             } else if lastItem {
                 return nil
             } else {
@@ -86,11 +89,12 @@ public extension BidirectionalCollection where Iterator.Element: Equatable {
         }
         return nil
     }
-	func previous(_ item: Self.Iterator.Element, loop: Bool = false) -> Self.Iterator.Element? {
-        if let itemIndex = self.firstIndex(of: item) {
+
+    func previous(_ item: Self.Iterator.Element, loop: Bool = false) -> Self.Iterator.Element? {
+        if let itemIndex = firstIndex(of: item) {
             let firstItem: Bool = (itemIndex == startIndex)
-            if loop && firstItem {
-                return self.last
+            if loop, firstItem {
+                return last
             } else if firstItem {
                 return nil
             } else {
@@ -100,18 +104,20 @@ public extension BidirectionalCollection where Iterator.Element: Equatable {
         return nil
     }
 }
+
 public extension Array where Element: Identifiable {
-	mutating func replace(_ element: Element) {
-		if let index = firstIndex(where: { $0.id == element.id }) {
-			self.remove(at: index)
-			self.insert(element, at: index)
-		} else {
-			self.append(element)
-		}
-	}
-	mutating func replace(elements values: [Element]) {
-		values.forEach { each in
-			self.replace(each)
-		}
-	}
+    mutating func replace(_ element: Element) {
+        if let index = firstIndex(where: { $0.id == element.id }) {
+            remove(at: index)
+            insert(element, at: index)
+        } else {
+            append(element)
+        }
+    }
+
+    mutating func replace(elements values: [Element]) {
+        for each in values {
+            replace(each)
+        }
+    }
 }

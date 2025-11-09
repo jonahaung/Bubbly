@@ -24,9 +24,9 @@ private struct PhaseAnimationModifier: ViewModifier {
                     }, animation: { phase in
                         switch phase {
                         case .rotate:
-                            return .easeInOut(duration: 0.8)
-                        case .scale(let scale):
-                            return .easeInOut(duration: 1/scale)
+                            .easeInOut(duration: 0.8)
+                        case let .scale(scale):
+                            .easeInOut(duration: 1 / scale)
                         }
                     })
             } else {
@@ -39,15 +39,16 @@ private struct PhaseAnimationModifier: ViewModifier {
                     }, animation: { phase in
                         switch phase {
                         case .rotate:
-                            return .linear(duration: 0.8)
-                        case .scale(let scale):
-                            return .linear(duration: 0.5/scale)
+                            .linear(duration: 0.8)
+                        case let .scale(scale):
+                            .linear(duration: 0.5 / scale)
                         }
                     })
             }
         }
     }
 }
+
 public enum CardinalPoint: Double, CaseIterable {
     case north = 0
     case east = 90
@@ -56,35 +57,39 @@ public enum CardinalPoint: Double, CaseIterable {
     case northFullCircle = 360
 
     // SF Symbol (↗) is 45 degrees rotated, so we substract it to compensate
-    public var angle: Angle { .degrees(self.rawValue) }
+    public var angle: Angle { .degrees(rawValue) }
 }
+
 public enum PhaseAnimationType: Hashable {
     case scale(CGFloat)
     case rotate(CardinalPoint)
 
     var scale: CGFloat {
         switch self {
-        case .scale(let value):
-            return value
+        case let .scale(value):
+            value
         default:
-            return 1
+            1
         }
     }
+
     var angle: Angle {
         switch self {
-        case .rotate(let value):
-            return value.angle
+        case let .rotate(value):
+            value.angle
         default:
-            return .zero
+            .zero
         }
     }
+
     var size: (x: Double, y: Double) {
         switch self {
         default:
-            return (0, 0)
+            (0, 0)
         }
     }
 }
+
 public extension View {
     func phaseAnimation(_ phases: [PhaseAnimationType], _ trigger: String? = nil) -> some View {
         ModifiedContent(content: self, modifier: PhaseAnimationModifier(phases: phases, trigger: trigger))

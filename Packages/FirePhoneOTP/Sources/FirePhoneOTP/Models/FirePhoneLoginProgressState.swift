@@ -5,8 +5,8 @@
 //  Created by Aung Ko Min on 21/4/24.
 //
 
-import Foundation
 import FirebaseAuth
+import Foundation
 
 enum FirePhoneLoginProgressState: Hashable {
     case none, loading

@@ -8,27 +8,26 @@
 import UserNotifications
 
 extension PermissionKind.NotificationAccess {
-
-	var userNotifcationAuthorizationOptions: UNAuthorizationOptions {
-		switch self {
-		case .badge:
-				.badge
-		case .sound:
-				.sound
-		case .alert:
-				.alert
-		case .carPlay:
-				.carPlay
-		case .criticalAlert:
-				.criticalAlert
-		case .providesAppNotificationSettings:
-				.providesAppNotificationSettings
-		case .provisional:
-				.provisional
-		case .announcement:
-				.alert
-		case .timeSensitive:
-				.alert
-		}
-	}
+    var userNotifcationAuthorizationOptions: UNAuthorizationOptions {
+        switch self {
+        case .badge:
+            .badge
+        case .sound:
+            .sound
+        case .alert:
+            .alert
+        case .carPlay:
+            .carPlay
+        case .criticalAlert:
+            .criticalAlert
+        case .providesAppNotificationSettings:
+            .providesAppNotificationSettings
+        case .provisional:
+            .provisional
+        case .announcement:
+            .alert
+        case .timeSensitive:
+            .alert
+        }
+    }
 }

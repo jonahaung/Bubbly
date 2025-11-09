@@ -5,51 +5,52 @@
 //  Created by Aung Ko Min on 28/4/25.
 //
 
-import Foundation
 import Database
+import Foundation
 import Services
 import XUI
 
 @MainActor
 @Observable
 final class ContactsViewModel: ErrorPresenter {
+    var loading: Bool = false
 
-	var loading: Bool = false
+    init() {}
 
-	init() {}
+    @concurrent
+    func syncContacts(store: ContactStore) async {
+        await setLoading(true)
+        do {
+            try await store.syncContacts()
+            await setLoading(false)
+        } catch {
+            await showError(error)
+            await setLoading(false)
+        }
+    }
 
-	@concurrent
-	func syncContacts(store: ContactStore) async {
-		await setLoading(true)
-		do {
-			try await store.syncContacts()
-			await setLoading(false)
-		} catch {
-			await showError(error)
-			await setLoading(false)
-		}
-	}
-	@concurrent
-	func syncGroups(store: ContactStore) async throws {
-		await setLoading(true)
-		do {
-			try await store.syncGroups()
-			await setLoading(false)
-		} catch {
-			await showError(error)
-			await setLoading(false)
-		}
-	}
-	private func setLoading(_ isLoading: Bool) {
-		self.loading = isLoading
-	}
+    @concurrent
+    func syncGroups(store: ContactStore) async throws {
+        await setLoading(true)
+        do {
+            try await store.syncGroups()
+            await setLoading(false)
+        } catch {
+            await showError(error)
+            await setLoading(false)
+        }
+    }
+
+    private func setLoading(_ isLoading: Bool) {
+        loading = isLoading
+    }
 }
 
 public extension Contact {
-	var firstCharacter: String {
-		if let first = name.first {
-			return String(first).uppercased()
-		}
-		return ""
-	}
+    var firstCharacter: String {
+        if let first = name.first {
+            return String(first).uppercased()
+        }
+        return ""
+    }
 }

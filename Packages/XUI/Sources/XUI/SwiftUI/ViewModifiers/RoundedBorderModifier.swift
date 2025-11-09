@@ -1,5 +1,5 @@
 //
-//  Modifiers.swift
+//  RoundedBorderModifier.swift
 //  Msgr
 //
 //  Created by Aung Ko Min on 10/12/22.
@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct RoundedBorderModifier: ViewModifier {
-
     private var cornerRadius: CGFloat = 18
 
     init(cornerRadius: CGFloat) {
@@ -24,8 +23,8 @@ public struct RoundedBorderModifier: ViewModifier {
     }
 }
 
-extension View {
-    public func roundWithBorder(cornerRadius: CGFloat = 18) -> some View {
+public extension View {
+    func roundWithBorder(cornerRadius: CGFloat = 18) -> some View {
         modifier(RoundedBorderModifier(cornerRadius: cornerRadius))
     }
 }

@@ -27,13 +27,13 @@ public protocol ImageDecoding: Sendable {
     func decodePartiallyDownloadedData(_ data: Data) -> ImageContainer?
 }
 
-extension ImageDecoding {
+public extension ImageDecoding {
     /// Returns `true` by default.
-    public var isAsynchronous: Bool { true }
+    var isAsynchronous: Bool { true }
 
     /// The default implementation which simply returns `nil` (no progressive
     /// decoding available).
-    public func decodePartiallyDownloadedData(_ data: Data) -> ImageContainer? { nil }
+    func decodePartiallyDownloadedData(_: Data) -> ImageContainer? { nil }
 }
 
 public enum ImageDecodingError: Error, CustomStringConvertible, Sendable {
@@ -54,11 +54,11 @@ extension ImageDecoding {
                 throw ImageDecodingError.unknown
             }
         }
-#if !os(macOS)
-        if container.userInfo[.isThumbnailKey] == nil {
-            ImageDecompression.setDecompressionNeeded(true, for: container.image)
-        }
-#endif
+        #if !os(macOS)
+            if container.userInfo[.isThumbnailKey] == nil {
+                ImageDecompression.setDecompressionNeeded(true, for: container.image)
+            }
+        #endif
         return ImageResponse(container: container, request: context.request, urlResponse: context.urlResponse, cacheType: context.cacheType)
     }
 }

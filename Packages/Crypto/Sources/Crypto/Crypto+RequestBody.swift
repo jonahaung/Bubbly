@@ -2,12 +2,11 @@
 //  Created by Aung Ko Min on 10/01/2021.
 //
 
-import Foundation
 import CryptoKit
+import Foundation
 
 public extension Crypto {
-
-    fileprivate static func toJSON<T: Codable>(some: T) -> String? {
+    fileprivate static func toJSON(some: some Codable) -> String? {
         guard let data = try? JSONEncoder().encode(some.self) else { return nil }
         return String(data: data, encoding: .utf8)
     }
@@ -30,17 +29,15 @@ public extension Crypto {
 }
 
 public extension Crypto.StringRequestBody {
-    var toJSON: String? { return Crypto.toJSON(some: self) }
+    var toJSON: String? { Crypto.toJSON(some: self) }
 }
 
 public extension Crypto.DataRequestBody {
-
-    var toJSON: String? { return Crypto.toJSON(some: self) }
+    var toJSON: String? { Crypto.toJSON(some: self) }
 
     // Maps a [DataRequestBody] into a [StringRequestBody]
     var toStringRequestBody: Crypto.StringRequestBody {
-        let secret = Crypto.encondeForNetworkTransport(encrypted: self.secret)
+        let secret = Crypto.encondeForNetworkTransport(encrypted: secret)
         return Crypto.StringRequestBody(secret: secret)
     }
-
 }

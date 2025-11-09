@@ -5,28 +5,30 @@
 //  Created by Aung Ko Min on 8/2/23.
 //
 
-import SwiftUI
 import AudioToolbox
 import CoreHaptics
+import SwiftUI
 
 public struct Haptics: Sendable {
-
     public static var shared: Haptics {
-		get { _shared.value }
-		set { _shared.value = newValue }
+        get { _shared.value }
+        set { _shared.value = newValue }
     }
-	nonisolated(unsafe) private static var _shared = Mutex(Haptics())
+
+    private nonisolated(unsafe) static var _shared = Mutex(Haptics())
 
     @MainActor public static func play(_ style: UIImpactFeedbackGenerator.FeedbackStyle, _ intensity: CGFloat) {
-		Haptics.shared.play(style, intensity: intensity)
+        Haptics.shared.play(style, intensity: intensity)
     }
 
-	@MainActor private func play(
-		_ style: UIImpactFeedbackGenerator.FeedbackStyle,
-		intensity: CGFloat) {
-		 UIImpactFeedbackGenerator(style: style)
-			 .impactOccurred(intensity: intensity)
+    @MainActor private func play(
+        _ style: UIImpactFeedbackGenerator.FeedbackStyle,
+        intensity: CGFloat
+    ) {
+        UIImpactFeedbackGenerator(style: style)
+            .impactOccurred(intensity: intensity)
     }
+
     @MainActor public func generateNotificationFeedback(style: UINotificationFeedbackGenerator.FeedbackType) {
         UINotificationFeedbackGenerator().notificationOccurred(style)
     }

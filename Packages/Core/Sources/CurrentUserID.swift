@@ -8,5 +8,5 @@
 import FirebaseAuth
 
 public var currentUserId: String? {
-	GroupStorage.shared.string(for: .auth(.currentUserID)) ?? Auth.auth().currentUser?.uid
+    GroupStorage.shared.string(for: .auth(.currentUserID)) ?? Auth.auth().currentUser?.uid
 }

@@ -8,5 +8,5 @@
 import Foundation
 
 public enum ToastStyle: Sendable, Hashable {
-	case `default`
+    case `default`
 }

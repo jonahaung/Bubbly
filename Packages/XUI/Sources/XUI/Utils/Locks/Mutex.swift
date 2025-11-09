@@ -11,10 +11,10 @@ public final class Mutex<T>: @unchecked Sendable {
     private var _value: T
     private let lock: os_unfair_lock_t
 
-	public init(_ value: T) {
-        self._value = value
-        self.lock = .allocate(capacity: 1)
-        self.lock.initialize(to: os_unfair_lock())
+    public init(_ value: T) {
+        _value = value
+        lock = .allocate(capacity: 1)
+        lock.initialize(to: os_unfair_lock())
     }
 
     deinit {
@@ -22,7 +22,7 @@ public final class Mutex<T>: @unchecked Sendable {
         lock.deallocate()
     }
 
-	public var value: T {
+    public var value: T {
         get {
             os_unfair_lock_lock(lock)
             defer { os_unfair_lock_unlock(lock) }
@@ -35,7 +35,7 @@ public final class Mutex<T>: @unchecked Sendable {
         }
     }
 
-	public func withLock<U>(_ closure: (inout T) -> U) -> U {
+    public func withLock<U>(_ closure: (inout T) -> U) -> U {
         os_unfair_lock_lock(lock)
         defer { os_unfair_lock_unlock(lock) }
         return closure(&_value)

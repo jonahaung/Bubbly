@@ -9,7 +9,6 @@ import Combine
 import SwiftUI
 
 public struct ZoomableScrollView<Content: View>: View {
-
     private let content: Content
     @State private var doubleTap = PassthroughSubject<Void, Never>()
 
@@ -26,26 +25,24 @@ public struct ZoomableScrollView<Content: View>: View {
 }
 
 private struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepresentable {
-
     let content: Content
     let doubleTap: AnyPublisher<Void, Never>
 
     func makeUIViewController(context: Context) -> ZoomableScrollViewController {
-        return ZoomableScrollViewController(coordinator: context.coordinator, doubleTap: doubleTap)
+        ZoomableScrollViewController(coordinator: context.coordinator, doubleTap: doubleTap)
     }
 
     func makeCoordinator() -> Coordinator {
         Coordinator(hostingController: UIHostingController(rootView: content))
     }
 
-    func updateUIViewController(_ viewController: ZoomableScrollViewController, context: Context) {
+    func updateUIViewController(_ viewController: ZoomableScrollViewController, context _: Context) {
         viewController.update(content: content, doubleTap: doubleTap)
     }
 
     // MARK: - Coordinator
 
     class Coordinator: NSObject, UIScrollViewDelegate {
-
         let hostingController: UIHostingController<Content>
 
         init(hostingController: UIHostingController<Content>) {
@@ -57,9 +54,7 @@ private struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepresenta
 // MARK: - ZoomableScrollViewController
 
 extension ZoomableScrollViewImpl {
-
     class ZoomableScrollViewController: UIViewController, UIScrollViewDelegate {
-
         let coordinator: Coordinator
 
         private let scrollView: UIScrollView = {
@@ -69,7 +64,7 @@ extension ZoomableScrollViewImpl {
             $0.showsHorizontalScrollIndicator = false
             $0.showsVerticalScrollIndicator = false
             $0.clipsToBounds = false
-			$0.backgroundColor = .clear
+            $0.backgroundColor = .clear
             return $0
         }(UIScrollView())
 
@@ -81,7 +76,8 @@ extension ZoomableScrollViewImpl {
             didSet { NSLayoutConstraint.activate(contentSizeConstraints) }
         }
 
-        required init?(coder: NSCoder) { fatalError() }
+        @available(*, unavailable)
+        required init?(coder _: NSCoder) { fatalError() }
 
         init(coordinator: Coordinator, doubleTap: AnyPublisher<Void, Never>) {
             self.coordinator = coordinator
@@ -103,7 +99,7 @@ extension ZoomableScrollViewImpl {
                 hostedView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
                 hostedView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
                 hostedView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-                hostedView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor)
+                hostedView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             ])
 
             scrollView.delegate = self
@@ -131,11 +127,11 @@ extension ZoomableScrollViewImpl {
             let hostedContentSize = coordinator.hostingController.sizeThatFits(in: view.bounds.size)
             contentSizeConstraints = [
                 hostedView.widthAnchor.constraint(equalToConstant: hostedContentSize.width),
-                hostedView.heightAnchor.constraint(equalToConstant: hostedContentSize.height)
+                hostedView.heightAnchor.constraint(equalToConstant: hostedContentSize.height),
             ]
         }
 
-        override func viewDidAppear(_ animated: Bool) {
+        override func viewDidAppear(_: Bool) {
             scrollView.zoom(to: hostedView.bounds, animated: false)
         }
 
@@ -149,13 +145,13 @@ extension ZoomableScrollViewImpl {
             )
         }
 
-        override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        override func viewWillTransition(to _: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
             coordinator.animate(alongsideTransition: { _ in
                 self.scrollView.zoom(to: self.hostedView.bounds, animated: false)
             })
         }
 
-        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+        func viewForZooming(in _: UIScrollView) -> UIView? {
             hostedView
         }
     }

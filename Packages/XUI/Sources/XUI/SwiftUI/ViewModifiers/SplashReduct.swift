@@ -8,21 +8,20 @@
 import SwiftUI
 
 private struct SplashReductView: ViewModifier {
-
     private let timeout: TimeInterval
     @State private var isActive = true
 
-    public init(timeout: TimeInterval) {
+    init(timeout: TimeInterval) {
         self.timeout = timeout
     }
 
-    public func body(content: Content) -> some View {
+    func body(content: Content) -> some View {
         content
             .redacted(reason: isActive ? .privacy : [])
             .animation(.interactiveSpring(), value: isActive == true)
             .onAppear {
                 DispatchQueue.main.asyncAfter(deadline: .now() + timeout) {
-                    self.isActive = false
+                    isActive = false
                 }
             }
             .onDisappear {

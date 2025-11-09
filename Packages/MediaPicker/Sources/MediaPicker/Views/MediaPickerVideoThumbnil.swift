@@ -5,8 +5,8 @@
 //  Created by Aung Ko Min on 2024/04/22.
 //
 
-import SwiftUI
 import AVFoundation
+import SwiftUI
 
 public struct MediaPickerVideoThumbnil: View {
     struct FramePositionSlider: View {
@@ -20,9 +20,9 @@ public struct MediaPickerVideoThumbnil: View {
 
         var body: some View {
             VStack(alignment: .trailing) {
-                Slider(value: $position, in: 0...1.0)
+                Slider(value: $position, in: 0 ... 1.0)
                     .onChange(of: position) { _, newValue in
-                        pos = CMTimeMakeWithSeconds(duration.seconds*newValue, preferredTimescale: duration.timescale)
+                        pos = CMTimeMakeWithSeconds(duration.seconds * newValue, preferredTimescale: duration.timescale)
                     }
                 Text("\(pos.seconds, specifier: "%.1f")/\(duration.seconds, specifier: "%.1f")")
             }
@@ -40,15 +40,15 @@ public struct MediaPickerVideoThumbnil: View {
 
     public init(asset: AVAsset, image: Binding<UIImage?>) {
         self.asset = asset
-        self.imageGenerator = AVAssetImageGenerator(asset: asset)
-        self.imageGenerator.requestedTimeToleranceBefore = CMTime(value: 1, timescale: 30)
-        self.imageGenerator.requestedTimeToleranceAfter = CMTime(value: 1, timescale: 30)
-        self._frameImage = image
+        imageGenerator = AVAssetImageGenerator(asset: asset)
+        imageGenerator.requestedTimeToleranceBefore = CMTime(value: 1, timescale: 30)
+        imageGenerator.requestedTimeToleranceAfter = CMTime(value: 1, timescale: 30)
+        _frameImage = image
     }
 
     private func updateFrame(atTime time: CMTime) {
         var actualTime: CMTime = .zero
-        if let cgImage = try? self.imageGenerator.copyCGImage(at: time, actualTime: &actualTime) {
+        if let cgImage = try? imageGenerator.copyCGImage(at: time, actualTime: &actualTime) {
             frameImage = UIImage(cgImage: cgImage)
         }
     }
@@ -67,7 +67,7 @@ public struct MediaPickerVideoThumbnil: View {
             do {
                 let duration = try await asset.load(.duration)
                 self.duration = duration
-                self.updateFrame(atTime: time)
+                updateFrame(atTime: time)
             } catch {
                 /// Error
             }

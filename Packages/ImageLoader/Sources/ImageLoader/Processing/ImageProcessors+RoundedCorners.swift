@@ -2,21 +2,21 @@
 //
 // Copyright (c) 2015-2024 Alexander Grebenyuk (github.com/kean).
 
-import Foundation
 import CoreGraphics
+import Foundation
 
 #if !os(macOS)
-import UIKit
+    import UIKit
 #else
-import AppKit
+    import AppKit
 #endif
 
-extension ImageProcessors {
+public extension ImageProcessors {
     /// Rounds the corners of an image to the specified radius.
     ///
     /// - important: In order for the corners to be displayed correctly, the image must exactly match the size
     /// of the image view in which it will be displayed. See ``ImageProcessors/Resize`` for more info.
-    public struct RoundedCorners: ImageProcessing, Hashable, CustomStringConvertible {
+    struct RoundedCorners: ImageProcessing, Hashable, CustomStringConvertible {
         private let radius: CGFloat
         private let border: ImageProcessingOptions.Border?
 

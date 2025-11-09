@@ -1,5 +1,5 @@
 //
-//  EULA.swift
+//  EULAView.swift
 //  HomeForYou
 //
 //  Created by Aung Ko Min on 24/4/23.
@@ -11,16 +11,15 @@ public enum EULA {
     static let key = "com.jonahaung.hasShownEULA"
     public static var hasShown: Bool {
         get {
-            UserDefaults.standard.bool(forKey: Self.key)
+            UserDefaults.standard.bool(forKey: key)
         }
         set {
-            UserDefaults.standard.setValue(newValue, forKey: Self.key)
+            UserDefaults.standard.setValue(newValue, forKey: key)
         }
     }
 }
 
 public struct EULAView: View {
-
     private let text: String
     private let onClose: (() -> Void)?
     @Environment(\.dismiss) private var dismiss

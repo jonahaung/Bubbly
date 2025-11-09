@@ -5,14 +5,14 @@
 import Foundation
 
 #if !os(macOS)
-import UIKit
+    import UIKit
 #else
-import AppKit
+    import AppKit
 #endif
 
-extension ImageProcessors {
+public extension ImageProcessors {
     /// Composes multiple processors.
-    public struct Composition: ImageProcessing, Hashable, CustomStringConvertible {
+    struct Composition: ImageProcessing, Hashable, CustomStringConvertible {
         let processors: [any ImageProcessing]
 
         /// Composes multiple processors.
@@ -45,7 +45,7 @@ extension ImageProcessors {
 
         /// Returns combined identifier of all the underlying processors.
         public var identifier: String {
-            processors.map({ $0.identifier }).joined()
+            processors.map(\.identifier).joined()
         }
 
         /// Creates a combined hash of all the given processors.

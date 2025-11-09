@@ -19,7 +19,7 @@ public struct FilesError<Reason: Sendable>: Error {
 
 extension FilesError: CustomStringConvertible {
     public var description: String {
-        return """
+        """
         Files encountered an error at '\(path)'.
         Reason: \(reason)
         """

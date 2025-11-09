@@ -6,18 +6,19 @@
 //
 
 import SwiftUI
+
 @available(iOS 18.0, *)
 public struct PagerTabMenuBar<Page, Content>: View where Page: Sendable & Equatable & Hashable & Identifiable, Content: View {
-
     let items: [Page]
     @Binding var selection: Page
     let content: ((Page, Bool)) -> Content
 
     public init(items: [Page], selection: Binding<Page>, content: @escaping ((Page, Bool)) -> Content) {
         self.items = items
-        self._selection = selection
+        _selection = selection
         self.content = content
     }
+
     public var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(alignment: .bottom, spacing: 16) {

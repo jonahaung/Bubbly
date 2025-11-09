@@ -1,8 +1,8 @@
 import Foundation
 
-extension Task {
+public extension Task {
     @discardableResult
-    public static func delayed(
+    static func delayed(
         seconds: TimeInterval,
         operation: @Sendable @escaping () async -> Void
     ) -> Self where Success == Void, Failure == Never {

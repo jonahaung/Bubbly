@@ -8,6 +8,6 @@
 import Foundation
 
 public enum ImageViewTapAction {
-	case openPhotoViewer
-	case custom(() -> Void)
+    case openPhotoViewer
+    case custom(() -> Void)
 }
