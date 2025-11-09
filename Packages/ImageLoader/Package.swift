@@ -7,10 +7,10 @@ let package = Package(
     platforms: [.iOS(.v17)],
     products: [
         .library(name: "ImageLoader", targets: ["ImageLoader"]),
-        .library(name: "VideoLoader", targets: ["VideoLoader"]),
+        .library(name: "VideoLoader", targets: ["VideoLoader"])
     ],
     targets: [
         .target(name: "ImageLoader"),
-        .target(name: "VideoLoader", dependencies: ["ImageLoader"]),
+        .target(name: "VideoLoader", dependencies: ["ImageLoader"])
     ]
 )

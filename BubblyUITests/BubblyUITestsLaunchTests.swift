@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class BubblyUITestsLaunchTests: XCTestCase {
+class BubblyUITestsLaunchTests: XCTestCase {
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true
     }

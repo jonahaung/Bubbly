@@ -277,8 +277,7 @@ extension ChatViewManager: ScrollViewPrefetcherDelegate {
         }
         scrollManager.handleVisibleIDsChange(uids)
         if let uid = inserts.last,
-           let msg = cellItems.viewModel(of: uid)?.msg
-        {
+           let msg = cellItems.viewModel(of: uid)?.msg {
             eventsManager.updateFloatingDate(msg.date)
         }
     }

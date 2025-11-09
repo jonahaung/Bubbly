@@ -21,7 +21,7 @@ public final class PhoneContactsService {
         let keysToFetch: [CNKeyDescriptor] = [
             CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
             CNContactPhoneNumbersKey as CNKeyDescriptor,
-            CNContactThumbnailImageDataKey as CNKeyDescriptor,
+            CNContactThumbnailImageDataKey as CNKeyDescriptor
         ]
 
         let allContainers = try contactStore.containers(matching: nil)

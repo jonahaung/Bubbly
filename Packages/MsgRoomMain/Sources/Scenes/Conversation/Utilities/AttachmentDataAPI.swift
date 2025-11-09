@@ -113,7 +113,6 @@ private extension AttachmentDataAPI {
     // MARK: - Video Attachment
 
     func processVideoAttachment(_: Attachment, for _: Message) async throws -> Data {
-        // TODO: Implement video thumbnail generation
         // For now, return empty data or implement basic video processing
         throw AttachmentError.invalidAttachmentState(.video)
     }

@@ -16,8 +16,7 @@ public struct Attachment: Codable, Sendable, Hashable {
     public init(uid: String,
                 url: String,
                 attachMentTypeRaw: Int,
-                aspectRatio: Double)
-    {
+                aspectRatio: Double) {
         self.uid = uid
         self.url = url
         self.attachMentTypeRaw = attachMentTypeRaw

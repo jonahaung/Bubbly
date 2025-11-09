@@ -116,13 +116,13 @@ public final class FirestoreRESTClient {
         let url = URL(string: "\(baseURL):runQuery")!
 
         var structuredQuery: [String: Any] = [
-            "from": [["collectionId": collection]],
+            "from": [["collectionId": collection]]
         ]
 
         if !filters.isEmpty {
             structuredQuery["where"] = ["compositeFilter": [
                 "op": "AND",
-                "filters": filters,
+                "filters": filters
             ]]
         }
 
@@ -208,12 +208,10 @@ public final class FirestoreRESTClient {
             } else if field["nullValue"] != nil {
                 return NSNull()
             } else if let array = field["arrayValue"] as? [String: Any],
-                      let values = array["values"] as? [Any]
-            {
+                      let values = array["values"] as? [Any] {
                 return values.compactMap(unwrap)
             } else if let map = field["mapValue"] as? [String: Any],
-                      let nestedFields = map["fields"] as? [String: Any]
-            {
+                      let nestedFields = map["fields"] as? [String: Any] {
                 var nested: [String: Any] = [:]
                 for (nestedKey, nestedValue) in nestedFields {
                     nested[nestedKey] = unwrap(nestedValue)

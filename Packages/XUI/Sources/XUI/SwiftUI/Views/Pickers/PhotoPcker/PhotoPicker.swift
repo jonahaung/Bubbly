@@ -7,8 +7,9 @@
 
 import AVKit
 import PhotosUI
-@preconcurrency import SwiftUI
+import SwiftUI
 
+@MainActor
 public struct PhotoPicker: UIViewControllerRepresentable {
     @Binding public var attachments: [XAttachment]
     public var multipleSelection: Bool
@@ -31,12 +32,10 @@ public struct PhotoPicker: UIViewControllerRepresentable {
         config.preselectedAssetIdentifiers = preselectedAssetIdentifiers
         config.selectionLimit = selectionLimit
         config.selection = selection
-        let picker = PHPickerViewController(configuration: config)
-        picker.extendedLayoutIncludesOpaqueBars = true
-        picker.edgesForExtendedLayout = .all
-        picker.delegate = context.coordinator
-        picker.edgesForExtendedLayout = .all
+
         let controller = PHPickerViewController(configuration: config)
+        controller.extendedLayoutIncludesOpaqueBars = true
+        controller.edgesForExtendedLayout = .all
         controller.delegate = context.coordinator
         return controller
     }
@@ -47,6 +46,7 @@ public struct PhotoPicker: UIViewControllerRepresentable {
         Coordinator(self)
     }
 
+    @MainActor
     public class Coordinator: NSObject, PHPickerViewControllerDelegate, UINavigationControllerDelegate {
         let parent: PhotoPicker
 
@@ -55,12 +55,10 @@ public struct PhotoPicker: UIViewControllerRepresentable {
         }
 
         public func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-            Task {
+            Task { @MainActor in
                 do {
                     try await self.loadPhotos(results: results)
-                    Task { @MainActor in
-                        picker.dismiss(animated: true)
-                    }
+                    picker.dismiss(animated: true)
                 } catch {
                     Log(error)
                 }
@@ -70,15 +68,18 @@ public struct PhotoPicker: UIViewControllerRepresentable {
         private func loadPhotos(results: [PHPickerResult]) async throws {
             let existingSelection = parent.attachments
             parent.attachments.removeAll(where: { $0.isLocalURL })
+
             for result in results {
-                let id = result.assetIdentifier!
-                let firstItem = existingSelection.first(where: { $0.identifier == id })
-                if let firstItem {
+                guard let id = result.assetIdentifier else { continue }
+
+                if let firstItem = existingSelection.first(where: { $0.identifier == id }) {
                     parent.attachments.append(firstItem)
                     continue
                 }
+
                 let itemProvider = result.itemProvider
-                let item = try await loadPhoto(item: itemProvider)
+                let item = try await loadPhoto(itemProvider: itemProvider)
+
                 switch item {
                 case let uiImage as UIImage:
                     do {
@@ -90,20 +91,22 @@ public struct PhotoPicker: UIViewControllerRepresentable {
                     } catch {
                         Log(error.localizedDescription)
                     }
+
                 case let movieURL as URL:
                     let attachment = XAttachment(url: movieURL.absoluteString, type: .video, identifier: id)
                     parent.attachments.append(attachment)
+
                 default:
                     break
                 }
             }
         }
 
-        private func loadPhoto(item: sending NSItemProvider) async throws -> sending NSItemProviderReading {
-            if item.canLoadObject(ofClass: UIImage.self) {
-                return try await item.loadObject(ofClass: UIImage.self)
-            } else if item.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
-                let url = try await item.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier)
+        private func loadPhoto(itemProvider: NSItemProvider) async throws -> NSItemProviderReading {
+            if itemProvider.canLoadObject(ofClass: UIImage.self) {
+                return try await itemProvider.loadObject(ofClass: UIImage.self)
+            } else if itemProvider.hasItemConformingToTypeIdentifier(UTType.movie.identifier) {
+                let url = try await itemProvider.loadFileRepresentation(forTypeIdentifier: UTType.movie.identifier)
                 return url as NSItemProviderReading
             }
             fatalError()
@@ -135,6 +138,7 @@ public extension PhotoPicker {
     }
 }
 
+@MainActor
 public extension NSItemProvider {
     func loadPhoto() async throws -> NSItemProviderReading {
         if canLoadObject(ofClass: UIImage.self) {
@@ -157,6 +161,7 @@ public extension UIImage {
     }
 }
 
+@MainActor
 public extension NSItemProvider {
     func loadFileRepresentation(forTypeIdentifier typeIdentifier: String) async throws -> URL {
         try await withCheckedThrowingContinuation { continuation in
@@ -183,18 +188,21 @@ public extension NSItemProvider {
         }
     }
 
+    // Keep this on the main actor so returning non-Sendable UI types (e.g., UIImage)
+    // does not cross actors, removing the "sending 'object' risks causing data races" error.
+    @MainActor
     func loadObject(ofClass aClass: NSItemProviderReading.Type) async throws -> NSItemProviderReading {
         try await withCheckedThrowingContinuation { continuation in
-            self.loadObject(ofClass: aClass) { data, error in
+            self.loadObject(ofClass: aClass) { _, error in
                 if let error {
                     return continuation.resume(throwing: error)
                 }
 
-                guard let data else {
+                guard let object else {
                     return continuation.resume(throwing: NSError())
                 }
 
-                continuation.resume(returning: data)
+//                continuation.resume(returning: object)
             }.resume()
         }
     }

@@ -52,8 +52,7 @@ public struct AttachmentViewerView: View {
                 Text(error.localizedDescription)
             case .none:
                 if let data = attachment.initialImageData, let fileImage = UIImage(
-                    data: data)
-                {
+                    data: data) {
                     Image(uiImage: fileImage)
                         .resizable()
                         .scaledToFit()

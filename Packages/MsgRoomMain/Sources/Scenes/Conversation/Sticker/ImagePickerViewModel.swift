@@ -100,7 +100,7 @@ final class ImagePickerViewModel {
         if !cachedSelection.contains(where: { $0 == id }) {
             cachedSelection.append(id)
             let url = cachedDirectory.appendingPathComponent("\(id)")
-            try! data.write(to: url)
+            try? data.write(to: url)
         }
     }
 

@@ -12,8 +12,7 @@ public actor StoreModelActor<Model>: ModelActor
     where Model: PersistentModel & CollectionDocument & SendableDocument,
     Model.SendableType: Sendable,
     Model.UID == String,
-    Model.SendableType.UID == String
-{
+    Model.SendableType.UID == String {
     public nonisolated let modelExecutor: any ModelExecutor
     public nonisolated let modelContainer: ModelContainer
 

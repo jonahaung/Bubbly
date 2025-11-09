@@ -9,7 +9,7 @@ import Database
 import Foundation
 import Services
 
-public extension ChatOverlayView {
+extension ChatOverlayView {
     struct Item: Hashable, Sendable, Identifiable {
         public let id: String
         public var frame: CGRect

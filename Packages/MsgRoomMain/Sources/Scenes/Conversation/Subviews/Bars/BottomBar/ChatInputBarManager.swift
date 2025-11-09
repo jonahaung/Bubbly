@@ -125,7 +125,7 @@ extension String {
             #"^#{1,6}\s"#, // # Heading
             #"^\s*[-*+]\s"#, // - List item
             #"!\[.*\]\(.+\)"#, // ![alt](img)
-            #"`[^`]+`"#, // `code`
+            #"`[^`]+`"# // `code`
         ]
         return markdownPatterns.contains { self.range(of: $0, options: .regularExpression) != nil }
     }

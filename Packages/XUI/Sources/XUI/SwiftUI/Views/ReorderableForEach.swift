@@ -18,8 +18,7 @@ public struct ReorderableForEach<Data, Content>: View where Data: Hashable & Ide
 
     public init(_ data: Binding<[Data]>,
                 allowReordering: Binding<Bool>,
-                @ViewBuilder content: @escaping (Data, Bool) -> Content)
-    {
+                @ViewBuilder content: @escaping (Data, Bool) -> Content) {
         _data = data
         _allowReordering = allowReordering
         self.content = content

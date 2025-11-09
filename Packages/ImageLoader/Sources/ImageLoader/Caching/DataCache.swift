@@ -108,8 +108,7 @@ public final class DataCache: DataCaching, @unchecked Sendable {
 
     private func scheduleSweep() {
         if let lastSweepDate = getMetadata().lastSweepDate,
-           Date().timeIntervalSince(lastSweepDate) < sweepInterval
-        {
+           Date().timeIntervalSince(lastSweepDate) < sweepInterval {
             return // Already completed recently
         }
         // Add a bit of a delay to free the resources during launch
@@ -385,8 +384,7 @@ public final class DataCache: DataCaching, @unchecked Sendable {
 
     private func getMetadata() -> Metadata {
         if let data = try? Data(contentsOf: metadataFileURL),
-           let metadata = try? JSONDecoder().decode(Metadata.self, from: data)
-        {
+           let metadata = try? JSONDecoder().decode(Metadata.self, from: data) {
             return metadata
         }
         return Metadata()
@@ -508,8 +506,7 @@ private struct Staging {
 
     mutating func flushed(_ change: Change) {
         if let index = changes.index(forKey: change.key),
-           changes[index].value.id == change.id
-        {
+           changes[index].value.id == change.id {
             changes.remove(at: index)
         }
     }

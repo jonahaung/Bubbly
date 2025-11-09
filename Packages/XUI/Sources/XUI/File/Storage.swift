@@ -64,8 +64,7 @@ extension Storage {
     }
 
     func move(to newPath: String,
-              errorReasonProvider: (Error) -> LocationErrorReason) throws
-    {
+              errorReasonProvider: (Error) -> LocationErrorReason) throws {
         do {
             try fileManager.moveItem(atPath: path, toPath: newPath)
 

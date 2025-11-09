@@ -32,7 +32,7 @@ public final class PushNotificationService: NSObject, Sendable {
                 options: [
                     .alert,
                     .badge,
-                    .sound,
+                    .sound
                 ]
             ) {
                 success,

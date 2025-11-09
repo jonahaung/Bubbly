@@ -22,7 +22,7 @@ struct LaunchScreen: View {
     let phrases = [
         "Bubbly              ",
         "Connecting People   ",
-        "Embracing Pravicy   ",
+        "Embracing Pravicy   "
     ]
 
     var body: some View {

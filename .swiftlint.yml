@@ -1,0 +1,114 @@
+# ---------------------------------------------------------
+#  SwiftLint Configuration for Bubbly iOS App
+#  Author: Aung Ko Min
+#  Created: 2025-11-09
+# ---------------------------------------------------------
+
+# Only lint your source folders (skip generated or vendor files)
+included:
+  - Bubbly
+  - Packages
+
+disabled_rules:
+  - identifier_name
+  - line_length
+  - function_body_length
+  - cyclomatic_complexity
+  - nesting
+  - force_try
+
+excluded:
+  - Pods
+  - Carthage
+  - DerivedData
+  - fastlane
+  - build
+  - "**/Generated"
+  - "**/R.generated.swift"
+  - "**/*.g.swift"
+
+# Use modern SwiftLint settings
+opt_in_rules:
+  - anyobject_protocol
+  - array_init
+  - attributes
+  - closure_end_indentation
+  - closure_spacing
+  - collection_alignment
+  - contains_over_first_not_nil
+  - convenience_type
+  - discouraged_optional_boolean
+  - empty_count
+  - explicit_init
+  - fallthrough
+  - fatal_error_message
+  - first_where
+  - joined_default_parameter
+  - let_var_whitespace
+  - lower_acl_than_parent
+  - modifier_order
+  - number_separator
+  - operator_usage_whitespace
+  - private_action
+  - private_outlet
+  - redundant_type_annotation
+  - shorthand_optional_binding
+  - toggle_bool
+  - trailing_closure
+  - unavailable_function
+  - unneeded_parentheses_in_closure_argument
+  - vertical_parameter_alignment_on_call
+
+# Disable rules that are too noisy for big SwiftUI projects
+disabled_rules:
+  - todo
+  - line_length
+  - file_length
+  - function_body_length
+  - type_body_length
+  - cyclomatic_complexity
+  - identifier_name
+  - force_unwrapping
+  - nesting
+  - function_parameter_count
+  - switch_case_alignment
+
+# Rule customizations
+line_length:
+  warning: 120
+  error: 180
+  ignores_comments: true
+  ignores_urls: true
+
+function_body_length:
+  warning: 60
+  error: 100
+
+type_body_length:
+  warning: 400
+  error: 600
+
+file_length:
+  warning: 800
+  error: 1200
+
+identifier_name:
+  min_length: 2
+  max_length: 60
+  excluded:
+    - id
+    - x
+    - y
+    - z
+    - ai
+    - on
+    - to
+
+force_try:
+  severity: warning
+
+cyclomatic_complexity:
+  warning: 12
+  error: 20
+
+reporter: "xcode"  # options: xcode, json, emoji, sonarqube

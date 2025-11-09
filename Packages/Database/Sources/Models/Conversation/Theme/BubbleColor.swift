@@ -64,7 +64,7 @@ public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Iden
 
         // MARK: - Grays / Neutrals
 
-        .lightGray: .init(red: 0.93, green: 0.93, blue: 0.93),
+        .lightGray: .init(red: 0.93, green: 0.93, blue: 0.93)
     ]
 }
 

@@ -5,7 +5,7 @@
 //  Created by Aung Ko Min on 2024/04/22.
 //
 
-import AVKit
+@preconcurrency import AVKit
 @preconcurrency import PhotosUI
 import SwiftUI
 
