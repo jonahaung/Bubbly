@@ -83,6 +83,6 @@ public enum DemoImages {
         URL(string: "\(host)/1567433/9781895/83b7f3fa-57a1-11e5-8579-e2fd6098052d.jpg")!,
         URL(string: "\(host)/1567433/9781834/0931ad74-57a1-11e5-9080-c8f6ecea19ce.jpg")!,
         URL(string: "\(host)/1567433/9781817/ecb16e82-57a0-11e5-9b43-6b4f52659997.jpg")!,
-        URL(string: "\(host)/1567433/9782132/548a3b9a-57a3-11e5-8228-8ee523e7809e.jpg")!
+        URL(string: "\(host)/1567433/9782132/548a3b9a-57a3-11e5-8228-8ee523e7809e.jpg")!,
     ]
 }

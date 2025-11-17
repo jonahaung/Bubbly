@@ -55,18 +55,18 @@ public nonisolated struct StickerProcessor: Sendable {
 
         let dilatedMask = mask
             .applyingFilter("CIMorphologyMaximum", parameters: [
-                "inputRadius": scaledRadius
+                "inputRadius": scaledRadius,
             ])
 
         let whiteBackground = CIImage(color: .white)
             .cropped(to: extent)
             .applyingFilter("CIBlendWithMask", parameters: [
-                "inputMaskImage": dilatedMask
+                "inputMaskImage": dilatedMask,
             ])
 
         let subject = image
             .applyingFilter("CIBlendWithMask", parameters: [
-                "inputMaskImage": mask
+                "inputMaskImage": mask,
             ])
 
         let sticker = subject.composited(over: whiteBackground)

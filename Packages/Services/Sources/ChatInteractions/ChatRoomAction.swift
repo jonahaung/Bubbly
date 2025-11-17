@@ -9,12 +9,12 @@ import Database
 import SwiftUI
 
 public struct ChatRoomAction: EnvironmentKey {
-	public static let defaultValue: (@Sendable (AnyMsgData) -> Void)? = nil
+    public static let defaultValue: (@Sendable (AnyMsgData) -> Void)? = nil
 }
 
-extension EnvironmentValues {
-	public var sendChatRoomAction: (@Sendable (AnyMsgData) -> Void)? {
-		get { self[ChatRoomAction.self] }
-		set { self[ChatRoomAction.self] = newValue }
-	}
+public extension EnvironmentValues {
+    var sendChatRoomAction: (@Sendable (AnyMsgData) -> Void)? {
+        get { self[ChatRoomAction.self] }
+        set { self[ChatRoomAction.self] = newValue }
+    }
 }

@@ -99,7 +99,7 @@ extension ZoomableScrollViewImpl {
                 hostedView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
                 hostedView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
                 hostedView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
-                hostedView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor)
+                hostedView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
             ])
 
             scrollView.delegate = self
@@ -127,7 +127,7 @@ extension ZoomableScrollViewImpl {
             let hostedContentSize = coordinator.hostingController.sizeThatFits(in: view.bounds.size)
             contentSizeConstraints = [
                 hostedView.widthAnchor.constraint(equalToConstant: hostedContentSize.width),
-                hostedView.heightAnchor.constraint(equalToConstant: hostedContentSize.height)
+                hostedView.heightAnchor.constraint(equalToConstant: hostedContentSize.height),
             ]
         }
 

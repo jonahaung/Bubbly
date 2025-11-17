@@ -10,7 +10,7 @@ let package = Package(
         .library(
             name: "MediaPicker",
             targets: ["MediaPicker"]
-        )
+        ),
     ],
     targets: [
         .target(
@@ -18,6 +18,6 @@ let package = Package(
         .testTarget(
             name: "MediaPickerTests",
             dependencies: ["MediaPicker"]
-        )
+        ),
     ]
 )

@@ -8,24 +8,24 @@
 import FoundationModels
 
 public protocol LanguageModelAvalityChecking {
-	func checkAvailability() throws
+    func checkAvailability() throws
 }
 
 public final class SystemModelAvailabilityChecker: LanguageModelAvalityChecking {
-	private let model: SystemLanguageModel
+    private let model: SystemLanguageModel
 
-	public init(model: SystemLanguageModel = .default) {
-		self.model = model
-	}
+    public init(model: SystemLanguageModel = .default) {
+        self.model = model
+    }
 
-	public func checkAvailability() throws {
-		switch model.availability {
-		case .available:
-			return
-		case .unavailable(let reason):
-			throw LanguageModelError.modelUnavailable(String(describing: reason))
-		@unknown default:
-			throw LanguageModelError.modelUnavailable("Unknown model availability state.")
-		}
-	}
+    public func checkAvailability() throws {
+        switch model.availability {
+        case .available:
+            return
+        case let .unavailable(reason):
+            throw LanguageModelError.modelUnavailable(String(describing: reason))
+        @unknown default:
+            throw LanguageModelError.modelUnavailable("Unknown model availability state.")
+        }
+    }
 }

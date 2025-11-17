@@ -11,18 +11,18 @@ import Services
 
 extension ChatOverlayView {
     struct Item: Hashable, Sendable, Identifiable {
-        public let id: String
-        public var frame: CGRect
-        public init(id: String, frame: CGRect) {
+        let id: String
+        var frame: CGRect
+        init(id: String, frame: CGRect) {
             self.id = id
             self.frame = frame
         }
 
-        public func hash(into hasher: inout Hasher) {
+        func hash(into hasher: inout Hasher) {
             id.hash(into: &hasher)
         }
 
-        public static func == (lhs: Item, rhs: Item) -> Bool {
+        static func == (lhs: Item, rhs: Item) -> Bool {
             lhs.id == rhs.id
         }
     }

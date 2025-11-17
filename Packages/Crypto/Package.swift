@@ -10,7 +10,7 @@ let package = Package(
         .library(
             name: "Crypto",
             targets: ["Crypto"]
-        )
+        ),
     ],
     targets: [
         .target(
@@ -18,6 +18,6 @@ let package = Package(
         .testTarget(
             name: "CryptoTests",
             dependencies: ["Crypto"]
-        )
+        ),
     ]
 )

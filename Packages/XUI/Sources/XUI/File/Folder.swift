@@ -66,7 +66,8 @@ public extension Folder {
              fileManager: FileManager,
              isRecursive: Bool,
              includeHidden: Bool,
-             reverseTopLevelTraversal: Bool) {
+             reverseTopLevelTraversal: Bool)
+        {
             self.folder = folder
             self.fileManager = fileManager
             self.isRecursive = isRecursive
@@ -283,13 +284,15 @@ public extension Folder {
 
     @discardableResult
     func createFileIfNeeded(at path: String,
-                            contents: @autoclosure () -> Data? = nil) throws -> File {
+                            contents: @autoclosure () -> Data? = nil) throws -> File
+    {
         try (try? file(at: path)) ?? createFile(at: path, contents: contents())
     }
 
     @discardableResult
     func createFileIfNeeded(withName name: String,
-                            contents: @autoclosure () -> Data? = nil) throws -> File {
+                            contents: @autoclosure () -> Data? = nil) throws -> File
+    {
         try (try? file(named: name)) ?? createFile(named: name, contents: contents())
     }
 

@@ -18,23 +18,23 @@ import Foundation
 import XUI
 
 public protocol Socketable {
-	func updateToLocal(_ msg: Message) async throws
-	func notifyMessage(_ data: AnyMsgData) async
+    func updateToLocal(_ msg: Message) async throws
+    func notifyMessage(_ data: AnyMsgData) async
 }
 
-extension Socketable {
-	public func updateToLocal(_ msg: Message) async throws {
-		try await Store.shared.msgStore
-			.updateAndSaveDebounced(
-				uid: msg.uid
-			) { model in
-				model.update(with: msg)
-			}
-	}
+public extension Socketable {
+    func updateToLocal(_ msg: Message) async throws {
+        try await Store.shared.msgStore
+            .updateAndSaveDebounced(
+                uid: msg.uid
+            ) { model in
+                model.update(with: msg)
+            }
+    }
 
-	@MainActor
-	public func notifyMessage(_ data: AnyMsgData) {
-		NotificationCenter.default
-			.post(name: .msgNoti(for: data.conID), object: data)
-	}
+    @MainActor
+    func notifyMessage(_ data: AnyMsgData) {
+        NotificationCenter.default
+            .post(name: .msgNoti(for: data.conID), object: data)
+    }
 }

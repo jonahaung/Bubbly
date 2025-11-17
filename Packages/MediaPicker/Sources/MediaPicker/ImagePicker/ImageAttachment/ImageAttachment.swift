@@ -63,7 +63,8 @@ public final nonisolated class ImageAttachment: @unchecked Sendable, Identifiabl
         imageStatus = .loading
         do {
             if let data = try await pickerItem.loadTransferable(type: Data.self),
-               let uiImage = UIImage(data: data) {
+               let uiImage = UIImage(data: data)
+            {
                 imageStatus = .finished(uiImage)
             } else {
                 throw LoadingError.contentTypeNotSupported
@@ -76,7 +77,8 @@ public final nonisolated class ImageAttachment: @unchecked Sendable, Identifiabl
     public func image() async -> UIImage? {
         do {
             if let data = try await pickerItem.loadTransferable(type: Data.self),
-               let uiImage = UIImage(data: data) {
+               let uiImage = UIImage(data: data)
+            {
                 return uiImage
             } else {
                 return nil

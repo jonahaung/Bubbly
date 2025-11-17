@@ -54,7 +54,7 @@ public extension ImageEncoders {
                 return nil
             }
             var options: [CFString: Any] = [
-                kCGImageDestinationLossyCompressionQuality: compressionRatio
+                kCGImageDestinationLossyCompressionQuality: compressionRatio,
             ]
             #if canImport(UIKit)
                 options[kCGImagePropertyOrientation] = CGImagePropertyOrientation(image.imageOrientation).rawValue

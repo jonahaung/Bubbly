@@ -48,6 +48,7 @@ extension FirePhoneOTPLoginViewModel {
             DispatchQueue.main.async {
                 self.isLoading = false
                 if let error {
+                    debugPrint(error)
                     self.viewState = .error(error.localizedDescription)
                     return
                 }

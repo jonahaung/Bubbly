@@ -9,18 +9,18 @@ import Foundation
 
 public protocol ErrorPresenter {}
 
-extension ErrorPresenter {
-	@MainActor
-	public func showError(_ error: Error) async {
-		await LocalNotificationService
-			.sendAlert(
-				title: "Error",
-				body: error.localizedDescription
-			)
-	}
+public extension ErrorPresenter {
+    @MainActor
+    func showError(_ error: Error) async {
+        await LocalNotificationService
+            .sendAlert(
+                title: "Error",
+                body: error.localizedDescription
+            )
+    }
 
-	@MainActor
-	public func showMessage(_ title: String, _ msg: String) async {
-		await LocalNotificationService.sendAlert(title: title, body: msg)
-	}
+    @MainActor
+    func showMessage(_ title: String, _ msg: String) async {
+        await LocalNotificationService.sendAlert(title: title, body: msg)
+    }
 }

@@ -13,56 +13,56 @@ import SwiftUI
 import XUI
 
 struct ChatInputBar: View {
-	private let inputManager = try! ChatInputBarManager()
-	@Environment(ChatViewManager.self) private var manager
+    private let inputManager = try! ChatInputBarManager()
+    @Environment(ChatViewManager.self) private var manager
 
-	var body: some View {
-		VStack(spacing: 0) {
-			if inputManager.imagePicker.selections.isEmpty == false {
-				imageAttachmentView
-			}
-			TextInputBar()
-				.environment(inputManager)
-				.padding(.top, 4)
-				.background {
-					manager.conversation.theme.background.color.ignoresSafeArea(edges: .bottom)
-				}
-		}
-	}
+    var body: some View {
+        VStack(spacing: 0) {
+            if inputManager.imagePicker.selections.isEmpty == false {
+                imageAttachmentView
+            }
+            TextInputBar()
+                .environment(inputManager)
+                .padding(.top, 4)
+                .background {
+                    manager.conversation.theme.background.color.ignoresSafeArea(edges: .bottom)
+                }
+        }
+    }
 
-	private var imageAttachmentView: some View {
-		ScrollView(.horizontal) {
-			HStack {
-				ForEach(inputManager.imagePicker.selections) { selectedPhoto in
-					Group {
-						if let processedPhoto = inputManager.imagePicker.processedPhotos[selectedPhoto.id] {
-							Button {
-								inputManager.send(conversation: manager.conversation)
-							} label: {
-								Image(uiImage: processedPhoto)
-									.resizable()
-									.scaledToFill()
-									.aspectRatio(1, contentMode: .fill)
-							}
+    private var imageAttachmentView: some View {
+        ScrollView(.horizontal) {
+            HStack {
+                ForEach(inputManager.imagePicker.selections) { selectedPhoto in
+                    Group {
+                        if let processedPhoto = inputManager.imagePicker.processedPhotos[selectedPhoto.id] {
+                            Button {
+                                inputManager.send(conversation: manager.conversation)
+                            } label: {
+                                Image(uiImage: processedPhoto)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .aspectRatio(1, contentMode: .fill)
+                            }
 
-						} else {
-							ZStack {
-								ProgressView()
-									.controlSize(.mini)
-							}
-							.frame(square: 150)
-							.task { [self] in
-								await inputManager.imagePicker.loadPhoto(selectedPhoto)
-							}
-						}
-					}
-					.frame(maxHeight: 70)
-				}
-				Button("Remove All") {
-					inputManager.imagePicker.selections.removeAll()
-				}
-			}
-			.padding(.horizontal, 8)
-		}
-	}
+                        } else {
+                            ZStack {
+                                ProgressView()
+                                    .controlSize(.mini)
+                            }
+                            .frame(square: 150)
+                            .task { [self] in
+                                await inputManager.imagePicker.loadPhoto(selectedPhoto)
+                            }
+                        }
+                    }
+                    .frame(maxHeight: 70)
+                }
+                Button("Remove All") {
+                    inputManager.imagePicker.selections.removeAll()
+                }
+            }
+            .padding(.horizontal, 8)
+        }
+    }
 }

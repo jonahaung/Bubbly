@@ -8,53 +8,53 @@
 import Database
 
 extension Socket {
-	func receive(_ data: AnyMsgData) {
-		switch data {
-		case .newMsg(let rMsg):
-			Task { [weak self] in
-				guard let self else { return }
-				await queue.addOperation {
-					if try await Store.shared.msgStore.exists(uid: rMsg.uid) {
-						AudioService.shared.playMessageIncoming()
-						await self.notifyMessage(data)
-					}
-				}
-			}
-		case .updatedMsg:
-			Task { [weak self] in
-				guard let self else { return }
-				await queue.addOperation {
-					await self.notifyMessage(data)
-				}
-			}
-		case .typingStatus:
-			Task { [weak self] in
-				guard let self else { return }
-				await queue.addOperation {
-					await self.notifyMessage(data)
-				}
-			}
-		case .reaction:
-			Task { [weak self] in
-				guard let self else { return }
-				await queue.addOperation {
-					await self.notifyMessage(data)
-				}
-			}
-		case .deleteMsg:
-			Task { [weak self] in
-				guard let self else { return }
-				await queue.addOperation {
-					await self.notifyMessage(data)
-				}
-			}
-		case .seenStatus:
-			Task { [weak self] in
-				guard let self else { return }
-				await queue.addOperation {
-					await self.notifyMessage(data)
-				}
-			}
-		}
-	}
+    func receive(_ data: AnyMsgData) {
+        switch data {
+        case let .newMsg(rMsg):
+            Task { [weak self] in
+                guard let self else { return }
+                await queue.addOperation {
+                    if try await Store.shared.msgStore.exists(uid: rMsg.uid) {
+                        AudioService.shared.playMessageIncoming()
+                        await self.notifyMessage(data)
+                    }
+                }
+            }
+        case .updatedMsg:
+            Task { [weak self] in
+                guard let self else { return }
+                await queue.addOperation {
+                    await self.notifyMessage(data)
+                }
+            }
+        case .typingStatus:
+            Task { [weak self] in
+                guard let self else { return }
+                await queue.addOperation {
+                    await self.notifyMessage(data)
+                }
+            }
+        case .reaction:
+            Task { [weak self] in
+                guard let self else { return }
+                await queue.addOperation {
+                    await self.notifyMessage(data)
+                }
+            }
+        case .deleteMsg:
+            Task { [weak self] in
+                guard let self else { return }
+                await queue.addOperation {
+                    await self.notifyMessage(data)
+                }
+            }
+        case .seenStatus:
+            Task { [weak self] in
+                guard let self else { return }
+                await queue.addOperation {
+                    await self.notifyMessage(data)
+                }
+            }
+        }
+    }
 }

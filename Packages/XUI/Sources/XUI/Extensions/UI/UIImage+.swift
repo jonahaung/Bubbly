@@ -47,7 +47,8 @@ public extension UIImage {
 
         return newImage
     }
-	@MainActor
+
+    @MainActor
     func temporaryLocalFileUrl(id: String, quality: CGFloat) async throws -> URL? {
         guard let imageData = jpegData(compressionQuality: quality) else { return nil }
         guard let localPath = FileUtil.documentDirectory?.appending(path: id) else { return nil }

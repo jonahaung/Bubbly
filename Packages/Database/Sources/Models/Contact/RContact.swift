@@ -8,10 +8,10 @@
 import XUI
 
 public struct RContact: ContactRepresentable {
-	public let uid: String
-	public var name: String
-	public let mobile: String
-	public var photoURL: String
-	public var pushToken: String
-	public var publicKeyString: String
+    public let uid: String
+    public var name: String
+    public let mobile: String
+    public var photoURL: String
+    public var pushToken: String
+    public var publicKeyString: String
 }

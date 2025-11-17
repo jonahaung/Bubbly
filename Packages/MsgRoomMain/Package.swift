@@ -4,27 +4,27 @@
 import PackageDescription
 
 let package = Package(
-	name: "MsgRoomMain",
-	platforms: [.iOS(.v26)],
-	products: [
-		.library(
-			name: "MsgRoomMain",
-			targets: ["MsgRoomMain"]
-		)
-	],
-	dependencies: [
-		.package(name: "Services", path: "../Services")
-	],
-	targets: [
-		.target(
-			name: "MsgRoomMain",
-			dependencies: [
-				.product(name: "Services", package: "Services")
-			]
-		),
-		.testTarget(
-			name: "MsgRoomMainTests",
-			dependencies: ["MsgRoomMain"]
-		)
-	]
+    name: "MsgRoomMain",
+    platforms: [.iOS(.v26)],
+    products: [
+        .library(
+            name: "MsgRoomMain",
+            targets: ["MsgRoomMain"]
+        ),
+    ],
+    dependencies: [
+        .package(name: "Services", path: "../Services"),
+    ],
+    targets: [
+        .target(
+            name: "MsgRoomMain",
+            dependencies: [
+                .product(name: "Services", package: "Services"),
+            ]
+        ),
+        .testTarget(
+            name: "MsgRoomMainTests",
+            dependencies: ["MsgRoomMain"]
+        ),
+    ]
 )

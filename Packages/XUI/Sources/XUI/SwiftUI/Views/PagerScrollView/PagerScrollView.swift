@@ -10,7 +10,8 @@ import SwiftUI
 
 @available(iOS 18.0, *)
 public struct PagerScrollView<Page, Content>: View
-    where Page: Sendable & Equatable & Hashable & Identifiable, Content: View {
+    where Page: Sendable & Equatable & Hashable & Identifiable, Content: View
+{
     private let items: [Page]
     private let content: (Page) -> Content
     @Binding private var selection: Page

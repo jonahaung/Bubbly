@@ -99,7 +99,7 @@ public actor AccessTokenService {
 
         let bodyParams = [
             "grant_type": Constants.grantType,
-            "assertion": jwt
+            "assertion": jwt,
         ]
 
         request.httpBody = bodyParams
@@ -117,7 +117,8 @@ public actor AccessTokenService {
 
         do {
             if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-               let accessToken = json["access_token"] as? String {
+               let accessToken = json["access_token"] as? String
+            {
                 return accessToken
             } else {
                 throw PushNotificationError.tokenDecodingFailed

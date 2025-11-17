@@ -9,22 +9,22 @@ import Database
 import SwiftUI
 
 struct MsgLayoutValue: Hashable {
-	let uid: String
-	let recipient: MsgRecipient
+    let uid: String
+    let recipient: MsgRecipient
 }
 
 struct MsgLayoutValueKey: LayoutValueKey {
-	static let defaultValue: MsgLayoutValue = .init(uid: "", recipient: .none)
+    static let defaultValue: MsgLayoutValue = .init(uid: "", recipient: .none)
 }
 
 extension View {
-	func layoutValue(_ value: MsgLayoutValue) -> some View {
-		layoutValue(key: MsgLayoutValueKey.self, value: value)
-	}
+    func layoutValue(_ value: MsgLayoutValue) -> some View {
+        layoutValue(key: MsgLayoutValueKey.self, value: value)
+    }
 }
 
 extension Message {
-	var layoutValue: MsgLayoutValue {
-		.init(uid: uid, recipient: receiptType)
-	}
+    var layoutValue: MsgLayoutValue {
+        .init(uid: uid, recipient: receiptType)
+    }
 }

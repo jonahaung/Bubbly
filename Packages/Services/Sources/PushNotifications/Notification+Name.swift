@@ -9,18 +9,18 @@ import Combine
 import Database
 import Foundation
 
-extension Notification.Name {
-	public static func msgNoti(for conID: String) -> Notification.Name {
-		Notification.Name("conversation=\(conID)")
-	}
+public extension Notification.Name {
+    static func msgNoti(for conID: String) -> Notification.Name {
+        Notification.Name("conversation=\(conID)")
+    }
 
-	public static let tapPushNotificationAction = Notification.Name("tapPushNotificationAction")
-	public static let receiveDeviceToken = Notification.Name("receiveDeviceToken")
-	public static let inboxChanges = Notification.Name("inboxChanges")
+    static let tapPushNotificationAction = Notification.Name("tapPushNotificationAction")
+    static let receiveDeviceToken = Notification.Name("receiveDeviceToken")
+    static let inboxChanges = Notification.Name("inboxChanges")
 }
 
-extension NotificationCenter.Publisher.Output {
-	public var anyMsgData: AnyMsgData? {
-		object as? AnyMsgData
-	}
+public extension NotificationCenter.Publisher.Output {
+    var anyMsgData: AnyMsgData? {
+        object as? AnyMsgData
+    }
 }

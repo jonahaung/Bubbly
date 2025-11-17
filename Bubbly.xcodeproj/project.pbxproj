@@ -52,7 +52,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		472801C72EBC9EB60095B86E /* ChatLayoutConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatLayoutConstants.swift; sourceTree = "<group>"; };
 		4735A5E12DCEB7F3002854E4 /* FCM_V1 */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FCM_V1; sourceTree = "<group>"; };
 		475BAAB42DBE859D007B0876 /* Bubbly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bubbly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAAC52DBE859E007B0876 /* BubblyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -169,7 +168,6 @@
 				475BAAE82DBE88CA007B0876 /* NotificationService */,
 				475BAB522DBE8D78007B0876 /* Frameworks */,
 				475BAAB52DBE859D007B0876 /* Products */,
-				472801C72EBC9EB60095B86E /* ChatLayoutConstants.swift */,
 			);
 			sourceTree = "<group>";
 		};

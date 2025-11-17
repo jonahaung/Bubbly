@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-extension ScrollPosition {
-	public static let userDefined = {
-		var position = ScrollPosition()
-		position.isPositionedByUser = true
-		return position
-	}()
+public extension ScrollPosition {
+    static let userDefined = {
+        var position = ScrollPosition()
+        position.isPositionedByUser = true
+        return position
+    }()
 
-	public mutating func reset() {
-		self = .init()
-	}
+    mutating func reset() {
+        self = .init()
+    }
 }

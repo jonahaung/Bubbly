@@ -41,7 +41,8 @@ public final class DataLoader: DataLoading, @unchecked Sendable {
     ///   - validate: Validates the response. By default, check if the status
     ///   code is in the acceptable range (`200..<300`).
     public init(configuration: URLSessionConfiguration = DataLoader.defaultConfiguration,
-                validate: @Sendable @escaping (URLResponse) -> Swift.Error? = DataLoader.validate) {
+                validate: @Sendable @escaping (URLResponse) -> Swift.Error? = DataLoader.validate)
+    {
         impl = _DataLoader(validate: validate)
         let queue = OperationQueue()
         queue.maxConcurrentOperationCount = 1
@@ -144,7 +145,8 @@ private final class _DataLoader: NSObject, URLSessionDataDelegate, @unchecked Se
     func loadData(with task: URLSessionDataTask,
                   session: URLSession,
                   didReceiveData: @escaping (Data, URLResponse) -> Void,
-                  completion: @escaping (Error?) -> Void) -> URLSessionTask {
+                  completion: @escaping (Error?) -> Void) -> URLSessionTask
+    {
         let handler = _Handler(didReceiveData: didReceiveData, completion: completion)
         session.delegateQueue.addOperation { // `URLSession` is configured to use this same queue
             self.handlers[task] = handler
@@ -168,7 +170,8 @@ private final class _DataLoader: NSObject, URLSessionDataDelegate, @unchecked Se
     func urlSession(_ session: URLSession,
                     dataTask: URLSessionDataTask,
                     didReceive response: URLResponse,
-                    completionHandler: @escaping (URLSession.ResponseDisposition) -> Void) {
+                    completionHandler: @escaping (URLSession.ResponseDisposition) -> Void)
+    {
         (delegate as? URLSessionDataDelegate)?.urlSession?(session, dataTask: dataTask, didReceive: response, completionHandler: { _ in })
 
         guard let handler = handlers[dataTask] else {

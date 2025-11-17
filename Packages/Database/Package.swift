@@ -10,21 +10,21 @@ let package = Package(
         .library(
             name: "Database",
             targets: ["Database"]
-        )
+        ),
     ],
     dependencies: [
-        .package(name: "Core", path: "../Core")
+        .package(name: "Core", path: "../Core"),
     ],
     targets: [
         .target(
             name: "Database",
             dependencies: [
-                .product(name: "Core", package: "Core")
+                .product(name: "Core", package: "Core"),
             ]
         ),
         .testTarget(
             name: "DatabaseTests",
             dependencies: ["Database"]
-        )
+        ),
     ]
 )
