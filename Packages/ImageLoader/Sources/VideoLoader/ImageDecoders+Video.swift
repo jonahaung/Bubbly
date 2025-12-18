@@ -31,7 +31,7 @@
 
             public func decode(_ data: Data) throws -> ImageContainer {
                 ImageContainer(image: PlatformImage(), type: type, data: data, userInfo: [
-                    .videoAssetKey: AVDataAsset(data: data, type: type),
+                    .videoAssetKey: AVDataAsset(data: data, type: type)
                 ])
             }
 
@@ -48,7 +48,7 @@
                 }
                 didProducePreview = true
                 return ImageContainer(image: preview, type: type, isPreview: true, data: data, userInfo: [
-                    .videoAssetKey: AVDataAsset(data: data, type: type),
+                    .videoAssetKey: AVDataAsset(data: data, type: type)
                 ])
             }
         }

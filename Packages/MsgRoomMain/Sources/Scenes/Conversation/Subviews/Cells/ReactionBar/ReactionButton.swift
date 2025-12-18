@@ -20,7 +20,7 @@ struct ReactionButton: View {
         Button {
             handleReactionTap()
         } label: {
-            Text(reactionType.icon)
+			Image(reactionType.imageResource)
                 .font(.headline)
                 .padding(.vertical, 8)
                 .padding(.horizontal, 2)

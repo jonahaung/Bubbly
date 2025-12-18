@@ -77,7 +77,6 @@ public final class ScrollViewPrefetcher {
                 newWindow = (end - windowSize) ..< end
             }
         }
-
         applyPrefetchWindow(newWindow)
         lastVisibleIndices = visibleIndices
     }

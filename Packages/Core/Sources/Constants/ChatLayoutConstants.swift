@@ -18,5 +18,5 @@ public enum ChatLayoutConstants {
     }
 
     public static let topBarHeight: CGFloat = 44
-    public static let bottomBarHeight: CGFloat = 50
+    public static let bottomBarHeight: CGFloat = 55
 }

@@ -126,8 +126,7 @@ public actor DefaultNotificationService: NotificationService {
             if request.authorizationOptions
                 .contains(
                     .alert
-                ), settings.alertSetting != .enabled
-            {
+                ), settings.alertSetting != .enabled {
                 print(
                     "Alert notifications are not enabled"
                 )
@@ -136,8 +135,7 @@ public actor DefaultNotificationService: NotificationService {
             if request.authorizationOptions
                 .contains(
                     .badge
-                ), settings.badgeSetting != .enabled
-            {
+                ), settings.badgeSetting != .enabled {
                 print(
                     "Badge notifications are not enabled"
                 )
@@ -146,8 +144,7 @@ public actor DefaultNotificationService: NotificationService {
             if request.authorizationOptions
                 .contains(
                     .sound
-                ), settings.soundSetting != .enabled
-            {
+                ), settings.soundSetting != .enabled {
                 print(
                     "Sound notifications are not enabled"
                 )

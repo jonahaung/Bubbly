@@ -10,21 +10,21 @@ let package = Package(
         .library(
             name: "MsgRoomMain",
             targets: ["MsgRoomMain"]
-        ),
+        )
     ],
     dependencies: [
-        .package(name: "Services", path: "../Services"),
+        .package(name: "Services", path: "../Services")
     ],
     targets: [
         .target(
             name: "MsgRoomMain",
             dependencies: [
-                .product(name: "Services", package: "Services"),
+                .product(name: "Services", package: "Services")
             ]
         ),
         .testTarget(
             name: "MsgRoomMainTests",
             dependencies: ["MsgRoomMain"]
-        ),
+        )
     ]
 )

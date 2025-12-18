@@ -7,7 +7,7 @@
 
 import Foundation
 
-private protocol Cancellable {
+private protocol Cancelling {
     func cancel()
 }
 
@@ -15,7 +15,7 @@ private protocol Awaitable: Sendable {
     func waitForCompletion() async
 }
 
-extension Task: Awaitable, Cancellable {
+extension Task: Awaitable, Cancelling {
     fileprivate func waitForCompletion() async {
         _ = try? await value
     }
@@ -44,7 +44,7 @@ public final class AsyncQueue: @unchecked Sendable {
     }
 
     private struct QueueEntry {
-        let task: any (Awaitable & Cancellable)
+        let task: any (Awaitable & Cancelling)
         let isBarrier: Bool
         let id: UUID
     }

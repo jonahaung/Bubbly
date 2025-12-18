@@ -24,7 +24,7 @@ public struct PermissionView: View {
                 .frame(square: 24)
                 .padding(8)
 
-            Text(permission.kind.name) + Text("\n" + permission.kind.description)
+            Text(permission.kind.name + "\n" + permission.kind.description)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .italic()

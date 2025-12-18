@@ -22,15 +22,15 @@ struct ChatOverlayView: View {
             BlurredBackgroundView {
                 manager.eventsManager.updateFocusedFrame(nil)
             }
+			.transition(.opacity.animation(.default))
             MsgCellContent()
                 .frame(size: item.frame.size)
                 .position(x: item.frame.midX, y: item.frame.midY)
-
             ReactionsView()
                 .position(x: item.frame.midX, y: item.frame.minY)
 
             RoomFocesedOverlayBar()
-                .position(x: item.frame.midX, y: item.frame.maxY + 20)
+                .position(x: item.frame.midX, y: item.frame.maxY + 10)
         }
         .statusBarHidden()
         .environment(viewModel)
@@ -150,33 +150,33 @@ struct RoomFocesedOverlayBar: View {
     @Environment(MsgCellViewModel.self) private var item
 
     var body: some View {
-        HStack {
+		HStack(spacing: 0) {
             ReactionJumpButton {
                 let msg = item.msg
                 msgRoomAction?(.deleteMsg(rMsg: RMsg(msg)))
                 manager.eventsManager.updateFocusedFrame(nil)
             } label: {
-                SystemImageWithShape(.trashFill, .square(.color(.red)))
+				SystemImageWithShape(.trashCircle, .plain(.plain))
             }
 
             ReactionRotateButton(.leading) {} label: {
-                SystemImageWithShape(.arrowshapeTurnUpLeftFill, .square(.color(.indigo)))
+				SystemImageWithShape(.arrowshapeTurnUpLeftFill, .plain(.plain))
             }.zIndex(10)
 
             ReactionRotateButton(.trailing) {} label: {
-                SystemImageWithShape(.arrowshapeTurnUpRightFill, .square(.color(.indigo)))
+                SystemImageWithShape(.arrowshapeTurnUpRightFill, .plain(.plain))
             }.zIndex(10)
 
-            SystemImageWithShape(.ellipsis, .circle(.color(.gray)))
-                .presentSheet {
-                    Text(item.msg.preetyPrinted)
-                }
             ReactionJumpButton {
-                UIPasteboard.general.string = item.msg.preetyPrinted
-                manager.eventsManager.updateFocusedFrame(nil)
+				UIPasteboard.general.string = item.msg.text
             } label: {
-                SystemImageWithShape(.squareOnSquareDashed, .square(.color(.teal)))
+				SystemImageWithShape(.squareFillOnSquareFill, .plain(.plain))
             }
+
+			SystemImageWithShape(.ellipsisCircle, .plain(.color(.accentColor)))
+				.presentSheet {
+					Text(item.msg.preetyPrinted)
+				}
         }
     }
 }
@@ -186,10 +186,10 @@ struct BlurredBackgroundView: View {
     var tapAction: (() -> Void)?
 
     var body: some View {
-        manager.conversation.theme.background.color.opacity(0.9)
+		manager.conversation.properties.theme.background.color.opacity(0.95)
             .edgesIgnoringSafeArea(.all)
-            .onTapGesture {
-                tapAction?()
-            }
+			.onTapGesture(count: 1) {
+				tapAction?()
+			}
     }
 }

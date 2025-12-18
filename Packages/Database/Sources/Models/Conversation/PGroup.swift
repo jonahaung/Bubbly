@@ -19,7 +19,6 @@ public final class PGroup {
     public var createdBy: String
     public var theme: ConversationTheme
     public var seenMembers: [SeenMember]
-    public var lastMsgID: String?
 
     public init(
         uid: String,
@@ -29,8 +28,7 @@ public final class PGroup {
         members: [String],
         createdBy: String,
         theme: ConversationTheme = ConversationTheme(),
-        seenMembers: [SeenMember],
-        lastMsgID: String?
+        seenMembers: [SeenMember]
     ) {
         self.uid = uid
         self.name = name
@@ -40,33 +38,11 @@ public final class PGroup {
         self.createdBy = createdBy
         self.theme = theme
         self.seenMembers = seenMembers
-        self.lastMsgID = lastMsgID
     }
 }
 
 extension PGroup: CollectionDocument, UIdentifiable {
-    public func update(with group: Database.Group) {
-        if name != group.name {
-            name = group.name
-        }
-        if photoURL != group.photoURL {
-            photoURL = group.photoURL ?? photoURL
-        }
-        if members.sorted() != group.members.sorted() {
-            members = group.members
-        }
-        if theme != group.theme {
-            theme = group.theme
-        }
-        if group.lastMsgID != nil, lastMsgID != group.lastMsgID {
-            lastMsgID = group.lastMsgID
-        }
-        if seenMembers != group.seenMembers {
-            seenMembers = group.seenMembers ?? []
-        }
-    }
-
-    public func update(with conversation: any ConversationRepresentable) {
+	public func update(with conversation: Conversation) {
         if name != conversation.name {
             name = conversation.name
         }
@@ -76,16 +52,31 @@ extension PGroup: CollectionDocument, UIdentifiable {
         if members.sorted() != conversation.members.sorted() {
             members = conversation.members
         }
-        if theme != conversation.theme {
-            theme = conversation.theme
+		if theme != conversation.properties.theme {
+			theme = conversation.properties.theme
         }
-        if lastMsgID != conversation.lastMsgID {
-            lastMsgID = conversation.lastMsgID
-        }
-        if seenMembers != conversation.seenMembers {
-            seenMembers = conversation.seenMembers
+		if seenMembers != conversation.properties.seenMembers {
+			seenMembers = conversation.properties.seenMembers
         }
     }
+
+	public func update(from item: Group) {
+		if name != item.name {
+			name = item.name
+		}
+		if photoURL != item.photoURL {
+			photoURL = item.photoURL ?? photoURL
+		}
+		if members.sorted() != item.members.sorted() {
+			members = item.members
+		}
+		if theme != item.theme {
+			theme = item.theme
+		}
+		if seenMembers != item.seenMembers {
+			seenMembers = item.seenMembers ?? []
+		}
+	}
 }
 
 extension PGroup: SendableDocument {
@@ -99,8 +90,7 @@ extension PGroup: SendableDocument {
             photoURL: snapshot.photoURL ?? "",
             members: snapshot.members,
             createdBy: snapshot.createdBy,
-            seenMembers: snapshot.seenMembers ?? [],
-            lastMsgID: snapshot.lastMsgID
+            seenMembers: snapshot.seenMembers ?? []
         )
     }
 
@@ -113,8 +103,7 @@ extension PGroup: SendableDocument {
             members: members,
             createdBy: createdBy,
             theme: theme,
-            seenMembers: seenMembers,
-            lastMsgID: lastMsgID
+            seenMembers: seenMembers
         )
     }
 }

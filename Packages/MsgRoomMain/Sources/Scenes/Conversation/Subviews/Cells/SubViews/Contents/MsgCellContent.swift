@@ -12,64 +12,73 @@ import SwiftUI
 import XUI
 
 struct MsgCellContent: View {
-    @Environment(MsgCellViewModel.self) private var viewModel
-    @Environment(\.conversationTheme) private var theme
-    private var layout: MsgCellLayout { viewModel.layout }
+	@Environment(MsgCellViewModel.self) private var viewModel
+	@Environment(\.conversationTheme) private var theme
+	private var layout: MsgCellLayout { viewModel.layout }
+	@Environment(\.selectedMsg) private var selectedMsg
+	@Environment(\.conversationTheme) private var conversationTheme
 
-    var body: some View {
-        ZStack(alignment: .center) {
-            switch viewModel.displayData.content {
-            case let .text(text):
-                TextContent(text: text)
-                    .padding(.init(top: 6, leading: 12, bottom: 6, trailing: 10))
-            case let .markdown(attributedString):
-                MarkdownTextContent(text: attributedString)
-                    .padding(.init(top: 6, leading: 12, bottom: 6, trailing: 10))
-            case let .attachment(attachment):
-                AttachmentContent(attachment: attachment)
-                    .clipShape(bubbleShape)
-                    .padding(
-                        .init(top: 0.1, leading: viewModel.isSender ? 0.5 : 0.2, bottom: 0.5, trailing: viewModel.isSender ? 0.2 : 0.5)
-                    )
-            case let .emoji(image):
-                Text(image)
-            }
-        }
-        .background(bubbleColor)
-        .padding(
-            .init(top: 0.1, leading: viewModel.isSender ? 0.5 : 0.2, bottom: 0.5, trailing: viewModel.isSender ? 0.2 : 0.5)
-        )
-        .background(theme.shadowColor)
-        .foregroundStyle(viewModel.isSender ? theme.outgoingForegroundColor : theme.incomingForegroundColor)
-        .containerShape(bubbleShape)
-    }
+	var body: some View {
+		ZStack {
+			switch viewModel.displayData.content {
+			case let .text(text):
+				if let attachment = viewModel.msg.attachment {
+					VStack(alignment: .leading, spacing: 0) {
+						TextContent(text: text)
+							.layoutPriority(-1)
+							.padding(theme.bubblePading)
+						AttachmentContent(attachment: attachment)
+							.frame(height: attachment.bestFitHeight)
+					}
+					.frame(width: attachment.bestFitWidth)
+					.mask(ContainerRelativeShape().inset(by: 4))
+				} else {
+					TextContent(text: text)
+						.padding(theme.bubblePading)
+				}
+			case let .markdown(attributedString):
+				MarkdownTextContent(text: attributedString)
+					.padding(theme.bubblePading)
+			case let .attachment(attachment):
+				AttachmentContent(attachment: attachment)
+					.frame(size: attachment.bestFitSize)
+					.clipShape(ContainerRelativeShape().inset(by: 3))
+			case let .emoji(image):
+				Text(image)
+			}
+		}
+		.foregroundStyle(viewModel.isSender ? theme.outgoingForegroundColor : theme.incomingForegroundColor)
+		.background(bubbleColor)
+		.padding(
+			.init(top: 0.2, leading: viewModel.isSender ? 0.5 : 0.2, bottom: 0.5, trailing: viewModel.isSender ? 0.2 : 0.5)
+		)
+		.containerShape(bubbleShape)
+		.background(bubbleShape.fill(theme.shadowColor))
+	}
 
-    private var bubbleShape: UnevenRoundedRectangle {
-        if bubbleCorner == .none {
-            return .init()
-        }
-        return bubbleCorner.roundedRectange(cornerRadius: theme.bubbleCornorRadius)
-    }
+	private var bubbleShape: UnevenRoundedRectangle {
+		bubbleCorner.roundedRectange(cornerRadius: theme.bubbleCornorRadius)
+	}
 
-    private var bubbleColor: Color {
-        viewModel.isSender ? theme.outgoingBubbleColor : theme.incomingBubbbleColor
-    }
+	private var bubbleColor: Color {
+		viewModel.isSender ? theme.outgoingBubbleColor : theme.incomingBubbbleColor
+	}
 
-    private var bubbleCorner: BubbleCorner {
-        let isSelected = layout.isSelected
-        if isSelected {
-            return .all
-        }
-        //		var corner = bubble.bubbleCorner
-//
-        //		if id == selected.previous?.id {
-        //			corner.append(.bottom)
-        //			return corner
-        //		}
-        //		if id == selected.next?.id {
-        //			corner.append(.top)
-        //			return corner
-        //		}
-        return layout.bubble.bubbleCorner
-    }
+	private var bubbleCorner: BubbleCorner {
+		let isSelected = selectedMsg?.id == viewModel.id
+		if isSelected {
+			return .all
+		}
+		var corner = layout.bubble.bubbleCorner
+
+		if selectedMsg?.previous == viewModel.id {
+			corner.append(.bottom)
+			return corner
+		}
+		if selectedMsg?.next == viewModel.id {
+			corner.append(.top)
+			return corner
+		}
+		return corner
+	}
 }

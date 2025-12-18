@@ -28,11 +28,6 @@ public class NavRouter: Identifiable {
         navPath.append(path)
     }
 
-    public func replace(_ paths: [NavPath]) {
-        guard !navPath.isEmpty else { return }
-        navPath = paths
-    }
-
     public func pop() {
         guard navPath.isEmpty == false else { return }
         navPath.remove(at: 0)

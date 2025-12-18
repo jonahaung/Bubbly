@@ -20,6 +20,7 @@ public enum GroupStorageKey: Hashable, Sendable {
 public extension GroupStorageKey {
     enum Router: String, Hashable, Sendable {
         case targetedDeepLinkPath
+		case tappedConversationID
     }
 
     enum Device: String, Hashable, Sendable {

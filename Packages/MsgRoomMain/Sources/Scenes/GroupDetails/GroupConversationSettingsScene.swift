@@ -67,7 +67,7 @@ public struct GroupConversationSettingsScene: View {
             Section {
                 AsyncButton {
                     try await ConversationRepo.deleteMessages(conID: viewModel.group.uid)
-                    Router.shared.currentNavRouter?.navPath.removeAll()
+					Router.shared.currentNavRouter.navPath.removeAll()
                 } label: {
                     Text("Delete Messages")
                 }
@@ -78,8 +78,7 @@ public struct GroupConversationSettingsScene: View {
                     ? currentUser
                     : contactStore.contact(
                         for: viewModel.group.createdBy
-                    )
-                {
+                    ) {
                     FormCell("Admin", admin.name)
                 }
             }

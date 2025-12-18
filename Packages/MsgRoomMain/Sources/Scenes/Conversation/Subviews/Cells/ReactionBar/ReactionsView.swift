@@ -13,7 +13,7 @@ public struct ReactionsView: View {
         static let appearDelayIncrement: Double = 0.1
         static let springStiffness: Double = 170
         static let springDamping: Double = 8
-        static let itemSpacing: CGFloat = 0
+        static let itemSpacing: CGFloat = 1
         static let scaleMultiplier: Double = 1.5
         static let floatOffset: CGFloat = -30
         static let rotationAngle: Double = 45
@@ -48,6 +48,9 @@ public struct ReactionsView: View {
                 ReactionButton(reactionState: $reaction, isVisible: isVisible)
             }
         }
+		.padding()
+		.background(Color.systemBackground.opacity(0.00001))
+		.foregroundStyle(Color.accentColor)
         .onAppear {
             animateAppearance()
         }

@@ -29,8 +29,7 @@ struct ImageProcessingExtensions {
 
     func byResizing(to targetSize: CGSize,
                     contentMode: ImageProcessingOptions.ContentMode,
-                    upscale: Bool) -> PlatformImage?
-    {
+                    upscale: Bool) -> PlatformImage? {
         guard let cgImage = image.cgImage else {
             return nil
         }
@@ -403,7 +402,7 @@ func makeThumbnail(data: Data, options: ImageRequest.ThumbnailOptions, scale: CG
         kCGImageSourceCreateThumbnailFromImageIfAbsent: options.createThumbnailFromImageIfAbsent,
         kCGImageSourceShouldCacheImmediately: options.shouldCacheImmediately,
         kCGImageSourceCreateThumbnailWithTransform: options.createThumbnailWithTransform,
-        kCGImageSourceThumbnailMaxPixelSize: maxPixelSize,
+        kCGImageSourceThumbnailMaxPixelSize: maxPixelSize
     ] as [CFString: Any]
     guard let image = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else {
         return nil
@@ -413,8 +412,7 @@ func makeThumbnail(data: Data, options: ImageRequest.ThumbnailOptions, scale: CG
         var orientation: UIImage.Orientation = .up
         if let imageProperties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [AnyHashable: Any],
            let orientationValue = imageProperties[kCGImagePropertyOrientation as String] as? UInt32,
-           let cgOrientation = CGImagePropertyOrientation(rawValue: orientationValue)
-        {
+           let cgOrientation = CGImagePropertyOrientation(rawValue: orientationValue) {
             orientation = UIImage.Orientation(cgOrientation)
         }
         return PlatformImage(cgImage: image, scale: scale, orientation: orientation)

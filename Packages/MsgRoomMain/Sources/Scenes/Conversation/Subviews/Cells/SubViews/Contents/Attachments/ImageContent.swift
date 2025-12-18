@@ -14,11 +14,13 @@ import VideoLoader
 import XUI
 
 extension AttachmentContent {
+
     struct ImageContent: View {
+
         let attachment: Attachment
         @Environment(MsgCellViewModel.self) private var viewModel
         @Environment(\.sendChatRoomAction) private var msgRoomAction
-        @Environment(\.attachmentFetcher) private var attachmentFetcher
+        @Environment(\.asyncFetcher) private var asyncFetcher
         @State private var isLoading = false
         @State private var error: Error?
 
@@ -33,6 +35,7 @@ extension AttachmentContent {
                         if viewModel.isVisible {
                             if viewModel.msg.fileExist(), let image = viewModel.msg.thumbnailImage() {
                                 viewModel.attachment.thumbnail = image
+								viewModel.layoutIfNeeded()
                             } else {
                                 await loadAttachmentIfNeeded()
                             }
@@ -57,36 +60,30 @@ extension AttachmentContent {
 
         func loadLocalFile() async {
             if let image = viewModel.msg.thumbnailImage() {
-                await MainActor.run {
-                    viewModel.attachment.thumbnail = image
-                    viewModel.layoutIfNeeded()
-                }
+				viewModel.attachment.thumbnail = image
+				viewModel.layoutIfNeeded()
             } else {
                 await loadAttachmentData()
             }
         }
 
+        @MainActor
         func loadAttachmentData() async {
-            await MainActor.run {
-                isLoading = true
-                error = nil
-            }
+            isLoading = true
+            error = nil
 
             do {
-                let data = try await attachmentFetcher?.fetch(viewModel.msg.uid)
+                let data = try await asyncFetcher?.fetch(viewModel.msg.uid)
 
-                await MainActor.run {
-                    if let data = data?.data, let image = UIImage(data: data) {
-                        viewModel.attachment.thumbnail = image
-                    }
-                    isLoading = false
+                if let data = data?.data, let image = UIImage(data: data) {
+                    viewModel.attachment.thumbnail = image
+					viewModel.layoutIfNeeded()
                 }
+                isLoading = false
             } catch {
-                await MainActor.run {
-                    self.error = error
-                    isLoading = false
-                    Log("Failed to load attachment: \(error)")
-                }
+                self.error = error
+                isLoading = false
+                Log("Failed to load attachment: \(error)")
             }
         }
 

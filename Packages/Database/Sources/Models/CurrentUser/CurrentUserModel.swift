@@ -11,7 +11,7 @@ import FirebaseMessaging
 import Foundation
 import XUI
 
-public struct CurrentUserModel: ContactRepresentable {
+public struct CurrentUserModel: ContactRepresentableSendable, Codable, Hashable {
     public let uid: String
     public var name: String
     public let mobile: String
@@ -33,24 +33,6 @@ public struct CurrentUserModel: ContactRepresentable {
         self.photoURL = photoURL
         self.pushToken = pushToken
         self.publicKeyString = publicKeyString
-    }
-
-    // MARK: - Equatable (Value-based)
-
-    public static func == (lhs: CurrentUserModel, rhs: CurrentUserModel) -> Bool {
-        lhs.uid == rhs.uid && lhs.name == rhs.name && lhs.mobile == rhs.mobile && lhs.photoURL == rhs.photoURL && lhs.pushToken == rhs.pushToken
-            && lhs.publicKeyString == rhs.publicKeyString
-    }
-
-    // MARK: - Hashable (Value-based)
-
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(uid)
-        hasher.combine(name)
-        hasher.combine(mobile)
-        hasher.combine(photoURL)
-        hasher.combine(pushToken)
-        hasher.combine(publicKeyString)
     }
 }
 

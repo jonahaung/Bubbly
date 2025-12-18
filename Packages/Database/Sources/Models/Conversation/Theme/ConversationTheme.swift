@@ -32,8 +32,11 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
 }
 
 public extension ConversationTheme {
+	var isDarkMode: Bool {
+		UITraitCollection.current.userInterfaceStyle == .dark
+	}
     var incomingBubbleColor: Color {
-        background == .system ? .tertiarySystemGroupedBackground : .tertiarySystemBackground
+		.tertiarySystemBackground
     }
 
     var outgoingBubbleColor: Color {

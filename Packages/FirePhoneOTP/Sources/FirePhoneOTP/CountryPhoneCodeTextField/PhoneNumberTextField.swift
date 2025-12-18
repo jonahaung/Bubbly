@@ -34,6 +34,7 @@ public struct PhoneNumberTextField: View {
                 Text(phoneNumber.wrappedValue.countryCode.flag)
             }.buttonStyle(.plain)
         }
+		.font(.title2)
         .padding(3)
         .sheet(isPresented: $showCountryPicker) {
             CountryCodePickerView(countryCode: phoneNumber.countryCode)

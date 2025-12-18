@@ -22,20 +22,20 @@ public enum ConversationInitializer {
         public var maxNumberOfMsgsToDisplay: Int { pageSize * 2 }
 
         public let contentInsets = EdgeInsets(
-            top: ChatLayoutConstants.topBarHeight,
+            top: 0,
             leading: 8,
-            bottom: ChatLayoutConstants.bottomBarHeight,
+			bottom: 0,
             trailing: 4
         )
     }
 
     public struct PrefetchedData: Sendable {
-        public let conversation: any ConversationRepresentable
+		public let conversation: Conversation
         public let msgs: [Message]
         public let configuration: Configuration
 
         public init(
-            conversation: any ConversationRepresentable,
+            conversation: Conversation,
             msgs: [Message],
             configuration: Configuration
         ) {
@@ -48,7 +48,7 @@ public enum ConversationInitializer {
 
 public extension ConversationInitializer {
     static func createPrefetchedObject(
-        conversation: any ConversationRepresentable
+        conversation: Conversation
     ) async throws -> PrefetchedData {
         let conID = conversation.uid
         let msgsCount = try await ConversationRepo.totalMsgsCount(
@@ -79,7 +79,7 @@ public extension ConversationInitializer {
 
 public extension ConversationInitializer {
     static func start(conID: String, refetch: Bool, delay: Double = 0) {
-        Task.detached(priority: .background) {
+        Task {
             do {
                 let conversation = try await ConversationRepo.getOrCreate(
                     for: conID,
@@ -95,7 +95,7 @@ public extension ConversationInitializer {
         }
     }
 
-    static func start(conversation: any ConversationRepresentable) {
+    static func start(conversation: Conversation) {
         Task {
             do {
                 try await initializeAndPush(conversation: conversation)
@@ -106,12 +106,12 @@ public extension ConversationInitializer {
     }
 
     @concurrent
-    static func initializeAndPush(conversation: any ConversationRepresentable) async throws {
-        let conversationKit = try await createPrefetchedObject(
+    static func initializeAndPush(conversation: Conversation) async throws {
+        let prefetchedData = try await createPrefetchedObject(
             conversation: conversation
         )
         await MainActor.run {
-            Router.shared.push(.conversation(conversationKit))
+			Router.shared.push(.conversation(prefetchedData))
         }
     }
 }

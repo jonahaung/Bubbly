@@ -31,7 +31,7 @@ public final class PushNotificationService: NSObject, Sendable {
                 options: [
                     .alert,
                     .badge,
-                    .sound,
+                    .sound
                 ]
             ) {
                 success,
@@ -52,6 +52,11 @@ public final class PushNotificationService: NSObject, Sendable {
                 }
             }
     }
+
+	public func removeAllNotifications() {
+		UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+		UNUserNotificationCenter.current().setBadgeCount(0)
+	}
 }
 
 extension PushNotificationService: UNUserNotificationCenterDelegate {
@@ -63,7 +68,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
         guard let data = AnyMsgData(userInfo: userInfo) else {
             return [.badge, .banner, .list, .sound]
         }
-        guard let currentNavPath = await Router.shared.currentNavRouter?.navPath.last else {
+		guard let currentNavPath = await Router.shared.currentNavPath else {
             NotificationCenter.default
                 .post(name: .inboxChanges, object: nil)
             return [.badge, .banner, .list, .sound]
@@ -72,7 +77,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
         case let .conversation(conversationKit):
             if data.conID == conversationKit.configuration.conID {
                 await Socket.shared.receive(data)
-                return []
+				return []
             } else {
                 return [.banner]
             }
@@ -89,12 +94,10 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
         let userInfo = response.notification.request.content.userInfo
-        NotificationCenter.default
-            .post(
-                name: .tapPushNotificationAction,
-                object: nil,
-                userInfo: userInfo
-            )
+		guard let data = AnyMsgData(userInfo: userInfo) else {
+			return
+		}
+		ConversationInitializer.start(conID: data.conID, refetch: false, delay: 0)
         completionHandler()
     }
 }

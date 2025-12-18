@@ -46,17 +46,18 @@ public final class PMsg: CollectionDocument {
 }
 
 public extension PMsg {
-    func update(with snapshot: Message) {
-        incomingStatus = snapshot.incomingStatus.rawValue
-        outgoingStatus = snapshot.outgoingStatus
-        attachment = snapshot.attachment
-    }
 
     func update(with rMsg: RMsg) {
         incomingStatus = rMsg.incomingStatus.rawValue
         outgoingStatus = rMsg.outgoingStatus
         attachment = rMsg.attachment
     }
+
+	func update(from item: Message) {
+		incomingStatus = item.incomingStatus.rawValue
+		outgoingStatus = item.outgoingStatus
+		attachment = item.attachment
+	}
 }
 
 extension PMsg: SendableDocument {

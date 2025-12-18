@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		47B167E72E9AB3530020F282 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */; };
-		47BA967C2EB537360019FE94 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47BA967B2EB537360019FE94 /* MsgRoomMain */; };
-		47BA967E2EB537410019FE94 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47BA967D2EB537410019FE94 /* MsgRoomMain */; };
+		47CC12A62EE646EF00D3BDE8 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47CC12A52EE646EF00D3BDE8 /* MsgRoomMain */; };
+		47CC12A82EE655A600D3BDE8 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 47CC12A72EE655A600D3BDE8 /* Services */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,7 +128,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47BA967C2EB537360019FE94 /* MsgRoomMain in Frameworks */,
+				47CC12A62EE646EF00D3BDE8 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -150,7 +150,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47BA967E2EB537410019FE94 /* MsgRoomMain in Frameworks */,
+				47CC12A82EE655A600D3BDE8 /* Services in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -228,7 +228,7 @@
 			);
 			name = Bubbly;
 			packageProductDependencies = (
-				47BA967B2EB537360019FE94 /* MsgRoomMain */,
+				47CC12A52EE646EF00D3BDE8 /* MsgRoomMain */,
 			);
 			productName = Bubbly;
 			productReference = 475BAAB42DBE859D007B0876 /* Bubbly.app */;
@@ -297,7 +297,7 @@
 			);
 			name = NotificationService;
 			packageProductDependencies = (
-				47BA967D2EB537410019FE94 /* MsgRoomMain */,
+				47CC12A72EE655A600D3BDE8 /* Services */,
 			);
 			productName = NotificationService;
 			productReference = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */;
@@ -440,6 +440,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Bubbly/Bubbly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -456,10 +457,10 @@
 				INFOPLIST_KEY_NSContactsUsageDescription = "TO DO";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TO DO";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "TO DO";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = NO;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -471,7 +472,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -481,6 +482,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Bubbly/Bubbly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -497,10 +499,10 @@
 				INFOPLIST_KEY_NSContactsUsageDescription = "TO DO";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "TO DO";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "TO DO";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarHidden = NO;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -512,7 +514,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -819,13 +821,13 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		47BA967B2EB537360019FE94 /* MsgRoomMain */ = {
+		47CC12A52EE646EF00D3BDE8 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MsgRoomMain;
 		};
-		47BA967D2EB537410019FE94 /* MsgRoomMain */ = {
+		47CC12A72EE655A600D3BDE8 /* Services */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = MsgRoomMain;
+			productName = Services;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

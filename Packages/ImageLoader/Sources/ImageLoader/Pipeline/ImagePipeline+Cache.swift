@@ -57,8 +57,7 @@ public extension ImagePipeline.Cache {
         }
         if caches.contains(.disk) {
             if let data = cachedData(for: request),
-               let image = decodeImageData(data, for: request)
-            {
+               let image = decodeImageData(data, for: request) {
                 return image
             }
         }

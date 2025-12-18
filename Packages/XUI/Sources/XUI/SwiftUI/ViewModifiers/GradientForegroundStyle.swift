@@ -15,7 +15,7 @@ struct GradientForegroundStyle: ViewModifier {
                     Color(red: 0.259, green: 0.522, blue: 0.957),
                     Color(red: 0.608, green: 0.447, blue: 0.796),
                     Color(red: 0.851, green: 0.396, blue: 0.439),
-                    Color(red: 0.851, green: 0.396, blue: 0.439),
+                    Color(red: 0.851, green: 0.396, blue: 0.439)
                 ],
                 startPoint: .leading,
                 endPoint: .trailing
@@ -34,7 +34,7 @@ struct MovingGradientForegroundStyle: ViewModifier {
                     Color(red: 0.259, green: 0.522, blue: 0.957),
                     Color(red: 0.608, green: 0.447, blue: 0.796),
                     Color(red: 0.259, green: 0.522, blue: 0.957),
-                    Color(red: 0.608, green: 0.447, blue: 0.796),
+                    Color(red: 0.608, green: 0.447, blue: 0.796)
                 ],
                 startPoint: animateGradient ? .leading : .trailing,
                 endPoint: animateGradient ? .trailing : .leading

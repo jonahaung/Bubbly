@@ -14,10 +14,11 @@ struct FloatingDateView: View {
         if let string = manager.eventsManager.floatingDateString {
             Text(string)
                 .font(.footnote.bold())
+				.lineHeight(.normal)
+				.lineSpacing(0)
                 .padding(.horizontal, 12)
-                .padding(.vertical, 3)
-                .background(manager.conversation.theme.background.color, in: .capsule)
-                .transition(.move(edge: .top).combined(with: .scale(0.01, anchor: .top)))
+                .padding(.vertical, 4)
+				.background(manager.conversation.properties.theme.background.color, in: .capsule)
         }
     }
 }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public actor AsyncFetcher<T: Sendable & Hashable> {
+public actor AsyncFetcher<T: Sendable> {
     public typealias ID = String
     public typealias Fetch = @Sendable (ID) async throws -> T
     public typealias Completion = @Sendable (Result<T, Error>) -> Void
@@ -98,8 +98,10 @@ public actor AsyncFetcher<T: Sendable & Hashable> {
             }
             return try await task.value
         } else {
-            // Enqueue and wait for start
-            pendingQueue.append(id)
+            // Avoid duplicate pending entries for the same id
+            if !pendingQueue.contains(id) {
+                pendingQueue.append(id)
+            }
             return try await waitForPending(id: id)
         }
     }
@@ -228,7 +230,8 @@ public actor AsyncFetcher<T: Sendable & Hashable> {
 
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<T, Error>) in
             waiters[id, default: []].append(continuation)
-            // If the id was removed from pending before it starts (e.g. cancelled), the cancellation path will resume the continuation.
+            // If the id was removed from pending before it starts (e.g. cancelled),
+            // the cancellation path will resume the continuation.
         }
     }
 

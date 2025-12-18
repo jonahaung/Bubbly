@@ -56,7 +56,7 @@ actor AttachmentDataAPI {
         guard let id = message.imageID else {
             throw AttachmentError.missingImageID
         }
-
+		debugPrint("fetching attachment data for id: \(id)")
         // Early return if no attachment exists
         guard let attachment = message.attachment else {
             return AttachmentData(id: id, data: nil)

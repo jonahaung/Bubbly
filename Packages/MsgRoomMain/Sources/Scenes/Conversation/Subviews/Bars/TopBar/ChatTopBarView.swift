@@ -13,11 +13,12 @@ import XUI
 struct ChatTopBarView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(ChatViewManager.self) private var manager
+	@Environment(\.conversationTheme) private var theme
 
     var body: some View {
         HStack {
             AsyncButton {
-                await saveConversation()
+				await manager.saveConversationChanges()
                 dismiss()
             } label: {
                 SystemImage(.chevronLeft)
@@ -56,15 +57,6 @@ struct ChatTopBarView: View {
                     .padding(.init([.top, .bottom, .trailing]))
             }
         }
-        .frame(height: ChatLayoutConstants.topBarHeight)
-        .background {
-            manager.conversation.theme.background.color.ignoresSafeArea(edges: .top)
-        }
-    }
-
-    private func saveConversation() async {
-        var conversation = manager.conversation
-        conversation.lastMsgID = manager.cellItems.last?.id
-        try? await conversation.saveChanges()
+		.background(theme.backgroundColor, ignoresSafeAreaEdges: [.leading, .trailing, .top])
     }
 }

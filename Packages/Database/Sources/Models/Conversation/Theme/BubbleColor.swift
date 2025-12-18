@@ -24,8 +24,8 @@ public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Iden
     private static let colorMap: [BubbleColor: Color] = [
         // MARK: - Basics
 
-        .default: .init(red: 1.0, green: 1.0, blue: 1.0),
-        .whatsApp: .init(red: 0.85, green: 1.0, blue: 0.85),
+		.default: .init(red: 0.85, green: 1.0, blue: 0.85),
+		.whatsApp: .init(red: 0.85, green: 1.0, blue: 0.85),
 
         // MARK: - Blues
 
@@ -64,7 +64,7 @@ public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Iden
 
         // MARK: - Grays / Neutrals
 
-        .lightGray: .init(red: 0.93, green: 0.93, blue: 0.93),
+        .lightGray: .init(red: 0.93, green: 0.93, blue: 0.93)
     ]
 }
 

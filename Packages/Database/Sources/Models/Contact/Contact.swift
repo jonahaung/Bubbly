@@ -5,28 +5,61 @@
 //  Created by Aung Ko Min on 13/7/25.
 //
 
+import Contacts
 import Foundation
+import PhoneNumberKit
+import XUI
 
-public struct Contact: ContactRepresentable {
-    public let uid: String
-    public var name: String
-    public var photoURL: String
-    public var pushToken: String
-    public var publicKeyString: String
+public struct Contact: ContactRepresentableSendable, Codable, Hashable {
+	public let uid: String
+	public var name: String
+	public let mobile: String
+	public var photoURL: String
+	public var pushToken: String
+	public var publicKeyString: String
+}
 
-    public let mobile: String
-    public var theme: ConversationTheme?
-    public var seenMember: SeenMember?
-    public var lastMsgID: String?
+extension Contact: StringMergable {
+	public var isChatAvailable: Bool { !uid.hasPrefix("+") }
+	public init?(cnContact: CNContact) {
+		let name = cnContact.givenName.isEmpty ? [
+			cnContact.middleName,
+			cnContact.familyName
+		].joined(
+			separator: " "
+		).trimmed : cnContact.givenName.trimmed
 
-    public enum CodingKeys: String, CodingKey {
-        case uid
-        case name
-        case mobile
-        case photoURL
-        case pushToken
-        case publicKeyString
-    }
+		guard !name.isWhitespace,
+			  let phoneNumberString = cnContact.phoneNumbers.first(where: { $0.value.stringValue.isWhitespace == false })?.value.stringValue
+		else {
+			return nil
+		}
 
-    public var isChatAvailable: Bool { !uid.hasPrefix("+") }
+		let phoneNumberKit = PhoneNumberKit()
+		guard let phoneNumber = try? phoneNumberKit.parse(phoneNumberString),
+			  phoneNumber.type == .mobile
+		else {
+			return nil
+		}
+
+		let formattedPhoneNumber =
+		phoneNumberKit
+			.format(phoneNumber, toType: .e164)
+			.withoutSpacesAndNewLines
+
+		self.init(
+			uid: formattedPhoneNumber,
+			name: name,
+			mobile: formattedPhoneNumber,
+			photoURL: "",
+			pushToken: "",
+			publicKeyString: ""
+		)
+	}
+}
+
+extension Contact: EmptyRepresentable {
+	public static var empty: Contact {
+		.init(uid: "", name: "", mobile: "", photoURL: "", pushToken: "", publicKeyString: "")
+	}
 }

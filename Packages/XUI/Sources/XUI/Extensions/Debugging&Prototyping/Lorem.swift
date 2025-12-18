@@ -195,7 +195,7 @@ public enum Lorem {
             "https://chat.deepseek.com",
             "https://github.com/jonahaung",
             "https://www.facebook.com",
-            "https://www.figma.com/design/HLD95kRfVL3qKuucdMY4vF/CIMB-Micro-Credit-x-SimplyGo?m=dev",
+            "https://www.figma.com/design/HLD95kRfVL3qKuucdMY4vF/CIMB-Micro-Credit-x-SimplyGo?m=dev"
         ].compactMap { URL(string: $0) }.random()!
     }
 

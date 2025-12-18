@@ -15,7 +15,7 @@ struct ConversationGroupCell: View {
 
     var body: some View {
         Button {
-            ConversationInitializer.start(conversation: AnyConversation(.group(group)))
+			ConversationInitializer.start(conversation: Conversation(.group(group), properties: group.conversationProperties))
         } label: {
             HStack(spacing: 20) {
                 ProfilePhoto(

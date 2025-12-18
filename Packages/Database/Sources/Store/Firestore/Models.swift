@@ -35,8 +35,8 @@ public struct FirestoreFilter {
             "fieldFilter": [
                 "field": ["fieldPath": field],
                 "op": `operator`.rawValue,
-                "value": value.dictionary,
-            ],
+                "value": value.dictionary
+            ]
         ]
     }
 }

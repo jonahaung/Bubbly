@@ -22,8 +22,7 @@ public extension CryptoService {
         }
 
         if let storedKeyString = storage.string(for: .security(.privateKey(id: currentUserId))),
-           let privateKey = Crypto.privateKey(with: storedKeyString)
-        {
+           let privateKey = Crypto.privateKey(with: storedKeyString) {
             return privateKey
         }
 

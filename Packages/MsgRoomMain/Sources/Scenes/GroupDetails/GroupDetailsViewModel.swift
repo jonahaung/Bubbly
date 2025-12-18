@@ -61,7 +61,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
         let group = group
         try await Store.shared.groupStore
             .updateAndSave(uid: originalGroup.uid) { model in
-                model.update(with: group)
+                model.update(from: group)
             }
         try await FirestoreRepo.add(group, collectionPath: .groups, documentID: group.uid)
         setLoading(false)

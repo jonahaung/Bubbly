@@ -13,45 +13,35 @@ import SwiftUI
 import XUI
 
 private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
-    @LazyState private var currentUser: CurrentUser
 
-    init(_ user: User) {
-        _currentUser = .init(wrappedValue: .init(user))
-    }
+	@LazyState private var currentUser: CurrentUser
+	@LazyState private var contactStore = ContactStore.shared
+	@LazyState private var router = Router.shared
 
-    func body(content: Content) -> some View {
-        content
-            .environment(\.currentUser, currentUser.model)
-            .environment(ContactStore.shared)
-            .environment(\.sendChatRoomAction) { data in
-                Task {
-                    do {
-                        let conversation = try await ConversationRepo.getOrCreate(
-                            for: data.conID, refetch: false
-                        )
-                        try await Socket.shared
-                            .send(data, conversation: conversation)
-                    } catch {
-                        Log(error)
-                    }
-                }
-            }
-            .task {
-                do {
-                    currentUser.start()
-                    try await ContactStore.shared.fetchData()
-                } catch {
-                    Log(error)
-                }
-            }
-    }
+	init(_ currentUser: CurrentUserModel) {
+		_currentUser = .init(wrappedValue: .init(currentUser))
+	}
+
+	func body(content: Content) -> some View {
+		content
+			.environment(router)
+			.environment(\.currentUser, currentUser.model)
+			.environment(contactStore)
+			.task {
+				do {
+					try await contactStore.fetchData()
+				} catch {
+					Log(error)
+				}
+			}
+	}
 }
 
-public extension View {
-    func msgRoomEntryPoint(_ user: User) -> some View {
-        ModifiedContent(
-            content: self,
-            modifier: MsgRoomEntryPointModifier(user)
-        )
-    }
+extension View {
+	public func msgRoomEntryPoint(_ currentUser: CurrentUserModel) -> some View {
+		ModifiedContent(
+			content: self,
+			modifier: MsgRoomEntryPointModifier(currentUser)
+		)
+	}
 }

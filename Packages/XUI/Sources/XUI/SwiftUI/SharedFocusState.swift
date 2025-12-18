@@ -7,28 +7,38 @@
 
 import SwiftUI
 
+@MainActor
 @Observable
 public final class SharedFocusState {
-    public var value: FocusState<Bool>.Binding?
-    public init(_ focusState: FocusState<Bool>.Binding) {
-        value = focusState
-    }
+	public let binding: FocusState<Bool>.Binding
+
+	public init(_ binding: FocusState<Bool>.Binding) {
+		self.binding = binding
+	}
+
+	public var isFocused: Bool {
+		get { binding.wrappedValue }
+		set { binding.wrappedValue = newValue }
+	}
+
+	public func focus() { isFocused = true }
+	public func defocus() { isFocused = false }
+	public func toggle() { isFocused.toggle() }
 }
 
-struct SharedFocusStateEnvironmentKey: @preconcurrency EnvironmentKey {
-    @MainActor
-    static let defaultValue: SharedFocusState? = nil
+private struct SharedFocusEnvironmentKey: EnvironmentKey {
+	static let defaultValue: SharedFocusState? = nil
 }
 
 public extension EnvironmentValues {
-    var focusState: SharedFocusState? {
-        get { self[SharedFocusStateEnvironmentKey.self] }
-        set { self[SharedFocusStateEnvironmentKey.self] = newValue }
-    }
+	var sharedFocus: SharedFocusState? {
+		get { self[SharedFocusEnvironmentKey.self] }
+		set { self[SharedFocusEnvironmentKey.self] = newValue }
+	}
 }
 
 public extension View {
-    func focusState(_ value: FocusState<Bool>.Binding) -> some View {
-        environment(\.focusState, SharedFocusState(value))
-    }
+	func sharedFocus(_ binding: FocusState<Bool>.Binding) -> some View {
+		environment(\.sharedFocus, SharedFocusState(binding))
+	}
 }

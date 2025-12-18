@@ -31,13 +31,3 @@ public struct SelectedPhoto: Sendable, Equatable, Identifiable {
         try await item.loadTransferable(type: T.self)
     }
 }
-
-public struct StickerResult: Sendable, Identifiable {
-    public let id: SelectedPhoto.ID
-    public let uiImage: UIImage
-
-    public init(id: SelectedPhoto.ID, uiImage: UIImage) {
-        self.id = id
-        self.uiImage = uiImage
-    }
-}

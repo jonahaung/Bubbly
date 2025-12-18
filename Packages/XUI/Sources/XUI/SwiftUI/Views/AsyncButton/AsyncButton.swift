@@ -72,8 +72,7 @@ public struct AsyncButton<Label>: View where Label: View {
                         }
 
                         if options.contains(.showAlertOnError),
-                           case let .failure(error) = result
-                        {
+                           case let .failure(error) = result {
                             let localizedError = error as? LocalizedError ?? UnlocalizedError(error: error)
                             self.localizedError = AnyLocalizedError(erasing: localizedError)
                             showingErrorAlert = true

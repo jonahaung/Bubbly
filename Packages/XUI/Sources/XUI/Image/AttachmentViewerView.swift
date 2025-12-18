@@ -5,8 +5,8 @@
 //  Created by Aung Ko Min on 27/7/23.
 //
 
-import ImageLoader
 import SwiftUI
+import ImageLoader
 
 public struct AttachmentViewerView: View {
     @State private var attachment: XAttachment
@@ -52,8 +52,7 @@ public struct AttachmentViewerView: View {
                 Text(error.localizedDescription)
             case .none:
                 if let data = attachment.initialImageData, let fileImage = UIImage(
-                    data: data)
-                {
+                    data: data) {
                     Image(uiImage: fileImage)
                         .resizable()
                         .scaledToFit()

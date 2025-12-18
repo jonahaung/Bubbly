@@ -12,7 +12,6 @@ public struct MsgCellLayout: Conformable {
     public let showTimeSeparator: Bool
     public let showTopPadding: Bool
     public let bubble: Bubble
-    public var isSelected: Bool = false
 
     public init(showTimeSeparator: Bool, showTopPadding: Bool, bubble: Bubble) {
         self.showTimeSeparator = showTimeSeparator

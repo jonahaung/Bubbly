@@ -112,11 +112,15 @@ private struct ParagraphView: View {
     }
 }
 
-private struct CodeBlockView: View {
+public struct CodeBlockView: View {
     let language: String?
     let content: String
 
-    var body: some View {
+	public init(language: String?, content: String) {
+		self.language = language
+		self.content = content
+	}
+    public var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let language {
                 Text(language.capitalized)

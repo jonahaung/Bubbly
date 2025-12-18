@@ -16,7 +16,6 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
     public var createdBy: String
     public var theme: ConversationTheme = .init()
     public var seenMembers: [SeenMember]?
-    public var lastMsgID: String?
 
     public init(
         uid: String,
@@ -26,8 +25,7 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         members: [String],
         createdBy: String,
         theme: ConversationTheme,
-        seenMembers: [SeenMember],
-        lastMsgID: String?
+        seenMembers: [SeenMember]
     ) {
         self.uid = uid
         self.name = name
@@ -37,7 +35,6 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         self.createdBy = createdBy
         self.theme = theme
         self.seenMembers = seenMembers
-        self.lastMsgID = lastMsgID
     }
 
     enum CodingKeys: String, CodingKey {
@@ -50,4 +47,8 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         case theme
         case seenMembers
     }
+
+	public var conversationProperties: ConversationProperties {
+		ConversationProperties(uid: uid, theme: theme, seenMembers: seenMembers ?? [])
+	}
 }

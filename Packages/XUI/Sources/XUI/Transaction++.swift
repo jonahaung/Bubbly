@@ -10,11 +10,11 @@ import SwiftUI
 public extension Transaction {
     @MainActor
     static let withAnimation: Transaction = {
-        var transition = Transaction(animation: .interpolatingSpring(.smooth, initialVelocity: 0.1))
+		var transition = Transaction(animation: .interpolatingSpring)
         transition.disablesAnimations = false
         transition.scrollPositionUpdatePreservesVelocity = false
-        transition.scrollContentOffsetAdjustmentBehavior = .disabled
-        transition.tracksVelocity = true
+		transition.scrollContentOffsetAdjustmentBehavior = .automatic
+		transition.tracksVelocity = false
         return transition
     }()
 

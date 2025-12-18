@@ -10,12 +10,12 @@ import SwiftUI
 private struct ToastPresentableodifier: ViewModifier {
     @State private var toastPresenter = ToastPresenter.shared
     func body(content: Content) -> some View {
-        ZStack(alignment: .top) {
-            content
-            if let toast = toastPresenter.toast {
-                ToastBanner(toast: toast)
-            }
-        }
+		content
+			.overlay(alignment: .top) {
+				if let toast = toastPresenter.toast {
+					ToastBanner(toast: toast)
+				}
+			}
     }
 }
 

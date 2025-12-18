@@ -123,7 +123,7 @@ public struct DocumentPicker: UIViewControllerRepresentable {
     }
 
     public func makeUIViewController(context: Context) -> UIViewControllerType {
-        var picker = if let contentTypes {
+        let picker = if let contentTypes {
             UIDocumentPickerViewController(forOpeningContentTypes: contentTypes, asCopy: asCopy)
         } else {
             UIDocumentPickerViewController(forExporting: urls!, asCopy: asCopy)

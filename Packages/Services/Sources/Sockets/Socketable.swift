@@ -28,7 +28,7 @@ public extension Socketable {
             .updateAndSaveDebounced(
                 uid: msg.uid
             ) { model in
-                model.update(with: msg)
+                model.update(from: msg)
             }
     }
 

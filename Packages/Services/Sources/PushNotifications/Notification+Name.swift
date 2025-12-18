@@ -14,7 +14,7 @@ public extension Notification.Name {
         Notification.Name("conversation=\(conID)")
     }
 
-    static let tapPushNotificationAction = Notification.Name("tapPushNotificationAction")
+//    static let tapPushNotificationAction = Notification.Name("tapPushNotificationAction")
     static let receiveDeviceToken = Notification.Name("receiveDeviceToken")
     static let inboxChanges = Notification.Name("inboxChanges")
 }

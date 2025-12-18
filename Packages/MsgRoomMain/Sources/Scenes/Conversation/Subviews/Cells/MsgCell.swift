@@ -12,6 +12,7 @@ import SwiftUI
 import XUI
 
 struct MsgCell: View {
+
     private var layout: MsgCellLayout { viewModel.layout }
     @Environment(MsgCellViewModel.self) private var viewModel
     @Environment(\.sendMsgCellInteraction) private var sendMsgCellInteraction
@@ -22,7 +23,6 @@ struct MsgCell: View {
             MsgCellContentGesturesView(MsgCellContent())
             MsgCellOutgoingStatusView()
         }
-        .allowsTightening(true)
         .equatable(by: viewModel.reloadID)
         .id(viewModel.id)
         .layoutValue(viewModel.msg.layoutValue)
@@ -32,7 +32,7 @@ struct MsgCell: View {
     private func leftView() -> some View {
         if !viewModel.isSender {
             ZStack(alignment: .bottom) {
-                if layout.bubble.showAvatar, let sender = viewModel.sender() {
+				if viewModel.isVisible, layout.bubble.showAvatar, let sender = viewModel.sender() {
                     ProfilePhoto(
                         sender,
                         size: .custom(ChatLayoutConstants.Cell.defaultSpacing),

@@ -22,8 +22,9 @@ public final class CurrentUser {
     public var model: CurrentUserModel
     private let cancelBag = CancelBag()
 
-    public init(_ user: User) {
-        model = .init(user)
+	public init(_ model: CurrentUserModel) {
+		self.model = model
+		observeReloadNotification()
     }
 
     @concurrent private func updateIfNeeded() async throws {
@@ -55,13 +56,13 @@ public final class CurrentUser {
     @MainActor private func updateModelOnMain(_ newValue: CurrentUserModel) {
         model = newValue
     }
-
-    public func start() {
-        debugPrint("4️⃣ CurrentUser starting...")
-        observeReloadNotification()
-        CurrentUser.reload()
-    }
-
+//
+//    public func start() {
+//        debugPrint("4️⃣ CurrentUser starting...")
+//        observeReloadNotification()
+//        CurrentUser.reload()
+//    }
+//
     private func observeReloadNotification() {
         NotificationCenter.default
             .publisher(for: .reloadCurrentUser)

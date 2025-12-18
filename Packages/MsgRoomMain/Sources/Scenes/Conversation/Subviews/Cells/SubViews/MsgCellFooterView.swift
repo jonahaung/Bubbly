@@ -22,9 +22,15 @@ struct MsgCellHeader: View {
         Text(text)
             .font(.system(size: UIFont.smallSystemFontSize, weight: .medium).smallCaps())
             .foregroundStyle(.secondary)
-            .padding(.horizontal, 8)
-            .padding(.horizontal, ChatLayoutConstants.Cell.defaultSpacing + 4)
-            .padding(.top, 8)
+			.padding(
+				.init(
+					top: 8,
+					leading: ChatLayoutConstants.Cell.defaultSpacing + 4 + 8,
+					bottom: 4,
+					trailing: ChatLayoutConstants.Cell.defaultSpacing + 4 + 8
+				)
+			)
+			.lineHeight(.tight)
             .equatable(by: msg.uid)
             .id(msg.uid + Self.typeName)
             .layoutValue(.init(uid: msg.uid + Self.typeName, recipient: msg.receiptType))
@@ -43,28 +49,19 @@ struct MsgCellFooter: View {
 
     var body: some View {
         Text(text)
-            .font(.system(size: UIFont.smallSystemFontSize, weight: .medium).smallCaps())
+			.font(.system(size: UIFont.smallSystemFontSize, weight: .medium).smallCaps())
             .foregroundStyle(.secondary)
-            .padding(.horizontal, 8)
-            .padding(.horizontal, ChatLayoutConstants.Cell.defaultSpacing + 4)
-            .padding(.bottom, 8)
+			.padding(
+				.init(
+					top: 0,
+					leading: ChatLayoutConstants.Cell.defaultSpacing + 4 + 8,
+					bottom: 8,
+					trailing: ChatLayoutConstants.Cell.defaultSpacing + 4 + 8
+				)
+			)
+			.lineHeight(.tight)
             .equatable(by: msg.uid)
             .id(msg.uid + Self.typeName)
             .layoutValue(.init(uid: msg.uid + Self.typeName, recipient: msg.receiptType))
-    }
-}
-
-struct MsgCellFooterView: View {
-    private let text: String
-    init(_ text: String) {
-        self.text = text
-    }
-
-    var body: some View {
-        Text(.init(text))
-            .font(.system(size: UIFont.smallSystemFontSize, weight: .medium))
-            .foregroundStyle(.secondary)
-            .padding(.horizontal, 8)
-            .equatable(by: text)
     }
 }

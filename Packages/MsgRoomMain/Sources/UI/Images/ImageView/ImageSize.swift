@@ -7,16 +7,29 @@
 
 import Foundation
 
-public protocol ImageSize {
-    var width: CGFloat? { get }
-    var height: CGFloat? { get }
-}
+public enum ImageSize: Sendable, Equatable, Codable {
 
-public extension ImageSize {
-    var size: CGSize? {
-        guard let width, let height else {
-            return nil
-        }
-        return .init(width: width, height: height)
-    }
+	case mini
+	case small
+	case medium
+	case original
+	case custom(CGFloat)
+
+	public var value: CGFloat? {
+		switch self {
+		case .mini:
+			30
+		case .small:
+			50
+		case .medium:
+			100
+		case .original:
+			nil
+		case let .custom(cGFloat):
+			cGFloat
+		}
+	}
+
+	public var width: CGFloat? { value }
+	public var height: CGFloat? { value }
 }

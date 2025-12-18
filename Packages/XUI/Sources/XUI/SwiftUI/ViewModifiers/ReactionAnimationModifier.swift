@@ -7,7 +7,8 @@
 
 import SwiftUI
 
-private struct ReactionAnimationModifier<T: Equatable>: ViewModifier {
+@MainActor
+private struct ReactionAnimationModifier<T: Equatable & Sendable>: ViewModifier {
     struct AnimationValues {
         var scale = 1.0
         var verticalStretch = 1.0
@@ -63,7 +64,7 @@ private struct ReactionAnimationModifier<T: Equatable>: ViewModifier {
 }
 
 public extension View {
-    func withReactionAnimation(_ trigger: some Equatable, offset: CGSize = .zero) -> some View {
+    func withReactionAnimation(_ trigger: some Equatable & Sendable, offset: CGSize = .zero) -> some View {
         modifier(ReactionAnimationModifier(trigger: trigger, offset: offset))
     }
 }

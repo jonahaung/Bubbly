@@ -9,21 +9,21 @@ import ImageLoader
 import SwiftUI
 
 public struct ImageViewConfig {
-    public typealias Size = any ImageSize
-    public var size: Size?
-    public var processors: [ImageProcessing]
-    public var tapAction: ImageViewTapAction
-    public var backgroundColor: Color?
+
+	public let size: ImageSize
+    public let processors: [ImageProcessing]
+    public let tapAction: ImageViewTapAction
+	public let backgroundColor: Color?
 
     public init(
-        size: Size? = nil,
+        size: ImageSize,
         processors: [ImageProcessing] = [],
         backgroundColor: Color? = nil,
         tapAction: ImageViewTapAction = .openPhotoViewer
     ) {
         self.size = size
         self.processors = processors
-        self.tapAction = tapAction
-        self.backgroundColor = backgroundColor
+		self.backgroundColor = backgroundColor
+		self.tapAction = tapAction
     }
 }

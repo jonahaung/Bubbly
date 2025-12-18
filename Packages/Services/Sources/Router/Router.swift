@@ -14,62 +14,50 @@ import XUI
 @MainActor
 @Observable
 public class Router {
-    public static let shared = Router()
 
-    private let cancelBag = CancelBag()
+	public static let shared = Router()
 
-    public var tab: TabPath = .inbox
-    public var fullScreen: NavPath?
-    public var sheet: NavPath?
+	public var tab: TabPath = .inbox
+	public var fullScreen: NavPath?
+	public var sheet: NavPath?
 
-    public var navRouters = TabPath.allCases.map { NavRouter($0) }
-    public var currentNavRouter: NavRouter? {
-        navRouters.first(where: { $0.id == tab })
-    }
+	public var navRouters = TabPath.allCases.map { NavRouter($0) }
 
-    public var currentNavPath: NavPath? {
-        currentNavRouter?.navPath.last
-    }
+	public var currentNavRouter: NavRouter {
+		navRouters.first(where: { $0.id == tab })!
+	}
 
-    public func navRouter(for tab: TabPath) -> NavRouter {
-        navRouters.first(where: { $0.id.id == tab.id })!
-    }
+	public var currentNavPath: NavPath? {
+		currentNavRouter.navPath.last
+	}
 
-    private init() {
-        registerForRemoteNotifications()
-    }
+	public func navRouter(for tab: TabPath) -> NavRouter {
+		navRouters.first(where: { $0.id == tab })!
+	}
 
-    public func push(_ path: NavPath) {
-        currentNavRouter?.push(path)
-    }
+	private init() {}
 
-    public func presentFullScreen(_ path: NavPath?) {
-        fullScreen = path
-    }
+	public func push(_ path: NavPath) {
+		currentNavRouter.push(path)
+	}
 
-    public func presentSheet(_ path: NavPath?) {
-        sheet = path
-    }
+	public func presentFullScreen(_ path: NavPath?) {
+		fullScreen = path
+	}
 
-    public var tabBarVisibility: Visibility {
-        currentNavRouter?.navPath.count == 0 ? .visible : .hidden
-    }
-}
+	public func dismissFullScreen() {
+		fullScreen = nil
+	}
 
-private extension Router {
-    func registerForRemoteNotifications() {
-        NotificationCenter.default
-            .publisher(for: .tapPushNotificationAction)
-            .receive(on: RunLoop.main)
-            .sink { notification in
-                guard let userInfo = notification.userInfo else {
-                    return
-                }
-                guard let data = AnyMsgData(userInfo: userInfo) else {
-                    return
-                }
-                ConversationInitializer.start(conID: data.conID, refetch: false, delay: 1)
-            }
-            .store(in: cancelBag)
-    }
+	public func presentSheet(_ path: NavPath?) {
+		sheet = path
+	}
+
+	public func dismissSheet() {
+		sheet = nil
+	}
+
+	public var tabBarVisibility: Visibility {
+		currentNavRouter.navPath.isEmpty ? .visible : .hidden
+	}
 }

@@ -65,7 +65,7 @@ public extension ContactStore {
             collection: .groups,
             field: .members
         )
-
+		print(groups)
         let store = Store.shared.groupStore
 
         try await withThrowingTaskGroup(of: Void.self) { taskGroup in
@@ -75,7 +75,7 @@ public extension ContactStore {
                         try await store.insert(group)
                     } else {
                         try await store.updateAndSave(uid: group.uid) { model in
-                            model.update(with: group)
+                            model.update(from: group)
                         }
                     }
                     try await ContactRepo.getOrCreate(for: group.members, refatch: false)

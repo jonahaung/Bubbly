@@ -12,101 +12,99 @@ import SwiftUI
 import XUI
 
 struct MsgsScrollView: View {
-    let manager: ChatViewManager
-    @Environment(\.screenSize) var screenSize
-    @Namespace private var namespace
-    @Environment(\.focusState) private var focusState
 
-    var body: some View {
-        ScrollView(.vertical, showsIndicators: true) {
-            MsgsScrollViewLayout(
-                config: .init(
-                    manager.config.lineSpacing,
-                    manager.config.contentInsets,
-                    containerSize: screenSize
-                ),
-                layoutCache: manager.scrollManager.layoutCache
-            ) {
-                if manager.eventsManager.showContactInfo {
-                    ConversationHeaderView()
-                        .frame(size: screenSize)
-                }
-                ForEach(
-                    manager.cellItems,
-                    id: \.id
-                ) {
-                    let layout = $0.layout
-                    if layout.showTimeSeparator {
-                        MsgCellTimeSeparaterView(
-                            id: $0.id,
-                            date: $0.msg.date
-                        )
-                    } else if layout.showTopPadding {
-                        MsgCellSpacer(
-                            id: $0.id
-                        )
-                    }
-                    if layout.isSelected {
-                        MsgCellHeader(
-                            msg: $0.msg
-                        )
-                    }
-                    MsgCell()
-                        .environment(
-                            $0
-                        )
-                    if layout.isSelected {
-                        MsgCellFooter(
-                            msg: $0.msg
-                        )
-                    }
-                }
-            }
-            .geometryGroup()
-            .scrollTargetLayout()
-        }
-        .onScrollPhaseChange {
-            oldPhase,
-                newPhase,
-                context in
-            manager.scrollManager
-                .handleScrollPhaseChange(
-                    oldPhase,
-                    newPhase,
-                    context
-                )
-        }
-        .onScrollGeometryChange(
-            for: VScrollGeometry.self,
-            of: {
-                .init($0)
-            },
-            action: {
-                oldValue,
-                    newValue in
-                manager.scrollManager
-                    .handleScrollGeometryChange(
-                        oldValue,
-                        newValue
-                    )
-            }
-        )
-        .onScrollTargetVisibilityChange(
-            idType: String.self,
-            threshold: 0.001
-        ) { values in
-            manager.handleVisibleIDsChange(values)
-        }
-        .scrollClipDisabled(true)
-        .scrollDismissesKeyboard(.interactively)
-        .defaultScrollAnchor(.bottom, for: .initialOffset)
-        .defaultScrollAnchor(.bottom, for: .sizeChanges)
-        .scrollContentBackground(.hidden)
-        .namespace(namespace)
-        .equatable(by: manager.reloadID)
-        .scrollPosition(.constant(manager.scrollManager.scrollPosition))
-        .task(priority: .background) {
-            await manager.onViewAppear()
-        }
-    }
+	@Namespace private var namespace
+	@Environment(ChatViewManager.self) private var manager
+	@Environment(\.selectedMsg) private var selectedMsg
+	@Environment(\.sharedFocus) private var sharedFocus
+
+	var body: some View {
+		GeometryReader { proxy in
+			ScrollView(.vertical, showsIndicators: true) {
+				MsgsScrollViewLayout(
+					config: .init(
+						manager.config.lineSpacing,
+						manager.config.contentInsets,
+						containerSize: proxy.size
+					),
+					layoutCache: manager.scrollManager.layoutCache
+				) {
+					if manager.eventsManager.showContactInfo {
+						ConversationHeaderView()
+							.frame(size: proxy.size)
+					}
+
+					ForEach(manager.data.array, id: \.id) { cellViewModel in
+						let isSelected = cellViewModel.id == selectedMsg?.id
+						if cellViewModel.layout.showTimeSeparator {
+							MsgCellTimeSeparaterView(
+								id: cellViewModel.id,
+								date: cellViewModel.msg.date
+							)
+						} else if cellViewModel.layout.showTopPadding {
+							MsgCellSpacer(
+								id: cellViewModel.id
+							)
+						}
+						if isSelected {
+							MsgCellHeader(
+								msg: cellViewModel.msg
+							)
+						}
+						MsgCell()
+							.environment(cellViewModel)
+						if isSelected {
+							MsgCellFooter(
+								msg: cellViewModel.msg
+							)
+						}
+					}
+				}
+//				.allowsTightening(true)
+				.namespace(namespace)
+				.animation(.snappy, value: manager.conversation.properties.seenMembers)
+				.geometryGroup()
+				.scrollTargetLayout()
+			}
+			.animation(.interactiveSpring, value: selectedMsg)
+			.onScrollPhaseChange { oldPhase, newPhase, context in
+				manager.scrollManager
+					.handleScrollPhaseChange(oldPhase, newPhase, context)
+				defocusIfNeeded(oldPhase, newPhase)
+
+			}
+			.onScrollGeometryChange(for: VScrollGeometry.self, of: { .init($0) }) { oldValue, newValue in
+				manager.scrollManager
+					.handleScrollGeometryChange(oldValue, newValue)
+			}
+			.onScrollTargetVisibilityChange(
+				idType: String.self,
+				threshold: 0.001
+			) { values in
+				manager.handleVisibleIDsChange(values)
+			}
+			.scrollDismissesKeyboard(.never)
+			.defaultScrollAnchor(.bottom, for: .sizeChanges)
+			.equatable(by: manager.reloadID)
+			.scrollPosition(
+				.init(
+					get: {
+						manager.scrollManager.scrollPosition
+					},
+					set: { _ in
+					}
+				)
+			)
+		}
+	}
+
+	func defocusIfNeeded(_ oldPhase: ScrollPhase, _ newPhase: ScrollPhase) {
+		if let sharedFocus {
+			if sharedFocus.isFocused {
+				if oldPhase == .interacting && newPhase == .decelerating {
+					sharedFocus.defocus()
+				}
+			}
+		}
+	}
 }

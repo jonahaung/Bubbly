@@ -10,17 +10,20 @@ import Foundation
 
 public extension Attachment {
     var bestFitHeight: CGFloat {
-        if aspectRatio == 1 {
-            return 200
-        }
-        return min(300, max(150, 200 * 1 / aspectRatio))
+		bestFitWidth / aspectRatio
     }
 
     var bestFitWidth: CGFloat {
-        bestFitHeight * aspectRatio
+		aspectRatio < 0.9 ? 200 : aspectRatio > 1.1 ? 300 : 150
     }
 
     var bestFitSize: CGSize {
         .init(width: bestFitWidth, height: bestFitHeight)
     }
+}
+
+public extension CGSize {
+	func divided(by ratio: CGFloat) -> CGSize {
+		.init(width: width / ratio, height: height / ratio)
+	}
 }

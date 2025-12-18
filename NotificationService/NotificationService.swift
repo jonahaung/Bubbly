@@ -56,8 +56,7 @@ final class NotificationService: UNNotificationServiceExtension {
     override func serviceExtensionTimeWillExpire() {
         if let content = bestAttemptContent, let data = AnyMsgData(
             userInfo: content
-                .userInfo)
-        {
+                .userInfo) {
             processNotificationData(data) { [weak self] _ in
                 guard let self else { return }
                 contentHandler?(content)

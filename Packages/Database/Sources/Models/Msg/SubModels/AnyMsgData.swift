@@ -98,7 +98,7 @@ public extension AnyMsgData {
     }
 
     func pushNotificationTitle(
-        for conversation: any ConversationRepresentable
+		for conversation: Conversation
     ) -> String {
         switch conversation.kind {
         case .contact:

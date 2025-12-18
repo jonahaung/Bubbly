@@ -17,6 +17,7 @@ public final class AppContainer: Sendable {
                 PContact.self,
                 PMsg.self,
                 PGroup.self,
+				PConversationProperties.self
             ]
         )
         let configuration = ModelConfiguration(

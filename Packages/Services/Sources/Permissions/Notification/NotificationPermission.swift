@@ -45,18 +45,22 @@ public final class NotificationPermission: Permission {
     }
 
     // Synchronous legacy fetch used by the `status` property.
-    // This avoids capturing any non-Sendable reference types inside the @Sendable closure.
+    // Avoids mutating a captured var inside a concurrently executing closure.
     private func fetchAuthorizationStatusLegacy() -> UNAuthorizationStatus? {
         let semaphore = DispatchSemaphore(value: 0)
-        var status: UNAuthorizationStatus?
+        let resultQueue = DispatchQueue(label: "NotificationPermission.fetchAuthorizationStatusLegacy.result")
 
+        var result: UNAuthorizationStatus?
         UNUserNotificationCenter.current().getNotificationSettings { settings in
-            status = settings.authorizationStatus
-            semaphore.signal()
+            let auth = settings.authorizationStatus
+            resultQueue.async {
+                result = auth
+                semaphore.signal()
+            }
         }
 
         semaphore.wait()
-        return status
+        return result
     }
 
     // Modern async alternative you can adopt at call sites.

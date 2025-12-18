@@ -64,8 +64,7 @@ public enum FSValue: Codable, Sendable {
         } else if let boolValue = try? container.decode(Bool.self, forKey: .booleanValue) {
             self = .bool(boolValue)
         } else if let timestamp = try? container.decode(String.self, forKey: .timestampValue),
-                  let date = formatter.date(from: timestamp)
-        {
+                  let date = formatter.date(from: timestamp) {
             self = .timestamp(date)
         } else if container.contains(.mapValue) {
             let mapContainer = try container.nestedContainer(keyedBy: CodingKeys.self, forKey: .mapValue)

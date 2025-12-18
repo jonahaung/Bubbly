@@ -9,15 +9,15 @@ import Database
 import SwiftUI
 import XUI
 
-@MainActor
 @Observable
 public final class MsgCellViewModel: ViewReloadable {
-    public private(set) var msg: Message
-    public private(set) var displayData: MsgCellDisplayData
+
+	public private(set) var msg: Message
+	public private(set) var displayData: MsgCellDisplayData
     public private(set) var isVisible = false
-    public private(set) var layout = MsgCellLayout()
-    public var reloadID: Int = 0
-    public let attachment: MsgCellAttachmentViewModel = .init()
+	public private(set) var layout = MsgCellLayout()
+	@ObservationIgnored public let attachment: MsgCellAttachmentViewModel = .init()
+	public var reloadID: Int = 0
 
     public init(_ msg: Message) {
         self.msg = msg
@@ -34,26 +34,13 @@ public final class MsgCellViewModel: ViewReloadable {
     public func update(layout: MsgCellLayout) {
         guard self.layout != layout else { return }
         self.layout = layout
-        layoutIfNeeded()
-    }
-
-    public func resetLayout() {
-        update(layout: .init())
+		layoutIfNeeded()
     }
 
     public func setVisibility(_ isVisible: Bool) {
         guard self.isVisible != isVisible else { return }
         self.isVisible = isVisible
-    }
-
-    public func setSelected(_ isSelected: Bool) {
-        var layout = layout
-        layout.isSelected = isSelected
-        var transaction = Transaction()
-        transaction.animation = .interactiveSpring
-        withTransaction(transaction) {
-            update(layout: layout)
-        }
+		layoutIfNeeded()
     }
 }
 

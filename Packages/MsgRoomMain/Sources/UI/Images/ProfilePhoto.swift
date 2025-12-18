@@ -10,31 +10,26 @@ import Services
 import SwiftUI
 import XUI
 
-extension AvatarSize: ImageSize {}
-
 public struct ProfilePhoto: View {
-    public typealias Item = any ImageViewItem
 
-    let item: Item
-    let size: AvatarSize
-    let config: ImageViewConfig
+	let item: any ImageViewItem
+	let config: ImageViewConfig
 
-    public init(
-        _ item: Item,
-        size: AvatarSize = .small,
-        tapAction: ImageViewTapAction = .openPhotoViewer
-    ) {
-        self.item = item
-        self.size = size
-        config = .init(
-            size: size,
-            processors: [], tapAction: tapAction
-        )
-    }
+	public init(
+		_ item: any ImageViewItem,
+		size: ImageSize = .small,
+		tapAction: ImageViewTapAction = .openPhotoViewer
+	) {
+		self.item = item
+		config = .init(
+			size: size,
+			processors: [], tapAction: tapAction
+		)
+	}
 
-    public var body: some View {
-        ImageView(item, config: config)
-            .background(Color.systemGray6)
-            .clipShape(.circle)
-    }
+	public var body: some View {
+		ImageView(item, config: config)
+			.clipShape(.circle)
+			.equatable(by: item.remoteURL)
+	}
 }

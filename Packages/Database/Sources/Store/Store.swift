@@ -16,6 +16,7 @@ public final class Store: Sendable {
     public let msgStore: StoreModelActor<PMsg>
     public let contactStore: StoreModelActor<PContact>
     public let groupStore: StoreModelActor<PGroup>
+	public let conversationPropertiesStore: StoreModelActor<PConversationProperties>
 
     public init() {
         let appContainer = AppContainer(migrationPlan: nil)
@@ -35,6 +36,10 @@ public final class Store: Sendable {
             modelContainer: modelContainer,
             modelExecutor: modelExecutor
         )
+		conversationPropertiesStore = .init(
+			modelContainer: modelContainer,
+			modelExecutor: modelExecutor
+		)
         self.appContainer = appContainer
     }
 }

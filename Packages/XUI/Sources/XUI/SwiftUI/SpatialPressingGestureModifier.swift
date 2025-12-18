@@ -16,8 +16,7 @@ struct SpatialPressingGestureModifier: ViewModifier {
     init(coordinateSpace: CoordinateSpaceProtocol,
          minimumPressDuration: TimeInterval,
          allowableMovement: CGFloat,
-         action: @escaping @Sendable (CGPoint?) -> Void)
-    {
+         action: @escaping @Sendable (CGPoint?) -> Void) {
         onPressingChanged = action
         self.coordinateSpace = coordinateSpace
         self.minimumPressDuration = minimumPressDuration
