@@ -30,11 +30,11 @@ public struct APNSNotification: Codable {
     }
 
     public struct APS: Codable {
+		public let alert: Alert
         public let mutableContent: Int
         public let contentAvailable: Int
         public let sound: String
         public let badge: Int
-        public let alert: Alert
 
         enum CodingKeys: String, CodingKey {
             case mutableContent = "mutable-content"
@@ -43,11 +43,11 @@ public struct APNSNotification: Codable {
         }
 
         public init(
+			alert: Alert,
             mutableContent: Bool = true,
             contentAvailable: Bool = true,
             sound: String = "default",
-            badge: Int = 1,
-            alert: Alert
+            badge: Int = 1
         ) {
             self.mutableContent = mutableContent ? 1 : 0
             self.contentAvailable = contentAvailable ? 1 : 0
@@ -57,15 +57,21 @@ public struct APNSNotification: Codable {
         }
     }
 
-    public struct Alert: Codable {
+	public struct Alert: Codable, Sendable {
         public let title: String
+		public let body: String
+
+		public init(title: String, body: String) {
+			self.title = title
+			self.body = body
+		}
     }
 
     public init(
         validateOnly: Bool = false,
         deviceToken: String,
         messageContent: String,
-        title: String
+		alert: APNSNotification.Alert,
     ) {
         self.validateOnly = validateOnly
         message = Message(
@@ -74,7 +80,7 @@ public struct APNSNotification: Codable {
             apns: APNS(
                 payload: Payload(
                     aps: APS(
-                        alert: Alert(title: title)
+						alert: alert
                     )
                 )
             )

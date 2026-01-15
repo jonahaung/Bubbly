@@ -41,14 +41,14 @@ public extension AnyMsgData {
     }
 
     struct ReactionPayload: Sendable, Codable, Hashable {
-        public let reaction: String
+		public let reaction: Reaction
+		public let msgID: String
         public let conID: String
-        public let senderID: String
 
-        public init(reaction: String, conID: String, senderID: String) {
+		public init(reaction: Reaction, msgID: String, conID: String) {
             self.reaction = reaction
+			self.msgID = msgID
             self.conID = conID
-            self.senderID = senderID
         }
     }
 
@@ -85,13 +85,13 @@ public extension AnyMsgData {
         switch self {
         case let .newMsg(rMsg),
              let .updatedMsg(rMsg):
-            rMsg.text
+			rMsg.text ?? rMsg.attachments.first?.displayText ?? "New Message"
         case let .deleteMsg(rMsg):
-            "Deleted: \(rMsg.text)"
+			"Deleted: \(rMsg.uid)"
         case let .typingStatus(typingStatus):
             typingStatus.conID
         case let .reaction(reaction):
-            reaction.reaction
+			reaction.reaction.rawValue
         case .seenStatus:
             "Seen"
         }
@@ -105,8 +105,6 @@ public extension AnyMsgData {
             Auth.auth().currentUser?.displayName ?? conversation.name
         case let .group(group):
             group.name
-        case let .system(ai):
-            ai.name
         }
     }
 
@@ -125,7 +123,7 @@ public extension AnyMsgData {
         switch self {
         case let .newMsg(msg),
              let .updatedMsg(msg):
-            msg.text
+			msg.text ?? msg.attachments.first?.displayText ?? "New Message"
         case .deleteMsg:
             "Message Deleted"
         case let .reaction(reaction):

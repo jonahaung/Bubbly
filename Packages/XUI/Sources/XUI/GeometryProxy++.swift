@@ -12,8 +12,6 @@ extension GeometryProxy {
 		frame(in: .global)
 	}
 }
-
-@available(macOS 11.0, iOS 14.0, tvOS 14.0, *)
 extension GeometryProxy {
 	public var insetAdjustedSize: CGSize {
 		.init(

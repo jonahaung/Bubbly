@@ -32,10 +32,6 @@ public struct Conversation: Codable, Sendable, Hashable, Equatable, UIdentifiabl
 			self.name = group.name
 			self.photoURL = group.photoURL ?? ""
 			self.members = group.members
-		case .system(let ai):
-			self.name = ai.name
-			self.photoURL = ai.photoURL
-			self.members = []
 		}
 	}
 }
@@ -66,22 +62,14 @@ extension Conversation {
 				uid: uid,
 				properties: properties
 			)
-		case .system(let contact):
-			let uid = ConversationIDGenerator.generate(currentUserID, contact.uid)
-			self.init(
-				kind: kind,
-				uid: uid,
-				properties: properties
-			)
 		}
 	}
-
 	@concurrent
 	public func reload(refetch: Bool = false) async throws -> Self {
 		try await ConversationRepo
 			.getOrCreate(for: uid, refetch: refetch)
 	}
-
+	@concurrent
 	public func saveChanges() async throws {
 		try await Store.shared.conversationPropertiesStore.updateAndSave(uid: uid) { value in
 			value.theme = properties.theme

@@ -33,10 +33,9 @@ public extension View {
     }
 }
 
-public struct DoubleEqualableView<Content: View, Value: Equatable, Value2: Equatable>: Sendable, @preconcurrency Equatable, View {
+public struct DoubleEqualableView<Content: View, Value: Equatable>: Sendable, @preconcurrency Equatable, View {
     public let content: Content
-    public let value: Value
-    public let value2: Value2
+    public let values: [Value]
 
     public var body: some View {
         content
@@ -44,20 +43,17 @@ public struct DoubleEqualableView<Content: View, Value: Equatable, Value2: Equat
 
     @MainActor
     public static func == (lhs: DoubleEqualableView, rhs: DoubleEqualableView) -> Bool {
-        lhs.value == rhs.value && lhs.value2 == rhs.value2
-    }
-
-    public init(content: Content, value: Value, value2: Value2) {
-        self.content = content
-        self.value = value
-        self.value2 = value2
+		lhs.values == rhs.values
     }
 }
 
 public extension View {
     /// Prevents the view from updating its child view when its new given value is the same as its old given value.
-    func equatable<value2: Equatable>(by value: some Equatable, value2: value2) -> some View {
-        DoubleEqualableView(content: self, value: value, value2: value2)
+	func equatable(by values: [AnyEquatable]) -> some View {
+        DoubleEqualableView(content: self, values: values)
             .equatable()
     }
+	func animation(_ animation: Animation, values: [String]) -> some View {
+		self.animation(animation, value: values)
+	}
 }

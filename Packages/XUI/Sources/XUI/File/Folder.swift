@@ -194,7 +194,6 @@ public extension Folder {
     static var kind: LocationKind {
         .folder
     }
-
     static var current: Folder {
         try! Folder(path: "")
     }
@@ -334,37 +333,35 @@ public extension Folder {
     }
 }
 
-#if os(iOS) || os(tvOS) || os(macOS)
-    public extension Folder {
-        static func matching(
-            _ searchPath: FileManager.SearchPathDirectory,
-            in domain: FileManager.SearchPathDomainMask = .userDomainMask,
-            resolvedBy fileManager: FileManager = .default
-        ) throws -> Folder {
-            let urls = fileManager.urls(for: searchPath, in: domain)
+public extension Folder {
+	static func matching(
+		_ searchPath: FileManager.SearchPathDirectory,
+		in domain: FileManager.SearchPathDomainMask = .userDomainMask,
+		resolvedBy fileManager: FileManager = .default
+	) throws -> Folder {
+		let urls = fileManager.urls(for: searchPath, in: domain)
 
-            guard let match = urls.first else {
-                throw LocationError(
-                    path: "",
-                    reason: .unresolvedSearchPath(searchPath, domain: domain)
-                )
-            }
+		guard let match = urls.first else {
+			throw LocationError(
+				path: "",
+				reason: .unresolvedSearchPath(searchPath, domain: domain)
+			)
+		}
 
-            return try Folder(storage: Storage(
-                path: match.relativePath,
-                fileManager: fileManager
-            ))
-        }
+		return try Folder(storage: Storage(
+			path: match.relativePath,
+			fileManager: fileManager
+		))
+	}
 
-        static var documents: Folder? {
-            return try? .matching(.documentDirectory)
-        }
+	static var documents: Folder? {
+		return try? .matching(.documentDirectory)
+	}
 
-        static var library: Folder? {
-            return try? .matching(.libraryDirectory)
-        }
-    }
-#endif
+	static var library: Folder? {
+		return try? .matching(.libraryDirectory)
+	}
+}
 extension String {
     func removingPrefix(_ prefix: String) -> String {
         guard hasPrefix(prefix) else { return self }

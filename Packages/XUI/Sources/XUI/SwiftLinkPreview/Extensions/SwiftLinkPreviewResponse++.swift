@@ -33,55 +33,56 @@ extension SwiftLinkPreviewResponse {
 
 	mutating func set(_ value: Any, for key: Key) {
 		switch key {
-		case Key.baseURL:
+		case .baseURL:
 			if let value = value as? String { baseURL = value }
-		case Key.url:
+		case .url:
 			if let value = value as? URL { url = value }
-		case Key.finalUrl:
+		case .finalUrl:
 			if let value = value as? URL { finalUrl = value }
-		case Key.canonicalUrl:
+		case .canonicalUrl:
 			if let value = value as? String { canonicalUrl = value }
-		case Key.title:
+		case .title:
 			if let value = value as? String { title = value }
-		case Key.description:
+		case .description:
 			if let value = value as? String { description = value }
-		case Key.image:
+		case .image:
 			if let value = value as? String { image = value }
-		case Key.images:
+		case .images:
 			if let value = value as? [String] { images = value }
-		case Key.icon:
+		case .icon:
 			if let value = value as? String { icon = value }
-		case Key.video:
+		case .video:
 			if let value = value as? String { video = value }
-		case Key.price:
+		case .price:
 			if let value = value as? String { price = value }
 		}
 	}
 
 	func value(for key: Key) -> Any? {
 		switch key {
-		case Key.baseURL:
+		case .baseURL:
 			return baseURL
-		case Key.url:
+		case .url:
 			return url
-		case Key.finalUrl:
+		case .finalUrl:
 			return finalUrl
-		case Key.canonicalUrl:
+		case .canonicalUrl:
 			return canonicalUrl
-		case Key.title:
+		case .title:
 			return title
-		case Key.description:
+		case .description:
 			return description
-		case Key.image:
+		case .image:
 			return image
-		case Key.images:
+		case .images:
 			return images
-		case Key.icon:
+		case .icon:
 			return icon
-		case Key.video:
+		case .video:
 			return video
-		case Key.price:
+		case .price:
 			return price
 		}
 	}
 }
+

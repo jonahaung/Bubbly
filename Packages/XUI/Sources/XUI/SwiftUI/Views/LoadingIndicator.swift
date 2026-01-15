@@ -15,21 +15,3 @@ public struct LoadingIndicator: View {
             .tint(Color.secondary)
     }
 }
-
-private struct LoadingViewModifier: ViewModifier {
-    let isLoading: Bool
-    func body(content: Content) -> some View {
-        content
-            .overlay(alignment: .center) {
-                if isLoading {
-                    LoadingIndicator()
-                }
-            }
-    }
-}
-
-public extension View {
-    func showLoading(_ isLoading: Bool) -> some View {
-        modifier(LoadingViewModifier(isLoading: isLoading))
-    }
-}

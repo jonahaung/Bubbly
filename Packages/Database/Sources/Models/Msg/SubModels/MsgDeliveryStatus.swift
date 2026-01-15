@@ -7,23 +7,16 @@
 import Foundation
 import XUI
 
-public enum MsgOutgoingStatus: Int, Codable, Sendable, Hashable {
+public enum MsgOutgoingStatus: Int, Codable, Sendable, Hashable, CaseNameReflectable {
     case sending, sent, sendingFailed
 }
 
 public extension MsgOutgoingStatus {
     var description: String {
-        switch self {
-        case .sending:
-            "Sending"
-        case .sendingFailed:
-            "Failed"
-        case .sent:
-            "Sent"
-        }
+		localizedName
     }
 }
 
-public enum MsgIncomingStatus: Int, Conformable, Codable {
+public enum MsgIncomingStatus: Int, Conformable, Codable, CaseNameReflectable {
     case none, delivered, read
 }

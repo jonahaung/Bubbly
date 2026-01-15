@@ -24,4 +24,14 @@ public enum AttachMentType: Int, Codable, Sendable, Hashable {
         case .link: "Link"
         }
     }
+
+	var displayText: String {
+		switch self {
+			case .image: "Photo Message"
+		case .imageUploading: "✹"
+		case .video: "🎥"
+		case .videoUploading: "✹"
+		case .link: "Attachment"
+		}
+	}
 }

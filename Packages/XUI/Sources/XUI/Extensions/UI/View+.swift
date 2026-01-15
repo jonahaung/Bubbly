@@ -8,6 +8,7 @@
 import SwiftUI
 
 public extension View {
+	@inlinable
     @ViewBuilder func `if`(_ condition: Bool, _ transform: (Self) -> some View) -> some View {
         if condition {
             transform(self)
@@ -15,7 +16,7 @@ public extension View {
             self
         }
     }
-
+	@inlinable
     @ViewBuilder func if_let<T>(_ optional: T?, _ transform: (T, Self) -> some View) -> some View {
         if let optional {
             transform(optional, self)
@@ -26,12 +27,15 @@ public extension View {
 
     @inlinable
     func frame(size: CGSize?) -> some View {
-        frame(width: size?.width, height: size?.height)
+        frame(
+            width: size.flatMap { $0.width.safeFrameDimension },
+            height: size.flatMap { $0.height.safeFrameDimension }
+        )
     }
 
     @inlinable
     func frame(square: CGFloat?) -> some View {
-        frame(width: square, height: square)
+        frame(width: square?.safeFrameDimension, height: square?.safeFrameDimension)
     }
 
     @inlinable
@@ -42,10 +46,20 @@ public extension View {
     }
 }
 
+public extension CGFloat {
+    // Return nil if the value is not a valid frame dimension for SwiftUI
+    var safeFrameDimension: CGFloat? {
+        guard self.isFinite, self >= 0 else { return nil }
+        return self
+    }
+}
+
 public extension View {
+	@inlinable
     static var typeName: String { String(describing: self) }
 }
 
 public extension AnyView {
+	@inlinable
     static var name: String { String(describing: self) }
 }

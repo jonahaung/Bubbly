@@ -13,38 +13,35 @@ import XUI
 struct InboxCell: View {
 
 	let item: InboxItem
+	@Environment(\.typography) private var typography
 
 	var body: some View {
-		HStack {
-			ProfilePhoto(item, size: .custom(45))
-			Button {
-				ConversationInitializer.start(conversation: item.conversation)
-			} label: {
-				VStack(alignment: .leading) {
+		Label {
+			AsyncButton(options: [.disableButtonOnLoading, .enableTintFeedback]) {
+				try await ConversationInitializer.start(conversation: item.conversation)
+			} label: { _ in
+				LabeledContent {
+					if item.msg.incomingStatus != .read && item.msg.receiptType == .receive {
+						SystemImage(.circleFill, 10)
+							.foregroundStyle(Color.blue)
+					}
+				} label: {
 					Text(item.title)
-						.font(.headline)
-						.frame(maxWidth: .infinity, alignment: .leading)
-					Text(.init(item.msg.text))
-						.font(
-							Font
-								.system(
-									size: 14,
-									weight: item.msg.incomingStatus != .read && item.msg.receiptType == .receive
-									? .medium
-									: .regular
-								)
-						)
+						.font(typography.headLine)
+					Text(item.msg.displayText)
+						.font(typography.callout)
 						.foregroundStyle(
 							item.msg.incomingStatus != .read && item.msg.receiptType == .receive ? .primary : .secondary
 						)
-						.frame(maxWidth: .infinity, alignment: .leading)
 				}
-				.lineLimit(4)
-				.multilineTextAlignment(.leading)
 			}
-			.buttonStyle(.borderless)
 			.foregroundStyle(.primary)
+		} icon: {
+			ProfilePhoto(item, size: .custom(45))
+				.padding(.leading)
 		}
+		.labelIconToTitleSpacing(30)
+		.multilineTextAlignment(.leading)
 		.equatable(by: item.msg)
 	}
 }

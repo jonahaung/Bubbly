@@ -42,7 +42,8 @@ public struct StretchyHeaderScrollView<Content: View, Header: View>: View {
             .onScrollGeometryChange(for: CGFloat.self, of: { geometry in
                 geometry.contentOffset.y + geometry.contentInsets.top
             }, action: { oldValue, newValue in
-                guard oldValue != newValue else { return }
+                // Coalesce micro updates to avoid multiple per-frame state writes
+                guard abs(newValue - oldValue) > 0.5 else { return }
                 scrollViewOffset = newValue
             })
         }

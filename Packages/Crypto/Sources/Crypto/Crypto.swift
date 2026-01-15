@@ -13,11 +13,6 @@ public struct Crypto {
     }
 }
 
-//
-// MARK: - Encrypt & decrypt methods
-
-//
-
 public extension Crypto {
     static func generateSalt(length: Int = 16) -> Data {
         var salt = [UInt8](repeating: 0, count: length)

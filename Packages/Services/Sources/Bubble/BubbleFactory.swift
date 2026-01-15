@@ -134,7 +134,9 @@ public struct BubbleFactory: Sendable {
         }
 
         let showTimeSeparater = !isSimilierDateTime(of: msg.date, from: previous)
-        let showTopPadding = !showTimeSeparater && (msg.senderID != previous.senderID)
+		let showTopPadding = !showTimeSeparater && (
+			msg.senderID != previous.senderID || msg.attachments
+				.isEmpty == false)
         let bubble = getBubble(msg: msg, previousMsg: previous, nextMsg: next)
         return .init(
             showTimeSeparator: showTimeSeparater,
@@ -146,11 +148,17 @@ public struct BubbleFactory: Sendable {
     // MARK: - Grouping helpers
 
     private func shouldGroupWithPrevious(msg: Message, previousMsg: Message) -> Bool {
-        isEqual(of: msg, to: previousMsg) && isSimilierDateTime(of: msg.date, from: previousMsg)
+		isEqual(of: msg, to: previousMsg) && isSimilierDateTime(
+			of: msg.date,
+			from: previousMsg
+		) && previousMsg.attachments.isEmpty
     }
 
     private func shouldGroupWithNext(msg: Message, nextMsg: Message) -> Bool {
-        isEqual(of: msg, to: nextMsg) && isSimilierDateTime(of: msg.date, from: nextMsg)
+		isEqual(of: msg, to: nextMsg) && isSimilierDateTime(
+			of: msg.date,
+			from: nextMsg
+		) && nextMsg.attachments.isEmpty
     }
 
     private func isEqual(of thisMsg: Message, to msg: Message) -> Bool {

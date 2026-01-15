@@ -12,6 +12,7 @@ import SwiftUI
 import XUI
 
 public struct ImageView: View {
+	
 	public typealias Item = any ImageViewItem
 	@State private var error: Error?
 	@State private var manager: ImageViewManager
@@ -26,7 +27,6 @@ public struct ImageView: View {
 
 	public var body: some View {
 		ZStack {
-			config.backgroundColor?.layoutPriority(-1)
 			if let image = manager.image {
 				imageView(for: image)
 			} else {
@@ -44,15 +44,6 @@ public struct ImageView: View {
 						} else {
 							if let image = fetchImage.image {
 								imageView(for: image)
-							} else {
-								switch fetchImage.result {
-								case .success(let response):
-									imageView(for: response.image)
-								case .failure:
-									SystemImageWithShape(.exclamationmark, .circle(.color(.red)))
-								case .none:
-									ProgressView().controlSize(.mini)
-								}
 							}
 						}
 					}
@@ -116,16 +107,12 @@ extension ImageView {
 		}
 	}
 
-	@ViewBuilder var imagerViewerScene: some View {
-		if let url = manager.item.file()?.url {
-			PhotoViewer(
-				.init(
-					url: url.absoluteString,
-					type: .photo,
-					identifier: manager.item.imageID
-				)
-			)
-		}
+	var imagerViewerScene: some View {
+		PhotoGalleryView(
+			items: [manager.item],
+			title: manager.item.fileName(),
+			selection: manager
+				.item.id)
 	}
 
 	var processors: [ImageProcessing] {

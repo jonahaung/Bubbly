@@ -178,9 +178,8 @@ struct SettingsScene: View {
                 ResizableImage(currentUser.photoURL, processors: [.circle()])
                     .frame(square: 200)
                     .sheetWithZoomTransition {
-                        PhotoViewer(
-                            .init(url: currentUser.photoURL, type: .photo),
-                            title: currentUser.name
+						PhotoGalleryCell(
+							currentUser
                         )
                     }
             }
@@ -189,4 +188,13 @@ struct SettingsScene: View {
         .listRowInsets(.init())
         .listRowBackground(Color.clear.hidden())
     }
+}
+
+extension CurrentUserModel: @retroactive PhotoGalleryItem {
+	public var galleryURL: URL? {
+		.init(string: photoURL)
+	}
+	public var galleryTitle: String? {
+		name
+	}
 }

@@ -9,40 +9,55 @@ import SwiftUI
 import UIKit
 
 public struct Typography: Sendable {
-	public let message: Font
-	public let sender: Font
-	public let timestamp: Font
+	public let body: Font
+	public let callout: Font
+	public let subHeadline: Font
+	public let headLine: Font
+	public let footnote: Font
 
 	public init(
-		message: Font,
-		sender: Font,
-		timestamp: Font
+		body: Font,
+		callout: Font,
+		subHeadline: Font,
+		headLine: Font,
+		footnote: Font
 	) {
-		self.message = message
-		self.sender = sender
-		self.timestamp = timestamp
+		self.body = body
+		self.callout = callout
+		self.subHeadline = subHeadline
+		self.headLine = headLine
+		self.footnote = footnote
 	}
 }
 public extension Typography {
 
 	static let `default` = Typography(
-		message: .chatScaled(
-			baseSize: 16.5,
+		body: .chatScaled(
+			baseSize: 17,
 			weight: .regular,
 			textStyle: .body
 		),
-
-		sender: .chatScaled(
+		callout: .chatScaled(
+			baseSize: 14,
+			weight: .regular,
+			textStyle: .callout
+		),
+		subHeadline: .chatScaled(
 			baseSize: 13,
 			weight: .medium,
-			textStyle: .subheadline
+			textStyle: .footnote
 		),
 
-		timestamp: .chatScaled(
+		headLine: .chatScaled(
+			baseSize: 17,
+			weight: .semibold,
+			textStyle: .headline
+		),
+		footnote: .chatScaled(
 			baseSize: 12,
-			weight: .regular,
-			textStyle: .caption1
-		)
+			weight: .medium,
+			textStyle: .footnote
+		).leading(.tight)
 	)
 }
 public extension Font {
@@ -53,38 +68,17 @@ public extension Font {
 		textStyle: UIFont.TextStyle
 	) -> Font {
 		let metrics = UIFontMetrics(forTextStyle: textStyle)
-
-		let scaledSize = metrics.scaledValue(
-			for: baseSize,
-			compatibleWith: UITraitCollection(preferredContentSizeCategory: .large)
-		)
+		let scaledSize = metrics.scaledValue(for: baseSize)
 
 		return .system(
 			size: scaledSize,
-			weight: weight
+			weight: weight,
+			design: .default
 		)
+		.leading(.tight)
 	}
-}
-private struct TypographyKey: EnvironmentKey {
-	static let defaultValue: Typography = .default
 }
 
 public extension EnvironmentValues {
-	var typography: Typography {
-		get { self[TypographyKey.self] }
-		set { self[TypographyKey.self] = newValue }
-	}
-}
-public extension Font {
-	static var chat: ChatFontProxy {
-		ChatFontProxy()
-	}
-}
-
-public struct ChatFontProxy {
-	@Environment(\.typography) private var typography
-
-	public var message: Font { typography.message }
-	public var sender: Font { typography.sender }
-	public var timestamp: Font { typography.timestamp }
+	@Entry var typography = Typography.default
 }

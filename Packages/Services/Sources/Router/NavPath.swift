@@ -8,6 +8,7 @@
 import Database
 import Foundation
 import XUI
+import SwiftUI
 
 public enum NavPath: Hashable, Sendable, Identifiable, CaseNameReflectable {
 	case conversationDetails(_ conversation: Conversation)
@@ -35,7 +36,6 @@ public enum NavPath: Hashable, Sendable, Identifiable, CaseNameReflectable {
 		case let .contactDetails(snapshot):
 			hasher.combine(2)
 			hasher.combine(snapshot.uid)
-
 		case .currentUserDetails:
 			hasher.combine(3)
 		}

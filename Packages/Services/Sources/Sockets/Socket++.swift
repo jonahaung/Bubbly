@@ -7,7 +7,7 @@
 
 import Database
 
-extension Socket {
+public extension Socket {
     func receive(_ data: AnyMsgData) {
         switch data {
         case let .newMsg(rMsg):

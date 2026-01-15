@@ -9,22 +9,22 @@ import SwiftUI
 
 public extension Transaction {
     @MainActor
-    static let withAnimation: Transaction = {
-		var transition = Transaction(animation: .interpolatingSpring)
+	static func withAnimation(_ animation: Animation = .interpolatingSpring) -> Transaction {
+		var transition = Transaction(animation: animation)
         transition.disablesAnimations = false
-        transition.scrollPositionUpdatePreservesVelocity = false
-		transition.scrollContentOffsetAdjustmentBehavior = .automatic
-		transition.tracksVelocity = false
+		transition.scrollPositionUpdatePreservesVelocity = true
+		transition.scrollContentOffsetAdjustmentBehavior = .disabled
+		transition.isContinuous = false
         return transition
-    }()
+    }
 
     @MainActor
     static let withoutAnimation: Transaction = {
         var transition = Transaction(animation: nil)
         transition.disablesAnimations = true
-        transition.scrollPositionUpdatePreservesVelocity = false
-        transition.scrollContentOffsetAdjustmentBehavior = .disabled
-        transition.tracksVelocity = false
+		transition.scrollPositionUpdatePreservesVelocity = true
+		transition.scrollContentOffsetAdjustmentBehavior = .disabled
+		transition.tracksVelocity = true
         return transition
     }()
 }

@@ -7,28 +7,13 @@
 
 import SwiftUI
 
-@MainActor
 @Observable
 public final class SharedNamespace {
-	public var value: Namespace.ID?
-	init(_ namespace: Namespace.ID? = nil) {
+	public var value: Namespace.ID
+	public init(_ namespace: Namespace.ID) {
 		value = namespace
 	}
 }
-
-private struct SharedNamespaceEnvironmentKey: EnvironmentKey {
-	static let defaultValue: SharedNamespace? = nil
-}
-
 public extension EnvironmentValues {
-	var namespace: SharedNamespace? {
-		get { self[SharedNamespaceEnvironmentKey.self] }
-		set { self[SharedNamespaceEnvironmentKey.self] = newValue }
-	}
-}
-
-public extension View {
-	func namespace(_ value: Namespace.ID) -> some View {
-		environment(\.namespace, SharedNamespace(value))
-	}
+	@Entry var sharedNamespace: SharedNamespace?
 }

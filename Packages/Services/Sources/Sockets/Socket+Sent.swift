@@ -27,6 +27,18 @@ extension Socket {
 			if rMsg.uid == currentUserId {
 				addToQueue()
 			}
+			addToQueue()
+		case let .reaction(payload):
+			try await Store.shared.msgStore.updateAndSave(uid: payload.msgID) { model in
+				let isSame = model.reactions.contains(
+					where: { $0.senderID == payload.reaction.senderID && $0.rawValue == payload.reaction.rawValue })
+				model.reactions.removeAll(where: { $0.senderID == payload.reaction.senderID })
+				if !isSame {
+					model.reactions.append(payload.reaction)
+				}
+			}
+			notifyMessage(data)
+			addToQueue()
 		default:
 			addToQueue()
 		}
@@ -62,19 +74,14 @@ extension Socket {
 		switch data {
 		case let .newMsg(rMsg):
 			var msg = Message(rMsg)
-			switch conversation.kind {
-			case .contact, .group:
-				msg.outgoingStatus = try await sendToRemote(
-					.newMsg(rMsg: rMsg),
-					conversation: conversation
-				)
-				try await Store.shared.msgStore.updateAndSave(uid: rMsg.uid) { model in
-					model.update(from: msg)
-				}
-				notifyMessage(.updatedMsg(rMsg: .init(msg)))
-			case .system:
-				break
+			msg.outgoingStatus = try await sendToRemote(
+				.newMsg(rMsg: rMsg),
+				conversation: conversation
+			)
+			try await Store.shared.msgStore.updateAndSave(uid: rMsg.uid) { model in
+				model.update(from: msg)
 			}
+			notifyMessage(.updatedMsg(rMsg: .init(msg)))
 		case let .updatedMsg(rMsg):
 			try await sendToRemote(.updatedMsg(rMsg: rMsg), conversation: conversation)
 			try await Store.shared.msgStore.updateAndSave(uid: rMsg.uid) { model in
@@ -83,8 +90,8 @@ extension Socket {
 			notifyMessage(data)
 		case .typingStatus:
 			try await sendToRemote(data, conversation: conversation)
-		case let .reaction(reaction):
-			debugPrint(reaction)
+		case .reaction:
+			try await sendToRemote(data, conversation: conversation)
 		case .deleteMsg:
 			try await sendToRemote(data, conversation: conversation)
 		case let .seenStatus(status: status):
@@ -99,9 +106,10 @@ extension Socket {
 				return
 			}
 			let title = data.pushNotificationTitle(for: conversation)
+			let body = data.pushNotificationSubtitle
 			try await sendToRemote(
 				data,
-				title: title,
+				alert: .init(title: title, body: body),
 				contacts: [contact]
 			)
 		}
@@ -120,7 +128,11 @@ extension Socket {
 			)
 		}
 		let title = data.pushNotificationTitle(for: conversation)
-		return try await sendToRemote(data, title: title, contacts: contacts)
+		return try await sendToRemote(
+			data,
+			alert: .init(title: title, body: data.pushNotificationSubtitle),
+			contacts: contacts
+		)
 	}
 
 	private func getContacts(
@@ -131,25 +143,19 @@ extension Socket {
 			[contact]
 		case let .group(group):
 			try await ContactRepo.getOrCreate(for: group.members, refatch: false)
-		case .system:
-			[]
 		}
 	}
 
 	@discardableResult public func sendToRemote(
 		_ data: AnyMsgData,
-		title: String,
+		alert: APNSNotification.Alert,
 		contacts: [Contact]
 	) async throws -> [String: MsgOutgoingStatus] {
 		let encoded = try JSONEncoder().encode(data)
 		guard let encodedString = String(data: encoded, encoding: .utf8) else {
 			throw SocketError.encodingFailed
 		}
-		let results:
-		[(
-			Contact,
-			Bool
-		)] = try await AsyncOrderedStream.mapOrdered(
+		let results: [(Contact, Bool)] = try await AsyncOrderedStream.mapOrdered(
 			inputs: contacts
 		) { contact in
 			let encrypted = try await self.encrypt(
@@ -161,7 +167,7 @@ extension Socket {
 			let notification = APNSNotification(
 				deviceToken: contact.pushToken,
 				messageContent: encrypted,
-				title: title
+				alert: alert
 			)
 			let success = try? await self.pushNotificationSender.send(notification: notification)
 			return (contact, success != nil)
@@ -175,11 +181,10 @@ extension Socket {
 	}
 
 	private func encrypt(_ dataString: String, publicKeyString: String) async throws -> String {
-		let encrypted = cryptoService.encrypt(
+		try await cryptoService.encrypt(
 			dataString: dataString,
-			publicKeyString: publicKeyString
+			recipientPublicKeyString: publicKeyString
 		)
-		return cryptoService.createPayload(for: encrypted)
 	}
 
 	public func notifyMessage(_ data: AnyMsgData) {

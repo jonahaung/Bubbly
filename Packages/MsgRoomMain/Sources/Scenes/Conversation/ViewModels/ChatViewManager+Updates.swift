@@ -13,8 +13,8 @@ import XUI
 
 extension ChatViewManager: ChatDatasourceDelegate {
 	@concurrent func saveConversationChanges() async {
-		await updateReceiveMsgs()
 		do {
+			await updateReceiveMsgs()
 			try await conversation.saveChanges()
 		} catch {
 			await showError(error)
@@ -25,47 +25,48 @@ extension ChatViewManager: ChatDatasourceDelegate {
 	}
 
 	func datasource(didReceive typingStatus: Database.AnyMsgData.TypingStatusPayload) async {
-		eventsManager.updateTypingStatus(typingStatus)
+		presentation.updateTypingStatus(typingStatus)
 	}
 
 	func datasource(didInsert msg: Message) async {
-		if let existingModel = data.element(withID: msg.uid) {
+		if let existingModel = messageItems.element(withID: msg.uid) {
 			existingModel.update(with: msg)
 		} else {
 			if canResetDatasource {
-				ToastPresenter.show(msg.text) { [weak self] in
+				ToastPresenter.show(msg.displayText) { [weak self] in
 					guard let self else { return }
 					resetDatasource()
 				}
 			} else {
 				let newModel = MsgCellViewModel(msg)
-				let index = data.insertionIndex(for: newModel, by: \.msg.date)
-				let previousItem = data[safe: index - 1]
-				let nextItem = data[safe: index + 1]
+				let index = messageItems.insertionIndex(for: newModel, by: \.msg.date)
+				let previousItem = messageItems[safe: index - 1]
+				let nextItem = messageItems[safe: index + 1]
 
-				if scrollManager.scrolledPosition.nearBottom {
-					scrollManager.updateLoadingState(.appendingItem(msg.uid))
+				if scrollController.currentScrolledPosition.nearBottom {
+					scrollController.setUpdateState(.appendingItem(msg.uid))
 				} else {
 					let msgID = msg.uid
-					ToastPresenter.show(msg.text) { [weak self] in
+					ToastPresenter.show(msg.displayText) { [weak self] in
 						guard let self else { return }
-						scrollManager.scroll(to: .id(value: msgID, anchor: .bottom))
+						scrollController.enqueueScroll(to: .id(value: msgID, anchor: .bottom))
 					}
 				}
 
-				let layout = bubbleFactory.msgCellLayout(
+				let layout = bubbleLayout.msgCellLayout(
 					for: msg,
 					previous: previousItem?.msg,
 					next: nextItem?.msg
 				)
 				newModel.update(layout: layout)
 
-				data.insert(newModel, at: index)
+				messageItems.insert(newModel, at: index)
 				if let previousItem {
-					previousItem.update(layout: msgCellLayoutFor(previousItem.msg, cellItems: data.array))
+					previousItem
+						.update(layout: msgCellLayoutFor(previousItem.msg, cellItems: messageItems.array))
 				}
 				if let nextItem {
-					nextItem.update(layout: msgCellLayoutFor(nextItem.msg, cellItems: data.array))
+					nextItem.update(layout: msgCellLayoutFor(nextItem.msg, cellItems: messageItems.array))
 				}
 				layoutIfNeeded()
 			}
@@ -78,14 +79,16 @@ extension ChatViewManager: ChatDatasourceDelegate {
 	}
 
 	func datasource(didUpdate snapshot: Message, animated: Bool) async {
-		data.update(snapshot) { [self] msg, prev, next in
-			bubbleFactory.msgCellLayout(for: msg, previous: prev, next: next)
+		messageItems.update(snapshot) { [self] msg, prev, next in
+			bubbleLayout.msgCellLayout(for: msg, previous: prev, next: next)
 		}
 	}
 
 	func datasource(didRemove snapshot: Message, animated: Bool) async {
-		data.remove(snapshot) { [self] msg, prev, next in
-			bubbleFactory.msgCellLayout(for: msg, previous: prev, next: next)
+		scrollController.setDefaultAnimation(.interactiveSpring(duration: 0.3))
+		messageItems.remove(snapshot) { [self] msg, prev, next in
+			self.layoutIfNeeded()
+			return bubbleLayout.msgCellLayout(for: msg, previous: prev, next: next)
 		}
 	}
 
@@ -98,9 +101,9 @@ extension ChatViewManager: ChatDatasourceDelegate {
 
 extension ChatViewManager {
 	func reloadData(with msgs: [Message], forceReset: Bool) {
-		var newItems = forceReset ? [] : data.array
+		var newItems = forceReset ? [] : messageItems.array
 		for msg in msgs {
-			if let existing = data.element(withID: msg.uid) {
+			if let existing = messageItems.element(withID: msg.uid) {
 				existing.update(with: msg)
 				if forceReset {
 					newItems.append(existing)
@@ -111,8 +114,8 @@ extension ChatViewManager {
 				newItems.insert(item, at: index)
 			}
 		}
-		eventsManager.showContactInfo = {
-			guard let firstMsgID = config.firstMsgID else { return true }
+		presentation.showContactInfo = {
+			guard let firstMsgID = conversationConfig.firstMsgID else { return true }
 			return newItems.contains(where: { $0.id == firstMsgID })
 		}()
 		for item in newItems {
@@ -121,7 +124,7 @@ extension ChatViewManager {
 				item.update(layout: layout)
 			}
 		}
-		data = .init(newItems)
+		messageItems = .init(newItems)
 	}
 
 	func reloadConversation() async throws {
@@ -129,9 +132,9 @@ extension ChatViewManager {
 	}
 
 	func updateReceiveMsgs() {
-		guard let lastMsg = data.array.last(where: { $0.isSender == false })?.msg,
-			lastMsg.incomingStatus.rawValue < MsgIncomingStatus.read.rawValue,
-			let currentUserId
+		guard let lastMsg = messageItems.array.last(where: { $0.msg.receiptType == .receive })?.msg,
+			  lastMsg.incomingStatus.rawValue < MsgIncomingStatus.read.rawValue,
+			  let currentUserId
 		else {
 			return
 		}
@@ -150,7 +153,7 @@ extension ChatViewManager {
 				)
 				await MainActor.run {
 					for msg in msgs {
-						if let model = self.data.element(withID: msg.uid) {
+						if let model = self.messageItems.element(withID: msg.uid) {
 							model.update(with: msg)
 						}
 					}

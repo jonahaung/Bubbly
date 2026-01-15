@@ -18,10 +18,11 @@ struct ConversationHeaderView: View {
 		VStack {
 			Text(manager.conversation.name)
 				.bold()
+			Divider()
 			Text(.init(manager.conversation.preetyPrinted))
-				.font(.footnote)
+				.font(.system(size: 12, weight: .regular, design: .default).width(.condensed))
+				.textSelection(.enabled)
 		}
-		.flexible(.horizontal)
 		.padding()
 		.background(
 			Color.secondarySystemGroupedBackground,
@@ -29,12 +30,10 @@ struct ConversationHeaderView: View {
 				cornerRadius: 12
 			)
 		)
-		.lineHeight(.leading(increase: 0))
+		.lineHeight(.multiple(factor: 1.2))
 		.lineSpacing(0)
-		.baselineOffset(0)
-        .padding(.horizontal)
 		.allowsTightening(true)
         .id(Self.typeName)
-        .layoutValue(.init(uid: Self.typeName, recipient: .none))
+		.layoutValue(key: MsgLayoutValueKey.self, value: .empty)
     }
 }

@@ -8,97 +8,95 @@
 import UIKit
 import XUI
 
-public protocol ImageViewItem: Sendable {
-    var remoteURL: URL? { get }
-    var imageID: String? { get }
-    var subFolderName: String? { get }
-    var folderName: String? { get }
-    var mediaType: MediaType? { get }
+public protocol ImageViewItem: Sendable, PhotoGalleryItem {
+	var remoteURL: URL? { get }
+	var imageID: String { get }
+	var subFolders: [String] { get }
 }
 
 public extension ImageViewItem {
-    var folderName: String? {
-        mediaType?.directory
-    }
+	func folder() -> Folder? {
+		var document = Folder.documents
 
-    func folder() -> Folder? {
-        guard let folderName,
-              let subFolderName
-        else { return nil }
-        do {
-            return try Folder.documents?
-                .createSubfolderIfNeeded(withName: folderName)
-                .createSubfolderIfNeeded(withName: subFolderName)
-        } catch {
-            Log(error)
-            return nil
-        }
-    }
+		do {
+			try subFolders.forEach { each in
+				document = try document?.createSubfolderIfNeeded(withName: each)
+			}
+		} catch {
+			Log(error)
+			return nil
+		}
+		return document
+	}
 
-    func file() -> File? {
-        guard let fileName = fileName() else { return nil }
-        do {
-            return try folder()?.createFileIfNeeded(withName: fileName)
-        } catch {
-            Log(error)
-            return nil
-        }
-    }
+	func file() -> File? {
+		do {
+			return try folder()?.createFileIfNeeded(withName: fileName())
+		} catch {
+			Log(error)
+			return nil
+		}
+	}
 
-    func thumbnailFile() -> File? {
-        guard let thumbnailFileName = thumbnailFileName() else { return nil }
-        do {
-            return try folder()?.createFileIfNeeded(withName: thumbnailFileName)
-        } catch {
-            Log(error)
-            return nil
-        }
-    }
+	func thumbnailFile() -> File? {
+		do {
+			return try folder()?.createFileIfNeeded(withName: thumbnailFileName())
+		} catch {
+			Log(error)
+			return nil
+		}
+	}
 
-    func fileName() -> String? {
-        guard let imageID, let mediaType else { return nil }
-        return imageID + mediaType.fileExtension
-    }
+	func fileName() -> String {
+		imageID
+	}
 
-    func thumbnailFileName() -> String? {
-        guard let name = fileName() else { return nil }
-        return "thumbnail_\(name)"
-    }
+	func thumbnailFileName() -> String {
+		return "thumbnail_\(fileName())"
+	}
 
-    func fileExist() -> Bool {
-        guard let fileName = fileName() else { return false }
-        return folder()?.containsFile(named: fileName) == true
-    }
+	func fileExist() -> Bool {
+		folder()?.containsFile(named: fileName()) == true
+	}
+	func thumbnailExist() -> Bool {
+		folder()?.containsFile(named: thumbnailFileName()) == true
+	}
+	func data() -> Data? {
+		do {
+			return try file()?.read()
+		} catch {
+			Log(error)
+			return nil
+		}
+	}
 
-    func data() -> Data? {
-        do {
-            return try file()?.read()
-        } catch {
-            Log(error)
-            return nil
-        }
-    }
+	func thumbnailData() -> Data? {
+		do {
+			return try thumbnailFile()?.read()
+		} catch {
+			Log(error)
+			return nil
+		}
+	}
 
-    func thumbnailData() -> Data? {
-        do {
-            return try thumbnailFile()?.read()
-        } catch {
-            Log(error)
-            return nil
-        }
-    }
+	func image() -> UIImage? {
+		guard let data = data() else { return nil }
+		return UIImage(data: data)
+	}
 
-    func image() -> UIImage? {
-        guard let data = data() else { return nil }
-        return UIImage(data: data)
-    }
+	func thumbnailImage() -> UIImage? {
+		guard let data = thumbnailData() else { return nil }
+		return UIImage(data: data)
+	}
 
-    func thumbnailImage() -> UIImage? {
-        guard let data = thumbnailData() else { return nil }
-        return UIImage(data: data)
-    }
+	func localURL() -> URL? {
+		file()?.url
+	}
+}
 
-    func localURL() -> URL? {
-        file()?.url
-    }
+public extension ImageViewItem {
+	var galleryURL: URL? {
+		let url = localURL() ?? remoteURL
+		return url
+	}
 }

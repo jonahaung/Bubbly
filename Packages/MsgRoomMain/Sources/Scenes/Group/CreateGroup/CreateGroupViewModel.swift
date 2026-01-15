@@ -50,7 +50,7 @@ final class CreateGroupViewModel {
             uid: groupID,
             name: groupName,
             createdDate: .init(.now),
-            photoURL: url,
+			photoURL: url.absoluteString,
             members: memberIDs,
             createdBy: currentUserID,
             theme: .init(),

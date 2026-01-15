@@ -9,140 +9,142 @@ import FirebaseStorage
 import SwiftUI
 import UIKit
 
-public struct ImageUploadingService {
-    public enum Path {
-        case user(uid: String)
-        case group(groupID: String)
-        case conversation(conID: String, msgID: String)
+public struct ImageUploadingService: Sendable {
+	public enum Path {
+		case user(uid: String)
+		case group(groupID: String)
+		case conversation(conID: String, attachmentID: String)
 
-        var path: String {
-            switch self {
-            case .user:
-                "users"
-            case .group:
-                "groups"
-            case .conversation:
-                "conversations"
-            }
-        }
+		var path: String {
+			switch self {
+			case .user:
+				"users"
+			case .group:
+				"groups"
+			case .conversation:
+				"conversations"
+			}
+		}
 
-        var childPath: String {
-            switch self {
-            case let .user(uid):
-                uid
-            case let .group(groupID):
-                groupID
-            case let .conversation(conID, msgID):
-                conID + "/" + msgID
-            }
-        }
-    }
+		var childPath: String {
+			switch self {
+			case let .user(uid):
+				uid
+			case let .group(groupID):
+				groupID
+			case let .conversation(conID, attachmentID):
+				conID + "/" + attachmentID
+			}
+		}
+	}
 
-    public enum Error: Swift.Error {
-        case resizingFailed
-        case dataCreationFailed
-    }
+	public enum Error: Swift.Error {
+		case resizingFailed
+		case dataCreationFailed
+	}
 
-    public init() {}
+	public init() {}
 
-    public func uploadImage(
-        _ image: UIImage,
-        size: CGSize?,
-        to path: Path,
-        onProgress: (
-            @Sendable (
-                Progress?
-            ) -> Void
-        )? = nil
-    ) async throws -> String {
-        let mediaManager = MediaManager.shared
+	public func uploadImage(_ image: UIImage, size: CGSize?, to path: Path, onProgress: ( @Sendable (Progress?) -> Void)? = nil) async throws -> URL {
+		let mediaManager = MediaManager.shared
 
-        let uploadingImage: UIImage =
-            if let size, let resizedImage = image.resizedToFill(size) {
-                resizedImage
-            } else {
-                image
-            }
-        let data = try mediaManager.createData(from: uploadingImage)
+		let uploadingImage: UIImage =
+		if let size, let resizedImage = image.resizedToFill(size) {
+			resizedImage
+		} else {
+			image
+		}
+		let data = try mediaManager.createData(from: uploadingImage)
 
-        let reference = Storage.storage()
-            .reference(withPath: path.path)
-            .child(path.childPath)
+		let reference = Storage.storage()
+			.reference(withPath: path.path)
+			.child(path.childPath)
 
-        let metadata = StorageMetadata()
-        metadata.contentType = "image/jpeg"
+		let metadata = StorageMetadata()
+		metadata.contentType = "image/png"
+		_ = try await reference.putDataAsync(
+			data,
+			metadata: metadata,
+			onProgress: onProgress
+		)
+		let url = try await reference.downloadURL()
+		return url
+	}
 
-        _ = try await reference.putDataAsync(
-            data,
-            metadata: metadata,
-            onProgress: onProgress
-        )
-        let url = try await reference.downloadURL()
-        return await shortenURL(url.absoluteString)
-    }
+	public func uploadFile(_ url: URL, to path: Path, onProgress: ( @Sendable (Progress?) -> Void)? = nil) async throws -> URL {
+		let reference = Storage.storage()
+			.reference(withPath: path.path)
+			.child(path.childPath)
+		let metadata = StorageMetadata()
+		metadata.contentType = "image/png"
+		_ = try await reference.putFileAsync(from: url, metadata: metadata, onProgress: onProgress)
+		let url = try await reference.downloadURL()
+		return url
+	}
 
-    func shortenURL(_ longURL: String) async -> String {
-        guard let escaped = longURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-            return longURL
-        }
-        guard let endpoint = URL(string: "https://is.gd/create.php?format=simple&url=\(escaped)") else {
-            return longURL
-        }
-        guard let response = try? await URLSession.shared.data(from: endpoint) else {
-            return longURL
-        }
-        let data = response.0
-        return String(decoding: data, as: UTF8.self)
-    }
+
+	func shortenURL(_ longURL: String) async -> String {
+		guard let escaped = longURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+			return longURL
+		}
+		guard let endpoint = URL(string: "https://is.gd/create.php?format=simple&url=\(escaped)") else {
+			return longURL
+		}
+		guard let response = try? await URLSession.shared.data(from: endpoint) else {
+			return longURL
+		}
+		let data = response.0
+		return String(decoding: data, as: UTF8.self)
+	}
 }
 
 public extension UIImage {
-    func resizedToFit(in targetSize: CGSize) -> UIImage? {
-        let aspectRatio = min(
-            targetSize.width / size.width,
-            targetSize.height / size.height
-        )
+	func resizedToFit(in targetSize: CGSize) -> UIImage? {
+		let aspectRatio = min(
+			targetSize.width / size.width,
+			targetSize.height / size.height
+		)
 
-        let newSize = CGSize(
-            width: size.width * aspectRatio,
-            height: size.height * aspectRatio
-        )
+		let newSize = CGSize(
+			width: size.width * aspectRatio,
+			height: size.height * aspectRatio
+		)
 
-        return renderResizedImage(to: newSize)
-    }
+		return renderResizedImage(to: newSize)
+	}
 
-    func resizedToFill(_ targetSize: CGSize) -> UIImage? {
-        let aspectRatio = max(
-            targetSize.width / size.width,
-            targetSize.height / size.height
-        )
+	func resizedToFill(_ targetSize: CGSize) -> UIImage? {
+		let aspectRatio = max(
+			targetSize.width / size.width,
+			targetSize.height / size.height
+		)
 
-        let scaledSize = CGSize(
-            width: size.width * aspectRatio,
-            height: size.height * aspectRatio
-        )
+		let scaledSize = CGSize(
+			width: size.width * aspectRatio,
+			height: size.height * aspectRatio
+		)
 
-        let renderer = UIGraphicsImageRenderer(size: targetSize)
-        return renderer.image { _ in
-            let origin = CGPoint(
-                x: (targetSize.width - scaledSize.width) * 0.5,
-                y: (targetSize.height - scaledSize.height) * 0.5
-            )
-            draw(in: CGRect(origin: origin, size: scaledSize))
-        }
-    }
+		let renderer = UIGraphicsImageRenderer(size: targetSize)
+		return renderer.image { _ in
+			let origin = CGPoint(
+				x: (targetSize.width - scaledSize.width) * 0.5,
+				y: (targetSize.height - scaledSize.height) * 0.5
+			)
+			draw(in: CGRect(origin: origin, size: scaledSize))
+		}
+	}
 
-    func resized(toWidth width: CGFloat) -> UIImage? {
-        let scale = width / size.width
-        let newHeight = size.height * scale
-        let newSize = CGSize(width: width, height: newHeight)
-        return renderResizedImage(to: newSize)
-    }
+	func resized(toWidth width: CGFloat) -> UIImage? {
+		let scale = width / size.width
+		let newHeight = size.height * scale
+		let newSize = CGSize(width: width, height: newHeight)
+		return renderResizedImage(to: newSize)
+	}
 
-    private func renderResizedImage(to size: CGSize) -> UIImage? {
-        let renderer = UIGraphicsImageRenderer(size: size)
-        return renderer.image { _ in
-            draw(in: CGRect(origin: .zero, size: size))
-        }
-    }
+	private func renderResizedImage(to size: CGSize) -> UIImage? {
+		let renderer = UIGraphicsImageRenderer(size: size)
+		return renderer.image { _ in
+			draw(in: CGRect(origin: .zero, size: size))
+		}
+	}
 }

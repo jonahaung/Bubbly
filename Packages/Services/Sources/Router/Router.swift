@@ -35,10 +35,33 @@ public class Router {
 		navRouters.first(where: { $0.id == tab })!
 	}
 
-	private init() {}
-
+	private init() {
+		trackItemsChanges()
+	}
+	func trackItemsChanges() {
+		withObservationTracking {
+			_ = currentNavRouter.navPath
+		} onChange: { [weak self] in
+			guard let self else {
+				return
+			}
+			Task { @MainActor in
+				if currentNavRouter.navPath.isEmpty && tabBarVisibility == .hidden {
+					tabBarVisibility = .visible
+				}
+				trackItemsChanges()
+			}
+		}
+	}
 	public func push(_ path: NavPath) {
-		currentNavRouter.push(path)
+		if case .conversation = path {
+			tabBarVisibility = .hidden
+			DispatchQueue.delay {
+				self.currentNavRouter.push(path)
+			}
+		} else {
+			currentNavRouter.push(path)
+		}
 	}
 
 	public func presentFullScreen(_ path: NavPath?) {
@@ -57,7 +80,5 @@ public class Router {
 		sheet = nil
 	}
 
-	public var tabBarVisibility: Visibility {
-		currentNavRouter.navPath.isEmpty ? .visible : .hidden
-	}
+	public var tabBarVisibility: Visibility = .automatic
 }

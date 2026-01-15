@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 public protocol CaseNameReflectable {
     var caseName: String { get }
@@ -32,4 +33,7 @@ public extension String {
         let spaced = replacingOccurrences(of: pattern, with: "$1 $2", options: .regularExpression)
         return spaced.capitalized
     }
+}
+extension Visibility: CaseNameReflectable {
+
 }

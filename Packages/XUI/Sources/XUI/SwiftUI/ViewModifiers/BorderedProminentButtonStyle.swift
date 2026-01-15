@@ -17,12 +17,12 @@ private struct BorderedProminentButtonStyle: ViewModifier {
 public struct RoundedButtonStyle: ButtonStyle {
     public func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .flexible(.horizontal)
             .foregroundStyle(Color.white)
             .frame(height: 38.scaled)
-            .flexible(.horizontal)
+			.frame(maxWidth: .infinity)
             .background(Color.accentColor.gradient, in: Capsule())
             .contentShape(Capsule())
+			.buttonSizing(.flexible)
     }
 }
 
@@ -33,7 +33,7 @@ public extension ButtonStyle where Self == RoundedButtonStyle {
 }
 
 public extension View {
-    func _borderedProminentButtonStyle() -> some View {
+    func borderedProminentButtonStyle() -> some View {
         ModifiedContent(content: self, modifier: BorderedProminentButtonStyle())
     }
 }
@@ -45,13 +45,13 @@ private struct BorderedProminentLightButtonStyle: ViewModifier {
         }
         .foregroundStyle(Color.systemBackground)
         .frame(height: 38.scaled)
-        .flexible(.horizontal)
+		.buttonSizing(.flexible)
         .background(Color.secondary.gradient, in: Capsule())
     }
 }
 
 public extension View {
-    func _borderedProminentLightButtonStyle() -> some View {
+    func borderedProminentLightButtonStyle() -> some View {
         ModifiedContent(content: self, modifier: BorderedProminentLightButtonStyle())
     }
 }
@@ -65,7 +65,7 @@ private struct OverlayLightButtonStyle: ViewModifier {
 }
 
 public extension View {
-    func _overlayLightButtonStyle() -> some View {
+    func overlayLightButtonStyle() -> some View {
         ModifiedContent(content: self, modifier: OverlayLightButtonStyle())
     }
 }
@@ -85,7 +85,7 @@ private struct NavigationLinkStyle: ViewModifier {
 }
 
 public extension View {
-    func _navigationLinkStyle() -> some View {
+    func navigationLinkStyle() -> some View {
         ModifiedContent(content: self, modifier: NavigationLinkStyle())
     }
 }
@@ -97,7 +97,7 @@ private struct BorderStyle: ViewModifier {
     func body(content: Content) -> some View {
         ZStack {
             shape
-                .stroke(color, lineWidth: lineWidth)
+				.stroke(color, lineWidth: lineWidth)
             content
         }
     }

@@ -2,288 +2,513 @@
 //  Lorem.swift
 //  HomeForYou
 //
-//  Created by Aung Ko Min on 29/1/23.
+//  Semantic Lorem Generator
+//  Chat-aware, Emoji-aware, i18n-ready
 //
 
 import Foundation
 
-public enum Lorem {
-    /// Generates a single word.
-    public static var word: String {
-        allWords.randomElement()!
-    }
-
-    /// Generates multiple words whose count is defined by the given value.
-    ///
-    /// - Parameter count: The number of words to generate.
-    /// - Returns: The generated words joined by a space character.
-    public static func words(_ count: Int) -> String {
-        _compose(
-            word,
-            count: count,
-            joinBy: .space
-        )
-    }
-
-    public static func phoneNumber() -> String {
-        (80_000_000 ... 999_999_999).randomElement()!.description
-    }
-
-    /// Generates multiple words whose count is randomly selected from within the given range.
-    ///
-    /// - Parameter range: The range of number of words to generate.
-    /// - Returns: The generated words joined by a space character.
-    public static func words(_ range: Range<Int>) -> String {
-        _compose(word, count: Int.random(in: range), joinBy: .space)
-    }
-
-    /// Generates multiple words whose count is randomly selected from within the given closed range.
-    ///
-    /// - Parameter range: The range of number of words to generate.
-    /// - Returns: The generated words joined by a space character.
-    public static func words(_ range: ClosedRange<Int>) -> String {
-        _compose(word, count: Int.random(in: range), joinBy: .space)
-    }
-
-    /// Generates a single sentence.
-    public static var sentence: String {
-        let numberOfWords = Int.random(
-            in: minWordsCountInSentence ... maxWordsCountInSentence
-        )
-
-        return _compose(
-            word,
-            count: numberOfWords,
-            joinBy: .space,
-            endWith: .dot,
-            decorate: { $0.firstLetterCapitalized }
-        )
-    }
-
-    /// Generates multiple sentences whose count is defined by the given value.
-    ///
-    /// - Parameter count: The number of sentences to generate.
-    /// - Returns: The generated sentences joined by a space character.
-    public static func sentences(_ count: Int) -> String {
-        _compose(
-            sentence,
-            count: count,
-            joinBy: .space
-        )
-    }
-
-    /// Generates multiple sentences whose count is selected from within the given range.
-    ///
-    /// - Parameter count: The number of sentences to generate.
-    /// - Returns: The generated sentences joined by a space character.
-    public static func sentences(_ range: Range<Int>) -> String {
-        _compose(sentence, count: Int.random(in: range), joinBy: .space)
-    }
-
-    /// Generates multiple sentences whose count is selected from within the given closed range.
-    ///
-    /// - Parameter count: The number of sentences to generate.
-    /// - Returns: The generated sentences joined by a space character.
-    public static func sentences(_ range: ClosedRange<Int>) -> String {
-        _compose(sentence, count: Int.random(in: range), joinBy: .space)
-    }
-
-    public static var random: String {
-        [sentence, fullName, shortTweet, tweet, word, title, paragraph].random() ?? tweet
-    }
-
-    /// Generates a single paragraph.
-    public static var paragraph: String {
-        let numberOfSentences = Int.random(
-            in: minSentencesCountInParagraph ... maxSentencesCountInParagraph
-        )
-
-        return _compose(
-            sentence,
-            count: numberOfSentences,
-            joinBy: .space
-        )
-    }
-
-    /// Generates multiple paragraphs whose count is defined by the given value.
-    ///
-    /// - Parameter count: The number of paragraphs to generate.
-    /// - Returns: The generated paragraphs joined by a new line character.
-    public static func paragraphs(_ count: Int) -> String {
-        _compose(
-            paragraph,
-            count: count,
-            joinBy: .newLine
-        )
-    }
-
-    /// Generates multiple paragraphs whose count is selected from within the given range.
-    ///
-    /// - Parameter count: The number of paragraphs to generate.
-    /// - Returns: The generated paragraphs joined by a new line character.
-    public static func paragraphs(_ range: Range<Int>) -> String {
-        _compose(
-            paragraph,
-            count: Int.random(in: range),
-            joinBy: .newLine
-        )
-    }
-
-    /// Generates multiple paragraphs whose count is selected from within the given closed range.
-    ///
-    /// - Parameter count: The number of paragraphs to generate.
-    /// - Returns: The generated paragraphs joined by a new line character.
-    public static func paragraphs(_ range: ClosedRange<Int>) -> String {
-        _compose(
-            paragraph,
-            count: Int.random(in: range),
-            joinBy: .newLine
-        )
-    }
-
-    /// Generates a capitalized title.
-    public static var title: String {
-        let numberOfWords = Int.random(
-            in: minWordsCountInTitle ... maxWordsCountInTitle
-        )
-
-        return _compose(
-            word,
-            count: numberOfWords,
-            joinBy: .space,
-            decorate: { $0.capitalized }
-        )
-    }
-
-    // ======================================================= //
-    // MARK: - Names
-
-    // ======================================================= //
-
-    /// Generates a first name.
-    public static var firstName: String {
-        firstNames.randomElement()!
-    }
-
-    /// Generates a last name.
-    public static var lastName: String {
-        lastNames.randomElement()!
-    }
-
-    /// Generates a full name.
-    public static var fullName: String {
-        "\(firstName) \(lastName)"
-    }
-
-    // ======================================================= //
-    // MARK: - Email Addresses & URLs
-
-    // ======================================================= //
-
-    /// Generates an email address.
-    public static var emailAddress: String {
-        let emailDelimiter = emailDelimiters.randomElement()!
-        let emailDomain = emailDomains.randomElement()!
-
-        return "\(firstName)\(emailDelimiter)\(lastName)@\(emailDomain)".lowercased()
-    }
-
-    /// Generates a URL.
-    public static var url: URL {
-        [
-            "https://simplygo.com.sg",
-            "https://chat.deepseek.com",
-            "https://github.com/jonahaung",
-            "https://www.facebook.com",
-            "https://www.figma.com/design/HLD95kRfVL3qKuucdMY4vF/CIMB-Micro-Credit-x-SimplyGo?m=dev"
-        ].compactMap { URL(string: $0) }.random()!
-    }
-
-    public static var imageUrl: URL {
-        DemoImages.demoPhotosURLs.randomElement()!
-    }
-
-    // ======================================================= //
-    // MARK: - Tweets
-
-    // ======================================================= //
-
-    /// Generates a random tweet which is shorter than 140 characters.
-    public static var shortTweet: String {
-        _composeTweet(shortTweetMaxLength)
-    }
-
-    /// Generates a random tweet which is shorter than 280 characters.
-    public static var tweet: String {
-        _composeTweet(tweetMaxLength)
-    }
+// MARK: - Public Configuration
+public enum LoremTone {
+	case neutral
+	case friendly
 }
 
-private extension Lorem {
-    enum Separator: String {
-        case none = ""
-        case space = " "
-        case dot = "."
-        case newLine = "\n"
-    }
+public struct LoremConversationContext {
+	public let previousMessage: String?
 
-    static func _compose(
-        _ provider: @autoclosure () -> String,
-        count: Int,
-        joinBy middleSeparator: Separator,
-        endWith endSeparator: Separator = .none,
-        decorate decorator: ((String) -> String)? = nil
-    ) -> String {
-        var string = ""
+	public init(previousMessage: String?) {
+		self.previousMessage = previousMessage
+	}
+}
 
-        for index in 0 ..< count {
-            string += provider()
+public enum LoremDomain {
+	case generic
+	case chat
+}
 
-            if index < count - 1 {
-                string += middleSeparator.rawValue
-            } else {
-                string += endSeparator.rawValue
-            }
-        }
+public enum LoremEmojiPolicy {
+	case none
+	case light
+	case expressive
+}
 
-        if let decorator {
-            string = decorator(string)
-        }
+public struct LoremConfiguration {
+	public var domain: LoremDomain
+	public var emoji: LoremEmojiPolicy
+	public var locale: Locale
+	public var tone: LoremTone
 
-        return string
-    }
+	@MainActor
+	public static let `default` = LoremConfiguration(
+		domain: .generic,
+		emoji: .none,
+		locale: .current,
+		tone: .neutral
+	)
+}
 
-    static func _composeTweet(_ maxLength: Int) -> String {
-        for numberOfSentences in [4, 3, 2, 1] {
-            let tweet = sentences(numberOfSentences)
-            if tweet.count < maxLength {
-                return tweet
-            }
-        }
+// MARK: - Lorem
+@MainActor
+public enum Lorem {
 
-        return ""
-    }
+	// MARK: Configuration
 
-    static let minWordsCountInSentence = 4
-    static let maxWordsCountInSentence = 16
-    static let minSentencesCountInParagraph = 3
-    static let maxSentencesCountInParagraph = 9
-    static let minWordsCountInTitle = 2
-    static let maxWordsCountInTitle = 7
-    static let shortTweetMaxLength = 140
-    static let tweetMaxLength = 280
+	public static var configuration = LoremConfiguration.default
 
-    static let allWords = ["alias", "consequatur", "aut", "perferendis", "sit", "voluptatem", "accusantium", "doloremque", "aperiam", "eaque", "ipsa", "quae", "ab", "illo", "inventore", "veritatis", "et", "quasi", "architecto", "beatae", "vitae", "dicta", "sunt", "explicabo", "aspernatur", "aut", "odit", "aut", "fugit", "sed", "quia", "consequuntur", "magni", "dolores", "eos", "qui", "ratione", "voluptatem", "sequi", "nesciunt", "neque", "dolorem", "ipsum", "quia", "dolor", "sit", "amet", "consectetur", "adipisci", "velit", "sed", "quia", "non", "numquam", "eius", "modi", "tempora", "incidunt", "ut", "labore", "et", "dolore", "magnam", "aliquam", "quaerat", "voluptatem", "ut", "enim", "ad", "minima", "veniam", "quis", "nostrum", "exercitationem", "ullam", "corporis", "nemo", "enim", "ipsam", "voluptatem", "quia", "voluptas", "sit", "suscipit", "laboriosam", "nisi", "ut", "aliquid", "ex", "ea", "commodi", "consequatur", "quis", "autem", "vel", "eum", "iure", "reprehenderit", "qui", "in", "ea", "voluptate", "velit", "esse", "quam", "nihil", "molestiae", "et", "iusto", "odio", "dignissimos", "ducimus", "qui", "blanditiis", "praesentium", "laudantium", "totam", "rem", "voluptatum", "deleniti", "atque", "corrupti", "quos", "dolores", "et", "quas", "molestias", "excepturi", "sint", "occaecati", "cupiditate", "non", "provident", "sed", "ut", "perspiciatis", "unde", "omnis", "iste", "natus", "error", "similique", "sunt", "in", "culpa", "qui", "officia", "deserunt", "mollitia", "animi", "id", "est", "laborum", "et", "dolorum", "fuga", "et", "harum", "quidem", "rerum", "facilis", "est", "et", "expedita", "distinctio", "nam", "libero", "tempore", "cum", "soluta", "nobis", "est", "eligendi", "optio", "cumque", "nihil", "impedit", "quo", "porro", "quisquam", "est", "qui", "minus", "id", "quod", "maxime", "placeat", "facere", "possimus", "omnis", "voluptas", "assumenda", "est", "omnis", "dolor", "repellendus", "temporibus", "autem", "quibusdam", "et", "aut", "consequatur", "vel", "illum", "qui", "dolorem", "eum", "fugiat", "quo", "voluptas", "nulla", "pariatur", "at", "vero", "eos", "et", "accusamus", "officiis", "debitis", "aut", "rerum", "necessitatibus", "saepe", "eveniet", "ut", "et", "voluptates", "repudiandae", "sint", "et", "molestiae", "non", "recusandae", "itaque", "earum", "rerum", "hic", "tenetur", "a", "sapiente", "delectus", "ut", "aut", "reiciendis", "voluptatibus", "maiores", "doloribus", "asperiores", "repellat"]
+	// MARK: - Words
 
-    static let firstNames = ["Judith", "Angelo", "Margarita", "Kerry", "Elaine", "Lorenzo", "Justice", "Doris", "Raul", "Liliana", "Kerry", "Elise", "Ciaran", "Johnny", "Moses", "Davion", "Penny", "Mohammed", "Harvey", "Sheryl", "Hudson", "Brendan", "Brooklynn", "Denis", "Sadie", "Trisha", "Jacquelyn", "Virgil", "Cindy", "Alexa", "Marianne", "Giselle", "Casey", "Alondra", "Angela", "Katherine", "Skyler", "Kyleigh", "Carly", "Abel", "Adrianna", "Luis", "Dominick", "Eoin", "Noel", "Ciara", "Roberto", "Skylar", "Brock", "Earl", "Dwayne", "Jackie", "Hamish", "Sienna", "Nolan", "Daren", "Jean", "Shirley", "Connor", "Geraldine", "Niall", "Kristi", "Monty", "Yvonne", "Tammie", "Zachariah", "Fatima", "Ruby", "Nadia", "Anahi", "Calum", "Peggy", "Alfredo", "Marybeth", "Bonnie", "Gordon", "Cara", "John", "Staci", "Samuel", "Carmen", "Rylee", "Yehudi", "Colm", "Beth", "Dulce", "Darius", "inley", "Javon", "Jason", "Perla", "Wayne", "Laila", "Kaleigh", "Maggie", "Don", "Quinn", "Collin", "Aniya", "Zoe", "Isabel", "Clint", "Leland", "Esmeralda", "Emma", "Madeline", "Byron", "Courtney", "Vanessa", "Terry", "Antoinette", "George", "Constance", "Preston", "Rolando", "Caleb", "Kenneth", "Lynette", "Carley", "Francesca", "Johnnie", "Jordyn", "Arturo", "Camila", "Skye", "Guy", "Ana", "Kaylin", "Nia", "Colton", "Bart", "Brendon", "Alvin", "Daryl", "Dirk", "Mya", "Pete", "Joann", "Uriel", "Alonzo", "Agnes", "Chris", "Alyson", "Paola", "Dora", "Elias", "Allen", "Jackie", "Eric", "Bonita", "Kelvin", "Emiliano", "Ashton", "Kyra", "Kailey", "Sonja", "Alberto", "Ty", "Summer", "Brayden", "Lori", "Kelly", "Tomas", "Joey", "Billie", "Katie", "Stephanie", "Danielle", "Alexis", "Jamal", "Kieran", "Lucinda", "Eliza", "Allyson", "Melinda", "Alma", "Piper", "Deana", "Harriet", "Bryce", "Eli", "Jadyn", "Rogelio", "Orlaith", "Janet", "Randal", "Toby", "Carla", "Lorie", "Caitlyn", "Annika", "Isabelle", "inn", "Ewan", "Maisie", "Michelle", "Grady", "Ida", "Reid", "Emely", "Tricia", "Beau", "Reese", "Vance", "Dalton", "Lexi", "Rafael", "Makenzie", "Mitzi", "Clinton", "Xena", "Angelina", "Kendrick", "Leslie", "Teddy", "Jerald", "Noelle", "Neil", "Marsha", "Gayle", "Omar", "Abigail", "Alexandra", "Phil", "Andre", "Billy", "Brenden", "Bianca", "Jared", "Gretchen", "Patrick", "Antonio", "Josephine", "Kyla", "Manuel", "Freya", "Kellie", "Tonia", "Jamie", "Sydney", "Andres", "Ruben", "Harrison", "Hector", "Clyde", "Wendell", "Kaden", "Ian", "Tracy", "Cathleen", "Shawn"]
+	public static var word: String {
+		sentencePack.words.randomElement()!
+	}
 
-    static let lastNames = ["Chung", "Chen", "Melton", "Hill", "Puckett", "Song", "Hamilton", "Bender", "Wagner", "McLaughlin", "McNamara", "Raynor", "Moon", "Woodard", "Desai", "Wallace", "Lawrence", "Griffin", "Dougherty", "Powers", "May", "Steele", "Teague", "Vick", "Gallagher", "Solomon", "Walsh", "Monroe", "Connolly", "Hawkins", "Middleton", "Goldstein", "Watts", "Johnston", "Weeks", "Wilkerson", "Barton", "Walton", "Hall", "Ross", "Chung", "Bender", "Woods", "Mangum", "Joseph", "Rosenthal", "Bowden", "Barton", "Underwood", "Jones", "Baker", "Merritt", "Cross", "Cooper", "Holmes", "Sharpe", "Morgan", "Hoyle", "Allen", "Rich", "Rich", "Grant", "Proctor", "Diaz", "Graham", "Watkins", "Hinton", "Marsh", "Hewitt", "Branch", "Walton", "O'Brien", "Case", "Watts", "Christensen", "Parks", "Hardin", "Lucas", "Eason", "Davidson", "Whitehead", "Rose", "Sparks", "Moore", "Pearson", "Rodgers", "Graves", "Scarborough", "Sutton", "Sinclair", "Bowman", "Olsen", "Love", "McLean", "Christian", "Lamb", "James", "Chandler", "Stout", "Cowan", "Golden", "Bowling", "Beasley", "Clapp", "Abrams", "Tilley", "Morse", "Boykin", "Sumner", "Cassidy", "Davidson", "Heath", "Blanchard", "McAllister", "McKenzie", "Byrne", "Schroeder", "Griffin", "Gross", "Perkins", "Robertson", "Palmer", "Brady", "Rowe", "Zhang", "Hodge", "Li", "Bowling", "Justice", "Glass", "Willis", "Hester", "Floyd", "Graves", "Fischer", "Norman", "Chan", "Hunt", "Byrd", "Lane", "Kaplan", "Heller", "May", "Jennings", "Hanna", "Locklear", "Holloway", "Jones", "Glover", "Vick", "O'Donnell", "Goldman", "McKenna", "Starr", "Stone", "McClure", "Watson", "Monroe", "Abbott", "Singer", "Hall", "Farrell", "Lucas", "Norman", "Atkins", "Monroe", "Robertson", "Sykes", "Reid", "Chandler", "Finch", "Hobbs", "Adkins", "Kinney", "Whitaker", "Alexander", "Conner", "Waters", "Becker", "Rollins", "Love", "Adkins", "Black", "Fox", "Hatcher", "Wu", "Lloyd", "Joyce", "Welch", "Matthews", "Chappell", "MacDonald", "Kane", "Butler", "Pickett", "Bowman", "Barton", "Kennedy", "Branch", "Thornton", "McNeill", "Weinstein", "Middleton", "Moss", "Lucas", "Rich", "Carlton", "Brady", "Schultz", "Nichols", "Harvey", "Stevenson", "Houston", "Dunn", "West", "O'Brien", "Barr", "Snyder", "Cain", "Heath", "Boswell", "Olsen", "Pittman", "Weiner", "Petersen", "Davis", "Coleman", "Terrell", "Norman", "Burch", "Weiner", "Parrott", "Henry", "Gray", "Chang", "McLean", "Eason", "Weeks", "Siegel", "Puckett", "Heath", "Hoyle", "Garrett", "Neal", "Baker", "Goldman", "Shaffer", "Choi", "Carver"]
+	public static func words(_ count: Int) -> String {
+		compose(word, count: count, joinBy: .space)
+	}
 
-    static let emailDomains = ["gmail.com", "yahoo.com", "hotmail.com", "email.com", "live.com", "me.com", "mac.com", "aol.com", "fastmail.com", "mail.com"]
+	public static func words(_ range: Range<Int>) -> String {
+		compose(word, count: .random(in: range), joinBy: .space)
+	}
 
-    static let emailDelimiters = ["", ".", "-", "_"]
+	public static func words(_ range: ClosedRange<Int>) -> String {
+		compose(word, count: .random(in: range), joinBy: .space)
+	}
 
-    static let urlSchemes = ["http", "https"]
+	// MARK: - Sentences
 
-    static let urlDomains = ["twitter.com", "google.com", "youtube.com", "wordpress.org", "adobe.com", "blogspot.com", "godaddy.com", "wikipedia.org", "wordpress.com", "yahoo.com", "linkedin.com", "amazon.com", "flickr.com", "w3.org", "apple.com", "myspace.com", "tumblr.com", "digg.com", "microsoft.com", "vimeo.com", "pinterest.com", "stumbleupon.com", "youtu.be", "miibeian.gov.cn", "baidu.com", "feedburner.com", "bit.ly"]
+	public static var sentence: String {
+		let pack = sentencePack
+
+		let base: String = {
+			switch configuration.domain {
+			case .chat:
+				return pack.chatTemplates.random()()
+			case .generic:
+				return pack.genericTemplates.random()()
+			}
+		}()
+
+		return decorateWithEmoji(base) + "."
+	}
+
+	public static func sentences(_ count: Int) -> String {
+		compose(sentence, count: count, joinBy: .space)
+	}
+
+	public static func sentences(_ range: Range<Int>) -> String {
+		compose(sentence, count: .random(in: range), joinBy: .space)
+	}
+
+	public static func sentences(_ range: ClosedRange<Int>) -> String {
+		compose(sentence, count: .random(in: range), joinBy: .space)
+	}
+
+	public static func random() -> String {
+		[
+			sentence,
+			tweet,
+			paragraph,
+			title,
+			shortTweet,
+			url.absoluteString,
+			reply(to: .init(previousMessage: sentence))
+		].random()
+	}
+
+	// MARK: - Paragraphs
+
+	public static var paragraph: String {
+		compose(
+			sentence,
+			count: .random(in: minSentencesCountInParagraph...maxSentencesCountInParagraph),
+			joinBy: .space
+		)
+	}
+
+	public static func paragraphs(_ count: Int) -> String {
+		compose(paragraph, count: count, joinBy: .newLine)
+	}
+
+	public static func paragraphs(_ range: Range<Int>) -> String {
+		compose(paragraph, count: .random(in: range), joinBy: .newLine)
+	}
+
+	public static func paragraphs(_ range: ClosedRange<Int>) -> String {
+		compose(paragraph, count: .random(in: range), joinBy: .newLine)
+	}
+
+	// MARK: - Titles
+
+	public static var title: String {
+		compose(
+			word,
+			count: .random(in: minWordsCountInTitle...maxWordsCountInTitle),
+			joinBy: .space,
+			decorate: { $0.capitalized }
+		)
+	}
+
+	// MARK: - Tweets
+
+	public static var shortTweet: String {
+		composeTweet(shortTweetMaxLength)
+	}
+
+	public static var tweet: String {
+		composeTweet(tweetMaxLength)
+	}
+
+	// MARK: - Names
+
+	public static var firstName: String {
+		sentencePack.firstNames.random()
+	}
+
+	public static var lastName: String {
+		sentencePack.lastNames.random()
+	}
+
+	public static var fullName: String {
+		"\(firstName) \(lastName)"
+	}
+
+	// MARK: - Email & URLs
+
+	public static var emailAddress: String {
+		"\(firstName).\(lastName)@\(sentencePack.emailDomains.random())".lowercased()
+	}
+
+	public static var url: URL {
+		URL(string: sentencePack.urls.random())!
+	}
+}
+
+// MARK: - Sentence Packs (i18n-ready)
+
+private protocol LoremSentencePack {
+	var words: [String] { get }
+	var chatTemplates: [() -> String] { get }
+	var replyTemplates: [(String) -> String] { get }  // 👈 NEW
+	var genericTemplates: [() -> String] { get }
+	var emojisLight: [String] { get }
+	var emojisExpressive: [String] { get }
+	var firstNames: [String] { get }
+	var lastNames: [String] { get }
+	var emailDomains: [String] { get }
+	var urls: [String] { get }
+}
+
+// MARK: - English Pack
+
+private struct EnglishSentencePack: LoremSentencePack {
+
+	// MARK: - Vocabulary (used by word/title generators)
+
+	let words = [
+		"message", "system", "user", "feature", "update",
+		"conversation", "service", "experience", "design",
+		"performance", "security", "workflow", "notification",
+		"account", "profile", "session", "request",
+		"response", "timeline", "status", "delivery",
+		"support", "issue", "confirmation", "details",
+		"information", "summary", "progress", "result",
+	]
+
+	// MARK: - Chat Templates (openers, questions, updates)
+
+	let chatTemplates: [() -> String] = [
+
+		// Openers
+		{ "Hey, are you free right now" },
+		{ "Hi, do you have a moment" },
+		{ "Just checking in with you" },
+		{ "Hope you are doing well" },
+		{ "Hey there, quick question" },
+
+		// Follow-ups
+		{ "I wanted to follow up on this" },
+		{ "Just following up on my earlier message" },
+		{ "Any updates on this so far" },
+		{ "Let me know if you had a chance to check" },
+
+		// Status updates
+		{ "I am looking into this now" },
+		{ "I am still checking on this" },
+		{ "I will get back to you shortly" },
+		{ "I should have an update soon" },
+		{ "Let me check and update you" },
+
+		// Requests
+		{ "Can you help me with this" },
+		{ "Could you share more details" },
+		{ "Can you send me the details later" },
+		{ "Do you need anything else from me" },
+
+		// Scheduling
+		{ "Can we discuss this later today" },
+		{ "Let us continue this later" },
+		{ "We can revisit this tomorrow if needed" },
+
+		// Confirmations
+		{ "That sounds good to me" },
+		{ "That should be fine" },
+		{ "Okay, that works for me" },
+
+		// Closings
+		{ "Thanks for checking on this" },
+		{ "Appreciate your help here" },
+		{ "Thanks, talk to you soon" },
+	]
+
+	// MARK: - Generic / System Messages (UI, banners, logs)
+
+	let genericTemplates: [() -> String] = [
+
+		{
+			"The application is running smoothly, and all core features are currently available without any interruptions."
+		},
+
+		{
+			"This feature has been designed to improve the overall user experience by making common actions faster and easier to complete."
+		},
+
+		{
+			"The system processes requests efficiently in the background to ensure a responsive and reliable experience for all users."
+		},
+
+		{
+			"The latest update enhances overall performance while also improving stability and reducing unexpected issues."
+		},
+
+		{
+			"The workflow has been updated successfully, and the changes will take effect the next time the application is opened."
+		},
+
+		{
+			"Notifications are delivered in real time so that important updates and messages are not missed."
+		},
+
+		{
+			"Security checks are completed automatically to protect your data and maintain a safe and trusted environment."
+		},
+
+		{
+			"The service is currently operating normally, and no outages or maintenance activities are affecting availability."
+		},
+
+		{
+			"Your request has been received successfully and is now being processed by the system."
+		},
+
+		{
+			"Changes have been saved successfully, and no further action is required at this time."
+		},
+
+		{
+			"The system is temporarily unavailable due to scheduled maintenance, and services will resume shortly."
+		},
+
+		{
+			"Please try again later if the issue persists, or contact support for further assistance."
+		},
+
+		{
+			"Some features may be limited while background updates are in progress, but normal functionality will return soon."
+		},
+
+		{
+			"We are currently performing routine maintenance to improve reliability and long-term performance."
+		},
+
+		{
+			"Your settings have been updated and will be applied across all devices linked to your account."
+		},
+
+		{
+			"Data synchronization is in progress to ensure that your information remains up to date."
+		},
+
+		{
+			"No further action is required unless you receive additional instructions from the system."
+		},
+
+		{
+			"If you continue to experience issues, please restart the application and try again."
+		},
+	]
+
+	// MARK: - Reply Templates (reply-aware, friendly)
+
+	let replyTemplates: [(String) -> String] = [
+
+		// Acknowledgements
+		{ _ in "Sure, that works for me" },
+		{ _ in "Yep, I can do that" },
+		{ _ in "Sounds good, thanks for checking" },
+		{ _ in "No problem at all" },
+		{ _ in "Got it, thanks for letting me know" },
+
+		// Action replies
+		{ _ in "I am on it now" },
+		{ _ in "I will take care of this" },
+		{ _ in "Let me check and get back to you" },
+		{ _ in "I will confirm and update you shortly" },
+
+		// Clarifications
+		{ _ in "Could you clarify this part for me" },
+		{ _ in "Just to confirm, is this correct" },
+		{ _ in "Let me make sure I understood this correctly" },
+
+		// Delays
+		{ _ in "Sorry for the delay, I am checking now" },
+		{ _ in "Thanks for your patience on this" },
+
+		// Context-aware reply
+		{ previous in
+			"I saw your message about \(previous.lowercased())"
+		},
+	]
+
+	// MARK: - Emojis
+
+	let emojisLight = [
+		"🙂", "👍", "👌", "😊", "🤝", "✨",
+	]
+
+	let emojisExpressive = [
+		"😂", "🔥", "🚀", "🙌", "😅", "🎉", "💯",
+	]
+
+	// MARK: - Names
+
+	let firstNames = [
+		"Alex", "Jamie", "Taylor", "Jordan", "Chris", "Morgan",
+		"Sam", "Casey", "Avery", "Riley", "Drew", "Quinn",
+		"Ryan", "Shawn", "Daniel", "Ethan", "Sophia", "Emma",
+	]
+
+	let lastNames = [
+		"Lee", "Tan", "Ng", "Smith", "Johnson",
+		"Brown", "Wong", "Lim", "Chen", "Park",
+		"Wilson", "Anderson", "Harris",
+	]
+
+	// MARK: - Internet
+
+	let emailDomains = [
+		"gmail.com",
+		"icloud.com",
+		"outlook.com",
+		"yahoo.com",
+		"proton.me",
+	]
+
+	let urls = [
+		"https://www.simplygo.com.sg",
+		"https://github.com",
+		"https://apple.com",
+		"https://developer.apple.com",
+		"https://figma.com",
+		"https://support.apple.com",
+	]
+}
+
+// MARK: - Internal Helpers
+
+extension Lorem {
+
+	fileprivate static var sentencePack: LoremSentencePack {
+		switch configuration.locale.language.languageCode?.identifier {
+		case "en", .none:
+			return EnglishSentencePack()
+		default:
+			return EnglishSentencePack()
+		}
+	}
+
+	fileprivate static func decorateWithEmoji(_ sentence: String) -> String {
+		switch configuration.emoji {
+		case .none:
+			return sentence
+		case .light:
+			guard Bool.random() else { return sentence }
+			return "\(sentence) \(sentencePack.emojisLight.random())"
+		case .expressive:
+			return "\(sentence) \(sentencePack.emojisExpressive.random())"
+		}
+	}
+
+	fileprivate enum Separator: String {
+		case space = " "
+		case newLine = "\n"
+	}
+
+	fileprivate static func compose(
+		_ provider: @autoclosure () -> String,
+		count: Int,
+		joinBy separator: Separator,
+		decorate: ((String) -> String)? = nil
+	) -> String {
+		let result = (0..<count)
+			.map { _ in provider() }
+			.joined(separator: separator.rawValue)
+
+		return decorate?(result) ?? result
+	}
+
+	public static func composeTweet(_ maxLength: Int) -> String {
+		for count in [4, 3, 2, 1] {
+			let text = sentences(count)
+			if text.count <= maxLength {
+				return text
+			}
+		}
+		return sentence
+	}
+
+	public static func reply(
+		to context: LoremConversationContext
+	) -> String {
+
+		let pack = sentencePack
+
+		let base: String = {
+			guard
+				configuration.domain == .chat,
+				let previous = context.previousMessage,
+				configuration.tone == .friendly
+			else {
+				return sentence
+			}
+
+			return pack.replyTemplates.random()(previous)
+		}()
+
+		return decorateWithEmoji(base) + "."
+	}
+	fileprivate static let minSentencesCountInParagraph = 3
+	fileprivate static let maxSentencesCountInParagraph = 7
+	fileprivate static let minWordsCountInTitle = 2
+	fileprivate static let maxWordsCountInTitle = 6
+	fileprivate static let shortTweetMaxLength = 140
+	fileprivate static let tweetMaxLength = 280
+}
+extension Lorem {
+	fileprivate static func applyTone(_ sentence: String) -> String {
+		switch configuration.tone {
+		case .neutral:
+			return sentence
+		case .friendly:
+			return Bool.random()
+				? sentence
+				: "Hey! \(sentence.lowercased())"
+		}
+	}
+}
+// MARK: - Convenience
+
+extension Array {
+	fileprivate func random() -> Element {
+		randomElement()!
+	}
 }

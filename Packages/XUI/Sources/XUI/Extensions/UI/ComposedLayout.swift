@@ -12,7 +12,7 @@ public struct ComposedLayout: Layout {
 
     private let topColumns: Int
     private let bottomColumns: Int
-    public init(topColumns: Int = 2, bottomColumns: Int = 2) {
+    public init(topColumns: Int = 1, bottomColumns: Int = 2) {
         self.topColumns = topColumns
         self.bottomColumns = bottomColumns
     }
@@ -61,7 +61,6 @@ public struct ComposedLayout: Layout {
 
         if !tViews.isEmpty {
             let tSize = hStack.sizeThatFits(proposal: proposal, subviews: tViews, cache: &cache.topCache)
-
             hStack.placeSubviews(in: bounds, proposal: proposal, subviews: tViews, cache: &cache.topCache)
 
             bounds.origin = CGPoint(x: bounds.origin.x, y: bounds.origin.y + tSize.height)

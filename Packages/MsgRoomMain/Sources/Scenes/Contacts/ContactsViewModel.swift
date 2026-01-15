@@ -14,7 +14,7 @@ import XUI
 @Observable
 final class ContactsViewModel: ErrorPresenter {
     var loading: Bool = false
-
+	var searchText = ""
     init() {}
 
     @concurrent

@@ -9,7 +9,6 @@ import Foundation
 
 public protocol SwiftLinkPreviewCache {
     func slp_getCachedResponse(url: String) -> SwiftLinkPreviewResponse?
-
     func slp_setCachedResponse(url: String, response: SwiftLinkPreviewResponse?)
 }
 
@@ -22,7 +21,7 @@ public final class DisabledCache: SwiftLinkPreviewCache {
     public func slp_setCachedResponse(url: String, response: SwiftLinkPreviewResponse?) { }
 }
 
-final class LinkPreviewInMemoryCache: SwiftLinkPreviewCache {
+public final class LinkPreviewInMemoryCache: SwiftLinkPreviewCache {
     private var cache = [String: (response: SwiftLinkPreviewResponse, date: Date)]()
     private let invalidationTimeout: TimeInterval
     private let cleanupTimer: DispatchSource?

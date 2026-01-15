@@ -19,14 +19,6 @@ public struct SelectedMsg: Hashable, Identifiable, Sendable {
 		self.next = next
 	}
 }
-
-private struct SelectedMsgKey: EnvironmentKey {
-	static let defaultValue: SelectedMsg? = nil
-}
-
 extension EnvironmentValues {
-	var selectedMsg: SelectedMsg? {
-		get { self[SelectedMsgKey.self] }
-		set { self[SelectedMsgKey.self] = newValue }
-	}
+	@Entry var selectedMsg: SelectedMsg? = nil
 }

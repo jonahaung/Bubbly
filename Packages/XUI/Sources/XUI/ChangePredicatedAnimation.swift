@@ -30,8 +30,8 @@ private struct ChangePredicatedAnimation<Value: Equatable>: ViewModifier {
 	func body(content: Content) -> some View {
 		content
 			.transaction { view in
-				if let oldValue = lastValue {
-					if predicate((oldValue, value)) {
+				if let lastValue {
+					if predicate((lastValue, value)) {
 						view.animation = animation
 					}
 				}

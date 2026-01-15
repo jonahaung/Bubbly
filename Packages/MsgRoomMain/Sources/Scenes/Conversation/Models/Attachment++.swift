@@ -14,7 +14,7 @@ public extension Attachment {
     }
 
     var bestFitWidth: CGFloat {
-		aspectRatio < 0.9 ? 200 : aspectRatio > 1.1 ? 300 : 150
+		aspectRatio < 0.9 ? 200 : aspectRatio > 1.1 ? 300 : 200
     }
 
     var bestFitSize: CGSize {

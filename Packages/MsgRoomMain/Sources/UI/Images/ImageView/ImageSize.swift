@@ -12,6 +12,7 @@ public enum ImageSize: Sendable, Equatable, Codable {
 	case mini
 	case small
 	case medium
+	case large
 	case original
 	case custom(CGFloat)
 
@@ -23,6 +24,8 @@ public enum ImageSize: Sendable, Equatable, Codable {
 			50
 		case .medium:
 			100
+		case .large:
+			300
 		case .original:
 			nil
 		case let .custom(cGFloat):

@@ -18,7 +18,13 @@ public struct AsyncButtonOptions: OptionSet, Sendable {
     public static let enableTintFeedback = AsyncButtonOptions(rawValue: 1 << 5)
 
     public static let all: AsyncButtonOptions = [.disableButtonOnLoading, .showProgressViewOnLoading, .showAlertOnError, .disallowParallelOperations, .enableNotificationFeedback, .enableTintFeedback]
-    public static let automatic: AsyncButtonOptions = [.disableButtonOnLoading, .showProgressViewOnLoading, .showAlertOnError, .disallowParallelOperations, .enableNotificationFeedback]
+	public static let automatic: AsyncButtonOptions = [
+		.disableButtonOnLoading,
+		.showAlertOnError,
+		.disallowParallelOperations,
+		.enableNotificationFeedback,
+		.enableTintFeedback
+	]
 
     public init(rawValue: Int) {
         self.rawValue = rawValue

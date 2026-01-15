@@ -26,11 +26,6 @@ public enum ConversationRepo {
 	}
 
 	public static func getConversationKind(for conID: String, refetch: Bool) async throws -> ConversationKind {
-		if conID.contains(AI.contact.uid) {
-			let contact = try await ContactRepo.getOrCreate(for: AI.contact.uid, refetch: false)
-			return .system(contact)
-		}
-
 		if conID.contains("|") {
 			let contactID = try resolveContactID(from: conID)
 			let contact = try await ContactRepo.getOrCreate(for: contactID, refetch: refetch)
@@ -149,5 +144,31 @@ public enum ConversationRepo {
 		}
 
 		return updated
+	}
+
+	public static func search(form name: String, currentUserId: String) async throws -> Conversation? {
+		if let contact = try await ContactRepo.search(named: name) {
+			return await Conversation(
+				.contact(contact),
+				properties: ConversationPropertiesRepo.getOrCreateMain(
+					for: ConversationIDGenerator.generate(
+						currentUserId,
+						contact.uid
+					)
+				)
+			)
+		} else if let group = try await ContactRepo.searchGroup(named: name) {
+			return await Conversation(
+				.group(group),
+				properties: ConversationPropertiesRepo.getOrCreateMain(
+					for: ConversationIDGenerator.generate(
+						currentUserId,
+						group.uid
+					)
+				)
+			)
+		} else {
+			return nil
+		}
 	}
 }

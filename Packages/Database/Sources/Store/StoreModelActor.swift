@@ -37,7 +37,7 @@ Model.SendableType.UID == String {
 	// MARK: - Create
 
 	public func insert(_ data: Model.SendableType) throws {
-		if var existing = try getModel(for: data.uid) {
+		if let existing = try getModel(for: data.uid) {
 			existing.update(from: data)      // you’d add this API on Model
 		} else {
 			context.insert(Model(from: data))

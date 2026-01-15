@@ -114,7 +114,9 @@ extension ChatDatasource {
 			case let .updatedMsg(rMsg):
 				await delegate?.datasource(didUpdate: .init(rMsg), animated: false)
 			case let .reaction(reaction):
-				Log(reaction)
+				if let msg = try? await Store.shared.msgStore.fetch(uid: reaction.msgID) {
+					await delegate?.datasource(didUpdate: msg, animated: false)
+				}
 			case let .typingStatus(status):
 				await delegate?.datasource(didReceive: status)
 			case let .deleteMsg(rMsg):

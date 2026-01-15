@@ -7,6 +7,7 @@
 
 import SwiftUI
 
+@MainActor
 public struct AppLaunchingView: View {
 
 	@Environment(AppLauncher.self) private var launcher
@@ -16,12 +17,11 @@ public struct AppLaunchingView: View {
 	public var body: some View {
 		switch launcher.route {
 		case .loading:
-			ProgressView()
-				.controlSize(.mini)
+			LaunchScreen()
 		case .getStarted:
 			AuthFlow()
 		case .main(let currentUser):
-			MainTabView()
+			RootView()
 				.msgRoomEntryPoint(currentUser)
 		}
 	}

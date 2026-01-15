@@ -115,8 +115,7 @@ public struct GroupConversationSettingsScene: View {
                     if let image = viewModel.pickedPhoto?.uiImage {
                         let url = try await viewModel.uploadImage(image: image)
                         await MainActor.run {
-                            viewModel.group.photoURL = url
-                            //							viewModel.pickedPhoto = nil
+							viewModel.group.photoURL = url.absoluteString
                         }
                     }
                     try await viewModel.applyUpdate()

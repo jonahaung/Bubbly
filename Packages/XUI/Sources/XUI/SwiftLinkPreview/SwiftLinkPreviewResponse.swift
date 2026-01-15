@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SwiftLinkPreviewResponse: Sendable {
+public struct SwiftLinkPreviewResponse: Sendable, Hashable {
 
     public internal(set) var url: URL
     public internal(set) var finalUrl: URL
@@ -27,5 +27,12 @@ public struct SwiftLinkPreviewResponse: Sendable {
 		self.finalUrl = finalUrl
 		self.canonicalUrl = canonicalUrl
 		self.baseURL = baseURL
+	}
+
+	public var imageURL: URL? {
+		guard let urlString = image ?? icon else {
+			return nil
+		}
+		return .init(string: urlString)
 	}
 }

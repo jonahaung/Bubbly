@@ -33,7 +33,7 @@ public struct CircleButton: View {
             action()
         } label: {
             ZStack {
-                Circle().fill(Color.white.gradient)
+				Circle().fill(Color.systemBackground.gradient)
                     .frame(square: size)
                     .layoutPriority(1)
                 SystemImage(symbol, size * 0.4)

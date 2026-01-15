@@ -14,119 +14,156 @@ import XUI
 public struct ConversationScene: View {
 
 	@LazyState private var manager: ChatViewManager
-	@FocusState private var isFieldFocused: Bool
+	@LazyState private var composer: ChatComposer
+	@FocusState private var focusState: String?
+	@Environment(Router.self) private var router
+	@Environment(\.currentUser) private var currentUser
+	@Namespace private var namespace
 
 	public init(_ prefetchedData: ConversationInitializer.PrefetchedData) {
 		_manager = .init(wrappedValue: .init(prefetchedData))
-
+		_composer = .init(wrappedValue: .init())
 	}
 
 	public var body: some View {
-		ZStack(alignment: .leading) {
-			background
-			MsgsScrollView()
+		ZStack(alignment: .init(horizontal: .center, vertical: .bottom)) {
+			manager.conversation.properties.theme.background.color
+				.backgroundExtensionEffect()
+			Image("adaptive")
+				.resizable(resizingMode: .tile)
+				.foregroundStyle(manager.conversation.theme.outgoingBubbleColor)
+				.backgroundExtensionEffect()
+
+
+			if let boundsWidth = manager.scrollController.inputAccessoryFrame?.size.width {
+				MsgsScrollView(boundsWidth: boundsWidth)
+					.safeAreaPadding(
+						.init(
+							top: ChatLayoutConstants.topBarHeight,
+							leading: 0,
+							bottom: ChatLayoutConstants.bottomBarHeight,
+							trailing: 0
+						)
+					)
+					.fullScreenCover(item: $manager.presentation.overlayItem) { frame in
+						if let viewModel = manager.messageItems.element(withID: frame.id) {
+							ChatOverlayView(item: frame)
+								.environment(viewModel)
+								.environment(manager)
+								.presentationBackgroundInteraction(.enabled)
+								.presentationBackground(.clear)
+								.environment(\.viewIsVisible, true)
+						}
+					}
+			}
 			VStack {
+				ChatTitleBar()
 				FloatingDateView()
-				Spacer()
-				ChatToastView()
 			}
-		}
-		.safeAreaInset(edge: .top, spacing: 0) {
-			ChatTopBarView()
-		}
-		.safeAreaInset(edge: .bottom, spacing: 0) {
-			ChatInputBar()
-				.onGeometryChange(for: CGRect.self) { geometry in
-					geometry.frame(in: .global)
-				} action: { oldValue, newValue in
-					manager.scrollManager.handleBottomBarFrameChange(oldValue, newValue)
-				}
-		}
-		.background(
-			manager.conversation.properties.theme.background.color,
-			ignoresSafeAreaEdges: .all
-		)
-		.fullScreenCover(item: $manager.eventsManager.overlayItem) { frame in
-			if let viewModel = manager.data.element(withID: frame.id) {
-				ChatOverlayView(item: frame, viewModel: viewModel)
-					.ignoresSafeArea(.container)
-					.environment(manager)
-					.presentationBackgroundInteraction(.disabled)
-					.presentationBackground(.clear)
+			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+
+			VStack {
+				ChatAccessoryBar()
+				ComposeBar(composer: composer)
+					.onGeometryChange(for: CGRect.self) { geometry in
+						geometry.frame(in: .global)
+					} action: { oldValue, newValue in
+						manager.scrollController.didChangeInputAccessoryFrame(oldValue, newValue)
+					}
 			}
+			.frame(maxWidth: .infinity, alignment: .bottom)
 		}
-		.receiveMsgCellInteraction { action in
-			MainActor.assumeIsolated {
-				handleMsgCellInteraction(action: action)
-			}
-		}
+		.containerRelativeFrame(.horizontal)
 		.environment(manager)
-		.environment(\.sharedFocus, SharedFocusState($isFieldFocused))
+		.environment(composer)
 		.environment(\.conversationTheme, .init(manager.conversation))
 		.environment(\.conversation, manager.conversation)
-		.environment(\.asyncFetcher, manager.asyncFetcher)
-		.environment(\.selectedMsg, manager.eventsManager.selectedMsg)
+		.environment(\.attachmentFetcher, manager.attachments)
+		.environment(\.selectedMsg, manager.presentation.selectedMsg)
+		.environment(\.sharedFocusState, SharedFocusState($focusState))
+		.environment(\.sharedNamespace, SharedNamespace(namespace))
+		.environment(\.msgCellActions, MsgCellAction(action: handleMsgCellInteraction))
+		.environment(\.layoutCache, manager.scrollController.messageLayoutCache)
 		.task(priority: .background) {
-			await manager.onViewAppear()
-		}
-	}
-
-	private func handleMsgCellInteraction(action: MsgCellInteraction.Action) {
-		switch action {
-			case let .onTapMsg(uid):
-				handleTapMsg(with: uid)
-			case let .onTapAvatar(id):
-				handleTapAvatar(with: id)
-			case let .onMarkMsg(data):
-				handleMarkMsg(with: data)
-			case let .onFocusMsgBubble(item):
-				handleFocusMsgBubble(with: item)
-		}
-	}
-
-	private func handleRefreshMsg(_ uid: String) {
-		Task {
 			do {
-				guard let msg = try await Store.shared.msgStore.fetch(uid: uid) else {
-					fatalError()
-				}
-				await MainActor.run {
-					if let msgCellViewModel = manager.data.element(withID: msg.uid) {
-						msgCellViewModel.update(with: msg)
-					}
-				}
+				try await manager.onViewAppear()
 			} catch {
 				await manager.showError(error)
 			}
 		}
 	}
 
-	private func handleTapMsg(with uid: String?) {
-		if let uid {
-			manager.setSelectedMsg(uid)
+}
+
+private extension ConversationScene {
+	func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
+		switch action {
+		case let .onTapMsg(uid):
+			handleTapMsg(with: uid)
+		case let .onTapAvatar(id):
+			handleTapAvatar(with: id)
+		case let .onMarkMsg(data):
+			handleMarkMsg(with: data)
+		case let .onFocusMsgBubble(item):
+			handleFocusMsgBubble(with: item)
+		case let .onUploadedAttachments(msg):
+			sendMsg(msg)
+		case let .onReact(msg, reaction):
+			handleReact(msg, reaction)
 		}
 	}
 
-	private func handleTapAvatar(with id: String) {
-		guard let viewModel = manager.data.element(withID: id),
+	func handleTapMsg(with uid: String) {
+		manager.setSelectedMsg(uid)
+	}
+
+	func handleReact(_ msg: Message, _ reaction: String) {
+
+		let currentUserID = currentUser.uid
+		Task.detached {
+			do {
+				try await Task.sleep(seconds: 1)
+				let reaction = Reaction.init(
+					rawValue: reaction,
+					senderID: currentUserID,
+					date: .now
+				)
+				try await Socket.shared
+					.send(
+						.reaction(
+							reaction: .init(
+								reaction: reaction,
+								msgID: msg.uid,
+								conID: manager.conversation.uid
+							)
+						),
+						conversation: manager.conversation
+					)
+			} catch {
+				await manager.showError(error)
+			}
+		}
+		manager.presentation.updateFocusedFrame(nil)
+	}
+
+	func handleTapAvatar(with id: String) {
+		guard let viewModel = manager.messageItems.element(withID: id),
 			  let contact = viewModel.sender()
 		else {
 			return
 		}
 		Router.shared.push(NavPath.contactDetails(contact))
 	}
-
-	private func handleMarkMsg(with msg: Message) {
-		manager.eventsManager.updateToast(.message(msg))
+	func handleMarkMsg(with msg: Message) {
+		manager.presentation.updateToast(.message(msg))
 	}
-
-	private func handleFocusMsgBubble(with item: ChatOverlayView.Item) {
-		manager.eventsManager.updateFocusedFrame(item)
+	func handleFocusMsgBubble(with item: ChatOverlayView.Item) {
+		manager.presentation.updateFocusedFrame(item)
 	}
-
-	private let background: some View = Image("adaptive")
-		.resizable(resizingMode: .tile)
-		.foregroundStyle(.tertiary)
-		.ignoresSafeArea(.all)
-		.equatable(by: true)
+	func sendMsg(_ msg: Message) {
+		Task {
+			try await Socket.shared
+				.send(.newMsg(rMsg: .init(msg)), conversation: manager.conversation)
+		}
+	}
 }

@@ -8,8 +8,10 @@
 import SwiftUI
 
 public extension UIImage {
-    @MainActor func resizedImage(maxSize: CGFloat) -> UIImage? {
-        let maxSizePixels = maxSize * UIScreen.main.scale
+	@inlinable
+	@concurrent
+	func resizedImage(maxSize: CGFloat) async -> UIImage? {
+        let maxSizePixels = maxSize * self.scale
         let originalWidth = size.width
         let originalHeight = size.height
         let aspectRatio = originalWidth / originalHeight
@@ -47,12 +49,10 @@ public extension UIImage {
 
         return newImage
     }
+}
 
-    @MainActor
-    func temporaryLocalFileUrl(id: String, quality: CGFloat) async throws -> URL? {
-        guard let imageData = jpegData(compressionQuality: quality) else { return nil }
-        guard let localPath = FileUtil.documentDirectory?.appending(path: id) else { return nil }
-        imageData.write(path: localPath.path())
-        return localPath
-    }
+public extension UIImage {
+	var aspectRatio: CGFloat {
+		return size.height.isZero ? 0 : size.width / size.height
+	}
 }

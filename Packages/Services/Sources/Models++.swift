@@ -12,73 +12,53 @@ import SwiftUI
 import XUI
 
 extension Contact: @retroactive ImageViewItem {
-    public var remoteURL: URL? {
-        .init(string: photoURL) ?? DemoImages.demoPhotosURLs.random()!
-    }
+	public var subFolders: [String] {
+		["Contacts", "Profile Photos", uid]
+	}
 
-    public var subFolderName: String? {
-        "Contacts"
-    }
-
-    public var folderName: String? {
-        mediaType?.directory
-    }
-
-    public var imageID: String? {
-        uid
-    }
-
-    public var mediaType: Database.MediaType? {
-        .png
-    }
+	public var remoteURL: URL? {
+		.init(string: photoURL)
+	}
+	public var imageID: String {
+		uid
+	}
+	public var galleryTitle: String? {
+		name
+	}
 }
 
 extension Database.Group: @retroactive ImageViewItem {
-    public var remoteURL: URL? {
-        .init(string: photoURL ?? "") ?? DemoImages.demoPhotosURLs.random()!
-    }
+	public var subFolders: [String] {
+		["Groups", "Profile Photos", uid]
+	}
+	public var galleryTitle: String? {
+		name
+	}
 
-    public var subFolderName: String? {
-        "Conversations"
-    }
+	public var remoteURL: URL? {
+		.init(string: photoURL ?? "") ?? DemoImages.demoPhotosURLs.random()!
+	}
 
-    public var imageID: String? {
-        uid
-    }
-
-    public var mediaType: Database.MediaType? {
-        .png
-    }
+	public var imageID: String {
+		uid
+	}
 }
-
-extension Message: @retroactive ImageViewItem {
-    public var remoteURL: URL? {
-        guard let string = attachment?.url else { return nil }
-        return .init(string: string)
-    }
-
-    public var imageID: String? {
-        attachment?.uid
-    }
-
-    public var subFolderName: String? {
-        uid
-    }
-
-    public var mediaType: MediaType? {
-        switch attachment?.attachmentType {
-        case .image:
-            MediaType.png
-        case .imageUploading:
-            MediaType.png
-        case .video:
-            .video
-        case .videoUploading:
-            .video
-        case .link:
-            .data
-        case nil:
-            nil
-        }
-    }
+extension Attachment: @retroactive ImageViewItem {
+	public var subFolders: [String] {
+		var values = ["Conversations", "Messages", "Attachments", attachmentType.description]
+		let split = uid.components(separatedBy: "_")
+		if split.count == 2 {
+			values.append(split[0])
+		}
+		return values
+	}
+	public var galleryTitle: String? {
+		title
+	}
+	public var remoteURL: URL? {
+		.init(string: url)
+	}
+	public var imageID: String {
+		uid
+	}
 }

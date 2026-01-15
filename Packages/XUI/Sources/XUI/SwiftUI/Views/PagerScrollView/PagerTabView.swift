@@ -8,13 +8,13 @@
 import SwiftUI
 
 @available(iOS 18.0, *)
-public struct PagerTabView<Page, Content, TabButton>: View where Page: Sendable & Equatable & Hashable & Identifiable, Content: View, TabButton: View {
-    private let items: [Page]
-    private let content: (Page) -> Content
-    private let tab: (Page, Bool) -> TabButton
-    @Binding private var selection: Page
+public struct PagerTabView<Item, Content, TabButton>: View where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, TabButton: View {
+    private let items: [Item]
+    private let content: (Item) -> Content
+    private let tab: (Item, Bool) -> TabButton
+    @Binding private var selection: Item
 
-    public init(items: [Page], selection: Binding<Page>, content: @escaping (Page) -> Content, tab: @escaping (Page, Bool) -> TabButton) {
+    public init(items: [Item], selection: Binding<Item>, content: @escaping (Item) -> Content, tab: @escaping (Item, Bool) -> TabButton) {
         self.items = items
         self.content = content
         _selection = selection
@@ -27,7 +27,7 @@ public struct PagerTabView<Page, Content, TabButton>: View where Page: Sendable 
                 tab(item, isSelected)
             }
             Divider().foregroundStyle(.quinary)
-            PagerScrollView(items: items, selection: $selection, content: content)
+//            PagerScrollView(items: items, selection: $selection, content: content)
         }
     }
 }

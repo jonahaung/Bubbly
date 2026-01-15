@@ -22,10 +22,10 @@ public enum ConversationInitializer {
         public var maxNumberOfMsgsToDisplay: Int { pageSize * 2 }
 
         public let contentInsets = EdgeInsets(
-            top: 0,
+			top: 0,
             leading: 8,
 			bottom: 0,
-            trailing: 4
+            trailing: 8
         )
     }
 
@@ -47,6 +47,7 @@ public enum ConversationInitializer {
 }
 
 public extension ConversationInitializer {
+	@concurrent
     static func createPrefetchedObject(
         conversation: Conversation
     ) async throws -> PrefetchedData {
@@ -88,30 +89,16 @@ public extension ConversationInitializer {
                 if delay > 0 {
                     try await Task.sleep(seconds: delay)
                 }
-                try await initializeAndPush(conversation: conversation)
+				try await start(conversation: conversation)
             } catch {
                 debugPrint(error)
             }
         }
     }
-
-    static func start(conversation: Conversation) {
-        Task {
-            do {
-                try await initializeAndPush(conversation: conversation)
-            } catch {
-                debugPrint(error)
-            }
-        }
-    }
-
-    @concurrent
-    static func initializeAndPush(conversation: Conversation) async throws {
-        let prefetchedData = try await createPrefetchedObject(
-            conversation: conversation
-        )
-        await MainActor.run {
-			Router.shared.push(.conversation(prefetchedData))
-        }
+	static func start(conversation: Conversation) async throws {
+		let prefetchedData = try await createPrefetchedObject(
+			conversation: conversation
+		)
+		await Router.shared.push(.conversation(prefetchedData))
     }
 }

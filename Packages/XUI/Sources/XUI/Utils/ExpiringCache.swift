@@ -18,7 +18,11 @@ public final class ExpiringCache<Value> {
 
     public init() {}
 
-    public func setValue(_ value: Value, forKey key: AnyHashable, expiresAt timeInterval: TimeInterval = .infinity) {
+	public func setValue(
+		_ value: Value,
+		forKey key: AnyHashable,
+		expiresAt timeInterval: TimeInterval = .oneMinute
+	) {
         storage[key] = Entry(value: value, expiry: .now + timeInterval)
     }
 

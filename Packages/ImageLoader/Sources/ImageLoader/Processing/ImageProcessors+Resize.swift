@@ -321,7 +321,7 @@ public final class ColorExtractor {
     }
 
     /// Calculates k-means for the selected thumbnail.
-    public func extractColors(from data: Data) -> PhotoColorScheme? {
+	public func extractColors(from data: Data) async -> PhotoColorScheme? {
         guard let image = cgImage(from: data) else { return nil }
 
         allocateDistancesBuffer()

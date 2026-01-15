@@ -14,8 +14,8 @@ struct ConversationGroupCell: View {
     let group: Database.Group
 
     var body: some View {
-        Button {
-			ConversationInitializer.start(conversation: Conversation(.group(group), properties: group.conversationProperties))
+		AsyncButton {
+			try await ConversationInitializer.start(conversation: Conversation(.group(group), properties: group.conversationProperties))
         } label: {
             HStack(spacing: 20) {
                 ProfilePhoto(

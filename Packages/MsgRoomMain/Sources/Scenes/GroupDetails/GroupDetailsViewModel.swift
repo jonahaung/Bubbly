@@ -41,7 +41,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
             .compactMap { ContactStore.shared.contact(for: $0) }
     }
 
-    func uploadImage(image: UIImage) async throws -> String {
+    func uploadImage(image: UIImage) async throws -> URL {
         setLoading(true)
         UIApplication.shared.endEditing()
         let uid = originalGroup.uid

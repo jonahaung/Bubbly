@@ -8,6 +8,7 @@
 import Core
 import Foundation
 import XUI
+import SwiftData
 
 public enum ContactRepo {
 	enum XError: Error {
@@ -59,5 +60,28 @@ public enum ContactRepo {
 			}
 			return try await group.map(\.self).reduce(into: []) { $0.append($1) }
 		}
+	}
+
+	public static func search(named name: String) async throws -> Contact? {
+		let targetName = name
+		var descriptor = FetchDescriptor<PContact>(
+			predicate: #Predicate {
+				$0.name == targetName
+			}
+		)
+		descriptor.fetchLimit = 1
+		return try await Store.shared.contactStore.fetch(descriptor).first
+	}
+
+
+	public static func searchGroup(named name: String) async throws -> Group? {
+		let targetName = name
+		var descriptor = FetchDescriptor<PGroup>(
+			predicate: #Predicate {
+				$0.name == targetName
+			}
+		)
+		descriptor.fetchLimit = 1
+		return try await Store.shared.groupStore.fetch(descriptor).first
 	}
 }

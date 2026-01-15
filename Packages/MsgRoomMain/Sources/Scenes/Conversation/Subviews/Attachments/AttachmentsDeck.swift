@@ -1,0 +1,69 @@
+//
+//  AttachmentsDeck.swift
+//  MsgRoomMain
+//
+//  Created by Aung Ko Min on 29/12/25.
+//
+
+import SwiftUI
+import Database
+import XUI
+
+struct AttachmentsDeck<Content: View>: View {
+
+	let items: [Attachment]
+	let alignment: HorizontalAlignment
+	let content: (Attachment) -> Content
+
+	var body: some View {
+		ZStack(alignment: .bottom) {
+			ForEach(Array(items.enumerated()), id: \.element) { (index, item) in
+				content(item)
+					.roundWithBorder(color: .systemBackground)
+					.scaleEffect(
+						scale(for: index),
+						anchor: alignment == .trailing ? .bottomLeading : .bottomTrailing
+					)
+					.offset(x: offsetX(for: index), y: offsetY(for: index))
+					.rotationEffect(
+						.degrees(rotation(for: index)),
+						anchor: alignment == .trailing ? .leading: .trailing)
+//					.shadow(color: shadow(for: index), radius: 30, y: 20)
+					.zIndex(zIndex(for: index))
+			}
+		}
+		.padding(alignment == .trailing ? .leading : .trailing, xValue * items.count.cgFloat * 0.5)
+	}
+
+	private var xValue: CGFloat { items.count > 1 ? 20.0 : 0 }
+	private var yValue: CGFloat { items.count > 1 ? 10.0 : 0 }
+
+	private func zIndex(for index: Int) -> CGFloat {
+		items.count.cgFloat - index.cgFloat
+	}
+	private func offsetX(for index: Int) -> CGFloat {
+		let x = xValue
+		let value = alignment == .trailing ? -x : x
+		return value * index.cgFloat
+	}
+	private func offsetY(for index: Int) -> CGFloat {
+		-(index.cgFloat * yValue)
+	}
+	private func rotation(for index: Int) -> CGFloat {
+		let index = index.cgFloat
+		let degree = items.count > 3 ? 4.0 : 6.0
+		let value = alignment == .trailing ? -degree : degree
+		return value * index
+	}
+	func scale(for index: Int) -> CGFloat {
+		guard items.count > 1 else { return 1.0 }
+		return 1.0 - (0.1 * index.cgFloat)
+	}
+
+	func shadow(for index: Int) -> Color {
+		let index = Double(index)
+		let progress = 1.0 - abs(items.count.double - index)
+		let opacity = 0.5 * progress
+		return .black.opacity(opacity)
+	}
+}

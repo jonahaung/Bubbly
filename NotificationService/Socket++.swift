@@ -25,8 +25,15 @@ extension Socket {
 			}
 		case .deleteMsg(let rMsg):
 			try await Store.shared.msgStore.delete(uid: rMsg.uid)
-		case .reaction:
-			break
+		case let .reaction(payload):
+			try await Store.shared.msgStore.updateAndSave(uid: payload.msgID) { model in
+				let isSame = model.reactions.contains(
+					where: { $0.senderID == payload.reaction.senderID && $0.rawValue == payload.reaction.rawValue })
+				model.reactions.removeAll(where: { $0.senderID == payload.reaction.senderID })
+				if !isSame {
+					model.reactions.append(payload.reaction)
+				}
+			}
 		case .typingStatus:
 			break
 		case .seenStatus(status: let status):

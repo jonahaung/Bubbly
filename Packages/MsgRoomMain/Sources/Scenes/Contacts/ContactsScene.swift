@@ -13,10 +13,12 @@ import SwiftUI
 import XUI
 
 public struct ContactsScene: View {
+
 	@Environment(ContactStore.self) private var store
 	@State private var viewModel: ContactsViewModel = .init()
 	@Environment(Router.self) private var router
 	@Environment(\.currentUser) private var currentUser
+	@State private var executor = ToolExecutor()
 
 	enum DefaultContactDisplayType: String, CaseIterable {
 		case chat = "Chat Contacts"
@@ -92,10 +94,10 @@ public struct ContactsScene: View {
 				}
 			case .chat:
 				ForEach(createSections(from: store.contacts), id: \.0) { group in
-					Section {
+					Section(group.0) {
 						ForEach(group.1, id: \.uid) { contact in
 							ContactCell(contact) {
-								ConversationInitializer
+								try await ConversationInitializer
 									.start(
 										conversation: Conversation(
 											.contact(contact),
@@ -109,9 +111,8 @@ public struct ContactsScene: View {
 									)
 							}
 						}
-					} header: {
-						Text(group.0)
 					}
+					.sectionIndexLabel(group.0)
 				}
 			}
 		}
@@ -122,6 +123,14 @@ public struct ContactsScene: View {
 					ProgressView().controlSize(.mini)
 				}
 			}
+		}
+		.searchable(
+			text: $viewModel.searchText,
+			placement: .automatic,
+			prompt: "Search Contacts"
+		)
+		.onSubmit(of: .search) {
+			executeContactsSearch()
 		}
 		.task {
 			try? await store.fetchData()
@@ -151,5 +160,20 @@ public struct ContactsScene: View {
 		return items.sorted(by: { lhs, rhs in
 			lhs.0 < rhs.0
 		})
+	}
+
+	private func executeContactsSearch() {
+		Task {
+			let executor = ToolExecutor()
+			await executor
+				.execute(
+					tool: ContactsTool(),
+					prompt: "search contacts that has the name: \(viewModel.searchText)",
+					type: [ContactsTool.Arguments].self) { models in
+						return models.map{ $0.generatedContent.jsonString }.joined(separator: "\n - ")
+					} clearForm: {
+						viewModel.searchText = ""
+					}
+		}
 	}
 }

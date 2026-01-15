@@ -6,46 +6,78 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
+
+public protocol PhotoGalleryItem: Identifiable {
+	var galleryURL: URL? { get }
+	var galleryTitle: String? { get }
+	var id: String { get }
+}
 
 public struct PhotoGalleryView: View {
-    private let attachments: [XAttachment]
-    @Binding private var selection: Int
-    private let title: String
-    @Environment(\.dismiss) private var dismiss
 
-    public init(attachments: [XAttachment], title: String, selection: Binding<Int>) {
-        self.attachments = attachments
-        self.title = title
-        _selection = selection
-    }
+	private let items: [any PhotoGalleryItem]
+	@State private var selection: String?
+	private let title: String?
+	@Environment(\.dismiss) private var dismiss
 
-    public var body: some View {
-        content
-    }
+	public init(items: [any PhotoGalleryItem], title: String?, selection: String?) {
+		self.items = items
+		self.title = title
+		self.selection = selection ?? ""
+	}
 
-    private var content: some View {
-        NavigationView {
-            TabView(selection: $selection) {
-                ForEach(Array(attachments.enumerated()), id: \.offset) { index, item in
-                    AttachmentViewerView(item)
-                        .tag(index)
-                }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .never))
-            .navigationBarTitle(title, displayMode: .inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    DismissButton(dismiss: dismiss)
-                }
-            }
-            .overlay(alignment: .bottom) {
-                if attachments.count > 1 {
-                    XPhotoPageControl(selection: $selection, length: attachments.count, size: 10)
-                }
-            }
-        }
-        .colorScheme(.dark)
-        .tint(Color.white.gradient)
-        .statusBarHidden(true)
-    }
+	public var body: some View {
+		VStack(spacing: 0) {
+			topBar
+			TabView(selection: $selection) {
+				ForEach(items, id: \.id) { item in
+					Tab(value: item.id) {
+						PhotoGalleryCell(item)
+							.tag(item.id)
+					}
+				}
+			}
+			.tabViewStyle(.page(indexDisplayMode: .never))
+			bottomBar
+		}
+	}
+
+	private var topBar: some View {
+		HStack {
+			DismissButton(dismiss: dismiss)
+			Spacer()
+			shareButton
+		}
+		.padding()
+
+	}
+	private var bottomBar: some View {
+		XPhotoPageControl(
+			selection: .init(
+				get: { self.selection ?? items.first?.id
+				 ?? ""},
+				set: { self.selection = $0 }),
+			items: items.map(\.id),
+			size: 20
+		)
+			.padding()
+
+	}
+	@ViewBuilder private var shareButton: some View {
+		let currentItem = items.first(where: { $0.id == selection })
+		if
+			let item = currentItem,
+			let url = item.galleryURL,
+			let data = try? Data(contentsOf: url),
+			let uIImage = UIImage(data: data)
+		{
+			let image = Image(uiImage: uIImage)
+			ShareLink(
+				item: image,
+				preview: SharePreview.init(item.galleryTitle ?? "", image: image)
+			)
+			.labelStyle(.iconOnly)
+		}
+	}
 }

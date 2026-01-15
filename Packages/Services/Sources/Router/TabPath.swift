@@ -20,13 +20,13 @@ public enum TabPath: Int, Sendable, Hashable, CaseIterable, Identifiable, CaseNa
     public var systemName: String {
         switch self {
         case .inbox:
-            "tray.fill"
+            "message"
         case .contacts:
-            "person.2.fill"
+            "at.circle"
         case .test:
             "checkmark.seal.fill"
         case .settings:
-            "gearshape.fill"
+            "circle.hexagongrid.fill"
         }
     }
 }

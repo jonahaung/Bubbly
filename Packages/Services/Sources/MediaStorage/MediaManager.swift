@@ -16,7 +16,7 @@ public final class MediaManager: Sendable {
     private init() {}
 
     public func createThumbnail(from uiImage: UIImage) async throws -> Data {
-        guard let data = uiImage.resized(toWidth: 220)?.pngData() else {
+		guard let data = uiImage.resized(toWidth: 100)?.pngData() else {
             throw NSError(domain: "Falied to create thumbnil", code: 0)
         }
         return data

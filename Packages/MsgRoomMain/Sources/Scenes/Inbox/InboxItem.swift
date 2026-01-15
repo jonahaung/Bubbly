@@ -21,14 +21,30 @@ struct InboxItem: Sendable, Identifiable {
 }
 
 extension InboxItem: ImageViewItem {
-    var imageID: String? {
+	var subFolders: [String] {
+		switch conversation.kind {
+		case let .contact(contact):
+			contact.subFolders
+		case let .group(group):
+			group.subFolders
+		}
+	}
+
+	var galleryTitle: String? {
+		switch conversation.kind {
+		case let .contact(contact):
+			contact.galleryTitle
+		case let .group(group):
+			group.galleryTitle
+		}
+	}
+
+    var imageID: String {
         switch conversation.kind {
         case let .contact(contact):
             contact.imageID
         case let .group(group):
             group.imageID
-        case let .system(ai):
-            ai.imageID
         }
     }
 
@@ -38,30 +54,6 @@ extension InboxItem: ImageViewItem {
             contact.remoteURL
         case let .group(group):
             group.remoteURL
-        case let .system(ai):
-            ai.remoteURL
-        }
-    }
-
-    var mediaType: MediaType? {
-        switch conversation.kind {
-        case let .contact(contact):
-            contact.mediaType
-        case let .group(group):
-            group.mediaType
-        case let .system(ai):
-            ai.mediaType
-        }
-    }
-
-    var subFolderName: String? {
-        switch conversation.kind {
-        case let .contact(contact):
-            contact.subFolderName
-        case let .group(group):
-            group.subFolderName
-        case let .system(ai):
-            ai.subFolderName
         }
     }
 }

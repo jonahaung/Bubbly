@@ -6,12 +6,12 @@
 //
 
 import Foundation
+import SwiftUI
+import XUI
 
-public struct AttachmentData: Sendable, Hashable, Equatable {
-    public let id: String
-    public let data: Data?
-    public init(id: String, data: Data?) {
-        self.id = id
-        self.data = data
-    }
+public enum AttachmentData: Sendable, Hashable, Equatable {
+	case image(thumbnail: UIImage)
+	case imageUpload(localURL: URL, thumbnail: UIImage)
+	case link(thumbnail: UIImage)
+	case video(videoURL: URL, thumbnail: UIImage)
 }

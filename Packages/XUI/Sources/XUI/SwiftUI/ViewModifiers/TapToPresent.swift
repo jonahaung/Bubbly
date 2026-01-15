@@ -42,6 +42,7 @@ private struct PresentFullScreenModifier<Destination: View>: ViewModifier {
 }
 
 private struct PresentFullScreenWithTransitionModifier<Destination: View>: ViewModifier {
+
     let id: String
     @ViewBuilder var destination: () -> Destination
 
@@ -50,13 +51,9 @@ private struct PresentFullScreenWithTransitionModifier<Destination: View>: ViewM
 
     func body(content: Content) -> some View {
         content
-            .gesture(
-                TapGesture(count: 1).onEnded { _ in
-                    withTransaction(.init(animation: .linear(duration: 0.2))) {
-                        isPresented = true
-                    }
-                }
-            )
+			.onTapGesture {
+				isPresented = true
+			}
             .matchedTransitionSource(id: id, in: animation)
             .fullScreenCover(
                 isPresented: $isPresented

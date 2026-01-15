@@ -14,19 +14,14 @@ import UserNotifications
 import XUI
 
 final class NotificationService: UNNotificationServiceExtension {
-    // MARK: - Properties
 
     private var contentHandler: ((UNNotificationContent) -> Void)?
     private var bestAttemptContent: UNMutableNotificationContent?
-
-    // MARK: - Initialization
 
     override init() {
         super.init()
         FirebaseApp.configure()
     }
-
-    // MARK: - Notification Handling
 
     override func didReceive(
         _ request: UNNotificationRequest,
@@ -36,11 +31,10 @@ final class NotificationService: UNNotificationServiceExtension {
         bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
 
         guard let bestAttemptContent else {
-            contentHandler(request.content)
             return
         }
-
-        guard let data = AnyMsgData(userInfo: bestAttemptContent.userInfo) else {
+		
+		guard let data = try? AnyMsgData.parse(from: bestAttemptContent.userInfo) else {
             contentHandler(bestAttemptContent)
             return
         }
@@ -53,16 +47,11 @@ final class NotificationService: UNNotificationServiceExtension {
         }
     }
 
-    override func serviceExtensionTimeWillExpire() {
-        if let content = bestAttemptContent, let data = AnyMsgData(
-            userInfo: content
-                .userInfo) {
-            processNotificationData(data) { [weak self] _ in
-                guard let self else { return }
-                contentHandler?(content)
-            }
-        }
-    }
+	override func serviceExtensionTimeWillExpire() {
+		if let contentHandler = contentHandler, let bestAttemptContent = bestAttemptContent {
+			contentHandler(bestAttemptContent)
+		}
+	}
 
     // MARK: - Private Methods
 

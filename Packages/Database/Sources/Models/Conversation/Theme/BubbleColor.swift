@@ -9,7 +9,8 @@ import SwiftUI
 import XUI
 
 public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Identifiable {
-    case `default`, whatsApp, skyBlue, babyPink
+    case `default`, whatsApp, blue, green, pink, purple, red, yellow
+	case skyBlue, babyPink
     case mistyRose, paleTurquoise, mintCream, warmBeige, aqua
     case lavender, lilac, blush, lemon, sage, mint, periwinkle
     case peach, coral, sand, olive, teal, navy
@@ -26,6 +27,12 @@ public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Iden
 
 		.default: .init(red: 0.85, green: 1.0, blue: 0.85),
 		.whatsApp: .init(red: 0.85, green: 1.0, blue: 0.85),
+		.blue: .init("blue1"),
+		.green: .init("green1"),
+		.pink: .init("pink1"),
+		.purple: .init("purple1"),
+		.red: .init("red1"),
+		.yellow: .init("yellow1"),
 
         // MARK: - Blues
 

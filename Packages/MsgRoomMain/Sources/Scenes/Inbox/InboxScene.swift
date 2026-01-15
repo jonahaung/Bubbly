@@ -43,13 +43,6 @@ struct InboxScene: View {
             transactions.disablesAnimations = false
             transactions.animation = .snappy
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Ask AI") {
-					ConversationInitializer.start(conversation: Conversation(.system(AI.contact), properties: .init(uid: AI.contact.uid)))
-                }
-            }
-        }
         .task {
             await viewModel.task(currentUser: currentUser)
         }

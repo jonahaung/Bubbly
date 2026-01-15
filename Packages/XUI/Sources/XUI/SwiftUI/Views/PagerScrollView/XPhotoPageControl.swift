@@ -8,29 +8,37 @@
 import SwiftUI
 
 public struct XPhotoPageControl: View {
-    @Binding private var selection: Int
-    private let length: Int
+	@Binding private var selection: String
+	private let items: [String]
     private let size: CGFloat
+	@Namespace private var namespace
 
-    public init(selection: Binding<Int>, length: Int, size: CGFloat) {
+	public init(selection: Binding<String>, items: [String], size: CGFloat) {
         _selection = selection
-        self.length = length
+		self.items = items
         self.size = size
     }
 
     public var body: some View {
         HStack(alignment: .bottom, spacing: 0.5) {
-            ForEach(0 ... length - 1) { i in
-                let isSelected = selection == i
+			ForEach(items, id: \.self) { item in
+				let isSelected = selection == item
                 if isSelected {
-                    Image(systemName: "\(i + 1).circle")
+					Image(systemName: "\(items.firstIndex(of: item) ?? 0 + 1).circle.fill")
+						.resizable()
+						.scaledToFit()
                         .frame(square: size)
+						.matchedTransitionSource(id: item, in: namespace)
                 } else {
-                    Circle()
+					Image(systemName: "\(items.firstIndex(of: item) ?? 0 + 1).circle")
+						.resizable()
+						.scaledToFit()
                         .frame(square: size / 1.5)
+						.matchedTransitionSource(id: item, in: namespace)
                 }
             }
         }
-        .equatable(by: selection)
+		.animation(.snappy, value: selection)
+		.geometryGroup()
     }
 }

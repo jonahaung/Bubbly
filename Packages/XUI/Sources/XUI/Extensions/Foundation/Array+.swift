@@ -8,6 +8,7 @@
 import Foundation
 
 public extension Array {
+	@inlinable
     func insertionIndex(
         for newElement: Element,
         by keyPath: KeyPath<Element, some Comparable>
@@ -30,12 +31,14 @@ public extension Array {
 }
 
 public extension Array {
+	@inlinable
     var enumerated: [(index: Int, element: Element)] {
         self.enumerated().map { (index: $0.offset, element: $0.element) }
     }
 }
 
 public extension Array where Element: Identifiable {
+	@inlinable
     func elementsAround(id: Element.ID, radius: Int) -> [Element]? {
         guard let index = firstIndex(where: { $0.id == id }) else {
             return nil
@@ -47,6 +50,7 @@ public extension Array where Element: Identifiable {
 }
 
 public extension Array where Element: Identifiable {
+	@inlinable
     func duplicates() -> [Element] {
         var seen = [Element]()
         var duplicates = [Element]()
@@ -64,6 +68,7 @@ public extension Array where Element: Identifiable {
 }
 
 public extension Array {
+	@inlinable
     var middleElement: Element? {
         guard !isEmpty else { return nil }
         return self[(count - 1) / 2]
@@ -71,12 +76,13 @@ public extension Array {
 }
 
 public extension Array where Element: Equatable {
+	@inlinable
     mutating func appendUnique(_ newElement: Element) {
         if !contains(newElement) {
             append(newElement)
         }
     }
-
+	@inlinable
     mutating func appendUnique(contentsOf newElements: [Element]) {
         for element in newElements where !contains(element) {
             append(element)
@@ -85,21 +91,22 @@ public extension Array where Element: Equatable {
 }
 
 public extension Array where Element: Identifiable {
+	@inlinable
     func next(of index: Int) -> Element? {
         guard index + 1 < count else { return nil }
         return self[index + 1]
     }
-
+	@inlinable
     func previous(of index: Int) -> Element? {
         guard index > 0 else { return nil }
         return self[index - 1]
     }
-
+	@inlinable
     func next(after item: Element) -> Element? {
         guard let index = index(of: item.id), index + 1 < count else { return nil }
         return next(of: index)
     }
-
+	@inlinable
     func previous(before item: Element) -> Element? {
         guard let index = index(of: item.id), index > 0 else { return nil }
         return previous(of: index)
@@ -107,6 +114,7 @@ public extension Array where Element: Identifiable {
 }
 
 public extension Array where Element: Identifiable {
+	@inlinable
     func index(of id: Element.ID) -> Int? {
         firstIndex(where: { $0.id == id })
     }
@@ -114,31 +122,31 @@ public extension Array where Element: Identifiable {
 
 public extension Array {
     // MARK: - Non-mutating: Removing
-
+	@inlinable
     func removingPrefix(_ count: Int) -> [Element] {
         guard count > 0 else { return self }
         return Array(dropFirst(count))
     }
-
+	@inlinable
     func removingSuffix(_ count: Int) -> [Element] {
         guard count > 0 else { return self }
         return Array(dropLast(count))
     }
 
     // MARK: - Non-mutating: Taking
-
+	@inlinable
     func takingPrefix(_ count: Int) -> [Element] {
         guard count > 0 else { return [] }
         return Array(prefix(count))
     }
-
+	@inlinable
     func takingSuffix(_ count: Int) -> [Element] {
         guard count > 0 else { return [] }
         return Array(suffix(count))
     }
 
     // MARK: - Non-mutating: Safe Slice
-
+	@inlinable
     func safeSlice(_ range: Range<Int>) -> [Element] {
         let lower = Swift.max(range.lowerBound, startIndex)
         let upper = Swift.min(range.upperBound, endIndex)
@@ -147,7 +155,7 @@ public extension Array {
     }
 
     // MARK: - Mutating
-
+	@inlinable
     mutating func removePrefix(_ count: Int) {
         guard count > 0 else { return }
         if count >= self.count {
@@ -156,7 +164,7 @@ public extension Array {
             removeFirst(count)
         }
     }
-
+	@inlinable
     mutating func removeSuffix(_ count: Int) {
         guard count > 0 else { return }
         if count >= self.count {
@@ -172,6 +180,7 @@ public extension Array where Element: Identifiable {
     /// - Parameters:
     ///   - newElements: The elements to append.
     ///   - replaceExisting: If `true`, replaces existing elements with the same ID.
+	@inlinable
     mutating func appendMerge(contentsOf newElements: [Element], replaceExisting: Bool = false) {
         guard !newElements.isEmpty else { return }
 
@@ -203,6 +212,7 @@ public extension Array where Element: Identifiable {
     ///   - newElements: The elements to insert.
     ///   - index: Insertion index in the array.
     ///   - replaceExisting: If `true`, replaces existing elements with the same ID.
+	@inlinable
     mutating func insertMerge(contentsOf newElements: [Element], at index: Int, replaceExisting: Bool = false) {
         guard !newElements.isEmpty else { return }
 
@@ -267,6 +277,7 @@ public extension Array where Element: Identifiable {
     /// - Parameters:
     ///   - newElements: The elements to merge.
     ///   - replaceExisting: If `true`, replaces existing elements with the same ID.
+	@inlinable
     mutating func merge(contentsOf newElements: [Element], replaceExisting: Bool = false) {
         appendMerge(contentsOf: newElements, replaceExisting: replaceExisting)
     }

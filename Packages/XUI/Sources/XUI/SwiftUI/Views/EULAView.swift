@@ -50,8 +50,8 @@ public struct EULAView: View {
                 onClose?()
             } label: {
                 Text(hasAgreedEULA ? "Close" : "I agree and continue")
-                    ._borderedProminentButtonStyle()
             }
+			.buttonStyle(.borderedProminent)
             .padding(.horizontal)
         }
         .statusBarHidden(true)

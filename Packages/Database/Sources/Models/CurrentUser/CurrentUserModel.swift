@@ -44,7 +44,8 @@ public extension CurrentUserModel {
             mobile: user.phoneNumber.str,
             photoURL: user.photoURL?.absoluteString ?? "",
             pushToken: Messaging.messaging().fcmToken ?? "",
-            publicKeyString: CryptoService.shared.publicKeyString
+			publicKeyString: GroupStorage.shared
+				.string(for: .security(.publicKey(id: user.uid))).str
         )
     }
 

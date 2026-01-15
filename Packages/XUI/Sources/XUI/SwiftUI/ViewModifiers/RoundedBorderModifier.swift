@@ -7,24 +7,23 @@
 
 import SwiftUI
 
-public struct RoundedBorderModifier: ViewModifier {
-    private var cornerRadius: CGFloat = 18
+struct RoundedBorderModifier: ViewModifier {
 
-    init(cornerRadius: CGFloat) {
-        self.cornerRadius = cornerRadius
-    }
+	let cornerRadius: CGFloat
+	let color: Color
 
-    public func body(content: Content) -> some View {
-        content.overlay(
-            RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(Color.gray.opacity(0.4), lineWidth: 1)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-    }
+	func body(content: Content) -> some View {
+		content
+		.clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+		.overlay(
+			RoundedRectangle(cornerRadius: cornerRadius)
+				.strokeBorder(color, lineWidth: 1)
+		)
+	}
 }
 
 public extension View {
-    func roundWithBorder(cornerRadius: CGFloat = 18) -> some View {
-        modifier(RoundedBorderModifier(cornerRadius: cornerRadius))
-    }
+	func roundWithBorder(color: Color = Color.gray.opacity(0.4), cornerRadius: CGFloat = 16) -> some View {
+		modifier(RoundedBorderModifier(cornerRadius: cornerRadius, color: color))
+	}
 }

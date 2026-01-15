@@ -9,6 +9,7 @@ import AVKit
 import SwiftUI
 
 public struct MediaPlayerView: View {
+	
     private let player: AVPlayer
     @Environment(\.dismiss) private var dismiss
 
@@ -18,16 +19,8 @@ public struct MediaPlayerView: View {
 
     public var body: some View {
         VideoPlayer(player: player)
-            .ignoresSafeArea()
             .onAppear {
                 player.play()
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                }
             }
     }
 }

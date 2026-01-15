@@ -10,52 +10,51 @@ import SwiftUI
 import XUI
 
 public struct ConversationTheme: Sendable, Hashable, Equatable, EmptyRepresentable {
-    let backgroundColor: Color
-    let outgoingBubbleColor: Color
-    let incomingBubbbleColor: Color
-    let bubbleCornorRadius: CGFloat
-    let shadowColor: Color
-    let incomingForegroundColor: Color
-    let outgoingForegroundColor: Color
+	// Rendering properties used by views
+	let id: String
+	let backgroundColor: Color
+	let outgoingBubbleColor: Color
+	let outgoingShadowColor: Color
+	let incomingBubbbleColor: Color
+	let incomingShadowColor: Color
+	let bubbleCornorRadius: CGFloat
+	let incomingForegroundColor: Color
+	let outgoingForegroundColor: Color
 	let bubblePading: EdgeInsets
 
-    public init(_ conversation: Conversation) {
-        let theme = conversation.properties.theme
-        backgroundColor = theme.background.color
-        outgoingBubbleColor = theme.outgoingBubbleColor
-        incomingBubbbleColor = theme.incomingBubbleColor
-        bubbleCornorRadius = theme.bubbleCornorRadius
-        shadowColor = Color.opaqueSeparator
-        incomingForegroundColor = Color.primary
-        outgoingForegroundColor = Color.black
-		bubblePading = .init(
-			top: UIFont.labelFontSize * 0.5,
+	public init(_ conversation: Conversation) {
+		let theme = conversation.properties.theme
+		self.id = conversation.uid
+		// Colors for rendering
+		let backgroundColor = theme.background.color
+		let outgoingBubbleColor = theme.outgoingBubbleColor
+		let incomingBubbbleColor = theme.incomingBubbleColor
+		let incomingForegroundColor = Color.darkText
+		let outgoingForegroundColor = Color.darkText
+
+		self.backgroundColor = backgroundColor
+		self.outgoingBubbleColor = outgoingBubbleColor.exposureAdjust(0.1)
+		self.incomingBubbbleColor = (theme.background == .system ? .secondarySystemBackground : incomingBubbbleColor).exposureAdjust(0.1)
+		self.bubbleCornorRadius = theme.bubbleCornorRadius
+		self.incomingForegroundColor = incomingForegroundColor
+		self.outgoingForegroundColor = outgoingForegroundColor
+		self.bubblePading = .init(
+			top: UIFont.labelFontSize * 0.6,
 			leading: UIFont.labelFontSize * 0.7,
-			bottom: UIFont.labelFontSize * 0.5,
+			bottom: UIFont.labelFontSize * 0.6,
 			trailing: UIFont.labelFontSize * 0.7
 		)
-    }
+		outgoingShadowColor = outgoingBubbleColor.mix(with: .primary, by: 0.1)
+		incomingShadowColor = incomingBubbbleColor.mix(with: .primary, by: 0.1)
+	}
 
-	public static let empty = ConversationTheme(
-		Conversation(.system(AI.contact), properties: .init(uid: AI.contact.uid))
-	)
+	public static let empty = ConversationTheme(.empty)
 
-    public static func == (lhs: ConversationTheme, rhs: ConversationTheme) -> Bool {
-        lhs.backgroundColor.description == rhs.backgroundColor.description
-            && lhs.outgoingBubbleColor.description == rhs.outgoingBubbleColor.description
-            && lhs.incomingBubbbleColor.description == rhs.incomingBubbbleColor.description && lhs.bubbleCornorRadius == rhs.bubbleCornorRadius
-            && lhs.shadowColor.description == rhs.shadowColor.description
-            && lhs.incomingForegroundColor.description == rhs.incomingForegroundColor.description
-            && lhs.outgoingForegroundColor.description == rhs.outgoingForegroundColor.description
-    }
+	public static func == (lhs: ConversationTheme, rhs: ConversationTheme) -> Bool {
+		lhs.id == rhs.id && lhs.outgoingBubbleColor == rhs.outgoingBubbleColor && lhs.incomingBubbbleColor == rhs.incomingBubbbleColor && lhs.backgroundColor == rhs.backgroundColor
+	}
 
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(backgroundColor.description)
-        hasher.combine(outgoingBubbleColor.description)
-        hasher.combine(incomingBubbbleColor.description)
-        hasher.combine(bubbleCornorRadius)
-        hasher.combine(shadowColor.description)
-        hasher.combine(incomingForegroundColor.description)
-        hasher.combine(outgoingForegroundColor.description)
-    }
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(id)
+	}
 }

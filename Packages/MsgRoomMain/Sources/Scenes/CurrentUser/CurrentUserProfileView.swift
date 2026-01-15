@@ -129,7 +129,7 @@ public struct CurrentUserProfileView: View {
 	private func saveProfile() async throws {
 		if let image = viewModel.pickedPhoto?.uiImage {
 			let url = try await viewModel.uploadImage(image: image)
-			currentUser.photoURL = url
+			currentUser.photoURL = url.absoluteString
 			viewModel.pickedPhoto = nil
 		}
 		try await viewModel.applyUpdates(for: currentUser)

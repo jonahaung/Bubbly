@@ -26,7 +26,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		FirebaseApp.configure()
 		FirebaseConfiguration.shared.setLoggerLevel(.error)
 		Auth.auth().shareAuthStateAcrossDevices = true
-		try? Auth.auth().useUserAccessGroup(AppInformation.groupID)
 		pushNotificationService.registerForPushNotifications {
 			MainActor.assumeIsolated {
 				debugPrint("1️⃣ Registered for push notifications")
@@ -54,11 +53,22 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		_: UIApplication,
 		didReceiveRemoteNotification userInfo: [AnyHashable: Any]
 	) async -> UIBackgroundFetchResult {
-		if Auth.auth().canHandleNotification(userInfo) {
-			return .noData
-		} else {
-			Messaging.messaging().appDidReceiveMessage(userInfo)
-			return .newData
-		}
+		return .noData
+//		guard let data = AnyMsgData(userInfo: userInfo) else {
+//			return .noData
+//		}
+//		print(data)
+//		await Socket.shared.receive(data)
+//		NotificationCenter.default
+//			.post(name: .inboxChanges, object: nil)
+//		return .newData
+		// If you intend to reach this code, restructure the returns above.
+		// Keeping it for reference:
+		// if Auth.auth().canHandleNotification(userInfo) {
+		//     return .newData
+		// } else {
+		//     Messaging.messaging().appDidReceiveMessage(userInfo)
+		//     return .newData
+		// }
 	}
 }

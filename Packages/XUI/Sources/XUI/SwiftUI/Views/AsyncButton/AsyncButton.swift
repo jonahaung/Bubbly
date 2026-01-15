@@ -86,29 +86,29 @@ public struct AsyncButton<Label>: View where Label: View {
                     .overlay {
                         if showProgressView {
                             ProgressView()
+								.controlSize(.mini)
                         }
                     }
             }
         )
-        .sensoryFeedback(.selection, trigger: operations.count)
+		.sensoryFeedback(.press(.button), trigger: operations.count)
         .disabled(disableButton)
         .animation(transaction.animation, value: operations)
         .tint(tint)
-        .alert(isPresented: $showingErrorAlert, error: localizedError) { _ in
-            Button("OK") {
-                showingErrorAlert = false
-            }
-        } message: { error in
-            if let message = error.failureReason ?? error.recoverySuggestion ?? error.helpAnchor {
-                Text(message)
-            }
-        }
+		.alert(isPresented: $showingErrorAlert, error: localizedError, actions: { error in
+			Button(role: .cancel) {
+				showingErrorAlert = false
+			}
+		}, message: { error in
+			let error = error as AnyLocalizedError
+			Text(error.failureReason ?? error.recoverySuggestion ?? "An unexpected error occurred.")
+		})
     }
 
     public init(
         role: ButtonRole? = nil,
-        options: AsyncButtonOptions = [],
-        transaction: Transaction = Transaction(),
+		options: AsyncButtonOptions = .automatic,
+		transaction: Transaction = .withoutAnimation,
         action: @escaping () async throws -> Void,
         @ViewBuilder label: @escaping ([AsyncButtonOperation]) -> Label
     ) {
@@ -123,8 +123,8 @@ public struct AsyncButton<Label>: View where Label: View {
 public extension AsyncButton {
     init(
         role: ButtonRole? = nil,
-        options: AsyncButtonOptions = .automatic,
-        transaction: Transaction = Transaction(animation: .default),
+		options: AsyncButtonOptions = .automatic,
+		transaction: Transaction = .withoutAnimation,
         action: @escaping () async throws -> Void,
         @ViewBuilder label: @escaping () -> Label
     ) {
@@ -139,7 +139,7 @@ public extension AsyncButton where Label == Text {
         _ titleKey: LocalizedStringKey,
         role: ButtonRole? = nil,
         options: AsyncButtonOptions = .automatic,
-        transaction: Transaction = Transaction(animation: .default),
+		transaction: Transaction = .withoutAnimation,
         action: @escaping () async throws -> Void
     ) {
         self.init(role: role, options: options, transaction: transaction, action: action) { _ in
@@ -153,7 +153,7 @@ public extension AsyncButton where Label == Text {
         _ title: some StringProtocol,
         role: ButtonRole?,
         options: AsyncButtonOptions = .automatic,
-        transaction: Transaction = Transaction(animation: .default),
+		transaction: Transaction = .withoutAnimation,
         action: @escaping () async throws -> Void
     ) {
         self.init(role: role, options: options, transaction: transaction, action: action) { _ in

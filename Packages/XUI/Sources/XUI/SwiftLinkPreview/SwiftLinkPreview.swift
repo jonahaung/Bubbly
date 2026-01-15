@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class SwiftLinkPreview: NSObject {
+public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 	// MARK: - Constants
 
 	static let titleMinimumRelevant: Int = 15
@@ -27,7 +27,7 @@ public final class SwiftLinkPreview: NSObject {
 
 	public init(
 		session: URLSession? = nil,
-		cache: SwiftLinkPreviewCache = DisabledCache.instance,
+		cache: SwiftLinkPreviewCache = LinkPreviewInMemoryCache.init(),
 		userAgent: String = SwiftLinkPreview.defaultUserAgent
 	) {
 		self.cache = cache
@@ -46,10 +46,16 @@ public final class SwiftLinkPreview: NSObject {
 		super.init()
 	}
 
-	// MARK: - Public API (Async/Await)
+	deinit {
+		// Break retain cycle between URLSession, its delegate and queue
+		session.finishTasksAndInvalidate()
+	}
 
-	/// Asynchronously loads link preview metadata for the first link in the provided text.
-	@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, visionOS 1.0, macCatalyst 13.0, *)
+	/// Explicitly close the underlying session if you want to release resources early.
+	public func close() {
+		session.invalidateAndCancel()
+	}
+
 	public func preview(_ text: String) async throws -> SwiftLinkPreviewResponse {
 		try Task.checkCancellation()
 
@@ -114,9 +120,6 @@ public final class SwiftLinkPreview: NSObject {
 		}
 	}
 
-	// MARK: - Networking (Async)
-
-	/// Unshorten URL by following redirections. Uses HEAD first, if same URL and HTML, tries GET to inspect meta refresh.
 	private func unshortenURL(_ url: URL) async throws -> URL {
 		try Task.checkCancellation()
 
@@ -204,25 +207,28 @@ public final class SwiftLinkPreview: NSObject {
 					))
 				}
 
-				if let encoding, let source = String(data: data, encoding: encoding) {
-					return parseHtmlString(source, response: response)
-				} else if let source = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) {
-					return parseHtmlString(source, response: response)
-				} else {
-					// As a last resort (rare), try Data -> NSString auto-detection path
-					var ns: NSString?
-					NSString.stringEncoding(
-						for: data,
-						encodingOptions: nil,
-						convertedString: &ns,
-						usedLossyConversion: nil
-					)
-					if let ns {
-						return parseHtmlString(ns as String, response: response)
+				// Autorelease pool to promptly reclaim UIKit/CoreGraphics temporaries
+				return try autoreleasepool(invoking: { () throws -> SwiftLinkPreviewResponse in
+					if let encoding, let source = String(data: data, encoding: encoding) {
+						return parseHtmlString(source, response: response)
+					} else if let source = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) {
+						return parseHtmlString(source, response: response)
 					} else {
-						throw SwiftLinkPreviewError.cannotBeOpened(sourceUrl.absoluteString)
+						// As a last resort (rare), try Data -> NSString auto-detection path
+						var ns: NSString?
+						NSString.stringEncoding(
+							for: data,
+							encodingOptions: nil,
+							convertedString: &ns,
+							usedLossyConversion: nil
+						)
+						if let ns {
+							return parseHtmlString(ns as String, response: response)
+						} else {
+							throw SwiftLinkPreviewError.cannotBeOpened(sourceUrl.absoluteString)
+						}
 					}
-				}
+				})
 			} catch {
 				// Network or decoding error
 				throw SwiftLinkPreviewError.cannotBeOpened("\(sourceUrl.absoluteString): \(error.localizedDescription)")
@@ -231,7 +237,10 @@ public final class SwiftLinkPreview: NSObject {
 	}
 
 	private func parseHtmlString(_ htmlString: String, response: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse {
-		performPageCrawling(cleanSource(htmlString), response: response)
+		// Keep parsing/crawling in its own autorelease pool to flush intermediates quickly
+		return autoreleasepool(invoking: {
+			performPageCrawling(cleanSource(htmlString), response: response)
+		})
 	}
 
 	// Removing unnecessary data from the source
@@ -299,7 +308,7 @@ public final class SwiftLinkPreview: NSObject {
 	public func formatImageURLs(_ array: [String]?, base: String?) -> [String]? {
 		guard var array else { return nil }
 		for i in 0 ..< array.count {
-			if let formatted = formatImageURL(array[0], base: base) {
+			if let formatted = formatImageURL(array[i], base: base) {
 				array[i] = formatted
 			}
 		}
@@ -422,11 +431,16 @@ public extension SwiftLinkPreview {
 				if value.isEmpty {
 					let fromBody: String = crawlCode(htmlCode, minimum: SwiftLinkPreview.titleMinimumRelevant)
 					if !fromBody.isEmpty {
-						result.title = fromBody.decoded.extendedTrim
+						// Keep final decode in an autorelease pool
+						autoreleasepool {
+							result.title = fromBody.decoded.extendedTrim
+						}
 						return (htmlCode.replace(fromBody, with: ""), result)
 					}
 				} else {
-					result.title = value.decoded.extendedTrim
+					autoreleasepool {
+						result.title = value.decoded.extendedTrim
+					}
 				}
 			}
 		}
@@ -440,7 +454,9 @@ public extension SwiftLinkPreview {
 		if description == nil || description?.isEmpty ?? true {
 			let value: String = crawlCode(htmlCode, minimum: SwiftLinkPreview.decriptionMinimumRelevant)
 			if !value.isEmpty {
-				result.description = value.decoded.extendedTrim
+				autoreleasepool {
+					result.description = value.decoded.extendedTrim
+				}
 			}
 		}
 		return (htmlCode, result)
