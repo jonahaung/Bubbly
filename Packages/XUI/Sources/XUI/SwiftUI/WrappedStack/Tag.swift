@@ -20,7 +20,9 @@ public struct Tag<Content: View>: View {
             )
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            ._borderStyle(color)
             .frame(height: 25)
+			.background {
+				ContainerRelativeShape().strokeBorder(color, style: .init())
+			}
     }
 }

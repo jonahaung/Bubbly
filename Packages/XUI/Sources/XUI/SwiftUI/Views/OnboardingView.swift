@@ -7,7 +7,7 @@
 
 import SwiftUI
 //
-//public enum Onboarding {
+// public enum Onboarding {
 //    static let key = "com.jonahaung.hasShownOnboarding"
 //    public static var hasShown: Bool {
 //        get {
@@ -17,9 +17,9 @@ import SwiftUI
 //            UserDefaults.standard.setValue(newValue, forKey: key)
 //        }
 //    }
-//}
+// }
 //
-//public struct OnboardingItem: Identifiable, Hashable {
+// public struct OnboardingItem: Identifiable, Hashable {
 //    public let id = UUID()
 //    public let title: String
 //    public let subtitle: String
@@ -30,10 +30,10 @@ import SwiftUI
 //        self.subtitle = subtitle
 //        self.imageName = imageName
 //    }
-//}
+// }
 //
-//@available(iOS 18.0, *)
-//public struct OnboardingView: View {
+// @available(iOS 18.0, *)
+// public struct OnboardingView: View {
 //	@State private var selection: OnboardingItem.ID
 //    private let items: [OnboardingItem]
 //    private let onClose: (() -> Void)?
@@ -127,10 +127,10 @@ import SwiftUI
 //            selection = items.count - 1
 //        }
 //    }
-//}
+// }
 //
-//@available(iOS 18.0, *)
-//private struct OnboardingCell: View {
+// @available(iOS 18.0, *)
+// private struct OnboardingCell: View {
 //    let item: OnboardingItem
 //    let index: Int
 //
@@ -160,4 +160,4 @@ import SwiftUI
 //            .ignoresSafeArea()
 //        }
 //    }
-//}
+// }

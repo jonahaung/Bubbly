@@ -13,48 +13,45 @@ import UIKit
 import UserNotifications
 import XUI
 
-public final class PushNotificationService: NSObject, Sendable {
-	public static let shared = PushNotificationService()
+public final class PushNotificationService: NSObject {
 
-	override private init() {
+	public override init() {
 		super.init()
 	}
 
-	public func registerForPushNotifications(
-		completion: @escaping @Sendable @MainActor () -> Void
-	) {
-		UNUserNotificationCenter
+	@MainActor
+	public func registerForPushNotifications() async throws {
+		try await UNUserNotificationCenter
 			.current()
 			.requestAuthorization(
-				options: [
-					.alert,
-					.badge,
-					.sound,
-				]
-			) {
-				success,
-				error in
-				if let error {
-					Log(error)
-				} else if success {
-					Task { @MainActor in
-						UIApplication.shared.registerForRemoteNotifications()
-						Messaging.messaging().delegate = self
-						UNUserNotificationCenter.current().delegate = self
-						completion()
-					}
-					return
-				}
-				Task { @MainActor in
-					completion()
-				}
-			}
+				options: [.alert, .badge, .sound]
+			)
+		UIApplication.shared.registerForRemoteNotifications()
+		Messaging.messaging().delegate = self
+		UNUserNotificationCenter.current().delegate = self
+		log("Registered for push notifications...")
 	}
 
-	public func removeAllNotifications() {
+	@MainActor
+	public func applicationDidBecomeActive() async throws {
+		let datas = await PushNotificationStore.shared.consumePendingAnyMsgData()
+		if !datas.isEmpty {
+			let currentNavPath = Router.shared.visiblePath
+			try await AsyncOrderedStream.mapOrdered(inputs: datas) { data in
+				switch currentNavPath {
+				case .conversation(let prefetchData):
+					if data.conID == prefetchData.configuration.conID {
+						await Socket.shared.receive(data)
+					}
+				default:
+					await PushNotificationStore.shared.postInboxChanges()
+				}
+			}
+		}
 		UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-		UNUserNotificationCenter.current().setBadgeCount(0)
+		try await UNUserNotificationCenter.current().setBadgeCount(0)
 	}
+
 }
 
 extension PushNotificationService: UNUserNotificationCenterDelegate {
@@ -66,26 +63,21 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
 		guard let data = try? AnyMsgData.parse(from: userInfo) else {
 			return [.badge, .banner, .list, .sound]
 		}
-		guard let currentNavPath = await Router.shared.currentNavPath else {
-			NotificationCenter.default
-				.post(name: .inboxChanges, object: nil)
-			return [.badge, .banner, .list, .sound]
-		}
+		let currentNavPath = await MainActor.run { Router.shared.visiblePath }
 		switch currentNavPath {
-		case .conversation(let conversationKit):
-			if data.conID == conversationKit.configuration.conID {
+		case .conversation(let prefetchData):
+			if data.conID == prefetchData.configuration.conID {
 				await Socket.shared.receive(data)
 				return []
 			} else {
 				return [.banner]
 			}
 		default:
-			NotificationCenter.default
-				.post(name: .inboxChanges, object: nil)
-			return [.banner, .sound]
+			await PushNotificationStore.shared.postInboxChanges()
+			return [.banner]
 		}
 	}
-	
+
 	public func userNotificationCenter(
 		_: UNUserNotificationCenter,
 		didReceive response: UNNotificationResponse,
@@ -93,9 +85,14 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
 	) {
 		let userInfo = response.notification.request.content.userInfo
 		guard let data = try? AnyMsgData.parse(from: userInfo) else {
+			completionHandler()
 			return
 		}
-		ConversationInitializer.start(conID: data.conID, refetch: false, delay: 0)
+		MainActor.assumeIsolated {
+			if let url = data.deeplinkURL {
+				UIApplication.shared.open(url)
+			}
+		}
 		completionHandler()
 	}
 }
@@ -105,28 +102,6 @@ extension PushNotificationService: MessagingDelegate {
 		_: Messaging,
 		didReceiveRegistrationToken fcmToken: String?
 	) {
-		PushNotificationService.shared.uploadTokenToFirestore(fcmToken)
-	}
-}
-
-extension PushNotificationService {
-	public func uploadTokenToFirestore(_ fcmToken: String?) {
-		GroupStorage.shared.save(fcmToken, for: .device(.deviceToken))
-		NotificationCenter.default
-			.post(name: .receiveDeviceToken, object: fcmToken)
-		//		guard
-		//			let fcmToken,
-		//			!fcmToken.isEmpty,
-		//			let user = Auth.auth().currentUser
-		//		else {
-		//			debugPrint("⚠️ Skipping Firestore upload — no token or user.")
-		//			return
-		//		}
-		//		do {
-		//			try await FirestoreRepo.update(value: [Contact.CodingKeys.pushToken.rawValue: fcmToken], collectionPath: .users, to: user.uid)
-		//			Log("Updated fcmToken (\(fcmToken) to Firestore for user: \(user.displayName ?? user.uid)")
-		//		} catch {
-		//			Log(error)
-		//		}
+		Task { await PushNotificationStore.shared.handleRegistrationToken(fcmToken) }
 	}
 }

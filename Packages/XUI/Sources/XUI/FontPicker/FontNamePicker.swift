@@ -8,7 +8,7 @@
 import SwiftUI
 
 internal struct FontNamePicker: View {
-    @Binding var selectedFontName: String?
+    @Binding var selectedFontName: String
 
     var familyName: String
     var fonts: [String]

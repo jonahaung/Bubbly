@@ -24,7 +24,7 @@ public extension GroupStorageKey {
     }
 
     enum Device: String, Hashable, Sendable {
-        case deviceToken
+        case deviceToken, anyMsgData
     }
 
     enum Auth: String, Hashable, Sendable {

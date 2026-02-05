@@ -51,7 +51,7 @@ public final class PhoneContactsService {
     public func syncContacts() async throws -> sending [Contact] {
         let phoneContacts = try await fetchContacts()
         let phoneNumberKit = PhoneNumberKit()
-        let dbContact = Store.shared.contactStore
+		let dbContact = await Store.shared.contactStore
         let contacts: [Contact?] = try await AsyncOrderedStream.mapOrdered(inputs: phoneContacts) { phoneContact in
             let parsedNumber = try phoneNumberKit.parse(phoneContact.mobile)
             let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
@@ -62,7 +62,7 @@ public final class PhoneContactsService {
             )
             if var remoteContact {
                 remoteContact.name = phoneContact.name
-                try await dbContact.insert(remoteContact)
+				try await dbContact?.insert(remoteContact)
                 return remoteContact
             } else {
                 return nil

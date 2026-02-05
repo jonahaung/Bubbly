@@ -29,46 +29,43 @@ extension ChatViewManager: ChatDatasourceDelegate {
 	}
 
 	func datasource(didInsert msg: Message) async {
-		if let existingModel = messageItems.element(withID: msg.uid) {
+		if let existingModel = models.element(withID: msg.uid) {
 			existingModel.update(with: msg)
 		} else {
 			if canResetDatasource {
-				ToastPresenter.show(msg.displayText) { [weak self] in
-					guard let self else { return }
-					resetDatasource()
+				let toast = Toast(node: Text(msg.displayText).opaqueView()) {
+					self.resetDatasource()
 				}
+				ToastPresenter.show(toast)
 			} else {
-				let newModel = MsgCellViewModel(msg)
-				let index = messageItems.insertionIndex(for: newModel, by: \.msg.date)
-				let previousItem = messageItems[safe: index - 1]
-				let nextItem = messageItems[safe: index + 1]
-
 				if scrollController.currentScrolledPosition.nearBottom {
 					scrollController.setUpdateState(.appendingItem(msg.uid))
 				} else {
-					let msgID = msg.uid
-					ToastPresenter.show(msg.displayText) { [weak self] in
-						guard let self else { return }
-						scrollController.enqueueScroll(to: .id(value: msgID, anchor: .bottom))
+					ToastPresenter.show {
+						VStack(alignment: .leading, spacing: 4) {
+							let image = Image(systemSymbol: .textBubble)
+							Text("\(image) New Message")
+								.font(
+									.system(
+										size: UIFont
+											.preferredFont(forTextStyle: .headline).pointSize
+										, weight: .medium)
+								)
+							Text(msg.displayText)
+								.font(
+									.system(
+										size: UIFont
+											.preferredFont(forTextStyle: .subheadline).pointSize
+										, weight: .regular)
+								)
+						}
+						.onTapGesture {
+							self.scrollController
+								.enqueueScroll(to: .id(value: msg.uid, anchor: .bottom))
+						}
 					}
 				}
-
-				let layout = bubbleLayout.msgCellLayout(
-					for: msg,
-					previous: previousItem?.msg,
-					next: nextItem?.msg
-				)
-				newModel.update(layout: layout)
-
-				messageItems.insert(newModel, at: index)
-				if let previousItem {
-					previousItem
-						.update(layout: msgCellLayoutFor(previousItem.msg, cellItems: messageItems.array))
-				}
-				if let nextItem {
-					nextItem.update(layout: msgCellLayoutFor(nextItem.msg, cellItems: messageItems.array))
-				}
-				layoutIfNeeded()
+				models.insert(msg: msg)
 			}
 		}
 		await saveConversationChanges()
@@ -79,17 +76,12 @@ extension ChatViewManager: ChatDatasourceDelegate {
 	}
 
 	func datasource(didUpdate snapshot: Message, animated: Bool) async {
-		messageItems.update(snapshot) { [self] msg, prev, next in
-			bubbleLayout.msgCellLayout(for: msg, previous: prev, next: next)
-		}
+		models.update(msg: snapshot)
 	}
 
 	func datasource(didRemove snapshot: Message, animated: Bool) async {
-		scrollController.setDefaultAnimation(.interactiveSpring(duration: 0.3))
-		messageItems.remove(snapshot) { [self] msg, prev, next in
-			self.layoutIfNeeded()
-			return bubbleLayout.msgCellLayout(for: msg, previous: prev, next: next)
-		}
+		scrollController.setDefaultAnimation(.smooth)
+		models.remove(msg: snapshot)
 	}
 
 	func datasource(didReceive status: Database.AnyMsgData.SeenStatusPayload) async {
@@ -101,30 +93,11 @@ extension ChatViewManager: ChatDatasourceDelegate {
 
 extension ChatViewManager {
 	func reloadData(with msgs: [Message], forceReset: Bool) {
-		var newItems = forceReset ? [] : messageItems.array
-		for msg in msgs {
-			if let existing = messageItems.element(withID: msg.uid) {
-				existing.update(with: msg)
-				if forceReset {
-					newItems.append(existing)
-				}
-			} else {
-				let item = MsgCellViewModel(msg)
-				let index = newItems.insertionIndex(for: item, by: \.msg.date)
-				newItems.insert(item, at: index)
-			}
-		}
+		models.set(msgs: msgs, forceReset: forceReset)
 		presentation.showContactInfo = {
 			guard let firstMsgID = conversationConfig.firstMsgID else { return true }
-			return newItems.contains(where: { $0.id == firstMsgID })
+			return msgs.contains(where: { $0.id == firstMsgID })
 		}()
-		for item in newItems {
-			if item.layout.isEmpty {
-				let layout = msgCellLayoutFor(item.msg, cellItems: newItems)
-				item.update(layout: layout)
-			}
-		}
-		messageItems = .init(newItems)
 	}
 
 	func reloadConversation() async throws {
@@ -132,7 +105,9 @@ extension ChatViewManager {
 	}
 
 	func updateReceiveMsgs() {
-		guard let lastMsg = messageItems.array.last(where: { $0.msg.receiptType == .receive })?.msg,
+		guard let lastMsg = models.msgs().last(
+			where: { $0.receiptType == .receive
+			}),
 			  lastMsg.incomingStatus.rawValue < MsgIncomingStatus.read.rawValue,
 			  let currentUserId
 		else {
@@ -140,7 +115,10 @@ extension ChatViewManager {
 		}
 		Task.detached { [self] in
 			do {
-				let msgs = try await ConversationRepo.updateReceiveMsgs(for: lastMsg.conID)
+				let msgs = try await ConversationRepo.updateReceiveMsgs(
+					for: lastMsg.conID,
+					currentUserID: currentUserId
+				)
 				try await Socket.shared.send(
 					.seenStatus(
 						status: .init(
@@ -153,7 +131,7 @@ extension ChatViewManager {
 				)
 				await MainActor.run {
 					for msg in msgs {
-						if let model = self.messageItems.element(withID: msg.uid) {
+						if let model = self.models.element(withID: msg.uid) {
 							model.update(with: msg)
 						}
 					}

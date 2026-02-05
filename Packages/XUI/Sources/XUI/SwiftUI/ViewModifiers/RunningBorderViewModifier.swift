@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RunningBorderViewModifier: ViewModifier {
-	
+
 	let lineWidth: CGFloat
 	let cornerRadius: CGFloat
 	let animated: Bool
@@ -17,8 +17,10 @@ struct RunningBorderViewModifier: ViewModifier {
 
 	func body(content: Content) -> some View {
 		content
-			.overlay(
-				RoundedRectangle(cornerRadius: cornerRadius)
+			.padding(lineWidth)
+			.background(
+				ContainerRelativeShape()
+					.fill(.background)
 					.strokeBorder(
 						AngularGradient(
 							gradient: Gradient(
@@ -28,7 +30,7 @@ struct RunningBorderViewModifier: ViewModifier {
 							startAngle: .degrees(rotation),
 							endAngle: .degrees(rotation + 360)
 						)
-						.opacity(animated ? 0.6 : 0.5),
+						.opacity(0.5),
 						lineWidth: lineWidth
 					)
 			)

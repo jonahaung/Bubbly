@@ -28,7 +28,7 @@ public final class ContactStore: ErrorPresenter {
 
     public func delete(uid: String) async throws {
         if let indext = contacts.firstIndex(where: { $0.uid == uid }) {
-            try await Store.shared.contactStore
+			try await Store.shared.contactStore?
                 .delete(uid: uid)
             contacts.remove(at: indext)
         }
@@ -40,8 +40,8 @@ public final class ContactStore: ErrorPresenter {
 
     @concurrent
     public func fetchData() async throws {
-        let contacts = try await Store.shared.contactStore.fetchAll()
-        let groups = try await Store.shared.groupStore.fetchAll()
+		let contacts = try await Store.shared.contactStore?.fetchAll() ?? []
+		let groups = try await Store.shared.groupStore?.fetchAll() ?? []
         Task { @MainActor in
             self.contacts = contacts
             self.groups = groups
@@ -49,32 +49,26 @@ public final class ContactStore: ErrorPresenter {
     }
 
     public func refresh() async throws {
-        contacts.removeAll()
-        try await Task.sleep(seconds: 2)
         try await fetchData()
     }
 }
 
 public extension ContactStore {
-    @concurrent func syncGroups() async throws {
-        guard let currentUserId else {
-            fatalError("Missing current user ID")
-        }
+	@concurrent func syncGroups(currentUser: CurrentUserModel) async throws {
         let groups: [Group] = try await FirestoreRepo.getModels(
-            for: currentUserId,
+			for: currentUser.uid,
             collection: .groups,
             field: .members
         )
-		print(groups)
-        let store = Store.shared.groupStore
+		let store = await Store.shared.groupStore
 
         try await withThrowingTaskGroup(of: Void.self) { taskGroup in
             for group in groups {
                 taskGroup.addTask {
-                    if try await store.exists(uid: group.uid) == false {
-                        try await store.insert(group)
+					if try await store?.exists(uid: group.uid) == false {
+						try await store?.insert(group)
                     } else {
-                        try await store.updateAndSave(uid: group.uid) { model in
+						try await store?.updateAndSave(uid: group.uid) { model in
                             model.update(from: group)
                         }
                     }

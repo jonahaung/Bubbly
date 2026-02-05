@@ -8,8 +8,7 @@
 import SwiftUI
 import XUI
 
-@MainActor
-public struct VScrollGeometry: Hashable, Equatable {
+public struct VScrollGeometry: Sendable, Hashable, Equatable {
 	public let contentHeight: CGFloat
 	public let boundsHeight: CGFloat
 	public var offsetY: CGFloat
@@ -35,7 +34,6 @@ public extension VScrollGeometry {
 		bottomInset: geometry.contentInsets.bottom)
 	}
 
-	@MainActor
 	static let empty = VScrollGeometry(
 		contentHeight: .zero,
 		boundsHeight: .zero,
@@ -75,7 +73,7 @@ public extension VScrollGeometry {
 	var centerFraction: CGFloat {
 		visibleRect.midY / contentHeight
 	}
-
+	@MainActor
 	var scrolledPosition: ScrolledPosition {
 		.init(self)
 	}

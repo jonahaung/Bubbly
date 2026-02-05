@@ -5,10 +5,9 @@
 //  Created by Aung Ko Min on 31/12/25.
 //
 
-
 import Foundation
 
-public actor IDGenerator: Sendable {
+public actor IDGenerator {
 
     public static let shared = IDGenerator()
 

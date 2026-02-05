@@ -8,10 +8,23 @@
 import SwiftUI
 
 public struct LoadingIndicator: View {
-    public init() {}
-    public var body: some View {
-        ProgressView()
-            .flexible(.horizontal)
-            .tint(Color.secondary)
-    }
+	private let size: CGFloat
+	public init(_ size: CGFloat) {
+		self.size = size
+	}
+	public var body: some View {
+		TimelineView(.animation) { context in
+			let angle = context.date.timeIntervalSinceReferenceDate * 360
+			Circle()
+				.trim(from: 0.2, to: 1)
+				.stroke(
+					AngularGradient(
+						gradient: Gradient(colors: [.blue, .indigo, .red]),
+						center: .center
+					),
+					style: StrokeStyle(lineWidth: 2, lineCap: .round)
+				)
+				.rotationEffect(.degrees(angle))
+		}.frame(square: size)
+	}
 }

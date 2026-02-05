@@ -17,6 +17,7 @@ struct CryptoPayload: Codable, Sendable {
 	let publicKey: String
 	let ciphertext: String
 }
+
 public class CryptoService {
 
 	nonisolated(unsafe)
@@ -24,37 +25,44 @@ public class CryptoService {
 
 	private init() {}
 
-	// MARK: - Keys
-
-	private var privateKey: Curve25519.KeyAgreement.PrivateKey {
-		let storage = GroupStorage.shared
-		guard let currentUserId else {
-			fatalError("Missing currentUserId")
+	@discardableResult
+	private func getPrivateKey(for userID: String) -> Curve25519.KeyAgreement.PrivateKey {
+		if let cached = getCachedPrivateKey(userID: userID) {
+			return cached
 		}
-
-		if let string = storage.string(
-			for: .security(.privateKey(id: currentUserId))),
-		   let key = Crypto.privateKey(with: string) {
-			return key
-		}
-
-		let newKey = Crypto.newPrivateKeyInstance()
-
-		storage.save(
-			Crypto.base64String(with: newKey),
-			for: .security(.privateKey(id: currentUserId))
-		)
-
-		storage.save(
-			Crypto.base64String(with: newKey.publicKey),
-			for: .security(.publicKey(id: currentUserId))
-		)
-
-		return newKey
+		return makeNewPrivateKey(userID: userID)
 	}
 
-	var publicKeyString: String {
-		Crypto.base64String(with: privateKey.publicKey)
+	private func getCachedPrivateKey(userID: String) -> Curve25519.KeyAgreement.PrivateKey? {
+		let storage = GroupStorage.shared
+		guard let bas64String = storage.string(for: .security(.privateKey(id: userID))) else {
+			return nil
+		}
+		return Crypto.privateKey(with: bas64String)
+	}
+
+	private func makeNewPrivateKey(userID: String) -> Curve25519.KeyAgreement.PrivateKey {
+		let storage = GroupStorage.shared
+		let newPrivateKey = Crypto.newPrivateKeyInstance()
+		let newPublicKey = newPrivateKey.publicKey
+		let newBas64PrivateKeyString = Crypto.base64String(privateKey: newPrivateKey)
+		let newBas64PublicKeyString = Crypto.base64String(publicKey: newPublicKey)
+		storage.save(newBas64PrivateKeyString, for: .security(.privateKey(id: userID)))
+		storage.save(newBas64PublicKeyString, for: .security(.publicKey(id: userID)))
+		return newPrivateKey
+	}
+
+	public func base64PublicKeyString(for userID: String) -> String {
+		let publicKey = getPrivateKey(for: userID).publicKey
+		let base64PublicKeyString = Crypto.base64String(publicKey: publicKey)
+		return base64PublicKeyString
+	}
+
+	public func forceReload(for userID: String) {
+		let storage = GroupStorage.shared
+		storage.delete(for: .security(.privateKey(id: userID)))
+		storage.delete(for: .security(.publicKey(id: userID)))
+		getPrivateKey(for: userID)
 	}
 }
 
@@ -62,7 +70,8 @@ public extension CryptoService {
 
 	func encrypt(
 		dataString: String,
-		recipientPublicKeyString: String
+		recipientPublicKeyString: String,
+		currentUserID: String
 	) throws -> String {
 
 		let salt = Crypto.generateSalt()
@@ -70,7 +79,7 @@ public extension CryptoService {
 		guard
 			let foreignPublicKey = Crypto.publicKey(with: recipientPublicKeyString),
 			let symmetricKey = Crypto.generateSymmetricKeyBetween(
-				privateKey,
+				getPrivateKey(for: currentUserID),
 				and: foreignPublicKey,
 				salt: salt
 			),
@@ -83,7 +92,7 @@ public extension CryptoService {
 		let payload = CryptoPayload(
 			v: 1,
 			salt: salt.base64EncodedString(),
-			publicKey: publicKeyString,
+			publicKey: base64PublicKeyString(for: currentUserID),
 			ciphertext: Crypto.encondeForNetworkTransport(encrypted: encryptedData)
 		)
 
@@ -94,7 +103,8 @@ public extension CryptoService {
 public extension CryptoService {
 
 	func decrypt(
-		payloadString: String
+		payloadString: String,
+		currentUserID: String
 	) throws -> String {
 
 		guard
@@ -104,7 +114,7 @@ public extension CryptoService {
 			let salt = Data(base64Encoded: payload.salt),
 			let foreignPublicKey = Crypto.publicKey(with: payload.publicKey),
 			let symmetricKey = Crypto.generateSymmetricKeyBetween(
-				privateKey,
+				getPrivateKey(for: currentUserID),
 				and: foreignPublicKey,
 				salt: salt
 			),
@@ -220,19 +230,18 @@ public enum CryptoError: Error, Sendable {
  }
  */
 
-
-//public final class CryptoService: Sendable {
+// public final class CryptoService: Sendable {
 //    public static let shared = CryptoService()
 //
 //	private let storage = GroupStorage.shared
 //    private let salt: Data = Crypto.generateSalt()
 //
 //    private init() {}
-//}
+// }
 //
 //// MARK: - Key Management
 //
-//public extension CryptoService {
+// public extension CryptoService {
 //    var privateKey: Curve25519.KeyAgreement.PrivateKey {
 //        guard let currentUserId else {
 //            fatalError("No current user ID found")
@@ -257,11 +266,11 @@ public enum CryptoError: Error, Sendable {
 //    var publicKeyString: String {
 //        Crypto.base64String(with: publicKey)
 //    }
-//}
+// }
 //
 //// MARK: - Payload Handling
 //
-//public extension CryptoService {
+// public extension CryptoService {
 //    func createPayload(for encryptedDataString: String) -> String {
 //        [salt.base64EncodedString(), publicKeyString, encryptedDataString].joined(separator: ":")
 //    }
@@ -271,11 +280,11 @@ public enum CryptoError: Error, Sendable {
 //        guard components.count == 3 else { return nil }
 //        return (components[0], components[1], components[2])
 //    }
-//}
+// }
 //
 //// MARK: - Encryption & Decryption
 //
-//public extension CryptoService {
+// public extension CryptoService {
 //    func encrypt(dataString: String, publicKeyString: String) -> String {
 //        guard let foreignPublicKey = Crypto.publicKey(with: publicKeyString),
 //              let symmetricKey = generateSymmetricKey(with: foreignPublicKey),
@@ -299,11 +308,11 @@ public enum CryptoError: Error, Sendable {
 //        let decryptedData = Crypto.decrypt(encryptedData: encryptedData, using: symmetricKey)
 //        return Crypto.dataPlainMessageToHumanFriendlyPlainMessage(decryptedData) ?? dataString
 //    }
-//}
+// }
 //
 //// MARK: - Private Helpers
 //
-//private extension CryptoService {
+// private extension CryptoService {
 //    func generateAndStoreNewKeyPair(for userId: String) -> Curve25519.KeyAgreement.PrivateKey {
 //        let newKeyPair = Crypto.newPrivateKeyInstance()
 //
@@ -322,4 +331,4 @@ public enum CryptoError: Error, Sendable {
 //    func generateSymmetricKey(with foreignPublicKey: Curve25519.KeyAgreement.PublicKey, salt: Data? = nil) -> SymmetricKey? {
 //        Crypto.generateSymmetricKeyBetween(privateKey, and: foreignPublicKey, salt: salt ?? self.salt)
 //    }
-//}
+// }

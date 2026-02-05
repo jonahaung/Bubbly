@@ -26,18 +26,16 @@ public struct GroupConversationSettingsScene: View {
     public var body: some View {
         Form {
             Section {
-                FormCell {
-                    TextField("Group Name", text: $viewModel.group.name)
-                        .textInputAutocapitalization(.words)
-                        .focused($isFocused)
-                } right: {
-                    Button {
-                        isFocused = true
-                    } label: {
-                        SystemImage(.squareAndPencil)
-                    }
-                    .buttonStyle(.borderless)
-                }
+				LabeledContent {
+					RenameButton()
+						.labelStyle(.iconOnly)
+						.renameAction($isFocused)
+				} label: {
+					TextField("Group Name", text: $viewModel.group.name)
+						.textInputAutocapitalization(.words)
+						.focused($isFocused)
+
+				}
             } header: {
                 VStack {
                     PhotoPickerButton(
@@ -67,19 +65,27 @@ public struct GroupConversationSettingsScene: View {
             Section {
                 AsyncButton {
                     try await ConversationRepo.deleteMessages(conID: viewModel.group.uid)
-					Router.shared.currentNavRouter.navPath.removeAll()
+					Router.shared.popToRoot()
                 } label: {
                     Text("Delete Messages")
                 }
             }
             Section {
-                FormCell("Created", viewModel.group.createdDate.date.formatted(date: .abbreviated, time: .shortened))
+				LabeledContent(
+					"Created",
+					value: viewModel.group.createdDate.date,
+					format: .dateTime
+				)
                 if let admin: (any ContactRepresentable) = viewModel.group.createdBy == currentUserId
                     ? currentUser
                     : contactStore.contact(
                         for: viewModel.group.createdBy
                     ) {
-                    FormCell("Admin", admin.name)
+
+					LabeledContent(
+						"Admin",
+						value: admin.name
+					)
                 }
             }
             Section {
@@ -102,7 +108,7 @@ public struct GroupConversationSettingsScene: View {
         }
         .toolbar {
             if viewModel.hasChanges {
-                ToolbarItem(placement: .topBarLeading) {
+				ToolbarItem(placement: .cancellationAction) {
                     Button {
                         viewModel.reset()
                     } label: {
@@ -110,7 +116,7 @@ public struct GroupConversationSettingsScene: View {
                     }
                 }
             }
-            ToolbarItem(placement: .topBarTrailing) {
+			ToolbarItem(placement: .primaryAction) {
                 AsyncButton {
                     if let image = viewModel.pickedPhoto?.uiImage {
                         let url = try await viewModel.uploadImage(image: image)

@@ -14,69 +14,54 @@ public struct Typography: Sendable {
 	public let subHeadline: Font
 	public let headLine: Font
 	public let footnote: Font
+	public let caption1: Font
+	public let caption2: Font
 
 	public init(
 		body: Font,
 		callout: Font,
 		subHeadline: Font,
 		headLine: Font,
-		footnote: Font
+		footnote: Font,
+		caption1: Font,
+		caption2: Font
 	) {
 		self.body = body
 		self.callout = callout
 		self.subHeadline = subHeadline
 		self.headLine = headLine
 		self.footnote = footnote
+		self.caption1 = caption1
+		self.caption2 = caption2
 	}
 }
 public extension Typography {
 
 	static let `default` = Typography(
-		body: .chatScaled(
-			baseSize: 17,
-			weight: .regular,
-			textStyle: .body
-		),
-		callout: .chatScaled(
-			baseSize: 14,
-			weight: .regular,
-			textStyle: .callout
-		),
-		subHeadline: .chatScaled(
-			baseSize: 13,
-			weight: .medium,
-			textStyle: .footnote
-		),
-
-		headLine: .chatScaled(
-			baseSize: 17,
-			weight: .semibold,
-			textStyle: .headline
-		),
-		footnote: .chatScaled(
-			baseSize: 12,
-			weight: .medium,
-			textStyle: .footnote
-		).leading(.tight)
+		body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize),
+		callout: .system(size: UIFont.preferredFont(forTextStyle: .callout).pointSize),
+		subHeadline: .system(size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize),
+		headLine:
+				.system(
+					size: UIFont.preferredFont(forTextStyle: .headline).pointSize,
+					weight: .semibold
+				),
+		footnote:
+				.system(
+					size: UIFont.preferredFont(forTextStyle: .footnote).pointSize,
+					design: .rounded
+				),
+		caption1:
+				.system(
+					size: UIFont.preferredFont(forTextStyle: .caption1).pointSize,
+					design: .rounded
+				),
+		caption2:
+				.system(
+					size: UIFont.preferredFont(forTextStyle: .caption2).pointSize,
+					design: .rounded
+				)
 	)
-}
-public extension Font {
-
-	static func chatScaled(
-		baseSize: CGFloat,
-		weight: Font.Weight,
-		textStyle: UIFont.TextStyle
-	) -> Font {
-		let metrics = UIFontMetrics(forTextStyle: textStyle)
-		let scaledSize = metrics.scaledValue(for: baseSize)
-
-		return .system(
-			size: scaledSize,
-			weight: weight,
-			design: .default
-		)
-		.leading(.tight)
-	}
 }
 
 public extension EnvironmentValues {

@@ -17,42 +17,49 @@ struct RootTabView: View {
 
 	var body: some View {
 		TabView(selection: selection) {
-			ForEach(router.navRouters) { navRouter in
+			ForEach(TabPath.allCases) { tabPath in
 				Tab(
-					navRouter.id.localizedName,
-					systemImage: navRouter.id.systemName,
-					value: navRouter.id
+					tabPath.localizedName,
+					systemImage: tabPath.systemName,
+					value: tabPath
 				) {
-					MainNavView(navRouter: navRouter) {
-						tabDestination(for: navRouter)
-							.navigationTitle(navRouter.id.localizedName)
-					}
+					tabDestination(for: tabPath)
+						.toolbarVisibility(
+							router.currentNavPaths.isNilOrEmpty ? .automatic : .hidden,
+							for: .tabBar
+						)
 				}
 			}
+
 		}
-		.ignoresSafeArea()
+		.sensoryFeedback(.impact(flexibility: .soft, intensity: 1), trigger: router.selectedTab)
 		.tabBarMinimizeBehavior(.onScrollDown)
 	}
 }
 
 private extension RootTabView {
 	var selection: Binding<TabPath> {
-		.init(get: { router.tab }, set: { router.tab = $0 })
+		.init(get: { router.selectedTab }, set: { router.selectedTab = $0 })
 	}
-	@ViewBuilder func tabDestination(for navRouter: NavRouter) -> some View {
-		switch navRouter.id {
+	@ViewBuilder func tabDestination(for tabPath: TabPath) -> some View {
+		switch tabPath {
 		case .test:
-			FolderExplorer()
+			MainNavView(tabPath: tabPath) {
+				Playground()
+			}
 		case .inbox:
-			InboxScene()
-				.toolbarVisibility(
-					router.tabBarVisibility,
-					for: .tabBar
-				)
+			MainNavView(tabPath: tabPath) {
+				InboxScene()
+			}
+
 		case .contacts:
-			ContactsScene()
+			MainNavView(tabPath: tabPath) {
+				ContactsScene()
+			}
 		case .settings:
-			SettingsScene()
+			MainNavView(tabPath: tabPath) {
+				SettingsScene()
+			}
 		}
 	}
 }

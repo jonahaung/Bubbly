@@ -211,7 +211,7 @@ private struct EnglishSentencePack: LoremSentencePack {
 		"account", "profile", "session", "request",
 		"response", "timeline", "status", "delivery",
 		"support", "issue", "confirmation", "details",
-		"information", "summary", "progress", "result",
+		"information", "summary", "progress", "result"
 	]
 
 	// MARK: - Chat Templates (openers, questions, updates)
@@ -257,7 +257,7 @@ private struct EnglishSentencePack: LoremSentencePack {
 		// Closings
 		{ "Thanks for checking on this" },
 		{ "Appreciate your help here" },
-		{ "Thanks, talk to you soon" },
+		{ "Thanks, talk to you soon" }
 	]
 
 	// MARK: - Generic / System Messages (UI, banners, logs)
@@ -334,7 +334,7 @@ private struct EnglishSentencePack: LoremSentencePack {
 
 		{
 			"If you continue to experience issues, please restart the application and try again."
-		},
+		}
 	]
 
 	// MARK: - Reply Templates (reply-aware, friendly)
@@ -366,17 +366,17 @@ private struct EnglishSentencePack: LoremSentencePack {
 		// Context-aware reply
 		{ previous in
 			"I saw your message about \(previous.lowercased())"
-		},
+		}
 	]
 
 	// MARK: - Emojis
 
 	let emojisLight = [
-		"🙂", "👍", "👌", "😊", "🤝", "✨",
+		"🙂", "👍", "👌", "😊", "🤝", "✨"
 	]
 
 	let emojisExpressive = [
-		"😂", "🔥", "🚀", "🙌", "😅", "🎉", "💯",
+		"😂", "🔥", "🚀", "🙌", "😅", "🎉", "💯"
 	]
 
 	// MARK: - Names
@@ -384,13 +384,13 @@ private struct EnglishSentencePack: LoremSentencePack {
 	let firstNames = [
 		"Alex", "Jamie", "Taylor", "Jordan", "Chris", "Morgan",
 		"Sam", "Casey", "Avery", "Riley", "Drew", "Quinn",
-		"Ryan", "Shawn", "Daniel", "Ethan", "Sophia", "Emma",
+		"Ryan", "Shawn", "Daniel", "Ethan", "Sophia", "Emma"
 	]
 
 	let lastNames = [
 		"Lee", "Tan", "Ng", "Smith", "Johnson",
 		"Brown", "Wong", "Lim", "Chen", "Park",
-		"Wilson", "Anderson", "Harris",
+		"Wilson", "Anderson", "Harris"
 	]
 
 	// MARK: - Internet
@@ -400,7 +400,7 @@ private struct EnglishSentencePack: LoremSentencePack {
 		"icloud.com",
 		"outlook.com",
 		"yahoo.com",
-		"proton.me",
+		"proton.me"
 	]
 
 	let urls = [
@@ -409,7 +409,7 @@ private struct EnglishSentencePack: LoremSentencePack {
 		"https://apple.com",
 		"https://developer.apple.com",
 		"https://figma.com",
-		"https://support.apple.com",
+		"https://support.apple.com"
 	]
 }
 

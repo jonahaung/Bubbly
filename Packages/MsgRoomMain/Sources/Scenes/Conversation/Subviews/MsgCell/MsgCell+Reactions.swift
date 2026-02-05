@@ -13,7 +13,7 @@ import XUI
 
 extension MsgCell {
 	struct Reactions: View {
-		
+
 		@Environment(MsgCellViewModel.self) private var viewModel
 		@Environment(\.viewIsVisible) private var viewIsVisible: Bool
 
@@ -33,7 +33,7 @@ extension MsgCell {
 							content
 								.modifier(
 									ReactionAnimationModifier(
-										reaction: reaction.rawValue,
+										reaction: .init(rawValue: reaction.rawValue)!,
 										isActive: phase
 									)
 								)
@@ -41,7 +41,7 @@ extension MsgCell {
 								.bouncy(
 									duration: ReactionsBar
 										.ReactionState(
-											reaction: reaction.rawValue
+											reaction: .init(rawValue: reaction.rawValue)!
 										).animationDuration,
 									extraBounce: ReactionsBar.Constants
 										.extraBounce)

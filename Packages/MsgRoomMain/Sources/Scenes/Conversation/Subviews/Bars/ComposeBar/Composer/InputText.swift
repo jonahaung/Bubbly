@@ -14,17 +14,18 @@ protocol InputTextDelegate: AnyObject {
 	func inputText(_ inputText: InputText, didBeganEditing text: String)
 	func inputText(_ inputText: InputText, didInsertLinks links: [ExtractedLink])
 }
+
 @MainActor
 @Observable
-final class InputText: Identifiable {
+final class InputText: Equatable {
 
-	let id = Date.now.formatted()
+	let id = 0
 	var text: String = String() {
 		willSet {
 			let oldValue = self.text
 			let diff = newValue.count - oldValue.count
 			switch true {
-			case diff == 1 && oldValue.isEmpty:
+			case abs(diff) == 1 && (oldValue.isEmpty || newValue.isEmpty):
 				delegate?.inputText(self, didBeganEditing: newValue)
 			case diff > 3:
 				parseLinks(newValue)
@@ -33,18 +34,24 @@ final class InputText: Identifiable {
 			}
 		}
 	}
-
+	var selection: TextSelection?
 	var hasText: Bool { !text.isWhitespace }
 
 	@ObservationIgnored private var linkExtractionTask: Task<Void, Never>?
-
-	weak var delegate: InputTextDelegate?
+	@ObservationIgnored weak var delegate: InputTextDelegate?
 
 	func clear() {
+		selection = nil
 		linkExtractionTask?.cancel()
 		text = .init()
 	}
 
+	func selectAll() {
+		let string = text
+		if string.isWhitespace == false, let range = string.range(of: string) {
+			selection = .init(range: range)
+		}
+	}
 	private func parseLinks(_ string: String) {
 		let currentText = string.trimmed
 
@@ -67,5 +74,9 @@ final class InputText: Identifiable {
 			}
 
 		}
+	}
+
+	nonisolated static func == (lhs: InputText, rhs: InputText) -> Bool {
+		lhs.id == rhs.id
 	}
 }

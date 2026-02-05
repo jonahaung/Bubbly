@@ -32,7 +32,9 @@ public enum ConversationRepo {
 			return .contact(contact)
 		}
 
-		if !refetch, let existing: PGroup.SendableType = try await Store.shared.groupStore.fetch(uid: conID) {
+		if !refetch, let existing: PGroup.SendableType = try await Store.shared.groupStore?.fetch(
+			uid: conID
+		) {
 			return .group(existing)
 		}
 
@@ -41,10 +43,10 @@ public enum ConversationRepo {
 			throw XError.noConversationGroupFound
 		}
 
-		if try await Store.shared.groupStore.exists(uid: conID) == false {
-			try await Store.shared.groupStore.insert(group)
+		if try await Store.shared.groupStore?.exists(uid: conID) == false {
+			try await Store.shared.groupStore?.insert(group)
 		} else {
-			try await Store.shared.groupStore.updateAndSave(uid: conID) { model in
+			try await Store.shared.groupStore?.updateAndSave(uid: conID) { model in
 				model.update(from: group)
 			}
 		}
@@ -67,7 +69,13 @@ public enum ConversationRepo {
 	static func messagesPredicate(for conID: String) -> Predicate<PMsg> {
 		#Predicate<PMsg> { $0.conID == conID }
 	}
-
+	static func statusNotPredicate(for status: MsgIncomingStatus) -> Predicate<PMsg> {
+		let readRawValue = status.rawValue
+		return #Predicate<PMsg> { $0.incomingStatus < readRawValue }
+	}
+	static func senderIDNotPredicate(for uid: String) -> Predicate<PMsg> {
+		#Predicate<PMsg> { $0.senderID != uid }
+	}
 	static func descriptor(
 		for conID: String,
 		order: SortOrder,
@@ -87,62 +95,72 @@ public enum ConversationRepo {
 		limit: Int? = nil
 	) async throws -> [Message] {
 		let descriptor = descriptor(for: conID, order: .reverse, limit: limit, offset: offset)
-		let snapshots = try await Store.shared.msgStore.fetch(descriptor)
+		let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
 		return snapshots.reversed()
 	}
 
 	public static func deleteMessages(conID: String) async throws {
-		try await Store.shared.msgStore.delete(where: messagesPredicate(for: conID))
+		try await Store.shared.msgStore?.delete(where: messagesPredicate(for: conID))
 	}
 
 	public static func lastMsg(conID: String) async throws -> Message? {
 		let descriptor = descriptor(for: conID, order: .reverse, limit: 1)
-		return try await Store.shared.msgStore.fetch(descriptor).first
+		return try await Store.shared.msgStore?.fetch(descriptor).first
 	}
 
 	public static func firstMsg(conID: String) async throws -> Message? {
 		let descriptor = descriptor(for: conID, order: .forward, limit: 1)
-		return try await Store.shared.msgStore.fetch(descriptor).first
+		return try await Store.shared.msgStore?.fetch(descriptor).first
 	}
 
 	public static func totalMsgsCount(conID: String) async throws -> Int {
 		let descriptor = FetchDescriptor<PMsg>(predicate: messagesPredicate(for: conID))
-		return try await Store.shared.msgStore.fetchCount(descriptor)
+		return try await Store.shared.msgStore?.fetchCount(descriptor) ?? 0
 	}
-
-	public static func updateReceiveMsgs(for conID: String) async throws -> [Message] {
-		guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
-			throw XError.noCurrentUserID
-		}
-
-		let conPredicate = #Predicate<PMsg> { $0.conID == conID }
-		let recipientPredicate = #Predicate<PMsg> { $0.senderID != currentUserID }
-		let readRawValue = MsgIncomingStatus.read.rawValue
-		let statusPredicate = #Predicate<PMsg> { $0.incomingStatus < readRawValue }
+	public static func countUnreadMsgs(conID: String, currentUserID: String) async throws -> Int {
+		let predicate = unreadMsgsPredicate(conID: conID, currentUserID: currentUserID)
+		let descriptor = FetchDescriptor<PMsg>(predicate: predicate)
+		return try await Store.shared.msgStore?.fetchCount(descriptor) ?? 0
+	}
+	public static func unreadMsgsPredicate(conID: String, currentUserID: String) -> Predicate<PMsg> {
+		let conPredicate = messagesPredicate(for: conID)
+		let recipientPredicate = senderIDNotPredicate(for: currentUserID)
+		let statusPredicate = statusNotPredicate(for: .read)
 
 		let predicate = #Predicate<PMsg> {
 			conPredicate.evaluate($0) && recipientPredicate.evaluate($0) && statusPredicate.evaluate($0)
 		}
-
+		return predicate
+	}
+	public static func fetchUnreadMessages(
+		conID: String,
+		limit: Int? = nil,
+		currentUserID: String
+	) async throws -> [Message] {
+		let predicate = unreadMsgsPredicate(conID: conID, currentUserID: currentUserID)
 		var descriptor = FetchDescriptor<PMsg>(predicate: predicate)
+		if let limit {
+			descriptor.fetchLimit = limit
+		}
 		descriptor.sortBy = [.init(\.date, order: .forward)]
+		return try await Store.shared.msgStore?.fetch(descriptor) ?? []
+	}
 
-		let unreadMsgs = try await Store.shared.msgStore.fetch(descriptor)
+	public static func updateReceiveMsgs(for conID: String, currentUserID: String) async throws -> [Message] {
+		let unreadMsgs = try await fetchUnreadMessages(conID: conID, currentUserID: currentUserID)
 		guard !unreadMsgs.isEmpty else { return [] }
 
-		let msgStore = Store.shared.msgStore
+		let msgStore = await Store.shared.msgStore
 
-		var updated: [Message] = []
-		updated.reserveCapacity(unreadMsgs.count)
-
-		for var msg in unreadMsgs {
+		// Transform each message and let mapOrdered collect the results.
+		let updated: [Message] = try await AsyncOrderedStream.mapOrdered(inputs: unreadMsgs) { msg in
+			var msg = msg
 			msg.incomingStatus = .read
-			try await msgStore.updateAndSave(uid: msg.uid) { model in
+			try await msgStore?.updateAndSave(uid: msg.uid) { model in
 				model.update(from: msg)
 			}
-			updated.append(msg)
+			return msg
 		}
-
 		return updated
 	}
 
@@ -172,3 +190,4 @@ public enum ConversationRepo {
 		}
 	}
 }
+

@@ -12,7 +12,7 @@ import SwiftUI
 import XUI
 
 public struct ImageView: View {
-	
+
 	public typealias Item = any ImageViewItem
 	@State private var error: Error?
 	@State private var manager: ImageViewManager
@@ -88,6 +88,10 @@ extension ImageView {
 				.aspectRatio(contentMode: config.size.value == nil ? .fit : .fill)
 				.onTapGesture(perform: action)
 				.equatable(by: manager.item.imageID)
+		case .none:
+			image
+				.resizable()
+				.aspectRatio(contentMode: config.size.value == nil ? .fit : .fill)
 		}
 	}
 

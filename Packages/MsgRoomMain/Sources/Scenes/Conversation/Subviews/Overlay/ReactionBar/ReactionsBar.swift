@@ -7,6 +7,48 @@
 import SwiftUI
 import Database
 
+public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable, CaseIterable {
+	public static var allCases: [ReactionType] { [.heart, .thumbUp, .thumbDown, .smile, .laugh, .sad]}
+
+	public var id: String { self.rawValue }
+	case heart
+	case thumbUp
+	case thumbDown
+	case smile
+	case laugh
+	case sad
+	case custom(String)
+
+	public var rawValue: String {
+		switch self {
+		case .heart:
+			return "❤️"
+		case .thumbUp:
+			return "👍"
+		case .thumbDown:
+			return "👎"
+		case .smile:
+			return "😊"
+		case .laugh:
+			return "😂"
+		case .sad:
+			return "😓"
+		case .custom(let string):
+			return string
+		}
+	}
+	public init?(rawValue: String) {
+		switch rawValue {
+			case "❤️": self = .heart
+		case "👍": self = .thumbUp
+		case "👎": self = .thumbDown
+		case "😊": self = .smile
+		case "😂": self = .laugh
+		case "😓": self = .sad
+		default: self = .custom(rawValue)
+		}
+	}
+}
 public struct ReactionsBar: View {
 	enum Constants {
 		static let animationDuration: Double = 0.5
@@ -23,21 +65,21 @@ public struct ReactionsBar: View {
 	}
 
 	struct ReactionState: Sendable, Hashable, Identifiable {
-		var id: String { reaction }
-		let reaction: String
+		var id: ReactionType { reaction }
+		let reaction: ReactionType
 		var count: Int
 		var animationState: Bool = false
 
-		init(reaction: String, count: Int = 0) {
+		init(reaction: ReactionType, count: Int = 0) {
 			self.reaction = reaction
 			self.count = count
 		}
 
 		var animationDuration: Double {
 			switch reaction {
-			case "❤️", "👍":
+			case .heart, .thumbUp:
 				ReactionsBar.Constants.animationDuration
-			case "👎", "😂", "😓":
+			case .thumbDown, .laugh, .sad:
 				ReactionsBar.Constants.animationDuration
 			default:
 				ReactionsBar.Constants.animationDuration
@@ -45,9 +87,9 @@ public struct ReactionsBar: View {
 		}
 	}
 
-	public let onReact: (String) -> Void
+	public let onReact: (ReactionType) -> Void
 
-	@State private var allStates: [ReactionState] = Reaction.allCases.map {
+	@State private var allStates: [ReactionState] = ReactionType.allCases.map {
 		ReactionState(reaction: $0)
 	}
 

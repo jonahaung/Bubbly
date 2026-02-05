@@ -1,4 +1,3 @@
-
 //  MsgSenderTool.swift
 //  Services
 //
@@ -13,7 +12,6 @@ import Core
 import XUI
 
 public struct MsgSenderTool: Tool {
-
 
 	public let name = "sendMsg"
 	public let description = "Search conversation, and send a message in the app."
@@ -71,7 +69,6 @@ public struct MsgSenderTool: Tool {
 			"message": "Failed to perform contact operation"
 		])
 	}
-
 
 	enum LocalError: Error, LocalizedError, CaseNameReflectable {
 		case accessDenied, invalidArguments

@@ -11,9 +11,10 @@ public struct XRadioPicker<Item: XPickable>: View {
     private let items: [Item]
     private var selection: Binding<Item>
 
-    public init(_ _items: [Item], _ _selection: Binding<Item>) {
-        items = _items
-        selection = _selection
+    // Keep external labels for source compatibility, but use valid identifiers
+    public init(_ items: [Item], _ selection: Binding<Item>) {
+        self.items = items
+        self.selection = selection
     }
 
     public var body: some View {

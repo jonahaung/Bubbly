@@ -59,7 +59,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
         UIApplication.shared.endEditing()
         try await Task.sleep(seconds: 1)
         let group = group
-        try await Store.shared.groupStore
+		try await Store.shared.groupStore?
             .updateAndSave(uid: originalGroup.uid) { model in
                 model.update(from: group)
             }

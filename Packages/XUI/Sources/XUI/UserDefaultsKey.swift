@@ -39,13 +39,3 @@ extension UserDefaults {
 private struct Box<T: Codable>: Codable {
     var value: T
 }
-
-/*
- extension UserDefaultsKey {
- static var foo: UserDefaultsKey<SomeType> { .init(name: "foo", default: .init(value: "foo")) }
- }
-
- struct SomeType: Codable {
- var value: String
- }
- */

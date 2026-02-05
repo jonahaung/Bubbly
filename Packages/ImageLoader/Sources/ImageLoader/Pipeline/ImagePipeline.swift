@@ -36,7 +36,8 @@ public final class ImagePipeline {
             }())
 
             $0.imageCache = ImageCache()
-            $0.dataCache = try! DataCache(name: "com.github.kean.Nuke.DataCache")
+            // Avoid force-try: if DataCache initialization fails, proceed without it.
+            $0.dataCache = try? DataCache(name: "com.github.kean.Nuke.DataCache")
         }
     )
 
@@ -178,7 +179,7 @@ public final class ImagePipeline {
 
     func cancelImageTask(_ task: ImageTask) {
         tasks.removeValue(forKey: task)?.unsubscribe()
-        task._cancel()
+        task.cancelInternal()
     }
 
     func imageTask(_ task: ImageTask, didChangePriority priority: ImageRequest.Priority) {

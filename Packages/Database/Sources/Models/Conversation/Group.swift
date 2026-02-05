@@ -15,7 +15,7 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
     public var members: [String]
     public var createdBy: String
     public var theme: ConversationTheme = .init()
-    public var seenMembers: [SeenMember]?
+    public var seenMembers: [SeenMember] = []
 
     public init(
         uid: String,
@@ -45,10 +45,9 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         case members
         case createdBy
         case theme
-        case seenMembers
     }
 
-	public var conversationProperties: ConversationProperties {
-		ConversationProperties(uid: uid, theme: theme, seenMembers: seenMembers ?? [])
-	}
+    public var conversationProperties: ConversationProperties {
+        ConversationProperties(uid: uid, theme: theme, seenMembers: seenMembers)
+    }
 }

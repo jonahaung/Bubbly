@@ -5,7 +5,6 @@
 //  Created by Aung Ko Min on 31/12/25.
 //
 
-
 import Core
 import Database
 import Services
@@ -30,8 +29,7 @@ extension MsgCell {
 		var body: some View {
 			let hPadding: CGFloat = ChatLayoutConstants.Cell.defaultSpacing + 4 + 8
 			Text(headerText)
-				.font(typography.footnote)
-				.foregroundStyle(.secondary)
+				.font(typography.caption1)
 				.padding(.horizontal, hPadding)
 		}
 	}

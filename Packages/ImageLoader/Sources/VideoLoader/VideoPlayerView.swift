@@ -9,19 +9,19 @@
 import Foundation
 
 #if os(macOS)
-    public typealias _PlatformBaseView = NSView
+    public typealias PlatformBaseView = NSView
 #else
-    public typealias _PlatformBaseView = UIView
+    public typealias PlatformBaseView = UIView
 #endif
 
 @MainActor
-public final class VideoPlayerView: _PlatformBaseView {
+public final class VideoPlayerView: PlatformBaseView {
     // MARK: Configuration
 
     /// `.resizeAspectFill` by default.
     public var videoGravity: AVLayerVideoGravity = .resizeAspectFill {
         didSet {
-            _playerLayer?.videoGravity = videoGravity
+            playerLayerStorage?.videoGravity = videoGravity
         }
     }
 
@@ -45,7 +45,7 @@ public final class VideoPlayerView: _PlatformBaseView {
     // MARK: Initialization
 
     public var playerLayer: AVPlayerLayer {
-        if let layer = _playerLayer {
+        if let layer = playerLayerStorage {
             return layer
         }
         let playerLayer = AVPlayerLayer()
@@ -57,11 +57,11 @@ public final class VideoPlayerView: _PlatformBaseView {
         #endif
         playerLayer.frame = bounds
         playerLayer.videoGravity = videoGravity
-        _playerLayer = playerLayer
+        playerLayerStorage = playerLayer
         return playerLayer
     }
 
-    private var _playerLayer: AVPlayerLayer?
+    private var playerLayerStorage: AVPlayerLayer?
 
     #if os(iOS) || os(tvOS) || os(visionOS)
         override public func layoutSubviews() {
@@ -69,7 +69,7 @@ public final class VideoPlayerView: _PlatformBaseView {
 
             CATransaction.begin()
             CATransaction.setDisableActions(!animatesFrameChanges)
-            _playerLayer?.frame = bounds
+            playerLayerStorage?.frame = bounds
             CATransaction.commit()
         }
 
@@ -79,7 +79,7 @@ public final class VideoPlayerView: _PlatformBaseView {
 
             CATransaction.begin()
             CATransaction.setDisableActions(!animatesFrameChanges)
-            _playerLayer?.frame = bounds
+            playerLayerStorage?.frame = bounds
             CATransaction.commit()
         }
     #endif
@@ -95,7 +95,7 @@ public final class VideoPlayerView: _PlatformBaseView {
     private var playerObserver: AnyObject?
 
     public func reset() {
-        _playerLayer?.player = nil
+        playerLayerStorage?.player = nil
         player = nil
         playerObserver = nil
     }

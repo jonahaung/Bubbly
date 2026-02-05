@@ -65,10 +65,15 @@ final class InboxViewModel: ErrorPresenter {
 				} else {
 					currentUser
 				}
+				let unreadMsgsCount = try await ConversationRepo.countUnreadMsgs(
+					conID: conversation.uid,
+					currentUserID: currentUser.uid
+				)
 				return InboxItem(
 					conversation: conversation,
 					msg: msg,
-					sender: sender
+					sender: sender,
+					unreadMsgsCount: unreadMsgsCount
 				)
 			}
 			return nil
@@ -80,10 +85,10 @@ final class InboxViewModel: ErrorPresenter {
 //		let predicate = #Predicate<PConversationProperties> { $0.lastMsgID != nil }
 		var descriptor = FetchDescriptor<PConversationProperties>()
 		descriptor.sortBy = [.init(\.uid, order: .forward)]
-		let properties = try await Store.shared.conversationPropertiesStore.fetch(descriptor)
+		let properties = try await Store.shared.conversationPropertiesStore?.fetch(descriptor)
 
 		let items = try await withThrowingTaskGroup(of: Conversation.self) { group in
-			properties.forEach { property in
+			properties?.forEach { property in
 				let conID = property.uid
 				return group.addTask {
 					let conversation = try await ConversationRepo.getOrCreate(for: conID, refetch: false)

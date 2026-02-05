@@ -11,7 +11,7 @@ import FirebaseMessaging
 import Foundation
 import XUI
 
-public struct CurrentUserModel: ContactRepresentableSendable, Codable, Hashable {
+public struct CurrentUserModel: ContactRepresentableSendable, Codable, Hashable, Equatable {
     public let uid: String
     public var name: String
     public let mobile: String
@@ -44,8 +44,7 @@ public extension CurrentUserModel {
             mobile: user.phoneNumber.str,
             photoURL: user.photoURL?.absoluteString ?? "",
             pushToken: Messaging.messaging().fcmToken ?? "",
-			publicKeyString: GroupStorage.shared
-				.string(for: .security(.publicKey(id: user.uid))).str
+			publicKeyString: CryptoService.shared.base64PublicKeyString(for: user.uid)
         )
     }
 

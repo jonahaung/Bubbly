@@ -10,41 +10,70 @@ import Services
 import SwiftUI
 import XUI
 
+private enum MsgCellGestureThresholds {
+	static let dragMinDistance: CGFloat = 80
+	static let markTrigger: CGFloat = 170
+}
+
 extension MsgCell {
+
+	@Observable
+	final class GestureViewModel {
+		var draggedOffset: CGFloat = .zero
+		@ObservationIgnored
+		var draggedLimitReached = false
+		var isLongPressActive = false
+
+		// For throttling drag updates
+		@ObservationIgnored
+		var lastAppliedOffset: CGFloat = .zero
+	}
+
 	struct GestureAware<Content: View>: View {
+
 		@Environment(MsgCellViewModel.self) private var viewModel
-		@Environment(ChatViewManager.self) private var manager
 		@Environment(\.msgCellActions) private var sendMsgCellInteraction
-		@State private var draggedLimitReached = false
-		@State private var draggedOffset: CGFloat = .zero
-		@State private var isLongPressActive = false
+		@State private var model = GestureViewModel()
 
 		let content: () -> Content
 
 		var body: some View {
 			content()
-				.offset(x: draggedOffset)
-				.gesture(
-					dragGesture.exclusively(before: tapGesture),
-					including: .gesture
-				)
-				.background {
-					if isLongPressActive {
-						Color.clear.hidden()
+				// Clamp to integral pixels to reduce re-rasterization jitter
+				.offset(x: round(model.draggedOffset))
+				// Prefer a simpler gesture composition: prioritize drag, add tap separately
+				.highPriorityGesture(dragGesture, including: .gesture)
+				.simultaneousGesture(tapGesture)
+				// Use a minimal overlay only while measuring; avoid .background
+				.overlay(alignment: .topLeading) {
+					if model.isLongPressActive {
+						Color.clear
+							// Keep this view as light as possible
+							.allowsHitTesting(false)
+							.accessibilityHidden(true)
+							// One-shot geometry read: capture and immediately dismiss
 							.onGeometryChange(for: CGRect.self) { proxy in
 								proxy.frame(in: .global)
-							} action: { newValue in
-								isLongPressActive = false
+							} action: { newFrame in
+								// Immediately turn off the overlay to avoid extra passes
+								model.isLongPressActive = false
 								Haptics.play(.rigid, 0.7)
-								sendMsgCellInteraction?(
-									.onFocusMsgBubble(.init(id: viewModel.id, frame: newValue))
-								)
+								withTransaction(.withoutAnimation) {
+									sendMsgCellInteraction?(
+										.onFocusMsgBubble(.init(id: viewModel.id, frame: newFrame))
+									)
+								}
 							}
 					}
 				}
 				.onPressingChanged(in: .local) { _ in
-					MainActor.assumeIsolated {
-						isLongPressActive = true
+					// Start measuring only if not already active to avoid re-entrancy
+					if !model.isLongPressActive {
+						// Defer to next runloop to avoid changing the layer tree
+						// in the same frame as the gesture state change.
+						DispatchQueue.main.async {
+							model.isLongPressActive = true
+						}
 					}
 				}
 		}
@@ -60,24 +89,48 @@ extension MsgCell.GestureAware {
 	}
 
 	private var dragGesture: some Gesture {
-		DragGesture(minimumDistance: 80, coordinateSpace: .local)
+		DragGesture(minimumDistance: MsgCellGestureThresholds.dragMinDistance, coordinateSpace: .local)
 			.onChanged { value in
 				let width = value.translation.width
-				let isValid = viewModel.isSender ? width < -80 : width > 80
-				guard isValid else { return }
+
+				// Only allow dragging in the intended direction
+				let validDirection = viewModel.isSender
+					? (width < -MsgCellGestureThresholds.dragMinDistance)
+					: (width > MsgCellGestureThresholds.dragMinDistance)
+
+				guard validDirection else {
+					// Prevent drift in the wrong direction
+					if !model.draggedLimitReached {
+						model.draggedOffset = 0
+						model.lastAppliedOffset = 0
+					}
+					return
+				}
+
 				let absWidth = abs(width)
-				if !draggedLimitReached, absWidth > 170 {
-					draggedLimitReached = true
+
+				// Trigger once when passing the mark threshold
+				if !model.draggedLimitReached, absWidth > MsgCellGestureThresholds.markTrigger {
+					model.draggedLimitReached = true
 					sendMsgCellInteraction?(.onMarkMsg(viewModel.msg))
 				}
-				guard !draggedLimitReached else { return }
-				draggedOffset = width
+
+				// Stop updating offset after limit reached to avoid jitter
+				guard !model.draggedLimitReached else { return }
+
+				// Throttle updates: apply only if change > 1pt and clamp to integral pixels
+				let clamped = round(width)
+				if abs(clamped - model.lastAppliedOffset) >= 1 {
+					model.draggedOffset = clamped
+					model.lastAppliedOffset = clamped
+				}
 			}
 			.onEnded { _ in
-				draggedLimitReached = false
-				guard draggedOffset != 0 else { return }
+				model.draggedLimitReached = false
+				guard model.draggedOffset != 0 else { return }
 				withTransaction(.init(animation: .interactiveSpring)) {
-					draggedOffset = 0
+					model.draggedOffset = 0
+					model.lastAppliedOffset = 0
 				}
 			}
 	}

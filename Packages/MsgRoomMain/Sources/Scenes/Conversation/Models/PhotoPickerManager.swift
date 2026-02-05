@@ -18,7 +18,6 @@ import SwiftUI
 @Observable
 final class PhotoPickerManager {
 
-
 	private var items: [SelectedPhotoItem] = [] {
 		didSet {
 			scheduleDebouncedUpdate()
@@ -29,10 +28,11 @@ final class PhotoPickerManager {
 		.init {
 			self.items.map(\.item)
 		} set: { newValue in
-			self.items = newValue.map{ SelectedPhotoItem($0) }
+			self.items = newValue.map { SelectedPhotoItem($0) }
+			print(newValue)
 		}
 	}
-	
+
 	var selectedImages = [SelectedImage]()
 
 	private var debounceTask: Task<Void, Never>?

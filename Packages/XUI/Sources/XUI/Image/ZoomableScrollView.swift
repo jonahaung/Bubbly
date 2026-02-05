@@ -106,7 +106,7 @@ extension ZoomableScrollViewImpl {
         }
 
         deinit {
-            Log("Deinit")
+			log("Deinit")
         }
 
         func update(content: Content, doubleTap: AnyPublisher<Void, Never>) {

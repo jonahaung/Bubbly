@@ -15,70 +15,73 @@ import XUI
 @Observable
 public class Router {
 
-	public static let shared = Router()
+	private var allPaths: [TabPath: [NavPath]] = {
+		var dictionary: [TabPath: [NavPath]] = [:]
+		TabPath.allCases.forEach {
+			dictionary[$0] = []
+		}
+		return dictionary
+	}()
 
-	public var tab: TabPath = .inbox
-	public var fullScreen: NavPath?
+	public var selectedTab: TabPath = .inbox
 	public var sheet: NavPath?
+	@ObservationIgnored
+	public var currentNavPaths: [NavPath]? {
+		allPaths[selectedTab]
+	}
+	@ObservationIgnored
+	public var visiblePath: NavPath { allPaths[selectedTab]?.last ?? .currentUserDetails }
 
-	public var navRouters = TabPath.allCases.map { NavRouter($0) }
+	public init() {}
 
-	public var currentNavRouter: NavRouter {
-		navRouters.first(where: { $0.id == tab })!
+	public func navPaths(for tab: TabPath) -> [NavPath] {
+		allPaths[tab] ?? []
+	}
+	public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
+		.init(get: {
+			self.navPaths(for: tab)
+		}, set: { newValue in
+			self.allPaths[tab] = newValue
+		})
+	}
+}
+
+public extension Router {
+	func selectTab(_ newValue: TabPath) {
+		self.selectedTab = newValue
 	}
 
-	public var currentNavPath: NavPath? {
-		currentNavRouter.navPath.last
-	}
-
-	public func navRouter(for tab: TabPath) -> NavRouter {
-		navRouters.first(where: { $0.id == tab })!
-	}
-
-	private init() {
-		trackItemsChanges()
-	}
-	func trackItemsChanges() {
-		withObservationTracking {
-			_ = currentNavRouter.navPath
-		} onChange: { [weak self] in
-			guard let self else {
+	func pushToNav(_ path: NavPath) {
+		Task(priority: .background) {
+			var allPaths = self.allPaths
+			if let index = allPaths[selectedTab]?.firstIndex(of: path), let array = allPaths[selectedTab] {
+				allPaths[selectedTab] = Array(array[0 ... index])
 				return
 			}
+			allPaths[selectedTab]?.append(path)
 			Task { @MainActor in
-				if currentNavRouter.navPath.isEmpty && tabBarVisibility == .hidden {
-					tabBarVisibility = .visible
-				}
-				trackItemsChanges()
+				self.allPaths = allPaths
 			}
 		}
 	}
-	public func push(_ path: NavPath) {
-		if case .conversation = path {
-			tabBarVisibility = .hidden
-			DispatchQueue.delay {
-				self.currentNavRouter.push(path)
-			}
-		} else {
-			currentNavRouter.push(path)
-		}
+	func pop() {
+		allPaths[selectedTab] = allPaths[selectedTab]?.dropLast()
+	}
+	func popToRoot() {
+		allPaths[selectedTab] = []
 	}
 
-	public func presentFullScreen(_ path: NavPath?) {
-		fullScreen = path
+	func presnetModel(_ value: NavPath) {
+		sheet = value
 	}
-
-	public func dismissFullScreen() {
-		fullScreen = nil
-	}
-
-	public func presentSheet(_ path: NavPath?) {
-		sheet = path
-	}
-
-	public func dismissSheet() {
+	func dismissModal() {
 		sheet = nil
 	}
+}
 
-	public var tabBarVisibility: Visibility = .automatic
+public extension Router {
+	// Shared instance for app-wide navigation
+	static let shared: Router = {
+		Router()
+	}()
 }

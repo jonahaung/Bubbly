@@ -8,7 +8,7 @@
 import SwiftUI
 
 internal struct RecentFontsSectionView: View {
-	@Binding var selectedFontName: String?
+	@Binding var selectedFontName: String
 	var recentFonts: [String]
 
 	@Environment(\.dismiss) private var dismiss

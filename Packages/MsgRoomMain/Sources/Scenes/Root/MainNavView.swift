@@ -11,16 +11,17 @@ import XUI
 
 @MainActor
 struct MainNavView<Content: View>: View {
-	
-	@Bindable var navRouter: NavRouter
+
+	let tabPath: TabPath
+	@Environment(Router.self) private var router
 	@ViewBuilder var content: () -> Content
-	
+
 	var body: some View {
-		NavigationStack(path: $navRouter.navPath) {
+		NavigationStack(path: router.navPathsBinding(for: tabPath) as Binding<[NavPath]>) {
 			content()
 				.navigationDestination(for: NavPath.self) { navPath in
 					navPath.destination()
 				}
 		}
-	}
+	} 
 }

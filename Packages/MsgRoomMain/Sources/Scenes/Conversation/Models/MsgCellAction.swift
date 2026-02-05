@@ -15,7 +15,7 @@ struct MsgCellAction {
 		case onTapAvatar(String)
 		case onFocusMsgBubble(_ item: ChatOverlayView.Item)
 		case onUploadedAttachments(Message)
-		case onReact(Message, String)
+		case onReact(Message, ReactionType)
 	}
 	let action: (ActionType) -> Void
 	func callAsFunction(_ type: ActionType) {
@@ -24,5 +24,5 @@ struct MsgCellAction {
 }
 
 extension EnvironmentValues {
-	@Entry var msgCellActions: MsgCellAction? = nil
+	@Entry var msgCellActions: MsgCellAction?
 }

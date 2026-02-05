@@ -120,7 +120,7 @@ public struct BubbleFactory: Sendable {
 
     // MARK: - Time separator & padding
 
-    public func msgCellLayout(
+    public func style(
         for msg: Message,
         previous: Message?,
         next: Message?

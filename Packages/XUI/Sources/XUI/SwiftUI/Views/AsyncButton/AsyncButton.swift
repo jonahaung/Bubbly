@@ -95,7 +95,7 @@ public struct AsyncButton<Label>: View where Label: View {
         .disabled(disableButton)
         .animation(transaction.animation, value: operations)
         .tint(tint)
-		.alert(isPresented: $showingErrorAlert, error: localizedError, actions: { error in
+		.alert(isPresented: $showingErrorAlert, error: localizedError, actions: { _ in
 			Button(role: .cancel) {
 				showingErrorAlert = false
 			}

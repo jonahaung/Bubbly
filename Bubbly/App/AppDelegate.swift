@@ -16,9 +16,7 @@ import XUI
 
 @MainActor
 class AppDelegate: NSObject, UIApplicationDelegate {
-
-	let pushNotificationService = PushNotificationService.shared
-
+	
 	func application(
 		_: UIApplication,
 		didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
@@ -26,11 +24,11 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		FirebaseApp.configure()
 		FirebaseConfiguration.shared.setLoggerLevel(.error)
 		Auth.auth().shareAuthStateAcrossDevices = true
-		pushNotificationService.registerForPushNotifications {
-			MainActor.assumeIsolated {
-				debugPrint("1️⃣ Registered for push notifications")
-			}
-		}
+//		pushNotificationService.registerForPushNotifications {
+//			MainActor.assumeIsolated {
+//				debugPrint("1️⃣ Registered for push notifications")
+//			}
+//		}
 		return true
 	}
 

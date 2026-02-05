@@ -5,46 +5,51 @@
 //  Created by Aung Ko Min on 18/10/25.
 //
 
-import Foundation
+import SwiftUI
 
-public struct Toast: Sendable, Identifiable, Hashable {
-    public var id: UUID = .init()
-    public var message: String
-    public var duration: Double
-    public var actionTitle: String?
-    public var style: ToastStyle = .default
+@MainActor
+public struct Toast: Sendable, @MainActor Identifiable, @MainActor Hashable {
 
-    public var action: (@MainActor @Sendable () -> Void)?
+	public let id: AnyHashable
+	public let node: any RenderNode
+	public let duration: Double
+	public let style: ToastStyle
 
-    public init(
-        id: UUID = UUID(),
-        message: String,
-        duration: Double = 5,
-        style: ToastStyle = .default,
-        actionTitle: String? = nil,
-        action: (@MainActor @Sendable () -> Void)? = nil
-    ) {
-        self.id = id
-        self.message = message
-        self.duration = duration
-        self.style = style
-        self.actionTitle = actionTitle
-        self.action = action
-    }
+	public init(
+		node: any RenderNode,
+		duration: Double = 5,
+		style: ToastStyle = .top,
+		action: (@MainActor @Sendable () -> Void)? = nil
+	) {
+		self.id = node.renderID()
+		self.node = node
+		self.duration = duration
+		self.style = style
+	}
 
-    public static func == (lhs: Toast, rhs: Toast) -> Bool {
-        lhs.id == rhs.id &&
-            lhs.message == rhs.message &&
-            lhs.duration == rhs.duration &&
-            lhs.style == rhs.style &&
-            lhs.actionTitle == rhs.actionTitle
-    }
+	public init(
+		message: String,
+		duration: Double = 5,
+		style: ToastStyle = .top,
+		actionTitle: String? = nil,
+	) {
+		self.init(
+			node: Text(message).opaqueView(),
+			duration: duration,
+			style: style
+		)
+	}
+	public static func == (lhs: Toast, rhs: Toast) -> Bool {
+		lhs.id == rhs.id &&
+		lhs.node.renderID() == rhs.node.renderID() &&
+		lhs.duration == rhs.duration &&
+		lhs.style == rhs.style
+	}
 
-    public func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-        hasher.combine(message)
-        hasher.combine(duration)
-        hasher.combine(style)
-        hasher.combine(actionTitle)
-    }
+	public func hash(into hasher: inout Hasher) {
+		hasher.combine(id)
+		hasher.combine(node.renderID())
+		hasher.combine(duration)
+		hasher.combine(style)
+	}
 }

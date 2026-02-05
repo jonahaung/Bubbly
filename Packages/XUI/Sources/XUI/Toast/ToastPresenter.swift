@@ -31,9 +31,14 @@ public final class ToastPresenter {
     }
 
     @MainActor
-    public static func show(_ text: String, action: (@MainActor @Sendable () -> Void)? = nil) {
-        shared.show(.init(message: text, action: action))
+    public static func show(_ text: String) {
+        shared.show(.init(message: text))
     }
+
+	@MainActor
+	public static func show(@ViewBuilder content: () -> some View) {
+		shared.show(.init(node: content().opaqueView()))
+	}
 
     public func dismiss() {
         stopTracking()

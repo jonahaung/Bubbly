@@ -31,7 +31,6 @@ extension Crypto {
     // Encrypt and decrypt using shared symmetric key
     //
     static func sampleUsage1() -> Bool {
-        print("\n\n\n\n\n\n")
         struct AliceSender {
             private init() {}
             static let privateKey = Crypto.newPrivateKeyInstance()
@@ -59,7 +58,6 @@ extension Crypto {
         let decryptedData = Crypto.decrypt(encryptedData: encryptedData, using: reveiverSymmetricKey)
 
         let bobSecret = String(data: decryptedData!, encoding: .utf8)!
-        print("bobSecret: \(bobSecret)\n")
 
         // The decripted data, should be equals with the secret
         return Crypto.dataPlainMessageToHumanFriendlyPlainMessage(decryptedData) == TestVars.secretPlain

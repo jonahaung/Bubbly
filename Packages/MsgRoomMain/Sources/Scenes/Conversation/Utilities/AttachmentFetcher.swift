@@ -319,7 +319,7 @@ public actor AttachmentFetcher {
 	) {
 		tasks.removeValue(forKey: attachment)
 		taskPriorities[attachment] = nil
-		
+
 		if let handlers = completions.removeValue(forKey: attachment) {
 			Task(priority: .utility) {
 				for handler in handlers {

@@ -72,7 +72,7 @@ extension AttachmentFactory {
 	static func createLinkAttachments(from items: [ExtractedLink]) async throws -> [Attachment] {
 		try await AsyncOrderedStream.mapOrdered(inputs: items) { item in
 			try await createLinkAttachment(from: item.url)
-		}.compactMap{ $0 }
+		}.compactMap { $0 }
 	}
 
 	static func createLinkAttachment(from url: URL) async throws -> Attachment? {

@@ -48,7 +48,7 @@ extension AssetType {
     }
 
     private static func make(_ data: Data) -> AssetType? {
-        func _match(_ numbers: [UInt8?], offset: Int = 0) -> Bool {
+        func matchSignature(_ numbers: [UInt8?], offset: Int = 0) -> Bool {
             guard data.count >= numbers.count else {
                 return false
             }
@@ -60,28 +60,28 @@ extension AssetType {
         }
 
         // JPEG magic numbers https://en.wikipedia.org/wiki/JPEG
-        if _match([0xFF, 0xD8, 0xFF]) { return .jpeg }
+        if matchSignature([0xFF, 0xD8, 0xFF]) { return .jpeg }
 
         // PNG Magic numbers https://en.wikipedia.org/wiki/Portable_Network_Graphics
-        if _match([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]) { return .png }
+        if matchSignature([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]) { return .png }
 
         // GIF magic numbers https://en.wikipedia.org/wiki/GIF
-        if _match([0x47, 0x49, 0x46]) { return .gif }
+        if matchSignature([0x47, 0x49, 0x46]) { return .gif }
 
         // WebP magic numbers https://en.wikipedia.org/wiki/List_of_file_signatures
-        if _match([0x52, 0x49, 0x46, 0x46, nil, nil, nil, nil, 0x57, 0x45, 0x42, 0x50]) { return .webp }
+        if matchSignature([0x52, 0x49, 0x46, 0x46, nil, nil, nil, nil, 0x57, 0x45, 0x42, 0x50]) { return .webp }
 
         // see https://stackoverflow.com/questions/21879981/avfoundation-avplayer-supported-formats-no-vob-or-mpg-containers
         // https://en.wikipedia.org/wiki/List_of_file_signatures
-        if _match([0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6F, 0x6D], offset: 4) { return .mp4 }
+        if matchSignature([0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6F, 0x6D], offset: 4) { return .mp4 }
 
         // https://www.garykessler.net/library/file_sigs.html
-        if _match([0x66, 0x74, 0x79, 0x70, 0x6D, 0x70, 0x34, 0x32], offset: 4) { return .m4v }
+        if matchSignature([0x66, 0x74, 0x79, 0x70, 0x6D, 0x70, 0x34, 0x32], offset: 4) { return .m4v }
 
-        if _match([0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x56, 0x20], offset: 4) { return .m4v }
+        if matchSignature([0x66, 0x74, 0x79, 0x70, 0x4D, 0x34, 0x56, 0x20], offset: 4) { return .m4v }
 
         // MOV magic numbers https://www.garykessler.net/library/file_sigs.html
-        if _match([0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20, 0x20], offset: 4) { return .mov }
+        if matchSignature([0x66, 0x74, 0x79, 0x70, 0x71, 0x74, 0x20, 0x20], offset: 4) { return .mov }
 
         // Either not enough data, or we just don't support this format.
         return nil

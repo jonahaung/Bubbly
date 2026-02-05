@@ -45,10 +45,16 @@ public struct CurrentUserProfileView: View {
 			.listRowBackground(Color.clear)
 
 			Section {
-				TextField("Enter Display Name", text: $currentUser.name)
-					.focused($isFocused)
-					.textContentType(.name)
-					.textInputAutocapitalization(.words)
+				LabeledContent {
+					RenameButton()
+						.labelStyle(.iconOnly)
+						.renameAction($isFocused)
+				} label: {
+					TextField("Enter Display Name", text: $currentUser.name)
+						.focused($isFocused)
+						.textContentType(.name)
+						.textInputAutocapitalization(.words)
+				}
 
 				Text("Phone").badge(currentUser.mobile)
 

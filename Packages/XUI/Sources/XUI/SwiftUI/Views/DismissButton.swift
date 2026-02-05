@@ -26,7 +26,7 @@ public struct DismissButton: View {
     public var body: some View {
         if isProtected {
             Text(.init(title))
-                ._comfirmationDialouge(message: "Are you sure to close?") {
+                .confirmationDialogue(message: "Are you sure to close?") {
                     Button("Continue to close", role: .destructive) {
                         dismiss()
                     }

@@ -20,10 +20,7 @@ public struct AsyncButtonOptions: OptionSet, Sendable {
     public static let all: AsyncButtonOptions = [.disableButtonOnLoading, .showProgressViewOnLoading, .showAlertOnError, .disallowParallelOperations, .enableNotificationFeedback, .enableTintFeedback]
 	public static let automatic: AsyncButtonOptions = [
 		.disableButtonOnLoading,
-		.showAlertOnError,
-		.disallowParallelOperations,
-		.enableNotificationFeedback,
-		.enableTintFeedback
+		.showAlertOnError
 	]
 
     public init(rawValue: Int) {

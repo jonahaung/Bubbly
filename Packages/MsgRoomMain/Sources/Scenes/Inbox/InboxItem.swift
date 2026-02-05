@@ -15,6 +15,7 @@ struct InboxItem: Sendable, Identifiable {
     let conversation: Conversation
     let msg: Message
     let sender: any ContactRepresentableSendable
+	let unreadMsgsCount: Int
     var title: String {
         conversation.name
     }

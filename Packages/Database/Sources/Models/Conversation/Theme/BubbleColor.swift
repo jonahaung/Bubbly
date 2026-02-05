@@ -8,83 +8,110 @@
 import SwiftUI
 import XUI
 
-public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Identifiable {
-    case `default`, whatsApp, blue, green, pink, purple, red, yellow
+public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Identifiable, CaseNameReflectable {
+	case `default`
 	case skyBlue, babyPink
-    case mistyRose, paleTurquoise, mintCream, warmBeige, aqua
-    case lavender, lilac, blush, lemon, sage, mint, periwinkle
-    case peach, coral, sand, olive, teal, navy
-    case lightGray
+	case mistyRose, paleTurquoise, mintCream, warmBeige
+	case lilac, blush, lemon, mint, periwinkle
+	case peach, coral, sand, teal
 
-    public var id: String { rawValue }
+	public var id: String { rawValue }
 
-    public var value: Color {
-        Self.colorMap[self] ?? .gray
-    }
+	public var value: Color {
+		switch self {
+		case .default: Palette.defaultGreen
+		case .skyBlue: Palette.skyBlue
+		case .periwinkle: Palette.periwinkle
+		case .teal: Palette.teal
+		case .mint: Palette.mint
+		case .mintCream: Palette.mintCream
+		case .paleTurquoise: Palette.paleTurquoise
+		case .lilac: Palette.lilac
 
-    private static let colorMap: [BubbleColor: Color] = [
-        // MARK: - Basics
+		case .babyPink: Palette.babyPink
+		case .blush: Palette.blush
+		case .mistyRose: Palette.mistyRose
+		case .coral: Palette.coral
+		case .peach: Palette.peach
 
-		.default: .init(red: 0.85, green: 1.0, blue: 0.85),
-		.whatsApp: .init(red: 0.85, green: 1.0, blue: 0.85),
-		.blue: .init("blue1"),
-		.green: .init("green1"),
-		.pink: .init("pink1"),
-		.purple: .init("purple1"),
-		.red: .init("red1"),
-		.yellow: .init("yellow1"),
-
-        // MARK: - Blues
-
-        .skyBlue: .init(red: 0.81, green: 0.90, blue: 0.95),
-        .aqua: .init(red: 0.75, green: 0.88, blue: 0.90),
-        .periwinkle: .init(red: 0.85, green: 0.90, blue: 0.96),
-        .teal: .init(red: 0.6, green: 0.85, blue: 0.85),
-        .navy: .init(red: 0.35, green: 0.45, blue: 0.65),
-
-        // MARK: - Greens
-
-        .mint: .init(red: 0.80, green: 0.96, blue: 0.88),
-        .mintCream: .init(red: 0.88, green: 0.94, blue: 0.85),
-        .sage: .init(red: 0.78, green: 0.84, blue: 0.70),
-        .paleTurquoise: .init(red: 0.87, green: 0.99, blue: 1.0),
-        .olive: .init(red: 0.75, green: 0.78, blue: 0.55),
-
-        // MARK: - Purples / Lilacs
-
-        .lavender: .init(red: 0.93, green: 0.90, blue: 0.98),
-        .lilac: .init(red: 0.90, green: 0.88, blue: 0.96),
-
-        // MARK: - Reds / Pinks
-
-        .babyPink: .init(red: 1.0, green: 0.86, blue: 0.90),
-        .blush: .init(red: 0.99, green: 0.88, blue: 0.89),
-        .mistyRose: .init(red: 1.0, green: 0.89, blue: 0.88),
-        .coral: .init(red: 1.0, green: 0.78, blue: 0.75),
-        .peach: .init(red: 1.0, green: 0.90, blue: 0.80),
-
-        // MARK: - Yellows / Beiges
-
-        .lemon: .init(red: 0.99, green: 0.96, blue: 0.87),
-        .warmBeige: .init(red: 0.98, green: 0.88, blue: 0.79),
-        .sand: .init(red: 0.96, green: 0.91, blue: 0.78),
-
-        // MARK: - Grays / Neutrals
-
-        .lightGray: .init(red: 0.93, green: 0.93, blue: 0.93)
-    ]
+		case .lemon: Palette.lemon
+		case .warmBeige: Palette.warmBeige
+		case .sand: Palette.sand
+		}
+	}
 }
+private enum Palette {
 
+	// MARK: - Basics
+
+	static let defaultGreen =
+	Color(red: 0.85, green: 1.0, blue: 0.85)
+
+	// MARK: - Blues
+
+	static let skyBlue =
+	Color(red: 0.81, green: 0.90, blue: 0.95)
+
+	static let periwinkle =
+	Color(red: 0.85, green: 0.90, blue: 0.96)
+
+	static let teal =
+	Color(red: 0.60, green: 0.85, blue: 0.85)
+
+	// MARK: - Greens
+
+	static let mint =
+	Color(red: 0.80, green: 0.96, blue: 0.88)
+
+	static let mintCream =
+	Color(red: 0.88, green: 0.94, blue: 0.85)
+
+	static let paleTurquoise =
+	Color(red: 0.87, green: 0.99, blue: 1.0)
+
+	// MARK: - Purples / Lilacs
+	static let lilac =
+	Color(red: 0.90, green: 0.88, blue: 0.96)
+
+	// MARK: - Reds / Pinks
+
+	static let babyPink =
+	Color(red: 1.0, green: 0.86, blue: 0.90)
+
+	static let blush =
+	Color(red: 0.99, green: 0.88, blue: 0.89)
+
+	static let mistyRose =
+	Color(red: 1.0, green: 0.89, blue: 0.88)
+
+	static let coral =
+	Color(red: 1.0, green: 0.78, blue: 0.75)
+
+	static let peach =
+	Color(red: 1.0, green: 0.90, blue: 0.80)
+
+	// MARK: - Yellows / Beiges
+
+	static let lemon =
+	Color(red: 0.99, green: 0.96, blue: 0.87)
+
+	static let warmBeige =
+	Color(red: 0.98, green: 0.88, blue: 0.79)
+
+	static let sand =
+	Color(red: 0.96, green: 0.91, blue: 0.78)
+}
 extension BubbleColor: XPickable, EmptyRepresentable {
-    var color: Color {
-        value
-    }
+	public var title: String { localizedName }
+	@MainActor
+	public var badge: (any RenderNode)? {
+		Circle()
+			.fill(value)
+			.strokeBorder(Color.secondary, style: .init(lineWidth: 1))
+			.frame(square: 25)
+			.foregroundStyle(.primary)
+			.opaqueView()
+	 }
 
-    public var title: String {
-        rawValue
-    }
-
-    public static var empty: BubbleColor {
-        .default
-    }
+	public static var empty: BubbleColor { .default }
 }

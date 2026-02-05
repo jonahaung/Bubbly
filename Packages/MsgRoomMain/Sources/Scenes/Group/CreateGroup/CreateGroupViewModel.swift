@@ -57,7 +57,7 @@ final class CreateGroupViewModel {
             seenMembers: []
         )
         try await FirestoreRepo.add(group, collectionPath: .groups, documentID: group.uid)
-        try await Store.shared.groupStore.insert(group)
+		try await Store.shared.groupStore?.insert(group)
         try await Task.sleep(seconds: 2)
         setLoading(false)
     }

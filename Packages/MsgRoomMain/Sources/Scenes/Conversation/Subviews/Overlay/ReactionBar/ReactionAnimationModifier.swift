@@ -10,19 +10,19 @@ import Database
 
 struct ReactionAnimationModifier: ViewModifier {
 
-	let reaction: String
+	let reaction: ReactionType
 	let isActive: Bool
 
 	func body(content: Content) -> some View {
 		switch reaction {
-		case "❤️":
+		case .heart:
 			content
 				.offset(y: isActive ? ReactionsBar.Constants.floatOffset/2 : 0)
 				.scaleEffect(
 					isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0,
 					anchor: .bottom
 				)
-		case "👍":
+		case .thumbUp:
 			content
 				.rotationEffect(
 					.degrees(isActive ? -ReactionsBar.Constants.rotationAngle : 0),
@@ -30,7 +30,7 @@ struct ReactionAnimationModifier: ViewModifier {
 				)
 				.scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
-		case "👎":
+		case .thumbDown:
 			content
 				.rotationEffect(
 					.degrees(isActive ? -ReactionsBar.Constants.rotationAngle : 0),
@@ -38,12 +38,12 @@ struct ReactionAnimationModifier: ViewModifier {
 				)
 				.scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
-		case "😂":
+		case .laugh:
 			content
 				.offset(y: isActive ? ReactionsBar.Constants.floatOffset : 0)
 				.scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
-		case "😓":
+		case .sad:
 			content
 				.offset(y: isActive ? ReactionsBar.Constants.floatOffset : 0)
 				.rotationEffect(

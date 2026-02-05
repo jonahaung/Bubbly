@@ -71,9 +71,8 @@ extension Conversation {
 	}
 	@concurrent
 	public func saveChanges() async throws {
-		try await Store.shared.conversationPropertiesStore.updateAndSave(uid: uid) { value in
-			value.theme = properties.theme
-			value.seenMembers = properties.seenMembers
+		try await Store.shared.conversationPropertiesStore?.updateAndSave(uid: uid) { value in
+			value.update(from: properties)
 		}
 	}
 }

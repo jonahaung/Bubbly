@@ -72,14 +72,14 @@ private extension AttachmentDataAPI {
 		case .image:
 			if attachment
 				.fileExist(), let image = attachment
-				.thumbnailImage()  {
+				.thumbnailImage() {
 				return .image(thumbnail: image)
 			}
 			return nil
 		case .link:
 			if attachment
 				.fileExist(), let image = attachment
-				.image()  {
+				.image() {
 				return .link(thumbnail: image)
 			}
 			return nil
@@ -93,7 +93,7 @@ private extension AttachmentDataAPI {
 		case .imageUploading:
 			if attachment
 				.fileExist(), let url = attachment.file()?.url, let image = attachment
-				.thumbnailImage()  {
+				.thumbnailImage() {
 				return .imageUpload(localURL: url, thumbnail: image)
 			}
 			return nil
@@ -139,8 +139,7 @@ private extension AttachmentDataAPI {
 
 	func processLinkAttachment(_ attachment: Attachment) async throws -> AttachmentData {
 		let image: UIImage
-		if let thumbnailURLString = attachment.thumbnailUrl{
-			print(thumbnailURLString)
+		if let thumbnailURLString = attachment.thumbnailUrl {
 			image = try await fetchImage(from: thumbnailURLString)
 		} else {
 			let linkData = try await swiftLinkPreview.preview(attachment.url)
@@ -185,7 +184,7 @@ private extension AttachmentDataAPI {
 			try attachment.file()?.write(data)
 			try attachment.thumbnailFile()?.write(thumbnailData)
 		} else {
-			print("existed")
+			log("existed")
 		}
 		return thumbnail
 	}

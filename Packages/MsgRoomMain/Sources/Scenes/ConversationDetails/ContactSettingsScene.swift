@@ -70,7 +70,7 @@ public struct ContactSettingsScene: View {
 			isSaving = true
 			Task.detached {
 				do {
-					try await Store.shared.contactStore
+					try await Store.shared.contactStore?
 						.updateAndSave(uid: newValue.uid) { model in
 							model.merge(from: newValue)
 						}
@@ -79,7 +79,7 @@ public struct ContactSettingsScene: View {
 						isSaving = false
 					}
 				} catch {
-					Log(error)
+					log(error)
 					await MainActor.run {
 						isSaving = false
 					}
@@ -90,7 +90,7 @@ public struct ContactSettingsScene: View {
 			isSaving = true
 			Task.detached {
 				do {
-					try await Store.shared.conversationPropertiesStore
+					try await Store.shared.conversationPropertiesStore?
 						.updateAndSave(uid: newValue.uid) { model in
 							model.theme = newValue.theme
 						}
@@ -99,7 +99,7 @@ public struct ContactSettingsScene: View {
 						isSaving = false
 					}
 				} catch {
-					Log(error)
+					log(error)
 					await MainActor.run {
 						isSaving = false
 					}

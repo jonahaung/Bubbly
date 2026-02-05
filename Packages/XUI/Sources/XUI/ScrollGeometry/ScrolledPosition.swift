@@ -39,7 +39,7 @@ public extension ScrollGeometry {
     }
 }
 
-public struct ScrollLocation: Hashable {
+public struct ScrollLocation: Sendable, Hashable {
     public let fraction: CGFloat
     public let edge: VerticalEdge
     public init(edge: VerticalEdge, fraction: CGFloat) {
@@ -64,7 +64,7 @@ public indirect enum ScrollPositionItem: Hashable {
     case bottom(animated: Bool = true, duration: Double? = nil)
 }
 
-public enum ScrolledPosition: Hashable {
+public enum ScrolledPosition: Sendable, Hashable {
     case none
     case atBottom
     case atTop

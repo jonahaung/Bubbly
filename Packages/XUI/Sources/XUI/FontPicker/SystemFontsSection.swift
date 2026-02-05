@@ -8,7 +8,7 @@
 import SwiftUI
 
 internal struct SystemFontsSection: View {
-    @Binding var selectedFontName: String?
+    @Binding var selectedFontName: String
     let textSize: CGFloat
     let dismiss: DismissAction
     let searchQuery: String

@@ -11,7 +11,7 @@ import SwiftData
 public final class AppContainer: Sendable {
     public let modelContainer: ModelContainer
 
-    public init(migrationPlan: (any SchemaMigrationPlan.Type)? = nil) {
+	public init(migrationPlan: (any SchemaMigrationPlan.Type)? = nil, id: String?) {
         let schema = Schema(
             [
                 PContact.self,
@@ -21,6 +21,7 @@ public final class AppContainer: Sendable {
             ]
         )
         let configuration = ModelConfiguration(
+			id,
             schema: schema,
             isStoredInMemoryOnly: false,
             allowsSave: true,

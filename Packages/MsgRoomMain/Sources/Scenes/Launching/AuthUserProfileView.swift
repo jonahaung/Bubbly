@@ -71,7 +71,7 @@ public struct AuthUserProfileView: View {
 						try await viewModel.updateRemoteUser()
 						appLauncher.markGetStartedAsDone(user: viewModel.currentUser)
 					} catch {
-						Log(error)
+						log(error)
 					}
 				}
 			}

@@ -65,8 +65,7 @@ public struct AttachmentGalleryView: View {
 			item.attachmentType == .image,
 			let url = item.galleryURL,
 			let data = try? Data(contentsOf: url),
-			let uIImage = UIImage(data: data)
-		{
+			let uIImage = UIImage(data: data) {
 			let image = Image(uiImage: uIImage)
 			ShareLink(
 				item: image,

@@ -10,7 +10,7 @@ import SwiftUI
 import XUI
 
 public struct ConversationTheme: Codable, Sendable, Hashable {
-	
+
     public var bubbleColor: BubbleColor
     public var background: ChatBackground
     public var bubbleCornorRadius: CGFloat
@@ -26,7 +26,7 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
     }
 
     public static let `default` = ConversationTheme(
-        bubbleColor: .whatsApp,
+		bubbleColor: .default,
         background: .default,
         bubbleCornorRadius: 17
     )
@@ -41,7 +41,7 @@ public extension ConversationTheme {
     }
 
     var outgoingBubbleColor: Color {
-		bubbleColor.color
+		bubbleColor.value
     }
 
     var shadowColor: Color {

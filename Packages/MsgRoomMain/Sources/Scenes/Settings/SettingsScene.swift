@@ -21,7 +21,7 @@ struct SettingsScene: View {
 	@Environment(AppLauncher.self) private var appLauncher
     @Environment(\.currentUser) private var currentUser
 
-	@AppStorage("fontName") private var fontName: String?
+	@AppStorage("fontName") private var fontName: String = UIFont.systemFontFamilyName
 
     @AppStorage(
         GroupStorageKey.layout(.chatMsgSpacing).value,
@@ -42,14 +42,23 @@ struct SettingsScene: View {
         Form {
             profilePhotoSection
             Section(header: Text("Sign Out")) {
-				NavigationLink(value: NavPath.currentUserDetails) {
-					FormCell("Profile", currentUser.name)
+				Button {
+					Router.shared
+						.pushToNav(
+							.view(
+								id: CurrentUserProfileView.typeName,
+								node: RenderNodeView(content: CurrentUserProfileView())
+							)
+						)
+				} label: {
+					LabeledContent(currentUser.name, value: currentUser.mobile)
 				}
+
                 AsyncButton {
-					appLauncher.resetGetStarted()
+					await appLauncher.resetGetStarted()
                 } label: {
                     Text("Sign Out")
-                }
+				}
             }
             Section {
                 Stepper(value: $chatCellVerticalSpacing) {
@@ -74,24 +83,27 @@ struct SettingsScene: View {
                         "Minutes For Chat Msg Grouping: \(minutesForChatMsgGrouping)"
                     )
                 }
-                FormCell {
-                    Text("File System")
-                } right: {
-                    if let path = Folder.documents?.path {
-                        Text(path)
-                    }
-                }._tapToPush {
-                    if let documents = Folder.documents {
-                        Text(documents.description)
-                    }
-                }
-				FormCell {
-					Text("Font")
-				} right: {
-					Text(fontName ?? UIFont.systemFontFamilyName)
-						.presentSheet {
-							FontPicker(selection: $fontName)
-						}
+				Button {
+					Router.shared
+						.pushToNav(
+							.view(
+								id: FolderExplorer.typeName,
+								node: RenderNodeView(content: FolderExplorer())
+							)
+						)
+				} label: {
+					LabeledContent("File System", value: Folder.current.nameExcludingExtension)
+				}
+				Button {
+					Router.shared
+						.pushToNav(
+							.view(
+								id: FontPicker.typeName,
+								node: RenderNodeView(content: XUI.FontPicker(selection: $fontName))
+							)
+						)
+				} label: {
+					LabeledContent("Font", value: fontName)
 				}
 
             } footer: {
@@ -120,7 +132,9 @@ struct SettingsScene: View {
             }
             Section {
                 AsyncButton { @MainActor in
-                    let context = Store.shared.modelContainer.mainContext
+					guard let context = await Store.shared.modelContainer?.mainContext else {
+						return
+					 }
                     try context.transaction {
                         let descriptor = FetchDescriptor<PMsg>()
                         do {
@@ -129,14 +143,16 @@ struct SettingsScene: View {
                                 context.delete(each)
                             }
                         } catch {
-                            Log(error)
+							log("\(error)")
                         }
                     }
                 } label: {
                     Text("Delete Messages")
                 }
                 AsyncButton { @MainActor in
-                    let context = Store.shared.modelContainer.mainContext
+					guard let context = await Store.shared.modelContainer?.mainContext else {
+						return
+					}
                     try context.transaction {
                         let descriptor = FetchDescriptor<PContact>()
                         do {
@@ -145,14 +161,16 @@ struct SettingsScene: View {
                                 context.delete(each)
                             }
                         } catch {
-                            Log(error)
+							log(error)
                         }
                     }
                 } label: {
                     Text("Delete Contacts")
                 }
                 AsyncButton { @MainActor in
-                    let context = Store.shared.modelContainer.mainContext
+					guard let context = await Store.shared.modelContainer?.mainContext else {
+						return
+					}
                     try context.transaction {
 						let descriptor = FetchDescriptor<PConversationProperties>()
                         do {
@@ -161,31 +179,48 @@ struct SettingsScene: View {
                                 context.delete(each)
                             }
                         } catch {
-                            Log(error)
+							log("\(error)")
                         }
                     }
                 } label: {
                     Text("Delete Conversations")
                 }
+				AsyncButton { @MainActor in
+					CryptoService.shared.forceReload(for: currentUser.uid)
+					CurrentUser.reload()
+				} label: {
+					Text("Reset Crypto Keys")
+				}
             }
         }
+		.buttonStyle(.borderless)
+		.buttonSizing(.flexible)
         .formStyle(.grouped)
+
     }
 
     private var profilePhotoSection: some View {
         Section {
-            VStack {
-                ResizableImage(currentUser.photoURL, processors: [.circle()])
-                    .frame(square: 200)
-                    .sheetWithZoomTransition {
+			ZStack(alignment: .bottomTrailing) {
+				ResizableImage(
+					currentUser.photoURL,
+					processors: [.circle(border: .init(color: .systemGroupedBackground, width: 5))]
+				)
+					.frame(square: 170)
+					.background(.background, in: .circle)
+					.padding()
+					.sheetWithZoomTransition {
 						PhotoGalleryCell(
 							currentUser
-                        )
-                    }
-            }
-            .flexible(.horizontal)
+						)
+					}
+			}
+			.frame(height: 300)
+			.frame(maxWidth: .infinity)
+			.background(Color.secondary.gradient, in: ProfileBackgroundShape())
         }
         .listRowInsets(.init())
+		.listSectionMargins(.init(), 0)
         .listRowBackground(Color.clear.hidden())
     }
 }
@@ -196,5 +231,22 @@ extension CurrentUserModel: @retroactive PhotoGalleryItem {
 	}
 	public var galleryTitle: String? {
 		name
+	}
+}
+struct ProfileBackgroundShape: Shape {
+	func path(in rect: CGRect) -> Path {
+		let width = rect.width
+		let height = rect.height
+		return Path { path in
+			path.move(to: CGPoint(x: 0, y: 0))
+			path.addLine(to: CGPoint(x: 0, y: height/2))
+			path
+				.addCurve(
+					to: CGPoint(x: width, y: height/1.7),
+					control1: CGPoint(x: width*1/3, y: height),
+					control2: CGPoint(x: width*2/3, y: height/4.5)
+				)
+			path.addLine(to: CGPoint(x: width, y: 0))
+		}
 	}
 }

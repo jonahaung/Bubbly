@@ -17,19 +17,21 @@ public final class AppLauncher {
 
 	public private(set) var route: Launching.MainRoute = .loading
 
-	private let defaults = UserDefaults.standard
-
 	public init() {}
 }
 
 extension AppLauncher {
-	public func startEvaluate() {
-		route = evaluateRoute()
+	public func startEvaluate() async {
+		route = await evaluateRoute()
 	}
-	private func evaluateRoute() -> Launching.MainRoute {
-		let hasCompleted = defaults.bool(forKey: Launching.DefaultKeys.getStarted)
+	@concurrent
+	private func evaluateRoute() async -> Launching.MainRoute {
+		let hasCompleted = UserDefaults.standard.bool(forKey: Launching.DefaultKeys.getStarted)
 		if hasCompleted {
 			if let user = Auth.auth().currentUser {
+				if await !Store.shared.hasSetUp(for: user.uid) {
+					await Store.shared.start(with: user.uid)
+				}
 				return .main(.init(user))
 			}
 		}
@@ -37,12 +39,15 @@ extension AppLauncher {
 	}
 
 	public func markGetStartedAsDone(user: CurrentUserModel) {
+		let defaults = UserDefaults.standard
 		defaults.set(true, forKey: Launching.DefaultKeys.getStarted)
 		route = .main(user)
 	}
-	public func resetGetStarted() {
+	public func resetGetStarted() async {
 		try? Auth.auth().signOut()
+		await Store.shared.destory()
+		let defaults = UserDefaults.standard
 		defaults.set(false, forKey: Launching.DefaultKeys.getStarted)
-		startEvaluate()
+		await startEvaluate()
 	}
 }

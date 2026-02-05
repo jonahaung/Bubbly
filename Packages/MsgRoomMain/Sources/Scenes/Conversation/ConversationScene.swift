@@ -19,24 +19,30 @@ public struct ConversationScene: View {
 	@Environment(Router.self) private var router
 	@Environment(\.currentUser) private var currentUser
 	@Namespace private var namespace
+	@Environment(\.typography) private var typography
 
 	public init(_ prefetchedData: ConversationInitializer.PrefetchedData) {
 		_manager = .init(wrappedValue: .init(prefetchedData))
-		_composer = .init(wrappedValue: .init())
+		_composer = .init(wrappedValue: .init(id: prefetchedData.conversation.uid))
 	}
 
 	public var body: some View {
-		ZStack(alignment: .init(horizontal: .center, vertical: .bottom)) {
-			manager.conversation.properties.theme.background.color
-				.backgroundExtensionEffect()
-			Image("adaptive")
-				.resizable(resizingMode: .tile)
-				.foregroundStyle(manager.conversation.theme.outgoingBubbleColor)
-				.backgroundExtensionEffect()
+		ZStack {
+			ZStack {
+				manager.conversation.properties.theme.background.color
+				Image("adaptive")
+					.resizable(resizingMode: .tile)
+					.clipped()
+					.foregroundStyle(
+						Color.accentColor
+							.mix(with: manager.conversation.theme.outgoingBubbleColor, by: 0.7)
+					)
+			}
+			.compositingGroup()
+			.backgroundExtensionEffect()
 
-
-			if let boundsWidth = manager.scrollController.inputAccessoryFrame?.size.width {
-				MsgsScrollView(boundsWidth: boundsWidth)
+			if let accessoryFrame = manager.scrollController.inputAccessoryFrame {
+				MsgsScrollView(boundsWidth: accessoryFrame.width)
 					.safeAreaPadding(
 						.init(
 							top: ChatLayoutConstants.topBarHeight,
@@ -46,23 +52,23 @@ public struct ConversationScene: View {
 						)
 					)
 					.fullScreenCover(item: $manager.presentation.overlayItem) { frame in
-						if let viewModel = manager.messageItems.element(withID: frame.id) {
-							ChatOverlayView(item: frame)
-								.environment(viewModel)
-								.environment(manager)
-								.presentationBackgroundInteraction(.enabled)
-								.presentationBackground(.clear)
-								.environment(\.viewIsVisible, true)
+						if let viewModel = manager.models.element(withID: frame.id) {
+							LazyLoadedView {
+								ChatOverlayView(item: frame)
+									.environment(viewModel)
+									.environment(\.conversation, manager.conversation)
+									.presentationBackgroundInteraction(.enabled)
+									.presentationBackground(.clear)
+									.environment(\.viewIsVisible, true)
+							}
 						}
 					}
+
 			}
 			VStack {
 				ChatTitleBar()
 				FloatingDateView()
-			}
-			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-
-			VStack {
+				Spacer()
 				ChatAccessoryBar()
 				ComposeBar(composer: composer)
 					.onGeometryChange(for: CGRect.self) { geometry in
@@ -71,9 +77,9 @@ public struct ConversationScene: View {
 						manager.scrollController.didChangeInputAccessoryFrame(oldValue, newValue)
 					}
 			}
-			.frame(maxWidth: .infinity, alignment: .bottom)
 		}
-		.containerRelativeFrame(.horizontal)
+		.toolbarVisibility(.hidden, for: .navigationBar)
+		.equatable(by: manager.reloadID)
 		.environment(manager)
 		.environment(composer)
 		.environment(\.conversationTheme, .init(manager.conversation))
@@ -83,8 +89,8 @@ public struct ConversationScene: View {
 		.environment(\.sharedFocusState, SharedFocusState($focusState))
 		.environment(\.sharedNamespace, SharedNamespace(namespace))
 		.environment(\.msgCellActions, MsgCellAction(action: handleMsgCellInteraction))
-		.environment(\.layoutCache, manager.scrollController.messageLayoutCache)
-		.task(priority: .background) {
+
+		.task {
 			do {
 				try await manager.onViewAppear()
 			} catch {
@@ -117,14 +123,14 @@ private extension ConversationScene {
 		manager.setSelectedMsg(uid)
 	}
 
-	func handleReact(_ msg: Message, _ reaction: String) {
+	func handleReact(_ msg: Message, _ reaction: ReactionType) {
 
 		let currentUserID = currentUser.uid
 		Task.detached {
 			do {
 				try await Task.sleep(seconds: 1)
 				let reaction = Reaction.init(
-					rawValue: reaction,
+					rawValue: reaction.rawValue,
 					senderID: currentUserID,
 					date: .now
 				)
@@ -147,12 +153,15 @@ private extension ConversationScene {
 	}
 
 	func handleTapAvatar(with id: String) {
-		guard let viewModel = manager.messageItems.element(withID: id),
+
+		guard let viewModel = manager.models.element(withID: id),
 			  let contact = viewModel.sender()
 		else {
 			return
 		}
-		Router.shared.push(NavPath.contactDetails(contact))
+		if let url = DeepLinkCoordinator.shared.url(for: .profile(id: contact.uid)) {
+			UIApplication.shared.open(url)
+		}
 	}
 	func handleMarkMsg(with msg: Message) {
 		manager.presentation.updateToast(.message(msg))

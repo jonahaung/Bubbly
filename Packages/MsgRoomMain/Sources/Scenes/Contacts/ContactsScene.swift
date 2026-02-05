@@ -34,99 +34,34 @@ public struct ContactsScene: View {
 
 	public var body: some View {
 		List {
-			Section {
-				switch defaultContactDisplay {
-				case .chat:
-					AsyncButton {
-						await viewModel.syncContacts(store: store)
-					} label: {
-						Label("Sync Contact", systemSymbol: .personCropSquare)
-					}
-					AsyncButton {
-						try await viewModel.syncGroups(store: store)
-					} label: {
-						Label("Sync Groups", systemSymbol: .arrow2Squarepath)
-					}
-				case .group:
-					Label("Create New Group", systemSymbol: .plusCircleFill)
-						.foregroundStyle(Color.accentColor)
-						.presentSheet {
-							NavigationView {
-								CreateGroupScene()
-							}
-							.interactiveDismissDisabled()
-						}
-					AsyncButton {
-						try await viewModel.syncGroups(store: store)
-					} label: {
-						Label("Sync Groups", systemSymbol: .arrow2Squarepath)
-					}
-				}
-			} header: {
+			actionSection
+			switch defaultContactDisplay {
+			case .group:
+				groupsSection
+			case .chat:
+				contactsSections
+			}
+		}
+		.listSectionIndexVisibility(.visible)
+		.navigationTitle("Contacts")
+		.toolbar {
+			ToolbarItem(placement: .principal) {
 				Picker(
 					"Contact Display",
 					selection: $defaultContactDisplay
 				) {
-					ForEach(
-						store.groups.isEmpty ? [DefaultContactDisplayType.chat] : [.chat, .group],
-						id: \.self
-					) { each in
+					let options: [DefaultContactDisplayType] =
+					store.groups.isEmpty ? [.chat] : [.chat, .group]
+					ForEach(options, id: \.self) { each in
 						Text(each.rawValue)
 					}
 				}
-				.pickerStyle(.segmented)
-				.padding(.vertical)
-			}
-
-			switch defaultContactDisplay {
-			case .group:
-				Section {
-					if store.groups.isEmpty {
-						ContentUnavailableView(
-							"No Groups",
-							systemImage: "person.2.circle.fill"
-						)
-					} else {
-						ForEach(store.groups) { group in
-							ConversationGroupCell(group: group)
-						}
-					}
-				}
-			case .chat:
-				ForEach(createSections(from: store.contacts), id: \.0) { group in
-					Section(group.0) {
-						ForEach(group.1, id: \.uid) { contact in
-							ContactCell(contact) {
-								try await ConversationInitializer
-									.start(
-										conversation: Conversation(
-											.contact(contact),
-											properties:
-												ConversationPropertiesRepo
-												.getOrCreateMain(
-													for: ConversationIDGenerator
-														.generate(currentUser.uid, contact.uid)
-												)
-										)
-									)
-							}
-						}
-					}
-					.sectionIndexLabel(group.0)
-				}
-			}
-		}
-		.listSectionIndexVisibility(.visible)
-		.toolbar {
-			if viewModel.loading {
-				ToolbarItem(placement: .topBarTrailing) {
-					ProgressView().controlSize(.mini)
-				}
+				.pickerStyle(.palette)
 			}
 		}
 		.searchable(
 			text: $viewModel.searchText,
-			placement: .automatic,
+			placement: .toolbar,
 			prompt: "Search Contacts"
 		)
 		.onSubmit(of: .search) {
@@ -137,6 +72,85 @@ public struct ContactsScene: View {
 		}
 		.refreshable {
 			try? await store.refresh()
+		}
+	}
+
+	// MARK: - Sections
+
+	private var actionSection: some View {
+		Section {
+			switch defaultContactDisplay {
+			case .chat:
+				AsyncButton {
+					Loading.show(true)
+					await viewModel.syncContacts(store: store, currentUser: currentUser)
+					Loading.show(false)
+				} label: {
+					Label("Sync Contact", systemSymbol: .personCropSquare)
+				}
+				AsyncButton {
+					Loading.show(true)
+					try await viewModel.syncGroups(store: store, currentUser: currentUser)
+					Loading.show(false)
+				} label: {
+					Label("Sync Groups", systemSymbol: .arrow2Squarepath)
+				}
+			case .group:
+				Label("Create New Group", systemSymbol: .plusCircleFill)
+					.foregroundStyle(Color.accentColor)
+					.presentSheet {
+						NavigationView {
+							CreateGroupScene()
+						}
+						.interactiveDismissDisabled()
+					}
+				AsyncButton {
+					Loading.show(true)
+					try await viewModel.syncGroups(store: store, currentUser: currentUser)
+					Loading.show(false)
+				} label: {
+					Label("Sync Groups", systemSymbol: .arrow2Squarepath)
+				}
+			}
+		}
+	}
+
+	private var groupsSection: some View {
+		Section {
+			if store.groups.isEmpty {
+				ContentUnavailableView(
+					"No Groups",
+					systemImage: "person.2.circle.fill"
+				)
+			} else {
+				ForEach(store.groups) { group in
+					ConversationGroupCell(group: group)
+				}
+			}
+		}
+	}
+
+	private var contactsSections: some View {
+		// Precompute sections with explicit type to help the type checker
+		let sections: [(String, [Contact])] = createSections(from: store.contacts)
+		return ForEach(sections, id: \.0) { section in
+			Section(section.0) {
+				ForEach(section.1, id: \.uid) { contact in
+					ContactCell(contact) {
+						try await openConversation(for: contact)
+					}
+				}
+			}
+			.sectionIndexLabel(section.0)
+		}
+	}
+
+	private func openConversation(for contact: Contact) async throws {
+		let id = ConversationIDGenerator.generate(contact.uid, self.currentUser.uid)
+		if let url = DeepLinkCoordinator.shared.url(for: .conversation(id: id)) {
+			await MainActor.run {
+				UIApplication.shared.open(url)
+			}
 		}
 	}
 
@@ -165,15 +179,16 @@ public struct ContactsScene: View {
 	private func executeContactsSearch() {
 		Task {
 			let executor = ToolExecutor()
-			await executor
-				.execute(
-					tool: ContactsTool(),
-					prompt: "search contacts that has the name: \(viewModel.searchText)",
-					type: [ContactsTool.Arguments].self) { models in
-						return models.map{ $0.generatedContent.jsonString }.joined(separator: "\n - ")
-					} clearForm: {
-						viewModel.searchText = ""
-					}
+			await executor.execute(
+				tool: ContactsTool(),
+				prompt: "search contacts that has the name: \(viewModel.searchText)",
+				type: [ContactsTool.Arguments].self
+			) { models in
+				return models.map { $0.generatedContent.jsonString }.joined(separator: "\n - ")
+			} clearForm: {
+				viewModel.searchText = ""
+			}
 		}
 	}
 }
+

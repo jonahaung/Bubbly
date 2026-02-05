@@ -17,7 +17,6 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 	@LazyState private var currentUser: CurrentUser
 	@LazyState private var contactStore = ContactStore.shared
 	@LazyState private var router = Router.shared
-
 	init(_ currentUser: CurrentUserModel) {
 		_currentUser = .init(wrappedValue: .init(currentUser))
 	}
@@ -28,10 +27,11 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 			.environment(\.currentUser, currentUser.model)
 			.environment(contactStore)
 			.task {
+
 				do {
 					try await contactStore.fetchData()
 				} catch {
-					Log(error)
+					log(error)
 				}
 			}
 	}

@@ -29,4 +29,3 @@ public struct ResultDisplay: View {
 		.navigationTitle("Result")
 	}
 }
-

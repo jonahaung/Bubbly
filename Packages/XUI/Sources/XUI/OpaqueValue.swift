@@ -92,35 +92,3 @@ extension OpaqueValue: Decodable {
         }
     }
 }
-
-/// *
-//
-// // Sample JSON-like data represented using OpaqueValue
-// let data: OpaqueValue = .object([
-//     "name": .string("Alice"),
-//     "age": .number(25),
-//     "isActive": .boolean(true),
-//     "scores": .array([.number(92.5), .number(88.0), .number(79.5)]),
-//     "address": .object([
-//         "street": .string("123 Swift Lane"),
-//         "city": .string("Cupertino"),
-//         "zip": .number(95014)
-//     ]),
-//     "metadata": .null
-// ])
-//
-// // Encoding to JSON
-// let encoder = JSONEncoder()
-// encoder.outputFormatting = .prettyPrinted // For readability
-//
-// if let jsonData = try? encoder.encode(data),
-//    let jsonString = String(data: jsonData, encoding: .utf8) {
-//     print("Encoded JSON:\n\(jsonString)")
-// }
-//
-// // Decoding from JSON
-// let decoder = JSONDecoder()
-// if let decodedData = try? decoder.decode(OpaqueValue.self, from: jsonData) {
-//     print("\nDecoded OpaqueValue:\n\(decodedData)")
-// }
-// */

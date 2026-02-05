@@ -19,13 +19,14 @@ final class ChatPresentationState {
 	private(set) var toastItem: ChatToastItem = .none
 	private(set) var selectedMsg: SelectedMsg?
 	private(set) var typingStatusText: String?
-	var bottomAccessory = BottomAccessoryItem.contactAvator
+	var bottomAccessory: BottomAccessoryItem?
 	private(set) var floatingDateString: String?
-	private(set) var summary: String?
 	var showContactInfo: Bool
 	@ObservationIgnored private let dateCache = ExpiringCache<String>()
+	@ObservationIgnored private let id: String
 
 	init(_ config: ConversationInitializer.Configuration) {
+		id = config.conID
 		showContactInfo = !config.canPaginate
 	}
 

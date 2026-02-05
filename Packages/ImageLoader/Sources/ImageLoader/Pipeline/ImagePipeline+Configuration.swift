@@ -48,8 +48,8 @@ public extension ImagePipeline {
         /// improve drawing performance as it allows a bitmap representation to be
         /// created in a background rather than on the main thread.
         public var isDecompressionEnabled: Bool {
-            get { _isDecompressionEnabled }
-            set { _isDecompressionEnabled = newValue }
+            get { decompressionEnabled }
+            set { decompressionEnabled = newValue }
         }
 
         /// Set this to `true` to use native `preparingForDisplay()` method for
@@ -58,9 +58,9 @@ public extension ImagePipeline {
         public var isUsingPrepareForDisplay: Bool = false
 
         #if os(macOS)
-            var _isDecompressionEnabled = false
+            var decompressionEnabled = false
         #else
-            var _isDecompressionEnabled = true
+            var decompressionEnabled = true
         #endif
 
         /// If you use an aggressive disk cache ``DataCaching``, you can specify
@@ -127,11 +127,11 @@ public extension ImagePipeline {
         /// https://developer.apple.com/documentation/os/logging and
         /// https://developer.apple.com/videos/play/wwdc2018/405/.
         public static var isSignpostLoggingEnabled: Bool {
-            get { _isSignpostLoggingEnabled.value }
-            set { _isSignpostLoggingEnabled.value = newValue }
+            get { signpostLoggingEnabled.value }
+            set { signpostLoggingEnabled.value = newValue }
         }
 
-        private static let _isSignpostLoggingEnabled = Mutex(false)
+        private static let signpostLoggingEnabled = Mutex(false)
 
         private var isCustomImageCacheProvided = false
 

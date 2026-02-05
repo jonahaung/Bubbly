@@ -9,7 +9,7 @@ import AVKit
 import SwiftUI
 
 public struct MediaPlayerView: View {
-	
+
     private let player: AVPlayer
     @Environment(\.dismiss) private var dismiss
 

@@ -11,6 +11,14 @@ import XUI
 
 @Observable
 public final class MsgCellViewModel: ViewReloadable {
+	public struct ContentRenderKey: Hashable {
+		public let id: String
+		public let text: String?
+		public let attachments: [Attachment]
+		public let isSelected: Bool
+		public let reactions: [Reaction]
+		public let isVisible: Bool
+	}
 
 	public var msg: Message
 	public private(set) var isVisible = false
@@ -18,8 +26,18 @@ public final class MsgCellViewModel: ViewReloadable {
 	public var reloadID: Int = 0
 	public var animationTrigger: Int = 0
 
+	public var contentRenderKey: ContentRenderKey
+
 	public init(_ msg: Message) {
 		self.msg = msg
+		contentRenderKey = .init(
+			id: msg.uid,
+			text: msg.text,
+			attachments: msg.attachments,
+			isSelected: false,
+			reactions: msg.reactions,
+			isVisible: false
+		)
 	}
 
 	public func update(with msg: Message) {
@@ -40,6 +58,42 @@ public final class MsgCellViewModel: ViewReloadable {
 	}
 	public func animate() {
 		animationTrigger += 1
+	}
+
+	func recomputeRenderKey(
+		selectedMsg: SelectedMsg?,
+		layout: MsgCellLayout
+	) {
+		let isSelected = (selectedMsg?.id == self.id)
+		contentRenderKey = ContentRenderKey(
+			id: id,
+			text: msg.text,
+			attachments: msg.attachments,
+			isSelected: isSelected,
+			reactions: msg.reactions,
+			isVisible: self.isVisible
+		)
+	}
+
+	func computeBubbleCOrner(selectedMsg: SelectedMsg?, isSender: Bool) -> BubbleCorner {
+		guard let selectedMsg else {
+			return layout.bubble.bubbleCorner
+		}
+		let isSelected = selectedMsg.id == self.id
+		if isSelected {
+			return .all
+		}
+		var corner = layout.bubble.bubbleCorner
+
+		if selectedMsg.previous == self.id {
+			corner.append(.bottom)
+			return corner
+		}
+		if selectedMsg.next == self.id {
+			corner.append(.top)
+			return corner
+		}
+		return corner
 	}
 }
 

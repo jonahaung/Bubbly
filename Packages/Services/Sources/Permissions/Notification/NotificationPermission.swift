@@ -14,6 +14,12 @@ public extension Permission {
     }
 }
 
+// Simple sendable box to move a value out of a @Sendable closure safely.
+private final class _SendableBox<T>: @unchecked Sendable {
+    var value: T?
+    init(_ value: T? = nil) { self.value = value }
+}
+
 public final class NotificationPermission: Permission {
     public let access: Set<PermissionKind.NotificationAccess>
     public var kind: PermissionKind { .notification(access: access) }
@@ -45,22 +51,18 @@ public final class NotificationPermission: Permission {
     }
 
     // Synchronous legacy fetch used by the `status` property.
-    // Avoids mutating a captured var inside a concurrently executing closure.
+    // Uses a Sendable box to satisfy Swift 6 concurrency checks.
     private func fetchAuthorizationStatusLegacy() -> UNAuthorizationStatus? {
         let semaphore = DispatchSemaphore(value: 0)
-        let resultQueue = DispatchQueue(label: "NotificationPermission.fetchAuthorizationStatusLegacy.result")
+        let box = _SendableBox<UNAuthorizationStatus>()
 
-        var result: UNAuthorizationStatus?
         UNUserNotificationCenter.current().getNotificationSettings { settings in
-            let auth = settings.authorizationStatus
-            resultQueue.async {
-                result = auth
-                semaphore.signal()
-            }
+            box.value = settings.authorizationStatus
+            semaphore.signal()
         }
 
         semaphore.wait()
-        return result
+        return box.value
     }
 
     // Modern async alternative you can adopt at call sites.

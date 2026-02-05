@@ -6,9 +6,9 @@
 
 import Foundation
 
-public struct GroupStorage: @unchecked Sendable {
+public struct GroupStorage {
 
-	public static let shared: GroupStorage = {
+	nonisolated(unsafe) public static let shared: GroupStorage = {
 		if let defaults = UserDefaults(suiteName: AppInformation.groupID) {
 			return GroupStorage(store: defaults)
 		} else {
@@ -26,36 +26,75 @@ public struct GroupStorage: @unchecked Sendable {
 		self.store = store
 	}
 
+	@usableFromInline
+	static let defaultEncoder = JSONEncoder()
+	@usableFromInline
+	static let defaultDecoder = JSONDecoder()
+
 	// MARK: - Delete
 
+	@inlinable
 	public func delete(for key: GroupStorageKey) {
 		store.removeObject(forKey: key.value)
 	}
 
+	@usableFromInline
+	func setOrDelete(_ value: Any?, for key: GroupStorageKey) {
+		if let value {
+			store.set(value, forKey: key.value)
+		} else {
+			delete(for: key)
+		}
+	}
+
 	// MARK: - Save
 
+	@inlinable
 	public func save(_ value: String?, for key: GroupStorageKey) {
-		if let value { store.set(value, forKey: key.value) } else { delete(for: key) }
+		setOrDelete(value, for: key)
 	}
 
+	@inlinable
 	public func save(_ value: Int?, for key: GroupStorageKey) {
-		if let value { store.set(value, forKey: key.value) } else { delete(for: key) }
+		setOrDelete(value, for: key)
 	}
 
+	@inlinable
 	public func save(_ value: Float?, for key: GroupStorageKey) {
-		if let value { store.set(value, forKey: key.value) } else { delete(for: key) }
+		setOrDelete(value, for: key)
 	}
 
+	@inlinable
 	public func save(_ value: Double?, for key: GroupStorageKey) {
-		if let value { store.set(value, forKey: key.value) } else { delete(for: key) }
+		setOrDelete(value, for: key)
 	}
 
+	@inlinable
 	public func save(_ value: Bool?, for key: GroupStorageKey) {
-		if let value { store.set(value, forKey: key.value) } else { delete(for: key) }
+		setOrDelete(value, for: key)
 	}
 
+	@inlinable
 	public func save(_ value: Any?, for key: GroupStorageKey) {
-		if let value { store.set(value, forKey: key.value) } else { delete(for: key) }
+		setOrDelete(value, for: key)
+	}
+
+	@inlinable
+	public func save<T: Encodable>(
+		_ value: T?,
+		for key: GroupStorageKey,
+		encoder: JSONEncoder = GroupStorage.defaultEncoder
+	) {
+		guard let value else {
+			delete(for: key)
+			return
+		}
+		do {
+			let data = try encoder.encode(value)
+			store.set(data, forKey: key.value)
+		} catch {
+			assertionFailure("Failed to encode value for key \(key.value): \(error)")
+		}
 	}
 
 	// MARK: - Get
@@ -81,8 +120,28 @@ public struct GroupStorage: @unchecked Sendable {
 		store.object(forKey: key.value) as? Bool
 	}
 
+	@inlinable
+	public func data(for key: GroupStorageKey) -> Data? {
+		store.data(forKey: key.value)
+	}
+
 	public func object<T>(for key: GroupStorageKey) -> T? {
 		store.object(forKey: key.value) as? T
+	}
+
+	@inlinable
+	public func codable<T: Decodable>(
+		_ type: T.Type,
+		for key: GroupStorageKey,
+		decoder: JSONDecoder = GroupStorage.defaultDecoder
+	) -> T? {
+		guard let data = data(for: key) else { return nil }
+		do {
+			return try decoder.decode(type, from: data)
+		} catch {
+			assertionFailure("Failed to decode value for key \(key.value): \(error)")
+			return nil
+		}
 	}
 
 	// MARK: - Requiring values
@@ -92,8 +151,23 @@ public struct GroupStorage: @unchecked Sendable {
 		throw MissingValueError(key: key)
 	}
 
+	@inlinable
+	public func requireCodable<T: Decodable>(
+		_ type: T.Type,
+		for key: GroupStorageKey,
+		decoder: JSONDecoder = GroupStorage.defaultDecoder
+	) throws -> T {
+		if let value = codable(type, for: key, decoder: decoder) { return value }
+		throw MissingValueError(key: key)
+	}
+
 	public struct MissingValueError: Error, CustomStringConvertible {
 		public let key: GroupStorageKey
+
+		public init(key: GroupStorageKey) {
+			self.key = key
+		}
+
 		public var description: String { "Missing value for key: \(key.value)" }
 	}
 }

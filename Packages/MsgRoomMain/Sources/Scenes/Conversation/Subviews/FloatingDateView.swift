@@ -25,7 +25,7 @@ struct FloatingDateView: View, Animatable {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 4)
 				.background(manager.conversation.properties.theme.background.color, in: .capsule)
-			
+
         }
     }
 }

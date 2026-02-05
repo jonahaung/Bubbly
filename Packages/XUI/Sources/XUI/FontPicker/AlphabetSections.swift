@@ -18,7 +18,7 @@ internal struct AlphabetSections<Destination: View>: View {
         ForEach(alphabets, id: \.self) { initial in
             let familiesWithInitial = families.filter { $0.first?.lowercased() == initial.lowercased() }
             if !familiesWithInitial.isEmpty {
-                Section(header: Text(String(initial))) {
+				Section(header: Text(String(initial.uppercased()))) {
                     ForEach(familiesWithInitial, id: \.self) { family in
                         let fonts = UIFont.fontNames(forFamilyName: family)
                         if let firstFont = fonts.first {

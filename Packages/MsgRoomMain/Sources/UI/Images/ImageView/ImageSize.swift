@@ -19,7 +19,7 @@ public enum ImageSize: Sendable, Equatable, Codable {
 	public var value: CGFloat? {
 		switch self {
 		case .mini:
-			30
+			35
 		case .small:
 			50
 		case .medium:

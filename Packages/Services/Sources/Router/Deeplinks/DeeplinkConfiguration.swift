@@ -1,0 +1,27 @@
+//
+//  DeeplinkConfiguration.swift
+//  Services
+//
+//  Created by Aung Ko Min on 29/1/26.
+//
+
+import Foundation
+
+public struct DeeplinkConfiguration: Sendable, Equatable {
+	public let scheme: String
+	public let supportedVersions: Set<String>
+	public let universalLinkHosts: Set<String>
+	public let queryValidation: QueryValidationMode
+
+	public init(
+		scheme: String,
+		supportedVersions: Set<String> = ["v1"],
+		universalLinkHosts: Set<String> = [],
+		queryValidation: QueryValidationMode = .permissive
+	) {
+		self.scheme = scheme
+		self.supportedVersions = supportedVersions
+		self.universalLinkHosts = universalLinkHosts
+		self.queryValidation = queryValidation
+	}
+}

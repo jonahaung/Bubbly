@@ -7,12 +7,16 @@
 
 import SwiftUI
 
-public struct _VLabel<Top, Bottom>: View where Top: View, Bottom: View {
+public struct VLabel<Top, Bottom>: View where Top: View, Bottom: View {
     private let spacing: CGFloat
     private var top: () -> Top
     private var bottom: () -> Bottom
 
-    public init(spacing: CGFloat = 5, @ViewBuilder top: @escaping () -> Top, @ViewBuilder bottom: @escaping () -> Bottom) {
+    public init(
+        spacing: CGFloat = 5,
+        @ViewBuilder top: @escaping () -> Top,
+        @ViewBuilder bottom: @escaping () -> Bottom
+    ) {
         self.spacing = spacing
         self.top = top
         self.bottom = bottom

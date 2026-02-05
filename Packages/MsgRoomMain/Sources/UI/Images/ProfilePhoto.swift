@@ -18,7 +18,7 @@ public struct ProfilePhoto: View {
 	public init(
 		_ item: any ImageViewItem,
 		size: ImageSize = .small,
-		tapAction: ImageViewTapAction = .openPhotoViewer
+		tapAction: ImageViewTapAction = .none
 	) {
 		self.item = item
 		config = .init(

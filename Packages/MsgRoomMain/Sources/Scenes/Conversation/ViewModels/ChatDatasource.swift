@@ -26,10 +26,11 @@ protocol ChatDatasourceDelegate: AnyObject {
 
 @MainActor
 final class ChatDatasource {
+
 	weak var delegate: ChatDatasourceDelegate?
 	private let cancelBag = CancelBag()
 	private let pageSize: Int
-	private let msgStore = Store.shared.msgStore
+
 	private let queue = SerialTaskQueue()
 
 	init(
@@ -82,7 +83,7 @@ final class ChatDatasource {
 		descriptor.sortBy = [.init(\.date, order: .reverse)]
 		descriptor.fetchLimit = pageSize
 
-		let snapshots = try await msgStore.fetch(descriptor)
+		let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
 		let ordered = Array(snapshots.reversed())
 		return ordered
 	}
@@ -99,7 +100,7 @@ final class ChatDatasource {
 		descriptor.sortBy = [.init(\.date, order: .forward)]
 		descriptor.fetchLimit = pageSize
 
-		return try await msgStore.fetch(descriptor)
+		return try await Store.shared.msgStore?.fetch(descriptor) ?? []
 	}
 }
 
@@ -114,14 +115,14 @@ extension ChatDatasource {
 			case let .updatedMsg(rMsg):
 				await delegate?.datasource(didUpdate: .init(rMsg), animated: false)
 			case let .reaction(reaction):
-				if let msg = try? await Store.shared.msgStore.fetch(uid: reaction.msgID) {
+			if let msg = try? await Store.shared.msgStore?.fetch(uid: reaction.msgID) {
 					await delegate?.datasource(didUpdate: msg, animated: false)
 				}
 			case let .typingStatus(status):
 				await delegate?.datasource(didReceive: status)
 			case let .deleteMsg(rMsg):
 				do {
-					try await msgStore.delete(uid: rMsg.uid)
+					try await Store.shared.msgStore?.delete(uid: rMsg.uid)
 					await delegate?.datasource(didRemove: .init(rMsg), animated: true)
 				} catch {
 					await delegate?.datasource(didRecieveError: error)

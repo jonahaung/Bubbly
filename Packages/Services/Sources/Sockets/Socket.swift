@@ -31,5 +31,6 @@ public final class Socket: Sendable {
 
     enum SocketError: Error {
         case encodingFailed
+		case encryptionFailed
     }
 }

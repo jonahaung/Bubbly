@@ -14,207 +14,110 @@ import UIKit
 import XUI
 
 struct ChatOverlayView: View {
+	enum TransitState: Hashable {
+		case appeared, didAppear, hidden
 
+		var isDidAppear: Bool { self == .didAppear }
+		var isAppeared: Bool { self == .appeared }
+	}
 	let item: ChatOverlayView.Item
 	@Environment(MsgCellViewModel.self) private var viewModel
-	@Environment(ChatViewManager.self) private var manager
 	@Environment(\.msgCellActions) private var msgCellActions
-	@State private var hasViewAppeared = false
+	@Environment(\.conversation) private var conversation
+	@Environment(\.dismiss) private var dismiss
+	@State private var transitionState = TransitState.hidden
+	@Environment(\.conversationTheme) private var theme
 
 	var body: some View {
 		ZStack {
-			if hasViewAppeared {
-				Rectangle().fill(.background.quinary)
-					.glassEffect(.regular, in: .containerRelative)
-					.backgroundExtensionEffect()
-					.transition(.blurReplace)
-					.onTapGesture {
-						manager.presentation.updateFocusedFrame(nil)
+			Rectangle().fill(conversation.theme.background.color.opacity(0.2))
+				.glassEffect(.regular, in: .containerRelative)
+				.backgroundExtensionEffect()
+				.opacity(transitionState.isDidAppear  ? 1 : 0)
+				.gesture(
+					DragGesture(minimumDistance: 0).onChanged { _ in
+						if transitionState == .didAppear {
+							withTransaction(.withAnimation()) {
+								transitionState = .appeared
+							}
+						}
+					}.onEnded { _ in
+						var transaction = Transaction.withAnimation()
+						transaction.addAnimationCompletion(criteria: .removed) {
+							withTransaction(.withoutAnimation) {
+								dismiss()
+							}
+						}
+						withTransaction(transaction) {
+							transitionState = .hidden
+						}
 					}
-			}
+				)
 
 			ReactionsBar { reaction in
 				msgCellActions?(.onReact(viewModel.msg, reaction))
+				dismiss()
 			}
 			.position(
 				x: item.frame.midX,
-				y: item.frame.minY - (hasViewAppeared ? 15 : -15)
+				y: item.frame.minY - (transitionState == .didAppear ? 15 : -15)
 			)
-			MsgCell.Content()
+			MsgCell.Content(viewModel: viewModel, theme: theme, selectedMsg: nil)
 				.frame(size: item.frame.size)
 				.position(x: item.frame.midX, y: item.frame.midY)
 
 			RoomFocesedOverlayBar()
 				.position(x: item.frame.midX, y: item.frame.maxY + 10)
+				.opacity(transitionState.isDidAppear ? 1 : 0)
 		}
 		.statusBarHidden()
 		.ignoresSafeArea(.container)
 		.onAppear {
-			withAnimation(.interactiveSpring.delay(0.2)) {
-				hasViewAppeared.toggle()
-			}
-		}
-	}
-}
-
-public struct ReactionRotateButton<Label: View>: View {
-	let alignment: HorizontalAlignment
-	let label: () -> Label
-	let action: () -> Void
-	@State private var animate = false
-
-	public init(
-		_ alignment: HorizontalAlignment,
-		action: @escaping () -> Void,
-		@ViewBuilder label: @escaping () -> Label
-	) {
-		self.label = label
-		self.action = action
-		self.alignment = alignment
-	}
-
-	public var body: some View {
-		Button {
-			withAnimation(
-				.interpolatingSpring(
-					stiffness: 170,
-					damping: 10
-				)
-			) {
-				animate.toggle()
-			} completion: {
-				withAnimation(.bouncy(extraBounce: 0.4)) {
-					animate = false
-				} completion: {
-					action()
+			var transaction = Transaction.withAnimation()
+			transaction.addAnimationCompletion(criteria: .removed) {
+				withTransaction(.withAnimation()) {
+					transitionState = .didAppear
 				}
 			}
-		} label: {
-			label()
-				.rotationEffect(.degrees(degrees), anchor: anchor)
-				.scaleEffect(animate ? 1.8 : 1, anchor: anchor)
-				.offset(y: offsetY)
-		}
-		.buttonStyle(.borderless)
-		.sensoryFeedback(.selection, trigger: anchor)
-	}
-
-	private var offsetY: CGFloat {
-		CGFloat(animate ? alignment == .center ? -10 : -40 : 0)
-	}
-	private var degrees: Double {
-		if animate {
-			switch alignment {
-			case .leading: return -45
-			case .center: return 360
-			case .trailing: return 45
-			default: return 0
+			withTransaction(transaction) {
+				transitionState = .appeared
 			}
-		}
-		return 0
-	}
-	private var anchor: UnitPoint {
-		switch alignment {
-		case .leading: return .bottomTrailing
-		case .center: return .center
-		case .trailing: return .bottomLeading
-		default: return .center
 		}
 	}
 }
 
-//public struct ReactionJumpButton<Label: View>: View {
-//    enum Reaction: CaseIterable {
-//        case initial, move, scale
-//        var verticalOffset: Double {
-//            switch self {
-//            case .initial: 0
-//            case .move, .scale: -64
-//            }
-//        }
-//
-//        var scale: Double {
-//            switch self {
-//            case .initial: 1
-//            case .move, .scale: 2.0
-//            }
-//        }
-//
-//        var chromaRotate: Double {
-//            switch self {
-//            case .initial: 0.0
-//            case .move, .scale: 225.0
-//            }
-//        }
-//    }
-//
-//    let label: () -> Label
-//    let action: () -> Void
-//    @State private var reactionCount = 0
-//
-//    public init(action: @escaping () -> Void, @ViewBuilder label: @escaping () -> Label) {
-//        self.label = label
-//        self.action = action
-//    }
-//
-//    public var body: some View {
-//        Button {
-//            reactionCount += 1
-//            DispatchQueue.delay(1.3) {
-//                action()
-//            }
-//        } label: {
-//            label()
-//        }
-//        //		.sensoryFeedback(.selection, trigger: reactionCount)
-//        .phaseAnimator(
-//            Reaction.allCases,
-//            trigger: reactionCount
-//        ) { heartSymbol, jump in
-//            heartSymbol
-//                .scaleEffect(jump.scale)
-//                .offset(y: jump.verticalOffset)
-//                .hueRotation(.degrees(jump.chromaRotate))
-//        } animation: { jump in
-//            switch jump {
-//            case .initial: .bouncy(duration: 0.5, extraBounce: 0.25)
-//            case .move: .easeInOut(duration: 0.3).delay(0.25)
-//            case .scale: .spring(duration: 0.5, bounce: 0.7)
-//            }
-//        }
-//    }
-//}
-
 struct RoomFocesedOverlayBar: View {
-	@Environment(ChatViewManager.self) private var manager
+	@Environment(\.conversation) private var conversation
 	@Environment(\.sendChatRoomAction) private var msgRoomAction
 	@Environment(MsgCellViewModel.self) private var item
 	private let iconStyle = SystemImageWithShape.IconStyle.circle(.plain)
 	@State private var showInfo = false
+	@Environment(\.dismiss) private var dismiss
+
 	var body: some View {
 		HStack(spacing: 0) {
-			ReactionRotateButton(.center) {
+			AnimatedButton(.center) {
 				Task {
 					let msg = item.msg
-					try? await Socket.shared.send(.deleteMsg(rMsg: .init(msg)), conversation: manager.conversation)
-					manager.presentation.updateFocusedFrame(nil)
+					try? await Socket.shared.send(.deleteMsg(rMsg: .init(msg)), conversation: conversation)
+					dismiss()
 				}
 			} label: {
 				SystemImageWithShape(.trashFill, iconStyle)
 			}
-			ReactionRotateButton(.leading) {} label: {
+			AnimatedButton(.leading) {} label: {
 				SystemImageWithShape(.arrowshapeTurnUpLeftFill, iconStyle)
 			}
 
-			ReactionRotateButton(.trailing) {} label: {
+			AnimatedButton(.trailing) {} label: {
 				SystemImageWithShape(.arrowshapeTurnUpRightFill, iconStyle)
 			}
-			ReactionRotateButton(.center) {
+			AnimatedButton(.center) {
 				UIPasteboard.general.string = item.msg.text
 			} label: {
 				SystemImageWithShape(.squareFilledOnSquare, iconStyle)
 			}
-			ReactionRotateButton(.center) {
+			AnimatedButton(.center) {
 				showInfo = true
 			} label: {
 				SystemImageWithShape(.ellipsis, iconStyle)
@@ -240,4 +143,3 @@ struct RoomFocesedOverlayBar: View {
 		}
 	}
 }
-

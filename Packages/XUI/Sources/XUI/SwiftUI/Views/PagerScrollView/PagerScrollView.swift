@@ -10,7 +10,7 @@ import SwiftUI
 
 public struct PagerScrollView<Item, Content>: View
 where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, Item.ID == String {
-	
+
     private let items: [Item]
     private let content: (Item) -> Content
 	@Binding private var selection: String
@@ -42,7 +42,7 @@ where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, Item.
 		.onAppear {
 			position = selection
 		}
-		.onChange(of: position.str, initial: false) { oldValue, newValue in
+		.onChange(of: position.str, initial: false) { _, newValue in
 			selection = newValue
 		}
     }

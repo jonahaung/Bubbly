@@ -79,7 +79,7 @@ public actor AsyncFetcher<T: Sendable> {
 
     /// Fetch a value, waiting for it if necessary
     public func fetch(_ id: ID) async throws -> T {
-		Log("fetching attachment with id: \(id)")
+		log("fetching attachment with id: \(id)")
         // If already fetching, return its value
         if let existingTask = tasks[id] {
             return try await existingTask.value

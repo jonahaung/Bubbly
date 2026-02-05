@@ -10,7 +10,7 @@ import SwiftUI
 public struct FontPicker: View {
 
     // Selection binding exposed publicly
-    @Binding var selectedFontName: String?
+    @Binding var selectedFontName: String
 
     // Environment
     @Environment(\.dismiss) var dismiss
@@ -37,37 +37,34 @@ public struct FontPicker: View {
     private let alphabets = Array("abcdefghijklmnopqrstuvwxyz")
 
     // Init
-    public init(selection: Binding<String?>) {
+    public init(selection: Binding<String>) {
         _selectedFontName = selection
     }
 
     public var body: some View {
-        NavigationStack {
-            List {
-                listContent(trimmedQuery: debouncedSearchQuery)
-            }
-            .environment(\.defaultMinListRowHeight, 48)
-            .navigationTitle("Select Font")
-            .navigationBarTitleDisplayMode(.inline)
-            .searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always))
-            .onChange(of: searchQuery) { _, newValue in
-                debounceSearch(newValue)
-            }
-            .onChange(of: selectedFontName) { _, newValue in
-                updateRecents(with: newValue)
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if isPresented {
-                        Button("Cancel") { dismiss() }
-                    }
-                }
-            }
-            .onAppear {
-                // Initialize debounced query on appear
-                debouncedSearchQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-            }
-        }
+		List {
+			listContent(trimmedQuery: debouncedSearchQuery)
+		}
+		.environment(\.defaultMinListRowHeight, 48)
+		.navigationTitle("Select Font")
+		.navigationBarTitleDisplayMode(.inline)
+		.searchable(text: $searchQuery, placement: .navigationBarDrawer(displayMode: .always))
+		.onChange(of: searchQuery) { _, newValue in
+			debounceSearch(newValue)
+		}
+		.onChange(of: selectedFontName) { _, newValue in
+			updateRecents(with: newValue)
+		}
+		.toolbar {
+			ToolbarItem(placement: .topBarLeading) {
+				if isPresented {
+					Button("Cancel") { dismiss() }
+				}
+			}
+		}
+		.onAppear {
+			debouncedSearchQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
+		}
     }
 }
 
@@ -179,5 +176,5 @@ public extension UIFont {
 }
 
 extension EnvironmentValues {
-    @Entry var textSize: CGFloat = 17
+	@Entry var textSize: CGFloat = UIFont.labelFontSize
 }

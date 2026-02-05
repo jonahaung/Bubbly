@@ -100,7 +100,11 @@ public final class FirestoreRESTClient {
         collectionPath: String,
         to documentID: String
     ) async throws {
-        try await Firestore.firestore().collection(collectionPath).document(documentID).setData(value, merge: true)
+		try await Firestore
+			.firestore()
+			.collection(collectionPath)
+			.document(documentID)
+			.setData(value, merge: false)
         debugPrint("\(documentID) updated to \(value)")
     }
 
@@ -231,7 +235,7 @@ public final class FirestoreRESTClient {
 
         let data = try JSONSerialization.data(withJSONObject: json, options: [.prettyPrinted])
         let item = try decoder.decode(T.self, from: data)
-        Log(item.preetyPrinted)
+		log(item.preetyPrinted)
         return item
     }
 }

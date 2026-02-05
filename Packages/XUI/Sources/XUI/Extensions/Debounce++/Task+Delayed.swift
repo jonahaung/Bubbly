@@ -11,7 +11,7 @@ public extension Task {
                 try await Task<Never, Never>.sleep(seconds: seconds)
                 await operation()
             } catch {
-                Log(error)
+				log(error)
             }
         }
     }

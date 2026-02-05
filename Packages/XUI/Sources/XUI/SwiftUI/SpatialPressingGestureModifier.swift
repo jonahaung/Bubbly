@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct SpatialPressingGestureModifier: ViewModifier {
-    let onPressingChanged: @Sendable (CGPoint?) -> Void
+    // UI callbacks should be main-actor isolated; do not require @Sendable.
+    let onPressingChanged: @MainActor (CGPoint?) -> Void
     let coordinateSpace: CoordinateSpaceProtocol
     let minimumPressDuration: TimeInterval
     let allowableMovement: CGFloat
@@ -16,7 +17,7 @@ struct SpatialPressingGestureModifier: ViewModifier {
     init(coordinateSpace: CoordinateSpaceProtocol,
          minimumPressDuration: TimeInterval,
          allowableMovement: CGFloat,
-         action: @escaping @Sendable (CGPoint?) -> Void) {
+         action: @escaping @MainActor (CGPoint?) -> Void) {
         onPressingChanged = action
         self.coordinateSpace = coordinateSpace
         self.minimumPressDuration = minimumPressDuration
@@ -40,7 +41,8 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
     public typealias UIGestureRecognizerType = UILongPressGestureRecognizer
 
     public final class Coordinator: NSObject, UIGestureRecognizerDelegate {
-        var onChange: (@Sendable (CGPoint?) -> Void)?
+        // Main-actor UI callback; no @Sendable required.
+        var onChange: ((CGPoint?) -> Void)?
         var coordinateSpace: CoordinateSpaceProtocol?
         var converter: CoordinateSpaceConverter?
 
@@ -80,13 +82,14 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
     let coordinateSpace: CoordinateSpaceProtocol
     let minimumPressDuration: TimeInterval
     let allowableMovement: CGFloat
-    let onChange: @Sendable (CGPoint?) -> Void
+    // Main-actor UI callback; no @Sendable required.
+    let onChange: (CGPoint?) -> Void
 
     public init(
         coordinateSpace: some CoordinateSpaceProtocol,
         minimumPressDuration: TimeInterval,
         allowableMovement: CGFloat,
-        onChange: @escaping @Sendable (CGPoint?) -> Void
+        onChange: @escaping (CGPoint?) -> Void
     ) {
         self.coordinateSpace = coordinateSpace
         self.minimumPressDuration = minimumPressDuration
@@ -122,9 +125,9 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
 public extension View {
     func onPressingChanged(
         in coordinateSpace: CoordinateSpaceProtocol,
-		minimumPressDuration: TimeInterval = 0.5,
+        minimumPressDuration: TimeInterval = 0.5,
         allowableMovement: CGFloat = 10,
-        _ action: sending @escaping @Sendable (CGPoint?) -> Void
+        _ action: @escaping @MainActor (CGPoint?) -> Void
     ) -> some View {
         modifier(
             SpatialPressingGestureModifier(

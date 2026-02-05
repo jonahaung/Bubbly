@@ -20,5 +20,5 @@ public struct SelectedMsg: Hashable, Identifiable, Sendable {
 	}
 }
 extension EnvironmentValues {
-	@Entry var selectedMsg: SelectedMsg? = nil
+	@Entry var selectedMsg: SelectedMsg?
 }

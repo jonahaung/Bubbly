@@ -106,7 +106,7 @@ struct AttachmentPreview: View {
 			imageView(for: thumbnail)
 		case .imageUpload(let url, let thumbnail):
 			imageView(for: thumbnail)
-				.if_let(onCompleteUpload) { onComplete, view in
+				.if_let(onCompleteUpload) { _, view in
 					view
 						.overlay {
 							ImageUploadingLayer(

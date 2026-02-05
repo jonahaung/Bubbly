@@ -24,7 +24,7 @@ public protocol Socketable {
 
 public extension Socketable {
     func updateToLocal(_ msg: Message) async throws {
-        try await Store.shared.msgStore
+		try await Store.shared.msgStore?
             .updateAndSaveDebounced(
                 uid: msg.uid
             ) { model in

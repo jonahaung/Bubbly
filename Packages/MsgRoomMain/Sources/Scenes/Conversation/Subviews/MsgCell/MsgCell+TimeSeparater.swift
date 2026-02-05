@@ -22,7 +22,7 @@ extension MsgCell {
 				Text(
 					msg.date.formatted(.dateTime.day().weekday(.abbreviated).hour().minute())
 				)
-				.font(typography.subHeadline)
+				.font(typography.footnote)
 			}
 			.flexible(.horizontal)
 			.frame(height: ChatLayoutConstants.Cell.timeSeparaterHeight, alignment: .center)

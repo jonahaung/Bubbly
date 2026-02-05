@@ -8,7 +8,7 @@
 import Foundation
 
 public struct Attachment: Codable, Sendable, Hashable, Identifiable {
-	
+
 	public var id: String { uid }
 	public let uid: String
 	public var url: String
@@ -17,7 +17,7 @@ public struct Attachment: Codable, Sendable, Hashable, Identifiable {
 	public let aspectRatio: Double
 	public let title: String?
 	public let subTitle: String?
-	
+
 	public init(
 		uid: String,
 		url: String,
@@ -41,7 +41,7 @@ public extension Attachment {
 	var attachmentType: AttachMentType {
 		.init(rawValue: attachMentTypeRaw) ?? .image
 	}
-	
+
 	var displayText: String {
 		attachmentType.displayText
 	}

@@ -18,7 +18,7 @@ final class ContactsViewModel: ErrorPresenter {
     init() {}
 
     @concurrent
-    func syncContacts(store: ContactStore) async {
+    func syncContacts(store: ContactStore, currentUser: CurrentUserModel) async {
         await setLoading(true)
         do {
             try await store.syncContacts()
@@ -30,10 +30,10 @@ final class ContactsViewModel: ErrorPresenter {
     }
 
     @concurrent
-    func syncGroups(store: ContactStore) async throws {
+	func syncGroups(store: ContactStore, currentUser: CurrentUserModel) async throws {
         await setLoading(true)
         do {
-            try await store.syncGroups()
+			try await store.syncGroups(currentUser: currentUser)
             await setLoading(false)
         } catch {
             await showError(error)

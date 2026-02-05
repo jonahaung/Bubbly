@@ -75,4 +75,3 @@ public struct ToolInputField: View {
         }
     }
 }
-

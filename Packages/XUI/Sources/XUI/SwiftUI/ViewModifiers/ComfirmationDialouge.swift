@@ -19,16 +19,36 @@ private struct XDialogModifier<DialogContent: View>: ViewModifier {
         } label: {
             content
         }
-        .confirmationDialog(.init(title), isPresented: $isShown, titleVisibility: .visible, actions: {
-            dialogContent()
-        }, message: {
-            Text(.init(message))
-        })
+        .confirmationDialog(
+            .init(title),
+            isPresented: $isShown,
+            titleVisibility: .visible,
+            actions: { dialogContent() },
+            message: { Text(.init(message)) }
+        )
     }
 }
 
 public extension View {
-    func _comfirmationDialouge(_ title: String = "Attention", message: String = "", @ViewBuilder _ content: @escaping () -> some View) -> some View {
-        ModifiedContent(content: self, modifier: XDialogModifier(title: title, message: message, dialogContent: content))
+    // Lint-compliant and corrected spelling
+    func confirmationDialogue(
+        _ title: String = "Attention",
+        message: String = "",
+        @ViewBuilder actions: @escaping () -> some View
+    ) -> some View {
+        ModifiedContent(
+            content: self,
+            modifier: XDialogModifier(title: title, message: message, dialogContent: actions)
+        )
+    }
+
+    // Deprecated shim to preserve old callers
+    @available(*, deprecated, renamed: "confirmationDialogue(_:message:actions:)")
+    func _comfirmationDialouge(
+        _ title: String = "Attention",
+        message: String = "",
+        @ViewBuilder _ content: @escaping () -> some View
+    ) -> some View {
+        confirmationDialogue(title, message: message, actions: content)
     }
 }

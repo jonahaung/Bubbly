@@ -31,7 +31,14 @@ private struct SplashReductView: ViewModifier {
 }
 
 public extension View {
-    func _splashReduct(for timeout: TimeInterval = 0.3) -> some View {
+    // New lint-compliant name
+    func splashReduct(timeout: TimeInterval = 0.3) -> some View {
         modifier(SplashReductView(timeout: timeout))
+    }
+
+    // Deprecated shim to preserve old callers
+    @available(*, deprecated, renamed: "splashReduct(timeout:)")
+    func _splashReduct(for timeout: TimeInterval = 0.3) -> some View {
+        splashReduct(timeout: timeout)
     }
 }

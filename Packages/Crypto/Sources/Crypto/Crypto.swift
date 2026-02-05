@@ -81,12 +81,16 @@ public extension Crypto {
 //
 
 public extension Crypto {
-    static func base64String(with publicKey: Curve25519.KeyAgreement.PublicKey) -> String {
+    static func base64String(publicKey: Curve25519.KeyAgreement.PublicKey) -> String {
         publicKey.rawRepresentation.base64EncodedString(
             options: Data.Base64EncodingOptions(rawValue: 0)
         )
     }
-
+	static func base64String(privateKey: Curve25519.KeyAgreement.PrivateKey) -> String {
+		privateKey.rawRepresentation.base64EncodedString(
+			options: Data.Base64EncodingOptions(rawValue: 0)
+		)
+	}
     static func publicKey(with base64String: String) -> Curve25519.KeyAgreement.PublicKey? {
         guard let data = Data(base64Encoded: base64String),
               let publicKey = try? Curve25519.KeyAgreement.PublicKey(rawRepresentation: data)

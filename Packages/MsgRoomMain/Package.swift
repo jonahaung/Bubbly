@@ -20,6 +20,9 @@ let package = Package(
             name: "MsgRoomMain",
             dependencies: [
                 .product(name: "Services", package: "Services")
+            ],
+            resources: [
+                .copy("Resources/emojis.json")
             ]
         ),
         .testTarget(

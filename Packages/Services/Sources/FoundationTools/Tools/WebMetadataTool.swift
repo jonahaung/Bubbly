@@ -24,7 +24,7 @@ import XUI
 /// - Note: Description extraction is not available through public API.
 ///   Image data is detected but not returned directly.
 public struct WebMetadataTool: Tool {
-	
+
 	/// The name of the tool, used for identification.
 	public let name = "getWebMetadata"
 	/// A brief description of the tool's functionality.
@@ -38,12 +38,12 @@ public struct WebMetadataTool: Tool {
 		/// The URL to extract metadata from
 		@Guide(description: "The URL to extract metadata from")
 		public var url: String
-		
+
 		public init(url: String = "") {
 			self.url = url
 		}
 	}
-	
+
 	/// Extracted metadata from a web page
 	@Generable
 	public struct WebMetadata {
@@ -52,20 +52,20 @@ public struct WebMetadataTool: Tool {
 		public let description: String?
 		public let imageURL: String?
 	}
-	
+
 	public init() {}
-	
+
 	public func call(arguments: Arguments) async throws -> some PromptRepresentable {
 		let urlString = arguments.url.trimmingCharacters(in: .whitespacesAndNewlines)
-		
+
 		guard !urlString.isEmpty else {
 			return createErrorOutput(for: urlString, error: WebMetadataError.emptyURL)
 		}
-		
+
 		guard let url = URL(string: urlString) else {
 			return createErrorOutput(for: urlString, error: WebMetadataError.invalidURL)
 		}
-		
+
 		do {
 			let metadata = try await fetchMetadata(from: url)
 			let webMetadata = extractBasicMetadata(from: metadata, url: url)
@@ -74,7 +74,7 @@ public struct WebMetadataTool: Tool {
 			return createErrorOutput(for: urlString, error: error)
 		}
 	}
-	
+
 	private func fetchMetadata(from url: URL) async throws -> SwiftLinkPreviewResponse {
 		try await swiftLinkPreview.preview(url.absoluteString)
 //		let provider = LPMetadataProvider()
@@ -86,7 +86,7 @@ public struct WebMetadataTool: Tool {
 //			throw WebMetadataError.fetchFailed(error)
 //		}
 	}
-	
+
 	private func extractBasicMetadata(from metadata: SwiftLinkPreviewResponse, url: URL) -> WebMetadata {
 		let title = metadata.title ?? "Untitled"
 		// Note: LPLinkMetadata does not expose a public API for page description/summary.
@@ -102,7 +102,7 @@ public struct WebMetadataTool: Tool {
 			imageURL: imageURL?.absoluteString
 		)
 	}
-	
+
 	private func createSuccessOutput(from metadata: WebMetadata) -> GeneratedContent {
 		return GeneratedContent(properties: [
 			"status": "success",
@@ -113,7 +113,7 @@ public struct WebMetadataTool: Tool {
 			"message": "Successfully extracted web metadata"
 		])
 	}
-	
+
 	private func createErrorOutput(for url: String, error: Error) -> GeneratedContent {
 		return GeneratedContent(properties: [
 			"status": "error",
@@ -128,7 +128,7 @@ enum WebMetadataError: Error, LocalizedError {
 	case emptyURL
 	case invalidURL
 	case fetchFailed(Error)
-	
+
 	var errorDescription: String? {
 		switch self {
 		case .emptyURL:

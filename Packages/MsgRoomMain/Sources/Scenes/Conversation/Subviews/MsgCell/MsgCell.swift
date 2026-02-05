@@ -12,15 +12,15 @@ import SwiftUI
 import XUI
 
 struct MsgCell: View {
-	
-	@Environment(MsgCellViewModel.self) private var viewModel
-	@Environment(\.msgCellActions) private var sendMsgCellInteraction
+
+	let viewModel: MsgCellViewModel
 	@Environment(\.selectedMsg) private var selectedMsg
-	@Environment(\.layoutCache) private var layoutCache
-	
+
 	private var isSelected: Bool { selectedMsg?.id == viewModel.id }
 	private var layout: MsgCellLayout { viewModel.layout }
-	
+	@Environment(\.typography) var typography
+	@Environment(\.conversationTheme) private var theme
+
 	var body: some View {
 		VStack(alignment: viewModel.horizontalAlignment, spacing: 0) {
 			if layout.showTimeSeparator {
@@ -37,7 +37,7 @@ struct MsgCell: View {
 					IncomingAccessory()
 				}
 				GestureAware {
-					Content()
+					Content(viewModel: viewModel, theme: theme, selectedMsg: selectedMsg)
 				}
 				OutgoingAccessory()
 			}
@@ -45,6 +45,8 @@ struct MsgCell: View {
 				Footer()
 			}
 		}
+		.font(typography.body)
+		.foregroundStyle(Color.label)
 		.equatable(by: viewModel.reloadID)
 		.environment(\.viewIsVisible, viewModel.isVisible)
 	}

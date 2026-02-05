@@ -66,7 +66,7 @@ public struct PressGestureViewModifier: ViewModifier {
     }
 
     private func onUpdate(_ time: Double) {
-        print(time)
+       
     }
 
     private func onTargetReached(_: Double) {}

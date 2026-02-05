@@ -15,34 +15,42 @@ import ImagePlayground
 
 @MainActor
 @Observable
-final class ChatComposer: ErrorPresenter, ViewReloadable {
+final class ChatComposer: ErrorPresenter, Equatable {
 
 	@ObservationIgnored var inputText = InputText()
 	@ObservationIgnored var photoPicker = PhotoPickerManager()
+	@ObservationIgnored private let msgCreator: MsgCreator
+	@ObservationIgnored private let id: String
 
-	var attachments = [Attachment]()
-	var composeType = ComposeSource.text
-	var menuVisibility = Visibility.visible
-	var isLoading: Bool = false
+	let chantEngine = ChatEngine()
+	var lastTopic: TopicGenerable?
+	var attachments: [Attachment] = []
+	var source: ChatComposer.Source = .text
+	var isLoading = false
 
-	private let msgCreater: MsgCreator
-
-	var reloadID: Int = 0
-
-	init() {
-		msgCreater = .init(currentUserId: currentUserId ?? "")
+	init(id: String) {
+		self.id = id
+		msgCreator = .init(currentUserId: currentUserId ?? "")
 		inputText.delegate = self
 		photoPicker.delegate = self
-		trackItemsChanges()
 	}
 	deinit {
-		Log("")
+		log("")
 	}
-
+	
 	var hasContent: Bool {
 		inputText.hasText || !attachments.isEmpty
 	}
 
+	func updateSource(_ newValue: ChatComposer.Source) {
+		source = newValue
+	}
+	nonisolated static func == (lhs: ChatComposer, rhs: ChatComposer) -> Bool {
+		lhs.id == rhs.id
+	}
+}
+
+private extension ChatComposer {
 	func setLoading(_ value: Bool) {
 		isLoading = value
 	}
@@ -56,8 +64,10 @@ extension ChatComposer: InputTextDelegate {
 	}
 
 	func inputText(_ inputText: InputText, didBeganEditing text: String) {
-		if menuVisibility == .visible && !text.isWhitespace {
-			menuVisibility = .hidden
+		if text.isEmpty {
+			attachments.removeAll()
+		} else {
+			source = .text
 		}
 	}
 }
@@ -74,43 +84,40 @@ extension ChatComposer: PhotoPickerManagerDelegate {
 
 }
 extension ChatComposer {
-	func send(conversation: Conversation) {
-		let text = inputText.text.trimmed
-		let attachments = self.attachments
-		guard !text.isWhitespace || !attachments.isEmpty else {
+	// MARK: - User Actions
+	func handlePrimaryAction(_ conversation: Conversation) {
+		let text = inputText.text
+		if text.isWhitespace && attachments.isEmpty {
 			inputText.text = Lorem.random()
 			return
 		}
-		switch composeType {
-		case .text:
-			internalSend()
-		case .camera:
-			internalSend()
-		case .liary:
-			internalSend()
-		case .audio:
-			internalSend()
-		case .document:
-			internalSend()
-		case .machineImag:
-			Task {
-				try await generateImage(prompt: text)
-			}
+		send(conversation: conversation)
+	}
+	func handleSecondaryAction(_ conversation: Conversation) {
+		if hasContent {
+			send(conversation: conversation)
+		} else {
+			resetSource()
 		}
-		func internalSend() {
-			reset()
-			Task {
-				do {
-					try await send(text: text, attachments: attachments, conversation: conversation)
-				} catch {
-					await self.showError(error)
-				}
+	}
+	func resetSource() {
+		source = .text
+	}
+	func send(conversation: Conversation) {
+		let text = inputText.text.trimmed
+		let attachments = self.attachments
+		resetDraft()
+		Task {
+			do {
+				try await send(text: text, attachments: attachments, conversation: conversation)
+			} catch {
+				await self.showError(error)
 			}
 		}
 	}
 
 	func send(msg: ChatEngineMsgGenerable, conversation: Conversation) async throws {
-		let msg = try await msgCreater.message(
+		let msg = try await msgCreator.message(
 			text: msg.content,
 			attachments: [],
 			in: conversation
@@ -118,7 +125,7 @@ extension ChatComposer {
 		try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
 	}
 	@concurrent func send(text: String, attachments: [Attachment], conversation: Conversation) async throws {
-		var msg = try await msgCreater.message(
+		var msg = try await msgCreator.message(
 			text: text,
 			attachments: attachments,
 			in: conversation
@@ -128,15 +135,9 @@ extension ChatComposer {
 				msg.text = nil
 			} else {
 				attachments.forEach { each in
-					if text
-						.contains(each.url), let url = URL(string: each.url), let host = url.host()?.replace(
-							"www.",
-							with: ""
-						) {
-						text = text.replace(each.url, with: "[\(host)](\(each.url))")
-					}
+					text = text.replace(each.url, with: "")
 				}
-				msg.text = text
+				msg.text = text.trimmed
 			}
 		}
 
@@ -147,43 +148,36 @@ extension ChatComposer {
 		}
 	}
 
-	private func reset() {
+	func resetDraft() {
 		inputText.clear()
 		attachments.removeAll()
 		photoPicker.removeAll()
+		source = .text
 	}
 }
 
-private extension ChatComposer {
-	func trackItemsChanges() {
-		withObservationTracking {
-			_ = composeType
-			_ = menuVisibility
-		} onChange: { [weak self] in
-			guard let self else { return }
-			Task {
-				await layoutIfNeeded()
-				await trackItemsChanges()
-			}
-		}
-	}
-}
 extension ChatComposer {
+	// MARK: - Async Processing
 	@concurrent
 	func parseLinks(links: [ExtractedLink]) async {
 		let items = await self.attachments
-		let newLinks = links.filter { link in
-			items.contains { attachment in
-				attachment.url == link.url.absoluteString
-			} == false
-		}
+		let existingURLs = Set(items.map(\.url))
+		let newLinks = links.filter { existingURLs.contains($0.url.absoluteString) == false }
 		guard newLinks.isEmpty == false else { return }
+
 		await setLoading(true)
 		if let attachments = try? await AttachmentFactory.createLinkAttachments(from: newLinks) {
-			await MainActor.run {
+			Task { @MainActor in
+				var text = inputText.text
+				newLinks.forEach { each in
+					text = text.replace(each.url.absoluteString, with: "")
+				}
+				self.inputText.text = text
 				setLoading(false)
 				self.attachments.append(contentsOf: attachments)
 			}
+		} else {
+			await setLoading(false)
 		}
 	}
 
@@ -192,28 +186,21 @@ extension ChatComposer {
 		await setLoading(true)
 		var items = await self.attachments
 		var pickerItems = selectedImages
-		items.forEach { each in
-			if !pickerItems.contains(where: { $0.id == each.uid }) {
-				if let index = items.firstIndex(where: { $0.uid == each.uid }) {
-					items.remove(at: index)
-				}
-			}
-		}
-		pickerItems.forEach { each in
-			if items.contains(where: { $0.uid == each.id }) {
-				if let index = pickerItems.firstIndex(where: { $0.id == each.id }) {
-					pickerItems.remove(at: index)
-				}
-			}
-		}
+		let pickerIDs = Set(pickerItems.map(\.id))
+		items.removeAll { pickerIDs.contains($0.uid) == false }
+		pickerItems.removeAll { item in items.contains { $0.uid == item.id } }
+
 		let newItems = try? await AttachmentFactory.createImageAttachments(
 			from: pickerItems)
 		if let newItems {
 			items.append(contentsOf: newItems)
 		}
-		await MainActor.run {
+		Task { @MainActor in
 			setLoading(false)
 			self.attachments = items
+			if !items.isEmpty {
+				self.source = .liary
+			}
 		}
 	}
 
@@ -236,7 +223,7 @@ extension ChatComposer {
 			return
 		}
 		let attachment = try await AttachmentFactory.createImageAttachment(from: image)
-		await MainActor.run {
+		Task { @MainActor in
 			setLoading(false)
 			inputText.clear()
 			self.attachments.append(attachment)
@@ -244,7 +231,7 @@ extension ChatComposer {
 	}
 
 	func removeAttachment(id: String) {
-		attachments.removeAll{ $0.id == id }
+		attachments.removeAll { $0.id == id }
 		self.photoPicker.remove(for: id)
 	}
 }

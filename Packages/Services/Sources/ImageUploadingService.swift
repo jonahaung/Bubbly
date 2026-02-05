@@ -82,7 +82,6 @@ public struct ImageUploadingService: Sendable {
 		return url
 	}
 
-
 	func shortenURL(_ longURL: String) async -> String {
 		guard let escaped = longURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
 			return longURL

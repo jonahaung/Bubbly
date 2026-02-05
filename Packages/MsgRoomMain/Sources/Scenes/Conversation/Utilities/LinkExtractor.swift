@@ -26,21 +26,25 @@ enum LinkExtractor {
 	//
 	// Note: This is pragmatic, not “perfect URL spec”.
 	private static let pattern =
- #"""
- (?xi)
- \b(
-  https?://[^\s<>()"\]]+
-  |
-  (?:www\.)[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s<>()"\]]*)?
-  |
-  [a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:/[^\s<>()"\]]*)?
- )
- """#
+	#"""
+	(?xi)
+	\b(
+	 https?://[^\s<>()"\]]+
+	 |
+	 (?:www\.)[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s<>()"\]]*)?
+	 |
+	 [a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:/[^\s<>()"\]]*)?
+	)
+	"""#
 
 	static func extractLinks(from text: String) -> [ExtractedLink] {
 		guard let regularExpression = try? NSRegularExpression(pattern: pattern, options: []) else { return [] }
 		let nsString = text as NSString
-		let matches = regularExpression.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
+		let matches = regularExpression.matches(
+			in: text,
+			options: [],
+			range: NSRange(location: 0, length: nsString.length)
+		)
 
 		var seen = Set<URL>()
 		var links: [ExtractedLink] = []
@@ -75,9 +79,8 @@ enum LinkExtractor {
 		extractLinks(from: text).map(\.url)
 	}
 
-	private static func trimTrailingPunctuation(_ s: String) -> String {
-		var result = s
-		// Common punctuation people type after links in sentences.
+	private static func trimTrailingPunctuation(_ string: String) -> String {
+		var result = string
 		while let last = result.unicodeScalars.last,
 			  CharacterSet(charactersIn: ".,;:!?)\u{201D}\u{2019}").contains(last) {
 			result.removeLast()

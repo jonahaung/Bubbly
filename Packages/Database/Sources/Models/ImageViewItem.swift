@@ -23,7 +23,7 @@ public extension ImageViewItem {
 				document = try document?.createSubfolderIfNeeded(withName: each)
 			}
 		} catch {
-			Log(error)
+			log(error)
 			return nil
 		}
 		return document
@@ -33,7 +33,7 @@ public extension ImageViewItem {
 		do {
 			return try folder()?.createFileIfNeeded(withName: fileName())
 		} catch {
-			Log(error)
+			log(error)
 			return nil
 		}
 	}
@@ -42,7 +42,7 @@ public extension ImageViewItem {
 		do {
 			return try folder()?.createFileIfNeeded(withName: thumbnailFileName())
 		} catch {
-			Log(error)
+			log(error)
 			return nil
 		}
 	}
@@ -65,7 +65,7 @@ public extension ImageViewItem {
 		do {
 			return try file()?.read()
 		} catch {
-			Log(error)
+			log(error)
 			return nil
 		}
 	}
@@ -74,7 +74,7 @@ public extension ImageViewItem {
 		do {
 			return try thumbnailFile()?.read()
 		} catch {
-			Log(error)
+			log(error)
 			return nil
 		}
 	}

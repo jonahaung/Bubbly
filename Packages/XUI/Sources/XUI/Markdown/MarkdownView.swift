@@ -22,13 +22,11 @@ public struct MarkdownView: View {
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        VStack(alignment: .leading, spacing: 4) {
             ForEach(Array(elements.enumerated()), id: \.offset) { _, element in
                 renderElement(element)
             }
         }
-        .allowsTightening(true)
-        .compositingGroup()
         .equatable(by: markdownText)
     }
 
@@ -37,8 +35,6 @@ public struct MarkdownView: View {
         switch element {
         case let .heading(level, text):
             HeadingView(level: level, text: text)
-                .padding(.top, CGFloat(level))
-                .textScale(.secondary)
         case let .paragraph(text):
             ParagraphView(text: text)
         case let .codeBlock(language, content):
@@ -52,20 +48,23 @@ public struct MarkdownView: View {
             EmptyView()
         case let .unknown(text):
             Text(text)
-                .font(.body)
                 .foregroundColor(.gray)
         case let .orderedListItem(index: index, text: text):
             OrderedListItemView(index: index, text: text)
+				.textScale(.secondary)
         case let .mention(username: username):
-            Text("@\(username)")
-                .font(.system(.subheadline, design: .rounded, weight: .medium))
-                .underline()
-                .foregroundStyle(Color.indigo)
+			Label.init(username, systemImage: "person.and.background.striped.horizontal")
+				.labelIconToTitleSpacing(0)
+				.fontWidth(.condensed)
+				.imageScale(.small)
+				.foregroundStyle(username.color.mix(with: Color.accentColor, by: 0.3))
+				.symbolRenderingMode(.hierarchical)
         case let .hashtag(topic: topic):
-            Text("#\(topic)")
-                .font(.system(.subheadline, design: .rounded, weight: .medium))
-                .underline()
-                .foregroundStyle(Color.indigo)
+			Label.init(topic, systemImage: "tag.square")
+				.labelIconToTitleSpacing(4)
+				.foregroundStyle(Color.link.mix(with: Color.accentColor, by: 0.2))
+				.imageScale(.small)
+				.symbolRenderingMode(.hierarchical)
         }
     }
 }
@@ -80,24 +79,49 @@ private struct HeadingView: View {
         switch level {
         case 1:
             Text(text)
-                .font(.largeTitle)
-                .bold()
+				.font(
+					.system(
+						size: UIFont.preferredFont(forTextStyle: .largeTitle).pointSize,
+						weight: .medium
+					)
+				)
+				.lineHeight(.loose)
         case 2:
             Text(text)
-                .font(.title)
-                .bold()
+				.font(
+					.system(
+						size: UIFont.preferredFont(forTextStyle: .title1).pointSize,
+						weight: .medium
+					)
+				)
+				.lineHeight(.loose)
         case 3:
             Text(text)
-                .font(.title2)
-                .bold()
+				.font(
+					.system(
+						size: UIFont.preferredFont(forTextStyle: .title2).pointSize,
+						weight: .medium
+					)
+				)
+				.lineHeight(.loose)
         case 4:
             Text(text)
-                .font(.title3)
-                .bold()
+				.font(
+					.system(
+						size: UIFont.preferredFont(forTextStyle: .title3).pointSize,
+						weight: .medium
+					)
+				)
+				.lineHeight(.loose)
         default:
             Text(text)
-                .font(.headline)
-                .bold()
+				.font(
+					.system(
+						size: UIFont.preferredFont(forTextStyle: .headline).pointSize,
+						weight: .semibold
+					)
+				)
+				.lineHeight(.loose)
         }
     }
 }
@@ -107,8 +131,6 @@ private struct ParagraphView: View {
 
     var body: some View {
         Text(.init(text))
-            .font(.body)
-            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -148,8 +170,13 @@ private struct ListItemView: View {
     let text: String
 
     var body: some View {
-        Text(.init("✦ \(text)"))
-            .font(.system(.callout, design: .default, weight: .regular))
+		HStack(alignment: .firstTextBaseline, spacing: 8) {
+			Text("∙")
+				.bold()
+			Text(.init(text))
+		}
+		.padding(.leading, 4)
+		.lineSpacing(0)
     }
 }
 
@@ -158,8 +185,11 @@ private struct OrderedListItemView: View {
     let text: String
 
     var body: some View {
-        Text(.init(" **\(index)**    \(text)"))
-            .font(.system(.callout, design: .default, weight: .regular))
+		HStack(alignment: .firstTextBaseline, spacing: 8) {
+			Text("\(index)")
+			Text(.init(text))
+		}
+		.lineSpacing(0)
     }
 }
 
@@ -194,7 +224,7 @@ private struct MarkLinkView: View {
 // MARK: - Preview
 
 public extension MarkdownView {
-    struct ContentView: View {
+    struct ExampleView: View {
         public static let markdownText = """
 
         # Welcome to Markdown
@@ -266,8 +296,8 @@ public extension MarkdownView {
 
         public var body: some View {
             ScrollView {
-                MarkdownView(markdownText: Self.markdownText)
-                    .padding()
+				MarkdownView(markdownText: Self.markdownText)
+					.padding()
             }
             .navigationTitle("MarkdownView")
         }

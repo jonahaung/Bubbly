@@ -151,6 +151,6 @@ final class DebouncedTextFieldManager {
             debounceTask?.cancel()
             debounceTask = nil
         }
-        Log("deinit")
+		log("deinit")
     }
 }

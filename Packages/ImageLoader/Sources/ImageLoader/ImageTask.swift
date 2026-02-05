@@ -200,7 +200,7 @@ public final class ImageTask: Hashable {
 
     /// Gets called when the task is cancelled either by the user or by an
     /// external event such as session invalidation.
-    func _cancel() {
+    func cancelInternal() {
         guard state == .running else { return }
         state = .cancelled
         dispatch(.cancelled)

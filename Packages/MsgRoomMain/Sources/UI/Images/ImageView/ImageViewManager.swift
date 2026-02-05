@@ -46,7 +46,7 @@ final class ImageViewManager {
 					try await self.saveImage(success.image)
 					await loadLocalImage()
 				} catch {
-					Log(error)
+					log(error)
 				}
 			}
 		case .failure:

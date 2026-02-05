@@ -89,7 +89,7 @@ public enum MarkdownParser {
     }
 
     private static func handleMarkdownLine(_ line: String, elements: inout [MarkdownElement]) {
-        if line.hasPrefix("#") {
+        if line.hasPrefix("# ") || line.hasPrefix("##") {
             parseHeading(line, elements: &elements)
         } else if line.hasPrefix(">") {
             parseBlockquote(line, elements: &elements)

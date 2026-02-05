@@ -14,33 +14,26 @@ import Core
 struct RootNavView: View {
 
 	@Environment(Router.self) private var router
-	@State private var columnVisibility: NavigationSplitViewVisibility = .all
 
 	var body: some View {
-		NavigationSplitView(columnVisibility: $columnVisibility) {
+		NavigationSplitView {
 			SidebarView()
 		} detail: {
-			tabDestination(for: router.currentNavRouter)
+			tabDestination(for: router.selectedTab)
 		}
-		.navigationSplitViewStyle(.balanced)
+		.navigationSplitViewStyle(.automatic)
 	}
 
-	@ViewBuilder func tabDestination(for navRouter: NavRouter) -> some View {
-		switch navRouter.id {
-		case .test:
-			MainNavView(navRouter: navRouter) {
+	@ViewBuilder func tabDestination(for tab: TabPath) -> some View {
+		MainNavView(tabPath: tab) {
+			switch tab {
+			case .test:
 				FolderExplorer()
-			}
-		case .inbox:
-			MainNavView(navRouter: navRouter) {
+			case .inbox:
 				InboxScene()
-			}
-		case .contacts:
-			MainNavView(navRouter: navRouter) {
+			case .contacts:
 				ContactsScene()
-			}
-		case .settings:
-			MainNavView(navRouter: navRouter) {
+			case .settings:
 				SettingsScene()
 			}
 		}
@@ -52,21 +45,31 @@ struct SidebarView: View {
 	@Environment(Router.self) private var router
 
 	var body: some View {
-		List {
-			ForEach(router.navRouters, id: \.id) { navRouter in
-				let tabPath = navRouter.id
-				Button {
-					router.tab = tabPath
-				} label: {
-					Label(tabPath.localizedName, systemImage: tabPath.systemName)
-						.symbolRenderingMode(router.tab == tabPath ? .multicolor : .hierarchical)
-						.symbolVariant(router.tab == tabPath ? .fill : .none)
+		List(selection: selection) {
+			Section {
+				ForEach(TabPath.allCases) { tabPath in
+					Button {
+						router.selectedTab = tabPath
+					} label: {
+						Label(tabPath.localizedName, systemImage: tabPath.systemName)
+							.symbolRenderingMode(router.selectedTab == tabPath ? .multicolor : .hierarchical)
+							.symbolVariant(router.selectedTab == tabPath ? .fill : .none)
+					}
+					.buttonStyle(.borderless)
+					.id(tabPath)
 				}
-				.buttonStyle(.borderless)
-				.id(tabPath)
 			}
 		}
 		.listStyle(.sidebar)
-		.navigationTitle("Bubbly")
+		.navigationTitle("Bubbley")
+	}
+
+
+	private var selection: Binding<TabPath?> {
+		Binding(get: { router.selectedTab }, set: { newValue in
+			if let newValue {
+				router.selectTab(newValue)
+			}
+		})
 	}
 }

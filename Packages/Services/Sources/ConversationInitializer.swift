@@ -80,7 +80,7 @@ public extension ConversationInitializer {
 
 public extension ConversationInitializer {
     static func start(conID: String, refetch: Bool, delay: Double = 0) {
-        Task {
+		Task.detached(priority: .background) {
             do {
                 let conversation = try await ConversationRepo.getOrCreate(
                     for: conID,
@@ -99,6 +99,6 @@ public extension ConversationInitializer {
 		let prefetchedData = try await createPrefetchedObject(
 			conversation: conversation
 		)
-		await Router.shared.push(.conversation(prefetchedData))
+		await Router.shared.pushToNav(NavPath.conversation(prefetchedData))
     }
 }

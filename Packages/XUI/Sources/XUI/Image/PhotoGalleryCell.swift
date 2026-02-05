@@ -5,12 +5,11 @@
 //  Created by Aung Ko Min on 29/12/25.
 //
 
-
 import SwiftUI
 import ImageLoader
 
 public struct PhotoGalleryCell: View {
-	
+
 	private let item: any PhotoGalleryItem
     @Environment(\.dismiss) private var dismiss
 

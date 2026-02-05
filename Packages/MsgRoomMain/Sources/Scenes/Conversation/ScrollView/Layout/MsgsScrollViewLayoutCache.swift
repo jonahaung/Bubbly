@@ -72,7 +72,3 @@ extension MsgsScrollViewLayoutCache {
 		msgCellLayouts[id] = layout
 	}
 }
-
-extension EnvironmentValues {
-	@Entry var layoutCache: MsgsScrollViewLayoutCache? = nil
-}

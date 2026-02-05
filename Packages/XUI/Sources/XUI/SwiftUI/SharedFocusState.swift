@@ -22,7 +22,7 @@ public final class SharedFocusState {
 		set { binding.wrappedValue = newValue }
 	}
 
-	public func focus(_ value: String) {
+	public func focus(_ value: String?) {
 		self.value = value
 	}
 
@@ -31,10 +31,13 @@ public final class SharedFocusState {
 	}
 
 	public func defocus() {
-		self.value = nil
+		guard self .value != nil else { return }
+		withTransaction(.withAnimation(.interactiveSpring)) {
+			self.value = nil
+		}
 	}
 }
 
 public extension EnvironmentValues {
-	@Entry var sharedFocusState: SharedFocusState? = nil
+	@Entry var sharedFocusState: SharedFocusState?
 }

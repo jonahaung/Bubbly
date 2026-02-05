@@ -19,7 +19,7 @@ public enum ContactRepo {
 
 	@discardableResult
 	public static func getOrCreate(for uid: String, refetch: Bool) async throws -> Contact {
-		let localValue = try await Store.shared.contactStore.fetch(uid: uid)
+		let localValue = try await Store.shared.contactStore?.fetch(uid: uid)
 		if let localValue, !refetch {
 			return localValue
 		}
@@ -32,11 +32,11 @@ public enum ContactRepo {
 			}
 		}
 		if localValue != nil {
-			try await Store.shared.contactStore.updateAndSave(uid: uid) { model in
+			try await Store.shared.contactStore?.updateAndSave(uid: uid) { model in
 				model.merge(from: serverValue)
 			}
 		} else {
-			try await Store.shared.contactStore.insert(serverValue)
+			try await Store.shared.contactStore?.insert(serverValue)
 		}
 		return serverValue
 	}
@@ -70,9 +70,8 @@ public enum ContactRepo {
 			}
 		)
 		descriptor.fetchLimit = 1
-		return try await Store.shared.contactStore.fetch(descriptor).first
+		return try await Store.shared.contactStore?.fetch(descriptor).first
 	}
-
 
 	public static func searchGroup(named name: String) async throws -> Group? {
 		let targetName = name
@@ -82,6 +81,6 @@ public enum ContactRepo {
 			}
 		)
 		descriptor.fetchLimit = 1
-		return try await Store.shared.groupStore.fetch(descriptor).first
+		return try await Store.shared.groupStore?.fetch(descriptor).first
 	}
 }

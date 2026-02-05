@@ -12,11 +12,11 @@ public enum ChatLayoutConstants {
         public static let defaultSpacing: CGFloat = 16
         public static let mediaBubbleMaxWidth: CGFloat = 220
         public static let bubbleCornorRadius: CGFloat = 17
-        public static let sectionSpacing: CGFloat = 16
-        public static let timeSeparaterHeight: CGFloat = 50
+        public static let sectionSpacing: CGFloat = 8
+        public static let timeSeparaterHeight: CGFloat = 60
         public static let bubbleMinSpacerWidth: CGFloat = 20
     }
 
-    public static let topBarHeight: CGFloat = 60
-    public static let bottomBarHeight: CGFloat = 55
+    public static let topBarHeight: CGFloat = 88
+    public static let bottomBarHeight: CGFloat = 60
 }

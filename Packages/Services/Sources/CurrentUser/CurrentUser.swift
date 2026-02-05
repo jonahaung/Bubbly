@@ -36,20 +36,23 @@ public final class CurrentUser {
         let newModel = CurrentUserModel(firUser)
         storage.save(newModel.pushToken, for: .device(.deviceToken))
 
-        let remoteModel: CurrentUserModel? = try? await FirestoreRepo.getModel(
+        if let remoteModel: CurrentUserModel? = try? await FirestoreRepo.getModel(
             for: newModel.uid,
             collection: .users,
             field: .uid
-        )
-        if newModel != remoteModel {
-            try await FirestoreRepo
-                .update(
-                    value: newModel.dictionary,
-                    collectionPath: .users,
-                    to: newModel.uid
-                )
-            await ToastPresenter.show("Profile Updated")
-        }
+		) {
+			if newModel != remoteModel {
+				try await FirestoreRepo
+					.update(
+						value: newModel.dictionary,
+						collectionPath: .users,
+						to: newModel.uid
+					)
+				await ToastPresenter.show("Profile Updated")
+			}
+		} else {
+			try await FirestoreRepo.add(newModel, collectionPath: .users, documentID: newModel.uid)
+		}
         await updateModelOnMain(newModel)
     }
 

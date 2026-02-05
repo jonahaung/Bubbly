@@ -13,44 +13,36 @@ import SwiftUI
 import XUI
 
 struct InboxScene: View {
-    @Environment(Router.self) private var router
-    @Environment(\.currentUser) private var currentUser
 
-    @LazyState private var viewModel = InboxViewModel()
+	@Environment(\.currentUser) private var currentUser
 
-    var body: some View {
-        List {
-            ForEach(viewModel.items, id: \.msg) { item in
-                InboxCell(item: item)
-            }
-            .onDelete { _ in
-                //				Task {
-                //					await withThrowingTaskGroup(of: Void.self) { group in
-                //						for index in indexSet {
-                //							group.addTask {
-                //								if let item = await viewModel.items[safe: index]?.conversation {
-                //									try await Store.shared.conversationStore
-                //										.delete(uid: item.uid)
-                //								}
-                //							}
-                //						}
-                //					}
-                //					await viewModel.fetch()
-                //				}
-            }
-        }
-        .transaction(value: viewModel.items.first?.msg) { transactions in
-            transactions.disablesAnimations = false
-            transactions.animation = .snappy
-        }
-        .task {
-            await viewModel.task(currentUser: currentUser)
-        }
-        .refreshable {
-            await viewModel.task(currentUser: currentUser)
-        }
-        .onDisappear {
-            viewModel.ondisappear()
-        }
-    }
+	@LazyState private var viewModel = InboxViewModel()
+
+	var body: some View {
+		List {
+			ForEach(viewModel.items, id: \.msg) { item in
+				InboxCell(item: item)
+			}
+			.onDelete { _ in
+			}
+		}
+		.task {
+			await viewModel.task(currentUser: currentUser)
+		}
+		.refreshable {
+			await viewModel.task(currentUser: currentUser)
+		}
+		.onDisappear {
+			viewModel.ondisappear()
+		}
+		.navigationTitle("pencil.line")
+		.toolbar {
+			ToolbarItem(placement: .primaryAction) {
+				Button {
+				} label: {
+					SystemImage(.bellBadge)
+				}
+			}.sharedBackgroundVisibility(.hidden)
+		}
+	}
 }

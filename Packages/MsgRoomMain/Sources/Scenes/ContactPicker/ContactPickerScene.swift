@@ -11,68 +11,71 @@ import SwiftUI
 import XUI
 
 public struct ContactPickerScene: View {
-    @Environment(ContactStore.self) private var contactStore
-    @Environment(\.dismiss) private var dismiss
-    @Binding var selection: [Contact]
-    @State private var searchText = ""
 
-    public init(selection: Binding<[Contact]>) {
-        _selection = selection
-    }
+	@Environment(ContactStore.self) private var contactStore
+	@Environment(\.dismiss) private var dismiss
+	@Binding var selection: [Contact]
+	@State private var searchText = ""
 
-    public var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    if contacts.isEmpty {
-                        ContentUnavailableView.search
-                    } else {
-                        ForEach(contacts, id: \.uid) { contact in
-                            let isSelected = selection.contains { $0.uid == contact.uid }
-                            SelectableContactCell(
-                                contact: contact,
-                                isSelected: isSelected
-                            ) { _ in
-                                toggleSelection(for: contact)
-                            }
-                        }
-                    }
-                } header: {
-                    Text("Select contacts")
-                }
-            }
-            .navigationTitle("Contact Picker")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                }
-            }
-            .searchable(
-                text: $searchText,
-                placement: .navigationBarDrawer(displayMode: .automatic),
-                prompt: "Search contacts"
-            )
-        }
-        .interactiveDismissDisabled()
-    }
+	public init(selection: Binding<[Contact]>) {
+		_selection = selection
+	}
 
-    private var contacts: [Contact] {
-        guard !searchText.isWhitespace else {
-            return contactStore.contacts
-        }
-        return contactStore.contacts.filter {
-            $0.name.lowercased().contains(searchText.lowercased())
-        }
-    }
+	public var body: some View {
+		NavigationStack {
+			List {
+				if contacts.isEmpty {
+					ContentUnavailableView.search
+				} else {
+					ForEach(contacts, id: \.uid) { contact in
+						let isSelected = selection.contains { $0.uid == contact.uid }
+						SelectableContactCell(
+							contact: contact,
+							isSelected: isSelected
+						) { _ in
+							toggleSelection(for: contact)
+						}
+					}
+				}
+			}
+			.navigationTitle("Contact Picker")
+			.toolbar {
+				ToolbarItem(placement: .primaryAction) {
+					Button(role: .confirm) {
+						dismiss()
+					}
+					.disabled(selection.isEmpty)
+				}
+				ToolbarItem(placement: .cancellationAction) {
+					Button(role: .cancel) {
+						dismiss()
+					}
+					.disabled(!selection.isEmpty)
+				}
+			}
+			.searchable(
+				text: $searchText,
+				placement: .automatic,
+				prompt: "Search contacts"
+			)
+		}
+		.interactiveDismissDisabled(!selection.isEmpty)
+	}
 
-    private func toggleSelection(for contact: Contact) {
-        if let index = selection.firstIndex(where: { $0.uid == contact.uid }) {
-            selection.remove(at: index)
-        } else {
-            selection.append(contact)
-        }
-    }
+	private var contacts: [Contact] {
+		guard !searchText.isWhitespace else {
+			return contactStore.contacts
+		}
+		return contactStore.contacts.filter {
+			$0.name.lowercased().contains(searchText.lowercased())
+		}
+	}
+
+	private func toggleSelection(for contact: Contact) {
+		if let index = selection.firstIndex(where: { $0.uid == contact.uid }) {
+			selection.remove(at: index)
+		} else {
+			selection.append(contact)
+		}
+	}
 }

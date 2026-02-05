@@ -8,8 +8,8 @@
 import SwiftUI
 
 public struct RangedSliderView: View {
-    @Binding var x1: CGFloat
-    @Binding var x2: CGFloat
+    @Binding var lowerValue: CGFloat
+    @Binding var upperValue: CGFloat
 
     @State private var inactiveColor: Color
     @State private var activeColor: Color
@@ -38,8 +38,8 @@ public struct RangedSliderView: View {
         self.activeColor = activeColor
         self.barheight = barheight
         self.buttonDiameter = buttonDiameter
-        _x1 = x1
-        _x2 = x2
+        _lowerValue = x1
+        _upperValue = x2
         pos1 = (x1.wrappedValue - offset) / scale
         pos2 = (x2.wrappedValue - offset) / scale
         self.scale = scale
@@ -53,7 +53,7 @@ public struct RangedSliderView: View {
                     Text(shoutOutText)
                         .font(.title.weight(.semibold).width(.condensed))
                 } else {
-                    Text("\(x1.int) - \(x2.int)")
+                    Text("\(lowerValue.int) - \(upperValue.int)")
                         .font(.footnote.weight(.semibold).width(.compressed))
                 }
             }
@@ -83,13 +83,19 @@ public struct RangedSliderView: View {
                         .offset(x: buttonDiameter / 2)
                         .gesture(DragGesture()
                             .onChanged { value in
-                                // Caluclate the scaled position
+                                // Calculate the scaled position
                                 let newPos = value.location.x / geometry.size.width
                                 // Set new Position
-                                if newPos < 0 { pos1 = 0 } else if newPos >= pos2 { pos1 = pos2 - 0.01 } else { pos1 = newPos }
-                                let value = (pos1.scaled(by: scale) + offset)
-                                let rounded = ((value.int / step) * step).cgFloat
-                                x1 = rounded
+                                if newPos < 0 {
+                                    pos1 = 0
+                                } else if newPos >= pos2 {
+                                    pos1 = pos2 - 0.01
+                                } else {
+                                    pos1 = newPos
+                                }
+                                let scaledValue = (pos1.scaled(by: scale) + offset)
+                                let rounded = ((scaledValue.int / step) * step).cgFloat
+                                lowerValue = rounded
                                 shoutOutText = rounded.formatted()
                             }.onEnded { _ in
                                 shoutOutText = nil
@@ -104,10 +110,16 @@ public struct RangedSliderView: View {
                         .gesture(DragGesture()
                             .onChanged { value in
                                 let newPos = value.location.x / geometry.size.width
-                                if newPos > 1.0 { pos2 = 1.0 } else if newPos <= pos1 { pos2 = pos1 + 0.01 } else { pos2 = newPos }
-                                let value = pos2.scaled(by: scale) + offset
-                                let rounded = ((value.int / step) * step).cgFloat
-                                x2 = rounded
+                                if newPos > 1.0 {
+                                    pos2 = 1.0
+                                } else if newPos <= pos1 {
+                                    pos2 = pos1 + 0.01
+                                } else {
+                                    pos2 = newPos
+                                }
+                                let scaledValue = pos2.scaled(by: scale) + offset
+                                let rounded = ((scaledValue.int / step) * step).cgFloat
+                                upperValue = rounded
                                 shoutOutText = rounded.formatted()
                             }.onEnded { _ in
                                 shoutOutText = nil

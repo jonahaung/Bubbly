@@ -14,23 +14,25 @@ import SwiftUI
 @Observable
 class ChatEngine {
 
-	private let model = SystemLanguageModel.default
-	private let chatSession: LanguageModelSession
-	private let summarySession: LanguageModelSession
-	var cachedSummary: String?
+    private let model = SystemLanguageModel.default
+    private let chatSession: LanguageModelSession
+    private let summarySession: LanguageModelSession
+    var cachedSummary: String?
 
-	var isAvailable: Bool {
-		switch model.availability {
-		case .available:
-			return true
-		default:
-			return false
-		}
-	}
+    var isAvailable: Bool {
+        switch model.availability {
+        case .available:
+            return true
+        default:
+            return false
+        }
+    }
 
-	init() {
+    init() {
 
-		chatSession = LanguageModelSession(model: .init(guardrails: .permissiveContentTransformations)) {
+        chatSession = LanguageModelSession(
+            model: .init(guardrails: .permissiveContentTransformations)
+        ) {
 """
 You are a chat assistant.
 
@@ -40,9 +42,11 @@ Rules:
 - Use prior messages as context.
 - Don't offer help.
 """
-		}
+        }
 
-		summarySession = LanguageModelSession(model: .init(guardrails: .permissiveContentTransformations)) {
+        summarySession = LanguageModelSession(
+            model: .init(guardrails: .permissiveContentTransformations)
+        ) {
 """
 You are a deterministic summarization engine.
 
@@ -51,54 +55,146 @@ Rules:
 - Preserve existing facts unless contradicted.
 - Avoid stylistic variation.
 """
-		}
-	}
+        }
+    }
 
-	func prewarm() {
-		chatSession.prewarm()
-	}
+    func prewarm() {
+        chatSession.prewarm()
+    }
 
-	func respondTo(msgs: [Message], summary: String?) async throws -> ChatEngineMsgGenerable {
-		let lastUserMsg = msgs.last
-		if let summary {
-			let response = try await chatSession.respond(generating: ChatEngineMsgGenerable.self) {
-  """
-  Here is the conversation summary:
-  \(summary)
-  And the last message of the conversation:
-  \(lastUserMsg?.text ?? "No message available")
-  
-  - Respond with the sender role to the user last message in casual tone.
-  - Do NOT duplicate information already present in the last message.
-  """
-			}
-			return response.content
-		} else {
-			let history = makeHistory(msgs: msgs)
-			let response = try await chatSession.respond(generating: ChatEngineMsgGenerable.self) {
-  """
-  Here is the conversation history:
-  \(history)
-  
-  And the last message of the conversation:
-  \(lastUserMsg?.text ?? "No message available")
-  
-  - Respond with the sender role to the user last message in casual tone.
-  - Do NOT duplicate information already present in the last message.
-  """
-			}
-			return response.content
-		}
-
-	}
-
-	func summarize(msgs: [Message], previousSummary: String?) async throws -> String {
+    func respondTo(
+        msgs: [Message],
+        summary: String?
+    ) async throws -> ChatEngineMsgGenerable {
+        let lastUserMsg = msgs.last
+        if let summary {
+            let response = try await chatSession.respond(
+                generating: ChatEngineMsgGenerable.self
+            ) {
+                self.buildResponsePrompt(
+                    summary: summary,
+                    lastMessage: lastUserMsg?.text
+                )
+            }
+            return response.content
+        } else {
+            let history = makeHistory(msgs: msgs)
+            let response = try await chatSession.respond(
+                generating: ChatEngineMsgGenerable.self
+            ) {
+                self.buildResponsePrompt(
+                    history: history,
+                    lastMessage: lastUserMsg?.text
+                )
+            }
+            return response.content
+        }
+    }
+	func topics(
+		msgs: [Message]
+	) async throws -> [TopicGenerable] {
 		let history = makeHistory(msgs: msgs)
+		let prompt = """
+You will be creating topics of the following conversation.
+Make topic short and precise.
+Make markdown texts if needed.
 
-		let prompt: String
+Conversation content:
+\(history)
+"""
+		let response = try await summarySession.respond(
+			generating: [TopicGenerable].self
+		) {
+			prompt
+		}
+		return response.content
+	}
 
-		if let previousSummary {
-			prompt = """
+    func summarize(
+        msgs: [Message],
+        previousSummary: String?
+    ) async throws -> String {
+        let history = makeHistory(msgs: msgs)
+        let prompt = buildSummaryPrompt(
+            history: history,
+            previousSummary: previousSummary
+        )
+
+        let response = try await summarySession.respond(
+            generating: String.self
+        ) {
+            prompt
+        }
+
+        cachedSummary = response.content
+        return response.content
+    }
+
+    func makeHistory(msgs: [Message]) -> String {
+        msgs.enumerated().map { index, msg in
+"""
+[\(index)]
+Role: \(msg.receiptType.role.rawValue)
+Content: \(msg.text ?? "")
+"""
+        }.joined(separator: "\n\n")
+    }
+}
+
+// MARK: - Prompt Builders
+
+private extension ChatEngine {
+
+    func buildResponsePrompt(
+        summary: String,
+        lastMessage: String?
+    ) -> String {
+"""
+Here is the conversation summary:
+\(summary)
+And the last message of the conversation:
+\(lastMessage ?? "No message available")
+
+- Respond with the sender role to the user last message in casual tone.
+- Do NOT duplicate information already present in the last message.
+"""
+    }
+
+    func buildResponsePrompt(
+        history: String,
+        lastMessage: String?
+    ) -> String {
+"""
+Here is the conversation history:
+\(history)
+
+And the last message of the conversation:
+\(lastMessage ?? "No message available")
+
+- Respond with the sender role to the user last message in casual tone.
+- Do NOT duplicate information already present in the last message.
+"""
+    }
+
+    func buildSummaryPrompt(
+        history: String,
+        previousSummary: String?
+    ) -> String {
+        if let previousSummary {
+            return buildIncrementalSummaryPrompt(
+                history: history,
+                previousSummary: previousSummary
+            )
+        } else {
+            return buildInitialSummaryPrompt(history: history)
+        }
+    }
+
+    func buildIncrementalSummaryPrompt(
+        history: String,
+        previousSummary: String
+    ) -> String {
+"""
 You are maintaining a running factual summary.
 
 Task:
@@ -127,9 +223,27 @@ Formatting Rules:
 
 Previous summary (authoritative source of truth):
 \(previousSummary)
+
+Conversation content:
+\(history)
 """
-		} else {
-			prompt =
+    }
+	func buildTopicPrompt(
+		history: String
+	) -> String {
+"""
+You will be creating topics of the following conversation.
+Make topic short and precise.
+Make markdown texts if needed.
+
+Conversation content:
+\(history)
+"""
+	}
+
+    func buildInitialSummaryPrompt(
+        history: String
+    ) -> String {
 """
 You are generating an initial factual summary.
 
@@ -152,23 +266,5 @@ Constraints:
 Conversation content:
 \(history)
 """
-		}
-
-		let response = try await summarySession.respond(generating: String.self) {
-			prompt
-		}
-
-		cachedSummary = response.content
-		return response.content
-	}
-
-	func makeHistory(msgs: [Message]) -> String {
-		msgs.enumerated().map { index, msg in
- """
- [\(index)]
- Role: \(msg.receiptType.role.rawValue)
- Content: \(msg.text ?? "")
- """
-		}.joined(separator: "\n\n")
-	}
+    }
 }

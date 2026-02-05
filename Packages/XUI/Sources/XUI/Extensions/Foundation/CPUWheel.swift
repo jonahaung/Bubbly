@@ -8,7 +8,7 @@
 @preconcurrency import Darwin
 import SwiftUI
 
-//public struct CPUWheel: View {
+// public struct CPUWheel: View {
 //    @State private var monitor = CPUMonitor()
 //
 //    private let gradient = AngularGradient(
@@ -39,11 +39,11 @@ import SwiftUI
 //                }
 //            }
 //    }
-//}
+// }
 //
 //// MARK: - Label
 //
-//private struct CPULabel: View {
+// private struct CPULabel: View {
 //    let pct: Int
 //    var body: some View {
 //        Text("\(pct)%")
@@ -51,11 +51,11 @@ import SwiftUI
 //            .foregroundStyle(Color.accentColor)
 //            .transaction { $0.animation = nil }
 //    }
-//}
+// }
 //
 //// MARK: - Shape
 //
-//private struct CPUClip: Shape {
+// private struct CPUClip: Shape {
 //    var pct: Double
 //
 //    var animatableData: Double {
@@ -77,13 +77,13 @@ import SwiftUI
 //            path.closeSubpath()
 //        }
 //    }
-//}
+// }
 //
 //// MARK: - CPU Monitor
 //
-//@MainActor
-//@Observable
-//private final class CPUMonitor {
+// @MainActor
+// @Observable
+// private final class CPUMonitor {
 //    var cpu: Double = 0
 //
 //    func update() {
@@ -135,4 +135,4 @@ import SwiftUI
 //            sleep_time: threadInfo[9]
 //        )
 //    }
-//}
+// }

@@ -14,17 +14,18 @@ import XUI
 import Combine
 
 @Observable
-final class ChatViewManager: ErrorPresenter, ViewReloadable {
+final class ChatViewManager: ErrorPresenter, ViewReloadable, Equatable {
 
-	let messageSource: ChatDatasource
-	let scrollController: ChatScrollCoordinator
-	var presentation: ChatPresentationState
-	let bubbleLayout: BubbleFactory
-	let conversationConfig: ConversationInitializer.Configuration
-	let attachments = AttachmentFetcher()
+	@ObservationIgnored let messageSource: ChatDatasource
+	@ObservationIgnored let scrollController: ChatScrollCoordinator
+	@ObservationIgnored var presentation: ChatPresentationState
+	@ObservationIgnored let conversationConfig: ConversationInitializer.Configuration
+	@ObservationIgnored let attachments = AttachmentFetcher()
+	@ObservationIgnored private let id: String
+	@ObservationIgnored var models: MsgModels
+	private let currentUserID: String
+
 	var reloadID: Int = 0
-
-	var messageItems = MessagesArray()
 
 	var conversation: Conversation {
 		willSet {
@@ -36,20 +37,26 @@ final class ChatViewManager: ErrorPresenter, ViewReloadable {
 	}
 
 	init(_ data: ConversationInitializer.PrefetchedData) {
+		let id = data.conversation.uid
+		self.id = id
 		conversationConfig = data.configuration
 		messageSource = .init(data.configuration)
-		scrollController = .init()
+		scrollController = .init(id: id)
 		presentation = .init(data.configuration)
-		bubbleLayout = .init()
 		conversation = data.conversation
+		currentUserID = currentUserId ?? ""
+		models = .init(data.msgs)
 		scrollController.coordinatorDelegate = self
 		messageSource.delegate = self
 		trackItemsChanges()
-		reloadData(with: data.msgs, forceReset: false)
 	}
 
 	deinit {
-		Log("Deinit")
+		log("Deinit")
+	}
+
+	nonisolated static func == (lhs: ChatViewManager, rhs: ChatViewManager) -> Bool {
+		lhs.id == rhs.id
 	}
 }
 
@@ -57,7 +64,7 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 
 	func trackItemsChanges() {
 		withObservationTracking {
-			_ = messageItems.reloadID
+			_ = models.ids
 		} onChange: { [weak self] in
 			guard let self else {
 				return
@@ -71,33 +78,33 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 	}
 
 	var newestMessage: Database.Message? {
-		messageItems.last?.msg
+		models.last?.msg
 	}
 
 	var oldestMessage: Database.Message? {
-		messageItems.first?.msg
+		models.first?.msg
 	}
 
 	var canLoadOlderMessages: Bool {
 		guard let firstMsgID = conversationConfig.firstMsgID else { return false }
-		guard !messageItems.isEmpty else { return false }
-		return !messageItems.contains(withID: firstMsgID)
+		guard !models.isEmpty else { return false }
+		return !models.contains(withID: firstMsgID)
 	}
 
 	var canLoadNewerMessages: Bool {
 		guard let lastMsgID = conversationConfig.lastMsgID else { return false }
-		guard !messageItems.isEmpty else { return false }
-		return !messageItems.contains(withID: lastMsgID)
+		guard !models.isEmpty else { return false }
+		return !models.contains(withID: lastMsgID)
 	}
 
 	func scrollCoordinator(_ coordinator: ChatScrollCoordinator, loadOlderStartingAt message: Message) {
 		coordinator.setUpdateState(.removingItems(.bottom))
 		let pageSize = max(1, conversationConfig.pageSize)
 		let trimCount = pageSize >= 2 ? pageSize - pageSize / 2 : 1
-		if messageItems.count >= pageSize * 2 {
-			messageItems = messageItems.takingPrefix(pageSize)
+		if models.count >= pageSize * 2 {
+			models.takingPrefix(pageSize)
 		} else {
-			messageItems = messageItems.takingPrefix(trimCount)
+			 models.takingPrefix(trimCount)
 		}
 		layoutIfNeeded()
 		Task {
@@ -131,6 +138,7 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 	}
 
 	func resetDatasource() {
+		scrollController.setDefaultAnimation(nil)
 		guard canResetDatasource else {
 			scrollController.enqueueScroll(to: .bottom())
 			return
@@ -147,16 +155,16 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 	}
 
 	func scrollCoordinator(_ coordinator: ChatScrollCoordinator, didFinalizeUpdateAt position: ScrolledPosition) {
-		presentation.bottomAccessory = position != .atBottom ? .scrollDownButton : .contactAvator
+		presentation.bottomAccessory = position != .atBottom ? .scrollDownButton : nil
 		if position == .atBottom {
 			resetDatasourceIfNeeded()
 		}
 	}
 
 	private func resetDatasourceIfNeeded() {
-		if scrollController.updateState.isNotUpdating, !canLoadNewerMessages, messageItems.count > conversationConfig.pageSize + 5 {
+		if scrollController.updateState.isNotUpdating, !canLoadNewerMessages, models.count > conversationConfig.pageSize + 5 {
 			scrollController.scrollTarget = .init(edge: .bottom)
-			messageItems = messageItems.takingSuffix(conversationConfig.pageSize)
+			models.takingSuffix(conversationConfig.pageSize)
 		}
 	}
 	func reloadScrollView(for coordinator: ChatScrollCoordinator) {
@@ -169,30 +177,12 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 
 extension ChatViewManager {
 
-	func msgCellLayoutFor(_ msg: Message, cellItems: [MsgCellViewModel]) -> MsgCellLayout {
-		guard let index = cellItems.index(of: msg.uid) else { return MsgCellLayout() }
-		if index > 0, index < cellItems.count - 1,
-		   let cached = scrollController.messageLayoutCache.msgCellLayout(for: msg.uid) {
-			return cached
-		}
-		let next = cellItems[safe: index + 1]?.msg
-		let previous = cellItems[safe: index - 1]?.msg
-		let layout = bubbleLayout.msgCellLayout(for: msg, previous: previous, next: next)
-		if index > 0, index < cellItems.count - 1, previous != nil, next != nil {
-			scrollController.messageLayoutCache.setMsgCellLayout(layout, for: msg.uid)
-		}
-		return layout
-	}
-}
-
-extension ChatViewManager {
-
 	func setSelectedMsg(_ uid: String) {
-		guard let index = messageItems.index(of: uid) else { return }
+		guard let index = models.index(of: uid) else { return }
 		let oldValue = presentation.selectedMsg
 
-		let nextMsg = messageItems[safe: index + 1]?.msg
-		let previousMsg = messageItems[safe: index - 1]?.msg
+		let nextMsg = models[safe: index + 1]?.msg
+		let previousMsg = models[safe: index - 1]?.msg
 		let newValue: SelectedMsg? = oldValue?.id == uid ? nil : SelectedMsg(
 			id: uid,
 			previous: previousMsg?.uid,
@@ -201,11 +191,11 @@ extension ChatViewManager {
 		presentation.updateSelectedMsg(newValue)
 		if let oldValue {
 			scrollController.messageLayoutCache.removeCache(for: oldValue.id)
-			messageItems.element(withID: oldValue.id)?.layoutIfNeeded()
+			models.element(withID: oldValue.id)?.layoutIfNeeded()
 		}
 		if let newValue {
 			scrollController.messageLayoutCache.removeCache(for: newValue.id)
-			let viewModel = messageItems.element(withID: newValue.id)
+			let viewModel = models.element(withID: newValue.id)
 			viewModel?.layoutIfNeeded()
 			viewModel?.animate()
 		}
@@ -217,10 +207,10 @@ extension ChatViewManager {
 extension ChatViewManager {
 
 	func onViewAppear() async throws {
-		scrollController.markViewAsLoaded()
 		conversation = try await conversation.reload(
 			refetch: !scrollController.updateState.hasViewLoaded
 		)
 		updateReceiveMsgs()
+		scrollController.markViewAsLoaded()
 	}
 }

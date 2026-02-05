@@ -74,7 +74,7 @@ extension PGroup: CollectionDocument, UIdentifiable {
 			theme = item.theme
 		}
 		if seenMembers != item.seenMembers {
-			seenMembers = item.seenMembers ?? []
+			seenMembers = item.seenMembers
 		}
 	}
 }
@@ -90,7 +90,7 @@ extension PGroup: SendableDocument {
             photoURL: snapshot.photoURL ?? "",
             members: snapshot.members,
             createdBy: snapshot.createdBy,
-            seenMembers: snapshot.seenMembers ?? []
+            seenMembers: snapshot.seenMembers
         )
     }
 

@@ -22,7 +22,7 @@ public struct ComfirmButton<Content: View>: View {
 
     public var body: some View {
         label()
-            ._comfirmationDialouge("Attention", message: "Comfirm to \(message)") {
+            .confirmationDialogue("Attention", message: "Comfirm to \(message)") {
                 Button(action: action) {
                     Text("Continue \(message)")
                 }

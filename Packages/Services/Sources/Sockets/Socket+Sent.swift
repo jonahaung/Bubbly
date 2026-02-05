@@ -16,20 +16,20 @@ extension Socket {
 		switch data {
 		case let .newMsg(rMsg):
 			let msg = Message(rMsg)
-			try await Store.shared.msgStore.insert(msg)
+			try await Store.shared.msgStore?.insert(msg)
 			notifyMessage(data)
 			if msg.isSender {
 				addToQueue()
 			}
 		case let .deleteMsg(rMsg: rMsg):
-			try await Store.shared.msgStore.delete(uid: rMsg.uid)
+			try await Store.shared.msgStore?.delete(uid: rMsg.uid)
 			notifyMessage(data)
 			if rMsg.uid == currentUserId {
 				addToQueue()
 			}
 			addToQueue()
 		case let .reaction(payload):
-			try await Store.shared.msgStore.updateAndSave(uid: payload.msgID) { model in
+			try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in
 				let isSame = model.reactions.contains(
 					where: { $0.senderID == payload.reaction.senderID && $0.rawValue == payload.reaction.rawValue })
 				model.reactions.removeAll(where: { $0.senderID == payload.reaction.senderID })
@@ -78,13 +78,13 @@ extension Socket {
 				.newMsg(rMsg: rMsg),
 				conversation: conversation
 			)
-			try await Store.shared.msgStore.updateAndSave(uid: rMsg.uid) { model in
+			try await Store.shared.msgStore?.updateAndSave(uid: rMsg.uid) { model in
 				model.update(from: msg)
 			}
 			notifyMessage(.updatedMsg(rMsg: .init(msg)))
 		case let .updatedMsg(rMsg):
 			try await sendToRemote(.updatedMsg(rMsg: rMsg), conversation: conversation)
-			try await Store.shared.msgStore.updateAndSave(uid: rMsg.uid) { model in
+			try await Store.shared.msgStore?.updateAndSave(uid: rMsg.uid) { model in
 				model.update(with: rMsg)
 			}
 			notifyMessage(data)
@@ -96,7 +96,7 @@ extension Socket {
 			try await sendToRemote(data, conversation: conversation)
 		case let .seenStatus(status: status):
 			guard
-				let msg = try await Store.shared.msgStore.fetch(
+				let msg = try await Store.shared.msgStore?.fetch(
 					uid: status.msgID
 				)
 			else {
@@ -181,9 +181,12 @@ extension Socket {
 	}
 
 	private func encrypt(_ dataString: String, publicKeyString: String) async throws -> String {
-		try await cryptoService.encrypt(
+		guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
+			throw SocketError.encryptionFailed
+		}
+		return try cryptoService.encrypt(
 			dataString: dataString,
-			recipientPublicKeyString: publicKeyString
+			recipientPublicKeyString: publicKeyString, currentUserID: currentUserID
 		)
 	}
 

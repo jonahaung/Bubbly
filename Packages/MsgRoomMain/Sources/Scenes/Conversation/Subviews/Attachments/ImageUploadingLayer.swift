@@ -72,7 +72,7 @@ struct ImageUploadingLayer: View {
 				onCompleteUpload?(newValue)
 			}
 		} catch {
-			Log(error)
+			log(error)
 		}
 	}
 }

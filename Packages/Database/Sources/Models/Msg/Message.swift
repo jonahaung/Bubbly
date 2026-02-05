@@ -18,7 +18,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
     public var incomingStatus: MsgIncomingStatus
     public var outgoingStatus = [String: MsgOutgoingStatus]()
     public var attachments: [Attachment]
-	public var reactions: [Reaction]
+    public var reactions: [Reaction]
 
     public init(
         uid: String,
@@ -28,8 +28,8 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         date: Date,
         incomingStatus: MsgIncomingStatus,
         outgoingStatus: [String: MsgOutgoingStatus],
-		attachments: [Attachment],
-		reactions: [Reaction]
+        attachments: [Attachment],
+        reactions: [Reaction]
     ) {
         self.uid = uid
         self.senderID = senderID
@@ -39,7 +39,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         self.incomingStatus = incomingStatus
         self.outgoingStatus = outgoingStatus
         self.attachments = attachments
-		self.reactions = reactions
+        self.reactions = reactions
     }
 
     public init(_ rMsg: RMsg) {
@@ -51,8 +51,8 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
             date: ServerTime(rMsg.date).date,
             incomingStatus: rMsg.incomingStatus,
             outgoingStatus: rMsg.outgoingStatus,
-			attachments: rMsg.attachments,
-			reactions: rMsg.reactions
+            attachments: rMsg.attachments,
+            reactions: rMsg.reactions
         )
     }
 }
@@ -70,11 +70,10 @@ public extension Message {
 }
 
 public extension Message {
-	var displayText: String {
-		guard let text, !text.isWhitespace else {
-			return attachments.first?.displayText ?? ""
-		}
-		return text
-	}
+    var displayText: String {
+        guard let text, !text.isWhitespace else {
+            return attachments.first?.displayText ?? ""
+        }
+        return text
+    }
 }
-

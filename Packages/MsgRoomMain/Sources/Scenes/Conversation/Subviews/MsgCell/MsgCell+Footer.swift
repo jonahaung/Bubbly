@@ -20,8 +20,7 @@ extension MsgCell {
 		var body: some View {
 			let hPadding: CGFloat = ChatLayoutConstants.Cell.defaultSpacing + 4 + 8
 			Text(footerText)
-				.font(typography.footnote)
-				.foregroundStyle(.secondary)
+				.font(typography.caption1)
 				.padding(.horizontal, hPadding)
 				.equatable(by: msg.uid)
 		}

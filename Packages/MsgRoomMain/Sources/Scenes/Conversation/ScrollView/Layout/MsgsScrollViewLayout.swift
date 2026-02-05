@@ -11,7 +11,7 @@ import SwiftUI
 import XUI
 
 private enum LayoutConstants {
-	static let bubbleWidthRatio: CGFloat = 0.95
+	static let bubbleWidthRatio: CGFloat = 0.92
 }
 
 struct MsgsScrollViewLayoutConfiguration {
@@ -67,10 +67,21 @@ extension MsgsScrollViewLayout {
 			height: max(proposedSize.height, cache.totalHeight)
 		)
 	}
-
+	func explicitAlignment(
+	             of guide: HorizontalAlignment,
+	             in bounds: CGRect,
+	             proposal: ProposedViewSize,
+	             subviews: Subviews,
+	             cache: inout ()
+	         ) -> CGFloat? {
+	             if guide == .leading {
+	                 return bounds.minX + 10
+	             }
+	             return nil
+	         }
 	func placeSubviews(
 		in _: CGRect,
-		proposal : ProposedViewSize,
+		proposal: ProposedViewSize,
 		subviews: Subviews,
 		cache: inout Cache
 	) {
