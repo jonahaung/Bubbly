@@ -16,7 +16,7 @@ public struct ConversationTheme: Sendable, Hashable, Equatable, EmptyRepresentab
 	let outgoingShadowColor: Color
 	let incomingBubbbleColor: Color
 	let incomingShadowColor: Color
-	let bubbleCornorRadius: CGFloat
+	let bubbleCornerRadius: CGFloat
 	let bubblePading: EdgeInsets
 	let fontSize: CGFloat
 
@@ -42,7 +42,7 @@ public struct ConversationTheme: Sendable, Hashable, Equatable, EmptyRepresentab
 			bottom: verticalPadding,
 			trailing: horizontalPadding
 		)
-		self.bubbleCornorRadius = max(16, font.lineHeight * 0.75)
+		self.bubbleCornerRadius = max(16, font.lineHeight * 0.75)
 		outgoingShadowColor = outgoingBubbleColor.mix(with: .primary, by: 0.1)
 		incomingShadowColor = incomingBubbbleColor.mix(with: .primary, by: 0.1)
 	}

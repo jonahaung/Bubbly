@@ -22,13 +22,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
 	) -> Bool {
 		FirebaseApp.configure()
+		FirebaseKeychainSanitizer.sanitize()
 		FirebaseConfiguration.shared.setLoggerLevel(.error)
 		Auth.auth().shareAuthStateAcrossDevices = true
-//		pushNotificationService.registerForPushNotifications {
-//			MainActor.assumeIsolated {
-//				debugPrint("1️⃣ Registered for push notifications")
-//			}
-//		}
 		return true
 	}
 

@@ -81,25 +81,25 @@ public extension MsgModels {
 		styleCache[id]
 	}
 	func set(msgs: [Message], forceReset: Bool) {
-		var models = forceReset ? [] : self.ids.compactMap{ self.cached(for: $0)}
+		var models = forceReset ? [] : self.ids.compactMap { self.cached(for: $0) }
+		var existingIDs = Set(models.map(\.msg.uid))
 		msgs.forEach { msg in
 			if let cached = self.cached(for: msg.uid) {
 				cached.update(with: msg)
+				if let existingIndex = models.firstIndex(where: { $0.msg.uid == msg.uid }) {
+					models.remove(at: existingIndex)
+				}
 				let index = models.insertionIndex(for: cached, by: \.msg.date)
 				models.insert(cached, at: index)
+				existingIDs.insert(msg.uid)
 			} else {
 				let model = self.model(for: msg)
 				let index = models.insertionIndex(for: model, by: \.msg.date)
 				models.insert(model, at: index)
+				existingIDs.insert(msg.uid)
 			}
 		}
-		models.forEach { model in
-			if model.layout.isEmpty {
-				let style = updateBubble(for: model.msg, msgs: models.map{ $0.msg })
-				styleCache[model.msg.uid] = style
-				model.update(layout: style)
-			}
-		}
+		rebuildLayouts(models: models)
 		ids = models.map(\.msg.uid)
 	}
 
@@ -114,7 +114,7 @@ public extension MsgModels {
 	}
 
 	func insert(msg: Message) {
-		let index = insertionIndex(for: msg.uid, by: \.self)
+		let index = insertionIndex(for: msg)
 		let model = model(for: msg)
 
 		let prevMsg: Message? = {
@@ -164,6 +164,12 @@ public extension MsgModels {
 	) -> Int {
 		ids.insertionIndex(for: id, by: keyPath)
 	}
+	func insertionIndex(for msg: Message) -> Int {
+		ids.firstIndex { id in
+			guard let existing = cached(for: id) else { return false }
+			return existing.msg.date > msg.date
+		} ?? ids.count
+	}
 
 	func takingPrefix(_ count: Int) {
 		guard count > 0 else { return }
@@ -175,9 +181,41 @@ public extension MsgModels {
 	}
 
 	func update(msg: Message) {
-		cached(for: msg.uid)?.update(with: msg)
+		guard let model = cached(for: msg.uid) else { return }
+		model.update(with: msg)
+		guard let index = ids.firstIndex(where: { $0 == msg.uid }) else { return }
+		refreshLayout(at: index)
 	}
 	func remove(msg: Message) {
-		ids.removeAll(where: { $0 == msg.uid })
+		guard let index = ids.firstIndex(where: { $0 == msg.uid }) else { return }
+		ids.remove(at: index)
+		modelCache[msg.uid] = nil
+		styleCache[msg.uid] = nil
+		refreshLayout(at: index - 1)
+		refreshLayout(at: index)
+	}
+}
+
+private extension MsgModels {
+	func rebuildLayouts(models: [MsgCellViewModel]) {
+		let messages = models.map(\.msg)
+		for (index, model) in models.enumerated() {
+			let prevMsg = messages[safe: index - 1]
+			let nextMsg = messages[safe: index + 1]
+			let style = bubbleFactory.style(for: model.msg, previous: prevMsg, next: nextMsg)
+			styleCache[model.msg.uid] = style
+			model.update(layout: style)
+		}
+	}
+
+	func refreshLayout(at index: Int) {
+		guard ids.indices.contains(index) else { return }
+		guard let id = ids[safe: index],
+		      let model = cached(for: id) else { return }
+		let prevMsg = ids[safe: index - 1].flatMap { cached(for: $0)?.msg }
+		let nextMsg = ids[safe: index + 1].flatMap { cached(for: $0)?.msg }
+		let style = bubbleFactory.style(for: model.msg, previous: prevMsg, next: nextMsg)
+		styleCache[model.msg.uid] = style
+		model.update(layout: style)
 	}
 }

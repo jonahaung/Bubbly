@@ -89,7 +89,6 @@ public struct ConversationScene: View {
 		.environment(\.sharedFocusState, SharedFocusState($focusState))
 		.environment(\.sharedNamespace, SharedNamespace(namespace))
 		.environment(\.msgCellActions, MsgCellAction(action: handleMsgCellInteraction))
-
 		.task {
 			do {
 				try await manager.onViewAppear()
@@ -124,7 +123,6 @@ private extension ConversationScene {
 	}
 
 	func handleReact(_ msg: Message, _ reaction: ReactionType) {
-
 		let currentUserID = currentUser.uid
 		Task.detached {
 			do {

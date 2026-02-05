@@ -22,12 +22,11 @@ extension ComposeBar {
 			} label: {
 				Image(systemName: imageName)
 					.resizable()
-					.contentTransition(.symbolEffect(.replace.magic(fallback: .replace)))
 					.scaledToFit()
 					.frame(square: 24)
 			}
-			.frame(square: 44)
-			.background(.background, in: .circle)
+			.frame(width: 44, height: 44, alignment: .center)
+			.background(.windowBackground, in: .circle)
 			.overlay {
 				if composer.isLoading {
 					LoadingIndicator(43)

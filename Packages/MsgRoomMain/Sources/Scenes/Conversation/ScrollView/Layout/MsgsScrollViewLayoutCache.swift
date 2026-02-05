@@ -26,11 +26,11 @@ final class MsgsScrollViewLayoutCache: @unchecked Sendable {
 }
 
 extension MsgsScrollViewLayoutCache {
-	func size(for msgID: String) -> CGSize? {
-		cachedCellSize[msgID]
+	func size(for key: String) -> CGSize? {
+		cachedCellSize[key]
 	}
-	func setSize(_ size: CGSize?, for msgID: String) {
-		cachedCellSize[msgID] = size
+	func setSize(_ size: CGSize?, for key: String) {
+		cachedCellSize[key] = size
 	}
 }
 
@@ -56,7 +56,7 @@ extension MsgsScrollViewLayoutCache {
 		cachedLayout = nil
 	}
 	func removeCache(for id: String) {
-		cachedCellSize[id] = nil
+		cachedCellSize = cachedCellSize.filter { !$0.key.hasPrefix(id + "|") && $0.key != id }
 		if let index = cachedLayout?.layouts.firstIndex(where: { $0.id == id }) {
 			cachedLayout?.layouts.remove(at: index)
 		}

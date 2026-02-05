@@ -12,7 +12,7 @@ import PhotosUI
 struct ComposeBar: View {
 
 	let composer: ChatComposer
-
+	@Environment(\.conversationTheme) private var theme
 	var body: some View {
 		VStack(spacing: 0) {
 			switch composer.source {
@@ -23,70 +23,58 @@ struct ComposeBar: View {
 					ComposeBarAttachmentView()
 				}
 			}
-
-			Row(alignment: .bottom, spacing: -8) {
+			HStack(alignment: .bottom, spacing: 4) {
 				if composer.source == .menu {
-					ComposeBarSourceButton(source: .camera)
-					PhotosPicker(
-						selection: composer.photoPicker.photoPickerItems,
-						maxSelectionCount: 5,
-						selectionBehavior: .continuousAndOrdered,
-						preferredItemEncoding: .automatic,
-						photoLibrary: .shared()
-					) {
-						Image(systemName: "photo.on.rectangle.angled")
-							.resizable()
-							.scaledToFit()
-							.frame(width: 24, height: 24)
-							.foregroundStyle(AngularGradient(
-								gradient: Gradient(
-									colors:[.blue, .accentColor]
-								),
-								center: .center
-							))
-					}
-					.photosPickerStyle(.presentation)
-					.frame(square: 44)
-					.background(.windowBackground, in: .circle)
+					HStack(alignment: .center, spacing: -8) {
+						ComposeBarSourceButton(source: .camera)
+						PhotosPicker(
+							selection: composer.photoPicker.photoPickerItems,
+							maxSelectionCount: 5,
+							selectionBehavior: .continuousAndOrdered,
+							preferredItemEncoding: .automatic,
+							photoLibrary: .shared()
+						) {
+							Image(systemName: ChatComposer.Source.liary.systemImageName)
+								.resizable()
+								.scaledToFit()
+								.frame(width: 20, height: 20)
+						}
+						.photosPickerStyle(.presentation)
+						.frame(square: 38)
+						.foregroundStyle(
+							ChatComposer.Source.liary.foreGroundStyle
+						)
+						.background(.windowBackground, in: .circle)
 
-					Spacer(minLength: 32)
-					ComposeBarSourceButton(source: .audio)
-					ComposeBarSourceButton(source: .machineImag)
-					ComposeBarSourceButton(source: .emoji)
+						ComposeBarSourceButton(source: .audio)
+					}
+					.frame(height: 44)
+
+					HStack(alignment: .center, spacing: -8) {
+						ComposeBarSourceButton(source: .machineImag)
+						ComposeBarSourceButton(source: .emoji)
+					}
+					.frame(height: 44)
 				} else {
-					ComposeBarSourceButton(source: composer.source)
+					HStack(alignment: .center) {
+						ComposeBarSourceButton(source: composer.source)
+					}
+					.frame(height: 44)
 				}
-				Spacer(minLength: 17)
 				ComposeBarInputTextField(composer: composer)
 				ComposeBarSendButton()
 			}
-			.fontDesign(.rounded)
-			.geometryGroup()
+			.padding(.init(top: 0, leading: 8, bottom: 4, trailing: 8))
 		}
 		.sensoryFeedback(
 			.impact(weight: .light, intensity: 0.7),
 			trigger: composer.source
 		)
-		.animation(.interactiveSpring, value: composer.source)
-		.animation(.interactiveSpring, value: composer.hasContent)
 		.ignoresSafeArea(.container, edges: .bottom)
 	}
 }
 
 private extension ComposeBar {
-	struct Row<Content: View>: View {
-		var alignment: VerticalAlignment = .bottom
-		var spacing: CGFloat = 0
-		@ViewBuilder var content: () -> Content
-
-		var body: some View {
-			HStack(alignment: alignment, spacing: spacing) {
-				content()
-			}
-			.padding(.init(top: 0, leading: 8, bottom: 4, trailing: 8))
-		}
-	}
-
 	struct EmojiPanel: View {
 		@Environment(ChatComposer.self) private var composer: ChatComposer
 

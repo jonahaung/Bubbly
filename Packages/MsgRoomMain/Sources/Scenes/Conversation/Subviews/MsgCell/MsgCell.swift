@@ -24,7 +24,7 @@ struct MsgCell: View {
 	var body: some View {
 		VStack(alignment: viewModel.horizontalAlignment, spacing: 0) {
 			if layout.showTimeSeparator {
-				TimeSeparater()
+				TimeSeparator()
 			}
 			if layout.showTopPadding {
 				CellSpacer()

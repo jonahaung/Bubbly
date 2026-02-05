@@ -15,7 +15,7 @@ public extension Socket {
                 guard let self else { return }
                 await queue.addOperation {
 					if try await Store.shared.msgStore?.exists(uid: rMsg.uid) == true {
-                        AudioService.shared.playMessageIncoming()
+						await AudioService.shared.play(.msgIncoming)
                         await self.notifyMessage(data)
                     }
                 }

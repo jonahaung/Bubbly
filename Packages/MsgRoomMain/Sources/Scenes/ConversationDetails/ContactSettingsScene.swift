@@ -43,7 +43,10 @@ public struct ContactSettingsScene: View {
 						ChatBackground.allCases,
 						background
 					)
-					Stepper("Cornor Radius - \(properties.theme.bubbleCornorRadius.int)", value: bubbleCornorRadius)
+					Stepper(
+						"Cornor Radius - \(properties.theme.bubbleCornorRadius.int)",
+						value: bubbleCornerRadius
+					)
 				}
 			}
 			Section {
@@ -131,7 +134,7 @@ public struct ContactSettingsScene: View {
 		}
 	}
 
-	private var bubbleCornorRadius: Binding<CGFloat> {
+	private var bubbleCornerRadius: Binding<CGFloat> {
 		.init {
 			properties.theme.bubbleCornorRadius
 		} set: { newValue in

@@ -58,7 +58,6 @@ private extension ToastPresenter {
     func processQueue() {
         // If no current toast and queue has items
         guard toast == nil, !queue.isEmpty else { return }
-        UIImpactFeedbackGenerator(style: .rigid).impactOccurred(intensity: 0.8)
         let next = queue.removeFirst()
         toast = next
         startTracking()

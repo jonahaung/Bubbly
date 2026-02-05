@@ -7,7 +7,7 @@
 
 import Core
 import Database
-import UIKit
+import Foundation
 
 public struct BubbleFactory: Sendable {
     private let minutesForChatMsgGrouping: Int
@@ -41,18 +41,6 @@ public struct BubbleFactory: Sendable {
         previousMsg: Message?,
         nextMsg: Message?
     ) -> BubbleCorner {
-        if isSent {
-            resolveSendingCorner(msg, previousMsg: previousMsg, nextMsg: nextMsg)
-        } else {
-            resolveReceivingCorner(msg, previousMsg: previousMsg, nextMsg: nextMsg)
-        }
-    }
-
-    private func resolveSendingCorner(
-        _ msg: Message,
-        previousMsg: Message?,
-        nextMsg: Message?
-    ) -> BubbleCorner {
         let canPreviousGroup =
             previousMsg.map {
                 shouldGroupWithPrevious(
@@ -67,52 +55,42 @@ public struct BubbleFactory: Sendable {
                     nextMsg: $0
                 )
             } ?? false
-
-        switch (previousMsg != nil, nextMsg != nil) {
-        case (true, true):
-            if canPreviousGroup, canNextGroup { return .sendingCenter }
-            if !canPreviousGroup, !canNextGroup { return .all }
-            if canPreviousGroup, !canNextGroup { return .sendingBottom }
-            return .sendingTop
-        case (true, false):
-            return canPreviousGroup ? .sendingBottom : .all
-        case (false, true):
-            return canNextGroup ? .sendingTop : .all
-        case (false, false):
-            return .all
-        }
+        return resolveCorner(
+            isSent: isSent,
+            hasPrevious: previousMsg != nil,
+            hasNext: nextMsg != nil,
+            canGroupWithPrevious: canPreviousGroup,
+            canGroupWithNext: canNextGroup
+        )
     }
 
-    private func resolveReceivingCorner(
-        _ msg: Message,
-        previousMsg: Message?,
-        nextMsg: Message?
+    private func resolveCorner(
+        isSent: Bool,
+        hasPrevious: Bool,
+        hasNext: Bool,
+        canGroupWithPrevious: Bool,
+        canGroupWithNext: Bool
     ) -> BubbleCorner {
-        let canPreviousGroup =
-            previousMsg.map {
-                shouldGroupWithPrevious(
-                    msg: msg,
-                    previousMsg: $0
-                )
-            } ?? false
-        let canNextGroup =
-            nextMsg.map {
-                shouldGroupWithNext(
-                    msg: msg,
-                    nextMsg: $0
-                )
-            } ?? false
-
-        switch (previousMsg != nil, nextMsg != nil) {
+        switch (hasPrevious, hasNext) {
         case (true, true):
-            if canPreviousGroup, canNextGroup { return .receivingCenter }
-            if !canPreviousGroup, !canNextGroup { return .all }
-            if canPreviousGroup, !canNextGroup { return .receivingBottom }
-            return .receivingTop
+            if canGroupWithPrevious, canGroupWithNext {
+                return isSent ? .sendingCenter : .receivingCenter
+            }
+            if !canGroupWithPrevious, !canGroupWithNext {
+                return .all
+            }
+            if canGroupWithPrevious, !canGroupWithNext {
+                return isSent ? .sendingBottom : .receivingBottom
+            }
+            return isSent ? .sendingTop : .receivingTop
         case (true, false):
-            return canPreviousGroup ? .receivingBottom : .all
+            return canGroupWithPrevious
+                ? (isSent ? .sendingBottom : .receivingBottom)
+                : .all
         case (false, true):
-            return canNextGroup ? .receivingTop : .all
+            return canGroupWithNext
+                ? (isSent ? .sendingTop : .receivingTop)
+                : .all
         case (false, false):
             return .all
         }
@@ -133,13 +111,12 @@ public struct BubbleFactory: Sendable {
             )
         }
 
-        let showTimeSeparater = !isSimilierDateTime(of: msg.date, from: previous)
-		let showTopPadding = !showTimeSeparater && (
-			msg.senderID != previous.senderID || msg.attachments
-				.isEmpty == false)
+        let showTimeSeparator = !isSimilarDateTime(of: msg.date, from: previous)
+        let canGroupWithPrevious = shouldGroupWithPrevious(msg: msg, previousMsg: previous)
+		let showTopPadding = !showTimeSeparator && !canGroupWithPrevious
         let bubble = getBubble(msg: msg, previousMsg: previous, nextMsg: next)
         return .init(
-            showTimeSeparator: showTimeSeparater,
+            showTimeSeparator: showTimeSeparator,
             showTopPadding: showTopPadding,
             bubble: bubble
         )
@@ -148,24 +125,24 @@ public struct BubbleFactory: Sendable {
     // MARK: - Grouping helpers
 
     private func shouldGroupWithPrevious(msg: Message, previousMsg: Message) -> Bool {
-		isEqual(of: msg, to: previousMsg) && isSimilierDateTime(
+		isEqual(of: msg, to: previousMsg) && isSimilarDateTime(
 			of: msg.date,
 			from: previousMsg
-		) && previousMsg.attachments.isEmpty
+		) && msg.attachments.isEmpty && previousMsg.attachments.isEmpty
     }
 
     private func shouldGroupWithNext(msg: Message, nextMsg: Message) -> Bool {
-		isEqual(of: msg, to: nextMsg) && isSimilierDateTime(
+		isEqual(of: msg, to: nextMsg) && isSimilarDateTime(
 			of: msg.date,
 			from: nextMsg
-		) && nextMsg.attachments.isEmpty
+		) && msg.attachments.isEmpty && nextMsg.attachments.isEmpty
     }
 
     private func isEqual(of thisMsg: Message, to msg: Message) -> Bool {
         thisMsg.senderID == msg.senderID
     }
 
-    private func isSimilierDateTime(of date: Date, from msg: Message) -> Bool {
+    private func isSimilarDateTime(of date: Date, from msg: Message) -> Bool {
         let difference = date.getDifference(from: msg.date, unit: .minute)
         return abs(difference) < minutesForChatMsgGrouping
     }

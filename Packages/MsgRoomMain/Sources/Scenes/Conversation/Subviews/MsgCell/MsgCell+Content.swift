@@ -62,39 +62,36 @@ extension MsgCell {
 		private var layout: MsgCellLayout { viewModel.layout }
 		
 		var body: some View {
-			
-			Group {
-				if !viewModel.msg.attachments.isEmpty {
-					VStack(alignment: viewModel.horizontalAlignment, spacing: 0) {
-						MsgAttachmentsView(
-							attachments: viewModel.msg.attachments,
-							alignment: viewModel.horizontalAlignment
-						)
-						
-						if let text = viewModel.msg.text, !text.isWhitespace {
-							TextContent(text: text)
-						}
-					}
-				} else if let text = viewModel.msg.text {
-					BubbleTextLayout {
+			if !viewModel.msg.attachments.isEmpty {
+				VStack(alignment: viewModel.horizontalAlignment, spacing: 0) {
+					MsgAttachmentsView(
+						attachments: viewModel.msg.attachments,
+						alignment: viewModel.horizontalAlignment
+					)
+
+					if let text = viewModel.msg.text, !text.isWhitespace {
 						TextContent(text: text)
 					}
 				}
+			} else if let text = viewModel.msg.text {
+				BubbleTextLayout {
+					TextContent(text: text)
+				}
+				.padding(theme.bubblePading)
+				.background {
+					bubbleBackground
+						.padding(
+							.init(
+								top: 0.2,
+								leading: viewModel.isSender ? 1 : 0.2,
+								bottom: 1,
+								trailing: viewModel
+									.isSender ? 0.2 : 1)
+						)
+						.background(theme.incomingShadowColor, in: .rect(corners: .concentric))
+				}
+				.containerShape(bubbleShape)
 			}
-			.padding(theme.bubblePading)
-			.background {
-				bubbleBackground
-					.padding(
-						.init(
-							top: 0.2,
-							leading: viewModel.isSender ? 1 : 0.2,
-							bottom: 1,
-							trailing: viewModel
-								.isSender ? 0.2 : 1)
-					)
-					.background(theme.incomingShadowColor, in: .rect(corners: .concentric))
-			}
-			.containerShape(bubbleShape)
 		}
 		
 		private var bubbleBackground: some View {
@@ -108,7 +105,7 @@ extension MsgCell {
 		
 		private var bubbleShape: UnevenRoundedRectangle {
 			computeBubbleCorner()
-				.roundedRectange(cornerRadius: theme.bubbleCornorRadius)
+				.roundedRectange(cornerRadius: theme.bubbleCornerRadius)
 		}
 		
 		private func computeBubbleCorner() -> BubbleCorner {

@@ -9,12 +9,8 @@ import SwiftUI
 import XUI
 
 extension MsgCell {
-
-	
 	@MainActor
 	struct TextContent: View, @MainActor Equatable {
-
-
 		static let font = UIFont.preferredFont(forTextStyle: .body)
 		let text: String
 

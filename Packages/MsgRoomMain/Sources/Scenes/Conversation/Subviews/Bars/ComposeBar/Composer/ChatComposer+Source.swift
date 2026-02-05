@@ -20,15 +20,15 @@ extension ChatComposer.Source {
 	var systemImageName: String {
 		switch self {
 		case .audio:
-			"mic.fill"
+			"microphone.and.signal.meter.fill"
 		case .machineImag:
 			"apple.intelligence"
 		case .text:
 			"text.line.2.summary"
 		case .liary:
-			"photo.stack"
+			"photo.stack.fill"
 		case .camera:
-			"camera.aperture"
+			"camera.viewfinder"
 		case .document:
 			"text.document"
 		case .emoji:
@@ -36,5 +36,26 @@ extension ChatComposer.Source {
 		case .menu:
 			"plus"
 		}
+	}
+
+	var foreGroundStyle: AnyShapeStyle {
+		switch self {
+		case .camera, .liary, .audio, .text, .menu, .document:
+			AnyShapeStyle(
+				Color.accentColor.gradient
+			)
+		case .machineImag:
+			AnyShapeStyle(AngularGradient(
+				gradient: Gradient(
+					colors:[.indigo, .blue, .red, .orange, .indigo]
+				),
+				center: .center
+			))
+		case .emoji:
+			AnyShapeStyle(
+				Color.red.gradient
+			)
+		}
+
 	}
 }

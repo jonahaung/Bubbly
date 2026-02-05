@@ -75,7 +75,7 @@ extension MsgsScrollViewLayout {
 	             cache: inout ()
 	         ) -> CGFloat? {
 	             if guide == .leading {
-	                 return bounds.minX + 10
+	                 return bounds.minX + config.contentInsets.leading
 	             }
 	             return nil
 	         }
@@ -160,8 +160,12 @@ extension MsgsScrollViewLayout {
 
 extension MsgsScrollViewLayout {
 	private func getOrCalculateSize(for layoutValue: MsgLayoutValue, subview: LayoutSubview, proposedWidth: CGFloat) -> CGSize {
-		let messageID = layoutValue.uid
-		if let cachedSize = layoutCache.size(for: messageID) {
+		let cacheKey = makeSizeCacheKey(
+			messageID: layoutValue.uid,
+			proposedWidth: proposedWidth,
+			attachmentsCount: layoutValue.attachmentsCount
+		)
+		if let cachedSize = layoutCache.size(for: cacheKey) {
 			return cachedSize
 		}
 		let calculatedSize = calculateOptimalSize(
@@ -169,7 +173,7 @@ extension MsgsScrollViewLayout {
 			layoutValue: layoutValue,
 			proposedWidth: proposedWidth
 		)
-		layoutCache.setSize(calculatedSize, for: messageID)
+		layoutCache.setSize(calculatedSize, for: cacheKey)
 		return calculatedSize
 	}
 
@@ -184,6 +188,11 @@ extension MsgsScrollViewLayout {
 		let proposedViewSize = ProposedViewSize(width: targetWidth, height: nil)
 		let dimension = subview.sizeThatFits(proposedViewSize)
 		return .init(width: dimension.width, height: dimension.height)
+	}
+
+	private func makeSizeCacheKey(messageID: String, proposedWidth: CGFloat, attachmentsCount: Int) -> String {
+		let widthKey = String(format: "%.0f", proposedWidth)
+		return "\(messageID)|\(attachmentsCount)|\(widthKey)"
 	}
 }
 

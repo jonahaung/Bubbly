@@ -13,9 +13,6 @@ public extension Notification.Name {
     static func msgNoti(for conID: String) -> Notification.Name {
         Notification.Name("conversation=\(conID)")
     }
-	static func reloadMsgs(for conID: String) -> Notification.Name {
-		Notification.Name("reloadMsgs=\(conID)")
-	}
     static let receiveDeviceToken = Notification.Name("receiveDeviceToken")
     static let inboxChanges = Notification.Name("inboxChanges")
 }

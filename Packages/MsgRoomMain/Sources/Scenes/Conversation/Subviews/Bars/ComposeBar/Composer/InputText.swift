@@ -23,11 +23,10 @@ final class InputText: Equatable {
 	var text: String = String() {
 		willSet {
 			let oldValue = self.text
-			let diff = newValue.count - oldValue.count
 			switch true {
-			case abs(diff) == 1 && (oldValue.isEmpty || newValue.isEmpty):
+			case (newValue.isEmpty || oldValue.isEmpty) && oldValue != newValue:
 				delegate?.inputText(self, didBeganEditing: newValue)
-			case diff > 3:
+			case newValue.count - oldValue.count > 10:
 				parseLinks(newValue)
 			default:
 				break
@@ -48,9 +47,9 @@ final class InputText: Equatable {
 
 	func selectAll() {
 		let string = text
-		if string.isWhitespace == false, let range = string.range(of: string) {
-			selection = .init(range: range)
-		}
+		let start = string.startIndex
+		let end = string.endIndex
+		selection = TextSelection(range: start..<end)
 	}
 	private func parseLinks(_ string: String) {
 		let currentText = string.trimmed

@@ -20,7 +20,7 @@ extension ComposeBar {
 				textField()
 			}
 			.background(.background, in: .containerRelative)
-			.containerShape(RoundedRectangle(cornerRadius: theme.bubbleCornorRadius))
+			.containerShape(RoundedRectangle(cornerRadius: theme.bubbleCornerRadius))
 		}
 
 		private func textField() -> some View {

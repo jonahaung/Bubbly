@@ -1,19 +1,36 @@
 import Foundation
-@preconcurrency import UserNotifications
+import UserNotifications
 
-public struct NotificationContent: @unchecked Sendable {
+public enum NotificationSound: Sendable {
+    case `default`
+    case none
+    case named(String)
+}
+
+public enum NotificationInterruptionLevel: Int, Sendable {
+    case passive = 0
+    case active = 1
+    case timeSensitive = 2
+    case critical = 3
+}
+
+public enum NotificationTrigger: Sendable {
+    case timeInterval(TimeInterval, repeats: Bool)
+}
+
+public struct NotificationContent: Sendable {
     public let id: String
     public let title: String
     public let subtitle: String
     public let body: String
     public let badge: NSNumber?
-    public let sound: UNNotificationSound?
+    public let sound: NotificationSound?
     public let launchImageName: String?
-    public let userInfo: [AnyHashable: Any]
+    public let userInfo: [String: any Sendable]
     public let categoryIdentifier: String?
     public let threadIdentifier: String?
     public let targetContentIdentifier: String?
-    public let interruptionLevel: UNNotificationInterruptionLevel?
+    public let interruptionLevel: NotificationInterruptionLevel?
     public let relevanceScore: Double?
 
     public init(
@@ -22,13 +39,13 @@ public struct NotificationContent: @unchecked Sendable {
         subtitle: String = "",
         body: String = "",
         badge: NSNumber? = nil,
-        sound: UNNotificationSound? = .default,
+        sound: NotificationSound? = .default,
         launchImageName: String? = nil,
-        userInfo: [AnyHashable: Any] = [:],
+        userInfo: [String: any Sendable] = [:],
         categoryIdentifier: String? = nil,
         threadIdentifier: String? = nil,
         targetContentIdentifier: String? = nil,
-        interruptionLevel: UNNotificationInterruptionLevel? = nil,
+        interruptionLevel: NotificationInterruptionLevel? = nil,
         relevanceScore: Double? = nil
     ) {
         self.id = id
@@ -47,14 +64,14 @@ public struct NotificationContent: @unchecked Sendable {
     }
 }
 
-public struct NotificationRequest: Sendable {
+public struct NotificationRequest {
     public let content: NotificationContent
-    public let trigger: UNNotificationTrigger?
+    public let trigger: NotificationTrigger?
     public let authorizationOptions: UNAuthorizationOptions
 
     public init(
         content: NotificationContent,
-        trigger: UNNotificationTrigger? = nil,
+        trigger: NotificationTrigger? = nil,
         authorizationOptions: UNAuthorizationOptions = [.alert, .badge, .sound]
     ) {
         self.content = content
@@ -63,7 +80,8 @@ public struct NotificationRequest: Sendable {
     }
 }
 
-public protocol NotificationScheduler: Sendable {
+@MainActor
+public protocol NotificationScheduler {
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
     func add(_ request: UNNotificationRequest) async throws
 }
@@ -82,13 +100,15 @@ extension UNUserNotificationCenter: NotificationScheduler {
     }
 }
 
-public protocol NotificationService: Sendable {
+@MainActor
+public protocol NotificationService {
     func requestAuthorization(options: UNAuthorizationOptions) async throws -> Bool
     func schedule(request: NotificationRequest) async
     func sendAlert(title: String, subtitle: String, body: String) async
 }
 
-public actor DefaultNotificationService: NotificationService {
+@MainActor
+public final class DefaultNotificationService: NotificationService {
     private let scheduler: NotificationScheduler
     private let settingsProvider: NotificationSettingsProvider
 
@@ -113,59 +133,13 @@ public actor DefaultNotificationService: NotificationService {
         request: NotificationRequest
     ) async {
         do {
-            // Check authorization status first
             let settings = await settingsProvider.getSettings()
-
-            guard settings.authorizationStatus == .authorized else {
-                print(
-                    "Notification authorization not granted. Current status: \(settings.authorizationStatus.rawValue)"
-                )
+            guard canSchedule(request: request, settings: settings) else {
                 return
             }
-
-            if request.authorizationOptions
-                .contains(
-                    .alert
-                ), settings.alertSetting != .enabled {
-                print(
-                    "Alert notifications are not enabled"
-                )
-                return
-            }
-            if request.authorizationOptions
-                .contains(
-                    .badge
-                ), settings.badgeSetting != .enabled {
-                print(
-                    "Badge notifications are not enabled"
-                )
-                return
-            }
-            if request.authorizationOptions
-                .contains(
-                    .sound
-                ), settings.soundSetting != .enabled {
-                print(
-                    "Sound notifications are not enabled"
-                )
-                return
-            }
-            let content = makeContent(
-                from: request.content
-            )
-            let notificationRequest = UNNotificationRequest(
-                identifier: request.content.id,
-                content: content,
-                trigger: request.trigger
-            )
-            try await scheduler
-                .add(
-                    notificationRequest
-                )
+            try await scheduler.add(makeRequest(from: request))
         } catch {
-            print(
-                "Failed to schedule notification: \(error.localizedDescription)"
-            )
+            return
         }
     }
 
@@ -201,15 +175,30 @@ public actor DefaultNotificationService: NotificationService {
         notificationContent.subtitle = content.subtitle
         notificationContent.body = content.body
         notificationContent.badge = content.badge
-        notificationContent.sound = content.sound
-        notificationContent.launchImageName = content.launchImageName ?? "default"
-        notificationContent.userInfo = content.userInfo
-        notificationContent.categoryIdentifier = content.categoryIdentifier ?? ""
-        notificationContent.threadIdentifier = content.threadIdentifier ?? ""
+        notificationContent.sound = makeSound(from: content.sound)
+        if let launchImageName = content.launchImageName {
+            notificationContent.launchImageName = launchImageName
+        }
+        if !content.userInfo.isEmpty {
+            notificationContent.userInfo = content.userInfo
+                .reduce(into: [AnyHashable: Any]()) { result, item in
+                    result[item.key] = item.value
+                }
+        }
+        if let categoryIdentifier = content.categoryIdentifier {
+            notificationContent.categoryIdentifier = categoryIdentifier
+        }
+        if let threadIdentifier = content.threadIdentifier {
+            notificationContent.threadIdentifier = threadIdentifier
+        }
         notificationContent.targetContentIdentifier = content.targetContentIdentifier
 
         if let interruptionLevel = content.interruptionLevel {
-            notificationContent.interruptionLevel = interruptionLevel
+            if let mapped = UNNotificationInterruptionLevel(
+                rawValue: UInt(interruptionLevel.rawValue)
+            ) {
+                notificationContent.interruptionLevel = mapped
+            }
         }
 
         if let relevanceScore = content.relevanceScore {
@@ -218,14 +207,75 @@ public actor DefaultNotificationService: NotificationService {
 
         return notificationContent
     }
+
+    private func makeRequest(
+        from request: NotificationRequest
+    ) -> UNNotificationRequest {
+        UNNotificationRequest(
+            identifier: request.content.id,
+            content: makeContent(from: request.content),
+            trigger: makeTrigger(from: request.trigger)
+        )
+    }
+
+    private func makeTrigger(
+        from trigger: NotificationTrigger?
+    ) -> UNNotificationTrigger? {
+        guard let trigger else { return nil }
+        switch trigger {
+        case let .timeInterval(interval, repeats):
+            return UNTimeIntervalNotificationTrigger(
+                timeInterval: interval,
+                repeats: repeats
+            )
+        }
+    }
+
+    private func makeSound(
+        from sound: NotificationSound?
+    ) -> UNNotificationSound? {
+        guard let sound else { return nil }
+        switch sound {
+        case .none:
+            return nil
+        case .default:
+            return UNNotificationSound.default
+        case let .named(name):
+            return UNNotificationSound(named: UNNotificationSoundName(rawValue: name))
+        }
+    }
+
+    private func canSchedule(
+        request: NotificationRequest,
+        settings: UNNotificationSettings
+    ) -> Bool {
+        guard settings.authorizationStatus == .authorized else {
+            return false
+        }
+        if request.authorizationOptions.contains(.alert),
+           settings.alertSetting != .enabled {
+            return false
+        }
+        if request.authorizationOptions.contains(.badge),
+           settings.badgeSetting != .enabled {
+            return false
+        }
+        if request.authorizationOptions.contains(.sound),
+            settings.soundSetting != .enabled {
+            return false
+        }
+        return true
+    }
 }
 
 // MARK: - Supporting Protocols
 
-public protocol NotificationSettingsProvider: Sendable {
+@MainActor
+public protocol NotificationSettingsProvider {
     func getSettings() async -> UNNotificationSettings
 }
 
+@MainActor
 public struct DefaultNotificationSettingsProvider: NotificationSettingsProvider {
     private let center: UNUserNotificationCenter
 
@@ -244,7 +294,7 @@ public extension NotificationRequest {
     static func immediate(
         title: String,
         body: String,
-        sound: UNNotificationSound? = .default,
+        sound: NotificationSound? = .default,
         badge: NSNumber? = nil
     ) -> NotificationRequest {
         let content = NotificationContent(
@@ -260,16 +310,17 @@ public extension NotificationRequest {
         interval: TimeInterval,
         title: String,
         body: String,
-        sound: UNNotificationSound? = .default
+        sound: NotificationSound? = .default,
+        repeats: Bool = false
     ) -> NotificationRequest {
         let content = NotificationContent(
             title: title,
             body: body,
             sound: sound
         )
-        let trigger = UNTimeIntervalNotificationTrigger(
-            timeInterval: interval,
-            repeats: false
+        let trigger = NotificationTrigger.timeInterval(
+            interval,
+            repeats: repeats
         )
         return NotificationRequest(
             content: content,
@@ -281,15 +332,15 @@ public extension NotificationRequest {
 // MARK: - Global Convenience (Optional - for backward compatibility)
 
 public enum LocalNotificationService {
-    private static let service = DefaultNotificationService()
+    // Create and use the @MainActor service on the main actor when needed.
 
     public static func schedule(
-        id: String = UUID().uuidString,
+        id: String,
         title: String,
         body: String,
-        sound: UNNotificationSound? = .default,
+        sound: NotificationSound? = .default,
         badge: NSNumber? = nil,
-        trigger: UNNotificationTrigger? = nil
+        trigger: NotificationTrigger? = nil
     ) async {
         let content = NotificationContent(
             id: id,
@@ -304,7 +355,27 @@ public enum LocalNotificationService {
             trigger: trigger
         )
 
-        await service.schedule(request: request)
+        await MainActor.run {
+            let service = DefaultNotificationService()
+            Task { await service.schedule(request: request) }
+        }
+    }
+
+    public static func schedule(
+        title: String,
+        body: String,
+        sound: NotificationSound? = .default,
+        badge: NSNumber? = nil,
+        trigger: NotificationTrigger? = nil
+    ) async {
+        await schedule(
+            id: UUID().uuidString,
+            title: title,
+            body: body,
+            sound: sound,
+            badge: badge,
+            trigger: trigger
+        )
     }
 
     public static func sendAlert(
@@ -313,10 +384,9 @@ public enum LocalNotificationService {
         subtitle: String = "",
         body: String = ""
     ) async {
-        await service.sendAlert(
-            title: title ?? "",
-            subtitle: subtitle,
-            body: body
-        )
+        await MainActor.run {
+            let service = DefaultNotificationService()
+            Task { await service.sendAlert(title: title ?? "", subtitle: subtitle, body: body) }
+        }
     }
 }

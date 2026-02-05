@@ -37,13 +37,19 @@ final class ChatComposer: ErrorPresenter, Equatable {
 	deinit {
 		log("")
 	}
-	
 	var hasContent: Bool {
 		inputText.hasText || !attachments.isEmpty
 	}
 
-	func updateSource(_ newValue: ChatComposer.Source) {
-		source = newValue
+	func updateSource(_ source: ChatComposer.Source) {
+		if self.source == source {
+			self.source = .menu
+		} else {
+			self.source = source
+		}
+		Task {
+			await AudioService.shared.play(.tap1)
+		}
 	}
 	nonisolated static func == (lhs: ChatComposer, rhs: ChatComposer) -> Bool {
 		lhs.id == rhs.id
@@ -67,6 +73,7 @@ extension ChatComposer: InputTextDelegate {
 		if text.isEmpty {
 			attachments.removeAll()
 		} else {
+			inputText.selection = nil
 			source = .text
 		}
 	}
@@ -91,6 +98,7 @@ extension ChatComposer {
 			inputText.text = Lorem.random()
 			return
 		}
+
 		send(conversation: conversation)
 	}
 	func handleSecondaryAction(_ conversation: Conversation) {
@@ -108,6 +116,7 @@ extension ChatComposer {
 		let attachments = self.attachments
 		resetDraft()
 		Task {
+			await AudioService.shared.play(.tap1)
 			do {
 				try await send(text: text, attachments: attachments, conversation: conversation)
 			} catch {
