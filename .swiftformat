@@ -1,0 +1,13 @@
+--indent tab
+--tab-width 4
+--max-width 100
+--swift-version 6.2.3
+--linebreaks lf
+--cache ignore
+--semicolons never
+--self remove
+--strip-unused-args closure-only
+--import-grouping alpha
+--ranges spaced
+--else-position same-line
+--trailing-commas collections-only
