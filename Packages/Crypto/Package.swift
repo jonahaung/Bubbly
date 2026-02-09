@@ -4,20 +4,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "Crypto",
-    platforms: [.iOS(.v18)],
-    products: [
-        .library(
-            name: "Crypto",
-            targets: ["Crypto"]
-        )
-    ],
-    targets: [
-        .target(
-            name: "Crypto"),
-        .testTarget(
-            name: "CryptoTests",
-            dependencies: ["Crypto"]
-        )
-    ]
+	name: "Crypto",
+	platforms: [.iOS(.v18)],
+	products: [
+		.library(
+			name: "Crypto",
+			targets: ["Crypto"]
+		),
+	],
+	targets: [
+		.target(
+			name: "Crypto"
+		),
+		.testTarget(
+			name: "CryptoTests",
+			dependencies: ["Crypto"]
+		),
+	]
 )

@@ -1,21 +1,25 @@
 //
-//  ComposeType.swift
+//  ChatComposer+Source.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 3/1/26.
 //
 
-import Foundation
 import Database
-import XUI
+import Foundation
 import SwiftUI
+import XUI
 
 extension ChatComposer {
 	enum Source: String, Hashable, Identifiable, Equatable, CaseNameReflectable {
-		var id: Self { self }
+		var id: Self {
+			self
+		}
+
 		case menu, text, camera, liary, audio, document, machineImag, emoji
 	}
 }
+
 extension ChatComposer.Source {
 	var systemImageName: String {
 		switch self {
@@ -47,7 +51,7 @@ extension ChatComposer.Source {
 		case .machineImag:
 			AnyShapeStyle(AngularGradient(
 				gradient: Gradient(
-					colors:[.indigo, .blue, .red, .orange, .indigo]
+					colors: [.indigo, .blue, .red, .orange, .indigo]
 				),
 				center: .center
 			))
@@ -56,6 +60,5 @@ extension ChatComposer.Source {
 				Color.red.gradient
 			)
 		}
-
 	}
 }

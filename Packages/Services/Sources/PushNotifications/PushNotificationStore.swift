@@ -12,7 +12,6 @@ import Foundation
 import XUI
 
 public actor PushNotificationStore {
-
 	struct NotificationCenterProxy: @unchecked Sendable {
 		let center: NotificationCenter
 	}
@@ -43,7 +42,7 @@ public actor PushNotificationStore {
 	private let deps: Dependencies
 
 	init(dependencies: Dependencies = .live) {
-		self.deps = dependencies
+		deps = dependencies
 	}
 
 	public func consumePendingAnyMsgData() -> [AnyMsgData] {
@@ -86,7 +85,9 @@ public actor PushNotificationStore {
 		do {
 			deps.storage.save(fcmToken, for: .device(.deviceToken))
 			try await deps.updatePushToken(fcmToken, user.uid)
-			log("Updated fcmToken (\(fcmToken)) to Firestore for user: \(user.displayName ?? user.uid)")
+			log(
+				"Updated fcmToken (\(fcmToken)) to Firestore for user: \(user.displayName ?? user.uid)"
+			)
 		} catch {
 			log(error)
 		}

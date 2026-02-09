@@ -16,10 +16,21 @@ extension MsgCell {
 
 		var body: some View {
 			if text.containsMarkdown {
-				Text(.init(text))
+				let extraTop = text.containsTallMarksOrEmoji ? max(
+					1,
+					(Self.font.ascender - Self.font.capHeight) * 0.25
+				) : 0
+				MarkdownView(markdownText: text)
+					.lineSpacing(extraTop)
+					.fixedSize(horizontal: false, vertical: true)
+
 			} else {
-				let extraTop = text.containsTallMarksOrEmoji ? max(1, (Self.font.ascender - Self.font.capHeight) * 0.25) : 0
+				let extraTop = text.containsTallMarksOrEmoji ? max(
+					1,
+					(Self.font.ascender - Self.font.capHeight) * 0.25
+				) : 0
 				Text(text)
+					.customAttribute(HighlightAttribute())
 					.lineSpacing(extraTop)
 					.fixedSize(horizontal: false, vertical: true)
 			}
@@ -29,7 +40,6 @@ extension MsgCell {
 			lhs.text == rhs.text
 		}
 	}
-
 }
 
 extension String {

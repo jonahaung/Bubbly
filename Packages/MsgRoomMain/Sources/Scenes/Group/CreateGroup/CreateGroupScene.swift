@@ -44,7 +44,7 @@ public struct CreateGroupScene: View {
 
 			Section {
 				ForEach(viewModel.selection, id: \.uid) { contact in
-					Label.init {
+					Label {
 						LabeledContent(contact.name) {
 							Button {
 								if let index = viewModel.selection.firstIndex(

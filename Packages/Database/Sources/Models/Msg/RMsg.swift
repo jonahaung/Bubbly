@@ -19,17 +19,16 @@ public struct RMsg: Codable, Sendable, Hashable {
 	public let attachments: [Attachment]
 	public let reactions: [Reaction]
 
-	public init(
-		uid: String,
-		conID: String,
-		senderID: String,
-		date: String,
-		text: String?,
-		incomingStatus: MsgIncomingStatus,
-		outgoingStatus: [String: MsgOutgoingStatus],
-		attachments: [Attachment],
-		reactions: [Reaction]
-	) {
+	public init(uid: String,
+	            conID: String,
+	            senderID: String,
+	            date: String,
+	            text: String?,
+	            incomingStatus: MsgIncomingStatus,
+	            outgoingStatus: [String: MsgOutgoingStatus],
+	            attachments: [Attachment],
+	            reactions: [Reaction])
+	{
 		self.uid = uid
 		self.conID = conID
 		self.senderID = senderID

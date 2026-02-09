@@ -7,4 +7,4 @@
 
 import Foundation
 
-public protocol Conformable: Hashable, Sendable, Equatable {}
+public protocol Conformable: Hashable, Sendable {}

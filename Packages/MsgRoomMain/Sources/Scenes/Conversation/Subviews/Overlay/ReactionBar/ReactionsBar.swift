@@ -4,13 +4,18 @@
 //
 //  Created by Aung Ko Min on 5/11/25.
 //
-import SwiftUI
 import Database
+import SwiftUI
 
 public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable, CaseIterable {
-	public static var allCases: [ReactionType] { [.heart, .thumbUp, .thumbDown, .smile, .laugh, .sad]}
+	public static var allCases: [ReactionType] {
+		[.heart, .thumbUp, .thumbDown, .smile, .laugh, .sad]
+	}
 
-	public var id: String { self.rawValue }
+	public var id: String {
+		rawValue
+	}
+
 	case heart
 	case thumbUp
 	case thumbDown
@@ -22,24 +27,25 @@ public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable, Ca
 	public var rawValue: String {
 		switch self {
 		case .heart:
-			return "❤️"
+			"❤️"
 		case .thumbUp:
-			return "👍"
+			"👍"
 		case .thumbDown:
-			return "👎"
+			"👎"
 		case .smile:
-			return "😊"
+			"😊"
 		case .laugh:
-			return "😂"
+			"😂"
 		case .sad:
-			return "😓"
-		case .custom(let string):
-			return string
+			"😓"
+		case let .custom(string):
+			string
 		}
 	}
+
 	public init?(rawValue: String) {
 		switch rawValue {
-			case "❤️": self = .heart
+		case "❤️": self = .heart
 		case "👍": self = .thumbUp
 		case "👎": self = .thumbDown
 		case "😊": self = .smile
@@ -49,6 +55,7 @@ public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable, Ca
 		}
 	}
 }
+
 public struct ReactionsBar: View {
 	enum Constants {
 		static let animationDuration: Double = 0.5
@@ -65,7 +72,10 @@ public struct ReactionsBar: View {
 	}
 
 	struct ReactionState: Sendable, Hashable, Identifiable {
-		var id: ReactionType { reaction }
+		var id: ReactionType {
+			reaction
+		}
+
 		let reaction: ReactionType
 		var count: Int
 		var animationState: Bool = false
@@ -112,7 +122,7 @@ public struct ReactionsBar: View {
 			stiffness: Constants.springStiffness,
 			damping: Constants.springDamping
 		).delay(Constants.appearDelayIncrement / 2)) {
-			$allStates.forEach { each in
+			for each in $allStates {
 				each.wrappedValue.count += 1
 			}
 		}

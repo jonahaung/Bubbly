@@ -8,7 +8,10 @@
 import Foundation
 
 struct ExtractedLink: Hashable, Identifiable {
-	var id: String { matchedText }
+	var id: String {
+		matchedText
+	}
+
 	let url: URL
 	let range: Range<String.Index>
 	let matchedText: String
@@ -18,27 +21,27 @@ struct ExtractedLink: Hashable, Identifiable {
 }
 
 enum LinkExtractor {
-
-	// Matches:
-	// 1) http(s)://...
-	// 2) www.example.com/...
-	// 3) example.com/... (with a TLD)
-	//
-	// Note: This is pragmatic, not “perfect URL spec”.
+	/// Matches:
+	/// 1) http(s)://...
+	/// 2) www.example.com/...
+	/// 3) example.com/... (with a TLD)
+	///
+	/// Note: This is pragmatic, not “perfect URL spec”.
 	private static let pattern =
-	#"""
-	(?xi)
-	\b(
-	 https?://[^\s<>()"\]]+
-	 |
-	 (?:www\.)[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s<>()"\]]*)?
-	 |
-	 [a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:/[^\s<>()"\]]*)?
-	)
-	"""#
+		#"""
+		(?xi)
+		\b(
+		 https?://[^\s<>()"\]]+
+		 |
+		 (?:www\.)[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s<>()"\]]*)?
+		 |
+		 [a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:/[^\s<>()"\]]*)?
+		)
+		"""#
 
 	static func extractLinks(from text: String) -> [ExtractedLink] {
-		guard let regularExpression = try? NSRegularExpression(pattern: pattern, options: []) else { return [] }
+		guard let regularExpression = try? NSRegularExpression(pattern: pattern, options: [])
+		else { return [] }
 		let nsString = text as NSString
 		let matches = regularExpression.matches(
 			in: text,
@@ -57,11 +60,12 @@ enum LinkExtractor {
 			rawString = trimTrailingPunctuation(rawString)
 
 			// If no scheme, assume https
-			let normalized: String
-			if rawString.lowercased().hasPrefix("http://") || rawString.lowercased().hasPrefix("https://") {
-				normalized = rawString
+			let normalized: String = if rawString.lowercased().hasPrefix("http://") || rawString
+				.lowercased().hasPrefix("https://")
+			{
+				rawString
 			} else {
-				normalized = "https://" + rawString
+				"https://" + rawString
 			}
 
 			guard let url = URL(string: normalized) else { continue }
@@ -82,7 +86,8 @@ enum LinkExtractor {
 	private static func trimTrailingPunctuation(_ string: String) -> String {
 		var result = string
 		while let last = result.unicodeScalars.last,
-			  CharacterSet(charactersIn: ".,;:!?)\u{201D}\u{2019}").contains(last) {
+		      CharacterSet(charactersIn: ".,;:!?)\u{201D}\u{2019}").contains(last)
+		{
 			result.removeLast()
 		}
 		return result

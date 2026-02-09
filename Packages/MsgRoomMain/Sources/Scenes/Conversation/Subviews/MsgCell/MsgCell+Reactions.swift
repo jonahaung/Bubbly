@@ -13,13 +13,15 @@ import XUI
 
 extension MsgCell {
 	struct Reactions: View {
-
 		@Environment(MsgCellViewModel.self) private var viewModel
 		@Environment(\.viewIsVisible) private var viewIsVisible: Bool
 
 		var body: some View {
 			ZStack {
-				ForEach(Array(viewModel.msg.reactions.reversed().enumerated()), id: \.offset) { pair in
+				ForEach(
+					Array(viewModel.msg.reactions.reversed().enumerated()),
+					id: \.offset
+				) { pair in
 					let index = pair.offset
 					let reaction = pair.element
 
@@ -38,13 +40,14 @@ extension MsgCell {
 									)
 								)
 						} animation: { _ in
-								.bouncy(
-									duration: ReactionsBar
-										.ReactionState(
-											reaction: .init(rawValue: reaction.rawValue)!
-										).animationDuration,
-									extraBounce: ReactionsBar.Constants
-										.extraBounce)
+							.bouncy(
+								duration: ReactionsBar
+									.ReactionState(
+										reaction: .init(rawValue: reaction.rawValue)!
+									).animationDuration,
+								extraBounce: ReactionsBar.Constants
+									.extraBounce
+							)
 						}
 				}
 			}

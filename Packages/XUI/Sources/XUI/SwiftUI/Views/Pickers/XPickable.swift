@@ -25,10 +25,15 @@ public protocol XPickable: Hashable, Identifiable, Sendable, EmptyRepresentable,
 }
 
 public extension XPickable {
-	var badge: RenderNode? { nil }
+	var badge: RenderNode? {
+		nil
+	}
 }
+
 extension XPickable {
-	var isEmpty: Bool { self == Self.empty }
+	var isEmpty: Bool {
+		self == Self.empty
+	}
 }
 
 public protocol EmptyRepresentable: Sendable {

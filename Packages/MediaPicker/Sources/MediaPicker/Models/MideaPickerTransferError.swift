@@ -8,5 +8,5 @@
 import Foundation
 
 enum MideaPickerTransferError: Error {
-    case importFailed
+	case importFailed
 }

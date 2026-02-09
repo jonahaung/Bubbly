@@ -11,15 +11,13 @@ import SwiftUI
 import XUI
 
 public struct ProfilePhoto: View {
-
 	let item: any ImageViewItem
 	let config: ImageViewConfig
 
-	public init(
-		_ item: any ImageViewItem,
-		size: ImageSize = .small,
-		tapAction: ImageViewTapAction = .none
-	) {
+	public init(_ item: any ImageViewItem,
+	            size: ImageSize = .small,
+	            tapAction: ImageViewTapAction = .none)
+	{
 		self.item = item
 		config = .init(
 			size: size,

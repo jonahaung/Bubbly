@@ -52,15 +52,17 @@ public extension ImageViewItem {
 	}
 
 	func thumbnailFileName() -> String {
-		return "thumbnail_\(fileName())"
+		"thumbnail_\(fileName())"
 	}
 
 	func fileExist() -> Bool {
 		folder()?.containsFile(named: fileName()) == true
 	}
+
 	func thumbnailExist() -> Bool {
 		folder()?.containsFile(named: thumbnailFileName()) == true
 	}
+
 	func data() -> Data? {
 		do {
 			return try file()?.read()
@@ -96,7 +98,6 @@ public extension ImageViewItem {
 
 public extension ImageViewItem {
 	var galleryURL: URL? {
-		let url = localURL() ?? remoteURL
-		return url
+		localURL() ?? remoteURL
 	}
 }

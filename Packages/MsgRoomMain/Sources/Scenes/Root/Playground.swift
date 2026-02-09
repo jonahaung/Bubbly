@@ -1,22 +1,21 @@
 //
-//  SwiftUIView.swift
+//  Playground.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 3/2/26.
 //
 
-import SwiftUI
-import XUI
 import Core
 import Database
 import Services
+import SwiftUI
+import XUI
 
 struct Playground: View {
 	@State private var showModal = false
 	let text = Lorem.random()
 	var body: some View {
 		List {
-
 			Button("Show modal") {
 				showModal = true
 			}

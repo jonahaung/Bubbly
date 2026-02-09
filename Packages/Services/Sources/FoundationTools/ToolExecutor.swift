@@ -13,14 +13,13 @@ import FoundationModels
 @MainActor
 @Observable
 public final class ToolExecutor {
-
 	public private(set) var isRunning = false
 	public var result: String?
 	public var errorMessage: String?
 	public private(set) var successMessage: String?
 
-	public init() {
-	}
+	public init() {}
+
 	/// Executes a tool operation with standardized state management
 	public func execute<T: Generable>(
 		tool: any Tool,
@@ -41,8 +40,8 @@ public final class ToolExecutor {
 	}
 
 	/// Executes a tool operation using PromptBuilder
-	public func executeWithPromptBuilder<T: Tool>(
-		tool: T,
+	public func executeWithPromptBuilder(
+		tool: some Tool,
 		successMessage: String? = nil,
 		clearForm: (@MainActor @Sendable () -> Void)? = nil,
 		@PromptBuilder promptBuilder: @Sendable () -> Prompt
@@ -62,7 +61,7 @@ public final class ToolExecutor {
 		sessionBuilder: @Sendable () -> LanguageModelSession,
 		prompt: String,
 		successMessage: String? = nil,
-		clearForm: (@MainActor @Sendable () -> Void)? = nil,
+		clearForm: (@MainActor @Sendable () -> Void)? = nil
 	) async {
 		await performExecution(successMessage: successMessage, clearForm: clearForm) { @Sendable in
 			let session = sessionBuilder()
@@ -95,12 +94,15 @@ public final class ToolExecutor {
 	private func prepareForNewExecution() {
 		isRunning = true
 		errorMessage = nil
-		self.successMessage = nil
+		successMessage = nil
 		result = nil
 	}
 
-	private func finalizeExecution(result: String? = nil, successMessage: String? = nil, errorMessage: String? = nil) {
-		self.isRunning = false
+	private func finalizeExecution(result: String? = nil,
+	                               successMessage: String? = nil,
+	                               errorMessage: String? = nil)
+	{
+		isRunning = false
 		self.result = result
 		self.errorMessage = errorMessage
 		self.successMessage = successMessage

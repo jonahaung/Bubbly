@@ -1,5 +1,5 @@
 //
-//  MsgCellInteraction.swift
+//  MsgCellAction.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 12/7/25.
@@ -17,6 +17,7 @@ struct MsgCellAction {
 		case onUploadedAttachments(Message)
 		case onReact(Message, ReactionType)
 	}
+
 	let action: (ActionType) -> Void
 	func callAsFunction(_ type: ActionType) {
 		action(type)

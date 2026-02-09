@@ -14,8 +14,7 @@ import UserNotifications
 import XUI
 
 public final class PushNotificationService: NSObject {
-
-	public override init() {
+	override public init() {
 		super.init()
 	}
 
@@ -39,7 +38,7 @@ public final class PushNotificationService: NSObject {
 			let currentNavPath = Router.shared.visiblePath
 			try await AsyncOrderedStream.mapOrdered(inputs: datas) { data in
 				switch currentNavPath {
-				case .conversation(let prefetchData):
+				case let .conversation(prefetchData):
 					if data.conID == prefetchData.configuration.conID {
 						await Socket.shared.receive(data)
 					}
@@ -51,21 +50,20 @@ public final class PushNotificationService: NSObject {
 		UNUserNotificationCenter.current().removeAllDeliveredNotifications()
 		try await UNUserNotificationCenter.current().setBadgeCount(0)
 	}
-
 }
 
 extension PushNotificationService: UNUserNotificationCenterDelegate {
-	public func userNotificationCenter(
-		_: UNUserNotificationCenter,
-		willPresent notification: UNNotification
-	) async -> UNNotificationPresentationOptions {
+	public func userNotificationCenter(_: UNUserNotificationCenter,
+	                                   willPresent notification: UNNotification) async
+		-> UNNotificationPresentationOptions
+	{
 		let userInfo = notification.request.content.userInfo
 		guard let data = try? AnyMsgData.parse(from: userInfo) else {
 			return [.badge, .banner, .list, .sound]
 		}
 		let currentNavPath = await MainActor.run { Router.shared.visiblePath }
 		switch currentNavPath {
-		case .conversation(let prefetchData):
+		case let .conversation(prefetchData):
 			if data.conID == prefetchData.configuration.conID {
 				await Socket.shared.receive(data)
 				return []
@@ -78,11 +76,11 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
 		}
 	}
 
-	public func userNotificationCenter(
-		_: UNUserNotificationCenter,
-		didReceive response: UNNotificationResponse,
-		withCompletionHandler completionHandler: @escaping () -> Void
-	) {
+	public func userNotificationCenter(_: UNUserNotificationCenter,
+	                                   didReceive response: UNNotificationResponse,
+	                                   withCompletionHandler completionHandler: @escaping ()
+	                                   	-> Void)
+	{
 		let userInfo = response.notification.request.content.userInfo
 		guard let data = try? AnyMsgData.parse(from: userInfo) else {
 			completionHandler()
@@ -98,10 +96,9 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
 }
 
 extension PushNotificationService: MessagingDelegate {
-	public func messaging(
-		_: Messaging,
-		didReceiveRegistrationToken fcmToken: String?
-	) {
+	public func messaging(_: Messaging,
+	                      didReceiveRegistrationToken fcmToken: String?)
+	{
 		Task { await PushNotificationStore.shared.handleRegistrationToken(fcmToken) }
 	}
 }

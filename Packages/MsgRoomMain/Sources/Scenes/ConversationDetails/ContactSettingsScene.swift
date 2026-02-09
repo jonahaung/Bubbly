@@ -12,18 +12,15 @@ import SwiftUI
 import XUI
 
 public struct ContactSettingsScene: View {
-
 	@State private var contact: Contact
 	@State private var properties: ConversationProperties
 	@State private var updatingModelValueTask: Task<Void, Never>?
 	@State private var isSaving: Bool = false
 	@Environment(\.currentUser) private var currentUser
 
-	public init(
-		_ contact: Contact
-	) {
+	public init(_ contact: Contact) {
 		self.contact = contact
-		self.properties = .init(uid: "")
+		properties = .init(uid: "")
 	}
 
 	public var body: some View {
@@ -51,7 +48,10 @@ public struct ContactSettingsScene: View {
 			}
 			Section {
 				AsyncButton {
-					try await ConversationRepo.deleteMessages(conID: Conversation(.contact(contact), properties: properties).uid)
+					try await ConversationRepo.deleteMessages(conID: Conversation(
+						.contact(contact),
+						properties: properties
+					).uid)
 				} label: {
 					Text("Delete Messages")
 				}

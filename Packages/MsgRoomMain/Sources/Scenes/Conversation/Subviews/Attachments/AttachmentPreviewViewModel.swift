@@ -5,14 +5,13 @@
 //  Created by Aung Ko Min on 1/1/26.
 //
 
-import Foundation
 import Database
+import Foundation
 import Services
 
 @MainActor
 @Observable
 public final class AttachmentPreviewViewModel {
-
 	public var attachment: Attachment
 	public var attachmentData: AttachmentData?
 	public var error: Error?
@@ -23,28 +22,32 @@ public final class AttachmentPreviewViewModel {
 
 	@concurrent
 	public func cachedAttachmentData() async -> AttachmentData? {
-		let attachment = await self.attachment
+		let attachment = await attachment
 		switch attachment.attachmentType {
 		case .image:
 			if attachment.fileExist(),
-			   let thumb = attachment.thumbnailImage() {
+			   let thumb = attachment.thumbnailImage()
+			{
 				return .image(thumbnail: thumb)
 			}
 		case .imageUploading:
 			if attachment.fileExist(),
 			   let url = attachment.file()?.url,
-			   let thumb = attachment.thumbnailImage() {
+			   let thumb = attachment.thumbnailImage()
+			{
 				return .imageUpload(localURL: url, thumbnail: thumb)
 			}
 		case .video:
 			if attachment.fileExist(),
 			   let url = attachment.localURL(),
-			   let thumb = attachment.thumbnailImage() {
+			   let thumb = attachment.thumbnailImage()
+			{
 				return .video(videoURL: url, thumbnail: thumb)
 			}
 		case .link:
 			if attachment.fileExist(),
-			   let thumb = attachment.image() {
+			   let thumb = attachment.image()
+			{
 				return .link(thumbnail: thumb)
 			}
 		case .videoUploading:

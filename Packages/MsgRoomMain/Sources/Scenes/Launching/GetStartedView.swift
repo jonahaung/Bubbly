@@ -10,7 +10,6 @@ import Services
 import SwiftUI
 
 struct GetStartedView: View {
-
 	@Environment(AuthRouter.self) private var router
 	@Environment(AppLauncher.self) private var appLauncher
 
@@ -29,11 +28,13 @@ struct GetStartedView: View {
 				Text("Welcome to Bubbly")
 					.font(.largeTitle.weight(.bold))
 					.multilineTextAlignment(.center)
-				Text("Chat with friends, share moments, and stay connected. Let’s get you set up in a few seconds.")
-					.font(.body)
-					.foregroundStyle(.secondary)
-					.multilineTextAlignment(.center)
-					.padding(.horizontal)
+				Text(
+					"Chat with friends, share moments, and stay connected. Let’s get you set up in a few seconds."
+				)
+				.font(.body)
+				.foregroundStyle(.secondary)
+				.multilineTextAlignment(.center)
+				.padding(.horizontal)
 			}
 
 			Spacer(minLength: 0)

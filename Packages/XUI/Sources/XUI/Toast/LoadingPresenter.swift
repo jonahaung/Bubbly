@@ -12,8 +12,10 @@ public final class LoadingPresenter {
 			showLoading = value
 		}
 	}
+
 	public static let shared: LoadingPresenter = .init()
 }
+
 public enum Loading {
 	@MainActor public static func show(_ value: Bool) {
 		LoadingPresenter.shared.loading(value)

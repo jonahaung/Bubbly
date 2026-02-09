@@ -12,19 +12,16 @@ import SwiftUI
 import XUI
 
 extension MsgCell {
-	
 	struct Content: View, @MainActor Equatable {
-		
 		static func == (lhs: Self, rhs: Self) -> Bool {
 			lhs.viewModel.contentRenderKey == rhs.viewModel.contentRenderKey
 		}
-		
+
 		let viewModel: MsgCellViewModel
 		let theme: ConversationTheme
 		let selectedMsg: SelectedMsg?
-		
 		@Environment(\.viewIsVisible) private var viewIsVisible
-		
+
 		var body: some View {
 			let alignment = Alignment(
 				horizontal: viewModel.horizontalAlignment.inverted,
@@ -36,31 +33,37 @@ extension MsgCell {
 					theme: theme,
 					selectedMsg: selectedMsg
 				)
-				
+				.foregroundStyle(theme.foregroundStyle(for: viewModel.isSender))
+
 				OverlayBubbleView(
 					viewModel: viewModel,
 					isVisible: viewIsVisible
 				)
 			}
+			.font(theme.font)
+			.textRenderer(
+				QuakeRenderer(moveAmount: viewIsVisible ? 3 : 1)
+			)
 		}
 	}
-	
-	
+
 	struct StableBubbleView: View, @MainActor Equatable {
-		
 		static func == (lhs: Self, rhs: Self) -> Bool {
 			lhs.renderKey == rhs.renderKey
 		}
-		
+
 		let viewModel: MsgCellViewModel
 		let theme: ConversationTheme
 		let selectedMsg: SelectedMsg?
-		
+
 		private var renderKey: MsgCellViewModel.ContentRenderKey {
 			viewModel.contentRenderKey
 		}
-		private var layout: MsgCellLayout { viewModel.layout }
-		
+
+		private var layout: MsgCellLayout {
+			viewModel.layout
+		}
+
 		var body: some View {
 			if !viewModel.msg.attachments.isEmpty {
 				VStack(alignment: viewModel.horizontalAlignment, spacing: 0) {
@@ -86,45 +89,45 @@ extension MsgCell {
 								leading: viewModel.isSender ? 1 : 0.2,
 								bottom: 1,
 								trailing: viewModel
-									.isSender ? 0.2 : 1)
+									.isSender ? 0.2 : 1
+							)
 						)
-						.background(theme.incomingShadowColor, in: .rect(corners: .concentric))
+						.background(
+							theme.shadowColor(for: viewModel.isSender),
+							in: .rect(corners: .concentric)
+						)
 				}
 				.containerShape(bubbleShape)
 			}
 		}
-		
+
 		private var bubbleBackground: some View {
 			ConcentricRectangle(corners: .concentric)
-				.fill(
-					viewModel.isSender
-					? theme.outgoingBubbleColor
-					: theme.incomingBubbbleColor
-				)
+				.fill(theme.bubbleColor(for: viewModel.isSender))
 		}
-		
+
 		private var bubbleShape: UnevenRoundedRectangle {
 			computeBubbleCorner()
 				.roundedRectange(cornerRadius: theme.bubbleCornerRadius)
 		}
-		
+
 		private func computeBubbleCorner() -> BubbleCorner {
 			if selectedMsg?.id == viewModel.id {
 				return .all
 			}
-			var corner = layout.bubble.bubbleCorner
+			var corner = layout.bubbleCorner
 			if selectedMsg?.previous == viewModel.id { corner.append(.bottom) }
 			if selectedMsg?.next == viewModel.id { corner.append(.top) }
 			return corner
 		}
 	}
-	
+
 	struct OverlayBubbleView: View {
 		let viewModel: MsgCellViewModel
 		let isVisible: Bool
-		
+
 		var body: some View {
-			if isVisible && !viewModel.msg.reactions.isEmpty {
+			if isVisible, !viewModel.msg.reactions.isEmpty {
 				Reactions()
 					.fixedSize()
 					.allowsHitTesting(false)

@@ -27,7 +27,6 @@ import FoundationModels
 /// - Important: Requires Contacts entitlement, `NSContactsUsageDescription` in Info.plist,
 ///   and user permission at runtime.
 public struct ContactsTool: Tool {
-
 	/// The name of the tool, used for identification.
 	public let name = "manageContacts"
 	/// A brief description of the tool's functionality.
@@ -68,16 +67,15 @@ public struct ContactsTool: Tool {
 		@Guide(description: "Organization for creating contact")
 		public var organization: String?
 
-		public init(
-			action: String = "",
-			name: String? = nil,
-			contactId: String? = nil,
-			firstName: String? = nil,
-			lastName: String? = nil,
-			phoneNumber: String? = nil,
-			email: String? = nil,
-			organization: String? = nil
-		) {
+		public init(action: String = "",
+		            name: String? = nil,
+		            contactId: String? = nil,
+		            firstName: String? = nil,
+		            lastName: String? = nil,
+		            phoneNumber: String? = nil,
+		            email: String? = nil,
+		            organization: String? = nil)
+		{
 			self.action = action
 			self.name = name
 			self.contactId = contactId
@@ -131,7 +129,7 @@ public struct ContactsTool: Tool {
 			CNContactEmailAddressesKey as CNKeyDescriptor,
 			CNContactPhoneNumbersKey as CNKeyDescriptor,
 			CNContactOrganizationNameKey as CNKeyDescriptor,
-			CNContactIdentifierKey as CNKeyDescriptor
+			CNContactIdentifierKey as CNKeyDescriptor,
 		]
 
 		let predicate = CNContact.predicateForContacts(matchingName: searchQuery)
@@ -152,7 +150,9 @@ public struct ContactsTool: Tool {
 						return true
 					}
 					// Check phone numbers
-					for phone in contact.phoneNumbers where phone.value.stringValue.contains(searchQuery) {
+					for phone in contact.phoneNumbers
+						where phone.value.stringValue.contains(searchQuery)
+					{
 						return true
 					}
 					return false
@@ -180,7 +180,7 @@ public struct ContactsTool: Tool {
 			CNContactOrganizationNameKey as CNKeyDescriptor,
 			CNContactPostalAddressesKey as CNKeyDescriptor,
 			CNContactBirthdayKey as CNKeyDescriptor,
-			CNContactNoteKey as CNKeyDescriptor
+			CNContactNoteKey as CNKeyDescriptor,
 		]
 
 		do {
@@ -199,13 +199,14 @@ public struct ContactsTool: Tool {
 				"givenName": contact.givenName,
 				"familyName": contact.familyName,
 				"fullName": "\(contact.givenName) \(contact.familyName)".trimmingCharacters(
-					in: .whitespaces),
+					in: .whitespaces
+				),
 				"organization": contact.organizationName,
 				"emails": contact.emailAddresses.map { $0.value as String },
-				"phoneNumbers": contact.phoneNumbers.map { $0.value.stringValue },
+				"phoneNumbers": contact.phoneNumbers.map(\.value.stringValue),
 				"addresses": addresses,
 				"birthday": contact.birthday?.date?.description ?? "",
-				"note": contact.note
+				"note": contact.note,
 			])
 		} catch {
 			return createErrorOutput(error: error)
@@ -226,13 +227,16 @@ public struct ContactsTool: Tool {
 
 		if let email = arguments.email {
 			newContact.emailAddresses = [
-				CNLabeledValue(label: CNLabelHome, value: NSString(string: email))
+				CNLabeledValue(label: CNLabelHome, value: NSString(string: email)),
 			]
 		}
 
 		if let phone = arguments.phoneNumber {
 			newContact.phoneNumbers = [
-				CNLabeledValue(label: CNLabelPhoneNumberMobile, value: CNPhoneNumber(stringValue: phone))
+				CNLabeledValue(
+					label: CNLabelPhoneNumberMobile,
+					value: CNPhoneNumber(stringValue: phone)
+				),
 			]
 		}
 
@@ -253,10 +257,11 @@ public struct ContactsTool: Tool {
 				"givenName": newContact.givenName,
 				"familyName": newContact.familyName,
 				"fullName": "\(newContact.givenName) \(newContact.familyName)".trimmingCharacters(
-					in: .whitespaces),
+					in: .whitespaces
+				),
 				"email": arguments.email ?? "",
 				"phoneNumber": arguments.phoneNumber ?? "",
-				"organization": arguments.organization ?? ""
+				"organization": arguments.organization ?? "",
 			])
 
 		} catch {
@@ -268,7 +273,8 @@ public struct ContactsTool: Tool {
 		var contactsDescription = ""
 
 		for (index, contact) in contacts.enumerated() {
-			let name = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespaces)
+			let name = "\(contact.givenName) \(contact.familyName)"
+				.trimmingCharacters(in: .whitespaces)
 			let email = contact.emailAddresses.first?.value as String? ?? "No email"
 			let phone = contact.phoneNumbers.first?.value.stringValue ?? "No phone"
 			let org = contact.organizationName.isEmpty ? "" : " (\(contact.organizationName))"
@@ -285,7 +291,7 @@ public struct ContactsTool: Tool {
 			"query": query,
 			"count": contacts.count,
 			"results": contactsDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-			"message": "Found \(contacts.count) contact(s) matching '\(query)'"
+			"message": "Found \(contacts.count) contact(s) matching '\(query)'",
 		])
 	}
 
@@ -293,7 +299,7 @@ public struct ContactsTool: Tool {
 		GeneratedContent(properties: [
 			"status": "error",
 			"error": error.localizedDescription,
-			"message": "Failed to perform contact operation"
+			"message": "Failed to perform contact operation",
 		])
 	}
 }
@@ -308,15 +314,15 @@ enum ContactsError: Error, LocalizedError {
 	var errorDescription: String? {
 		switch self {
 		case .accessDenied:
-			return "Access to contacts denied. Please grant permission in Settings."
+			"Access to contacts denied. Please grant permission in Settings."
 		case .invalidAction:
-			return "Invalid action. Use 'search', 'read', or 'create'."
+			"Invalid action. Use 'search', 'read', or 'create'."
 		case .missingQuery:
-			return "Search query is required."
+			"Search query is required."
 		case .missingContactId:
-			return "Contact ID is required."
+			"Contact ID is required."
 		case .missingName:
-			return "Given name is required to create a contact."
+			"Given name is required to create a contact."
 		}
 	}
 }

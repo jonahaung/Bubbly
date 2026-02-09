@@ -27,8 +27,9 @@ extension ComposeBar {
 			TextField(
 				"\(composer.source.rawValue)",
 				text: $composer.inputText
-					.text, selection: $composer.inputText.selection, axis: .vertical)
-			.lineLimit(0...10)
+					.text, selection: $composer.inputText.selection, axis: .vertical
+			)
+			.lineLimit(0 ... 10)
 			.font(.body)
 			.tint(.link)
 			.padding(.init(top: 8, leading: 16, bottom: 8, trailing: 8))
@@ -37,7 +38,5 @@ extension ComposeBar {
 				equals: composer.source.rawValue
 			)
 		}
-
-		
 	}
 }

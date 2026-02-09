@@ -10,13 +10,13 @@ import Foundation
 public enum ImageEncoders {}
 
 public extension ImageEncoding where Self == ImageEncoders.Default {
-    static func `default`(compressionQuality: Float = 0.8) -> ImageEncoders.Default {
-        ImageEncoders.Default(compressionQuality: compressionQuality)
-    }
+	static func `default`(compressionQuality: Float = 0.8) -> ImageEncoders.Default {
+		ImageEncoders.Default(compressionQuality: compressionQuality)
+	}
 }
 
 public extension ImageEncoding where Self == ImageEncoders.ImageIO {
-    static func imageIO(type: AssetType, compressionRatio: Float = 0.8) -> ImageEncoders.ImageIO {
-        ImageEncoders.ImageIO(type: type, compressionRatio: compressionRatio)
-    }
+	static func imageIO(type: AssetType, compressionRatio: Float = 0.8) -> ImageEncoders.ImageIO {
+		ImageEncoders.ImageIO(type: type, compressionRatio: compressionRatio)
+	}
 }

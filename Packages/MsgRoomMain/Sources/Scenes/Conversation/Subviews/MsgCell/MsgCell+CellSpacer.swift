@@ -6,8 +6,8 @@
 //
 
 import Core
-import SwiftUI
 import Database
+import SwiftUI
 
 extension MsgCell {
 	struct CellSpacer: View {
@@ -16,5 +16,4 @@ extension MsgCell {
 				.frame(height: ChatLayoutConstants.Cell.sectionSpacing)
 		}
 	}
-
 }

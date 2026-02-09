@@ -9,10 +9,9 @@ import Foundation
 
 public extension Array {
 	@inlinable
-	func insertionIndex(
-		for newElement: Element,
-		by keyPath: KeyPath<Element, some Comparable>
-	) -> Int {
+	func insertionIndex(for newElement: Element,
+	                    by keyPath: KeyPath<Element, some Comparable>) -> Int
+	{
 		var low = startIndex
 		var high = endIndex
 
@@ -49,6 +48,7 @@ public extension Array where Element: Identifiable {
 		return Array(self[lowerBound ... upperBound])
 	}
 }
+
 public extension Array where Element: Identifiable, Element.ID: Hashable {
 	@inlinable
 	func duplicates() -> [Element] {
@@ -79,7 +79,7 @@ public extension Array where Element: Hashable {
 	}
 
 	@inlinable
-	mutating func appendUnique<S: Sequence>(contentsOf newElements: S) where S.Element == Element {
+	mutating func appendUnique(contentsOf newElements: some Sequence<Element>) {
 		var seen = Set(self)
 		for element in newElements where seen.insert(element).inserted {
 			append(element)
@@ -104,16 +104,19 @@ public extension Array where Element: Identifiable {
 		guard index + 1 < count else { return nil }
 		return self[index + 1]
 	}
+
 	@inlinable
 	func previous(of index: Int) -> Element? {
 		guard index > 0 else { return nil }
 		return self[index - 1]
 	}
+
 	@inlinable
 	func next(after item: Element) -> Element? {
 		guard let index = index(of: item.id), index + 1 < count else { return nil }
 		return next(of: index)
 	}
+
 	@inlinable
 	func previous(before item: Element) -> Element? {
 		guard let index = index(of: item.id), index > 0 else { return nil }
@@ -130,11 +133,13 @@ public extension Array where Element: Identifiable {
 
 public extension Array {
 	// MARK: - Non-mutating: Removing
+
 	@inlinable
 	func removingPrefix(_ count: Int) -> [Element] {
 		guard count > 0 else { return self }
 		return Array(dropFirst(count))
 	}
+
 	@inlinable
 	func removingSuffix(_ count: Int) -> [Element] {
 		guard count > 0 else { return self }
@@ -142,11 +147,13 @@ public extension Array {
 	}
 
 	// MARK: - Non-mutating: Taking
+
 	@inlinable
 	func takingPrefix(_ count: Int) -> [Element] {
 		guard count > 0 else { return [] }
 		return Array(prefix(count))
 	}
+
 	@inlinable
 	func takingSuffix(_ count: Int) -> [Element] {
 		guard count > 0 else { return [] }
@@ -154,6 +161,7 @@ public extension Array {
 	}
 
 	// MARK: - Non-mutating: Safe Slice
+
 	@inlinable
 	func safeSlice(_ range: Range<Int>) -> [Element] {
 		let lower = Swift.max(range.lowerBound, startIndex)
@@ -163,6 +171,7 @@ public extension Array {
 	}
 
 	// MARK: - Mutating
+
 	@inlinable
 	mutating func removePrefix(_ count: Int) {
 		guard count > 0 else { return }
@@ -172,6 +181,7 @@ public extension Array {
 			removeFirst(count)
 		}
 	}
+
 	@inlinable
 	mutating func removeSuffix(_ count: Int) {
 		guard count > 0 else { return }
@@ -217,7 +227,10 @@ public extension Array where Element: Identifiable, Element.ID: Hashable {
 	///   - index: Insertion index in the array.
 	///   - replaceExisting: If `true`, replaces existing elements with the same ID.
 	@inlinable
-	mutating func insertMerge(contentsOf newElements: [Element], at index: Int, replaceExisting: Bool = false) {
+	mutating func insertMerge(contentsOf newElements: [Element],
+	                          at index: Int,
+	                          replaceExisting: Bool = false)
+	{
 		guard !newElements.isEmpty else { return }
 
 		let insertionIndex = Swift.max(0, Swift.min(index, count))

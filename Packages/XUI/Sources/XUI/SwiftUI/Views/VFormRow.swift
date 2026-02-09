@@ -8,21 +8,21 @@
 import SwiftUI
 
 public struct VFormRow<Content: View>: View {
-    private let title: String
-    private let isEmpty: Bool
-    private let content: () -> Content
+	private let title: String
+	private let isEmpty: Bool
+	private let content: () -> Content
 
-    public init(title: String, isEmpty: Bool, content: @escaping () -> Content) {
-        self.title = title
-        self.isEmpty = isEmpty
-        self.content = content
-    }
+	public init(title: String, isEmpty: Bool, content: @escaping () -> Content) {
+		self.title = title
+		self.isEmpty = isEmpty
+		self.content = content
+	}
 
-    public var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(.init(title))
-                .foregroundStyle(isEmpty ? .primary : .tertiary)
-            content()
-        }
-    }
+	public var body: some View {
+		VStack(alignment: .leading, spacing: 2) {
+			Text(.init(title))
+				.foregroundStyle(isEmpty ? .primary : .tertiary)
+			content()
+		}
+	}
 }

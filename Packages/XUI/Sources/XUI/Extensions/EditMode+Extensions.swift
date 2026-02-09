@@ -1,5 +1,5 @@
 //
-//  EditMode++.swift
+//  EditMode+Extensions.swift
 //
 //
 //  Created by Aung Ko Min on 18/7/23.
@@ -8,16 +8,16 @@
 import SwiftUI
 
 public extension EditMode {
-    mutating func toggle() {
-        switch self {
-        case .inactive:
-            self = .active
-        case .transient:
-            self = .inactive
-        case .active:
-            self = .inactive
-        @unknown default:
-            self = .inactive
-        }
-    }
+	mutating func toggle() {
+		switch self {
+		case .inactive:
+			self = .active
+		case .transient:
+			self = .inactive
+		case .active:
+			self = .inactive
+		@unknown default:
+			self = .inactive
+		}
+	}
 }

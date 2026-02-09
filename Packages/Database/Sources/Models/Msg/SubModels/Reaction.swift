@@ -1,16 +1,19 @@
 //
-//  MsgReaction.swift
+//  Reaction.swift
 //  MsgRoom
 //
 //  Created by Aung Ko Min on 6/4/24.
 //
 
+import Core
 import Foundation
 import XUI
-import Core
 
 public struct Reaction: Codable, Sendable, Hashable, Equatable, Identifiable {
-	public var id: String { rawValue + senderID}
+	public var id: String {
+		rawValue + senderID
+	}
+
 	public let rawValue: String
 	public let senderID: String
 	public let date: ServerTime

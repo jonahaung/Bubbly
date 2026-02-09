@@ -31,7 +31,11 @@ extension Socket {
 		case let .reaction(payload):
 			try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in
 				let isSame = model.reactions.contains(
-					where: { $0.senderID == payload.reaction.senderID && $0.rawValue == payload.reaction.rawValue })
+					where: {
+						$0.senderID == payload.reaction.senderID && $0.rawValue == payload.reaction
+							.rawValue
+					}
+				)
 				model.reactions.removeAll(where: { $0.senderID == payload.reaction.senderID })
 				if !isSame {
 					model.reactions.append(payload.reaction)
@@ -115,17 +119,17 @@ extension Socket {
 		}
 	}
 
-	@discardableResult public func sendToRemote(
-		_ data: AnyMsgData,
-		conversation: Conversation
-	) async throws -> [String: MsgOutgoingStatus] {
+	@discardableResult public func sendToRemote(_ data: AnyMsgData,
+	                                            conversation: Conversation) async throws -> [
+		String: MsgOutgoingStatus
+	] {
 		let contacts = try await getContacts(
 			from: conversation
 		).filter {
 			$0.uid != currentUserId
-			&& isValidDeviceToken(
-				$0.pushToken
-			)
+				&& isValidDeviceToken(
+					$0.pushToken
+				)
 		}
 		let title = data.pushNotificationTitle(for: conversation)
 		return try await sendToRemote(
@@ -135,9 +139,7 @@ extension Socket {
 		)
 	}
 
-	private func getContacts(
-		from conversation: Conversation
-	) async throws -> [Contact] {
+	private func getContacts(from conversation: Conversation) async throws -> [Contact] {
 		switch conversation.kind {
 		case let .contact(contact):
 			[contact]
@@ -146,11 +148,11 @@ extension Socket {
 		}
 	}
 
-	@discardableResult public func sendToRemote(
-		_ data: AnyMsgData,
-		alert: APNSNotification.Alert,
-		contacts: [Contact]
-	) async throws -> [String: MsgOutgoingStatus] {
+	@discardableResult public func sendToRemote(_ data: AnyMsgData,
+	                                            alert: APNSNotification.Alert,
+	                                            contacts: [Contact]) async throws -> [
+		String: MsgOutgoingStatus
+	] {
 		let encoded = try JSONEncoder().encode(data)
 		guard let encodedString = String(data: encoded, encoding: .utf8) else {
 			throw SocketError.encodingFailed

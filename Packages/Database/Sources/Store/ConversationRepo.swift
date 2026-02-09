@@ -25,7 +25,9 @@ public enum ConversationRepo {
 		return Conversation(kind, properties: properties)
 	}
 
-	public static func getConversationKind(for conID: String, refetch: Bool) async throws -> ConversationKind {
+	public static func getConversationKind(for conID: String,
+	                                       refetch: Bool) async throws -> ConversationKind
+	{
 		if conID.contains("|") {
 			let contactID = try resolveContactID(from: conID)
 			let contact = try await ContactRepo.getOrCreate(for: contactID, refetch: refetch)
@@ -38,7 +40,11 @@ public enum ConversationRepo {
 			return .group(existing)
 		}
 
-		let group: Database.Group? = try await FirestoreRepo.getModel(for: conID, collection: .groups, field: .uid)
+		let group: Database.Group? = try await FirestoreRepo.getModel(
+			for: conID,
+			collection: .groups,
+			field: .uid
+		)
 		guard let group else {
 			throw XError.noConversationGroupFound
 		}
@@ -69,19 +75,21 @@ public enum ConversationRepo {
 	static func messagesPredicate(for conID: String) -> Predicate<PMsg> {
 		#Predicate<PMsg> { $0.conID == conID }
 	}
+
 	static func statusNotPredicate(for status: MsgIncomingStatus) -> Predicate<PMsg> {
 		let readRawValue = status.rawValue
 		return #Predicate<PMsg> { $0.incomingStatus < readRawValue }
 	}
+
 	static func senderIDNotPredicate(for uid: String) -> Predicate<PMsg> {
 		#Predicate<PMsg> { $0.senderID != uid }
 	}
-	static func descriptor(
-		for conID: String,
-		order: SortOrder,
-		limit: Int? = nil,
-		offset: Int? = nil
-	) -> FetchDescriptor<PMsg> {
+
+	static func descriptor(for conID: String,
+	                       order: SortOrder,
+	                       limit: Int? = nil,
+	                       offset: Int? = nil) -> FetchDescriptor<PMsg>
+	{
 		var descriptor = FetchDescriptor<PMsg>(predicate: messagesPredicate(for: conID))
 		descriptor.sortBy = [.init(\.date, order: order)]
 		if let limit { descriptor.fetchLimit = limit }
@@ -89,11 +97,10 @@ public enum ConversationRepo {
 		return descriptor
 	}
 
-	public static func fetchMessages(
-		conID: String,
-		offset: Int? = nil,
-		limit: Int? = nil
-	) async throws -> [Message] {
+	public static func fetchMessages(conID: String,
+	                                 offset: Int? = nil,
+	                                 limit: Int? = nil) async throws -> [Message]
+	{
 		let descriptor = descriptor(for: conID, order: .reverse, limit: limit, offset: offset)
 		let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
 		return snapshots.reversed()
@@ -117,26 +124,31 @@ public enum ConversationRepo {
 		let descriptor = FetchDescriptor<PMsg>(predicate: messagesPredicate(for: conID))
 		return try await Store.shared.msgStore?.fetchCount(descriptor) ?? 0
 	}
+
 	public static func countUnreadMsgs(conID: String, currentUserID: String) async throws -> Int {
 		let predicate = unreadMsgsPredicate(conID: conID, currentUserID: currentUserID)
 		let descriptor = FetchDescriptor<PMsg>(predicate: predicate)
 		return try await Store.shared.msgStore?.fetchCount(descriptor) ?? 0
 	}
-	public static func unreadMsgsPredicate(conID: String, currentUserID: String) -> Predicate<PMsg> {
+
+	public static func unreadMsgsPredicate(conID: String,
+	                                       currentUserID: String) -> Predicate<PMsg>
+	{
 		let conPredicate = messagesPredicate(for: conID)
 		let recipientPredicate = senderIDNotPredicate(for: currentUserID)
 		let statusPredicate = statusNotPredicate(for: .read)
 
 		let predicate = #Predicate<PMsg> {
-			conPredicate.evaluate($0) && recipientPredicate.evaluate($0) && statusPredicate.evaluate($0)
+			conPredicate.evaluate($0) && recipientPredicate.evaluate($0) && statusPredicate
+				.evaluate($0)
 		}
 		return predicate
 	}
-	public static func fetchUnreadMessages(
-		conID: String,
-		limit: Int? = nil,
-		currentUserID: String
-	) async throws -> [Message] {
+
+	public static func fetchUnreadMessages(conID: String,
+	                                       limit: Int? = nil,
+	                                       currentUserID: String) async throws -> [Message]
+	{
 		let predicate = unreadMsgsPredicate(conID: conID, currentUserID: currentUserID)
 		var descriptor = FetchDescriptor<PMsg>(predicate: predicate)
 		if let limit {
@@ -146,14 +158,16 @@ public enum ConversationRepo {
 		return try await Store.shared.msgStore?.fetch(descriptor) ?? []
 	}
 
-	public static func updateReceiveMsgs(for conID: String, currentUserID: String) async throws -> [Message] {
+	public static func updateReceiveMsgs(for conID: String,
+	                                     currentUserID: String) async throws -> [Message]
+	{
 		let unreadMsgs = try await fetchUnreadMessages(conID: conID, currentUserID: currentUserID)
 		guard !unreadMsgs.isEmpty else { return [] }
 
 		let msgStore = await Store.shared.msgStore
 
 		// Transform each message and let mapOrdered collect the results.
-		let updated: [Message] = try await AsyncOrderedStream.mapOrdered(inputs: unreadMsgs) { msg in
+		return try await AsyncOrderedStream.mapOrdered(inputs: unreadMsgs) { msg in
 			var msg = msg
 			msg.incomingStatus = .read
 			try await msgStore?.updateAndSave(uid: msg.uid) { model in
@@ -161,12 +175,13 @@ public enum ConversationRepo {
 			}
 			return msg
 		}
-		return updated
 	}
 
-	public static func search(form name: String, currentUserId: String) async throws -> Conversation? {
+	public static func search(form name: String,
+	                          currentUserId: String) async throws -> Conversation?
+	{
 		if let contact = try await ContactRepo.search(named: name) {
-			return await Conversation(
+			await Conversation(
 				.contact(contact),
 				properties: ConversationPropertiesRepo.getOrCreateMain(
 					for: ConversationIDGenerator.generate(
@@ -176,7 +191,7 @@ public enum ConversationRepo {
 				)
 			)
 		} else if let group = try await ContactRepo.searchGroup(named: name) {
-			return await Conversation(
+			await Conversation(
 				.group(group),
 				properties: ConversationPropertiesRepo.getOrCreateMain(
 					for: ConversationIDGenerator.generate(
@@ -186,8 +201,7 @@ public enum ConversationRepo {
 				)
 			)
 		} else {
-			return nil
+			nil
 		}
 	}
 }
-

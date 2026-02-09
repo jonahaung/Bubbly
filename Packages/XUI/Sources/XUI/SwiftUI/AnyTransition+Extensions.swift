@@ -1,5 +1,5 @@
 //
-//  ThumbnailExpandedModifier.swift
+//  AnyTransition+Extensions.swift
 //  XUI
 //
 //  Created by Aung Ko Min on 31/12/25.
@@ -10,12 +10,12 @@ import SwiftUI
 public extension EnvironmentValues {
 	@Entry var transitionProgress: CGFloat = 0
 }
+
 public extension AnyTransition {
 	@MainActor
-	static func move(
-		edge: Edge,
-		curve: Animation? = nil
-	) -> AnyTransition {
+	static func move(edge: Edge,
+	                 curve: Animation? = nil) -> AnyTransition
+	{
 		let base = AnyTransition.modifier(
 			active: MoveModifier(edge: edge, progress: 0),
 			identity: MoveModifier(edge: edge, progress: 1)
@@ -27,6 +27,7 @@ public extension AnyTransition {
 			return base
 		}
 	}
+
 	struct MoveModifier: @MainActor AnimatableModifier {
 		let edge: Edge
 		var progress: CGFloat
@@ -47,8 +48,9 @@ public extension AnyTransition {
 					)
 			}
 		}
+
 		private func transform(for size: CGSize) -> CGAffineTransform {
-			let translation: CGPoint = switch edge {
+			let translation = switch edge {
 			case .bottom:
 				CGPoint(x: 0, y: size.height * (1 - progress))
 			case .top:
@@ -65,6 +67,7 @@ public extension AnyTransition {
 		}
 	}
 }
+
 public extension AnyTransition {
 	@MainActor
 	static var invisible: AnyTransition {

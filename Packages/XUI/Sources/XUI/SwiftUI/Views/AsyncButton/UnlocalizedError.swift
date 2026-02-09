@@ -1,9 +1,9 @@
 import Foundation
 
 struct UnlocalizedError: LocalizedError {
-    let errorDescription: String?
+	let errorDescription: String?
 
-    init(error: Error) {
-        errorDescription = error.localizedDescription
-    }
+	init(error: Error) {
+		errorDescription = error.localizedDescription
+	}
 }

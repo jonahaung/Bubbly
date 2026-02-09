@@ -1,5 +1,5 @@
 //
-//  String++.swift
+//  String+Extensions.swift
 //  XUI
 //
 //  Created by Aung Ko Min on 16/12/25.
@@ -9,35 +9,35 @@ import Foundation
 
 #if os(iOS) || os(watchOS) || os(tvOS)
 
-import UIKit
+	import UIKit
 
 #elseif os(OSX)
 
-import Cocoa
+	import Cocoa
 
 #endif
 
 public extension String {
-	// Trim
+	/// Trim
 	var trim: String {
-		return trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
+		trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
 	}
 
-	// Remove extra white spaces
+	/// Remove extra white spaces
 	var extendedTrim: String {
-		let components = self.components(separatedBy: CharacterSet.whitespacesAndNewlines)
+		let components = components(separatedBy: CharacterSet.whitespacesAndNewlines)
 		return components.filter { !$0.isEmpty }.joined(separator: " ").trim
 	}
 
-	// Decode HTML entities
+	/// Decode HTML entities
 	var decoded: String {
 		guard let encodedData = data(using: String.Encoding.utf8) else { return self }
 
 		let attributedOptions: [NSAttributedString.DocumentReadingOptionKey: Any] =
-		[
-			.documentType: NSAttributedString.DocumentType.html,
-			.characterEncoding: NSNumber(value: String.Encoding.utf8.rawValue)
-		]
+			[
+				.documentType: NSAttributedString.DocumentType.html,
+				.characterEncoding: NSNumber(value: String.Encoding.utf8.rawValue),
+			]
 
 		do {
 			let attributedString = try NSAttributedString(
@@ -52,19 +52,19 @@ public extension String {
 		}
 	}
 
-	// Strip tags
+	/// Strip tags
 	var tagsStripped: String {
-		return deleteTagByPattern(Regex.rawTagPattern)
+		deleteTagByPattern(Regex.rawTagPattern)
 	}
 
-	// Delete tab by pattern
+	/// Delete tab by pattern
 	func deleteTagByPattern(_ pattern: String) -> String {
-		return replacingOccurrences(of: pattern, with: "", options: .regularExpression, range: nil)
+		replacingOccurrences(of: pattern, with: "", options: .regularExpression, range: nil)
 	}
 
-	// Substring
+	/// Substring
 	func substring(_ start: Int, end: Int) -> String {
-		return substring(NSRange(location: start, length: end - start))
+		substring(NSRange(location: start, length: end - start))
 	}
 
 	func substring(_ range: NSRange) -> String {
@@ -74,11 +74,12 @@ public extension String {
 		return substring(range.location, end: end)
 	}
 
-	// Check if url is an image
+	/// Check if url is an image
 	func isImage() -> Bool {
 		let possible = ["gif", "jpg", "jpeg", "png", "bmp"]
 		if let url = URL(string: self),
-		   possible.contains(url.pathExtension) {
+		   possible.contains(url.pathExtension)
+		{
 			return true
 		}
 
@@ -86,26 +87,27 @@ public extension String {
 	}
 
 	func isOpenGraphImage() -> Bool {
-		return Regex.test(self, regex: Regex.openGraphImagePattern)
+		Regex.test(self, regex: Regex.openGraphImagePattern)
 	}
 
 	func isVideo() -> Bool {
 		let possible = ["mp4", "mov", "mpeg", "avi", "m3u8"]
 		if let url = URL(string: self),
-		   possible.contains(url.pathExtension) {
+		   possible.contains(url.pathExtension)
+		{
 			return true
 		}
 
 		return false
 	}
 
-	// Split into substring of equal length
+	/// Split into substring of equal length
 	func split(by length: Int) -> [String] {
-		var startIndex = self.startIndex
+		var startIndex = startIndex
 		var results = [Substring]()
 
 		while startIndex < endIndex {
-			let endIndex = index(startIndex, offsetBy: length, limitedBy: self.endIndex) ?? self.endIndex
+			let endIndex = index(startIndex, offsetBy: length, limitedBy: endIndex) ?? endIndex
 			results.append(self[startIndex ..< endIndex])
 			startIndex = endIndex
 		}
@@ -114,7 +116,7 @@ public extension String {
 	}
 
 	var containsMarkdown: Bool {
-		let tokens = ["**", "__", "`", "```", "[", "](", "#", "> ", "- ", "* ", "@"]
+		let tokens = ["**", "__", "`", "```", "[", "](", "#", "> ", "- ", "* ", "@", "://"]
 		return tokens.contains { contains($0) }
 	}
 }

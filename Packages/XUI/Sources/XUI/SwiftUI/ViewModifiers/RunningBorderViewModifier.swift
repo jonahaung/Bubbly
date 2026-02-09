@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct RunningBorderViewModifier: ViewModifier {
-
 	let lineWidth: CGFloat
 	let cornerRadius: CGFloat
 	let animated: Bool
@@ -24,7 +23,8 @@ struct RunningBorderViewModifier: ViewModifier {
 					.strokeBorder(
 						AngularGradient(
 							gradient: Gradient(
-								colors: animated ? [.indigo, .blue, .red, .orange, .indigo] : [Color.accentColor]
+								colors: animated ? [.indigo, .blue, .red, .orange, .indigo] :
+									[Color.accentColor]
 							),
 							center: .center,
 							startAngle: .degrees(rotation),
@@ -54,11 +54,10 @@ struct RunningBorderViewModifier: ViewModifier {
 }
 
 public extension View {
-	func runningBorder(
-		lineWidth: CGFloat = 1,
-		cornerRadius: CGFloat = 10,
-		animated: Bool = true
-	) -> some View {
+	func runningBorder(lineWidth: CGFloat = 1,
+	                   cornerRadius: CGFloat = 10,
+	                   animated: Bool = true) -> some View
+	{
 		modifier(RunningBorderViewModifier(
 			lineWidth: lineWidth,
 			cornerRadius: cornerRadius,

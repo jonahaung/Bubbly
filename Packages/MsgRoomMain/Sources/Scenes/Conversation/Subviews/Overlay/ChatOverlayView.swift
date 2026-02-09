@@ -17,9 +17,15 @@ struct ChatOverlayView: View {
 	enum TransitState: Hashable {
 		case appeared, didAppear, hidden
 
-		var isDidAppear: Bool { self == .didAppear }
-		var isAppeared: Bool { self == .appeared }
+		var isDidAppear: Bool {
+			self == .didAppear
+		}
+
+		var isAppeared: Bool {
+			self == .appeared
+		}
 	}
+
 	let item: ChatOverlayView.Item
 	@Environment(MsgCellViewModel.self) private var viewModel
 	@Environment(\.msgCellActions) private var msgCellActions
@@ -33,7 +39,7 @@ struct ChatOverlayView: View {
 			Rectangle().fill(conversation.theme.background.color.opacity(0.2))
 				.glassEffect(.regular, in: .containerRelative)
 				.backgroundExtensionEffect()
-				.opacity(transitionState.isDidAppear  ? 1 : 0)
+				.opacity(transitionState.isDidAppear ? 1 : 0)
 				.gesture(
 					DragGesture(minimumDistance: 0).onChanged { _ in
 						if transitionState == .didAppear {
@@ -99,7 +105,10 @@ struct RoomFocesedOverlayBar: View {
 			AnimatedButton(.center) {
 				Task {
 					let msg = item.msg
-					try? await Socket.shared.send(.deleteMsg(rMsg: .init(msg)), conversation: conversation)
+					try? await Socket.shared.send(
+						.deleteMsg(rMsg: .init(msg)),
+						conversation: conversation
+					)
 					dismiss()
 				}
 			} label: {

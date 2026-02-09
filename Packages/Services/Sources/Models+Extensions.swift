@@ -1,5 +1,5 @@
 //
-//  Models++.swift
+//  Models+Extensions.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 4/9/25.
@@ -19,9 +19,11 @@ extension Contact: @retroactive ImageViewItem {
 	public var remoteURL: URL? {
 		.init(string: photoURL)
 	}
+
 	public var imageID: String {
 		uid
 	}
+
 	public var galleryTitle: String? {
 		name
 	}
@@ -31,6 +33,7 @@ extension Database.Group: @retroactive ImageViewItem {
 	public var subFolders: [String] {
 		["Groups", "Profile Photos", uid]
 	}
+
 	public var galleryTitle: String? {
 		name
 	}
@@ -43,6 +46,7 @@ extension Database.Group: @retroactive ImageViewItem {
 		uid
 	}
 }
+
 extension Attachment: @retroactive ImageViewItem {
 	public var subFolders: [String] {
 		var values = ["Conversations", "Messages", "Attachments", attachmentType.description]
@@ -52,12 +56,15 @@ extension Attachment: @retroactive ImageViewItem {
 		}
 		return values
 	}
+
 	public var galleryTitle: String? {
 		title
 	}
+
 	public var remoteURL: URL? {
 		.init(string: url)
 	}
+
 	public var imageID: String {
 		uid
 	}

@@ -1,21 +1,20 @@
 //
-//  AttachmentContent.swift
+//  AttachmentPreview.swift
 //  Conversation
 //
 //  Created by Aung Ko Min on 31/1/22.
 //
 
+import _AVKit_SwiftUI
 import Database
+import ImageLoader
+import QuickLook
 import Services
 import SwiftUI
-import XUI
-import ImageLoader
 import VideoLoader
-import _AVKit_SwiftUI
-import QuickLook
+import XUI
 
 struct AttachmentPreview: View {
-
 	let onSelect: (_ item: Attachment) -> Void
 	let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
@@ -25,17 +24,15 @@ struct AttachmentPreview: View {
 	@Environment(\.msgCellActions) private var sendMsgCellInteraction
 	@State private var model: AttachmentPreviewViewModel
 
-	init(
-		attachment: Attachment,
-		onSelect: @escaping (_: Attachment) -> Void,
-		onCompleteUpload: ((_ newValue: Attachment) -> Void)? = nil
-	) {
+	init(attachment: Attachment,
+	     onSelect: @escaping (_: Attachment) -> Void,
+	     onCompleteUpload: ((_ newValue: Attachment) -> Void)? = nil)
+	{
 		model = .init(attachment: attachment)
 		self.onSelect = onSelect
 		self.onCompleteUpload = onCompleteUpload
 	}
 
-	@ViewBuilder
 	var body: some View {
 		switch model.attachment.attachmentType {
 		case .image, .imageUploading, .video, .videoUploading:
@@ -100,20 +97,21 @@ struct AttachmentPreview: View {
 	@ViewBuilder
 	private func attachmentView(for data: AttachmentData) -> some View {
 		switch data {
-		case .image(let thumbnail):
+		case let .image(thumbnail):
 			imageView(for: thumbnail)
-		case .link(let thumbnail):
+		case let .link(thumbnail):
 			imageView(for: thumbnail)
-		case .imageUpload(let url, let thumbnail):
+		case let .imageUpload(url, thumbnail):
 			imageView(for: thumbnail)
 				.if_let(onCompleteUpload) { _, view in
 					view
 						.overlay {
 							ImageUploadingLayer(
 								attachment: model.attachment, url: url,
-								conversationID: conversation.uid) {
-									onCompleteUpload?($0)
-								}
+								conversationID: conversation.uid
+							) {
+								onCompleteUpload?($0)
+							}
 						}
 				}
 		case .video(videoURL: _, thumbnail: let thumbnail):

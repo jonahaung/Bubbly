@@ -2,18 +2,18 @@
 import SwiftUI
 
 private struct LoadingPresentableModifier: ViewModifier {
-    @State private var presenter = LoadingPresenter.shared
+	@State private var presenter = LoadingPresenter.shared
 
-    func body(content: Content) -> some View {
-        content
+	func body(content: Content) -> some View {
+		content
 			.fullScreenCover(isPresented: $presenter.showLoading) {
 				LoadingOverlay()
 			}
-    }
+	}
 }
 
 public extension View {
-    func loadingPresentable() -> some View {
-        modifier(LoadingPresentableModifier())
-    }
+	func loadingPresentable() -> some View {
+		modifier(LoadingPresentableModifier())
+	}
 }

@@ -1,9 +1,9 @@
 //
-	//  VScrollGemotry.swift
-	//  MsgRoomMain
-	//
-	//  Created by Aung Ko Min on 8/11/25.
-	//
+//  VScrollGemotry.swift
+//  MsgRoomMain
+//
+//  Created by Aung Ko Min on 8/11/25.
+//
 
 import SwiftUI
 import XUI
@@ -27,11 +27,12 @@ public struct VScrollGeometry: Sendable, Hashable, Equatable {
 public extension VScrollGeometry {
 	init(_ geometry: ScrollGeometry) {
 		self.init(
-		contentHeight: geometry.contentSize.height,
-		boundsHeight: geometry.bounds.height,
-		offsetY: geometry.contentOffset.y,
-		topInset: geometry.contentInsets.top,
-		bottomInset: geometry.contentInsets.bottom)
+			contentHeight: geometry.contentSize.height,
+			boundsHeight: geometry.bounds.height,
+			offsetY: geometry.contentOffset.y,
+			topInset: geometry.contentInsets.top,
+			bottomInset: geometry.contentInsets.bottom
+		)
 	}
 
 	static let empty = VScrollGeometry(
@@ -63,16 +64,17 @@ public extension VScrollGeometry {
 	var location: ScrollLocation {
 		let edge: VerticalEdge = centerFraction < 0.45 ? .top : .bottom
 		switch edge {
-			case .top:
-				return .init(edge: edge, fraction: visibleRect.minY / contentHeight)
-			case .bottom:
-				return .init(edge: edge, fraction: 1 - (visibleRect.maxY / contentHeight))
+		case .top:
+			return .init(edge: edge, fraction: visibleRect.minY / contentHeight)
+		case .bottom:
+			return .init(edge: edge, fraction: 1 - (visibleRect.maxY / contentHeight))
 		}
 	}
 
 	var centerFraction: CGFloat {
 		visibleRect.midY / contentHeight
 	}
+
 	@MainActor
 	var scrolledPosition: ScrolledPosition {
 		.init(self)
@@ -94,8 +96,9 @@ public extension VScrollGeometry {
 			// Preserve current visible rect minY -> convert back to offset space
 			return visibleRect.minY - topInset
 		}
-		// Preserve old visibleRect.minY position, adjusted by content height change, then convert back to offset space
-		return (oldValue.visibleRect.minY + diff)
+		// Preserve old visibleRect.minY position, adjusted by content height change, then convert
+		// back to offset space
+		return oldValue.visibleRect.minY + diff
 	}
 }
 
@@ -109,10 +112,10 @@ public extension ScrolledPosition {
 
 		let location = geometry.location
 		switch location.edge {
-			case .top:
-				self = location.fraction <= 0 ? .atTop : .position(location)
-			case .bottom:
-				self = location.fraction <= 0 ? .atBottom : .position(location)
+		case .top:
+			self = location.fraction <= 0 ? .atTop : .position(location)
+		case .bottom:
+			self = location.fraction <= 0 ? .atBottom : .position(location)
 		}
 	}
 }

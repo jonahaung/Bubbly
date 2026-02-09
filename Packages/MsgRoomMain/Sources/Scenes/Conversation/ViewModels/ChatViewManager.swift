@@ -5,17 +5,16 @@
 //  Created by Aung Ko Min on 26/10/24.
 //
 
+import Combine
 import Core
 import Database
 import ImageLoader
 import Services
 import SwiftUI
 import XUI
-import Combine
 
 @Observable
 final class ChatViewManager: ErrorPresenter, ViewReloadable, Equatable {
-
 	@ObservationIgnored let messageSource: ChatDatasource
 	@ObservationIgnored let scrollController: ChatScrollCoordinator
 	@ObservationIgnored var presentation: ChatPresentationState
@@ -61,7 +60,6 @@ final class ChatViewManager: ErrorPresenter, ViewReloadable, Equatable {
 }
 
 extension ChatViewManager: ChatScrollCoordinatorDelegate {
-
 	func trackItemsChanges() {
 		withObservationTracking {
 			_ = models.ids
@@ -97,14 +95,16 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 		return !models.contains(withID: lastMsgID)
 	}
 
-	func scrollCoordinator(_ coordinator: ChatScrollCoordinator, loadOlderStartingAt message: Message) {
+	func scrollCoordinator(_ coordinator: ChatScrollCoordinator,
+	                       loadOlderStartingAt message: Message)
+	{
 		coordinator.setUpdateState(.removingItems(.bottom))
 		let pageSize = max(1, conversationConfig.pageSize)
 		let trimCount = pageSize >= 2 ? pageSize - pageSize / 2 : 1
 		if models.count >= pageSize * 2 {
 			models.takingPrefix(pageSize)
 		} else {
-			 models.takingPrefix(trimCount)
+			models.takingPrefix(trimCount)
 		}
 		layoutIfNeeded()
 		Task {
@@ -120,7 +120,9 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 		}
 	}
 
-	func scrollCoordinator(_ coordinator: ChatScrollCoordinator, loadNewerStartingAt message: Message) {
+	func scrollCoordinator(_ coordinator: ChatScrollCoordinator,
+	                       loadNewerStartingAt message: Message)
+	{
 		Task {
 			let query = ServerTime(message.date).value
 			do {
@@ -154,7 +156,9 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 		}
 	}
 
-	func scrollCoordinator(_ coordinator: ChatScrollCoordinator, didFinalizeUpdateAt position: ScrolledPosition) {
+	func scrollCoordinator(_ coordinator: ChatScrollCoordinator,
+	                       didFinalizeUpdateAt position: ScrolledPosition)
+	{
 		presentation.bottomAccessory = position != .atBottom ? .scrollDownButton : nil
 		if position == .atBottom {
 			resetDatasourceIfNeeded()
@@ -162,21 +166,22 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 	}
 
 	private func resetDatasourceIfNeeded() {
-		if scrollController.updateState.isNotUpdating, !canLoadNewerMessages, models.count > conversationConfig.pageSize + 5 {
-			scrollController.scrollTarget = .init(edge: .bottom)
+		if scrollController.updateState.isNotUpdating, !canLoadNewerMessages,
+		   models.count > conversationConfig.pageSize + 5
+		{
+			scrollController.scrollPosition.wrappedValue = .init(edge: .bottom)
 			models.takingSuffix(conversationConfig.pageSize)
 		}
 	}
+
 	func reloadScrollView(for coordinator: ChatScrollCoordinator) {
 		scrollController.setDefaultAnimation(nil)
-		scrollController.messageLayoutCache.invalidateSizes()
 		scrollController.messageLayoutCache.invalidateLayout()
 		layoutIfNeeded()
 	}
 }
 
 extension ChatViewManager {
-
 	func setSelectedMsg(_ uid: String) {
 		guard let index = models.index(of: uid) else { return }
 		let oldValue = presentation.selectedMsg
@@ -205,7 +210,6 @@ extension ChatViewManager {
 }
 
 extension ChatViewManager {
-
 	func onViewAppear() async throws {
 		conversation = try await conversation.reload(
 			refetch: !scrollController.updateState.hasViewLoaded

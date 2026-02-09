@@ -7,14 +7,13 @@
 
 import Core
 import FirebaseAuth
+import MsgRoomMain
 import Services
 import SwiftUI
 import XUI
-import MsgRoomMain
 
 @main
 struct BubblyApp: App {
-
 	private let appLauncher = AppLauncher()
 	private let pushNotificationServie = PushNotificationService()
 

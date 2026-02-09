@@ -11,11 +11,13 @@ import Foundation
 //        private init() {}
 //
 //        public static func store(publicKey base64String: String, for userID: String) {
-//            guard let publicKey = Crypto.publicKey(with: base64String) else { return } // Not a valid public key
+//            guard let publicKey = Crypto.publicKey(with: base64String) else { return } // Not a
+//            valid public key
 //            store(publicKey: publicKey, for: userID)
 //        }
 //
-//        public static func store(publicKey: Curve25519.KeyAgreement.PublicKey, for userID: String) {
+//        public static func store(publicKey: Curve25519.KeyAgreement.PublicKey, for userID: String)
+//        {
 //            HotStorage.add(object: publicKey.toBase64String, withKey: userID)
 //        }
 //

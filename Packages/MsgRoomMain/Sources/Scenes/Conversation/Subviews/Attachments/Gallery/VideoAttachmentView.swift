@@ -5,13 +5,12 @@
 //  Created by Aung Ko Min on 29/12/25.
 //
 
-import XUI
+import AVKit
 import Database
 import SwiftUI
-import AVKit
+import XUI
 
 public struct VideoAttachmentView: View {
-
 	let attachment: Attachment
 	@State private var player: AVPlayer?
 

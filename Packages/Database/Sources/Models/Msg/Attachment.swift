@@ -8,8 +8,10 @@
 import Foundation
 
 public struct Attachment: Codable, Sendable, Hashable, Identifiable {
+	public var id: String {
+		uid
+	}
 
-	public var id: String { uid }
 	public let uid: String
 	public var url: String
 	public var thumbnailUrl: String?
@@ -18,15 +20,14 @@ public struct Attachment: Codable, Sendable, Hashable, Identifiable {
 	public let title: String?
 	public let subTitle: String?
 
-	public init(
-		uid: String,
-		url: String,
-		thumbnailUrl: String? = nil,
-		attachMentTypeRaw: Int,
-		aspectRatio: Double,
-		title: String? = nil,
-		subTitle: String? = nil
-	) {
+	public init(uid: String,
+	            url: String,
+	            thumbnailUrl: String? = nil,
+	            attachMentTypeRaw: Int,
+	            aspectRatio: Double,
+	            title: String? = nil,
+	            subTitle: String? = nil)
+	{
 		self.uid = uid
 		self.url = url
 		self.thumbnailUrl = thumbnailUrl

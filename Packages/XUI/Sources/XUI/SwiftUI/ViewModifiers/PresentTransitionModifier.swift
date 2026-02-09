@@ -100,7 +100,6 @@ private struct TransitionOverlayView<Content: View, Snapshot: View>: View {
 // MARK: - Blurred Background
 
 public struct BlurredBackgroundView: View {
-
 	var onTap: (() -> Void)?
 
 	public init(onTap: (() -> Void)? = nil) {
@@ -119,7 +118,9 @@ public struct BlurredBackgroundView: View {
 }
 
 private struct FramePreferenceKey: PreferenceKey {
-	static var defaultValue: CGRect? { nil }
+	static var defaultValue: CGRect? {
+		nil
+	}
 
 	static func reduce(value: inout CGRect?, nextValue: () -> CGRect?) {
 		value = nextValue() ?? value
@@ -135,7 +136,9 @@ extension CGRect: @retroactive Identifiable {
 }
 
 public extension View {
-	func presentTransition(_ snapshot: @escaping () -> some View, content: @escaping () -> some View) -> some View {
+	func presentTransition(_ snapshot: @escaping () -> some View,
+	                       content: @escaping () -> some View) -> some View
+	{
 		modifier(PresentTransitionModifier(
 			snapshot: snapshot,
 			destination: content

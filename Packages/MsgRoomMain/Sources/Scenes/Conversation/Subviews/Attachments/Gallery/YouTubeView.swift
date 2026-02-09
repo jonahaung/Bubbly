@@ -5,8 +5,8 @@
 //  Created by Aung Ko Min on 6/1/26.
 //
 
-import WebKit
 import SwiftUI
+import WebKit
 
 struct YouTubeWebView: UIViewRepresentable {
 	let videoID: String
@@ -52,19 +52,17 @@ struct YouTubeWebView: UIViewRepresentable {
 			self.onError = onError
 		}
 
-		func webView(
-			_ webView: WKWebView,
-			didFail navigation: WKNavigation!,
-			withError error: Error
-		) {
+		func webView(_ webView: WKWebView,
+		             didFail navigation: WKNavigation!,
+		             withError error: Error)
+		{
 			onError()
 		}
 
-		func webView(
-			_ webView: WKWebView,
-			didFailProvisionalNavigation navigation: WKNavigation!,
-			withError error: Error
-		) {
+		func webView(_ webView: WKWebView,
+		             didFailProvisionalNavigation navigation: WKNavigation!,
+		             withError error: Error)
+		{
 			onError()
 		}
 	}

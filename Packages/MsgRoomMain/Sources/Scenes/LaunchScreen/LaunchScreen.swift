@@ -15,18 +15,11 @@ struct LaunchScreen: View {
 	@Environment(AppLauncher.self) private var launcher
 	var body: some View {
 		ZStack {
-			LaunchScreenShape()
-				.fill(.secondary)
-				.flexible(.all)
-				.backgroundExtensionEffect()
-
-			Text("Bubbly")
-				.font(.largeTitle)
-				.bold()
+			LoadingIndicator(40)
 		}
-		.statusBarHidden()
 		.task {
 			await launcher.startEvaluate()
 		}
+		.statusBarHidden()
 	}
 }

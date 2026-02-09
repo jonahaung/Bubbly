@@ -13,7 +13,6 @@ import SwiftUI
 import XUI
 
 struct InboxScene: View {
-
 	@Environment(\.currentUser) private var currentUser
 
 	@LazyState private var viewModel = InboxViewModel()
@@ -38,8 +37,7 @@ struct InboxScene: View {
 		.navigationTitle("pencil.line")
 		.toolbar {
 			ToolbarItem(placement: .primaryAction) {
-				Button {
-				} label: {
+				Button {} label: {
 					SystemImage(.bellBadge)
 				}
 			}.sharedBackgroundVisibility(.hidden)

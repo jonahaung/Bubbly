@@ -12,17 +12,18 @@ public struct SideEffectHandler: Sendable {
 	public var run: @Sendable (DeeplinkAction.SideEffect) async throws -> Void
 
 	public init(run: @escaping @Sendable (DeeplinkAction.SideEffect) async throws -> Void) {
-        self.run = run
-    }
-	public static let `default` =  SideEffectHandler { effect in
+		self.run = run
+	}
+
+	public static let `default` = SideEffectHandler { effect in
 		switch effect {
-		case .prepareForConversation(let id):
+		case let .prepareForConversation(id):
 			ConversationInitializer.start(conID: id, refetch: false)
-		case .track(let event, let props):
+		case let .track(event, props):
 			print("Track \(event) \(props)")
 		case .requireAuth:
 			break
-		case .prepareForContactDetails(id: let id):
+		case let .prepareForContactDetails(id: id):
 			let contact = try await ContactRepo.getOrCreate(for: id, refetch: false)
 			await Router.shared.pushToNav(NavPath.contactDetails(contact))
 		}

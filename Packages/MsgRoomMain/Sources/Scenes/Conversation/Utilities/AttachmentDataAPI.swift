@@ -55,7 +55,7 @@ actor AttachmentDataAPI {
 	}
 
 	func fetchAttachmentData(for attachment: Attachment) async throws -> AttachmentData {
-		if let cachedData = try  await cachedData(for: attachment) {
+		if let cachedData = try await cachedData(for: attachment) {
 			return cachedData
 		}
 		return try await fetchDataAndCache(attachment)
@@ -72,28 +72,32 @@ private extension AttachmentDataAPI {
 		case .image:
 			if attachment
 				.fileExist(), let image = attachment
-				.thumbnailImage() {
+				.thumbnailImage()
+			{
 				return .image(thumbnail: image)
 			}
 			return nil
 		case .link:
 			if attachment
 				.fileExist(), let image = attachment
-				.image() {
+				.image()
+			{
 				return .link(thumbnail: image)
 			}
 			return nil
 		case .video:
 			if attachment
 				.fileExist(), let url = URL(string: attachment.url), let image = attachment
-				.thumbnailImage() {
+				.thumbnailImage()
+			{
 				return .video(videoURL: url, thumbnail: image)
 			}
 			return nil
 		case .imageUploading:
 			if attachment
 				.fileExist(), let url = attachment.file()?.url, let image = attachment
-				.thumbnailImage() {
+				.thumbnailImage()
+			{
 				return .imageUpload(localURL: url, thumbnail: image)
 			}
 			return nil
@@ -129,6 +133,7 @@ private extension AttachmentDataAPI {
 		}
 		return .video(videoURL: url, thumbnail: thumbnail)
 	}
+
 	// MARK: - Image Attachment
 
 	func processImageAttachment(_ attachment: Attachment) async throws -> AttachmentData {
@@ -161,7 +166,7 @@ private extension AttachmentDataAPI {
 		}
 		let (data, response) = try await urlSession.data(from: url)
 		guard let httpResponse = response as? HTTPURLResponse,
-			  (200 ... 299).contains(httpResponse.statusCode)
+		      (200 ... 299).contains(httpResponse.statusCode)
 		else {
 			throw URLError(.badServerResponse)
 		}

@@ -1,5 +1,5 @@
 //
-//  Attachment++.swift
+//  Attachment+Extensions.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 19/9/25.
@@ -9,17 +9,17 @@ import Database
 import Foundation
 
 public extension Attachment {
-    var bestFitHeight: CGFloat {
+	var bestFitHeight: CGFloat {
 		bestFitWidth / aspectRatio
-    }
+	}
 
-    var bestFitWidth: CGFloat {
+	var bestFitWidth: CGFloat {
 		aspectRatio < 0.9 ? 200 : aspectRatio > 1.1 ? 300 : 200
-    }
+	}
 
-    var bestFitSize: CGSize {
-        .init(width: bestFitWidth, height: bestFitHeight)
-    }
+	var bestFitSize: CGSize {
+		.init(width: bestFitWidth, height: bestFitHeight)
+	}
 }
 
 public extension CGSize {

@@ -12,9 +12,9 @@ import SwiftUI
 import XUI
 
 struct ConversationHeaderView: View {
-    @Environment(ChatViewManager.self) private var manager
+	@Environment(ChatViewManager.self) private var manager
 
-    var body: some View {
+	var body: some View {
 		VStack {
 			Text(manager.conversation.name)
 				.bold()
@@ -33,7 +33,7 @@ struct ConversationHeaderView: View {
 		.lineHeight(.multiple(factor: 1.2))
 		.lineSpacing(0)
 		.allowsTightening(true)
-        .id(Self.typeName)
+		.id(Self.typeName)
 		.layoutValue(key: MsgLayoutValueKey.self, value: .empty)
-    }
+	}
 }

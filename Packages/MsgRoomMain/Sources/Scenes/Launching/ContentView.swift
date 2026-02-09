@@ -1,5 +1,5 @@
 //
-//  LaunchingSwitch.swift
+//  ContentView.swift
 //  Bubbly
 //
 //  Created by Aung Ko Min on 18/11/25.
@@ -8,7 +8,6 @@
 import SwiftUI
 
 public struct ContentView: View {
-
 	@Environment(AppLauncher.self) private var launcher
 
 	public init() {}
@@ -20,7 +19,7 @@ public struct ContentView: View {
 				.transition(.opacity)
 		case .getStarted:
 			AuthFlow()
-		case .main(let currentUser):
+		case let .main(currentUser):
 			RootView()
 				.transition(.invisible)
 				.msgRoomEntryPoint(currentUser)

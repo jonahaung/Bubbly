@@ -10,7 +10,6 @@ import FirePhoneOTP
 import SwiftUI
 
 public struct AuthFlow: View {
-
 	@State private var router = AuthRouter()
 
 	public init() {}
@@ -22,7 +21,7 @@ public struct AuthFlow: View {
 					switch value {
 					case .signIn:
 						FirePhoneOTPLoginView()
-					case .userInfo(let user):
+					case let .userInfo(user):
 						AuthUserProfileView(user: user)
 					case .landing:
 						LaunchScreen()

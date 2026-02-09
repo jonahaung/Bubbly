@@ -1,5 +1,5 @@
 //
-//  TextField++.swift
+//  TextField+Extensions.swift
 //  XUI
 //
 //  Created by Aung Ko Min on 1/12/25.
@@ -7,13 +7,12 @@
 
 import SwiftUI
 
-extension TextField where Label == Text {
-	public init(
-		_ title: LocalizedStringKey,
-		text: Binding<String>,
-		isEditing: Binding<Bool>,
-		onCommit: @escaping () -> Void = { }
-	) {
+public extension TextField where Label == Text {
+	init(_ title: LocalizedStringKey,
+	     text: Binding<String>,
+	     isEditing: Binding<Bool>,
+	     onCommit: @escaping () -> Void = {})
+	{
 		self.init(
 			title,
 			text: text,
@@ -22,12 +21,11 @@ extension TextField where Label == Text {
 		)
 	}
 
-	public init(
-		_ title: LocalizedStringKey,
-		text: Binding<String?>,
-		onEditingChanged: @escaping (Bool) -> Void = { _ in },
-		onCommit: @escaping () -> Void = { }
-	) {
+	init(_ title: LocalizedStringKey,
+	     text: Binding<String?>,
+	     onEditingChanged: @escaping (Bool) -> Void = { _ in },
+	     onCommit: @escaping () -> Void = {})
+	{
 		let nonOptional = Binding<String>(
 			get: { text.wrappedValue ?? "" },
 			set: { newValue in
@@ -43,12 +41,11 @@ extension TextField where Label == Text {
 		)
 	}
 
-	public init(
-		_ title: LocalizedStringKey,
-		text: Binding<String?>,
-		isEditing: Binding<Bool>,
-		onCommit: @escaping () -> Void = { }
-	) {
+	init(_ title: LocalizedStringKey,
+	     text: Binding<String?>,
+	     isEditing: Binding<Bool>,
+	     onCommit: @escaping () -> Void = {})
+	{
 		let nonOptional = Binding<String>(
 			get: { text.wrappedValue ?? "" },
 			set: { newValue in

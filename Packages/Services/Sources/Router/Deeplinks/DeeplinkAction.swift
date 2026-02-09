@@ -5,11 +5,9 @@
 //  Created by Aung Ko Min on 29/1/26.
 //
 
-
 import Foundation
 
 public enum DeeplinkAction: Sendable, Equatable {
-
 	case selectTab(TabPath)
 	case pushToNav(NavPath)
 	case presnetModel(NavPath)

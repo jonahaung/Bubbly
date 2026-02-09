@@ -9,20 +9,20 @@ import Combine
 import SwiftUI
 
 public struct PagerScrollView<Item, Content>: View
-where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, Item.ID == String {
-
-    private let items: [Item]
-    private let content: (Item) -> Content
+	where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, Item.ID == String
+{
+	private let items: [Item]
+	private let content: (Item) -> Content
 	@Binding private var selection: String
 	@State private var position: String?
 
 	public init(items: [Item], selection: Binding<Item.ID>, content: @escaping (Item) -> Content) {
-        self.items = items
-        self.content = content
-        _selection = selection
-    }
+		self.items = items
+		self.content = content
+		_selection = selection
+	}
 
-    public var body: some View {
+	public var body: some View {
 		ScrollView(.horizontal, showsIndicators: false) {
 			LazyHStack(alignment: .center, spacing: 0) {
 				ForEach(items) { item in
@@ -45,5 +45,5 @@ where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, Item.
 		.onChange(of: position.str, initial: false) { _, newValue in
 			selection = newValue
 		}
-    }
+	}
 }

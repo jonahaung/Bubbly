@@ -27,7 +27,8 @@ public enum AppStateStore {
 	public static func read() -> AppLifecycleState {
 		guard let raw = UserDefaults(suiteName: AppInformation.groupID)?
 			.string(forKey: key),
-			  let state = AppLifecycleState(rawValue: raw) else {
+			let state = AppLifecycleState(rawValue: raw)
+		else {
 			return .unknown
 		}
 		return state

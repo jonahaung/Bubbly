@@ -5,25 +5,25 @@
 //  Created by Aung Ko Min on 18/11/25.
 //
 
+import Database
 import FirebaseAuth
 import Foundation
 import Observation
 import Services
-import Database
 
 @MainActor
 @Observable
 public final class AppLauncher {
-
 	public private(set) var route: Launching.MainRoute = .loading
 
 	public init() {}
 }
 
-extension AppLauncher {
-	public func startEvaluate() async {
+public extension AppLauncher {
+	func startEvaluate() async {
 		route = await evaluateRoute()
 	}
+
 	@concurrent
 	private func evaluateRoute() async -> Launching.MainRoute {
 		let hasCompleted = UserDefaults.standard.bool(forKey: Launching.DefaultKeys.getStarted)
@@ -38,12 +38,13 @@ extension AppLauncher {
 		return .getStarted
 	}
 
-	public func markGetStartedAsDone(user: CurrentUserModel) {
+	func markGetStartedAsDone(user: CurrentUserModel) {
 		let defaults = UserDefaults.standard
 		defaults.set(true, forKey: Launching.DefaultKeys.getStarted)
 		route = .main(user)
 	}
-	public func resetGetStarted() async {
+
+	func resetGetStarted() async {
 		try? Auth.auth().signOut()
 		await Store.shared.destory()
 		let defaults = UserDefaults.standard

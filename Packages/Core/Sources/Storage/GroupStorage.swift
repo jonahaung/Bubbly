@@ -7,8 +7,7 @@
 import Foundation
 
 public struct GroupStorage {
-
-	nonisolated(unsafe) public static let shared: GroupStorage = {
+	public nonisolated(unsafe) static let shared: GroupStorage = {
 		if let defaults = UserDefaults(suiteName: AppInformation.groupID) {
 			return GroupStorage(store: defaults)
 		} else {
@@ -21,7 +20,7 @@ public struct GroupStorage {
 
 	public let store: UserDefaults
 
-	// Injectable for tests or custom setups
+	/// Injectable for tests or custom setups
 	public init(store: UserDefaults) {
 		self.store = store
 	}
@@ -80,11 +79,10 @@ public struct GroupStorage {
 	}
 
 	@inlinable
-	public func save<T: Encodable>(
-		_ value: T?,
-		for key: GroupStorageKey,
-		encoder: JSONEncoder = GroupStorage.defaultEncoder
-	) {
+	public func save(_ value: (some Encodable)?,
+	                 for key: GroupStorageKey,
+	                 encoder: JSONEncoder = GroupStorage.defaultEncoder)
+	{
 		guard let value else {
 			delete(for: key)
 			return
@@ -103,7 +101,7 @@ public struct GroupStorage {
 		store.string(forKey: key.value)
 	}
 
-	// Use object(forKey:) to preserve “missing” vs default(0/false)
+	/// Use object(forKey:) to preserve “missing” vs default(0/false)
 	public func integer(for key: GroupStorageKey) -> Int? {
 		store.object(forKey: key.value) as? Int
 	}
@@ -130,11 +128,10 @@ public struct GroupStorage {
 	}
 
 	@inlinable
-	public func codable<T: Decodable>(
-		_ type: T.Type,
-		for key: GroupStorageKey,
-		decoder: JSONDecoder = GroupStorage.defaultDecoder
-	) -> T? {
+	public func codable<T: Decodable>(_ type: T.Type,
+	                                  for key: GroupStorageKey,
+	                                  decoder: JSONDecoder = GroupStorage.defaultDecoder) -> T?
+	{
 		guard let data = data(for: key) else { return nil }
 		do {
 			return try decoder.decode(type, from: data)
@@ -152,11 +149,11 @@ public struct GroupStorage {
 	}
 
 	@inlinable
-	public func requireCodable<T: Decodable>(
-		_ type: T.Type,
-		for key: GroupStorageKey,
-		decoder: JSONDecoder = GroupStorage.defaultDecoder
-	) throws -> T {
+	public func requireCodable<T: Decodable>(_ type: T.Type,
+	                                         for key: GroupStorageKey,
+	                                         decoder: JSONDecoder = GroupStorage
+	                                         	.defaultDecoder) throws -> T
+	{
 		if let value = codable(type, for: key, decoder: decoder) { return value }
 		throw MissingValueError(key: key)
 	}
@@ -168,6 +165,8 @@ public struct GroupStorage {
 			self.key = key
 		}
 
-		public var description: String { "Missing value for key: \(key.value)" }
+		public var description: String {
+			"Missing value for key: \(key.value)"
+		}
 	}
 }

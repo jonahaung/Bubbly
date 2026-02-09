@@ -5,9 +5,9 @@
 //  Created by Aung Ko Min on 19/11/25.
 //
 
-import Foundation
-import FirebaseAuth
 import Database
+import FirebaseAuth
+import Foundation
 
 public enum Launching {
 	public enum MainRoute {

@@ -5,18 +5,18 @@
 //  Created by Aung Ko Min on 19/12/25.
 //
 
-import UIKit
-import Database
-import XUI
 import AVFoundation
+import Database
 import MediaPicker
 import Services
+import UIKit
+import XUI
 
 public struct AttachmentFactory {
 	public init() {}
 }
-extension AttachmentFactory {
 
+extension AttachmentFactory {
 	static func createImageAttachments(from items: [SelectedImage]) async throws -> [Attachment] {
 		try await AsyncOrderedStream.mapOrdered(inputs: items) { item in
 			try await createImageAttachment(from: item)
@@ -37,7 +37,7 @@ extension AttachmentFactory {
 		guard let url = attachment.file()?.url else {
 			throw CocoaError(.fileReadUnknown)
 		}
-		attachment.url =  url.absoluteString
+		attachment.url = url.absoluteString
 		try attachment.file()?.write(imageData)
 		try attachment.thumbnailFile()?.write(thumbnailData)
 		return attachment
@@ -48,6 +48,7 @@ extension AttachmentFactory {
 			try await createImageAttachment(from: item)
 		}
 	}
+
 	static func createImageAttachment(from uiImage: UIImage) async throws -> Attachment {
 		let imageData = try MediaManager.shared.createData(from: uiImage)
 		let thumbnailData = try await MediaManager.shared.createThumbnail(from: uiImage)
@@ -63,7 +64,7 @@ extension AttachmentFactory {
 		}
 		try attachment.file()?.write(imageData)
 		try attachment.thumbnailFile()?.write(thumbnailData)
-		attachment.url =  url.absoluteString
+		attachment.url = url.absoluteString
 		return attachment
 	}
 }
@@ -72,7 +73,7 @@ extension AttachmentFactory {
 	static func createLinkAttachments(from items: [ExtractedLink]) async throws -> [Attachment] {
 		try await AsyncOrderedStream.mapOrdered(inputs: items) { item in
 			try await createLinkAttachment(from: item.url)
-		}.compactMap { $0 }
+		}.compactMap(\.self)
 	}
 
 	static func createLinkAttachment(from url: URL) async throws -> Attachment? {
@@ -84,7 +85,9 @@ extension AttachmentFactory {
 			url.absoluteString
 		)
 		guard let extracted else { return nil }
-		guard let imageURL = extracted.imageURL, let image = try? await getImage(from: imageURL) else {
+		guard let imageURL = extracted.imageURL,
+		      let image = try? await getImage(from: imageURL)
+		else {
 			return nil
 		}
 		return await Attachment(
@@ -101,9 +104,10 @@ extension AttachmentFactory {
 	static func isYouTubeURL(_ url: URL) -> Bool {
 		guard let host = url.host?.lowercased() else { return false }
 		return host.contains("youtube.com")
-		|| host.contains("youtu.be")
-		|| host.contains("youtube-nocookie.com")
+			|| host.contains("youtu.be")
+			|| host.contains("youtube-nocookie.com")
 	}
+
 	static func isVideoURLByContentType(_ url: URL) async -> Bool {
 		var request = URLRequest(url: url)
 		request.httpMethod = "HEAD"
@@ -112,7 +116,8 @@ extension AttachmentFactory {
 		do {
 			let (_, response) = try await URLSession.shared.data(for: request)
 			guard let http = response as? HTTPURLResponse,
-				  let contentType = http.value(forHTTPHeaderField: "Content-Type") else {
+			      let contentType = http.value(forHTTPHeaderField: "Content-Type")
+			else {
 				return false
 			}
 
@@ -125,10 +130,12 @@ extension AttachmentFactory {
 
 extension AttachmentFactory {
 	static func makeVideoAttachment(from text: String) async -> Attachment? {
-		guard let url = URL(string: text), let thumbnail = try? await VideoFactory.generateVideoThumbnail(from: url) else {
+		guard let url = URL(string: text),
+		      let thumbnail = try? await VideoFactory.generateVideoThumbnail(from: url)
+		else {
 			return nil
 		}
-		return await Attachment.init(
+		return await Attachment(
 			uid: IDGenerator.shared.make(),
 			url: text,
 			attachMentTypeRaw: AttachMentType.video.rawValue,
@@ -136,14 +143,14 @@ extension AttachmentFactory {
 			title: ""
 		)
 	}
+
 	static func getImage(from url: URL) async throws -> UIImage? {
 		let (data, response) = try await URLSession.shared.data(from: url)
-		if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+		if let http = response as? HTTPURLResponse, !(200 ... 299).contains(http.statusCode) {
 			return nil
 		}
 		if let mime = (response as? HTTPURLResponse)?.mimeType,
-		   !mime.lowercased().hasPrefix("image/") {
-		}
+		   !mime.lowercased().hasPrefix("image/") {}
 		return UIImage(data: data)
 	}
 }

@@ -7,15 +7,17 @@ import Foundation
 import Nuke
 
 public extension ImagePipeline {
-    /// Returns a publisher which starts a new ``ImageTask`` when a subscriber is added.
-    nonisolated func imagePublisher(with url: URL) -> AnyPublisher<ImageResponse, Error> {
-        imagePublisher(with: ImageRequest(url: url))
-    }
+	/// Returns a publisher which starts a new ``ImageTask`` when a subscriber is added.
+	nonisolated func imagePublisher(with url: URL) -> AnyPublisher<ImageResponse, Error> {
+		imagePublisher(with: ImageRequest(url: url))
+	}
 
-    /// Returns a publisher which starts a new ``ImageTask`` when a subscriber is added.
-    nonisolated func imagePublisher(with request: ImageRequest) -> AnyPublisher<ImageResponse, Error> {
-        ImagePublisher(request: request, pipeline: self).eraseToAnyPublisher()
-    }
+	/// Returns a publisher which starts a new ``ImageTask`` when a subscriber is added.
+	nonisolated func imagePublisher(with request: ImageRequest)
+		-> AnyPublisher<ImageResponse, Error>
+	{
+		ImagePublisher(request: request, pipeline: self).eraseToAnyPublisher()
+	}
 }
 
 /// A publisher that starts a new `ImageTask` when a subscriber is added.
@@ -28,70 +30,78 @@ public extension ImagePipeline {
 /// and the image being downloaded supports progressive decoding, the publisher
 /// might emit more than a single value.
 struct ImagePublisher: Publisher, Sendable {
-    typealias Output = ImageResponse
-    typealias Failure = ImagePipeline.Error
+	typealias Output = ImageResponse
+	typealias Failure = ImagePipeline.Error
 
-    let request: ImageRequest
-    let pipeline: ImagePipeline
+	let request: ImageRequest
+	let pipeline: ImagePipeline
 
-    func receive<S>(subscriber: S) where S: Subscriber, S: Sendable, Failure == S.Failure, Output == S.Input {
-        let subscription = ImageSubscription(
-            request: request,
-            pipeline: pipeline,
-            subscriber: subscriber
-        )
-        subscriber.receive(subscription: subscription)
-    }
+	func receive<S: Subscriber & Sendable>(subscriber: S) where Failure == S.Failure,
+		Output == S.Input
+	{
+		let subscription = ImageSubscription(
+			request: request,
+			pipeline: pipeline,
+			subscriber: subscriber
+		)
+		subscriber.receive(subscription: subscription)
+	}
 }
 
-private final class ImageSubscription<S>: Subscription where S: Subscriber, S: Sendable, S.Input == ImageResponse, S.Failure == ImagePipeline.Error {
-    private var task: ImageTask?
-    private let subscriber: S?
-    private let request: ImageRequest
-    private let pipeline: ImagePipeline
-    private var isStarted = false
+private final class ImageSubscription<S: Subscriber & Sendable>: Subscription
+	where S.Input == ImageResponse, S.Failure == ImagePipeline.Error
+{
+	private var task: ImageTask?
+	private let subscriber: S?
+	private let request: ImageRequest
+	private let pipeline: ImagePipeline
+	private var isStarted = false
 
-    init(request: ImageRequest, pipeline: ImagePipeline, subscriber: S) {
-        self.pipeline = pipeline
-        self.request = request
-        self.subscriber = subscriber
-    }
+	init(request: ImageRequest, pipeline: ImagePipeline, subscriber: S) {
+		self.pipeline = pipeline
+		self.request = request
+		self.subscriber = subscriber
+	}
 
-    func request(_ demand: Subscribers.Demand) {
-        guard demand > 0 else { return }
-        guard let subscriber else { return }
+	func request(_ demand: Subscribers.Demand) {
+		guard demand > 0 else { return }
+		guard let subscriber else { return }
 
-        if let image = pipeline.cache[request] {
-            _ = subscriber.receive(ImageResponse(container: image, request: request, cacheType: .memory))
+		if let image = pipeline.cache[request] {
+			_ = subscriber.receive(ImageResponse(
+				container: image,
+				request: request,
+				cacheType: .memory
+			))
 
-            if !image.isPreview {
-                subscriber.receive(completion: .finished)
-                return
-            }
-        }
+			if !image.isPreview {
+				subscriber.receive(completion: .finished)
+				return
+			}
+		}
 
-        task = pipeline.loadImage(
-            with: request,
-            progress: { response, _, _ in
-                if let response {
-                    // Send progressively decoded image (if enabled and if any)
-                    _ = subscriber.receive(response)
-                }
-            },
-            completion: { result in
-                switch result {
-                case let .success(response):
-                    _ = subscriber.receive(response)
-                    subscriber.receive(completion: .finished)
-                case let .failure(error):
-                    subscriber.receive(completion: .failure(error))
-                }
-            }
-        )
-    }
+		task = pipeline.loadImage(
+			with: request,
+			progress: { response, _, _ in
+				if let response {
+					// Send progressively decoded image (if enabled and if any)
+					_ = subscriber.receive(response)
+				}
+			},
+			completion: { result in
+				switch result {
+				case let .success(response):
+					_ = subscriber.receive(response)
+					subscriber.receive(completion: .finished)
+				case let .failure(error):
+					subscriber.receive(completion: .failure(error))
+				}
+			}
+		)
+	}
 
-    func cancel() {
-        task?.cancel()
-        task = nil
-    }
+	func cancel() {
+		task?.cancel()
+		task = nil
+	}
 }

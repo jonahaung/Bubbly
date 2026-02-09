@@ -6,8 +6,8 @@
 //
 
 import Core
-import FirePhoneOTP
 import FirebaseAuth
+import FirePhoneOTP
 import Foundation
 import XUI
 
@@ -19,6 +19,7 @@ public final class AuthRouter {
 		case userInfo(_ user: User)
 		case landing
 	}
+
 	public var paths = [AuthRouter.Route]()
 	private let cancelBag = CancelBag()
 
@@ -26,6 +27,7 @@ public final class AuthRouter {
 		paths.append(route)
 	}
 }
+
 extension AuthRouter {
 	public func startObservingAuthStateChanges() {
 		cancelBag.cancel()
@@ -45,4 +47,5 @@ extension AuthRouter {
 		route(to: .userInfo(user))
 	}
 }
+
 extension User: @unchecked @retroactive Sendable {}

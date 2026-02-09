@@ -88,7 +88,9 @@ public struct KeyPathHashable<Root, Value: Hashable>: Hashable {
 
 @frozen
 @_documentation(visibility: internal)
-public struct ArbitrarilyIdentifiedValue<Value, ID: Hashable>: CustomStringConvertible, Identifiable {
+public struct ArbitrarilyIdentifiedValue<Value, ID: Hashable>: CustomStringConvertible,
+	Identifiable
+{
 	public let value: Value
 	public let idProvider: (Value) -> ID
 
@@ -116,7 +118,9 @@ public struct ArbitrarilyIdentifiedValue<Value, ID: Hashable>: CustomStringConve
 
 @frozen
 @_documentation(visibility: internal)
-public struct KeyPathHashIdentifiableValue<Value, ID: Hashable>: CustomStringConvertible, Identifiable {
+public struct KeyPathHashIdentifiableValue<Value, ID: Hashable>: CustomStringConvertible,
+	Identifiable
+{
 	public let value: Value
 	public let keyPath: KeyPath<Value, ID>
 

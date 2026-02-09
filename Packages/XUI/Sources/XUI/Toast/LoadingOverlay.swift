@@ -1,8 +1,6 @@
 // LoadingOverlay.swift (in XUI)
 import SwiftUI
 
-import SwiftUI
-
 public struct LoadingOverlay: View {
 	public init() {}
 

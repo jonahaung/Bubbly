@@ -9,11 +9,12 @@ import Foundation
 import SwiftData
 
 public actor StoreModelActor<Model>: ModelActor
-where
-Model: PersistentModel & CollectionDocument & SendableDocument,
-Model.SendableType: Sendable,
-Model.UID == String,
-Model.SendableType.UID == String {
+	where
+	Model: PersistentModel & CollectionDocument & SendableDocument,
+	Model.SendableType: Sendable,
+	Model.UID == String,
+	Model.SendableType.UID == String
+{
 	public nonisolated let modelExecutor: any ModelExecutor
 	public nonisolated let modelContainer: ModelContainer
 
@@ -21,15 +22,14 @@ Model.SendableType.UID == String {
 		modelExecutor.modelContext
 	}
 
-	// Debounced save task
+	/// Debounced save task
 	private var saveTask: Task<Void, Never>?
 
 	// MARK: - Init
 
-	public init(
-		modelContainer: ModelContainer,
-		modelExecutor: ModelExecutor
-	) {
+	public init(modelContainer: ModelContainer,
+	            modelExecutor: ModelExecutor)
+	{
 		self.modelContainer = modelContainer
 		self.modelExecutor = modelExecutor
 	}
@@ -38,7 +38,7 @@ Model.SendableType.UID == String {
 
 	public func insert(_ data: Model.SendableType) throws {
 		if let existing = try getModel(for: data.uid) {
-			existing.update(from: data)      // you’d add this API on Model
+			existing.update(from: data) // you’d add this API on Model
 		} else {
 			context.insert(Model(from: data))
 		}
@@ -85,10 +85,10 @@ Model.SendableType.UID == String {
 
 	// MARK: - Update
 
-	public func updateAndSave<Result: Sendable>(
-		uid: String,
-		_ update: sending (inout Model) -> Result
-	) throws -> Result? {
+	public func updateAndSave<Result: Sendable>(uid: String,
+	                                            _ update: sending (inout Model) -> Result) throws
+		-> Result?
+	{
 		guard var model = try getModel(for: uid) else {
 			return nil
 		}
@@ -98,10 +98,10 @@ Model.SendableType.UID == String {
 		return result
 	}
 
-	public func updateAndSaveDebounced<Result: Sendable>(
-		uid: String,
-		_ update: @escaping (inout Model) -> Result
-	) throws -> Result? {
+	public func updateAndSaveDebounced<Result: Sendable>(uid: String,
+	                                                     _ update: @escaping (inout Model)
+	                                                     	-> Result) throws -> Result?
+	{
 		guard var model = try getModel(for: uid) else {
 			return nil
 		}

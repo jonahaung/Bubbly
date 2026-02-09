@@ -10,7 +10,6 @@ import SwiftUI
 @MainActor
 @Animatable
 public struct ScreenOutModifier: ViewModifier {
-
 	public let edge: Edge
 	public var progress: Double
 
@@ -46,17 +45,15 @@ public struct ScreenOutModifier: ViewModifier {
 	// MARK: - Transform
 
 	private func calculateAffineTransform() -> CGAffineTransform {
-		let target: CGPoint
-
-		switch edge {
+		let target = switch edge {
 		case .leading:
-			target = CGPoint(x: -rect.maxX, y: 0)
+			CGPoint(x: -rect.maxX, y: 0)
 		case .trailing:
-			target = CGPoint(x: canvasSize.width, y: 0)
+			CGPoint(x: canvasSize.width, y: 0)
 		case .top:
-			target = CGPoint(x: 0, y: -rect.maxY)
+			CGPoint(x: 0, y: -rect.maxY)
 		case .bottom:
-			target = CGPoint(x: 0, y: canvasSize.height)
+			CGPoint(x: 0, y: canvasSize.height)
 		}
 
 		return CGAffineTransform(
@@ -65,6 +62,7 @@ public struct ScreenOutModifier: ViewModifier {
 		)
 	}
 }
+
 public extension AnyTransition {
 	@MainActor static func screenOut(edge: Edge) -> AnyTransition {
 		.modifier(

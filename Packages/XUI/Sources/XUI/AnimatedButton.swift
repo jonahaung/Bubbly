@@ -13,11 +13,10 @@ public struct AnimatedButton<Label: View>: View {
 	let action: () -> Void
 	@State private var animate = false
 
-	public init(
-		_ alignment: HorizontalAlignment,
-		action: @escaping () -> Void,
-		@ViewBuilder label: @escaping () -> Label
-	) {
+	public init(_ alignment: HorizontalAlignment,
+	            action: @escaping () -> Void,
+	            @ViewBuilder label: @escaping () -> Label)
+	{
 		self.label = label
 		self.action = action
 		self.alignment = alignment
@@ -53,6 +52,7 @@ public struct AnimatedButton<Label: View>: View {
 	private var offsetY: CGFloat {
 		CGFloat(animate ? alignment == .center ? -10 : -40 : 0)
 	}
+
 	private var degrees: Double {
 		if animate {
 			switch alignment {
@@ -64,12 +64,13 @@ public struct AnimatedButton<Label: View>: View {
 		}
 		return 0
 	}
+
 	private var anchor: UnitPoint {
 		switch alignment {
-		case .leading: return .bottomTrailing
-		case .center: return .center
-		case .trailing: return .bottomLeading
-		default: return .center
+		case .leading: .bottomTrailing
+		case .center: .center
+		case .trailing: .bottomLeading
+		default: .center
 		}
 	}
 }

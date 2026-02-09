@@ -16,7 +16,6 @@ import SwiftUI
 import XUI
 
 public struct AuthUserProfileView: View {
-
 	@State private var viewModel: AuthUserProfileViewModel
 	@FocusState private var isFocused: Bool
 

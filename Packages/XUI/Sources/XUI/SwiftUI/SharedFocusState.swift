@@ -10,7 +10,6 @@ import SwiftUI
 @MainActor
 @Observable
 public final class SharedFocusState {
-
 	public let binding: FocusState<String?>.Binding
 
 	public init(_ binding: FocusState<String?>.Binding) {
@@ -31,7 +30,7 @@ public final class SharedFocusState {
 	}
 
 	public func defocus() {
-		guard self .value != nil else { return }
+		guard value != nil else { return }
 		withTransaction(.withAnimation(.interactiveSpring)) {
 			self.value = nil
 		}

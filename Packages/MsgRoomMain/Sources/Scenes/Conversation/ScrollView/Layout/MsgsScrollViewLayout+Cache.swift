@@ -21,7 +21,10 @@ extension MsgsScrollViewLayout {
 				self.size = size
 				self.position = position
 			}
-			var frame: CGRect { .init(origin: position, size: size) }
+
+			var frame: CGRect {
+				.init(origin: position, size: size)
+			}
 		}
 	}
 }

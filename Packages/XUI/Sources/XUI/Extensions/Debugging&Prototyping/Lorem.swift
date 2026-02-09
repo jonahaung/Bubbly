@@ -9,6 +9,7 @@
 import Foundation
 
 // MARK: - Public Configuration
+
 public enum LoremTone {
 	case neutral
 	case friendly
@@ -49,9 +50,9 @@ public struct LoremConfiguration {
 }
 
 // MARK: - Lorem
+
 @MainActor
 public enum Lorem {
-
 	// MARK: Configuration
 
 	public static var configuration = LoremConfiguration.default
@@ -79,14 +80,12 @@ public enum Lorem {
 	public static var sentence: String {
 		let pack = sentencePack
 
-		let base: String = {
-			switch configuration.domain {
-			case .chat:
-				return pack.chatTemplates.random()()
-			case .generic:
-				return pack.genericTemplates.random()()
-			}
-		}()
+		let base: String = switch configuration.domain {
+		case .chat:
+			pack.chatTemplates.random()()
+		case .generic:
+			pack.genericTemplates.random()()
+		}
 
 		return decorateWithEmoji(base) + "."
 	}
@@ -111,7 +110,7 @@ public enum Lorem {
 			title,
 			shortTweet,
 			url.absoluteString,
-			reply(to: .init(previousMessage: sentence))
+			reply(to: .init(previousMessage: sentence)),
 		].random()
 	}
 
@@ -120,7 +119,7 @@ public enum Lorem {
 	public static var paragraph: String {
 		compose(
 			sentence,
-			count: .random(in: minSentencesCountInParagraph...maxSentencesCountInParagraph),
+			count: .random(in: minSentencesCountInParagraph ... maxSentencesCountInParagraph),
 			joinBy: .space
 		)
 	}
@@ -142,7 +141,7 @@ public enum Lorem {
 	public static var title: String {
 		compose(
 			word,
-			count: .random(in: minWordsCountInTitle...maxWordsCountInTitle),
+			count: .random(in: minWordsCountInTitle ... maxWordsCountInTitle),
 			joinBy: .space,
 			decorate: { $0.capitalized }
 		)
@@ -188,7 +187,7 @@ public enum Lorem {
 private protocol LoremSentencePack {
 	var words: [String] { get }
 	var chatTemplates: [() -> String] { get }
-	var replyTemplates: [(String) -> String] { get }  // 👈 NEW
+	var replyTemplates: [(String) -> String] { get } // 👈 NEW
 	var genericTemplates: [() -> String] { get }
 	var emojisLight: [String] { get }
 	var emojisExpressive: [String] { get }
@@ -201,7 +200,6 @@ private protocol LoremSentencePack {
 // MARK: - English Pack
 
 private struct EnglishSentencePack: LoremSentencePack {
-
 	// MARK: - Vocabulary (used by word/title generators)
 
 	let words = [
@@ -211,13 +209,12 @@ private struct EnglishSentencePack: LoremSentencePack {
 		"account", "profile", "session", "request",
 		"response", "timeline", "status", "delivery",
 		"support", "issue", "confirmation", "details",
-		"information", "summary", "progress", "result"
+		"information", "summary", "progress", "result",
 	]
 
 	// MARK: - Chat Templates (openers, questions, updates)
 
 	let chatTemplates: [() -> String] = [
-
 		// Openers
 		{ "Hey, are you free right now" },
 		{ "Hi, do you have a moment" },
@@ -257,13 +254,12 @@ private struct EnglishSentencePack: LoremSentencePack {
 		// Closings
 		{ "Thanks for checking on this" },
 		{ "Appreciate your help here" },
-		{ "Thanks, talk to you soon" }
+		{ "Thanks, talk to you soon" },
 	]
 
 	// MARK: - Generic / System Messages (UI, banners, logs)
 
 	let genericTemplates: [() -> String] = [
-
 		{
 			"The application is running smoothly, and all core features are currently available without any interruptions."
 		},
@@ -334,13 +330,12 @@ private struct EnglishSentencePack: LoremSentencePack {
 
 		{
 			"If you continue to experience issues, please restart the application and try again."
-		}
+		},
 	]
 
 	// MARK: - Reply Templates (reply-aware, friendly)
 
 	let replyTemplates: [(String) -> String] = [
-
 		// Acknowledgements
 		{ _ in "Sure, that works for me" },
 		{ _ in "Yep, I can do that" },
@@ -366,17 +361,17 @@ private struct EnglishSentencePack: LoremSentencePack {
 		// Context-aware reply
 		{ previous in
 			"I saw your message about \(previous.lowercased())"
-		}
+		},
 	]
 
 	// MARK: - Emojis
 
 	let emojisLight = [
-		"🙂", "👍", "👌", "😊", "🤝", "✨"
+		"🙂", "👍", "👌", "😊", "🤝", "✨",
 	]
 
 	let emojisExpressive = [
-		"😂", "🔥", "🚀", "🙌", "😅", "🎉", "💯"
+		"😂", "🔥", "🚀", "🙌", "😅", "🎉", "💯",
 	]
 
 	// MARK: - Names
@@ -384,13 +379,13 @@ private struct EnglishSentencePack: LoremSentencePack {
 	let firstNames = [
 		"Alex", "Jamie", "Taylor", "Jordan", "Chris", "Morgan",
 		"Sam", "Casey", "Avery", "Riley", "Drew", "Quinn",
-		"Ryan", "Shawn", "Daniel", "Ethan", "Sophia", "Emma"
+		"Ryan", "Shawn", "Daniel", "Ethan", "Sophia", "Emma",
 	]
 
 	let lastNames = [
 		"Lee", "Tan", "Ng", "Smith", "Johnson",
 		"Brown", "Wong", "Lim", "Chen", "Park",
-		"Wilson", "Anderson", "Harris"
+		"Wilson", "Anderson", "Harris",
 	]
 
 	// MARK: - Internet
@@ -400,7 +395,7 @@ private struct EnglishSentencePack: LoremSentencePack {
 		"icloud.com",
 		"outlook.com",
 		"yahoo.com",
-		"proton.me"
+		"proton.me",
 	]
 
 	let urls = [
@@ -409,20 +404,19 @@ private struct EnglishSentencePack: LoremSentencePack {
 		"https://apple.com",
 		"https://developer.apple.com",
 		"https://figma.com",
-		"https://support.apple.com"
+		"https://support.apple.com",
 	]
 }
 
 // MARK: - Internal Helpers
 
 extension Lorem {
-
 	fileprivate static var sentencePack: LoremSentencePack {
 		switch configuration.locale.language.languageCode?.identifier {
 		case "en", .none:
-			return EnglishSentencePack()
+			EnglishSentencePack()
 		default:
-			return EnglishSentencePack()
+			EnglishSentencePack()
 		}
 	}
 
@@ -443,13 +437,12 @@ extension Lorem {
 		case newLine = "\n"
 	}
 
-	fileprivate static func compose(
-		_ provider: @autoclosure () -> String,
-		count: Int,
-		joinBy separator: Separator,
-		decorate: ((String) -> String)? = nil
-	) -> String {
-		let result = (0..<count)
+	fileprivate static func compose(_ provider: @autoclosure () -> String,
+	                                count: Int,
+	                                joinBy separator: Separator,
+	                                decorate: ((String) -> String)? = nil) -> String
+	{
+		let result = (0 ..< count)
 			.map { _ in provider() }
 			.joined(separator: separator.rawValue)
 
@@ -466,10 +459,7 @@ extension Lorem {
 		return sentence
 	}
 
-	public static func reply(
-		to context: LoremConversationContext
-	) -> String {
-
+	public static func reply(to context: LoremConversationContext) -> String {
 		let pack = sentencePack
 
 		let base: String = {
@@ -486,6 +476,7 @@ extension Lorem {
 
 		return decorateWithEmoji(base) + "."
 	}
+
 	fileprivate static let minSentencesCountInParagraph = 3
 	fileprivate static let maxSentencesCountInParagraph = 7
 	fileprivate static let minWordsCountInTitle = 2
@@ -493,22 +484,24 @@ extension Lorem {
 	fileprivate static let shortTweetMaxLength = 140
 	fileprivate static let tweetMaxLength = 280
 }
-extension Lorem {
-	fileprivate static func applyTone(_ sentence: String) -> String {
+
+private extension Lorem {
+	static func applyTone(_ sentence: String) -> String {
 		switch configuration.tone {
 		case .neutral:
-			return sentence
+			sentence
 		case .friendly:
-			return Bool.random()
+			Bool.random()
 				? sentence
 				: "Hey! \(sentence.lowercased())"
 		}
 	}
 }
+
 // MARK: - Convenience
 
-extension Array {
-	fileprivate func random() -> Element {
+private extension Array {
+	func random() -> Element {
 		randomElement()!
 	}
 }

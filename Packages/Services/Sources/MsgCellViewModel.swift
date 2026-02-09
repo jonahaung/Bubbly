@@ -56,40 +56,40 @@ public final class MsgCellViewModel: ViewReloadable {
 		guard self.isVisible != isVisible else { return }
 		self.isVisible = isVisible
 	}
+
 	public func animate() {
 		animationTrigger += 1
 	}
 
-	func recomputeRenderKey(
-		selectedMsg: SelectedMsg?,
-		layout: MsgCellLayout
-	) {
-		let isSelected = (selectedMsg?.id == self.id)
+	func recomputeRenderKey(selectedMsg: SelectedMsg?,
+	                        layout: MsgCellLayout)
+	{
+		let isSelected = (selectedMsg?.id == id)
 		contentRenderKey = ContentRenderKey(
 			id: id,
 			text: msg.text,
 			attachments: msg.attachments,
 			isSelected: isSelected,
 			reactions: msg.reactions,
-			isVisible: self.isVisible
+			isVisible: isVisible
 		)
 	}
 
 	func computeBubbleCOrner(selectedMsg: SelectedMsg?, isSender: Bool) -> BubbleCorner {
 		guard let selectedMsg else {
-			return layout.bubble.bubbleCorner
+			return layout.bubbleCorner
 		}
-		let isSelected = selectedMsg.id == self.id
+		let isSelected = selectedMsg.id == id
 		if isSelected {
 			return .all
 		}
-		var corner = layout.bubble.bubbleCorner
+		var corner = layout.bubbleCorner
 
-		if selectedMsg.previous == self.id {
+		if selectedMsg.previous == id {
 			corner.append(.bottom)
 			return corner
 		}
-		if selectedMsg.next == self.id {
+		if selectedMsg.next == id {
 			corner.append(.top)
 			return corner
 		}
@@ -98,8 +98,14 @@ public final class MsgCellViewModel: ViewReloadable {
 }
 
 public extension MsgCellViewModel {
-	var id: String { msg.uid }
-	var isSender: Bool { msg.isSender }
+	var id: String {
+		msg.uid
+	}
+
+	var isSender: Bool {
+		msg.isSender
+	}
+
 	var foregroundStyle: Color {
 		isSender ? .black : .primary
 	}
@@ -107,6 +113,7 @@ public extension MsgCellViewModel {
 	var horizontalAlignment: HorizontalAlignment {
 		isSender ? .trailing : .leading
 	}
+
 	func sender() -> Contact? {
 		ContactStore.shared.contact(for: msg.senderID)
 	}

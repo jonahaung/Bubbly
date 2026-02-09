@@ -19,9 +19,7 @@ struct CryptoPayload: Codable, Sendable {
 }
 
 public class CryptoService {
-
-	nonisolated(unsafe)
-	public static let shared = CryptoService()
+	public nonisolated(unsafe) static let shared = CryptoService()
 
 	private init() {}
 
@@ -54,8 +52,7 @@ public class CryptoService {
 
 	public func base64PublicKeyString(for userID: String) -> String {
 		let publicKey = getPrivateKey(for: userID).publicKey
-		let base64PublicKeyString = Crypto.base64String(publicKey: publicKey)
-		return base64PublicKeyString
+		return Crypto.base64String(publicKey: publicKey)
 	}
 
 	public func forceReload(for userID: String) {
@@ -67,13 +64,10 @@ public class CryptoService {
 }
 
 public extension CryptoService {
-
-	func encrypt(
-		dataString: String,
-		recipientPublicKeyString: String,
-		currentUserID: String
-	) throws -> String {
-
+	func encrypt(dataString: String,
+	             recipientPublicKeyString: String,
+	             currentUserID: String) throws -> String
+	{
 		let salt = Crypto.generateSalt()
 
 		guard
@@ -100,13 +94,11 @@ public extension CryptoService {
 		return encoded.base64EncodedString()
 	}
 }
+
 public extension CryptoService {
-
-	func decrypt(
-		payloadString: String,
-		currentUserID: String
-	) throws -> String {
-
+	func decrypt(payloadString: String,
+	             currentUserID: String) throws -> String
+	{
 		guard
 			let payloadData = Data(base64Encoded: payloadString),
 			let payload = try? JSONDecoder().decode(CryptoPayload.self, from: payloadData),
@@ -138,11 +130,13 @@ public extension CryptoService {
 		return message
 	}
 }
+
 public enum CryptoError: Error, Sendable {
 	case encryptionFailed
 	case decryptionFailed
 	case invalidPlaintext
 }
+
 /*
  public final class CryptoService: Sendable {
  public static let shared = CryptoService()
@@ -275,7 +269,8 @@ public enum CryptoError: Error, Sendable {
 //        [salt.base64EncodedString(), publicKeyString, encryptedDataString].joined(separator: ":")
 //    }
 //
-//    func parsePayload(_ payloadString: String) -> (salt64: String, publicKeyString: String, encryptedDataString: String)? {
+//    func parsePayload(_ payloadString: String) -> (salt64: String, publicKeyString: String,
+//    encryptedDataString: String)? {
 //        let components = payloadString.components(separatedBy: ":")
 //        guard components.count == 3 else { return nil }
 //        return (components[0], components[1], components[2])
@@ -328,7 +323,9 @@ public enum CryptoError: Error, Sendable {
 //        return newKeyPair
 //    }
 //
-//    func generateSymmetricKey(with foreignPublicKey: Curve25519.KeyAgreement.PublicKey, salt: Data? = nil) -> SymmetricKey? {
-//        Crypto.generateSymmetricKeyBetween(privateKey, and: foreignPublicKey, salt: salt ?? self.salt)
+//    func generateSymmetricKey(with foreignPublicKey: Curve25519.KeyAgreement.PublicKey, salt:
+//    Data? = nil) -> SymmetricKey? {
+//        Crypto.generateSymmetricKeyBetween(privateKey, and: foreignPublicKey, salt: salt ??
+//        self.salt)
 //    }
 // }

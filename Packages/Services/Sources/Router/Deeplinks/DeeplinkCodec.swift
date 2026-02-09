@@ -19,11 +19,10 @@ public struct DeeplinkCodec: Sendable {
 
 	private let routes: [String: DeeplinkRouteDefinition<Deeplink>]
 
-	public init(
-		config: DeeplinkConfiguration,
-		aliases: DeeplinkAliases = .init(),
-		telemetry: DeeplinkTelemetry = .default
-	) {
+	public init(config: DeeplinkConfiguration,
+	            aliases: DeeplinkAliases = .init(),
+	            telemetry: DeeplinkTelemetry = .default)
+	{
 		self.config = config
 		self.aliases = aliases
 		self.telemetry = telemetry
@@ -49,7 +48,7 @@ public struct DeeplinkCodec: Sendable {
 				allowedQueryItems: ["id"],
 				makeLink: { q in q["id"].map(Deeplink.profile(id:)) },
 				queryFromLink: { link in
-					if case .profile(let id) = link { return ["id": id] }
+					if case let .profile(id) = link { return ["id": id] }
 					return nil
 				}
 			),
@@ -59,13 +58,13 @@ public struct DeeplinkCodec: Sendable {
 				allowedQueryItems: ["id"],
 				makeLink: { q in q["id"].map(Deeplink.conversation(id:)) },
 				queryFromLink: { link in
-					if case .conversation(let id) = link { return ["id": id] }
+					if case let .conversation(id) = link { return ["id": id] }
 					return nil
 				}
-			)
+			),
 		]
 
-		self.routes = Dictionary(uniqueKeysWithValues: defs.map { ($0.name, $0) })
+		routes = Dictionary(uniqueKeysWithValues: defs.map { ($0.name, $0) })
 	}
 
 	// MARK: - Build
@@ -75,7 +74,7 @@ public struct DeeplinkCodec: Sendable {
 
 		var c = URLComponents()
 		switch style {
-		case .customScheme(let version):
+		case let .customScheme(version):
 			c.scheme = config.scheme
 			if let version, config.supportedVersions.contains(version) {
 				c.host = version
@@ -83,7 +82,7 @@ public struct DeeplinkCodec: Sendable {
 			} else {
 				c.host = routeName
 			}
-		case .universalLink(let host, let version):
+		case let .universalLink(host, version):
 			c.scheme = "https"
 			c.host = host
 			if let version, config.supportedVersions.contains(version) {
@@ -93,7 +92,9 @@ public struct DeeplinkCodec: Sendable {
 			}
 		}
 
-		for (k, v) in query { c.setQueryItem(name: k, value: v) }
+		for (k, v) in query {
+			c.setQueryItem(name: k, value: v)
+		}
 		return c.url
 	}
 
@@ -111,9 +112,10 @@ public struct DeeplinkCodec: Sendable {
 			return parseCustomScheme(url)
 		}
 
-		if (url.scheme == "https" || url.scheme == "http"),
+		if url.scheme == "https" || url.scheme == "http",
 		   let host = url.host,
-		   config.universalLinkHosts.contains(host) {
+		   config.universalLinkHosts.contains(host)
+		{
 			return parseUniversal(url)
 		}
 
@@ -130,7 +132,12 @@ public struct DeeplinkCodec: Sendable {
 		}()
 
 		let canonical = aliases.canonicalRoute(for: routeName)
-		return finalizeParse(url: url, route: canonical, isVersioned: isVersioned, source: .customScheme)
+		return finalizeParse(
+			url: url,
+			route: canonical,
+			isVersioned: isVersioned,
+			source: .customScheme
+		)
 	}
 
 	private func parseUniversal(_ url: URL) -> Result<Deeplink, DeeplinkParseError> {
@@ -143,17 +150,28 @@ public struct DeeplinkCodec: Sendable {
 		}()
 
 		let canonical = aliases.canonicalRoute(for: routeName)
-		return finalizeParse(url: url, route: canonical, isVersioned: isVersioned, source: .universalLink)
+		return finalizeParse(
+			url: url,
+			route: canonical,
+			isVersioned: isVersioned,
+			source: .universalLink
+		)
 	}
 
-	private func finalizeParse(
-		url: URL,
-		route: String,
-		isVersioned: Bool,
-		source: DeeplinkTelemetry.Metadata.Source
-	) -> Result<Deeplink, DeeplinkParseError> {
+	private func finalizeParse(url: URL,
+	                           route: String,
+	                           isVersioned: Bool,
+	                           source: DeeplinkTelemetry.Metadata.Source) -> Result<
+		Deeplink,
+		DeeplinkParseError
+	> {
 		guard let def = routes[route] else {
-			let meta = DeeplinkTelemetry.Metadata(source: source, isVersioned: isVersioned, route: route, queryKeys: queryKeys(url))
+			let meta = DeeplinkTelemetry.Metadata(
+				source: source,
+				isVersioned: isVersioned,
+				route: route,
+				queryKeys: queryKeys(url)
+			)
 			telemetry.onFailed(url, .unsupportedRoute(route), meta)
 			return .failure(.unsupportedRoute(route))
 		}
@@ -169,7 +187,12 @@ public struct DeeplinkCodec: Sendable {
 		if config.queryValidation == .strict {
 			let unknown = query.keys.filter { !def.allowedQueryItems.contains($0) }.sorted()
 			if !unknown.isEmpty {
-				let meta = DeeplinkTelemetry.Metadata(source: source, isVersioned: isVersioned, route: route, queryKeys: query.keys.sorted())
+				let meta = DeeplinkTelemetry.Metadata(
+					source: source,
+					isVersioned: isVersioned,
+					route: route,
+					queryKeys: query.keys.sorted()
+				)
 				telemetry.onFailed(url, .unknownQueryItems(route: route, unknown: unknown), meta)
 				return .failure(.unknownQueryItems(route: route, unknown: unknown))
 			}
@@ -178,24 +201,44 @@ public struct DeeplinkCodec: Sendable {
 		// Required params
 		for key in def.requiredQueryItems {
 			guard let value = query[key] else {
-				let meta = DeeplinkTelemetry.Metadata(source: source, isVersioned: isVersioned, route: route, queryKeys: query.keys.sorted())
+				let meta = DeeplinkTelemetry.Metadata(
+					source: source,
+					isVersioned: isVersioned,
+					route: route,
+					queryKeys: query.keys.sorted()
+				)
 				telemetry.onFailed(url, .missingRequiredParameter(route: route, name: key), meta)
 				return .failure(.missingRequiredParameter(route: route, name: key))
 			}
 			guard !value.isEmpty else {
-				let meta = DeeplinkTelemetry.Metadata(source: source, isVersioned: isVersioned, route: route, queryKeys: query.keys.sorted())
+				let meta = DeeplinkTelemetry.Metadata(
+					source: source,
+					isVersioned: isVersioned,
+					route: route,
+					queryKeys: query.keys.sorted()
+				)
 				telemetry.onFailed(url, .emptyRequiredParameter(route: route, name: key), meta)
 				return .failure(.emptyRequiredParameter(route: route, name: key))
 			}
 		}
 
 		guard let link = def.makeLink(query) else {
-			let meta = DeeplinkTelemetry.Metadata(source: source, isVersioned: isVersioned, route: route, queryKeys: query.keys.sorted())
+			let meta = DeeplinkTelemetry.Metadata(
+				source: source,
+				isVersioned: isVersioned,
+				route: route,
+				queryKeys: query.keys.sorted()
+			)
 			telemetry.onFailed(url, .unsupportedRoute(route), meta)
 			return .failure(.unsupportedRoute(route))
 		}
 
-		let meta = DeeplinkTelemetry.Metadata(source: source, isVersioned: isVersioned, route: route, queryKeys: query.keys.sorted())
+		let meta = DeeplinkTelemetry.Metadata(
+			source: source,
+			isVersioned: isVersioned,
+			route: route,
+			queryKeys: query.keys.sorted()
+		)
 		telemetry.onParsed(url, link, meta)
 		return .success(link)
 	}

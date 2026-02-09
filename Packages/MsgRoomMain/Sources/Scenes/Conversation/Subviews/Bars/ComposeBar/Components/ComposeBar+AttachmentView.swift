@@ -1,5 +1,5 @@
 //
-//  ComposeBar+Attachment.swift
+//  ComposeBar+AttachmentView.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 2/2/26.
@@ -10,7 +10,6 @@ import XUI
 
 extension ComposeBar {
 	struct ComposeBarAttachmentView: View {
-
 		@Environment(ChatComposer.self) private var composer: ChatComposer
 
 		var body: some View {
@@ -31,7 +30,7 @@ extension ComposeBar {
 									.padding(5)
 									.background(Color.red, in: .circle)
 							}
-								.buttonStyle(.borderless)
+							.buttonStyle(.borderless)
 						)
 						.id(attachment.uid)
 					}

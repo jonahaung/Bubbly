@@ -5,13 +5,12 @@
 //  Created by Aung Ko Min on 7/1/26.
 //
 
-import SwiftUI
 import Database
 import Services
+import SwiftUI
 import XUI
 
 struct MsgSenderInputSheet: View {
-
 	let conversationName: String
 	@State private var inputText = ""
 	@State private var executor = ToolExecutor()
@@ -23,8 +22,12 @@ struct MsgSenderInputSheet: View {
 		NavigationStack {
 			ScrollView(.vertical, showsIndicators: false) {
 				VStack {
-					ToolInputField(label: "Enter message to send", text: $inputText, placeholder: "Text ...")
-						.focused($isFocused)
+					ToolInputField(
+						label: "Enter message to send",
+						text: $inputText,
+						placeholder: "Text ..."
+					)
+					.focused($isFocused)
 
 					if let result = executor.result {
 						ResultDisplay(result: result, isSuccess: executor.successMessage != nil)
@@ -47,7 +50,6 @@ struct MsgSenderInputSheet: View {
 					Button(role: .close) {
 						dismiss()
 					}
-
 				}
 				ToolbarItem(placement: .topBarTrailing) {
 					Button(action: copyToClipboard) {
@@ -60,6 +62,7 @@ struct MsgSenderInputSheet: View {
 			}
 		}
 	}
+
 	private func executeMsgSend() {
 		Task {
 			let text = inputText
@@ -68,20 +71,22 @@ struct MsgSenderInputSheet: View {
 				.execute(
 					tool: MsgSenderTool(),
 					prompt: "send message to conversation name: \(conversationName) and text: \(text)",
-					type: MsgSenderToolOutput.self) { model in
-						model.text
-					} clearForm: {
-						clear()
-					}
+					type: MsgSenderToolOutput.self
+				) { model in
+					model.text
+				} clearForm: {
+					clear()
+				}
 		}
 	}
+
 	private func copyToClipboard() {
-#if os(iOS)
-		UIPasteboard.general.string = executor.result
-#elseif os(macOS)
-		NSPasteboard.general.clearContents()
-		NSPasteboard.general.setString(result, forType: .string)
-#endif
+		#if os(iOS)
+			UIPasteboard.general.string = executor.result
+		#elseif os(macOS)
+			NSPasteboard.general.clearContents()
+			NSPasteboard.general.setString(result, forType: .string)
+		#endif
 
 		ToastPresenter.shared.show(.init(message: "Copied to clipboard"))
 	}

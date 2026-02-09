@@ -10,57 +10,74 @@ import SwiftUI
 import XUI
 
 public struct ConversationTheme: Sendable, Hashable, Equatable, EmptyRepresentable {
-	let id: String
+	struct Theme {
+		let bubbleCoor: Color
+		let shadowColor: Color
+		let foregroundStyle: Color
+	}
+
+	let theme: Database.ConversationTheme
+	let outgoing: Theme
+	let incoming: Theme
 	let backgroundColor: Color
-	let outgoingBubbleColor: Color
-	let outgoingShadowColor: Color
-	let incomingBubbbleColor: Color
-	let incomingShadowColor: Color
 	let bubbleCornerRadius: CGFloat
 	let bubblePading: EdgeInsets
-	let fontSize: CGFloat
+	let font: Font
 
 	public init(_ conversation: Conversation) {
 		let theme = conversation.properties.theme
-		self.id = conversation.uid
-		// Colors for rendering
-		let backgroundColor = theme.background.color
-		let outgoingBubbleColor = theme.outgoingBubbleColor
-		let incomingBubbbleColor = theme.incomingBubbleColor
+		backgroundColor = theme.background.color
 
-		self.backgroundColor = backgroundColor
-		self.outgoingBubbleColor = outgoingBubbleColor
-		self.incomingBubbbleColor = (theme.background == .system ? .secondarySystemBackground : incomingBubbbleColor)
-		
-		let font = UIFont.preferredFont(forTextStyle: .body)
-		fontSize = font.pointSize
-		let verticalPadding = font.chatVerticalPadding
-		let horizontalPadding = font.chatHorizontalPadding
-		self.bubblePading = .init(
+		outgoing = .init(
+			bubbleCoor: theme.outgoingBubbleColor,
+			shadowColor: theme.outgoingBubbleColor.mix(with: .primary, by: 0.1),
+			foregroundStyle: .darkText
+		)
+		incoming = .init(
+			bubbleCoor: theme.incomingBubbleColor,
+			shadowColor: theme.incomingBubbleColor.mix(with: .primary, by: 0.1),
+			foregroundStyle: .primary
+		)
+		let uiFont = UIFont.preferredFont(forTextStyle: .body)
+		font = .system(size: uiFont.pointSize)
+		let verticalPadding = uiFont.chatVerticalPadding
+		let horizontalPadding = uiFont.chatHorizontalPadding
+		bubblePading = .init(
 			top: verticalPadding,
 			leading: horizontalPadding,
 			bottom: verticalPadding,
 			trailing: horizontalPadding
 		)
-		self.bubbleCornerRadius = max(16, font.lineHeight * 0.75)
-		outgoingShadowColor = outgoingBubbleColor.mix(with: .primary, by: 0.1)
-		incomingShadowColor = incomingBubbbleColor.mix(with: .primary, by: 0.1)
+		bubbleCornerRadius = max(16, uiFont.lineHeight * 0.75)
+		self.theme = conversation.theme
 	}
 
 	public static let empty = ConversationTheme(.empty)
 
 	public static func == (lhs: ConversationTheme, rhs: ConversationTheme) -> Bool {
-		lhs.id == rhs.id && lhs.outgoingBubbleColor == rhs.outgoingBubbleColor && lhs.incomingBubbbleColor == rhs.incomingBubbbleColor && lhs.backgroundColor == rhs.backgroundColor
+		lhs.theme == rhs.theme
 	}
 
 	public func hash(into hasher: inout Hasher) {
-		hasher.combine(id)
+		hasher.combine(theme)
+	}
+
+	public func bubbleColor(for isSender: Bool) -> some ShapeStyle {
+		isSender ? outgoing.bubbleCoor : incoming.bubbleCoor
+	}
+
+	public func foregroundStyle(for isSender: Bool) -> some ShapeStyle {
+		isSender ? outgoing.foregroundStyle : incoming.foregroundStyle
+	}
+
+	public func shadowColor(for isSender: Bool) -> some ShapeStyle {
+		isSender ? outgoing.shadowColor : incoming.shadowColor
 	}
 }
+
 extension UIFont {
-	/// Small vertical tweak to make text feel centered in a pill/bubble (iMessage-ish).
 	var chatOpticalOffset: CGFloat {
-		let topExtra = ascender - capHeight      // space above capital letters
+		let topExtra = ascender - capHeight // space above capital letters
 		let bottom = abs(descender)
 		// tuned for SF Pro Text/Display; usually about -1...+1 pt depending on size
 		return (topExtra * 0.18) - (bottom * 0.06)

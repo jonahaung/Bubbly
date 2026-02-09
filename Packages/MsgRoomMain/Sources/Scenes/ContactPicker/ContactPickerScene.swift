@@ -11,7 +11,6 @@ import SwiftUI
 import XUI
 
 public struct ContactPickerScene: View {
-
 	@Environment(ContactStore.self) private var contactStore
 	@Environment(\.dismiss) private var dismiss
 	@Binding var selection: [Contact]

@@ -8,15 +8,15 @@
 import Foundation
 
 public struct DeeplinkActionPlanner: Sendable {
-    public var plan: @Sendable (_ link: Deeplink) -> [DeeplinkAction]
-    public init(plan: @escaping @Sendable (Deeplink) -> [DeeplinkAction]) {
-        self.plan = plan
-    }
+	public var plan: @Sendable (_ link: Deeplink) -> [DeeplinkAction]
+	public init(plan: @escaping @Sendable (Deeplink) -> [DeeplinkAction]) {
+		self.plan = plan
+	}
 }
+
 public extension DeeplinkActionPlanner {
 	static func `default`(tabMapping: TabMapping, navMapping: NavMapping) -> DeeplinkActionPlanner {
 		.init { link in
-
 			var actions = [DeeplinkAction]()
 
 			if let tab = tabMapping.tabForLink(link) {
@@ -29,13 +29,22 @@ public extension DeeplinkActionPlanner {
 			case .home:
 				actions.append(.sideEffect(.track(event: "deeplink_open_home", properties: [:])))
 			case .settings:
-				actions.append(.sideEffect(.track(event: "deeplink_open_settings", properties: [:])))
-			case .profile(let id):
+				actions.append(.sideEffect(.track(
+					event: "deeplink_open_settings",
+					properties: [:]
+				)))
+			case let .profile(id):
 				actions.append(.sideEffect(.prepareForContactDetails(id: id)))
-				actions.append(.sideEffect(.track(event: "deeplink_open_profile", properties: ["id": id])))
-			case .conversation(let id):
+				actions.append(.sideEffect(.track(
+					event: "deeplink_open_profile",
+					properties: ["id": id]
+				)))
+			case let .conversation(id):
 				actions.append(.sideEffect(.prepareForConversation(id: id)))
-				actions.append(.sideEffect(.track(event: "deeplink_open_conversation", properties: ["id": id])))
+				actions.append(.sideEffect(.track(
+					event: "deeplink_open_conversation",
+					properties: ["id": id]
+				)))
 			}
 			return .init(actions)
 		}

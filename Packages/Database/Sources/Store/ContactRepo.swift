@@ -7,8 +7,8 @@
 
 import Core
 import Foundation
-import XUI
 import SwiftData
+import XUI
 
 public enum ContactRepo {
 	enum XError: Error {
@@ -23,7 +23,11 @@ public enum ContactRepo {
 		if let localValue, !refetch {
 			return localValue
 		}
-		let serverValue: Contact? = try? await FirestoreRepo.getModel(for: uid, collection: .users, field: .uid)
+		let serverValue: Contact? = try? await FirestoreRepo.getModel(
+			for: uid,
+			collection: .users,
+			field: .uid
+		)
 		guard let serverValue else {
 			if let localValue {
 				return localValue

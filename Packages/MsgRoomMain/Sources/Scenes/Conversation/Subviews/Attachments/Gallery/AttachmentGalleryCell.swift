@@ -5,20 +5,18 @@
 //  Created by Aung Ko Min on 29/12/25.
 //
 
-import XUI
-import Database
-import SwiftUI
-import ImageLoader
-import WebKit
 import _AVKit_SwiftUI
+import Database
+import ImageLoader
+import SwiftUI
+import WebKit
+import XUI
 
 public struct AttachmentGalleryCell: View {
-
 	let attachment: Attachment
 	@State private var webPage: WebPage?
 	@Environment(\.openURL) private var openURL
 
-	@ViewBuilder
 	public var body: some View {
 		switch attachment.attachmentType {
 		case .image, .imageUploading:

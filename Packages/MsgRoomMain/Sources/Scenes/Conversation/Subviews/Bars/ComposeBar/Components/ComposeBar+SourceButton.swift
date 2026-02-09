@@ -1,5 +1,5 @@
 //
-//  ComposeTypeButton.swift
+//  ComposeBar+SourceButton.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 3/1/26.
@@ -9,7 +9,6 @@ import SwiftUI
 import XUI
 
 extension ComposeBar {
-
 	struct ComposeBarSourceButton: View {
 		let source: ChatComposer.Source
 		@Environment(ChatComposer.self) private var composer
@@ -25,6 +24,7 @@ extension ComposeBar {
 			.background(.windowBackground, in: .circle)
 			.equatable(by: source)
 		}
+
 		private func action() {
 			composer.updateSource(source)
 		}

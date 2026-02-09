@@ -9,34 +9,34 @@ import Core
 import SwiftData
 
 public final class AppContainer: Sendable {
-    public let modelContainer: ModelContainer
+	public let modelContainer: ModelContainer
 
 	public init(migrationPlan: (any SchemaMigrationPlan.Type)? = nil, id: String?) {
-        let schema = Schema(
-            [
-                PContact.self,
-                PMsg.self,
-                PGroup.self,
-				PConversationProperties.self
-            ]
-        )
-        let configuration = ModelConfiguration(
+		let schema = Schema(
+			[
+				PContact.self,
+				PMsg.self,
+				PGroup.self,
+				PConversationProperties.self,
+			]
+		)
+		let configuration = ModelConfiguration(
 			id,
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            allowsSave: true,
-            groupContainer: .identifier(AppInformation.groupID)
-            // cloudKitDatabase: .private(AppInformation.iCloudID)
-        )
-        do {
-            let modelContainer = try ModelContainer(
-                for: schema,
-                migrationPlan: migrationPlan,
-                configurations: configuration
-            )
-            self.modelContainer = modelContainer
-        } catch {
-            fatalError(error.localizedDescription)
-        }
-    }
+			schema: schema,
+			isStoredInMemoryOnly: false,
+			allowsSave: true,
+			groupContainer: .identifier(AppInformation.groupID)
+			// cloudKitDatabase: .private(AppInformation.iCloudID)
+		)
+		do {
+			let modelContainer = try ModelContainer(
+				for: schema,
+				migrationPlan: migrationPlan,
+				configurations: configuration
+			)
+			self.modelContainer = modelContainer
+		} catch {
+			fatalError(error.localizedDescription)
+		}
+	}
 }

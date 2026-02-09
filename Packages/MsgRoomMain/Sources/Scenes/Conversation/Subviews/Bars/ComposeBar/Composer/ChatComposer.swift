@@ -7,16 +7,15 @@
 
 import Core
 import Database
+import ImagePlayground
 import MediaPicker
 import Services
 import SwiftUI
 import XUI
-import ImagePlayground
 
 @MainActor
 @Observable
 final class ChatComposer: ErrorPresenter, Equatable {
-
 	@ObservationIgnored var inputText = InputText()
 	@ObservationIgnored var photoPicker = PhotoPickerManager()
 	@ObservationIgnored private let msgCreator: MsgCreator
@@ -34,9 +33,11 @@ final class ChatComposer: ErrorPresenter, Equatable {
 		inputText.delegate = self
 		photoPicker.delegate = self
 	}
+
 	deinit {
 		log("")
 	}
+
 	var hasContent: Bool {
 		inputText.hasText || !attachments.isEmpty
 	}
@@ -51,6 +52,7 @@ final class ChatComposer: ErrorPresenter, Equatable {
 			await AudioService.shared.play(.tap1)
 		}
 	}
+
 	nonisolated static func == (lhs: ChatComposer, rhs: ChatComposer) -> Bool {
 		lhs.id == rhs.id
 	}
@@ -80,27 +82,28 @@ extension ChatComposer: InputTextDelegate {
 }
 
 extension ChatComposer: PhotoPickerManagerDelegate {
-	func photoPickerManager(
-		_ manager: PhotoPickerManager,
-		didSelectImages images: [MediaPicker.SelectedImage]
-	) {
+	func photoPickerManager(_ manager: PhotoPickerManager,
+	                        didSelectImages images: [MediaPicker.SelectedImage])
+	{
 		Task {
 			await parseImages(selectedImages: images)
 		}
 	}
-
 }
+
 extension ChatComposer {
 	// MARK: - User Actions
+
 	func handlePrimaryAction(_ conversation: Conversation) {
 		let text = inputText.text
-		if text.isWhitespace && attachments.isEmpty {
+		if text.isWhitespace, attachments.isEmpty {
 			inputText.text = Lorem.random()
 			return
 		}
 
 		send(conversation: conversation)
 	}
+
 	func handleSecondaryAction(_ conversation: Conversation) {
 		if hasContent {
 			send(conversation: conversation)
@@ -108,12 +111,14 @@ extension ChatComposer {
 			resetSource()
 		}
 	}
+
 	func resetSource() {
 		source = .text
 	}
+
 	func send(conversation: Conversation) {
 		let text = inputText.text.trimmed
-		let attachments = self.attachments
+		let attachments = attachments
 		resetDraft()
 		Task {
 			await AudioService.shared.play(.tap1)
@@ -133,7 +138,11 @@ extension ChatComposer {
 		)
 		try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
 	}
-	@concurrent func send(text: String, attachments: [Attachment], conversation: Conversation) async throws {
+
+	@concurrent func send(text: String,
+	                      attachments: [Attachment],
+	                      conversation: Conversation) async throws
+	{
 		var msg = try await msgCreator.message(
 			text: text,
 			attachments: attachments,
@@ -143,7 +152,7 @@ extension ChatComposer {
 			if text == attachments.first?.url {
 				msg.text = nil
 			} else {
-				attachments.forEach { each in
+				for each in attachments {
 					text = text.replace(each.url, with: "")
 				}
 				msg.text = text.trimmed
@@ -167,9 +176,10 @@ extension ChatComposer {
 
 extension ChatComposer {
 	// MARK: - Async Processing
+
 	@concurrent
 	func parseLinks(links: [ExtractedLink]) async {
-		let items = await self.attachments
+		let items = await attachments
 		let existingURLs = Set(items.map(\.url))
 		let newLinks = links.filter { existingURLs.contains($0.url.absoluteString) == false }
 		guard newLinks.isEmpty == false else { return }
@@ -178,7 +188,7 @@ extension ChatComposer {
 		if let attachments = try? await AttachmentFactory.createLinkAttachments(from: newLinks) {
 			Task { @MainActor in
 				var text = inputText.text
-				newLinks.forEach { each in
+				for each in newLinks {
 					text = text.replace(each.url.absoluteString, with: "")
 				}
 				self.inputText.text = text
@@ -193,14 +203,15 @@ extension ChatComposer {
 	@concurrent
 	func parseImages(selectedImages: [SelectedImage]) async {
 		await setLoading(true)
-		var items = await self.attachments
+		var items = await attachments
 		var pickerItems = selectedImages
 		let pickerIDs = Set(pickerItems.map(\.id))
 		items.removeAll { pickerIDs.contains($0.uid) == false }
 		pickerItems.removeAll { item in items.contains { $0.uid == item.id } }
 
 		let newItems = try? await AttachmentFactory.createImageAttachments(
-			from: pickerItems)
+			from: pickerItems
+		)
 		if let newItems {
 			items.append(contentsOf: newItems)
 		}
@@ -221,7 +232,8 @@ extension ChatComposer {
 		let createdImages = imageCreator.images(
 			for: [.text(prompt)],
 			style: .animation,
-			limit: 1)
+			limit: 1
+		)
 
 		var image: UIImage?
 		for try await created in createdImages {
@@ -241,6 +253,6 @@ extension ChatComposer {
 
 	func removeAttachment(id: String) {
 		attachments.removeAll { $0.id == id }
-		self.photoPicker.remove(for: id)
+		photoPicker.remove(for: id)
 	}
 }

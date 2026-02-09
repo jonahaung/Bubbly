@@ -36,7 +36,7 @@ private let toolOutputOverheadTokens = 3
 
 // MARK: - Private Helpers
 
-private extension Sequence where Element == Transcript.Segment {
+private extension Sequence<Transcript.Segment> {
 	/// Sums the estimated token count across all segments
 	var totalEstimatedTokenCount: Int {
 		reduce(0) { $0 + $1.estimatedTokenCount }
@@ -51,7 +51,7 @@ private extension Transcript.Entry {
 	}
 }
 
-extension Transcript.Entry {
+public extension Transcript.Entry {
 	/// Estimates the token count for this transcript entry.
 	///
 	/// This property calculates tokens based on the entry type:
@@ -60,24 +60,24 @@ extension Transcript.Entry {
 	/// - Tool output: Sum of segments + overhead (3 tokens)
 	///
 	/// Uses Apple's guidance of 4.5 characters per token.
-	public var estimatedTokenCount: Int {
+	var estimatedTokenCount: Int {
 		switch self {
-		case .instructions(let instructions):
+		case let .instructions(instructions):
 			return instructions.segments.totalEstimatedTokenCount
 
-		case .prompt(let prompt):
+		case let .prompt(prompt):
 			return prompt.segments.totalEstimatedTokenCount
 
-		case .response(let response):
+		case let .response(response):
 			return response.segments.totalEstimatedTokenCount
 
-		case .toolCalls(let toolCalls):
+		case let .toolCalls(toolCalls):
 			return toolCalls.reduce(0) { total, call in
 				total + estimateTokens(from: call.toolName) +
-				estimateTokens(from: call.arguments) + toolCallOverheadTokens
+					estimateTokens(from: call.arguments) + toolCallOverheadTokens
 			}
 
-		case .toolOutput(let output):
+		case let .toolOutput(output):
 			return output.segments.totalEstimatedTokenCount + toolOutputOverheadTokens
 
 		@unknown default:
@@ -87,7 +87,7 @@ extension Transcript.Entry {
 	}
 }
 
-extension Transcript.Segment {
+public extension Transcript.Segment {
 	/// Estimates the token count for this transcript segment.
 	///
 	/// Calculates tokens based on segment type:
@@ -95,12 +95,12 @@ extension Transcript.Segment {
 	/// - Structured segments: JSON representation length divided by 4.5
 	///
 	/// Uses Apple's guidance of 4.5 characters per token.
-	public var estimatedTokenCount: Int {
+	var estimatedTokenCount: Int {
 		switch self {
-		case .text(let textSegment):
+		case let .text(textSegment):
 			return estimateTokens(from: textSegment.content)
 
-		case .structure(let structuredSegment):
+		case let .structure(structuredSegment):
 			return estimateTokens(from: structuredSegment.content)
 
 		@unknown default:
@@ -110,7 +110,7 @@ extension Transcript.Segment {
 	}
 }
 
-extension Transcript {
+public extension Transcript {
 	/// Estimates the total token count for all entries in this transcript.
 	///
 	/// Returns the sum of estimated tokens across all transcript entries.
@@ -122,8 +122,8 @@ extension Transcript {
 	/// let tokens = transcript.estimatedTokenCount
 	/// print("Transcript uses approximately \(tokens) tokens")
 	/// ```
-	public var estimatedTokenCount: Int {
-		return self.reduce(0) { $0 + $1.estimatedTokenCount }
+	var estimatedTokenCount: Int {
+		reduce(0) { $0 + $1.estimatedTokenCount }
 	}
 
 	/// Returns the estimated token count with a safety buffer.
@@ -139,7 +139,7 @@ extension Transcript {
 	///     // Safe to continue conversation
 	/// }
 	/// ```
-	public var safeEstimatedTokenCount: Int {
+	var safeEstimatedTokenCount: Int {
 		let baseTokens = estimatedTokenCount
 		let buffer = Int(Double(baseTokens) * safetyBufferMultiplier)
 		let systemOverhead = systemOverheadTokens
@@ -162,7 +162,7 @@ extension Transcript {
 	///     // Trim transcript or summarize conversation
 	/// }
 	/// ```
-	public func isApproachingLimit(threshold: Double = 0.70, maxTokens: Int = 4096) -> Bool {
+	func isApproachingLimit(threshold: Double = 0.70, maxTokens: Int = 4096) -> Bool {
 		let currentTokens = safeEstimatedTokenCount
 		let limitThreshold = Int(Double(maxTokens) * threshold)
 		return currentTokens > limitThreshold
@@ -184,12 +184,12 @@ extension Transcript {
 	/// let trimmed = transcript.entriesWithinTokenBudget(2000)
 	/// let newTranscript = Transcript(trimmed)
 	/// ```
-	public func entriesWithinTokenBudget(_ budget: Int) -> [Transcript.Entry] {
+	func entriesWithinTokenBudget(_ budget: Int) -> [Transcript.Entry] {
 		var tokenCount = 0
 		var recentEntriesToKeep: [Transcript.Entry] = []
 
 		// 1. Find the first instruction
-		let firstInstruction = self.first(where: \.isInstruction)
+		let firstInstruction = first(where: \.isInstruction)
 
 		if let instruction = firstInstruction {
 			let instructionTokens = instruction.estimatedTokenCount
@@ -199,8 +199,9 @@ extension Transcript {
 			}
 		}
 
-		// 2. Iterate backwards through non-instructions and collect what fits in the remaining budget
-		for entry in self.reversed() {
+		// 2. Iterate backwards through non-instructions and collect what fits in the remaining
+		// budget
+		for entry in reversed() {
 			if entry.isInstruction { continue }
 
 			let entryTokens = entry.estimatedTokenCount
@@ -222,7 +223,8 @@ extension Transcript {
 
 // MARK: - Token Estimation Utilities
 
-/// Estimates token count from a string using empirically calibrated ratio: 4.75 characters per token.
+/// Estimates token count from a string using empirically calibrated ratio: 4.75 characters per
+/// token.
 ///
 /// Uses balanced calibration based on xctrace Foundation Models instrument measurements.
 /// For conservative estimates, use `estimateTokensConservative(from:)`.

@@ -5,28 +5,28 @@
 import Foundation
 
 #if !os(macOS)
-    import UIKit
+	import UIKit
 #else
-    import AppKit
+	import AppKit
 #endif
 
 public extension ImageProcessors {
-    /// Processed an image using a specified closure.
-    struct Anonymous: ImageProcessing, CustomStringConvertible {
-        public let identifier: String
-        private let closure: @Sendable (PlatformImage) -> PlatformImage?
+	/// Processed an image using a specified closure.
+	struct Anonymous: ImageProcessing, CustomStringConvertible {
+		public let identifier: String
+		private let closure: @Sendable (PlatformImage) -> PlatformImage?
 
-        public init(id: String, _ closure: @Sendable @escaping (PlatformImage) -> PlatformImage?) {
-            identifier = id
-            self.closure = closure
-        }
+		public init(id: String, _ closure: @Sendable @escaping (PlatformImage) -> PlatformImage?) {
+			identifier = id
+			self.closure = closure
+		}
 
-        public func process(_ image: PlatformImage) -> PlatformImage? {
-            closure(image)
-        }
+		public func process(_ image: PlatformImage) -> PlatformImage? {
+			closure(image)
+		}
 
-        public var description: String {
-            "AnonymousProcessor(identifier: \(identifier)"
-        }
-    }
+		public var description: String {
+			"AnonymousProcessor(identifier: \(identifier)"
+		}
+	}
 }

@@ -3,7 +3,6 @@
 --max-width 100
 --swift-version 6.2.3
 --linebreaks lf
---cache ignore
 --semicolons never
 --self remove
 --strip-unused-args closure-only
@@ -11,3 +10,6 @@
 --ranges spaced
 --else-position same-line
 --trailing-commas collections-only
+--wrap-collections before-first
+--wrap-parameters after-first
+--wrap-arguments before-first

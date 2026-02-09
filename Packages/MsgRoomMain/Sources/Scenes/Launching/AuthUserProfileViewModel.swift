@@ -1,9 +1,9 @@
 //
-	//  AuthUserProfileViewModel.swift
-	//  Bubbly
-	//
-	//  Created by Aung Ko Min on 19/11/25.
-	//
+//  AuthUserProfileViewModel.swift
+//  Bubbly
+//
+//  Created by Aung Ko Min on 19/11/25.
+//
 
 import Core
 import Database
@@ -15,7 +15,6 @@ import UIKit
 @MainActor
 @Observable
 public final class AuthUserProfileViewModel: ErrorPresenter {
-
 	var editingUser = CurrentUserModel.empty
 	var currentUser: CurrentUserModel
 
@@ -26,6 +25,7 @@ public final class AuthUserProfileViewModel: ErrorPresenter {
 		editingUser = .init(user)
 		currentUser = .init(user)
 	}
+
 	public func shouldUpdateDisplayName(for user: CurrentUserModel) -> Bool {
 		Auth
 			.auth().currentUser?.displayName != user.name.trimmed && user.name.isWhitespace == false

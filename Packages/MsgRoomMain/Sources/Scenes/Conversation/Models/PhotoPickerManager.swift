@@ -10,7 +10,6 @@ import SwiftUI
 @MainActor
 @Observable
 final class PhotoPickerManager {
-
 	private var items: [SelectedPhotoItem] = [] {
 		didSet {
 			scheduleDebouncedUpdate()
@@ -70,7 +69,9 @@ final class PhotoPickerManager {
 		}
 	}
 
-	private nonisolated static func processSelections(_ selections: [SelectedPhotoItem]) async -> [SelectedImage] {
+	private nonisolated static func processSelections(_ selections: [SelectedPhotoItem]) async
+		-> [SelectedImage]
+	{
 		var results = [SelectedImage]()
 		results.reserveCapacity(selections.count)
 
@@ -84,7 +85,9 @@ final class PhotoPickerManager {
 		return results
 	}
 
-	private nonisolated static func decodeImage(from photo: SelectedPhotoItem) async -> SelectedImage? {
+	private nonisolated static func decodeImage(from photo: SelectedPhotoItem) async
+		-> SelectedImage?
+	{
 		guard let data = await loadImageData(from: photo) else { return nil }
 		guard let uiImage = UIImage(data: data) else { return nil }
 		return SelectedImage(id: photo.id, image: uiImage)

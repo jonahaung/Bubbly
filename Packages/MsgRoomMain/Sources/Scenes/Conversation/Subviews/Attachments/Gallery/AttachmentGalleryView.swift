@@ -5,12 +5,11 @@
 //  Created by Aung Ko Min on 29/12/25.
 //
 
-import XUI
 import Database
 import SwiftUI
+import XUI
 
 public struct AttachmentGalleryView: View {
-
 	private let attachments: [Attachment]
 	@State private var selection: String
 	@Environment(\.dismiss) private var dismiss
@@ -52,12 +51,13 @@ public struct AttachmentGalleryView: View {
 		}
 		.padding()
 		.buttonStyle(.borderless)
-
 	}
+
 	private var bottomBar: some View {
 		XPhotoPageControl(selection: $selection, items: attachments.map(\.id), size: 20)
 			.padding()
 	}
+
 	@ViewBuilder private var shareButton: some View {
 		let currentItem = attachments.first(where: { $0.id == selection })
 		if
@@ -65,11 +65,12 @@ public struct AttachmentGalleryView: View {
 			item.attachmentType == .image,
 			let url = item.galleryURL,
 			let data = try? Data(contentsOf: url),
-			let uIImage = UIImage(data: data) {
+			let uIImage = UIImage(data: data)
+		{
 			let image = Image(uiImage: uIImage)
 			ShareLink(
 				item: image,
-				preview: SharePreview.init(item.galleryTitle ?? "", image: image)
+				preview: SharePreview(item.galleryTitle ?? "", image: image)
 			)
 			.labelStyle(.iconOnly)
 		}

@@ -7,11 +7,10 @@
 
 import Database
 import Foundation
-import XUI
 import SwiftUI
+import XUI
 
 public enum NavPath: Hashable, @unchecked Sendable, Identifiable, CaseNameReflectable {
-
 	case conversationDetails(_ conversation: Conversation)
 	case conversation(_ prefatchData: ConversationInitializer.PrefetchedData)
 	case contactDetails(_ contact: Contact)
@@ -45,6 +44,7 @@ public enum NavPath: Hashable, @unchecked Sendable, Identifiable, CaseNameReflec
 		lhs.id == rhs.id
 	}
 }
+
 public extension NavPath {
 	@MainActor static func view(_ node: RenderNode) -> NavPath {
 		let id = (node.renderID() as? String) ?? UUID().uuidString

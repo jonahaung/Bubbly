@@ -5,9 +5,9 @@
 //  Created by Aung Ko Min on 3/1/26.
 //
 
+import Database
 import FoundationModels
 import SwiftData
-import Database
 
 @Generable
 public enum ChatEngineRole: String, Codable, Hashable, CaseIterable {
@@ -15,15 +15,16 @@ public enum ChatEngineRole: String, Codable, Hashable, CaseIterable {
 	case assistant = "Assistant"
 	case sender = "Sender"
 }
+
 extension MsgRecipient {
 	var role: ChatEngineRole {
 		switch self {
 		case .send:
-			return .sender
+			.sender
 		case .receive:
-			return .user
+			.user
 		case .assistant:
-			return .assistant
+			.assistant
 		}
 	}
 }

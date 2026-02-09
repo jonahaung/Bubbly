@@ -54,30 +54,33 @@ final class InboxViewModel: ErrorPresenter {
 	}
 
 	@concurrent
-	private func fetchInboxItems(_ conversations: [Conversation], currentUser: CurrentUserModel) async throws -> [InboxItem] {
-		let items: [InboxItem?] = try await AsyncOrderedStream.mapOrdered(inputs: conversations) { conversation in
-			if let msg = try await ConversationRepo.lastMsg(
-				conID: conversation.uid
-			) {
-				let sender: any ContactRepresentableSendable =
-				if msg.receiptType == .receive {
-					try await ContactRepo.getOrCreate(for: msg.senderID, refetch: false)
-				} else {
-					currentUser
+	private func fetchInboxItems(_ conversations: [Conversation],
+	                             currentUser: CurrentUserModel) async throws -> [InboxItem]
+	{
+		let items: [InboxItem?] = try await AsyncOrderedStream
+			.mapOrdered(inputs: conversations) { conversation in
+				if let msg = try await ConversationRepo.lastMsg(
+					conID: conversation.uid
+				) {
+					let sender: any ContactRepresentableSendable =
+						if msg.receiptType == .receive {
+							try await ContactRepo.getOrCreate(for: msg.senderID, refetch: false)
+						} else {
+							currentUser
+						}
+					let unreadMsgsCount = try await ConversationRepo.countUnreadMsgs(
+						conID: conversation.uid,
+						currentUserID: currentUser.uid
+					)
+					return InboxItem(
+						conversation: conversation,
+						msg: msg,
+						sender: sender,
+						unreadMsgsCount: unreadMsgsCount
+					)
 				}
-				let unreadMsgsCount = try await ConversationRepo.countUnreadMsgs(
-					conID: conversation.uid,
-					currentUserID: currentUser.uid
-				)
-				return InboxItem(
-					conversation: conversation,
-					msg: msg,
-					sender: sender,
-					unreadMsgsCount: unreadMsgsCount
-				)
+				return nil
 			}
-			return nil
-		}
 		return items.compactMap(\.self).sorted(by: { $0.msg.date > $1.msg.date })
 	}
 
@@ -87,12 +90,11 @@ final class InboxViewModel: ErrorPresenter {
 		descriptor.sortBy = [.init(\.uid, order: .forward)]
 		let properties = try await Store.shared.conversationPropertiesStore?.fetch(descriptor)
 
-		let items = try await withThrowingTaskGroup(of: Conversation.self) { group in
+		return try await withThrowingTaskGroup(of: Conversation.self) { group in
 			properties?.forEach { property in
 				let conID = property.uid
 				return group.addTask {
-					let conversation = try await ConversationRepo.getOrCreate(for: conID, refetch: false)
-					return conversation
+					try await ConversationRepo.getOrCreate(for: conID, refetch: false)
 				}
 			}
 			var items = [Conversation]()
@@ -101,6 +103,5 @@ final class InboxViewModel: ErrorPresenter {
 			}
 			return items
 		}
-		return items
 	}
 }

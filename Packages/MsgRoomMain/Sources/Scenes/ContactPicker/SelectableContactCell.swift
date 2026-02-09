@@ -19,7 +19,8 @@ struct SelectableContactCell: View {
 		Button {
 			onSelected(!isSelected)
 		} label: {
-			let badgeView = Text("\(Image(systemName: isSelected ? "checkmark.circle.fill" : "circle"))")
+			let badgeView =
+				Text("\(Image(systemName: isSelected ? "checkmark.circle.fill" : "circle"))")
 			Label {
 				Text(contact.name)
 			} icon: {

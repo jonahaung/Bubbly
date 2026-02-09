@@ -1,16 +1,18 @@
 //
-//  AnyMsgData++.swift
+//  AnyMsgData+Extensions.swift
 //  Services
 //
 //  Created by Aung Ko Min on 24/8/25.
 //
 
-import Foundation
 import Core
+import Foundation
 
-extension AnyMsgData {
-	public static func parse(from userInfo: [AnyHashable: Any]) throws -> AnyMsgData? {
-		guard let string = userInfo["message"] as? String, let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
+public extension AnyMsgData {
+	static func parse(from userInfo: [AnyHashable: Any]) throws -> AnyMsgData? {
+		guard let string = userInfo["message"] as? String,
+		      let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID))
+		else {
 			return nil
 		}
 		let decrypted = try CryptoService.shared.decrypt(

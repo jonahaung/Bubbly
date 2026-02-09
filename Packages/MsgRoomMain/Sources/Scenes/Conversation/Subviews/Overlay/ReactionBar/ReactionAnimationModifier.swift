@@ -5,11 +5,10 @@
 //  Created by Aung Ko Min on 5/11/25.
 //
 
-import SwiftUI
 import Database
+import SwiftUI
 
 struct ReactionAnimationModifier: ViewModifier {
-
 	let reaction: ReactionType
 	let isActive: Bool
 
@@ -17,11 +16,12 @@ struct ReactionAnimationModifier: ViewModifier {
 		switch reaction {
 		case .heart:
 			content
-				.offset(y: isActive ? ReactionsBar.Constants.floatOffset/2 : 0)
+				.offset(y: isActive ? ReactionsBar.Constants.floatOffset / 2 : 0)
 				.scaleEffect(
 					isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0,
 					anchor: .bottom
 				)
+
 		case .thumbUp:
 			content
 				.rotationEffect(
@@ -50,6 +50,7 @@ struct ReactionAnimationModifier: ViewModifier {
 					.degrees(isActive ? ReactionsBar.Constants.rotationAngle : 0)
 				)
 				.scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
+
 		default:
 			content
 				.scaleEffect(

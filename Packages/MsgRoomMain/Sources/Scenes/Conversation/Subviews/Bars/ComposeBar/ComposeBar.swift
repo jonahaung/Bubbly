@@ -1,16 +1,15 @@
 //
-//  ChatComposerBar.swift
+//  ComposeBar.swift
 //  Msgr
 //
 //  Created by Aung Ko Min on 21/10/22.
 //
 
+import PhotosUI
 import SwiftUI
 import XUI
-import PhotosUI
 
 struct ComposeBar: View {
-
 	let composer: ChatComposer
 	@Environment(\.conversationTheme) private var theme
 	var body: some View {

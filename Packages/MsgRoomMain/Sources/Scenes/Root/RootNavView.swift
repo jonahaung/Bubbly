@@ -5,14 +5,13 @@
 //  Created by Aung Ko Min on 11/1/26.
 //
 
+import Core
 import Database
 import Services
 import SwiftUI
 import XUI
-import Core
 
 struct RootNavView: View {
-
 	@Environment(Router.self) private var router
 
 	var body: some View {
@@ -24,7 +23,7 @@ struct RootNavView: View {
 		.navigationSplitViewStyle(.automatic)
 	}
 
-	@ViewBuilder func tabDestination(for tab: TabPath) -> some View {
+	func tabDestination(for tab: TabPath) -> some View {
 		MainNavView(tabPath: tab) {
 			switch tab {
 			case .test:
@@ -41,7 +40,6 @@ struct RootNavView: View {
 }
 
 struct SidebarView: View {
-
 	@Environment(Router.self) private var router
 
 	var body: some View {
@@ -52,7 +50,8 @@ struct SidebarView: View {
 						router.selectedTab = tabPath
 					} label: {
 						Label(tabPath.localizedName, systemImage: tabPath.systemName)
-							.symbolRenderingMode(router.selectedTab == tabPath ? .multicolor : .hierarchical)
+							.symbolRenderingMode(router
+								.selectedTab == tabPath ? .multicolor : .hierarchical)
 							.symbolVariant(router.selectedTab == tabPath ? .fill : .none)
 					}
 					.buttonStyle(.borderless)
@@ -63,7 +62,6 @@ struct SidebarView: View {
 		.listStyle(.sidebar)
 		.navigationTitle("Bubbley")
 	}
-
 
 	private var selection: Binding<TabPath?> {
 		Binding(get: { router.selectedTab }, set: { newValue in

@@ -1,6 +1,6 @@
 @testable import FCM_V1
 import Testing
 
-@Test func example() async throws {
-    // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+@Test func example() {
+	// Write your test here and use APIs like `#expect(...)` to check expected conditions.
 }

@@ -14,11 +14,10 @@ import XUI
 @MainActor
 @Observable
 public class Router {
-
 	private var allPaths: [TabPath: [NavPath]] = {
 		var dictionary: [TabPath: [NavPath]] = [:]
-		TabPath.allCases.forEach {
-			dictionary[$0] = []
+		for item in TabPath.allCases {
+			dictionary[item] = []
 		}
 		return dictionary
 	}()
@@ -29,14 +28,18 @@ public class Router {
 	public var currentNavPaths: [NavPath]? {
 		allPaths[selectedTab]
 	}
+
 	@ObservationIgnored
-	public var visiblePath: NavPath { allPaths[selectedTab]?.last ?? .currentUserDetails }
+	public var visiblePath: NavPath {
+		allPaths[selectedTab]?.last ?? .currentUserDetails
+	}
 
 	public init() {}
 
 	public func navPaths(for tab: TabPath) -> [NavPath] {
 		allPaths[tab] ?? []
 	}
+
 	public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
 		.init(get: {
 			self.navPaths(for: tab)
@@ -48,13 +51,15 @@ public class Router {
 
 public extension Router {
 	func selectTab(_ newValue: TabPath) {
-		self.selectedTab = newValue
+		selectedTab = newValue
 	}
 
 	func pushToNav(_ path: NavPath) {
 		Task(priority: .background) {
 			var allPaths = self.allPaths
-			if let index = allPaths[selectedTab]?.firstIndex(of: path), let array = allPaths[selectedTab] {
+			if let index = allPaths[selectedTab]?.firstIndex(of: path),
+			   let array = allPaths[selectedTab]
+			{
 				allPaths[selectedTab] = Array(array[0 ... index])
 				return
 			}
@@ -64,9 +69,11 @@ public extension Router {
 			}
 		}
 	}
+
 	func pop() {
 		allPaths[selectedTab] = allPaths[selectedTab]?.dropLast()
 	}
+
 	func popToRoot() {
 		allPaths[selectedTab] = []
 	}
@@ -74,14 +81,13 @@ public extension Router {
 	func presnetModel(_ value: NavPath) {
 		sheet = value
 	}
+
 	func dismissModal() {
 		sheet = nil
 	}
 }
 
 public extension Router {
-	// Shared instance for app-wide navigation
-	static let shared: Router = {
-		Router()
-	}()
+	/// Shared instance for app-wide navigation
+	static let shared: Router = .init()
 }

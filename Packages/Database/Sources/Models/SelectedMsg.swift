@@ -18,6 +18,7 @@ public struct SelectedMsg: Hashable, Identifiable, Sendable {
 		self.next = next
 	}
 }
-extension EnvironmentValues {
+
+public extension EnvironmentValues {
 	@Entry var selectedMsg: SelectedMsg?
 }

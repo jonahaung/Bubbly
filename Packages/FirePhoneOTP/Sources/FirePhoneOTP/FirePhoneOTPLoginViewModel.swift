@@ -43,26 +43,30 @@ extension FirePhoneOTPLoginViewModel {
 	func sendCode(phoneNumber: String) {
 		guard !isLoading else { return }
 		isLoading = true
-		PhoneAuthProvider.provider().verifyPhoneNumber(phoneNumber, uiDelegate: nil) { [weak self] verificationId, error in
-			guard let self else { return }
-			DispatchQueue.main.async {
-				self.isLoading = false
-				if let error {
-					debugPrint(error)
-					self.viewState = .error(error.localizedDescription)
-					return
+		PhoneAuthProvider.provider()
+			.verifyPhoneNumber(phoneNumber, uiDelegate: nil) { [weak self] verificationId, error in
+				guard let self else { return }
+				DispatchQueue.main.async {
+					self.isLoading = false
+					if let error {
+						debugPrint(error)
+						self.viewState = .error(error.localizedDescription)
+						return
+					}
+					UserDefaults.standard.set(verificationId, forKey: "verificationId")
+					self.viewState = .verifyOTP
 				}
-				UserDefaults.standard.set(verificationId, forKey: "verificationId")
-				self.viewState = .verifyOTP
 			}
-		}
 	}
 
 	func verifyCode(code: String) {
 		guard !isLoading else { return }
 		isLoading = true
 		let verificationId = UserDefaults.standard.string(forKey: "verificationId") ?? ""
-		let credentials = PhoneAuthProvider.provider().credential(withVerificationID: verificationId, verificationCode: code)
+		let credentials = PhoneAuthProvider.provider().credential(
+			withVerificationID: verificationId,
+			verificationCode: code
+		)
 
 		Auth.auth().signIn(with: credentials) { [weak self] authResult, error in
 			guard let self else { return }
@@ -77,7 +81,10 @@ extension FirePhoneOTPLoginViewModel {
 					return
 				}
 				let user = authResult.user
-				self.viewState = .loggedIn(user: user, isNewUser: authResult.additionalUserInfo?.isNewUser == true)
+				self.viewState = .loggedIn(
+					user: user,
+					isNewUser: authResult.additionalUserInfo?.isNewUser == true
+				)
 			}
 		}
 	}
@@ -93,15 +100,26 @@ extension FirePhoneOTPLoginViewModel {
 extension FirePhoneOTPLoginViewModel {
 	private func validatePhoneNumber(_ phoneNumber: PhNumber) {
 		phoneNumber.validate()
-		applyPatternOnNumbers(&phoneNumber.rawString, pattern: "########", replacementCharacter: "#")
+		applyPatternOnNumbers(
+			&phoneNumber.rawString,
+			pattern: "########",
+			replacementCharacter: "#"
+		)
 		if let number = phoneNumber.formattedNumber, !isLoading {
 			sendCode(phoneNumber: number)
 		}
 	}
 
-	func applyPatternOnNumbers(_ stringvar: inout String, pattern: String, replacementCharacter: Character) {
-		var pureNumber = stringvar.replacingOccurrences(of: "[^0-9]", with: "", options: .regularExpression)
-		for index in 0..<pattern.count {
+	func applyPatternOnNumbers(_ stringvar: inout String,
+	                           pattern: String,
+	                           replacementCharacter: Character)
+	{
+		var pureNumber = stringvar.replacingOccurrences(
+			of: "[^0-9]",
+			with: "",
+			options: .regularExpression
+		)
+		for index in 0 ..< pattern.count {
 			guard index < pureNumber.count else {
 				stringvar = pureNumber
 				return

@@ -10,7 +10,6 @@ import SwiftUI
 import XUI
 
 struct ChatAccessoryBar: View {
-
 	@Environment(ChatViewManager.self) private var manager
 	@Environment(ChatComposer.self) private var composer
 	@Namespace private var chatNoticeView
@@ -38,7 +37,5 @@ struct ChatAccessoryBar: View {
 			.padding(.horizontal, 16)
 			.geometryGroup()
 		}
-
 	}
 }
-

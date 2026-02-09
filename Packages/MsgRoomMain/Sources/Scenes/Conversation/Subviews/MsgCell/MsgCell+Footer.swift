@@ -14,7 +14,10 @@ import XUI
 extension MsgCell {
 	struct Footer: View {
 		@Environment(MsgCellViewModel.self) private var viewModel
-		private var msg: Message { viewModel.msg }
+		private var msg: Message {
+			viewModel.msg
+		}
+
 		@Environment(\.typography) private var typography
 
 		var body: some View {
@@ -22,13 +25,14 @@ extension MsgCell {
 			Text(footerText)
 				.font(typography.caption1)
 				.padding(.horizontal, hPadding)
+				.fixedSize(horizontal: false, vertical: true)
 				.equatable(by: msg.uid)
 		}
 
 		private var footerText: String {
 			if msg.isSender {
 				let values = Array(msg.outgoingStatus.values)
-				let descriptions: [String] = values.map { $0.description }
+				let descriptions: [String] = values.map(\.description)
 				return descriptions.joined(separator: ", ")
 			} else {
 				return msg.date.formatted(date: .abbreviated, time: .shortened)

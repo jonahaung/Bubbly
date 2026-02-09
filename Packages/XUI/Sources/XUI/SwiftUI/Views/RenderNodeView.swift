@@ -1,5 +1,5 @@
 //
-//  PassthroughView.swift
+//  RenderNodeView.swift
 //  XUI
 //
 //  Created by Aung Ko Min on 22/9/25.
@@ -12,7 +12,6 @@ import SwiftUI
 @frozen
 @_documentation(visibility: internal)
 public struct RenderNodeView<Content: View>: RenderNode, View {
-
 	public let content: Content
 
 	@_optimize(speed)
@@ -67,7 +66,7 @@ public extension RenderNode where Self: View {
 
 	@inlinable
 	func nodeIdentity() -> AnyHashable {
-		return  renderID()
+		renderID()
 	}
 
 	@inlinable
@@ -79,11 +78,13 @@ public extension RenderNode where Self: View {
 public protocol OpaqueRenderableView: RenderNode {
 	func renderKey() -> AnyHashable
 }
+
 public extension OpaqueRenderableView where Self: View {
 	func renderKey() -> AnyHashable {
 		AnyHashable(ObjectIdentifier(Self.self))
 	}
 }
+
 public protocol OpaqueDiffableView: OpaqueRenderableView {
 	func isVisuallyEqual(to other: OpaqueDiffableView) -> Bool
 }
@@ -100,6 +101,7 @@ public extension View {
 		RenderNodeView { self }
 	}
 }
+
 public extension EnvironmentValues {
 	@Entry var anyObservable: AnyHashable? = nil
 }

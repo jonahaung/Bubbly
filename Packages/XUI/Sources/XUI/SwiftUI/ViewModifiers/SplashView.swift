@@ -8,35 +8,37 @@
 import SwiftUI
 
 private struct SplashView<SplashContent: View>: ViewModifier {
-    private let timeout: TimeInterval
-    private let splashContent: () -> SplashContent
+	private let timeout: TimeInterval
+	private let splashContent: () -> SplashContent
 
-    @State private var isActive = true
+	@State private var isActive = true
 
-    init(timeout: TimeInterval, @ViewBuilder splashContent: @escaping () -> SplashContent) {
-        self.timeout = timeout
-        self.splashContent = splashContent
-    }
+	init(timeout: TimeInterval, @ViewBuilder splashContent: @escaping () -> SplashContent) {
+		self.timeout = timeout
+		self.splashContent = splashContent
+	}
 
-    func body(content: Content) -> some View {
-        if isActive {
-            splashContent()
-                .task {
-                    do {
-                        try await Task.sleep(for: .seconds(timeout))
-                        isActive = false
-                    } catch {
+	func body(content: Content) -> some View {
+		if isActive {
+			splashContent()
+				.task {
+					do {
+						try await Task.sleep(for: .seconds(timeout))
+						isActive = false
+					} catch {
 						log(error)
-                    }
-                }
-        } else {
-            content
-        }
-    }
+					}
+				}
+		} else {
+			content
+		}
+	}
 }
 
 public extension View {
-    func splashView(timeout: TimeInterval = 2.5, @ViewBuilder splashContent: @escaping () -> some View) -> some View {
-        modifier(SplashView(timeout: timeout, splashContent: splashContent))
-    }
+	func splashView(timeout: TimeInterval = 2.5,
+	                @ViewBuilder splashContent: @escaping () -> some View) -> some View
+	{
+		modifier(SplashView(timeout: timeout, splashContent: splashContent))
+	}
 }

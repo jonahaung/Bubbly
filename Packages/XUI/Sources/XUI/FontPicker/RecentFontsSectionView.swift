@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-internal struct RecentFontsSectionView: View {
+struct RecentFontsSectionView: View {
 	@Binding var selectedFontName: String
 	var recentFonts: [String]
 
@@ -37,7 +37,8 @@ internal struct RecentFontsSectionView: View {
 								.background(
 									RoundedRectangle(cornerRadius: 8)
 										.fill(.white.opacity(0.9))
-										.stroke(recentFont == self.selectedFontName ? Color.blue : Color.clear)
+										.stroke(recentFont == selectedFontName ? Color.blue : Color
+											.clear)
 								)
 							}
 							.padding(.vertical, 8)

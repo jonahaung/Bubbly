@@ -3,14 +3,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "ImageLoader",
-    platforms: [.iOS(.v17)],
-    products: [
-        .library(name: "ImageLoader", targets: ["ImageLoader"]),
-        .library(name: "VideoLoader", targets: ["VideoLoader"])
-    ],
-    targets: [
-        .target(name: "ImageLoader"),
-        .target(name: "VideoLoader", dependencies: ["ImageLoader"])
-    ]
+	name: "ImageLoader",
+	platforms: [.iOS(.v17)],
+	products: [
+		.library(name: "ImageLoader", targets: ["ImageLoader"]),
+		.library(name: "VideoLoader", targets: ["VideoLoader"]),
+	],
+	targets: [
+		.target(name: "ImageLoader"),
+		.target(name: "VideoLoader", dependencies: ["ImageLoader"]),
+	]
 )

@@ -11,7 +11,6 @@ import SwiftUI
 import XUI
 
 struct ChatTitleBar: View {
-
 	@Environment(\.dismiss) private var dismiss
 	@Environment(ChatViewManager.self) private var manager
 	@Environment(\.conversationTheme) private var theme
@@ -54,7 +53,7 @@ struct ChatTitleBar: View {
 						.disallowParallelOperations,
 						.enableTintFeedback,
 						.disableButtonOnLoading,
-						.disallowParallelOperations
+						.disallowParallelOperations,
 					]
 				) {
 					await manager.saveConversationChanges()
@@ -72,7 +71,7 @@ struct ChatTitleBar: View {
 						.disallowParallelOperations,
 						.enableTintFeedback,
 						.disableButtonOnLoading,
-						.disallowParallelOperations
+						.disallowParallelOperations,
 					]
 				) {
 					try await Task.sleep(seconds: 1)
@@ -85,7 +84,6 @@ struct ChatTitleBar: View {
 			.padding(.horizontal, 8)
 			.padding(.bottom, 8)
 		}
-		.background(theme.backgroundColor.opacity(0.9))
-
+		.background(theme.backgroundColor)
 	}
 }

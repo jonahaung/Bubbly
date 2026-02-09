@@ -5,13 +5,12 @@
 //  Created by Aung Ko Min on 3/9/25.
 //
 
+import Core
 import Database
 import SwiftUI
-import Core
 import XUI
 
 struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
-
 	let uid: String
 	let recipient: MsgRecipient
 	let attachmentsCount: Int
@@ -19,16 +18,16 @@ struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
 	var anchor: UnitPoint {
 		switch recipient {
 		case .send:
-				.topTrailing
+			.topTrailing
 		case .receive:
-				.topLeading
+			.topLeading
 		case .assistant:
-				.top
+			.top
 		}
 	}
 
 	static func == (lhs: MsgLayoutValue, rhs: MsgLayoutValue) -> Bool {
-		return lhs.uid == rhs.uid
+		lhs.uid == rhs.uid
 	}
 
 	static let empty = MsgLayoutValue(
@@ -41,15 +40,17 @@ struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
 struct MsgLayoutValueKey: LayoutValueKey {
 	static let defaultValue: MsgLayoutValue = .empty
 }
+
 extension Message {
 	func layoutValue() -> MsgLayoutValue {
-		return .init(
+		.init(
 			uid: uid,
 			recipient: receiptType,
 			attachmentsCount: attachments.count
 		)
 	}
 }
+
 extension ContainerValues {
 	@Entry var viewIsVisible = false
 }

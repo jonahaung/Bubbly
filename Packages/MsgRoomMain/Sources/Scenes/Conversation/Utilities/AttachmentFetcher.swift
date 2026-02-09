@@ -5,9 +5,9 @@
 //  Created by Aung Ko Min on 18/12/25.
 //
 
-import Foundation
 import Core
 import Database
+import Foundation
 import ImageLoader
 import Services
 import SwiftUI
@@ -26,9 +26,9 @@ public enum FetchIntent: Sendable {
 private extension FetchIntent {
 	var priority: TaskPriority {
 		switch self {
-		case .prefetch: return .background
-		case .visible: return .userInitiated
-		case .userInitiated: return .high
+		case .prefetch: .background
+		case .visible: .userInitiated
+		case .userInitiated: .high
 		}
 	}
 }
@@ -36,7 +36,6 @@ private extension FetchIntent {
 // MARK: - AttachmentFetcher
 
 public actor AttachmentFetcher {
-
 	public static let shared = AttachmentFetcher()
 
 	public typealias Fetch = @Sendable (Attachment) async throws -> AttachmentData
@@ -52,8 +51,13 @@ public actor AttachmentFetcher {
 	private var pendingQueue: [Attachment] = []
 	private var waiters: [Attachment: [CheckedContinuation<AttachmentData, Error>]] = [:]
 
-	private var inFlightCount: Int { tasks.count }
-	private var hasCapacity: Bool { inFlightCount < maxConcurrent }
+	private var inFlightCount: Int {
+		tasks.count
+	}
+
+	private var hasCapacity: Bool {
+		inFlightCount < maxConcurrent
+	}
 
 	// MARK: - Init
 
@@ -93,11 +97,10 @@ public actor AttachmentFetcher {
 	// MARK: - Prefetch / Fetch
 
 	@discardableResult
-	public func prefetch(
-		_ attachment: Attachment,
-		intent: FetchIntent = .prefetch,
-		completion: Completion? = nil
-	) -> Bool {
+	public func prefetch(_ attachment: Attachment,
+	                     intent: FetchIntent = .prefetch,
+	                     completion: Completion? = nil) -> Bool
+	{
 		if let completion {
 			completions[attachment, default: []].append(completion)
 		}
@@ -117,11 +120,10 @@ public actor AttachmentFetcher {
 		}
 	}
 
-	public func fetch(
-		_ attachment: Attachment,
-		intent: FetchIntent,
-		timeout: Duration? = .seconds(10)
-	) async throws -> AttachmentData {
+	public func fetch(_ attachment: Attachment,
+	                  intent: FetchIntent,
+	                  timeout: Duration? = .seconds(10)) async throws -> AttachmentData
+	{
 		if let existingTask = tasks[attachment] {
 			return try await awaitWithOptionalTimeout(
 				task: existingTask,
@@ -199,8 +201,13 @@ public actor AttachmentFetcher {
 		pendingQueue.contains(attachment)
 	}
 
-	public var activeCount: Int { inFlightCount }
-	public var pendingCount: Int { pendingQueue.count }
+	public var activeCount: Int {
+		inFlightCount
+	}
+
+	public var pendingCount: Int {
+		pendingQueue.count
+	}
 
 	// MARK: - Scheduling
 
@@ -239,11 +246,9 @@ public actor AttachmentFetcher {
 		}
 	}
 
-	private func createTask(
-		for attachment: Attachment,
-		priority: TaskPriority
-	) -> Task<AttachmentData, Error> {
-
+	private func createTask(for attachment: Attachment,
+	                        priority: TaskPriority) -> Task<AttachmentData, Error>
+	{
 		Task(priority: priority) {
 			do {
 				let data = try await api.fetchAttachmentData(for: attachment)
@@ -273,11 +278,9 @@ public actor AttachmentFetcher {
 
 	// MARK: - Waiting / Timeout
 
-	private func waitForPending(
-		attachment: Attachment,
-		timeout: Duration?
-	) async throws -> AttachmentData {
-
+	private func waitForPending(attachment: Attachment,
+	                            timeout: Duration?) async throws -> AttachmentData
+	{
 		if let task = tasks[attachment] {
 			return try await awaitWithOptionalTimeout(
 				task: task,
@@ -290,11 +293,9 @@ public actor AttachmentFetcher {
 		}
 	}
 
-	private func awaitWithOptionalTimeout(
-		task: Task<AttachmentData, Error>,
-		timeout: Duration?
-	) async throws -> AttachmentData {
-
+	private func awaitWithOptionalTimeout(task: Task<AttachmentData, Error>,
+	                                      timeout: Duration?) async throws -> AttachmentData
+	{
 		guard let timeout else {
 			return try await task.value
 		}
@@ -313,10 +314,9 @@ public actor AttachmentFetcher {
 
 	// MARK: - Completion
 
-	private func finalizeFetch(
-		attachment: Attachment,
-		result: Result<AttachmentData, Error>
-	) {
+	private func finalizeFetch(attachment: Attachment,
+	                           result: Result<AttachmentData, Error>)
+	{
 		tasks.removeValue(forKey: attachment)
 		taskPriorities[attachment] = nil
 
@@ -344,11 +344,9 @@ public extension AttachmentFetcher {
 // MARK: - Convenience APIs
 
 public extension AttachmentFetcher {
-
-	func prefetch(
-		_ attachments: [Attachment],
-		intent: FetchIntent = .prefetch
-	) {
+	func prefetch(_ attachments: [Attachment],
+	              intent: FetchIntent = .prefetch)
+	{
 		for attachment in attachments {
 			prefetch(attachment, intent: intent)
 		}

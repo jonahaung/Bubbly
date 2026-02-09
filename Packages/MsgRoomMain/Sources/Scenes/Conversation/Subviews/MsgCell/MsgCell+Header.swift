@@ -14,7 +14,10 @@ import XUI
 extension MsgCell {
 	struct Header: View {
 		@Environment(MsgCellViewModel.self) private var viewModel
-		private var msg: Message { viewModel.msg }
+		private var msg: Message {
+			viewModel.msg
+		}
+
 		@Environment(\.typography) private var typography
 
 		private var headerText: String {
@@ -31,6 +34,8 @@ extension MsgCell {
 			Text(headerText)
 				.font(typography.caption1)
 				.padding(.horizontal, hPadding)
+				.fixedSize(horizontal: false, vertical: true)
+				.equatable(by: msg.uid)
 		}
 	}
 }

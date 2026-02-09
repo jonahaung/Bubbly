@@ -12,14 +12,15 @@ import SwiftUI
 
 extension MsgCell {
 	struct IncomingAccessory: View {
-
 		@Environment(MsgCellViewModel.self) private var viewModel
 		@Environment(\.msgCellActions) private var sendMsgCellInteraction
-		private var layout: MsgCellLayout { viewModel.layout }
+		private var layout: MsgCellLayout {
+			viewModel.layout
+		}
 
 		var body: some View {
 			ZStack(alignment: .bottom) {
-				if layout.bubble.showAvatar, let sender = viewModel.sender() {
+				if layout.showAvatar, let sender = viewModel.sender() {
 					ProfilePhoto(
 						sender,
 						size: .custom(ChatLayoutConstants.Cell.defaultSpacing),

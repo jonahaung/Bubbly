@@ -14,17 +14,16 @@ private struct ChangePredicatedAnimation<Value: Equatable>: ViewModifier {
 
 	@State var lastValue: Value?
 
-	init(
-		animation: Animation?,
-		value: Value,
-		initialValue: Value?,
-		predicate: @escaping ((oldValue: Value, newValue: Value)) -> Bool
-	) {
+	init(animation: Animation?,
+	     value: Value,
+	     initialValue: Value?,
+	     predicate: @escaping ((oldValue: Value, newValue: Value)) -> Bool)
+	{
 		self.animation = animation
 		self.value = value
 		self.predicate = predicate
 
-		self._lastValue = .init(wrappedValue: initialValue)
+		_lastValue = .init(wrappedValue: initialValue)
 	}
 
 	func body(content: Content) -> some View {
@@ -42,13 +41,20 @@ private struct ChangePredicatedAnimation<Value: Equatable>: ViewModifier {
 	}
 }
 
-extension View {
-	public func predicatedAnimation<Value: Equatable>(
-		_ animation: Animation?,
-		value: Value,
-		initialValue: Value? = nil,
-		predicate: @escaping ((oldValue: Value, newValue: Value)) -> Bool
-	) -> some View {
-		modifier(ChangePredicatedAnimation(animation: animation, value: value, initialValue: initialValue, predicate: predicate))
+public extension View {
+	func predicatedAnimation<Value: Equatable>(_ animation: Animation?,
+	                                           value: Value,
+	                                           initialValue: Value? = nil,
+	                                           predicate: @escaping ((
+	                                           	oldValue: Value,
+	                                           	newValue: Value
+	                                           )) -> Bool) -> some View
+	{
+		modifier(ChangePredicatedAnimation(
+			animation: animation,
+			value: value,
+			initialValue: initialValue,
+			predicate: predicate
+		))
 	}
 }

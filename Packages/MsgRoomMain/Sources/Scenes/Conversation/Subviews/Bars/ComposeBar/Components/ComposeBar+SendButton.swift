@@ -1,12 +1,12 @@
 //
-//  SendButton.swift
+//  ComposeBar+SendButton.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 3/1/26.
 //
 
-import SwiftUI
 import Database
+import SwiftUI
 import XUI
 
 extension ComposeBar {

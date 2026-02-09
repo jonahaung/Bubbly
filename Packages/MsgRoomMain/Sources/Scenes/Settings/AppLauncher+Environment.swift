@@ -8,19 +8,14 @@
 import SwiftUI
 
 public extension EnvironmentValues {
-    var appLauncher: AppLauncher {
-        get { self[AppLauncherKey.self] }
-        set { self[AppLauncherKey.self] = newValue }
-    }
+	@Entry var appLauncher: AppLauncher = {
+		preconditionFailure(
+			"AppLauncher not injected. Inject an instance via .environment(appLauncher) from a main-actor context (e.g., in your App)."
+		)
+	}()
 
-    subscript(_ type: AppLauncher.Type) -> AppLauncher {
-        get { appLauncher }
-        set { appLauncher = newValue }
-    }
-}
-
-private struct AppLauncherKey: EnvironmentKey {
-    static let defaultValue: AppLauncher = {
-        preconditionFailure("AppLauncher not injected. Inject an instance via .environment(appLauncher) from a main-actor context (e.g., in your App).")
-    }()
+	subscript(_ type: AppLauncher.Type) -> AppLauncher {
+		get { appLauncher }
+		set { appLauncher = newValue }
+	}
 }

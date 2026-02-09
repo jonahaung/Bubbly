@@ -14,7 +14,6 @@ import XUI
 @MainActor
 @Observable
 final class ChatPresentationState {
-
 	var overlayItem: ChatOverlayView.Item?
 	private(set) var toastItem: ChatToastItem = .none
 	private(set) var selectedMsg: SelectedMsg?
@@ -69,18 +68,18 @@ final class ChatPresentationState {
 			return cached
 		}
 		let string: String =
-		switch true {
-		case date.isInToday:
-			date.formatted(.dateTime.hour().minute())
-		case date.isInYesterday:
-			"Yesterday " + date.formatted(.dateTime.hour().minute())
-		case date.isInThisWeek:
-			date.formatted(.dateTime.weekday(.short).hour().minute())
-		case date.isInThisMonth:
-			date.formatted(.dateTime.day().hour().minute())
-		default:
-			date.formatted(.dateTime.day().month(.abbreviated).hour().minute())
-		}
+			switch true {
+			case date.isInToday:
+				date.formatted(.dateTime.hour().minute())
+			case date.isInYesterday:
+				"Yesterday " + date.formatted(.dateTime.hour().minute())
+			case date.isInThisWeek:
+				date.formatted(.dateTime.weekday(.short).hour().minute())
+			case date.isInThisMonth:
+				date.formatted(.dateTime.day().hour().minute())
+			default:
+				date.formatted(.dateTime.day().month(.abbreviated).hour().minute())
+			}
 		dateCache.setValue(string, forKey: date)
 		return string
 	}

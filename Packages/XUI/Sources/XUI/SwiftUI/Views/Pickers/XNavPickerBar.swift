@@ -35,7 +35,6 @@ public struct XNavPickerBar<T: XPickable>: View {
 }
 
 public struct XPickerView<T: XPickable>: View {
-
 	let title: String
 	let items: [T]
 	@Binding var selection: T
@@ -51,14 +50,13 @@ public struct XPickerView<T: XPickable>: View {
 		return items.filter { $0.title.lowercased().contains(needle) }
 	}
 
-	public init(
-		title: String,
-		items: [T],
-		selection: Binding<T>
-	) {
+	public init(title: String,
+	            items: [T],
+	            selection: Binding<T>)
+	{
 		self.title = title
 		self.items = items
-		self._selection = selection
+		_selection = selection
 	}
 
 	public var body: some View {
@@ -143,7 +141,8 @@ private struct PickerRow<T: XPickable>: View {
 
 				SystemImage(isSelected ? .checkmarkCircleFill : .circle)
 					.contentTransition(.symbolEffect(.replace))
-					.foregroundStyle(isSelected ? Color.accentColor : Color(uiColor: .quaternaryLabel))
+					.foregroundStyle(isSelected ? Color
+						.accentColor : Color(uiColor: .quaternaryLabel))
 			}
 		}
 	}

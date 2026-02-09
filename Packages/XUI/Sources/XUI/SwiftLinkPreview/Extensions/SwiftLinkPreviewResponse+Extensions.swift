@@ -61,27 +61,27 @@ extension SwiftLinkPreviewResponse {
 	func value(for key: Key) -> Any? {
 		switch key {
 		case .baseURL:
-			return baseURL
+			baseURL
 		case .url:
-			return url
+			url
 		case .finalUrl:
-			return finalUrl
+			finalUrl
 		case .canonicalUrl:
-			return canonicalUrl
+			canonicalUrl
 		case .title:
-			return title
+			title
 		case .description:
-			return description
+			description
 		case .image:
-			return image
+			image
 		case .images:
-			return images
+			images
 		case .icon:
-			return icon
+			icon
 		case .video:
-			return video
+			video
 		case .price:
-			return price
+			price
 		}
 	}
 }

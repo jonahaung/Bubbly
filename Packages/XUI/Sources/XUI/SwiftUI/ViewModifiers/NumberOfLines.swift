@@ -1,5 +1,5 @@
 //
-//  Number.swift
+//  NumberOfLines.swift
 //  XUI
 //
 //  Created by Aung Ko Min on 17/1/26.
@@ -27,6 +27,7 @@ struct OnNumberOfLinesChangeViewModifier: ViewModifier {
 
 	@State private var numberOfLines: Int = 0
 }
+
 public extension View {
 	/// Counts the number of lines it takes to draw a string, including word
 	/// wrapping.

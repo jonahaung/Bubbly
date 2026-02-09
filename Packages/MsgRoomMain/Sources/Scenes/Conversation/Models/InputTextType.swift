@@ -5,8 +5,8 @@
 //  Created by Aung Ko Min on 2/1/26.
 //
 
-import Foundation
 import Database
+import Foundation
 
 public enum InputTextType: Sendable, Hashable {
 	case text, imageGenerator

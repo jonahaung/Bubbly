@@ -10,7 +10,6 @@ import SwiftData
 
 @Model
 public final class PContact: ContactRepresentable, CollectionDocument, SendableDocument {
-
 	@Attribute(.unique)
 	public var uid: String
 	public var name: String
@@ -19,14 +18,13 @@ public final class PContact: ContactRepresentable, CollectionDocument, SendableD
 	public var pushToken: String
 	public var publicKeyString: String
 
-	init(
-		uid: String,
-		name: String,
-		mobile: String,
-		photoURL: String,
-		pushToken: String,
-		publicKeyString: String
-	) {
+	init(uid: String,
+	     name: String,
+	     mobile: String,
+	     photoURL: String,
+	     pushToken: String,
+	     publicKeyString: String)
+	{
 		self.uid = uid
 		self.name = name
 		self.mobile = mobile
@@ -35,6 +33,7 @@ public final class PContact: ContactRepresentable, CollectionDocument, SendableD
 		self.publicKeyString = publicKeyString
 	}
 }
+
 public extension PContact {
 	func merge(from source: any ContactRepresentable) {
 		name = mergedString(name, from: source.name)
@@ -52,6 +51,7 @@ public extension PContact {
 		publicKeyString = mergedString(publicKeyString, from: item.publicKeyString)
 	}
 }
+
 public extension PContact {
 	convenience init(from item: Contact) {
 		self.init(
@@ -63,6 +63,7 @@ public extension PContact {
 			publicKeyString: item.publicKeyString
 		)
 	}
+
 	func toSendable() -> Contact {
 		Contact(
 			uid: uid,

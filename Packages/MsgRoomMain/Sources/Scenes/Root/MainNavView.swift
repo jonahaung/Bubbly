@@ -11,7 +11,6 @@ import XUI
 
 @MainActor
 struct MainNavView<Content: View>: View {
-
 	let tabPath: TabPath
 	@Environment(Router.self) private var router
 	@ViewBuilder var content: () -> Content
@@ -23,5 +22,5 @@ struct MainNavView<Content: View>: View {
 					navPath.destination()
 				}
 		}
-	} 
+	}
 }

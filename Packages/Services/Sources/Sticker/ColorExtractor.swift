@@ -31,28 +31,35 @@ final class ColorExtractor {
 		colorSpace: CGColorSpaceCreateDeviceRGB(),
 		bitmapInfo: CGBitmapInfo(
 			rawValue: kCGBitmapByteOrder32Host.rawValue |
-			CGBitmapInfo.floatComponents.rawValue |
-			CGImageAlphaInfo.none.rawValue)
+				CGBitmapInfo.floatComponents.rawValue |
+				CGImageAlphaInfo.none.rawValue
+		)
 	)!
 
 	private var distances: UnsafeMutableBufferPointer<Float>!
 
-	private let redStorage = UnsafeMutableBufferPointer<Float>.allocate(capacity: dimension * dimension)
+	private let redStorage = UnsafeMutableBufferPointer<Float>
+		.allocate(capacity: dimension * dimension)
 	private let redBuffer: vImage.PixelBuffer<vImage.PlanarF>
 
-	private let greenStorage = UnsafeMutableBufferPointer<Float>.allocate(capacity: dimension * dimension)
+	private let greenStorage = UnsafeMutableBufferPointer<Float>
+		.allocate(capacity: dimension * dimension)
 	private let greenBuffer: vImage.PixelBuffer<vImage.PlanarF>
 
-	private let blueStorage = UnsafeMutableBufferPointer<Float>.allocate(capacity: dimension * dimension)
+	private let blueStorage = UnsafeMutableBufferPointer<Float>
+		.allocate(capacity: dimension * dimension)
 	private let blueBuffer: vImage.PixelBuffer<vImage.PlanarF>
 
-	private let redQuantizedStorage = UnsafeMutableBufferPointer<Float>.allocate(capacity: dimension * dimension)
+	private let redQuantizedStorage = UnsafeMutableBufferPointer<Float>
+		.allocate(capacity: dimension * dimension)
 	private let redQuantizedBuffer: vImage.PixelBuffer<vImage.PlanarF>
 
-	private let greenQuantizedStorage = UnsafeMutableBufferPointer<Float>.allocate(capacity: dimension * dimension)
+	private let greenQuantizedStorage = UnsafeMutableBufferPointer<Float>
+		.allocate(capacity: dimension * dimension)
 	private let greenQuantizedBuffer: vImage.PixelBuffer<vImage.PlanarF>
 
-	private let blueQuantizedStorage = UnsafeMutableBufferPointer<Float>.allocate(capacity: dimension * dimension)
+	private let blueQuantizedStorage = UnsafeMutableBufferPointer<Float>
+		.allocate(capacity: dimension * dimension)
 	private let blueQuantizedBuffer: vImage.PixelBuffer<vImage.PlanarF>
 
 	private var centroids = [Centroid]()
@@ -129,10 +136,11 @@ final class ColorExtractor {
 		allocateDistancesBuffer()
 		sourceImage = image
 
-		guard let rgbSources: [vImage.PixelBuffer<vImage.PlanarF>] = try? vImage.PixelBuffer<vImage.InterleavedFx3>(
-			cgImage: sourceImage,
-			cgImageFormat: &rgbImageFormat
-		).planarBuffers() else { return nil }
+		guard let rgbSources: [vImage.PixelBuffer<vImage.PlanarF>] = try? vImage
+			.PixelBuffer<vImage.InterleavedFx3>(
+				cgImage: sourceImage,
+				cgImageFormat: &rgbImageFormat
+			).planarBuffers() else { return nil }
 
 		rgbSources[0].scale(destination: redBuffer)
 		rgbSources[1].scale(destination: greenBuffer)
@@ -186,7 +194,8 @@ private extension ColorExtractor {
 
 		for centroidIndex in 1 ..< clusterCount {
 			distanceSquared(
-				greenPointer: greenStorage.baseAddress!, greenValue: centroids[centroidIndex - 1].green,
+				greenPointer: greenStorage.baseAddress!,
+				greenValue: centroids[centroidIndex - 1].green,
 				bluePointer: blueStorage.baseAddress!, blueValue: centroids[centroidIndex - 1].blue,
 				redPointer: redStorage.baseAddress!, redValue: centroids[centroidIndex - 1].red,
 				count: greenStorage.count,
@@ -249,7 +258,10 @@ private extension ColorExtractor {
 	func makeCentroidIndices() -> [Int32]? {
 		guard let distancesDescriptor = BNNSNDArrayDescriptor(
 			data: distances,
-			shape: .matrixRowMajor(ColorExtractor.dimension * ColorExtractor.dimension, clusterCount)
+			shape: .matrixRowMajor(
+				ColorExtractor.dimension * ColorExtractor.dimension,
+				clusterCount
+			)
 		) else { return nil }
 
 		do {
@@ -286,13 +298,12 @@ private extension ColorExtractor {
 		return result
 	}
 
-	private func distanceSquared(
-		greenPointer: UnsafePointer<Float>, greenValue: Float,
-		bluePointer: UnsafePointer<Float>, blueValue: Float,
-		redPointer: UnsafePointer<Float>, redValue: Float,
-		count: Int,
-		result: UnsafeMutablePointer<Float>
-	) {
+	private func distanceSquared(greenPointer: UnsafePointer<Float>, greenValue: Float,
+	                             bluePointer: UnsafePointer<Float>, blueValue: Float,
+	                             redPointer: UnsafePointer<Float>, redValue: Float,
+	                             count: Int,
+	                             result: UnsafeMutablePointer<Float>)
+	{
 		var green = subtract(a: greenPointer, b: greenValue, n: count)
 		vDSP.square(green, result: &green)
 

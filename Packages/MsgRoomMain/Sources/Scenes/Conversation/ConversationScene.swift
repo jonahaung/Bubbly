@@ -12,7 +12,6 @@ import SwiftUI
 import XUI
 
 public struct ConversationScene: View {
-
 	@LazyState private var manager: ChatViewManager
 	@LazyState private var composer: ChatComposer
 	@FocusState private var focusState: String?
@@ -38,18 +37,13 @@ public struct ConversationScene: View {
 							.mix(with: manager.conversation.theme.outgoingBubbleColor, by: 0.7)
 					)
 			}
-			.compositingGroup()
 			.backgroundExtensionEffect()
+			.equatable(by: 1)
 
 			if let accessoryFrame = manager.scrollController.inputAccessoryFrame {
 				MsgsScrollView(boundsWidth: accessoryFrame.width)
 					.safeAreaPadding(
-						.init(
-							top: ChatLayoutConstants.topBarHeight,
-							leading: 0,
-							bottom: ChatLayoutConstants.bottomBarHeight,
-							trailing: 0
-						)
+						.bottom, accessoryFrame.height
 					)
 					.fullScreenCover(item: $manager.presentation.overlayItem) { frame in
 						if let viewModel = manager.models.element(withID: frame.id) {
@@ -63,7 +57,6 @@ public struct ConversationScene: View {
 							}
 						}
 					}
-
 			}
 			VStack {
 				ChatTitleBar()
@@ -79,9 +72,9 @@ public struct ConversationScene: View {
 			}
 		}
 		.toolbarVisibility(.hidden, for: .navigationBar)
-		.equatable(by: manager.reloadID)
 		.environment(manager)
 		.environment(composer)
+		.environment(\.backgroundColor, manager.conversation.theme.background.color)
 		.environment(\.conversationTheme, .init(manager.conversation))
 		.environment(\.conversation, manager.conversation)
 		.environment(\.attachmentFetcher, manager.attachments)
@@ -89,6 +82,7 @@ public struct ConversationScene: View {
 		.environment(\.sharedFocusState, SharedFocusState($focusState))
 		.environment(\.sharedNamespace, SharedNamespace(namespace))
 		.environment(\.msgCellActions, MsgCellAction(action: handleMsgCellInteraction))
+		.equatable(by: manager.reloadID)
 		.task {
 			do {
 				try await manager.onViewAppear()
@@ -97,7 +91,6 @@ public struct ConversationScene: View {
 			}
 		}
 	}
-
 }
 
 private extension ConversationScene {
@@ -127,7 +120,7 @@ private extension ConversationScene {
 		Task.detached {
 			do {
 				try await Task.sleep(seconds: 1)
-				let reaction = Reaction.init(
+				let reaction = Reaction(
 					rawValue: reaction.rawValue,
 					senderID: currentUserID,
 					date: .now
@@ -151,9 +144,8 @@ private extension ConversationScene {
 	}
 
 	func handleTapAvatar(with id: String) {
-
 		guard let viewModel = manager.models.element(withID: id),
-			  let contact = viewModel.sender()
+		      let contact = viewModel.sender()
 		else {
 			return
 		}
@@ -161,12 +153,15 @@ private extension ConversationScene {
 			UIApplication.shared.open(url)
 		}
 	}
+
 	func handleMarkMsg(with msg: Message) {
 		manager.presentation.updateToast(.message(msg))
 	}
+
 	func handleFocusMsgBubble(with item: ChatOverlayView.Item) {
 		manager.presentation.updateFocusedFrame(item)
 	}
+
 	func sendMsg(_ msg: Message) {
 		Task {
 			try await Socket.shared

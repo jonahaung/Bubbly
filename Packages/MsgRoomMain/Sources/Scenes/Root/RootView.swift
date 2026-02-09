@@ -5,14 +5,13 @@
 //  Created by Aung Ko Min on 28/4/25.
 //
 
+import Core
 import Database
 import Services
 import SwiftUI
 import XUI
-import Core
 
 struct RootView: View {
-
 	@Environment(Router.self) private var router
 
 	var body: some View {
@@ -62,6 +61,7 @@ public extension NavPath {
 			node.eraseToNode()
 		}
 	}
+
 	@ViewBuilder
 	private func conversationDestination(_ conversation: Conversation) -> some View {
 		switch conversation.kind {

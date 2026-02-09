@@ -12,7 +12,6 @@ import SwiftUI
 import XUI
 
 public struct ImageView: View {
-
 	public typealias Item = any ImageViewItem
 	@State private var error: Error?
 	@State private var manager: ImageViewManager
@@ -78,11 +77,12 @@ extension ImageView {
 				.resizable()
 				.aspectRatio(
 					contentMode: (
-						config.size.value == nil) ? .fit : .fill
+						config.size.value == nil
+					) ? .fit : .fill
 				)
 				.sheetWithZoomTransition { imagerViewerScene }
 				.equatable(by: manager.item.imageID)
-		case .custom(let action):
+		case let .custom(action):
 			image
 				.resizable()
 				.aspectRatio(contentMode: config.size.value == nil ? .fit : .fill)
@@ -95,7 +95,6 @@ extension ImageView {
 		}
 	}
 
-	@ViewBuilder
 	func imageView(for uiImage: UIImage) -> some View {
 		imageView(for: Image(uiImage: uiImage))
 	}
@@ -116,7 +115,8 @@ extension ImageView {
 			items: [manager.item],
 			title: manager.item.fileName(),
 			selection: manager
-				.item.id)
+				.item.id
+		)
 	}
 
 	var processors: [ImageProcessing] {

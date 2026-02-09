@@ -15,7 +15,6 @@ public protocol PhotoGalleryItem: Identifiable {
 }
 
 public struct PhotoGalleryView: View {
-
 	private let items: [any PhotoGalleryItem]
 	@State private var selection: String?
 	private let title: String?
@@ -50,31 +49,34 @@ public struct PhotoGalleryView: View {
 			shareButton
 		}
 		.padding()
-
 	}
+
 	private var bottomBar: some View {
 		XPhotoPageControl(
 			selection: .init(
-				get: { self.selection ?? items.first?.id
-				 ?? ""},
-				set: { self.selection = $0 }),
+				get: { selection ?? items.first?.id
+					?? ""
+				},
+				set: { selection = $0 }
+			),
 			items: items.map(\.id),
 			size: 20
 		)
-			.padding()
-
+		.padding()
 	}
+
 	@ViewBuilder private var shareButton: some View {
 		let currentItem = items.first(where: { $0.id == selection })
 		if
 			let item = currentItem,
 			let url = item.galleryURL,
 			let data = try? Data(contentsOf: url),
-			let uIImage = UIImage(data: data) {
+			let uIImage = UIImage(data: data)
+		{
 			let image = Image(uiImage: uIImage)
 			ShareLink(
 				item: image,
-				preview: SharePreview.init(item.galleryTitle ?? "", image: image)
+				preview: SharePreview(item.galleryTitle ?? "", image: image)
 			)
 			.labelStyle(.iconOnly)
 		}

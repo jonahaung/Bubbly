@@ -25,7 +25,7 @@ struct OTPView: View {
 	var body: some View {
 		VStack {
 			HStack(spacing: 2) {
-				ForEach(0..<otpCodeLength, id: \.self) { index in
+				ForEach(0 ..< otpCodeLength, id: \.self) { index in
 					ZStack {
 						Image(systemName: "circle")
 							.resizable()
@@ -75,8 +75,8 @@ struct OTPView: View {
 	}
 }
 
-extension String {
-	public subscript(idx: Int) -> String {
+public extension String {
+	subscript(idx: Int) -> String {
 		String(self[index(startIndex, offsetBy: idx)])
 	}
 }

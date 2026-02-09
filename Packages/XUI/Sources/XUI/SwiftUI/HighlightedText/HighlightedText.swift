@@ -1,16 +1,14 @@
 import SwiftUI
 
 public struct HighlightedText: View {
-
 	private let text: String
 	private let highlightedText: String?
 	private let shapeStyle: (any ShapeStyle)?
 
-	public init(
-		text: String,
-		highlightedText: String? = nil,
-		shapeStyle: (any ShapeStyle)? = nil
-	) {
+	public init(text: String,
+	            highlightedText: String? = nil,
+	            shapeStyle: (any ShapeStyle)? = nil)
+	{
 		self.text = text
 		self.highlightedText = highlightedText
 		self.shapeStyle = shapeStyle
@@ -31,10 +29,7 @@ public struct HighlightedText: View {
 		}
 	}
 
-	private func highlightedComponents(
-		from highlight: String
-	) -> [HighlightedTextComponent] {
-
+	private func highlightedComponents(from highlight: String) -> [HighlightedTextComponent] {
 		let highlighted = text
 			.ranges(of: highlight, options: .caseInsensitive)
 			.map {
@@ -59,7 +54,7 @@ public struct HighlightedText: View {
 	}
 }
 
-fileprivate struct HighlightedTextComponent {
+private struct HighlightedTextComponent {
 	let text: Text
 	let range: Range<String.Index>
 }

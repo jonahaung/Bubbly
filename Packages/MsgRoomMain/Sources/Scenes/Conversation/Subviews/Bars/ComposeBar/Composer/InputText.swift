@@ -5,9 +5,9 @@
 //  Created by Aung Ko Min on 1/12/25.
 //
 
+import Database
 import SwiftUI
 import XUI
-import Database
 
 @MainActor
 protocol InputTextDelegate: AnyObject {
@@ -18,11 +18,10 @@ protocol InputTextDelegate: AnyObject {
 @MainActor
 @Observable
 final class InputText: Equatable {
-
 	let id = 0
-	var text: String = String() {
+	var text: String = .init() {
 		willSet {
-			let oldValue = self.text
+			let oldValue = text
 			switch true {
 			case (newValue.isEmpty || oldValue.isEmpty) && oldValue != newValue:
 				delegate?.inputText(self, didBeganEditing: newValue)
@@ -33,8 +32,11 @@ final class InputText: Equatable {
 			}
 		}
 	}
+
 	var selection: TextSelection?
-	var hasText: Bool { !text.isWhitespace }
+	var hasText: Bool {
+		!text.isWhitespace
+	}
 
 	@ObservationIgnored private var linkExtractionTask: Task<Void, Never>?
 	@ObservationIgnored weak var delegate: InputTextDelegate?
@@ -49,8 +51,9 @@ final class InputText: Equatable {
 		let string = text
 		let start = string.startIndex
 		let end = string.endIndex
-		selection = TextSelection(range: start..<end)
+		selection = TextSelection(range: start ..< end)
 	}
+
 	private func parseLinks(_ string: String) {
 		let currentText = string.trimmed
 
@@ -58,21 +61,21 @@ final class InputText: Equatable {
 		guard currentText.isWhitespace == false else {
 			return
 		}
-		linkExtractionTask = Task.detached(name: currentText, priority: .userInitiated) { [weak self] in
-			guard let self else { return }
-			let thisText = string
-			try? await Task.sleep(seconds: 0.4)
-			guard !Task.isCancelled else { return }
-			let links = LinkExtractor.extractLinks(from: thisText)
-			guard !Task.isCancelled else { return }
-			if !links.isEmpty {
-				Task { @MainActor in
-					guard self.text.contains(thisText) else { return }
-					self.delegate?.inputText(self, didInsertLinks: links)
+		linkExtractionTask = Task
+			.detached(name: currentText, priority: .userInitiated) { [weak self] in
+				guard let self else { return }
+				let thisText = string
+				try? await Task.sleep(seconds: 0.4)
+				guard !Task.isCancelled else { return }
+				let links = LinkExtractor.extractLinks(from: thisText)
+				guard !Task.isCancelled else { return }
+				if !links.isEmpty {
+					Task { @MainActor in
+						guard self.text.contains(thisText) else { return }
+						self.delegate?.inputText(self, didInsertLinks: links)
+					}
 				}
 			}
-
-		}
 	}
 
 	nonisolated static func == (lhs: InputText, rhs: InputText) -> Bool {

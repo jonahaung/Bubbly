@@ -20,32 +20,36 @@ public struct Contact: ContactRepresentableSendable, Codable, Hashable {
 }
 
 extension Contact: StringMergable {
-	public var isChatAvailable: Bool { !uid.hasPrefix("+") }
+	public var isChatAvailable: Bool {
+		!uid.hasPrefix("+")
+	}
+
 	public init?(cnContact: CNContact) {
 		let name = cnContact.givenName.isEmpty ? [
 			cnContact.middleName,
-			cnContact.familyName
+			cnContact.familyName,
 		].joined(
 			separator: " "
 		).trimmed : cnContact.givenName.trimmed
 
 		guard !name.isWhitespace,
-			  let phoneNumberString = cnContact.phoneNumbers.first(where: { $0.value.stringValue.isWhitespace == false })?.value.stringValue
+		      let phoneNumberString = cnContact.phoneNumbers
+		      .first(where: { $0.value.stringValue.isWhitespace == false })?.value.stringValue
 		else {
 			return nil
 		}
 
 		let phoneNumberKit = PhoneNumberKit()
 		guard let phoneNumber = try? phoneNumberKit.parse(phoneNumberString),
-			  phoneNumber.type == .mobile
+		      phoneNumber.type == .mobile
 		else {
 			return nil
 		}
 
 		let formattedPhoneNumber =
-		phoneNumberKit
-			.format(phoneNumber, toType: .e164)
-			.withoutSpacesAndNewLines
+			phoneNumberKit
+				.format(phoneNumber, toType: .e164)
+				.withoutSpacesAndNewLines
 
 		self.init(
 			uid: formattedPhoneNumber,

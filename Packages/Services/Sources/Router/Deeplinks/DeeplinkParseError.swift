@@ -17,15 +17,15 @@ public enum DeeplinkParseError: Error, Sendable, Equatable, CustomStringConverti
 
 	public var description: String {
 		switch self {
-		case .unsupportedScheme(let s): return "Unsupported scheme: \(s ?? "nil")"
-		case .unsupportedHost(let h): return "Unsupported host: \(h ?? "nil")"
-		case .unsupportedRoute(let r): return "Unsupported route: \(r)"
-		case .missingRequiredParameter(let route, let name):
-			return "Missing required query param '\(name)' for route '\(route)'"
-		case .emptyRequiredParameter(let route, let name):
-			return "Empty required query param '\(name)' for route '\(route)'"
-		case .unknownQueryItems(let route, let unknown):
-			return "Unknown query items for '\(route)': \(unknown.joined(separator: ","))"
+		case let .unsupportedScheme(s): "Unsupported scheme: \(s ?? "nil")"
+		case let .unsupportedHost(h): "Unsupported host: \(h ?? "nil")"
+		case let .unsupportedRoute(r): "Unsupported route: \(r)"
+		case let .missingRequiredParameter(route, name):
+			"Missing required query param '\(name)' for route '\(route)'"
+		case let .emptyRequiredParameter(route, name):
+			"Empty required query param '\(name)' for route '\(route)'"
+		case let .unknownQueryItems(route, unknown):
+			"Unknown query items for '\(route)': \(unknown.joined(separator: ","))"
 		}
 	}
 }

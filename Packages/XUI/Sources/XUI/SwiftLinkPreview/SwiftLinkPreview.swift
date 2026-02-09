@@ -17,19 +17,18 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 	public let userAgent: String
 
 	public static let defaultUserAgent =
-	"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"
+		"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36"
 	public static let googleBotUserAgent = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
 
-	// We keep a session with a delegate to force GET on redirects.
+	/// We keep a session with a delegate to force GET on redirects.
 	public private(set) var session: URLSession
 
 	// MARK: - Init
 
-	public init(
-		session: URLSession? = nil,
-		cache: SwiftLinkPreviewCache = LinkPreviewInMemoryCache.init(),
-		userAgent: String = SwiftLinkPreview.defaultUserAgent
-	) {
+	public init(session: URLSession? = nil,
+	            cache: SwiftLinkPreviewCache = LinkPreviewInMemoryCache(),
+	            userAgent: String = SwiftLinkPreview.defaultUserAgent)
+	{
 		self.cache = cache
 		self.userAgent = userAgent
 
@@ -41,7 +40,11 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 			let queue = OperationQueue()
 			queue.maxConcurrentOperationCount = 1
 			let delegate = RedirectForcingDelegate()
-			self.session = URLSession(configuration: config, delegate: delegate, delegateQueue: queue)
+			self.session = URLSession(
+				configuration: config,
+				delegate: delegate,
+				delegateQueue: queue
+			)
 		}
 		super.init()
 	}
@@ -80,8 +83,8 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 		let canonicalUrl = extractCanonicalURL(unshortened)
 		let baseUL = (
 			canonicalUrl.starts(with: "http") == false
-			? "https://\(canonicalUrl)"
-			: canonicalUrl
+				? "https://\(canonicalUrl)"
+				: canonicalUrl
 		)
 
 		var result = SwiftLinkPreviewResponse(
@@ -111,10 +114,11 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 
 	public func extractURL(text: String) -> URL? {
 		do {
-			let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+			let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link
+				.rawValue)
 			let range = NSRange(location: 0, length: text.utf16.count)
 			let matches = detector.matches(in: text, options: [], range: range)
-			return matches.compactMap { $0.url }.first
+			return matches.compactMap(\.url).first
 		} catch {
 			return nil
 		}
@@ -139,7 +143,10 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 				if let mime = (headResponse as? HTTPURLResponse)?.mimeType, mime.contains("/html") {
 					// Fetch HTML to check for meta refresh
 					var getRequest = URLRequest(url: url)
-					getRequest.addValue("text/html,application/xhtml+xml,application/xml", forHTTPHeaderField: "Accept")
+					getRequest.addValue(
+						"text/html,application/xhtml+xml,application/xml",
+						forHTTPHeaderField: "Accept"
+					)
 					getRequest.addValue(userAgent, forHTTPHeaderField: "User-Agent")
 					let (data, response) = try await session.data(for: getRequest)
 
@@ -150,15 +157,26 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 					} ?? .utf8
 
 					if let html = String(data: data, encoding: encoding) {
-						for meta in Regex.pregMatchAll(html, regex: Regex.metaTagPattern, index: 1) {
-							if meta.contains("http-equiv=\"refresh\"") || meta.contains("http-equiv='refresh'"),
-							   let value = Regex.pregMatchFirst(meta, regex: Regex.metaTagContentPattern, index: 2)?
+						for meta in Regex
+							.pregMatchAll(html, regex: Regex.metaTagPattern, index: 1)
+						{
+							if meta.contains("http-equiv=\"refresh\"") || meta
+								.contains("http-equiv='refresh'"),
+								let value = Regex.pregMatchFirst(
+									meta,
+									regex: Regex.metaTagContentPattern,
+									index: 2
+								)?
 								.decoded.extendedTrim,
-							   let redirectString = value.split(separator: ";")
+								let redirectString = value.split(separator: ";")
 								.first(where: { $0.lowercased().starts(with: "url=") })?
-								.split(separator: "=", maxSplits: 1).last {
+								.split(separator: "=", maxSplits: 1).last
+							{
 								let redirectTarget = String(redirectString)
-								if let redirectURL = URL(string: addImagePrefixIfNeeded(redirectTarget, url: url)) {
+								if let redirectURL = URL(string: addImagePrefixIfNeeded(
+									redirectTarget,
+									url: url
+								)) {
 									return try await unshortenURL(redirectURL)
 								}
 							}
@@ -171,13 +189,16 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 				return url
 			}
 		} catch {
-			// On HEAD error, just return original URL (like legacy behavior would eventually fall back)
+			// On HEAD error, just return original URL (like legacy behavior would eventually fall
+			// back)
 			return url
 		}
 	}
 
-	// Extract HTML code and the information contained on it
-	private func extractInfo(response: SwiftLinkPreviewResponse) async throws -> SwiftLinkPreviewResponse {
+	/// Extract HTML code and the information contained on it
+	private func extractInfo(response: SwiftLinkPreviewResponse) async throws
+		-> SwiftLinkPreviewResponse
+	{
 		try Task.checkCancellation()
 		let url = response.finalUrl
 
@@ -189,13 +210,17 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 			result.image = url.absoluteString
 			return result
 		} else {
-			guard let sourceUrl = url.scheme == "http" || url.scheme == "https" ? url : URL(string: "http://\(url)")
+			guard let sourceUrl = url.scheme == "http" || url
+				.scheme == "https" ? url : URL(string: "http://\(url)")
 			else {
 				throw SwiftLinkPreviewError.invalidURL(url.absoluteString)
 			}
 
 			var request = URLRequest(url: sourceUrl)
-			request.addValue("text/html,application/xhtml+xml,application/xml", forHTTPHeaderField: "Accept")
+			request.addValue(
+				"text/html,application/xhtml+xml,application/xml",
+				forHTTPHeaderField: "Accept"
+			)
 			request.addValue(userAgent, forHTTPHeaderField: "User-Agent")
 
 			do {
@@ -208,10 +233,13 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 				}
 
 				// Autorelease pool to promptly reclaim UIKit/CoreGraphics temporaries
-				return try autoreleasepool(invoking: { () throws -> SwiftLinkPreviewResponse in
+				return try autoreleasepool { () throws -> SwiftLinkPreviewResponse in
 					if let encoding, let source = String(data: data, encoding: encoding) {
 						return parseHtmlString(source, response: response)
-					} else if let source = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) {
+					} else if let source = String(data: data, encoding: .utf8) ?? String(
+						data: data,
+						encoding: .isoLatin1
+					) {
 						return parseHtmlString(source, response: response)
 					} else {
 						// As a last resort (rare), try Data -> NSString auto-detection path
@@ -228,22 +256,25 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 							throw SwiftLinkPreviewError.cannotBeOpened(sourceUrl.absoluteString)
 						}
 					}
-				})
+				}
 			} catch {
 				// Network or decoding error
-				throw SwiftLinkPreviewError.cannotBeOpened("\(sourceUrl.absoluteString): \(error.localizedDescription)")
+				throw SwiftLinkPreviewError
+					.cannotBeOpened("\(sourceUrl.absoluteString): \(error.localizedDescription)")
 			}
 		}
 	}
 
-	private func parseHtmlString(_ htmlString: String, response: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse {
+	private func parseHtmlString(_ htmlString: String,
+	                             response: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse
+	{
 		// Keep parsing/crawling in its own autorelease pool to flush intermediates quickly
-		return autoreleasepool(invoking: {
+		autoreleasepool {
 			performPageCrawling(cleanSource(htmlString), response: response)
-		})
+		}
 	}
 
-	// Removing unnecessary data from the source
+	/// Removing unnecessary data from the source
 	private func cleanSource(_ source: String) -> String {
 		var source = source
 		source = source.deleteTagByPattern(Regex.inlineStylePattern)
@@ -253,11 +284,10 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 		return source
 	}
 
-	// Perform the page crawling
-	private func performPageCrawling(
-		_ htmlCode: String,
-		response: SwiftLinkPreviewResponse
-	) -> SwiftLinkPreviewResponse {
+	/// Perform the page crawling
+	private func performPageCrawling(_ htmlCode: String,
+	                                 response: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse
+	{
 		var result = crawIcon(htmlCode, result: response)
 		let sanitizedHtmlCode = htmlCode.deleteTagByPattern(Regex.linkPattern).extendedTrim
 
@@ -271,7 +301,7 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 		return crawlImages(otherResponse.htmlCode, result: otherResponse.result)
 	}
 
-	// Extract url redirection inside the GET query.
+	/// Extract url redirection inside the GET query.
 	private func extractInURLRedirectionIfNeeded(_ url: URL) -> URL {
 		var url = url
 		var absoluteString = url.absoluteString + "&id=12"
@@ -279,15 +309,21 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 		if let range = absoluteString.range(of: "url="),
 		   let lastChar = absoluteString.last,
 		   let lastCharIndex = absoluteString
-			.range(of: String(lastChar), options: .backwards, range: nil, locale: nil) {
+		   .range(of: String(lastChar), options: .backwards, range: nil, locale: nil)
+		{
 			absoluteString = String(absoluteString[range.upperBound ..< lastCharIndex.upperBound])
 
 			if let range = absoluteString.range(of: "&"),
 			   let firstChar = absoluteString.first,
-			   let firstCharIndex = absoluteString.firstIndex(of: firstChar) {
-				absoluteString = String(absoluteString[firstCharIndex ..< absoluteString.index(before: range.upperBound)])
+			   let firstCharIndex = absoluteString.firstIndex(of: firstChar)
+			{
+				absoluteString =
+					String(absoluteString[firstCharIndex ..< absoluteString
+							.index(before: range.upperBound)])
 
-				if let decoded = absoluteString.removingPercentEncoding, let newURL = URL(string: decoded) {
+				if let decoded = absoluteString.removingPercentEncoding,
+				   let newURL = URL(string: decoded)
+				{
 					url = newURL
 				}
 			}
@@ -299,7 +335,7 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 
 	private func formatImageURL(_ url: String?, base: String?) -> String? {
 		guard var url else { return nil }
-		if !url.starts(with: "http"), let base = base {
+		if !url.starts(with: "http"), let base {
 			url = "\(base)\(url)"
 		}
 		return url
@@ -326,7 +362,11 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 			.replace("ftp://", with: "")
 
 		if preUrl != url {
-			if let canonicalUrl = Regex.pregMatchFirst(url, regex: Regex.cannonicalUrlPattern, index: 1) {
+			if let canonicalUrl = Regex.pregMatchFirst(
+				url,
+				regex: Regex.cannonicalUrlPattern,
+				index: 1
+			) {
 				if !canonicalUrl.isEmpty {
 					return extractBaseUrl(canonicalUrl)
 				} else {
@@ -341,29 +381,34 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 	}
 
 	fileprivate func extractBaseUrl(_ url: String) -> String {
-		return String(url.split(separator: "/", maxSplits: 1, omittingEmptySubsequences: true)[0])
+		String(url.split(separator: "/", maxSplits: 1, omittingEmptySubsequences: true)[0])
 	}
 }
 
 // MARK: - Tag functions
 
 public extension SwiftLinkPreview {
-	// search for favicon
-	func crawIcon(_ htmlCode: String, result: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse {
+	/// search for favicon
+	func crawIcon(_ htmlCode: String,
+	              result: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse
+	{
 		var result = result
 		let metatags = Regex.pregMatchAll(htmlCode, regex: Regex.linkPattern, index: 1)
 
 		let filters = [
 			{ (link: String) -> Bool in link.range(of: "apple-touch") != nil },
 			{ (link: String) -> Bool in link.range(of: "shortcut") != nil },
-			{ (link: String) -> Bool in link.range(of: "icon") != nil }
+			{ (link: String) -> Bool in link.range(of: "icon") != nil },
 		]
 
 		for filter in filters {
 			if let first = metatags.filter(filter).first {
 				let matches = Regex.pregMatchAll(first, regex: Regex.hrefPattern, index: 1)
 				if let val = matches.first {
-					result.icon = addImagePrefixIfNeeded(val.replace("\"", with: ""), result: result)
+					result.icon = addImagePrefixIfNeeded(
+						val.replace("\"", with: ""),
+						result: result
+					)
 					return result
 				}
 			}
@@ -371,15 +416,17 @@ public extension SwiftLinkPreview {
 		return result
 	}
 
-	// Search for meta tags
-	func crawlMetaTags(_ htmlCode: String, result: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse {
+	/// Search for meta tags
+	func crawlMetaTags(_ htmlCode: String,
+	                   result: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse
+	{
 		var result = result
 
 		let possibleTags: [String] = [
 			SwiftLinkPreviewResponse.Key.title.rawValue,
 			SwiftLinkPreviewResponse.Key.description.rawValue,
 			SwiftLinkPreviewResponse.Key.image.rawValue,
-			SwiftLinkPreviewResponse.Key.video.rawValue
+			SwiftLinkPreviewResponse.Key.video.rawValue,
 		]
 
 		let metatags = Regex.pregMatchAll(htmlCode, regex: Regex.metaTagPattern, index: 1)
@@ -393,9 +440,16 @@ public extension SwiftLinkPreview {
 					metatag.range(of: "name=\"\(tag)") != nil ||
 					metatag.range(of: "name='\(tag)") != nil ||
 					metatag.range(of: "itemprop=\"\(tag)") != nil ||
-					metatag.range(of: "itemprop='\(tag)") != nil {
-					if let key = SwiftLinkPreviewResponse.Key(rawValue: tag), result.value(for: key) == nil {
-						if let value = Regex.pregMatchFirst(metatag, regex: Regex.metaTagContentPattern, index: 2) {
+					metatag.range(of: "itemprop='\(tag)") != nil
+				{
+					if let key = SwiftLinkPreviewResponse.Key(rawValue: tag),
+					   result.value(for: key) == nil
+					{
+						if let value = Regex.pregMatchFirst(
+							metatag,
+							regex: Regex.metaTagContentPattern,
+							index: 2
+						) {
 							let value = value.decoded.extendedTrim
 							if tag == "image" {
 								let value = addImagePrefixIfNeeded(value, result: result)
@@ -414,7 +468,9 @@ public extension SwiftLinkPreview {
 		return result
 	}
 
-	func crawlMetaBase(_ htmlCode: String, result: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse {
+	func crawlMetaBase(_ htmlCode: String,
+	                   result: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse
+	{
 		var result = result
 		if let base = Regex.pregMatchAll(htmlCode, regex: Regex.baseTagPattern, index: 2).first {
 			result.set(base, for: .baseURL)
@@ -422,14 +478,20 @@ public extension SwiftLinkPreview {
 		return result
 	}
 
-	func crawlTitle(_ htmlCode: String, result: SwiftLinkPreviewResponse) -> (htmlCode: String, result: SwiftLinkPreviewResponse) {
+	func crawlTitle(_ htmlCode: String,
+	                result: SwiftLinkPreviewResponse) -> (htmlCode: String,
+	                                                      result: SwiftLinkPreviewResponse)
+	{
 		var result = result
 		let title = result.title
 
 		if title == nil || title?.isEmpty ?? true {
 			if let value = Regex.pregMatchFirst(htmlCode, regex: Regex.titlePattern, index: 2) {
 				if value.isEmpty {
-					let fromBody: String = crawlCode(htmlCode, minimum: SwiftLinkPreview.titleMinimumRelevant)
+					let fromBody: String = crawlCode(
+						htmlCode,
+						minimum: SwiftLinkPreview.titleMinimumRelevant
+					)
 					if !fromBody.isEmpty {
 						// Keep final decode in an autorelease pool
 						autoreleasepool {
@@ -447,12 +509,18 @@ public extension SwiftLinkPreview {
 		return (htmlCode, result)
 	}
 
-	func crawlDescription(_ htmlCode: String, result: SwiftLinkPreviewResponse) -> (htmlCode: String, result: SwiftLinkPreviewResponse) {
+	func crawlDescription(_ htmlCode: String,
+	                      result: SwiftLinkPreviewResponse) -> (htmlCode: String,
+	                                                            result: SwiftLinkPreviewResponse)
+	{
 		var result = result
 		let description = result.description
 
 		if description == nil || description?.isEmpty ?? true {
-			let value: String = crawlCode(htmlCode, minimum: SwiftLinkPreview.decriptionMinimumRelevant)
+			let value: String = crawlCode(
+				htmlCode,
+				minimum: SwiftLinkPreview.decriptionMinimumRelevant
+			)
 			if !value.isEmpty {
 				autoreleasepool {
 					result.description = value.decoded.extendedTrim
@@ -462,7 +530,9 @@ public extension SwiftLinkPreview {
 		return (htmlCode, result)
 	}
 
-	func crawlImages(_ htmlCode: String, result: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse {
+	func crawlImages(_ htmlCode: String,
+	                 result: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse
+	{
 		var result = result
 
 		let mainImage = result.image
@@ -472,13 +542,21 @@ public extension SwiftLinkPreview {
 
 			if images == nil || images?.isEmpty ?? true {
 				// Prefer OpenGraph images first
-				let values = Regex.pregMatchAll(htmlCode, regex: Regex.secondaryImageTagPattern, index: 2)
+				let values = Regex.pregMatchAll(
+					htmlCode,
+					regex: Regex.secondaryImageTagPattern,
+					index: 2
+				)
 				if !values.isEmpty {
 					result.images = values
 					result.image = values.first
 				} else {
 					// Fall back to <img> tags
-					let values = Regex.pregMatchAll(htmlCode, regex: Regex.imageTagPattern, index: 2)
+					let values = Regex.pregMatchAll(
+						htmlCode,
+						regex: Regex.imageTagPattern,
+						index: 2
+					)
 					if !values.isEmpty {
 						let imgs = values.map { self.addImagePrefixIfNeeded($0, result: result) }
 						result.images = imgs
@@ -487,7 +565,11 @@ public extension SwiftLinkPreview {
 				}
 			}
 		} else {
-			let values = Regex.pregMatchAll(htmlCode, regex: Regex.secondaryImageTagPattern, index: 2)
+			let values = Regex.pregMatchAll(
+				htmlCode,
+				regex: Regex.secondaryImageTagPattern,
+				index: 2
+			)
 			if !values.isEmpty {
 				result.images = values
 				result.image = values.first
@@ -498,7 +580,10 @@ public extension SwiftLinkPreview {
 		return result
 	}
 
-	private func crawlPrice(_ htmlCode: String, result: SwiftLinkPreviewResponse) -> (htmlCode: String, result: SwiftLinkPreviewResponse) {
+	private func crawlPrice(_ htmlCode: String,
+	                        result: SwiftLinkPreviewResponse) -> (htmlCode: String,
+	                                                              result: SwiftLinkPreviewResponse)
+	{
 		var result = result
 
 		let mainPrice = result.price
@@ -512,7 +597,7 @@ public extension SwiftLinkPreview {
 		return (htmlCode, result)
 	}
 
-	// Add prefix image if needed
+	/// Add prefix image if needed
 	private func addImagePrefixIfNeeded(_ image: String, url: URL) -> String {
 		addImagePrefixIfNeeded(
 			image,
@@ -521,11 +606,19 @@ public extension SwiftLinkPreview {
 		)
 	}
 
-	private func addImagePrefixIfNeeded(_ image: String, result: SwiftLinkPreviewResponse) -> String {
-		addImagePrefixIfNeeded(image, canonicalUrl: result.canonicalUrl, finalUrl: result.finalUrl.absoluteString)
+	private func addImagePrefixIfNeeded(_ image: String,
+	                                    result: SwiftLinkPreviewResponse) -> String
+	{
+		addImagePrefixIfNeeded(
+			image,
+			canonicalUrl: result.canonicalUrl,
+			finalUrl: result.finalUrl.absoluteString
+		)
 	}
 
-	private func addImagePrefixIfNeeded(_ image: String, canonicalUrl: String, finalUrl: String) -> String {
+	private func addImagePrefixIfNeeded(_ image: String, canonicalUrl: String,
+	                                    finalUrl: String) -> String
+	{
 		var image = image
 
 		if let proto = finalUrl.split(separator: ":").first {
@@ -556,7 +649,7 @@ public extension SwiftLinkPreview {
 		return image
 	}
 
-	// Crawl the entire code
+	/// Crawl the entire code
 	func crawlCode(_ content: String, minimum: Int) -> String {
 		let resultFirstSearch = getTagContent("p", content: content, minimum: minimum)
 		if !resultFirstSearch.isEmpty {
@@ -584,7 +677,7 @@ public extension SwiftLinkPreview {
 		}
 	}
 
-	// Get tag content
+	/// Get tag content
 	private func getTagContent(_ tag: String, content: String, minimum: Int) -> String {
 		let pattern = Regex.tagPattern(tag)
 		let index = 2
@@ -603,13 +696,12 @@ public extension SwiftLinkPreview {
 // MARK: - RedirectForcingDelegate
 
 private final class RedirectForcingDelegate: NSObject, URLSessionDataDelegate {
-	func urlSession(
-		_ session: URLSession,
-		task: URLSessionTask,
-		willPerformHTTPRedirection response: HTTPURLResponse,
-		newRequest request: URLRequest,
-		completionHandler: @escaping (URLRequest?) -> Void
-	) {
+	func urlSession(_ session: URLSession,
+	                task: URLSessionTask,
+	                willPerformHTTPRedirection response: HTTPURLResponse,
+	                newRequest request: URLRequest,
+	                completionHandler: @escaping (URLRequest?) -> Void)
+	{
 		var request = request
 		request.httpMethod = "GET"
 		completionHandler(request)

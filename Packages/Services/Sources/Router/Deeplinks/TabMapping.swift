@@ -1,28 +1,28 @@
 //
-//  AppTab.swift
+//  TabMapping.swift
 //  Services
 //
 //  Created by Aung Ko Min on 29/1/26.
 //
 
-import Foundation
 import Database
+import Foundation
 
 public struct TabMapping: Sendable {
 	public var tabForLink: @Sendable (Deeplink) -> TabPath?
 
-    public init(tabForLink: @escaping @Sendable (Deeplink) -> TabPath?) {
-        self.tabForLink = tabForLink
-    }
+	public init(tabForLink: @escaping @Sendable (Deeplink) -> TabPath?) {
+		self.tabForLink = tabForLink
+	}
 }
 
 public extension TabMapping {
 	static let `default` = TabMapping { link in
 		switch link {
-		case .home: return .inbox
-		case .settings: return .settings
+		case .home: .inbox
+		case .settings: .settings
 		default:
-			return nil
+			nil
 		}
 	}
 }
@@ -33,13 +33,14 @@ public struct NavMapping: Sendable {
 		self.navForLink = navForLink
 	}
 }
+
 public extension NavMapping {
 	static let `default` = NavMapping { link in
 		switch link {
-		case .conversation(let id):
-			return nil
+		case let .conversation(id):
+			nil
 		default:
-			return nil
+			nil
 		}
 	}
 }

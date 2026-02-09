@@ -14,6 +14,7 @@ struct ChatEngineMsgGenerable {
 	@Guide(description: "The content of the message")
 	let content: String
 }
+
 @Generable
 struct TopicGenerable {
 	@Guide(description: "The topic of the messages")

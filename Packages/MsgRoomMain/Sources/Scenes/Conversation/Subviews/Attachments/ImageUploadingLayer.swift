@@ -1,5 +1,5 @@
 //
-//  ImageUploadingContent.swift
+//  ImageUploadingLayer.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 19/9/25.
@@ -14,7 +14,6 @@ import VideoLoader
 import XUI
 
 struct ImageUploadingLayer: View {
-
 	let attachment: Attachment
 	let url: URL
 	let conversationID: String
@@ -53,20 +52,25 @@ struct ImageUploadingLayer: View {
 		let conID = conversationID
 
 		do {
-			let url = try await uploader.uploadFile(url, to: .conversation(conID: conID, attachmentID: attachmentID)) { progress in
+			let url = try await uploader.uploadFile(
+				url,
+				to: .conversation(conID: conID, attachmentID: attachmentID)
+			) { progress in
 				Task { @MainActor in
 					if let progress {
 						if progress.completedUnitCount == progress.totalUnitCount {
 							self.progress = nil
 						} else {
-							self.progress = .init(completed: progress.completedUnitCount, total: progress.totalUnitCount)
+							self.progress = .init(
+								completed: progress.completedUnitCount,
+								total: progress.totalUnitCount
+							)
 						}
 					}
-
 				}
 			}
 			await MainActor.run {
-				var newValue = self.attachment
+				var newValue = attachment
 				newValue.url = url.absoluteString
 				newValue.attachMentTypeRaw = AttachMentType.image.rawValue
 				onCompleteUpload?(newValue)

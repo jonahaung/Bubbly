@@ -8,8 +8,13 @@
 import Foundation
 
 public enum ImageQuality: Sendable, Codable {
-	public var width: CGFloat? { value }
-	public var height: CGFloat? { value }
+	public var width: CGFloat? {
+		value
+	}
+
+	public var height: CGFloat? {
+		value
+	}
 
 	case mini
 	case small

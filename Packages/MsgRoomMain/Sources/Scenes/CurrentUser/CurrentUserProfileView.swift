@@ -16,7 +16,6 @@ import SwiftUI
 import XUI
 
 public struct CurrentUserProfileView: View {
-
 	//	@Environment(AuthService.self) private var authService
 	@State private var currentUser = CurrentUserModel.empty
 	@Environment(\.currentUser) private var originalCurrentUser
@@ -58,11 +57,15 @@ public struct CurrentUserProfileView: View {
 
 				Text("Phone").badge(currentUser.mobile)
 
-				if let privateKey = GroupStorage.shared.string(for: .security(.privateKey(id: currentUser.uid))) {
+				if let privateKey = GroupStorage.shared
+					.string(for: .security(.privateKey(id: currentUser.uid)))
+				{
 					Text(privateKey)
 				}
 
-				if let publicKey = GroupStorage.shared.string(for: .security(.publicKey(id: currentUser.uid))) {
+				if let publicKey = GroupStorage.shared
+					.string(for: .security(.publicKey(id: currentUser.uid)))
+				{
 					Text(publicKey)
 				}
 			}
@@ -95,7 +98,11 @@ public struct CurrentUserProfileView: View {
 		.navigationTitle("Profile")
 		.refreshable {
 			try? await Task.sleep(seconds: 1)
-			if let remote: CurrentUserModel = try? await FirestoreRepo.getModel(for: currentUser.uid, collection: .users, field: .uid) {
+			if let remote: CurrentUserModel = try? await FirestoreRepo.getModel(
+				for: currentUser.uid,
+				collection: .users,
+				field: .uid
+			) {
 				currentUser = remote
 			}
 		}

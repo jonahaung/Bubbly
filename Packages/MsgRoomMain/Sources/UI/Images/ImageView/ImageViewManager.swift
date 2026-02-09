@@ -40,7 +40,7 @@ final class ImageViewManager {
 
 	func onCompletion(_ result: Result<ImageResponse, Error>) {
 		switch result {
-		case .success(let success):
+		case let .success(success):
 			Task {
 				do {
 					try await self.saveImage(success.image)

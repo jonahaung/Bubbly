@@ -11,14 +11,14 @@ import SwiftUI
 import XUI
 
 struct InboxCell: View {
-
 	let item: InboxItem
 	@Environment(\.typography) private var typography
 
 	var body: some View {
 		Button {
 			if let url = DeepLinkCoordinator.shared
-				.url(for: .conversation(id: item.conversation.uid)) {
+				.url(for: .conversation(id: item.conversation.uid))
+			{
 				UIApplication.shared.open(url)
 			}
 		} label: {

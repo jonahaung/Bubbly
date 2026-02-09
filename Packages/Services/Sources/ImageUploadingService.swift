@@ -45,15 +45,19 @@ public struct ImageUploadingService: Sendable {
 
 	public init() {}
 
-	public func uploadImage(_ image: UIImage, size: CGSize?, to path: Path, onProgress: ( @Sendable (Progress?) -> Void)? = nil) async throws -> URL {
+	public func uploadImage(_ image: UIImage,
+	                        size: CGSize?,
+	                        to path: Path,
+	                        onProgress: (@Sendable (Progress?) -> Void)? = nil) async throws -> URL
+	{
 		let mediaManager = MediaManager.shared
 
 		let uploadingImage: UIImage =
-		if let size, let resizedImage = image.resizedToFill(size) {
-			resizedImage
-		} else {
-			image
-		}
+			if let size, let resizedImage = image.resizedToFill(size) {
+				resizedImage
+			} else {
+				image
+			}
 		let data = try mediaManager.createData(from: uploadingImage)
 
 		let reference = Storage.storage()
@@ -67,26 +71,29 @@ public struct ImageUploadingService: Sendable {
 			metadata: metadata,
 			onProgress: onProgress
 		)
-		let url = try await reference.downloadURL()
-		return url
+		return try await reference.downloadURL()
 	}
 
-	public func uploadFile(_ url: URL, to path: Path, onProgress: ( @Sendable (Progress?) -> Void)? = nil) async throws -> URL {
+	public func uploadFile(_ url: URL,
+	                       to path: Path,
+	                       onProgress: (@Sendable (Progress?) -> Void)? = nil) async throws -> URL
+	{
 		let reference = Storage.storage()
 			.reference(withPath: path.path)
 			.child(path.childPath)
 		let metadata = StorageMetadata()
 		metadata.contentType = "image/png"
 		_ = try await reference.putFileAsync(from: url, metadata: metadata, onProgress: onProgress)
-		let url = try await reference.downloadURL()
-		return url
+		return try await reference.downloadURL()
 	}
 
 	func shortenURL(_ longURL: String) async -> String {
-		guard let escaped = longURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+		guard let escaped = longURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
+		else {
 			return longURL
 		}
-		guard let endpoint = URL(string: "https://is.gd/create.php?format=simple&url=\(escaped)") else {
+		guard let endpoint = URL(string: "https://is.gd/create.php?format=simple&url=\(escaped)")
+		else {
 			return longURL
 		}
 		guard let response = try? await URLSession.shared.data(from: endpoint) else {

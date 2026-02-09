@@ -8,6 +8,7 @@
 import Foundation
 import FoundationModels
 import XUI
+
 /// A tool for extracting metadata from web pages using LinkPresentation.
 ///
 /// Use `WebMetadataTool` to fetch and extract metadata from URLs including
@@ -24,12 +25,11 @@ import XUI
 /// - Note: Description extraction is not available through public API.
 ///   Image data is detected but not returned directly.
 public struct WebMetadataTool: Tool {
-
 	/// The name of the tool, used for identification.
 	public let name = "getWebMetadata"
 	/// A brief description of the tool's functionality.
 	public let description =
-	"Extract metadata from web pages including title, description, and images"
+		"Extract metadata from web pages including title, description, and images"
 
 	private let swiftLinkPreview = SwiftLinkPreview()
 	/// Arguments for web metadata extraction.
@@ -78,7 +78,7 @@ public struct WebMetadataTool: Tool {
 	private func fetchMetadata(from url: URL) async throws -> SwiftLinkPreviewResponse {
 		try await swiftLinkPreview.preview(url.absoluteString)
 //		let provider = LPMetadataProvider()
-//		
+//
 //		do {
 //			let metadata = try await provider.startFetchingMetadata(for: url)
 //			return metadata
@@ -87,7 +87,9 @@ public struct WebMetadataTool: Tool {
 //		}
 	}
 
-	private func extractBasicMetadata(from metadata: SwiftLinkPreviewResponse, url: URL) -> WebMetadata {
+	private func extractBasicMetadata(from metadata: SwiftLinkPreviewResponse,
+	                                  url: URL) -> WebMetadata
+	{
 		let title = metadata.title ?? "Untitled"
 		// Note: LPLinkMetadata does not expose a public API for page description/summary.
 		// The description field will be empty. Consider using alternative approaches like
@@ -104,22 +106,22 @@ public struct WebMetadataTool: Tool {
 	}
 
 	private func createSuccessOutput(from metadata: WebMetadata) -> GeneratedContent {
-		return GeneratedContent(properties: [
+		GeneratedContent(properties: [
 			"status": "success",
 			"url": metadata.url,
 			"title": metadata.title,
 			"description": metadata.description,
 			"imageURL": metadata.imageURL ?? "",
-			"message": "Successfully extracted web metadata"
+			"message": "Successfully extracted web metadata",
 		])
 	}
 
 	private func createErrorOutput(for url: String, error: Error) -> GeneratedContent {
-		return GeneratedContent(properties: [
+		GeneratedContent(properties: [
 			"status": "error",
 			"url": url,
 			"error": error.localizedDescription,
-			"message": "Failed to fetch web metadata"
+			"message": "Failed to fetch web metadata",
 		])
 	}
 }
@@ -132,11 +134,11 @@ enum WebMetadataError: Error, LocalizedError {
 	var errorDescription: String? {
 		switch self {
 		case .emptyURL:
-			return "URL cannot be empty"
+			"URL cannot be empty"
 		case .invalidURL:
-			return "Invalid URL format"
-		case .fetchFailed(let error):
-			return "Failed to fetch metadata: \(error.localizedDescription)"
+			"Invalid URL format"
+		case let .fetchFailed(error):
+			"Failed to fetch metadata: \(error.localizedDescription)"
 		}
 	}
 }

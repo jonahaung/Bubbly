@@ -14,6 +14,7 @@ public final class SharedNamespace {
 		value = namespace
 	}
 }
+
 public extension EnvironmentValues {
 	@Entry var sharedNamespace: SharedNamespace?
 }

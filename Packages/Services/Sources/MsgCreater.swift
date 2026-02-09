@@ -1,11 +1,10 @@
 import Database
 import Foundation
+import MediaPicker
 import UIKit
 import XUI
-import MediaPicker
 
 public actor MsgCreator {
-
 	public enum Error: Swift.Error {
 		case noCurrentUserId
 		case imageProcessingFailed(Swift.Error? = nil)
@@ -20,8 +19,11 @@ public actor MsgCreator {
 		self.currentUserId = currentUserId
 	}
 
-	public func message(text: String, attachments: [Attachment], in conversation: Conversation) async throws -> Message {
-		return await Message(
+	public func message(text: String,
+	                    attachments: [Attachment],
+	                    in conversation: Conversation) async throws -> Message
+	{
+		await Message(
 			uid: IDGenerator.shared.make(),
 			senderID: currentUserId,
 			conID: conversation.uid,
@@ -36,9 +38,7 @@ public actor MsgCreator {
 }
 
 private extension MsgCreator {
-	func makeOutgoingStatus(
-		for conversation: Conversation
-	) -> [String: MsgOutgoingStatus] {
+	func makeOutgoingStatus(for conversation: Conversation) -> [String: MsgOutgoingStatus] {
 		var dict = [String: MsgOutgoingStatus]()
 		dict.reserveCapacity(conversation.members.count)
 		for member in conversation.members where member != currentUserId {

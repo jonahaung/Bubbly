@@ -15,73 +15,73 @@ import XUI
 @MainActor
 @Observable
 public final class ContactStore: ErrorPresenter {
-    public static var shared: ContactStore {
-        get { sharedLock.value }
-        set { sharedLock.value = newValue }
-    }
+	public static var shared: ContactStore {
+		get { sharedLock.value }
+		set { sharedLock.value = newValue }
+	}
 
-    private static let sharedLock = Mutex(ContactStore())
-    private init() {}
+	private static let sharedLock = Mutex(ContactStore())
+	private init() {}
 
-    public var contacts = [Contact]()
-    public var groups = [Group]()
+	public var contacts = [Contact]()
+	public var groups = [Group]()
 
-    public func delete(uid: String) async throws {
-        if let indext = contacts.firstIndex(where: { $0.uid == uid }) {
+	public func delete(uid: String) async throws {
+		if let indext = contacts.firstIndex(where: { $0.uid == uid }) {
 			try await Store.shared.contactStore?
-                .delete(uid: uid)
-            contacts.remove(at: indext)
-        }
-    }
+				.delete(uid: uid)
+			contacts.remove(at: indext)
+		}
+	}
 
-    public func contact(for uid: String) -> Contact? {
-        contacts.first(where: { $0.uid == uid })
-    }
+	public func contact(for uid: String) -> Contact? {
+		contacts.first(where: { $0.uid == uid })
+	}
 
-    @concurrent
-    public func fetchData() async throws {
+	@concurrent
+	public func fetchData() async throws {
 		let contacts = try await Store.shared.contactStore?.fetchAll() ?? []
 		let groups = try await Store.shared.groupStore?.fetchAll() ?? []
-        Task { @MainActor in
-            self.contacts = contacts
-            self.groups = groups
-        }
-    }
+		Task { @MainActor in
+			self.contacts = contacts
+			self.groups = groups
+		}
+	}
 
-    public func refresh() async throws {
-        try await fetchData()
-    }
+	public func refresh() async throws {
+		try await fetchData()
+	}
 }
 
 public extension ContactStore {
 	@concurrent func syncGroups(currentUser: CurrentUserModel) async throws {
-        let groups: [Group] = try await FirestoreRepo.getModels(
+		let groups: [Group] = try await FirestoreRepo.getModels(
 			for: currentUser.uid,
-            collection: .groups,
-            field: .members
-        )
+			collection: .groups,
+			field: .members
+		)
 		let store = await Store.shared.groupStore
 
-        try await withThrowingTaskGroup(of: Void.self) { taskGroup in
-            for group in groups {
-                taskGroup.addTask {
+		try await withThrowingTaskGroup(of: Void.self) { taskGroup in
+			for group in groups {
+				taskGroup.addTask {
 					if try await store?.exists(uid: group.uid) == false {
 						try await store?.insert(group)
-                    } else {
+					} else {
 						try await store?.updateAndSave(uid: group.uid) { model in
-                            model.update(from: group)
-                        }
-                    }
-                    try await ContactRepo.getOrCreate(for: group.members, refatch: false)
-                }
-            }
-            try await taskGroup.waitForAll()
-        }
-        try await fetchData()
-    }
+							model.update(from: group)
+						}
+					}
+					try await ContactRepo.getOrCreate(for: group.members, refatch: false)
+				}
+			}
+			try await taskGroup.waitForAll()
+		}
+		try await fetchData()
+	}
 
-    @concurrent func syncContacts() async throws {
-        try await PhoneContactsService.shared.syncContacts()
-        try await fetchData()
-    }
+	@concurrent func syncContacts() async throws {
+		try await PhoneContactsService.shared.syncContacts()
+		try await fetchData()
+	}
 }

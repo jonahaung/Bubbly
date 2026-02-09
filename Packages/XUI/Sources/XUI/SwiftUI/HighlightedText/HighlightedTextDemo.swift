@@ -5,15 +5,12 @@
 //  Created by Aung Ko Min on 1/2/26.
 //
 
-
 import SwiftUI
 
 public struct HighlightedTextDemo: View {
-
 	public init() {}
 	public var body: some View {
 		VStack(spacing: 24) {
-
 			HighlightedText(
 				text: "Hello World, welcome to SwiftUI TextRenderer!",
 				highlightedText: "World"

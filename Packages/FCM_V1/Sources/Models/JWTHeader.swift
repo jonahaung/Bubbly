@@ -7,6 +7,6 @@
 import Foundation
 
 struct JWTHeader: Encodable {
-    let alg = "HS256"
-    let typ = "JWT"
+	let alg = "HS256"
+	let typ = "JWT"
 }

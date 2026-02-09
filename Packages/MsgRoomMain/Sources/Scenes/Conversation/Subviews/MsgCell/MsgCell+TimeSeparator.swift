@@ -1,20 +1,23 @@
 //
-//  MsgCell+TimeSeparater.swift
+//  MsgCell+TimeSeparator.swift
 //  Conversation
 //
 //  Created by Aung Ko Min on 13/2/22.
 //
 
 import Core
-import SwiftUI
-import XUI
 import Database
 import Services
+import SwiftUI
+import XUI
 
 extension MsgCell {
 	struct TimeSeparator: View {
 		@Environment(MsgCellViewModel.self) private var viewModel
-		private var msg: Message { viewModel.msg }
+		private var msg: Message {
+			viewModel.msg
+		}
+
 		@Environment(\.typography) private var typography
 
 		var body: some View {
@@ -22,10 +25,11 @@ extension MsgCell {
 				Text(
 					msg.date.formatted(.dateTime.day().weekday(.abbreviated).hour().minute())
 				)
-				.font(typography.footnote)
+				.fixedSize(horizontal: false, vertical: true)
 			}
 			.flexible(.horizontal)
 			.frame(height: ChatLayoutConstants.Cell.timeSeparatorHeight, alignment: .center)
+			.font(typography.footnote)
 			.equatable(by: msg.uid)
 		}
 	}

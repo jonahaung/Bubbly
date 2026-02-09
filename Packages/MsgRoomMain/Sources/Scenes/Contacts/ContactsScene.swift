@@ -7,13 +7,12 @@
 
 import Core
 import Database
-import SFSafeSymbols
 import Services
+import SFSafeSymbols
 import SwiftUI
 import XUI
 
 public struct ContactsScene: View {
-
 	@Environment(ContactStore.self) private var store
 	@State private var viewModel: ContactsViewModel = .init()
 	@Environment(Router.self) private var router
@@ -51,7 +50,7 @@ public struct ContactsScene: View {
 					selection: $defaultContactDisplay
 				) {
 					let options: [DefaultContactDisplayType] =
-					store.groups.isEmpty ? [.chat] : [.chat, .group]
+						store.groups.isEmpty ? [.chat] : [.chat, .group]
 					ForEach(options, id: \.self) { each in
 						Text(each.rawValue)
 					}
@@ -146,7 +145,7 @@ public struct ContactsScene: View {
 	}
 
 	private func openConversation(for contact: Contact) async throws {
-		let id = ConversationIDGenerator.generate(contact.uid, self.currentUser.uid)
+		let id = ConversationIDGenerator.generate(contact.uid, currentUser.uid)
 		if let url = DeepLinkCoordinator.shared.url(for: .conversation(id: id)) {
 			await MainActor.run {
 				UIApplication.shared.open(url)
@@ -184,11 +183,10 @@ public struct ContactsScene: View {
 				prompt: "search contacts that has the name: \(viewModel.searchText)",
 				type: [ContactsTool.Arguments].self
 			) { models in
-				return models.map { $0.generatedContent.jsonString }.joined(separator: "\n - ")
+				models.map(\.generatedContent.jsonString).joined(separator: "\n - ")
 			} clearForm: {
 				viewModel.searchText = ""
 			}
 		}
 	}
 }
-

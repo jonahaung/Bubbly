@@ -1,12 +1,12 @@
 //
-//  Composer+MenuBar.swift
+//  Composer+MenuButton.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 30/1/26.
 //
 
-import SwiftUI
 import PhotosUI
+import SwiftUI
 
 extension ComposeBar {
 	struct ComposeBarMenuButton: View {
@@ -22,10 +22,16 @@ extension ComposeBar {
 				TwoLinesShape()
 					.frame(square: 24)
 					.frame(square: 44)
-					.background(.background, in: RoundedRectangle(cornerRadius: 22, style: .circular))
+					.background(
+						.background,
+						in: RoundedRectangle(cornerRadius: 22, style: .circular)
+					)
 			}
 			.buttonStyle(.plain)
-			.matchedGeometryEffect(id: ComposeBarMenuButton.typeName, in: namespace.unsafelyUnwrapped.value)
+			.matchedGeometryEffect(
+				id: ComposeBarMenuButton.typeName,
+				in: namespace.unsafelyUnwrapped.value
+			)
 		}
 	}
 }

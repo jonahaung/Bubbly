@@ -17,8 +17,8 @@ public protocol ContactRepresentable: UIdentifiable, StringMergable {
 	var publicKeyString: String { get set }
 }
 
-extension ContactRepresentable {
-	public func merging(from source: some ContactRepresentable) -> Self {
+public extension ContactRepresentable {
+	func merging(from source: some ContactRepresentable) -> Self {
 		guard source.uid == uid else { return self }
 		var copy = self
 		copy.name = mergedString(copy.name, from: source.name)

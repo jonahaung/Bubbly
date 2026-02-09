@@ -13,7 +13,6 @@ import SwiftUI
 import XUI
 
 private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
-
 	@LazyState private var currentUser: CurrentUser
 	@LazyState private var contactStore = ContactStore.shared
 	@LazyState private var router = Router.shared
@@ -27,7 +26,6 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 			.environment(\.currentUser, currentUser.model)
 			.environment(contactStore)
 			.task {
-
 				do {
 					try await contactStore.fetchData()
 				} catch {
@@ -37,8 +35,8 @@ private struct MsgRoomEntryPointModifier: ViewModifier, ErrorPresenter {
 	}
 }
 
-extension View {
-	public func msgRoomEntryPoint(_ currentUser: CurrentUserModel) -> some View {
+public extension View {
+	func msgRoomEntryPoint(_ currentUser: CurrentUserModel) -> some View {
 		ModifiedContent(
 			content: self,
 			modifier: MsgRoomEntryPointModifier(currentUser)

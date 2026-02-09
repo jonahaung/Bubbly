@@ -1,5 +1,5 @@
 //
-//  MsgCell+OutgoingStatus.swift
+//  MsgCell+OutgoingAccessory.swift
 //  MsgRoomMain
 //
 //  Created by Aung Ko Min on 31/8/25.
@@ -25,11 +25,14 @@ extension MsgCell {
 							if let contact = ContactStore.shared.contact(
 								for: seenMember.uid
 							) {
-								ProfilePhoto(contact, size: .custom(ChatLayoutConstants.Cell.defaultSpacing - 6))
-									.matchedGeometryEffect(
-										id: contact.uid,
-										in: namespace.unsafelyUnwrapped.value
-									)
+								ProfilePhoto(
+									contact,
+									size: .custom(ChatLayoutConstants.Cell.defaultSpacing - 6)
+								)
+								.matchedGeometryEffect(
+									id: contact.uid,
+									in: namespace.unsafelyUnwrapped.value
+								)
 							}
 						}
 					}
@@ -44,5 +47,4 @@ extension MsgCell {
 			}
 		}
 	}
-
 }

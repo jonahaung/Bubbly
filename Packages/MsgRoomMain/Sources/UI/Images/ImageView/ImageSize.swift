@@ -8,7 +8,6 @@
 import Foundation
 
 public enum ImageSize: Sendable, Equatable, Codable {
-
 	case mini
 	case small
 	case medium
@@ -33,6 +32,11 @@ public enum ImageSize: Sendable, Equatable, Codable {
 		}
 	}
 
-	public var width: CGFloat? { value }
-	public var height: CGFloat? { value }
+	public var width: CGFloat? {
+		value
+	}
+
+	public var height: CGFloat? {
+		value
+	}
 }

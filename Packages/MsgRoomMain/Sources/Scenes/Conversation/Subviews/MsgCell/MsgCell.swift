@@ -12,13 +12,17 @@ import SwiftUI
 import XUI
 
 struct MsgCell: View {
-
 	let viewModel: MsgCellViewModel
 	@Environment(\.selectedMsg) private var selectedMsg
 
-	private var isSelected: Bool { selectedMsg?.id == viewModel.id }
-	private var layout: MsgCellLayout { viewModel.layout }
-	@Environment(\.typography) var typography
+	private var isSelected: Bool {
+		selectedMsg?.id == viewModel.id
+	}
+
+	private var layout: MsgCellLayout {
+		viewModel.layout
+	}
+
 	@Environment(\.conversationTheme) private var theme
 
 	var body: some View {
@@ -45,8 +49,7 @@ struct MsgCell: View {
 				Footer()
 			}
 		}
-		.font(typography.body)
-		.foregroundStyle(Color.label)
+
 		.equatable(by: viewModel.reloadID)
 		.environment(\.viewIsVisible, viewModel.isVisible)
 	}

@@ -20,6 +20,7 @@ extension ChatViewManager: ChatDatasourceDelegate {
 			await showError(error)
 		}
 	}
+
 	func datasource(didRecieveError: any Error) async {
 		await showError(didRecieveError)
 	}
@@ -38,7 +39,7 @@ extension ChatViewManager: ChatDatasourceDelegate {
 				}
 				ToastPresenter.show(toast)
 			} else {
-				if scrollController.currentScrolledPosition.nearBottom {
+				if scrollController.scrolledPosition.nearBottom {
 					scrollController.setUpdateState(.appendingItem(msg.uid))
 				} else {
 					ToastPresenter.show {
@@ -47,21 +48,33 @@ extension ChatViewManager: ChatDatasourceDelegate {
 							Text("\(image) New Message")
 								.font(
 									.system(
-										size: UIFont
-											.preferredFont(forTextStyle: .headline).pointSize
-										, weight: .medium)
+										size:
+										UIFont
+											.preferredFont(forTextStyle: .headline).pointSize,
+										weight: .medium
+									)
 								)
 							Text(msg.displayText)
 								.font(
 									.system(
-										size: UIFont
-											.preferredFont(forTextStyle: .subheadline).pointSize
-										, weight: .regular)
+										size:
+										UIFont
+											.preferredFont(forTextStyle: .subheadline).pointSize,
+										weight: .regular
+									)
 								)
 						}
 						.onTapGesture {
 							self.scrollController
-								.enqueueScroll(to: .id(value: msg.uid, anchor: .bottom))
+								.enqueueScroll(
+									to:
+									.layoutID(
+										value: msg.uid,
+										anchor: .bottom,
+										animated: true,
+										duration: 0.3
+									)
+								)
 						}
 					}
 				}
@@ -105,11 +118,14 @@ extension ChatViewManager {
 	}
 
 	func updateReceiveMsgs() {
-		guard let lastMsg = models.msgs().last(
-			where: { $0.receiptType == .receive
-			}),
-			  lastMsg.incomingStatus.rawValue < MsgIncomingStatus.read.rawValue,
-			  let currentUserId
+		guard
+			let lastMsg = models.msgs().last(
+				where: {
+					$0.receiptType == .receive
+				}
+			),
+			lastMsg.incomingStatus.rawValue < MsgIncomingStatus.read.rawValue,
+			let currentUserId
 		else {
 			return
 		}

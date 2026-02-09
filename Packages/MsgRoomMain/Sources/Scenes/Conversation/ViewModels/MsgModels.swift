@@ -13,7 +13,6 @@ import XUI
 @MainActor
 @Observable
 public final class MsgModels {
-
 	public typealias MsgID = Message.UID
 	@ObservationIgnored private var modelCache = [MsgID: MsgCellViewModel]()
 	@ObservationIgnored private var styleCache = [MsgID: MsgCellLayout]()
@@ -25,30 +24,40 @@ public final class MsgModels {
 		set(msgs: msgs, forceReset: false)
 	}
 }
+
 public extension MsgModels {
-	var count: Int { ids.count }
+	var count: Int {
+		ids.count
+	}
+
 	var first: MsgCellViewModel? {
 		guard let id = ids.first else {
 			return nil
 		}
 		return cached(for: id)
 	}
+
 	var last: MsgCellViewModel? {
 		guard let id = ids.last else {
 			return nil
 		}
 		return cached(for: id)
 	}
-	var isEmpty: Bool { ids.isEmpty }
+
+	var isEmpty: Bool {
+		ids.isEmpty
+	}
+
 	func contains(withID id: MsgID) -> Bool {
 		ids.contains(where: { $0 == id })
 	}
+
 	func index(of id: MsgID) -> Int? {
 		ids.firstIndex(where: { $0 == id })
 	}
 
 	subscript(position: Int) -> MsgCellViewModel? {
-		return self.cached(for: ids[position])
+		cached(for: ids[position])
 	}
 
 	subscript(safe position: Int) -> MsgCellViewModel? {
@@ -60,15 +69,15 @@ public extension MsgModels {
 	}
 
 	func msgs() -> [Message] {
-		ids.compactMap{ self.cached(for: $0 )?.msg}
+		ids.compactMap { self.cached(for: $0)?.msg }
 	}
 }
 
 public extension MsgModels {
-
 	func cached(for id: MsgID) -> MsgCellViewModel? {
 		modelCache[id]
 	}
+
 	func model(for msg: Message) -> MsgCellViewModel {
 		if let cached = cached(for: msg.uid) {
 			return cached
@@ -77,14 +86,16 @@ public extension MsgModels {
 		modelCache[msg.uid] = model
 		return model
 	}
+
 	func style(for id: MsgID) -> MsgCellLayout? {
 		styleCache[id]
 	}
+
 	func set(msgs: [Message], forceReset: Bool) {
-		var models = forceReset ? [] : self.ids.compactMap { self.cached(for: $0) }
+		var models = forceReset ? [] : ids.compactMap { self.cached(for: $0) }
 		var existingIDs = Set(models.map(\.msg.uid))
-		msgs.forEach { msg in
-			if let cached = self.cached(for: msg.uid) {
+		for msg in msgs {
+			if let cached = cached(for: msg.uid) {
 				cached.update(with: msg)
 				if let existingIndex = models.firstIndex(where: { $0.msg.uid == msg.uid }) {
 					models.remove(at: existingIndex)
@@ -93,7 +104,7 @@ public extension MsgModels {
 				models.insert(cached, at: index)
 				existingIDs.insert(msg.uid)
 			} else {
-				let model = self.model(for: msg)
+				let model = model(for: msg)
 				let index = models.insertionIndex(for: model, by: \.msg.date)
 				models.insert(model, at: index)
 				existingIDs.insert(msg.uid)
@@ -122,12 +133,10 @@ public extension MsgModels {
 			return self.cached(for: id)?.msg
 		}()
 
-
 		let nextMsg: Message? = {
 			guard let id = ids[safe: index + 1] else { return nil }
 			return self.cached(for: id)?.msg
 		}()
-
 
 		let style = bubbleFactory.style(for: msg, previous: prevMsg, next: nextMsg)
 		styleCache[msg.uid] = style
@@ -158,12 +167,12 @@ public extension MsgModels {
 		ids.insert(msg.uid, at: index)
 	}
 
-	func insertionIndex(
-		for id: MsgID,
-		by keyPath: KeyPath<MsgID, some Comparable>
-	) -> Int {
+	func insertionIndex(for id: MsgID,
+	                    by keyPath: KeyPath<MsgID, some Comparable>) -> Int
+	{
 		ids.insertionIndex(for: id, by: keyPath)
 	}
+
 	func insertionIndex(for msg: Message) -> Int {
 		ids.firstIndex { id in
 			guard let existing = cached(for: id) else { return false }
@@ -175,6 +184,7 @@ public extension MsgModels {
 		guard count > 0 else { return }
 		ids = Array(ids.prefix(count))
 	}
+
 	func takingSuffix(_ count: Int) {
 		guard count > 0 else { return }
 		ids = Array(ids.suffix(count))
@@ -186,6 +196,7 @@ public extension MsgModels {
 		guard let index = ids.firstIndex(where: { $0 == msg.uid }) else { return }
 		refreshLayout(at: index)
 	}
+
 	func remove(msg: Message) {
 		guard let index = ids.firstIndex(where: { $0 == msg.uid }) else { return }
 		ids.remove(at: index)
