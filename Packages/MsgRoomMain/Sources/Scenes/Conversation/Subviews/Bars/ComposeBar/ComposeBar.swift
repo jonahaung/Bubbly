@@ -13,7 +13,7 @@ struct ComposeBar: View {
 	let composer: ChatComposer
 	@Environment(\.conversationTheme) private var theme
 	var body: some View {
-		VStack(spacing: 0) {
+		LazyVStack(spacing: 0) {
 			switch composer.source {
 			case .emoji:
 				EmojiPanel()

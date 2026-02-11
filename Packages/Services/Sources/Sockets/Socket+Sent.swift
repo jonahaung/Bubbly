@@ -12,7 +12,13 @@ import Foundation
 import XUI
 
 extension Socket {
-	public func send(_ data: AnyMsgData, conversation: Conversation) async throws {
+	public static func send(_ data: AnyMsgData, conversation: Conversation) {
+		Task { @SocketActor in
+			try? await Socket.shared.send(data, conversation: conversation)
+		}
+	}
+
+	func send(_ data: AnyMsgData, conversation: Conversation) async throws {
 		switch data {
 		case let .newMsg(rMsg):
 			let msg = Message(rMsg)

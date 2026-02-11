@@ -113,7 +113,9 @@ public extension MsgCellViewModel {
 	var horizontalAlignment: HorizontalAlignment {
 		isSender ? .trailing : .leading
 	}
-
+	var verticalAlignment: VerticalItemAlignment {
+		isSender ? .trailing : .leading
+	}
 	func sender() -> Contact? {
 		ContactStore.shared.contact(for: msg.senderID)
 	}
@@ -123,4 +125,8 @@ public extension HorizontalAlignment {
 	var inverted: HorizontalAlignment {
 		self == .leading ? .trailing : .leading
 	}
+}
+public enum VerticalItemAlignment: Sendable {
+	case leading
+	case trailing
 }

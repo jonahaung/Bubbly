@@ -6,50 +6,51 @@
 //
 
 import Database
+import XUI
 
 public extension Socket {
 	func receive(_ data: AnyMsgData) {
 		switch data {
 		case let .newMsg(rMsg):
-			Task { [weak self] in
+			Task { @SocketActor [weak self] in
 				guard let self else { return }
 				await queue.addOperation {
 					if try await Store.shared.msgStore?.exists(uid: rMsg.uid) == true {
-						await AudioService.shared.play(.msgIncoming)
+						TonePlayer.play(.tap1)
 						await self.notifyMessage(data)
 					}
 				}
 			}
 		case .updatedMsg:
-			Task { [weak self] in
+			Task { @SocketActor [weak self] in
 				guard let self else { return }
 				await queue.addOperation {
 					await self.notifyMessage(data)
 				}
 			}
 		case .typingStatus:
-			Task { [weak self] in
+			Task { @SocketActor [weak self] in
 				guard let self else { return }
 				await queue.addOperation {
 					await self.notifyMessage(data)
 				}
 			}
 		case .reaction:
-			Task { [weak self] in
+			Task { @SocketActor [weak self] in
 				guard let self else { return }
 				await queue.addOperation {
 					await self.notifyMessage(data)
 				}
 			}
 		case .deleteMsg:
-			Task { [weak self] in
+			Task { @SocketActor [weak self] in
 				guard let self else { return }
 				await queue.addOperation {
 					await self.notifyMessage(data)
 				}
 			}
 		case .seenStatus:
-			Task { [weak self] in
+			Task { @SocketActor [weak self] in
 				guard let self else { return }
 				await queue.addOperation {
 					await self.notifyMessage(data)

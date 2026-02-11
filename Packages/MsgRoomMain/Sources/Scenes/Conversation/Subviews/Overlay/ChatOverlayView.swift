@@ -105,11 +105,13 @@ struct RoomFocesedOverlayBar: View {
 			AnimatedButton(.center) {
 				Task {
 					let msg = item.msg
-					try? await Socket.shared.send(
+					await Socket.send(
 						.deleteMsg(rMsg: .init(msg)),
 						conversation: conversation
 					)
-					dismiss()
+					await MainActor.run {
+						dismiss()
+					}
 				}
 			} label: {
 				SystemImageWithShape(.trashFill, iconStyle)

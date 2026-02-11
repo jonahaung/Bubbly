@@ -14,7 +14,7 @@ public extension ImageProcessors {
 	/// Composes multiple processors.
 	struct Composition: ImageProcessing, Hashable, CustomStringConvertible {
 		public static func == (lhs: ImageProcessors.Composition, rhs: ImageProcessors.Composition) -> Bool {
-			lhs.processors == rhs.processors
+			lhs.identifier == rhs.identifier
 		}
 
 		let processors: [any ImageProcessing]

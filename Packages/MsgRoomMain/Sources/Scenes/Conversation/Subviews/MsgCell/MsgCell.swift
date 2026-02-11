@@ -49,7 +49,6 @@ struct MsgCell: View {
 				Footer()
 			}
 		}
-
 		.equatable(by: viewModel.reloadID)
 		.environment(\.viewIsVisible, viewModel.isVisible)
 	}

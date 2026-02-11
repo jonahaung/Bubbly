@@ -61,7 +61,7 @@ public struct ScrollLocation: Sendable, Hashable {
 	}
 }
 
-public indirect enum ScrollPositionItem: Hashable {
+public indirect enum ScrollPositionItem: Hashable, Sendable {
 	case offset(yPosition: CGFloat, animated: Bool = true, duration: Double? = nil)
 	case id(value: String, anchor: UnitPoint? = nil, animated: Bool = true, duration: Double? = nil)
 	case layoutID(

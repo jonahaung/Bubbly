@@ -176,8 +176,6 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 
 	func reloadScrollView(for coordinator: ChatScrollCoordinator) {
 		scrollController.setDefaultAnimation(nil)
-		scrollController.messageLayoutCache.invalidateLayout()
-		layoutIfNeeded()
 	}
 }
 
@@ -194,16 +192,18 @@ extension ChatViewManager {
 			next: nextMsg?.uid
 		)
 		presentation.updateSelectedMsg(newValue)
+		scrollController.messageLayoutCache.invalidate(.all)
 		if let oldValue {
-			scrollController.messageLayoutCache.removeCache(for: oldValue.id)
+//			scrollController.messageLayoutCache.invalidate(.specificId(oldValue.id))
 			models.element(withID: oldValue.id)?.layoutIfNeeded()
 		}
 		if let newValue {
-			scrollController.messageLayoutCache.removeCache(for: newValue.id)
+//			scrollController.messageLayoutCache.invalidate(.specificId(newValue.id))
 			let viewModel = models.element(withID: newValue.id)
 			viewModel?.layoutIfNeeded()
 			viewModel?.animate()
 		}
+
 		scrollController.setDefaultAnimation(.interactiveSpring)
 		layoutIfNeeded()
 	}

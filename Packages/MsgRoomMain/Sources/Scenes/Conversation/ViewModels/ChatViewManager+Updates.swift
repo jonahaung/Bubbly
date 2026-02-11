@@ -34,7 +34,9 @@ extension ChatViewManager: ChatDatasourceDelegate {
 			existingModel.update(with: msg)
 		} else {
 			if canResetDatasource {
-				let toast = Toast(node: Text(msg.displayText).opaqueView()) {
+				let toast = Toast(
+					node: Text(msg.displayText).opaqueView(), allowsBackgroundTap: false
+				) {
 					self.resetDatasource()
 				}
 				ToastPresenter.show(toast)
@@ -42,7 +44,7 @@ extension ChatViewManager: ChatDatasourceDelegate {
 				if scrollController.scrolledPosition.nearBottom {
 					scrollController.setUpdateState(.appendingItem(msg.uid))
 				} else {
-					ToastPresenter.show {
+					ToastPresenter.show(allowsBackgroundTap: false) {
 						VStack(alignment: .leading, spacing: 4) {
 							let image = Image(systemSymbol: .textBubble)
 							Text("\(image) New Message")
@@ -64,18 +66,17 @@ extension ChatViewManager: ChatDatasourceDelegate {
 									)
 								)
 						}
-						.onTapGesture {
-							self.scrollController
-								.enqueueScroll(
-									to:
-									.layoutID(
-										value: msg.uid,
-										anchor: .bottom,
-										animated: true,
-										duration: 0.3
-									)
+					} action: {
+						self.scrollController
+							.enqueueScroll(
+								to:
+								.layoutID(
+									value: msg.uid,
+									anchor: .bottom,
+									animated: true,
+									duration: 0.3
 								)
-						}
+							)
 					}
 				}
 				models.insert(msg: msg)
@@ -135,7 +136,7 @@ extension ChatViewManager {
 					for: lastMsg.conID,
 					currentUserID: currentUserId
 				)
-				try await Socket.shared.send(
+				await Socket.send(
 					.seenStatus(
 						status: .init(
 							msgID: lastMsg.uid,

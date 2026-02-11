@@ -14,12 +14,18 @@ private struct ToastPresentableodifier: ViewModifier {
 			.statusBarHidden(toastPresenter.toast?.style.edge == .top)
 			.overlay {
 				if let toast = toastPresenter.toast {
-					ModalOverlay(toast.style.alignment, from: toast.style.edge) {
+					ModalOverlay(
+						toast.style.alignment,
+						from: toast.style.edge,
+						allowsBackgroundTap: toast.allowsBackgroundTap
+					) {
 						toast.node.eraseToNode()
-							.padding()
-							.foregroundStyle(Color.label.headroom(4))
-							.runningBorder(lineWidth: 1)
+							.lineHeight(.multiple(factor: 1.1))
+							.padding(16)
+							.glassEffect(.regular, in: .containerRelative)
+							.runningBorder(lineWidth: 2, cornerRadius: 12)
 							.containerShape(RoundedRectangle(cornerRadius: 12))
+							.padding(2)
 					} onClose: {
 						toastPresenter.dismiss()
 					}

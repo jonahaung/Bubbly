@@ -15,20 +15,16 @@ extension MsgCell {
 		let text: String
 
 		var body: some View {
+			let extraTop = text.containsTallMarksOrEmoji ? max(
+				1,
+				(Self.font.ascender - Self.font.capHeight) * 0.25
+			) : 0
 			if text.containsMarkdown {
-				let extraTop = text.containsTallMarksOrEmoji ? max(
-					1,
-					(Self.font.ascender - Self.font.capHeight) * 0.25
-				) : 0
-				MarkdownView(markdownText: text)
+				Text(LocalizedStringKey(text))
 					.lineSpacing(extraTop)
 					.fixedSize(horizontal: false, vertical: true)
 
 			} else {
-				let extraTop = text.containsTallMarksOrEmoji ? max(
-					1,
-					(Self.font.ascender - Self.font.capHeight) * 0.25
-				) : 0
 				Text(text)
 					.customAttribute(HighlightAttribute())
 					.lineSpacing(extraTop)

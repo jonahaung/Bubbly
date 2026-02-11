@@ -23,15 +23,11 @@ extension ComposeBar {
 					.frame(square: 24)
 					.frame(square: 44)
 					.background(
-						.background,
+						.windowBackground,
 						in: RoundedRectangle(cornerRadius: 22, style: .circular)
 					)
 			}
 			.buttonStyle(.plain)
-			.matchedGeometryEffect(
-				id: ComposeBarMenuButton.typeName,
-				in: namespace.unsafelyUnwrapped.value
-			)
 		}
 	}
 }

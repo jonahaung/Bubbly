@@ -31,13 +31,23 @@ public final class ToastPresenter {
 	}
 
 	@MainActor
-	public static func show(_ text: String) {
-		shared.show(.init(message: text))
+	public static func show(_ text: String, allowsBackgroundTap: Bool) {
+		shared.show(.init(message: text, allowsBackgroundTap: allowsBackgroundTap))
 	}
 
 	@MainActor
-	public static func show(@ViewBuilder content: () -> some View) {
-		shared.show(.init(node: content().opaqueView()))
+	public static func show(allowsBackgroundTap: Bool,
+	                        @ViewBuilder content: () -> some View,
+	                        action: @MainActor @escaping () -> Void)
+	{
+		shared
+			.show(
+				.init(
+					node: content().opaqueView(),
+					allowsBackgroundTap: allowsBackgroundTap,
+					action: action
+				)
+			)
 	}
 
 	public func dismiss() {

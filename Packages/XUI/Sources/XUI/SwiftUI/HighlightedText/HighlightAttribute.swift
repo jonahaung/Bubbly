@@ -11,6 +11,7 @@ import SwiftUI
 public struct HighlightAttribute: TextAttribute {
 	public init() {}
 }
+
 public struct EmptyAttribute: TextAttribute {
 	public init() {}
 }

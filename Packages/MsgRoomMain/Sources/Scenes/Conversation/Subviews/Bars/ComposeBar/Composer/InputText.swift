@@ -40,6 +40,7 @@ final class InputText: Equatable {
 
 	@ObservationIgnored private var linkExtractionTask: Task<Void, Never>?
 	@ObservationIgnored weak var delegate: InputTextDelegate?
+	@ObservationIgnored private let linkWorker = LinkExtractorWorker()
 
 	func clear() {
 		selection = nil
@@ -61,24 +62,26 @@ final class InputText: Equatable {
 		guard currentText.isWhitespace == false else {
 			return
 		}
-		linkExtractionTask = Task
-			.detached(name: currentText, priority: .userInitiated) { [weak self] in
-				guard let self else { return }
-				let thisText = string
-				try? await Task.sleep(seconds: 0.4)
-				guard !Task.isCancelled else { return }
-				let links = LinkExtractor.extractLinks(from: thisText)
-				guard !Task.isCancelled else { return }
-				if !links.isEmpty {
-					Task { @MainActor in
-						guard self.text.contains(thisText) else { return }
-						self.delegate?.inputText(self, didInsertLinks: links)
-					}
-				}
-			}
+		linkExtractionTask = Task { [weak self] in
+			guard let self else { return }
+			let thisText = string
+			try? await Task.sleep(seconds: 0.4)
+			guard !Task.isCancelled else { return }
+			let links = await linkWorker.extractLinks(from: thisText)
+			guard !Task.isCancelled else { return }
+			guard links.isEmpty == false else { return }
+			guard text.contains(thisText) else { return }
+			delegate?.inputText(self, didInsertLinks: links)
+		}
 	}
 
 	nonisolated static func == (lhs: InputText, rhs: InputText) -> Bool {
 		lhs.id == rhs.id
+	}
+}
+
+private actor LinkExtractorWorker {
+	func extractLinks(from text: String) -> [ExtractedLink] {
+		LinkExtractor.extractLinks(from: text)
 	}
 }

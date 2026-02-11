@@ -19,7 +19,7 @@ extension ComposeBar {
 			ZStack(alignment: .trailing) {
 				textField()
 			}
-			.background(.background, in: .containerRelative)
+			.background(.windowBackground, in: .containerRelative)
 			.containerShape(RoundedRectangle(cornerRadius: theme.bubbleCornerRadius))
 		}
 

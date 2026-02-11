@@ -16,6 +16,6 @@ public extension UIApplication {
 		guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
 			fatalError()
 		}
-		return windowScene.screen.bounds.size
+		return windowScene.windows.first?.rootViewController?.view.frame.size ?? windowScene.screen.bounds.size
 	}
 }

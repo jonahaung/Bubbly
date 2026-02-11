@@ -34,6 +34,9 @@ struct ConversationHeaderView: View {
 		.lineSpacing(0)
 		.allowsTightening(true)
 		.id(Self.typeName)
-		.layoutValue(key: MsgLayoutValueKey.self, value: .empty)
+		.layoutValue(
+			key: MsgLayoutValueKey.self,
+			value: .init(uid: manager.conversation.uid, recipient: .assistant, attachmentsCount: 0)
+		)
 	}
 }

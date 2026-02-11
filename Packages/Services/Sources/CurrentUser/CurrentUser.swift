@@ -48,7 +48,7 @@ public final class CurrentUser {
 						collectionPath: .users,
 						to: newModel.uid
 					)
-				await ToastPresenter.show("Profile Updated")
+				await ToastPresenter.show("Profile Updated", allowsBackgroundTap: false)
 			}
 		} else {
 			try await FirestoreRepo.add(newModel, collectionPath: .users, documentID: newModel.uid)
@@ -60,13 +60,6 @@ public final class CurrentUser {
 		model = newValue
 	}
 
-	///
-	///    public func start() {
-	///        debugPrint("4️⃣ CurrentUser starting...")
-	///        observeReloadNotification()
-	///        CurrentUser.reload()
-	///    }
-	///
 	private func observeReloadNotification() {
 		NotificationCenter.default
 			.publisher(for: .reloadCurrentUser)

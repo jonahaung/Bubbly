@@ -57,14 +57,10 @@ public class NetworkManager: NSObject {
 						Task { @MainActor in
 							if path.status == .satisfied {
 								ToastPresenter
-									.show(
-										"connected"
-									)
+									.show("connected", allowsBackgroundTap: false)
 							} else {
 								ToastPresenter
-									.show(
-										"no connection"
-									)
+									.show("no connection", allowsBackgroundTap: false)
 							}
 						}
 					}

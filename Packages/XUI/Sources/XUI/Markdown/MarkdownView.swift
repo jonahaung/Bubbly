@@ -25,6 +25,7 @@ public struct MarkdownView: View {
 
 	public init(markdownText: String) {
 		self.markdownText = markdownText
+		elements = MarkdownParser.parse(markdownText)
 	}
 
 	public init(elements: [MarkdownElement], text: String) {

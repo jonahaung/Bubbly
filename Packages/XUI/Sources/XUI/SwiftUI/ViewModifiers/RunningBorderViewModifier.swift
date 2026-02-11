@@ -19,7 +19,6 @@ struct RunningBorderViewModifier: ViewModifier {
 			.padding(lineWidth)
 			.background(
 				ContainerRelativeShape()
-					.fill(.background)
 					.strokeBorder(
 						AngularGradient(
 							gradient: Gradient(
@@ -29,14 +28,13 @@ struct RunningBorderViewModifier: ViewModifier {
 							center: .center,
 							startAngle: .degrees(rotation),
 							endAngle: .degrees(rotation + 360)
-						)
-						.opacity(0.5),
+						),
 						lineWidth: lineWidth
 					)
 			)
 			.onAppear {
 				guard animated else { return }
-				withAnimation(.linear(duration: 3).repeatForever(autoreverses: false)) {
+				withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
 					rotation = 360
 				}
 			}
@@ -55,7 +53,7 @@ struct RunningBorderViewModifier: ViewModifier {
 
 public extension View {
 	func runningBorder(lineWidth: CGFloat = 1,
-	                   cornerRadius: CGFloat = 10,
+	                   cornerRadius: CGFloat,
 	                   animated: Bool = true) -> some View
 	{
 		modifier(RunningBorderViewModifier(

@@ -12,7 +12,7 @@ import SwiftUI
 import XUI
 
 struct MsgsScrollView: View {
-	let boundsWidth: CGFloat
+	let proxy: GeometryProxy
 	@Environment(ChatViewManager.self) private var manager
 	@Environment(\.selectedMsg) private var selectedMsg
 
@@ -22,10 +22,7 @@ struct MsgsScrollView: View {
 				config: .init(
 					manager.conversationConfig.lineSpacing,
 					manager.conversationConfig.contentInsets,
-					boundsSize: .init(
-						width: boundsWidth,
-						height: .infinity
-					)
+					boundsWidth: proxy.insetAdjustedSize.width
 				),
 				layoutCache: manager.scrollController.messageLayoutCache
 			) {
@@ -37,9 +34,10 @@ struct MsgsScrollView: View {
 						MsgCell(viewModel: viewModel)
 							.environment(viewModel)
 							.id(viewModel.id)
-							.onScrollVisibilityChange(threshold: 0.001) { [
-								unowned viewModel
-							] isVisible in
+							.onScrollVisibilityChange(threshold: 0.001) {
+								[
+									unowned viewModel
+								] isVisible in
 								viewModel.setVisibility(isVisible)
 								if viewModel.layout.showTimeSeparator {
 									manager.presentation.updateFloatingDate(viewModel.msg.date)
@@ -53,6 +51,8 @@ struct MsgsScrollView: View {
 				}
 			}
 		}
+		.frame(width: proxy.insetAdjustedSize.width)
+		.padding(.leading, proxy.safeAreaInsets.leading)
 		.tint(Color.link.mix(with: Color.accentColor, by: 0.3))
 		.transaction(value: manager.reloadID) {
 			$0.animation = manager.scrollController.defaultAnimation
@@ -71,7 +71,7 @@ struct MsgsScrollView: View {
 			manager.scrollController
 				.didChangeScrollGeometry(oldValue, newValue)
 		}
-		.scrollClipDisabled(false)
+		.scrollClipDisabled()
 		.scrollDismissesKeyboard(.never)
 		.scrollBounceBehavior(.always, axes: .vertical)
 		.defaultScrollAnchor(.bottom, for: .sizeChanges)

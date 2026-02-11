@@ -13,27 +13,30 @@ public struct Toast: Sendable, @MainActor Identifiable, @MainActor Hashable {
 	public let node: any RenderNode
 	public let duration: Double
 	public let style: ToastStyle
+	public let allowsBackgroundTap: Bool
 
 	public init(node: any RenderNode,
 	            duration: Double = 5,
 	            style: ToastStyle = .top,
+	            allowsBackgroundTap: Bool,
 	            action: (@MainActor @Sendable () -> Void)? = nil)
 	{
 		id = node.renderID()
 		self.node = node
 		self.duration = duration
 		self.style = style
+		self.allowsBackgroundTap = allowsBackgroundTap
 	}
 
 	public init(message: String,
 	            duration: Double = 5,
 	            style: ToastStyle = .top,
-	            actionTitle: String? = nil)
+	            allowsBackgroundTap: Bool)
 	{
 		self.init(
-			node: Text(message).opaqueView(),
+			node: Text(.init(message)).opaqueView(),
 			duration: duration,
-			style: style
+			style: style, allowsBackgroundTap: allowsBackgroundTap
 		)
 	}
 

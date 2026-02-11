@@ -27,15 +27,18 @@ struct ChatAccessoryBar: View {
 							.scaledToFit()
 							.padding(12)
 							.frame(square: 40)
-							.background(.background, in: .circle)
+							.background(.windowBackground, in: .circle)
 					}
 					.transition(
-						.scale(scale: 0)
+						.scale(scale: 0).animation(.bouncy)
 					)
 				}
 			}
 			.padding(.horizontal, 16)
 			.geometryGroup()
+			.transition(
+				.scale(scale: 0).animation(.bouncy)
+			)
 		}
 	}
 }

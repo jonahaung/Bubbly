@@ -26,37 +26,38 @@ public struct ConversationScene: View {
 	}
 
 	public var body: some View {
-		ZStack {
-			ZStack {
-				manager.conversation.properties.theme.background.color
-				Image("adaptive")
-					.resizable(resizingMode: .tile)
-					.clipped()
-					.foregroundStyle(
-						Color.accentColor
-							.mix(with: manager.conversation.theme.outgoingBubbleColor, by: 0.7)
-					)
-			}
-			.backgroundExtensionEffect()
-			.equatable(by: 1)
+		ZStack(alignment: .trailing) {
+			Image("adaptive")
+				.resizable(resizingMode: .tile)
+				.clipped()
+				.background(
+					manager.conversation.properties.theme.background.color,
+					ignoresSafeAreaEdges: .all
+				)
+				.foregroundStyle(
+					Color.accentColor
+						.mix(with: manager.conversation.theme.outgoingBubbleColor, by: 0.7)
+				)
+				.backgroundExtensionEffect()
+				.equatable(by: 1)
 
 			if let accessoryFrame = manager.scrollController.inputAccessoryFrame {
-				MsgsScrollView(boundsWidth: accessoryFrame.width)
-					.safeAreaPadding(
-						.bottom, accessoryFrame.height
-					)
-					.fullScreenCover(item: $manager.presentation.overlayItem) { frame in
-						if let viewModel = manager.models.element(withID: frame.id) {
-							LazyLoadedView {
-								ChatOverlayView(item: frame)
-									.environment(viewModel)
-									.environment(\.conversation, manager.conversation)
-									.presentationBackgroundInteraction(.enabled)
-									.presentationBackground(.clear)
-									.environment(\.viewIsVisible, true)
+				GeometryReader { proxy in
+					MsgsScrollView(proxy: proxy)
+						.safeAreaPadding(.bottom, accessoryFrame.height)
+						.fullScreenCover(item: $manager.presentation.overlayItem) { frame in
+							if let viewModel = manager.models.element(withID: frame.id) {
+								LazyLoadedView {
+									ChatOverlayView(item: frame)
+										.environment(viewModel)
+										.environment(\.conversation, manager.conversation)
+										.presentationBackgroundInteraction(.enabled)
+										.presentationBackground(.clear)
+										.environment(\.viewIsVisible, true)
+								}
 							}
 						}
-					}
+				}
 			}
 			VStack {
 				ChatTitleBar()
@@ -64,8 +65,9 @@ public struct ConversationScene: View {
 				Spacer()
 				ChatAccessoryBar()
 				ComposeBar(composer: composer)
+					.flexible(.horizontal)
 					.onGeometryChange(for: CGRect.self) { geometry in
-						geometry.frame(in: .global)
+						geometry.frame(in: .global).integral
 					} action: { oldValue, newValue in
 						manager.scrollController.didChangeInputAccessoryFrame(oldValue, newValue)
 					}
@@ -93,29 +95,29 @@ public struct ConversationScene: View {
 	}
 }
 
-private extension ConversationScene {
-	func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
+extension ConversationScene {
+	fileprivate func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
 		switch action {
-		case let .onTapMsg(uid):
+		case .onTapMsg(let uid):
 			handleTapMsg(with: uid)
-		case let .onTapAvatar(id):
+		case .onTapAvatar(let id):
 			handleTapAvatar(with: id)
-		case let .onMarkMsg(data):
+		case .onMarkMsg(let data):
 			handleMarkMsg(with: data)
-		case let .onFocusMsgBubble(item):
+		case .onFocusMsgBubble(let item):
 			handleFocusMsgBubble(with: item)
-		case let .onUploadedAttachments(msg):
+		case .onUploadedAttachments(let msg):
 			sendMsg(msg)
-		case let .onReact(msg, reaction):
+		case .onReact(let msg, let reaction):
 			handleReact(msg, reaction)
 		}
 	}
 
-	func handleTapMsg(with uid: String) {
+	fileprivate func handleTapMsg(with uid: String) {
 		manager.setSelectedMsg(uid)
 	}
 
-	func handleReact(_ msg: Message, _ reaction: ReactionType) {
+	fileprivate func handleReact(_ msg: Message, _ reaction: ReactionType) {
 		let currentUserID = currentUser.uid
 		Task.detached {
 			do {
@@ -125,7 +127,7 @@ private extension ConversationScene {
 					senderID: currentUserID,
 					date: .now
 				)
-				try await Socket.shared
+				await Socket
 					.send(
 						.reaction(
 							reaction: .init(
@@ -143,9 +145,9 @@ private extension ConversationScene {
 		manager.presentation.updateFocusedFrame(nil)
 	}
 
-	func handleTapAvatar(with id: String) {
+	fileprivate func handleTapAvatar(with id: String) {
 		guard let viewModel = manager.models.element(withID: id),
-		      let contact = viewModel.sender()
+			let contact = viewModel.sender()
 		else {
 			return
 		}
@@ -154,17 +156,17 @@ private extension ConversationScene {
 		}
 	}
 
-	func handleMarkMsg(with msg: Message) {
+	fileprivate func handleMarkMsg(with msg: Message) {
 		manager.presentation.updateToast(.message(msg))
 	}
 
-	func handleFocusMsgBubble(with item: ChatOverlayView.Item) {
+	fileprivate func handleFocusMsgBubble(with item: ChatOverlayView.Item) {
 		manager.presentation.updateFocusedFrame(item)
 	}
 
-	func sendMsg(_ msg: Message) {
+	fileprivate func sendMsg(_ msg: Message) {
 		Task {
-			try await Socket.shared
+			await Socket
 				.send(.newMsg(rMsg: .init(msg)), conversation: manager.conversation)
 		}
 	}

@@ -40,8 +40,8 @@ final class ChatScrollCoordinator: ErrorPresenter, Equatable {
 		} set: { [weak self] newValue in
 			guard let self else { return }
 			if newValue.isPositionedByUser {
+				scrollTarget = newValue
 			} else {
-				scrollTarget = .init()
 			}
 		}
 	}
@@ -114,7 +114,8 @@ extension ChatScrollCoordinator {
 		displayLink.stop()
 		scrollPhase = newValue
 		scrolledPosition = context.geometry.scrolledPosition
-		scrollGeometry = .init(context.geometry)
+		let geometry = VScrollGeometry(context.geometry)
+		scrollGeometry = geometry
 		switch newValue {
 		case .idle:
 			displayLink.start()
@@ -157,6 +158,21 @@ extension ChatScrollCoordinator {
 		var vGeometry = newValue
 		if updateState.isUpdating {
 			guard oldValue.contentHeight != newValue.contentHeight else {
+				switch updateState {
+				case let .insertingItems(edge):
+					switch edge {
+					case .top:
+						if newValue.offsetY < -newValue.topInset, canLoadOlderMessages {
+							scrollTarget.scrollTo(y: 0)
+						}
+					case .bottom:
+						break
+					}
+					setUpdateState(.notLoading)
+					displayLink.start()
+				default:
+					break
+				}
 				return
 			}
 
@@ -165,12 +181,16 @@ extension ChatScrollCoordinator {
 			case let .insertingItems(edge):
 				switch edge {
 				case .top:
-					vGeometry.offsetY = difference
-					withTransaction(\.tracksVelocity, true) {
-						scrollTarget.scrollTo(y: vGeometry.offsetY)
-					}
+					let offsetY = newValue.offsetY + difference + newValue.topInset
+					scrollTarget.scrollTo(y: offsetY)
 				case .bottom:
-					break
+					let extraSpace = newValue.boundsHeight / 2
+					let bottomMostOffset =
+						newValue.contentHeight - newValue.boundsHeight - newValue.topInset
+							- extraSpace
+					if newValue.offsetY >= bottomMostOffset {
+						scrollTarget.scrollTo(y: bottomMostOffset + newValue.topInset)
+					}
 				}
 				setUpdateState(.notLoading)
 				displayLink.start()
@@ -200,16 +220,17 @@ extension ChatScrollCoordinator {
 			default:
 				vGeometry.offsetY = newValue.offsetY + newValue.topInset
 			}
+			scrollGeometry = vGeometry
 		} else {
 			guard oldValue.contentHeight == newValue.contentHeight else {
 				return
 			}
-
 			if updateState.isNotUpdating {
 				let direction: VerticalEdge = newValue.offsetY > oldValue.offsetY ? .bottom : .top
 				switch direction {
 				case .top:
 					if newValue.offsetY < -newValue.topInset, canLoadOlderMessages {
+
 						scrollTarget.scrollTo(y: 0)
 						loadOlderMessagesIfNeeded()
 					}
@@ -219,7 +240,6 @@ extension ChatScrollCoordinator {
 						newValue.contentHeight - newValue.boundsHeight - newValue.topInset
 							- extraSpace
 					if newValue.offsetY >= bottomMostOffset, canLoadNewerMessages {
-						scrollTarget.scrollTo(y: bottomMostOffset + newValue.topInset)
 						loadNewerMessagesIfNeeded()
 					}
 				}
@@ -299,26 +319,32 @@ extension ChatScrollCoordinator {
 				)
 			}
 		case let .layoutID(value, anchor, animated, duration):
-			if let layout = messageLayoutCache.layout(for: value) {
-				let rect = layout.frame
-				let targetY: CGFloat =
-					switch anchor {
-					case .top:
-						rect.minY - scrollGeometry.topInset
-					case .bottom:
-						scrollGeometry
-							.targetOffsetY(for: rect) + ChatLayoutConstants.bottomBarHeight
-					case .center:
-						rect.midY - scrollGeometry.boundsHeight / 4
-					default:
-						scrollGeometry.targetOffsetY(for: rect)
-					}
-				withScrollTransaction(animated: animated, duration: duration) {
-					scrollTarget.scrollTo(
-						y: targetY
-					)
-				}
+			withScrollTransaction(animated: animated, duration: duration) {
+				scrollTarget.scrollTo(
+					id: value,
+					anchor: anchor
+				)
 			}
+//			if let layout = messageLayoutCache.layout(for: value) {
+//				let rect = layout.frame
+//				let targetY: CGFloat =
+//					switch anchor {
+//					case .top:
+//						rect.minY - scrollGeometry.topInset
+//					case .bottom:
+//						scrollGeometry
+//							.targetOffsetY(for: rect) + ChatLayoutConstants.bottomBarHeight
+//					case .center:
+//						rect.midY - scrollGeometry.boundsHeight / 4
+//					default:
+//						scrollGeometry.targetOffsetY(for: rect)
+//					}
+//				withScrollTransaction(animated: animated, duration: duration) {
+//					scrollTarget.scrollTo(
+//						y: targetY
+//					)
+//				}
+//			}
 		case let .bottom(animated, duration):
 			withScrollTransaction(animated: animated, duration: duration) {
 				scrollTarget.scrollTo(
@@ -382,3 +408,4 @@ extension ChatScrollCoordinator {
 		performPendingScrollIfNeeded()
 	}
 }
+

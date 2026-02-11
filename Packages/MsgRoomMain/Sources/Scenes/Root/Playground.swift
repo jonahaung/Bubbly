@@ -14,13 +14,27 @@ import XUI
 struct Playground: View {
 	@State private var showModal = false
 	let text = Lorem.random()
+	@State private var fontName = ""
 	var body: some View {
 		List {
 			Button("Show modal") {
 				showModal = true
 			}
+			Button("Font Picker") {
+				Router.shared.presnetModel(.view(FontPicker(selection: $fontName).opaqueView()))
+			}
+			Button("Markdown View") {
+				Router.shared.presnetModel(.view(MarkdownView.ExampleView().opaqueView()))
+			}
+			Button("System Sounds") {
+				Router.shared.presnetModel(.view(SystemSoundTesterView().opaqueView()))
+			}
 			Button("Show Toast") {
-				ToastPresenter.show(Lorem.random())
+				ToastPresenter.show(allowsBackgroundTap: true) {
+					Text(Lorem.random())
+				} action: {
+					print("tapped")
+				}
 			}
 			Button("Show Loading") {
 				Loading.show(true)
@@ -30,11 +44,11 @@ struct Playground: View {
 		.navigationTitle("Playgound")
 		.overlay {
 			if showModal {
-				ModalOverlay(.top, from: .top) {
-					HighlightedTextDemo()
-//					Text(Lorem.random())
+				ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {
+					Text(Lorem.random())
 						.padding()
-						.background(.thickMaterial, in: .containerRelative)
+						.background(.bar, in: .rect)
+						.colorScheme(.dark)
 				} onClose: {
 					showModal = false
 				}

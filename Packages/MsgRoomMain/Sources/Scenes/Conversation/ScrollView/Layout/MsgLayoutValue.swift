@@ -1,10 +1,3 @@
-//
-//  MsgLayoutValue.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 3/9/25.
-//
-
 import Core
 import Database
 import SwiftUI
@@ -18,16 +11,16 @@ struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
 	var anchor: UnitPoint {
 		switch recipient {
 		case .send:
-			.topTrailing
+				.topTrailing
 		case .receive:
-			.topLeading
+				.topLeading
 		case .assistant:
-			.top
+				.top
 		}
 	}
 
 	static func == (lhs: MsgLayoutValue, rhs: MsgLayoutValue) -> Bool {
-		lhs.uid == rhs.uid
+		lhs.uid == rhs.uid && lhs.recipient == rhs.recipient
 	}
 
 	static let empty = MsgLayoutValue(

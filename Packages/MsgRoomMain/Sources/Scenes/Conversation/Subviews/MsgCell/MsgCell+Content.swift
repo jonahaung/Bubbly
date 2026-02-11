@@ -41,9 +41,6 @@ extension MsgCell {
 				)
 			}
 			.font(theme.font)
-			.textRenderer(
-				QuakeRenderer(moveAmount: viewIsVisible ? 3 : 1)
-			)
 		}
 	}
 
