@@ -30,7 +30,6 @@ struct ChatOverlayView: View {
 	@Environment(MsgCellViewModel.self) private var viewModel
 	@Environment(\.msgCellActions) private var msgCellActions
 	@Environment(\.conversation) private var conversation
-	@Environment(\.dismiss) private var dismiss
 	@State private var transitionState = TransitState.hidden
 	@Environment(\.conversationTheme) private var theme
 
@@ -71,6 +70,7 @@ struct ChatOverlayView: View {
 			MsgCell.Content(viewModel: viewModel, theme: theme, selectedMsg: nil)
 				.frame(size: item.frame.size)
 				.position(x: item.frame.midX, y: item.frame.midY)
+			
 
 			RoomFocesedOverlayBar()
 				.position(x: item.frame.midX, y: item.frame.maxY + 10)
@@ -89,6 +89,10 @@ struct ChatOverlayView: View {
 				transitionState = .appeared
 			}
 		}
+	}
+
+	private func dismiss() {
+		msgCellActions?(.onFocusMsgBubble(nil))
 	}
 }
 

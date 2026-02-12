@@ -11,11 +11,11 @@ import SwiftUI
 import XUI
 
 struct ChatTitleBar: View {
-	@Environment(\.dismiss) private var dismiss
-	@Environment(ChatViewManager.self) private var manager
+	@Environment(ConversationViewModel.self) private var viewModel
 	@Environment(\.conversationTheme) private var theme
 
 	var body: some View {
+		let manager = viewModel.manager
 		ZStack(alignment: .top) {
 			HStack {
 				switch manager.conversation.kind {
@@ -41,23 +41,11 @@ struct ChatTitleBar: View {
 					)
 			}
 			.onTapGesture {
-				Router.shared
-					.pushToNav(
-						NavPath
-							.conversationDetails(manager.conversation)
-					)
+				viewModel.send(.openConversationDetails)
 			}
 			HStack(alignment: .top) {
-				AsyncButton(
-					options: [
-						.disallowParallelOperations,
-						.enableTintFeedback,
-						.disableButtonOnLoading,
-						.disallowParallelOperations,
-					]
-				) {
-					await manager.saveConversationChanges()
-					dismiss()
+				Button {
+					Router.shared.pop()
 				} label: {
 					Image(systemSymbol: .chevronBackward)
 				}
@@ -66,15 +54,8 @@ struct ChatTitleBar: View {
 
 				Spacer()
 
-				AsyncButton(
-					options: [
-						.disallowParallelOperations,
-						.enableTintFeedback,
-						.disableButtonOnLoading,
-						.disallowParallelOperations,
-					]
-				) {
-					try await Task.sleep(seconds: 1)
+				Button {
+					viewModel.send(.loadMore)
 				} label: {
 					Image(systemSymbol: .quoteClosing)
 				}

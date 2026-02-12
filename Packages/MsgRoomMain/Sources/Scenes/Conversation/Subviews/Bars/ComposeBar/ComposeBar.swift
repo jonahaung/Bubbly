@@ -13,7 +13,7 @@ struct ComposeBar: View {
 	let composer: ChatComposer
 	@Environment(\.conversationTheme) private var theme
 	var body: some View {
-		LazyVStack(spacing: 0) {
+		VStack(spacing: 0) {
 			switch composer.source {
 			case .emoji:
 				EmojiPanel()
@@ -75,13 +75,11 @@ struct ComposeBar: View {
 
 private extension ComposeBar {
 	struct EmojiPanel: View {
-		@Environment(ChatComposer.self) private var composer: ChatComposer
+		@Environment(ConversationViewModel.self) private var viewModel
 
 		var body: some View {
 			EmojiPicker { emoji in
-				composer.inputText.text.append(emoji.value)
-				composer.inputText.selectAll()
-				composer.source = .text
+				viewModel.send(.appendEmoji(emoji.value))
 			}
 			.background(.regularMaterial, ignoresSafeAreaEdges: .bottom)
 		}

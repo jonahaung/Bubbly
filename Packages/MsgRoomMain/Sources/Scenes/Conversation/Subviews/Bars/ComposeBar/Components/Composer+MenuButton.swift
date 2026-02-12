@@ -11,13 +11,14 @@ import SwiftUI
 extension ComposeBar {
 	struct ComposeBarMenuButton: View {
 		@Environment(ChatComposer.self) private var composer: ChatComposer
+		@Environment(ConversationViewModel.self) private var viewModel
 		@Environment(\.sharedNamespace) private var namespace
 		@Environment(\.sharedFocusState) private var sharedFocus
 
 		var body: some View {
 			Button {
 				let isMenu = composer.source == .menu
-				composer.source = isMenu ? .text : .menu
+				viewModel.send(.updateComposerSource(isMenu ? .text : .menu))
 			} label: {
 				TwoLinesShape()
 					.frame(square: 24)

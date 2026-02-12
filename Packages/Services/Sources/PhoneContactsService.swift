@@ -38,14 +38,18 @@ public final class PhoneContactsService {
 			results.append(contentsOf: containerResults)
 		}
 
-		return results
-			.compactMap { Contact(cnContact: $0) }
-			.removeDuplicates { $0.mobile == $1.mobile }
+		var seenMobiles = Set<String>()
+		let mapped = results.compactMap { Contact(cnContact: $0) }
+		let deduped = mapped.filter { contact in
+		    guard !contact.mobile.isEmpty else { return false }
+		    return seenMobiles.insert(contact.mobile).inserted
+		}
+		return deduped
 	}
 
 	@discardableResult
 	@concurrent
-	public func syncContacts() async throws -> sending [Contact] {
+	public func syncContacts() async throws -> [Contact] {
 		let phoneContacts = try await fetchContacts()
 		let phoneNumberKit = PhoneNumberKit()
 		let dbContact = await Store.shared.contactStore
@@ -69,3 +73,4 @@ public final class PhoneContactsService {
 		return contacts.compactMap(\.self)
 	}
 }
+

@@ -12,13 +12,13 @@ import XUI
 extension ComposeBar {
 	struct ComposeBarSendButton: View {
 		@Environment(ChatComposer.self) private var composer: ChatComposer
-		@Environment(\.conversation) private var conversation
+		@Environment(ConversationViewModel.self) private var viewModel
 
 		var body: some View {
 			AsyncButton(
 				options: [.disallowParallelOperations, .showAlertOnError]
 			) {
-				composer.handlePrimaryAction(conversation)
+				viewModel.send(.sendMessage(composer.inputText.text))
 			} label: {
 				Image(systemName: imageName)
 					.resizable()

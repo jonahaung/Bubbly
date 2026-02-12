@@ -14,6 +14,7 @@ let package = Package(
 	],
 	dependencies: [
 		.package(name: "Services", path: "../Services"),
+		.package(name: "Database", path: "../Database"),
 	],
 	targets: [
 		.target(
@@ -27,7 +28,11 @@ let package = Package(
 		),
 		.testTarget(
 			name: "MsgRoomMainTests",
-			dependencies: ["MsgRoomMain"]
+			dependencies: [
+				"MsgRoomMain",
+				.product(name: "Services", package: "Services"),
+				.product(name: "Database", package: "Database"),
+			]
 		),
 	]
 )

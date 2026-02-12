@@ -497,11 +497,3 @@ private extension Lorem {
 		}
 	}
 }
-
-// MARK: - Convenience
-
-private extension Array {
-	func random() -> Element {
-		randomElement()!
-	}
-}

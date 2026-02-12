@@ -10,17 +10,18 @@ import SwiftUI
 import XUI
 
 struct ChatAccessoryBar: View {
-	@Environment(ChatViewManager.self) private var manager
-	@Environment(ChatComposer.self) private var composer
+
+	@Environment(ConversationViewModel.self) private var viewModel
 	@Namespace private var chatNoticeView
 
 	var body: some View {
-		if let accessory = manager.presentation.bottomAccessory {
-			HStack(alignment: .bottom) {
+		let manager = viewModel.manager
+		HStack(alignment: .bottom) {
+			if let accessory = manager.presentation.bottomAccessory {
 				Spacer()
 				if accessory == .scrollDownButton {
 					AsyncButton {
-						manager.resetDatasource()
+						viewModel.send(.loadMore)
 					} label: {
 						Image(systemName: "chevron.down")
 							.resizable()
@@ -34,11 +35,8 @@ struct ChatAccessoryBar: View {
 					)
 				}
 			}
-			.padding(.horizontal, 16)
-			.geometryGroup()
-			.transition(
-				.scale(scale: 0).animation(.bouncy)
-			)
 		}
+		.padding(.horizontal, 16)
+		.geometryGroup()
 	}
 }

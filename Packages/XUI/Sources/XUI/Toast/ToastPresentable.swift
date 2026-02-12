@@ -17,10 +17,14 @@ private struct ToastPresentableodifier: ViewModifier {
 					ModalOverlay(
 						toast.style.alignment,
 						from: toast.style.edge,
-						allowsBackgroundTap: toast.allowsBackgroundTap
+						allowsBackgroundTap: toast.allowsBackgroundTap,
 					) {
 						toast.node.eraseToNode()
 							.lineHeight(.multiple(factor: 1.1))
+							.onTapGesture {
+								toastPresenter.dismiss()
+								toast.action?()
+							}
 							.padding(16)
 							.glassEffect(.regular, in: .containerRelative)
 							.runningBorder(lineWidth: 2, cornerRadius: 12)

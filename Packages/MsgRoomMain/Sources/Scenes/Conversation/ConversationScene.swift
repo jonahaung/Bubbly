@@ -12,31 +12,29 @@ import SwiftUI
 import XUI
 
 public struct ConversationScene: View {
-	@LazyState private var manager: ChatViewManager
-	@LazyState private var composer: ChatComposer
+
+	@LazyState private var viewModel: ConversationViewModel
+	@Environment(\.dismiss) private var dismiss
 	@FocusState private var focusState: String?
-	@Environment(Router.self) private var router
-	@Environment(\.currentUser) private var currentUser
 	@Namespace private var namespace
-	@Environment(\.typography) private var typography
 
 	public init(_ prefetchedData: ConversationInitializer.PrefetchedData) {
-		_manager = .init(wrappedValue: .init(prefetchedData))
-		_composer = .init(wrappedValue: .init(id: prefetchedData.conversation.uid))
+		_viewModel = .init(wrappedValue: .init(prefetchedData))
 	}
 
 	public var body: some View {
+		let manager = viewModel.manager
+		let composer = viewModel.composer
 		ZStack(alignment: .trailing) {
 			Image("adaptive")
 				.resizable(resizingMode: .tile)
 				.clipped()
 				.background(
-					manager.conversation.properties.theme.background.color,
+					viewModel.state.conversation.properties.theme.background.color,
 					ignoresSafeAreaEdges: .all
 				)
 				.foregroundStyle(
-					Color.accentColor
-						.mix(with: manager.conversation.theme.outgoingBubbleColor, by: 0.7)
+					AngularGradient(colors: Color.adaptableColors, center: .center)
 				)
 				.backgroundExtensionEffect()
 				.equatable(by: 1)
@@ -45,17 +43,8 @@ public struct ConversationScene: View {
 				GeometryReader { proxy in
 					MsgsScrollView(proxy: proxy)
 						.safeAreaPadding(.bottom, accessoryFrame.height)
-						.fullScreenCover(item: $manager.presentation.overlayItem) { frame in
-							if let viewModel = manager.models.element(withID: frame.id) {
-								LazyLoadedView {
-									ChatOverlayView(item: frame)
-										.environment(viewModel)
-										.environment(\.conversation, manager.conversation)
-										.presentationBackgroundInteraction(.enabled)
-										.presentationBackground(.clear)
-										.environment(\.viewIsVisible, true)
-								}
-							}
+						.task {
+							viewModel.send(.appear)
 						}
 				}
 			}
@@ -72,26 +61,30 @@ public struct ConversationScene: View {
 						manager.scrollController.didChangeInputAccessoryFrame(oldValue, newValue)
 					}
 			}
+
+			if let frame = manager.presentation.overlayItem, let viewModel = manager.models.element(
+				withID: frame.id
+			) {
+				ChatOverlayView(item: frame)
+					.environment(viewModel)
+					.environment(\.conversation, self.viewModel.state.conversation)
+					.environment(\.viewIsVisible, true)
+			}
 		}
 		.toolbarVisibility(.hidden, for: .navigationBar)
+		.environment(viewModel)
 		.environment(manager)
 		.environment(composer)
-		.environment(\.backgroundColor, manager.conversation.theme.background.color)
-		.environment(\.conversationTheme, .init(manager.conversation))
-		.environment(\.conversation, manager.conversation)
+		.environment(\.backgroundColor, viewModel.state.conversation.theme.background.color)
+		.environment(\.conversationTheme, .init(viewModel.state.conversation))
+		.environment(\.conversation, viewModel.state.conversation)
 		.environment(\.attachmentFetcher, manager.attachments)
-		.environment(\.selectedMsg, manager.presentation.selectedMsg)
+		.environment(\.selectedMsg, viewModel.state.selectedMsg)
 		.environment(\.sharedFocusState, SharedFocusState($focusState))
 		.environment(\.sharedNamespace, SharedNamespace(namespace))
 		.environment(\.msgCellActions, MsgCellAction(action: handleMsgCellInteraction))
-		.equatable(by: manager.reloadID)
-		.task {
-			do {
-				try await manager.onViewAppear()
-			} catch {
-				await manager.showError(error)
-			}
-		}
+		.equatable(by: viewModel.state.reloadID)
+		
 	}
 }
 
@@ -99,75 +92,17 @@ extension ConversationScene {
 	fileprivate func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
 		switch action {
 		case .onTapMsg(let uid):
-			handleTapMsg(with: uid)
+			viewModel.send(.tapMessage(uid))
 		case .onTapAvatar(let id):
-			handleTapAvatar(with: id)
+			viewModel.send(.tapAvatar(id))
 		case .onMarkMsg(let data):
-			handleMarkMsg(with: data)
+			viewModel.send(.markMessage(data))
 		case .onFocusMsgBubble(let item):
-			handleFocusMsgBubble(with: item)
+			viewModel.send(.focusMsgBubble(item))
 		case .onUploadedAttachments(let msg):
-			sendMsg(msg)
+			viewModel.send(.uploadedAttachments(msg))
 		case .onReact(let msg, let reaction):
-			handleReact(msg, reaction)
-		}
-	}
-
-	fileprivate func handleTapMsg(with uid: String) {
-		manager.setSelectedMsg(uid)
-	}
-
-	fileprivate func handleReact(_ msg: Message, _ reaction: ReactionType) {
-		let currentUserID = currentUser.uid
-		Task.detached {
-			do {
-				try await Task.sleep(seconds: 1)
-				let reaction = Reaction(
-					rawValue: reaction.rawValue,
-					senderID: currentUserID,
-					date: .now
-				)
-				await Socket
-					.send(
-						.reaction(
-							reaction: .init(
-								reaction: reaction,
-								msgID: msg.uid,
-								conID: manager.conversation.uid
-							)
-						),
-						conversation: manager.conversation
-					)
-			} catch {
-				await manager.showError(error)
-			}
-		}
-		manager.presentation.updateFocusedFrame(nil)
-	}
-
-	fileprivate func handleTapAvatar(with id: String) {
-		guard let viewModel = manager.models.element(withID: id),
-			let contact = viewModel.sender()
-		else {
-			return
-		}
-		if let url = DeepLinkCoordinator.shared.url(for: .profile(id: contact.uid)) {
-			UIApplication.shared.open(url)
-		}
-	}
-
-	fileprivate func handleMarkMsg(with msg: Message) {
-		manager.presentation.updateToast(.message(msg))
-	}
-
-	fileprivate func handleFocusMsgBubble(with item: ChatOverlayView.Item) {
-		manager.presentation.updateFocusedFrame(item)
-	}
-
-	fileprivate func sendMsg(_ msg: Message) {
-		Task {
-			await Socket
-				.send(.newMsg(rMsg: .init(msg)), conversation: manager.conversation)
+			viewModel.send(.react(msg, reaction))
 		}
 	}
 }

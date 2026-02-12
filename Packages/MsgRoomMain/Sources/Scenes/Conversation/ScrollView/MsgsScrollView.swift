@@ -76,12 +76,5 @@ struct MsgsScrollView: View {
 		.scrollBounceBehavior(.always, axes: .vertical)
 		.defaultScrollAnchor(.bottom, for: .sizeChanges)
 		.scrollPosition(manager.scrollController.scrollPosition)
-		.task {
-			do {
-				try await manager.onViewAppear()
-			} catch {
-				await manager.showError(error)
-			}
-		}
 	}
 }

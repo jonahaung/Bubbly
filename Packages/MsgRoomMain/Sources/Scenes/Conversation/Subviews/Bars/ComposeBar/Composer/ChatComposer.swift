@@ -249,6 +249,7 @@ extension ChatComposer {
 	private func applySnapshot(_ snapshot: ChatComposerSnapshot) {
 		attachments = snapshot.attachments
 		source = snapshot.source
+		
 	}
 }
 

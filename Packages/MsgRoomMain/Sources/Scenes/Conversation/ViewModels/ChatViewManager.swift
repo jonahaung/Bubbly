@@ -15,6 +15,7 @@ import XUI
 
 @Observable
 final class ChatViewManager: ErrorPresenter, ViewReloadable, Equatable {
+
 	@ObservationIgnored let messageSource: ChatDatasource
 	@ObservationIgnored let scrollController: ChatScrollCoordinator
 	@ObservationIgnored var presentation: ChatPresentationState

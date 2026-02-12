@@ -35,7 +35,8 @@ extension ChatViewManager: ChatDatasourceDelegate {
 		} else {
 			if canResetDatasource {
 				let toast = Toast(
-					node: Text(msg.displayText).opaqueView(), allowsBackgroundTap: false
+					node: Text(msg.displayText).opaqueView(),
+					allowsBackgroundTap: false
 				) {
 					self.resetDatasource()
 				}
@@ -51,7 +52,7 @@ extension ChatViewManager: ChatDatasourceDelegate {
 								.font(
 									.system(
 										size:
-										UIFont
+											UIFont
 											.preferredFont(forTextStyle: .headline).pointSize,
 										weight: .medium
 									)
@@ -60,7 +61,7 @@ extension ChatViewManager: ChatDatasourceDelegate {
 								.font(
 									.system(
 										size:
-										UIFont
+											UIFont
 											.preferredFont(forTextStyle: .subheadline).pointSize,
 										weight: .regular
 									)
@@ -70,12 +71,12 @@ extension ChatViewManager: ChatDatasourceDelegate {
 						self.scrollController
 							.enqueueScroll(
 								to:
-								.layoutID(
-									value: msg.uid,
-									anchor: .bottom,
-									animated: true,
-									duration: 0.3
-								)
+										.id(
+											value: msg.uid,
+											anchor: .bottom,
+											animated: true,
+											duration: 0.3
+										)
 							)
 					}
 				}

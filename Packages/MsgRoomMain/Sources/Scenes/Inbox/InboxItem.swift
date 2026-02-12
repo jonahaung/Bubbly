@@ -25,6 +25,10 @@ struct InboxItem: Sendable, Identifiable {
 }
 
 extension InboxItem: ImageViewItem {
+	var imageName: String? {
+		conversation.name
+	}
+
 	var subFolders: [String] {
 		switch conversation.kind {
 		case let .contact(contact):

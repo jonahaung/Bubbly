@@ -12,6 +12,7 @@ public protocol ImageViewItem: Sendable, PhotoGalleryItem {
 	var remoteURL: URL? { get }
 	var imageID: String { get }
 	var subFolders: [String] { get }
+	var imageName: String? { get }
 }
 
 public extension ImageViewItem {

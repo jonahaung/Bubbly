@@ -12,6 +12,10 @@ import SwiftUI
 import XUI
 
 extension Contact: @retroactive ImageViewItem {
+	public var imageName: String? {
+		self.name
+	}
+
 	public var subFolders: [String] {
 		["Contacts", "Profile Photos", uid]
 	}
@@ -30,6 +34,10 @@ extension Contact: @retroactive ImageViewItem {
 }
 
 extension Database.Group: @retroactive ImageViewItem {
+	public var imageName: String? {
+		self.name
+	}
+
 	public var subFolders: [String] {
 		["Groups", "Profile Photos", uid]
 	}
@@ -39,7 +47,7 @@ extension Database.Group: @retroactive ImageViewItem {
 	}
 
 	public var remoteURL: URL? {
-		.init(string: photoURL ?? "") ?? DemoImages.demoPhotosURLs.random()!
+		.init(string: photoURL ?? "") ?? DemoImages.demoPhotosURLs.random()
 	}
 
 	public var imageID: String {
@@ -48,6 +56,10 @@ extension Database.Group: @retroactive ImageViewItem {
 }
 
 extension Attachment: @retroactive ImageViewItem {
+	public var imageName: String? {
+		"Attachment"
+	}
+
 	public var subFolders: [String] {
 		var values = ["Conversations", "Messages", "Attachments", attachmentType.description]
 		let split = uid.components(separatedBy: "_")

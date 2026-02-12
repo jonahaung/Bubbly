@@ -14,6 +14,7 @@ public struct Toast: Sendable, @MainActor Identifiable, @MainActor Hashable {
 	public let duration: Double
 	public let style: ToastStyle
 	public let allowsBackgroundTap: Bool
+	public let action: (@MainActor @Sendable () -> Void)?
 
 	public init(node: any RenderNode,
 	            duration: Double = 5,
@@ -26,6 +27,7 @@ public struct Toast: Sendable, @MainActor Identifiable, @MainActor Hashable {
 		self.duration = duration
 		self.style = style
 		self.allowsBackgroundTap = allowsBackgroundTap
+		self.action = action
 	}
 
 	public init(message: String,

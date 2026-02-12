@@ -11,7 +11,7 @@ import XUI
 extension ComposeBar {
 	struct ComposeBarSourceButton: View {
 		let source: ChatComposer.Source
-		@Environment(ChatComposer.self) private var composer
+		@Environment(ConversationViewModel.self) private var viewModel
 		@Environment(\.sharedNamespace) private var namespace
 		var body: some View {
 			Button(action: action) {
@@ -26,7 +26,7 @@ extension ComposeBar {
 		}
 
 		private func action() {
-			composer.updateSource(source)
+			viewModel.send(.updateComposerSource(source))
 		}
 	}
 }

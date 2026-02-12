@@ -31,7 +31,8 @@ extension MsgCell {
 								)
 								.matchedGeometryEffect(
 									id: contact.uid,
-									in: namespace.unsafelyUnwrapped.value
+									in: namespace.unsafelyUnwrapped.value,
+									isSource: true
 								)
 							}
 						}
