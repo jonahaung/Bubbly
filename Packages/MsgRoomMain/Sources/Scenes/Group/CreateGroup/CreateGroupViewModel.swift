@@ -28,7 +28,7 @@ final class CreateGroupViewModel {
 
 	func createGroup() async throws {
 		guard let currentUserID = currentUserId, let image = pickedPhoto?.uiImage else {
-			fatalError()
+			fatalError("explanation")
 		}
 		setLoading(true)
 		let groupID = UUID().uuidString

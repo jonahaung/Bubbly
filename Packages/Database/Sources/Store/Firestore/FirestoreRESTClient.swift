@@ -137,7 +137,8 @@ public final class FirestoreRESTClient {
 			structuredQuery["orderBy"] = orderBy.map { [
 				"field": ["fieldPath": $0],
 				"direction": "ASCENDING",
-			] }
+			]
+			}
 		}
 
 		if let limit {

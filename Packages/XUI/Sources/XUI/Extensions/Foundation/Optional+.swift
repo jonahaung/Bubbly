@@ -6,7 +6,7 @@ public extension Optional {
 		if let value = self {
 			return value
 		}
-		fatalError()
+		fatalError("explanation")
 	}
 }
 

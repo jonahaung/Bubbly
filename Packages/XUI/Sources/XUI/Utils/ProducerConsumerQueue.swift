@@ -43,7 +43,7 @@ public final class ProducerConsumerQueue<T> {
 	public func tryDequeue() -> T? {
 		lock.lock()
 		defer { lock.unlock() }
-		guard count > 0 else { return nil }
+		guard !isEmpty else { return nil }
 		let item = buffer[head]!
 		buffer[head] = nil
 		head = (head + 1) & (buffer.count - 1)
@@ -65,7 +65,7 @@ public final class ProducerConsumerQueue<T> {
 	/// Whether the queue is empty.
 	public var isEmpty: Bool {
 		lock.lock()
-		let result = count == 0
+		let result = self.count == 0
 		lock.unlock()
 		return result
 	}
@@ -146,7 +146,7 @@ public actor AsyncProducerConsumerQueue<T: Sendable> {
 	}
 
 	/// Convenience: An async sequence interface for iterating.
-	public nonisolated var stream: AsyncStream<T> {
+	nonisolated public var stream: AsyncStream<T> {
 		AsyncStream { continuation in
 			Task {
 				while let value = await self.dequeue() {

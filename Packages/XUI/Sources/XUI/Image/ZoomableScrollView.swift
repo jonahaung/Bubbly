@@ -75,7 +75,7 @@ extension ZoomableScrollViewImpl {
 
 		@available(*, unavailable)
 		required init?(coder _: NSCoder) {
-			fatalError()
+			fatalError("explanation")
 		}
 
 		init(coordinator: Coordinator, doubleTap: AnyPublisher<Void, Never>) {

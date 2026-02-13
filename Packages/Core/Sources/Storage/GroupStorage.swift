@@ -1,7 +1,7 @@
 import Foundation
 
 public struct GroupStorage {
-	public nonisolated(unsafe) static let shared: GroupStorage = {
+	nonisolated(unsafe) public static let shared: GroupStorage = {
 		if let defaults = UserDefaults(suiteName: AppInformation.groupID) {
 			return GroupStorage(store: defaults)
 		} else {

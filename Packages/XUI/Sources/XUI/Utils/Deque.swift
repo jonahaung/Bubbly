@@ -28,10 +28,6 @@ public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
 
 	// MARK: - Properties
 
-	public var isEmpty: Bool {
-		count == 0
-	}
-
 	public var isFull: Bool {
 		count == array.count
 	}

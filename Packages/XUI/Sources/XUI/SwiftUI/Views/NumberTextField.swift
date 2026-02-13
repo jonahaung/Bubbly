@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct _NumberTextField: View {
+public struct NumberTextField: View {
 	private var value: Binding<Int>
 	private let title: String
 	private let delima: String?

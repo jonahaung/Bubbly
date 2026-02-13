@@ -1,7 +1,3 @@
-// The MIT License (MIT)
-//
-// Copyright (c) 2015-2024 Alexander Grebenyuk (github.com/kean).
-
 import Foundation
 
 public extension ImagePipeline {
@@ -103,7 +99,7 @@ public extension ImagePipeline {
 		}
 	}
 
-	private nonisolated func _loadImage(with request: ImageRequest,
+	nonisolated private func _loadImage(with request: ImageRequest,
 	                                    isDataTask: Bool = false,
 	                                    progress: (
 	                                    	@MainActor @Sendable (ImageResponse?,

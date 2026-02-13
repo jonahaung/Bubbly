@@ -16,7 +16,7 @@ public extension Collection where Indices.Iterator.Element == Index {
 
 public extension Array {
 	mutating func shuffle() {
-		if count == 0 {
+		if isEmpty {
 			return
 		}
 

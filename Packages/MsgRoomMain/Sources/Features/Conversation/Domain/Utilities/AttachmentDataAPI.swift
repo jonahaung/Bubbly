@@ -95,7 +95,7 @@ private extension AttachmentDataAPI {
 			}
 			return nil
 		case .videoUploading:
-			fatalError()
+			fatalError("explanation")
 		}
 	}
 

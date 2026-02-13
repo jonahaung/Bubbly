@@ -138,7 +138,7 @@ public struct SystemImageWithShape: View {
 		public enum IconBackground: Hashable, Sendable {
 			case plain
 			case gray
-			case color(_ Color: Color)
+			case color(_ color: Color)
 			case randomColor
 		}
 	}

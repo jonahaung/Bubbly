@@ -7,7 +7,7 @@ public extension UIApplication {
 
 	func screenSize() -> CGSize {
 		guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
-			fatalError()
+			fatalError("explanation")
 		}
 		return windowScene.windows.first?.rootViewController?.view.frame.size ?? windowScene.screen
 			.bounds.size

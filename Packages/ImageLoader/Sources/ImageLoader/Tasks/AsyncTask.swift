@@ -352,7 +352,8 @@ final class TaskPool<Key: Hashable, Value: Sendable, Error: Sendable> {
 	/// the given key in the pool, the existing task is returned. Tasks are
 	/// automatically removed from the pool when they are disposed.
 	func publisherForKey(_ key: @autoclosure () -> Key,
-	                     _ make: () -> AsyncTask<Value, Error>) -> AsyncTask<Value, Error>.Publisher
+	                     _ make: () -> AsyncTask<Value, Error>) -> AsyncTask<Value, Error>
+		.Publisher
 	{
 		guard isCoalescingEnabled else {
 			return make().publisher

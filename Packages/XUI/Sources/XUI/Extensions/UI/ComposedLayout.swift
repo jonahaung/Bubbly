@@ -48,17 +48,17 @@ public struct ComposedLayout: Layout {
 		let cViews = centerViews(subviews: subviews)
 		let bViews = bottomViews(subviews: subviews)
 
-		let tSize = tViews.count == 0 ? .zero : hStack.sizeThatFits(
+		let tSize = tViews.isEmpty ? .zero : hStack.sizeThatFits(
 			proposal: proposal,
 			subviews: tViews,
 			cache: &cache.topCache
 		)
-		let cSize = cViews.count == 0 ? .zero : vStack.sizeThatFits(
+		let cSize = cViews.isEmpty ? .zero : vStack.sizeThatFits(
 			proposal: proposal,
 			subviews: cViews,
 			cache: &cache.centerCache
 		)
-		let bSize = bViews.count == 0 ? .zero : hStack.sizeThatFits(
+		let bSize = bViews.isEmpty ? .zero : hStack.sizeThatFits(
 			proposal: proposal,
 			subviews: bViews,
 			cache: &cache.bottomCache

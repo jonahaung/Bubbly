@@ -232,7 +232,7 @@ public class NetworkManager: NSObject {
 }
 
 extension NetworkManager: URLSessionDelegate, URLSessionTaskDelegate {
-	public nonisolated func urlSession(_: URLSession,
+	nonisolated public func urlSession(_: URLSession,
 	                                   task _: URLSessionTask,
 	                                   didCompleteWithError error: Error?)
 	{
@@ -242,7 +242,7 @@ extension NetworkManager: URLSessionDelegate, URLSessionTaskDelegate {
 		}
 	}
 
-	public nonisolated func urlSession(_: URLSession,
+	nonisolated public func urlSession(_: URLSession,
 	                                   task _: URLSessionTask,
 	                                   didFinishCollecting _: URLSessionTaskMetrics)
 	{

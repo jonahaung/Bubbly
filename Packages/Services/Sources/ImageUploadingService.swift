@@ -41,7 +41,8 @@ public struct ImageUploadingService: Sendable {
 	public func uploadImage(_ image: UIImage,
 	                        size: CGSize?,
 	                        to path: Path,
-	                        onProgress: (@Sendable (Progress?) -> Void)? = nil) async throws -> URL
+	                        onProgress: (@Sendable (Progress?) -> Void)? = nil) async throws
+		-> URL
 	{
 		let mediaManager = MediaManager.shared
 

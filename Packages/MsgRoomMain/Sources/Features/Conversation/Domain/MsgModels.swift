@@ -203,14 +203,12 @@ public extension MsgModels {
 private extension MsgModels {
 	func rebuildLayouts(models: [MsgCellViewModel]) {
 		let messages = models.map(\.msg)
-		for (index, model) in models.enumerated() {
-			if style(for: model.id) == nil {
-				let prevMsg = messages[safe: index - 1]
-				let nextMsg = messages[safe: index + 1]
-				let style = bubbleFactory.style(for: model.msg, previous: prevMsg, next: nextMsg)
-				styleCache[model.msg.uid] = style
-				model.update(layout: style)
-			}
+		for (index, model) in models.enumerated() where style(for: model.id) == nil {
+			let prevMsg = messages[safe: index - 1]
+			let nextMsg = messages[safe: index + 1]
+			let style = bubbleFactory.style(for: model.msg, previous: prevMsg, next: nextMsg)
+			styleCache[model.msg.uid] = style
+			model.update(layout: style)
 		}
 	}
 

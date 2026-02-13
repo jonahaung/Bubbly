@@ -279,7 +279,8 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 
 	/// Perform the page crawling
 	private func performPageCrawling(_ htmlCode: String,
-	                                 response: SwiftLinkPreviewResponse) -> SwiftLinkPreviewResponse
+	                                 response: SwiftLinkPreviewResponse)
+		-> SwiftLinkPreviewResponse
 	{
 		var result = crawIcon(htmlCode, result: response)
 		let sanitizedHtmlCode = htmlCode.deleteTagByPattern(Regex.linkPattern).extendedTrim

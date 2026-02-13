@@ -7,7 +7,6 @@ extension ComposeBar {
 		@Bindable var composer: ChatComposer
 		@Environment(\.sharedFocusState) private var focusState
 		@Environment(\.conversationTheme) private var theme
-		@Environment(\.sharedNamespace) private var namespace
 		var body: some View {
 			ZStack(alignment: .trailing) {
 				textField()

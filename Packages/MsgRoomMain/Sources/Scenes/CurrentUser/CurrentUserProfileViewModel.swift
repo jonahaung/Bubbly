@@ -55,7 +55,7 @@ public final class CurrentUserProfileViewModel: ErrorPresenter {
 		guard
 			let currentUser = Auth.auth().currentUser
 		else {
-			fatalError()
+			fatalError("explanation")
 		}
 		let imageUploader = ImageUploadingService()
 		let url = try await imageUploader.uploadImage(

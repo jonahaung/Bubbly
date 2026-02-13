@@ -69,7 +69,7 @@ final class PhotoPickerManager {
 		}
 	}
 
-	private nonisolated static func processSelections(_ selections: [SelectedPhotoItem]) async
+	nonisolated private static func processSelections(_ selections: [SelectedPhotoItem]) async
 		-> [SelectedImage]
 	{
 		var results = [SelectedImage]()
@@ -85,7 +85,7 @@ final class PhotoPickerManager {
 		return results
 	}
 
-	private nonisolated static func decodeImage(from photo: SelectedPhotoItem) async
+	nonisolated private static func decodeImage(from photo: SelectedPhotoItem) async
 		-> SelectedImage?
 	{
 		guard let data = await loadImageData(from: photo) else { return nil }
@@ -93,7 +93,7 @@ final class PhotoPickerManager {
 		return SelectedImage(id: photo.id, image: uiImage)
 	}
 
-	private nonisolated static func loadImageData(from photo: SelectedPhotoItem) async -> Data? {
+	nonisolated private static func loadImageData(from photo: SelectedPhotoItem) async -> Data? {
 		try? await withTaskCancellationHandler(
 			operation: {
 				try await photo.loadTransferable(type: Data.self)

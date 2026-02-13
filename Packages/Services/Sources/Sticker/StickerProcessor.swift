@@ -3,7 +3,7 @@ import PhotosUI
 import SwiftUI
 import Vision
 
-public nonisolated struct StickerProcessor: Sendable {
+nonisolated public struct StickerProcessor: Sendable {
 	public enum ExtractionError: Error {
 		case ciImageCreationFailed
 		case requestFailed

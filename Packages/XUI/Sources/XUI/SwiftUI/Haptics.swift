@@ -8,7 +8,7 @@ public struct Haptics: Sendable {
 		set { _shared.value = newValue }
 	}
 
-	private nonisolated(unsafe) static var _shared = Mutex(Haptics())
+	nonisolated(unsafe) private static var _shared = Mutex(Haptics())
 
 	@MainActor public static func play(_ style: UIImpactFeedbackGenerator.FeedbackStyle,
 	                                   _ intensity: CGFloat)

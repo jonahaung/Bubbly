@@ -6,7 +6,6 @@ extension ComposeBar {
 	struct ComposeBarMenuButton: View {
 		@Environment(ChatComposer.self) private var composer: ChatComposer
 		@Environment(ConversationViewModel.self) private var viewModel
-		@Environment(\.sharedNamespace) private var namespace
 		@Environment(\.sharedFocusState) private var sharedFocus
 
 		var body: some View {
