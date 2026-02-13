@@ -105,7 +105,7 @@ extension Socket {
 			else {
 				return
 			}
-			guard let contact = await ContactStore.shared.contact(for: msg.senderID) else {
+			guard let contact = await ContactsRepository.shared.contact(for: msg.senderID) else {
 				return
 			}
 			let title = data.pushNotificationTitle(for: conversation)

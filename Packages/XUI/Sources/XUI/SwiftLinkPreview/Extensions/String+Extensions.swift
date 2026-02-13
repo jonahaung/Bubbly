@@ -109,7 +109,7 @@ public extension String {
 	}
 
 	var containsMarkdown: Bool {
-		let tokens = ["**", "__", "`", "```", "[", "](", "#", "> ", "- ", "* ", "@", "://"]
+		let tokens = ["**", "__", "`", "```", "[", "](", "#", "> ", "- ", "* ", "@", "://", "]("]
 		return tokens.contains { contains($0) }
 	}
 }

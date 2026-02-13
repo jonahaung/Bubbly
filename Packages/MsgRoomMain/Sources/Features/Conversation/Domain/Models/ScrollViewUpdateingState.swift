@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 enum ScrollViewUpdatingState {
-	case initial, notLoading, resetting
+	case initial, ready, notLoading, resetting
 	case insertingItems(_ edge: VerticalEdge)
 	case removingItems(_ edge: VerticalEdge)
 	case appendingItem(_ id: String)

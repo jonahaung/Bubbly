@@ -28,15 +28,27 @@ struct MsgsScrollView: View {
 						MsgCell(viewModel: viewModel)
 							.environment(viewModel)
 							.id(viewModel.id)
-							.onScrollVisibilityChange(threshold: 0.001) {
-								[
-									unowned viewModel
-								] isVisible in
+							.onScrollVisibilityChange(threshold: 0.2) { isVisible in
 								viewModel.setVisibility(isVisible)
-								if viewModel.layout.showTimeSeparator {
-									manager.presentation.updateFloatingDate(viewModel.msg.date)
+								guard isVisible, viewModel.layout.showTimeSeparator else { return }
+								Task {
+									await manager.floatingDateThrottler.run {
+										await MainActor.run {
+											manager.presentation
+												.updateFloatingDate(viewModel.msg.date)
+										}
+									}
 								}
 							}
+//							.onScrollVisibilityChange(threshold: 0.001) {
+//								[
+//									unowned viewModel
+//								] isVisible in
+//								viewModel.setVisibility(isVisible)
+//								if viewModel.layout.showTimeSeparator {
+//									manager.presentation.updateFloatingDate(viewModel.msg.date)
+//								}
+//							}
 							.layoutValue(
 								key: MsgLayoutValueKey.self,
 								value: viewModel.msg.layoutValue()
@@ -46,24 +58,9 @@ struct MsgsScrollView: View {
 			}
 		}
 		.frame(width: proxy.insetAdjustedSize.width)
-		.padding(
-			.init(
-				top: 0,
-				leading: proxy.safeAreaInsets.leading,
-				bottom: 0,
-				trailing: proxy.safeAreaInsets
-					.trailing
-			)
-		)
+		.padding(.leading, proxy.safeAreaInsets.leading)
 		.tint(Color.link.mix(with: Color.accentColor, by: 0.3))
-		.transaction(value: viewModel.state) {
-			let animation = manager.scrollController.defaultAnimation
-			$0.animation = animation
-			$0.disablesAnimations = animation == nil
-			$0.addAnimationCompletion(criteria: .removed) {
-				manager.scrollController.setDefaultAnimation(nil)
-			}
-		}
+		.animation(manager.scrollController.defaultAnimation, value: manager.reloadID)
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.scrollController.didChangeScrollPhase(oldPhase, newPhase, context)
 		}
@@ -71,13 +68,12 @@ struct MsgsScrollView: View {
 			for: VScrollGeometry.self,
 			of: { .init($0) }
 		) { oldValue, newValue in
-			manager.scrollController
-				.didChangeScrollGeometry(oldValue, newValue)
+			guard oldValue != newValue else { return }
+			manager.scrollController.didChangeScrollGeometry(oldValue, newValue)
 		}
-		.scrollClipDisabled()
 		.scrollDismissesKeyboard(.never)
-		.scrollBounceBehavior(.always, axes: .vertical)
 		.defaultScrollAnchor(.bottom, for: .sizeChanges)
-		.scrollPosition(manager.scrollController.scrollPosition)
+		.equatable(by: manager.reloadID)
+		.scrollPosition(.constant(manager.scrollController.scrollTarget))
 	}
 }

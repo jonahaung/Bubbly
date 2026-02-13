@@ -40,7 +40,7 @@ final class ChatPresentationState {
 	}
 
 	func updateTypingStatus(_ status: AnyMsgData.TypingStatusPayload) {
-		if status.isTyping, let contact = ContactStore.shared.contact(for: status.senderID) {
+		if status.isTyping, let contact = ContactsRepository.shared.contact(for: status.senderID) {
 			typingStatusText = "\(contact.name) is typing..."
 		} else {
 			typingStatusText = nil

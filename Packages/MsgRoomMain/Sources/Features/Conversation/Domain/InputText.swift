@@ -15,30 +15,24 @@ final class InputText: Equatable {
 	var text: String = .init() {
 		willSet {
 			let oldValue = text
-			switch true {
-			case (newValue.isEmpty || oldValue.isEmpty) && oldValue != newValue:
+			if newValue.isEmpty || oldValue.isEmpty, oldValue != newValue {
 				delegate?.inputText(self, didBeganEditing: newValue)
-				parseLinks(newValue)
-			case newValue.count - oldValue.count > 10:
-				parseLinks(newValue)
-			default:
-				break
 			}
+			parseLinks(newValue)
 		}
 	}
 
+	private let throttler = Throttler(interval: .seconds(1))
 	var selection: TextSelection?
 	var hasText: Bool {
 		!text.isWhitespace
 	}
 
-	@ObservationIgnored private var linkExtractionTask: Task<Void, Never>?
 	@ObservationIgnored weak var delegate: InputTextDelegate?
 	@ObservationIgnored private let linkWorker = LinkExtractorWorker()
 
 	func clear() {
 		selection = nil
-		linkExtractionTask?.cancel()
 		text = .init()
 	}
 
@@ -51,21 +45,20 @@ final class InputText: Equatable {
 
 	private func parseLinks(_ string: String) {
 		let currentText = string.trimmed
-
-		linkExtractionTask?.cancel()
-		guard currentText.isWhitespace == false else {
+		guard currentText.isWhitespace == false, currentText.contains("://") else {
 			return
 		}
-		linkExtractionTask = Task { [weak self] in
-			guard let self else { return }
-			let thisText = string
-			try? await Task.sleep(seconds: 0.4)
-			guard !Task.isCancelled else { return }
-			let links = await linkWorker.extractLinks(from: thisText)
-			guard !Task.isCancelled else { return }
-			guard links.isEmpty == false else { return }
-			guard text.contains(thisText) else { return }
-			delegate?.inputText(self, didInsertLinks: links)
+		Task {
+			await throttler.run { [weak self] in
+				guard let self else { return }
+				let thisText = string
+				let links = await linkWorker.extractLinks(from: thisText)
+				guard links.isEmpty == false else { return }
+				guard thisText.contains(thisText) else { return }
+				await MainActor.run { [links] in
+					delegate?.inputText(self, didInsertLinks: links)
+				}
+			}
 		}
 	}
 

@@ -29,7 +29,7 @@ public struct CurrentUserModel: ContactRepresentableSendable, Codable, Hashable,
 }
 
 public extension CurrentUserModel {
-	init(_ user: User) {
+	init(_ user: FirebaseAuth.User) {
 		self.init(
 			uid: user.uid,
 			name: user.displayName.str,

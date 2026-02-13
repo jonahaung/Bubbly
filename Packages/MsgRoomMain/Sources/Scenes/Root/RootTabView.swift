@@ -5,46 +5,70 @@ import SwiftUI
 import XUI
 
 struct RootTabView: View {
-	@Environment(Router.self) private var router
+	let coordinator: AppCoordinator
 
 	var body: some View {
-		TabView(selection: selection) {
-			ForEach(TabPath.allCases, id: \.self) { tabPath in
-				Tab(
-					tabPath.localizedName,
-					systemImage: tabPath.systemName,
-					value: tabPath
-				) {
-					MainNavView(tabPath: tabPath) {
-						tabPath.destination()
+		TabView(selection: coordinator.router.tabPathBinding()) {
+			ForEach(TabPath.allCases) { tabPath in
+				Tab(value: tabPath, role: role(for: tabPath)) {
+					MainNavView(tabPath: tabPath, coordinator: coordinator) {
+						coordinator.view(for: tabPath)
 					}
-					.toolbarVisibility(router.toolBarVisibility(), for: .tabBar)
+					.equatable(by: tabPath == coordinator.router.selectedTab)
+					.toolbarVisibility(coordinator.router.toolBarVisibility(), for: .tabBar)
+				} label: {
+					Image(systemName: tabPath.systemName)
 				}
 			}
 		}
-		.sensoryFeedback(.impact(flexibility: .soft, intensity: 1), trigger: router.selectedTab)
+		.symbolRenderingMode(.multicolor)
+		.equatable(by: coordinator.router.selectedTab)
 		.tabBarMinimizeBehavior(.onScrollDown)
+		.toastPresentable()
+		.loadingPresentable()
+		.sheet(item: sheet) { coordinator.view(for: $0) }
+		.onOpenURL { coordinator.handleDeeplink($0) }
 	}
 }
 
 private extension RootTabView {
-	var selection: Binding<TabPath> {
-		.init(get: { router.selectedTab }, set: { router.selectedTab = $0 })
+	func role(for tabPath: TabPath) -> TabRole? {
+		tabPath == .test ? .search : nil
 	}
 }
 
-public extension TabPath {
-	@MainActor
-	@ViewBuilder func destination() -> some View {
-		switch self {
+private extension RootTabView {
+	var sheet: Binding<NavPath?> {
+		.init(
+			get: { coordinator.router.sheet },
+			set: { newValue in
+				if let newValue {
+					coordinator.router.presnetModel(newValue)
+				} else {
+					coordinator.router.dismissModal()
+				}
+			}
+		)
+	}
+}
+
+public extension AppCoordinator {
+	@ViewBuilder func view(for tabPath: TabPath) -> some View {
+		switch tabPath {
 		case .test:
 			Playground()
 		case .inbox:
 			InboxScene(viewModel: .init())
 		case .contacts:
-			ContactsScene()
+			ContactsScene(
+				router: router, contactsRepository: container.contactsRepository,
+				currentUserRepository: container.currentUserRepository
+			)
 		case .settings:
-			SettingsScene()
+			SettingsScene(
+				currentUserRepository: container.currentUserRepository,
+				appLauncher: appLauncher
+			)
 		}
 	}
 }

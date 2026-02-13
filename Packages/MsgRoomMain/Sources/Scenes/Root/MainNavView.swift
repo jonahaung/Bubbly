@@ -1,19 +1,43 @@
+import Database
 import Services
 import SwiftUI
 import XUI
 
-@MainActor
 struct MainNavView<Content: View>: View {
 	let tabPath: TabPath
-	@Environment(Router.self) private var router
+	let coordinator: AppCoordinator
 	@ViewBuilder var content: () -> Content
 
 	var body: some View {
-		NavigationStack(path: router.navPathsBinding(for: tabPath) as Binding<[NavPath]>) {
+		NavigationStack(
+			path: coordinator.router.navPathsBinding(for: tabPath) as Binding<[NavPath]>
+		) {
 			content()
 				.navigationDestination(for: NavPath.self) { navPath in
-					navPath.destination()
+					coordinator.view(for: navPath)
 				}
+		}
+	}
+}
+
+public extension AppCoordinator {
+	@ViewBuilder func view(for navPath: NavPath) -> some View {
+		switch navPath {
+		case let .conversationDetails(conversation):
+			switch conversation.kind {
+			case let .contact(contact):
+				ContactSettingsScene(contact)
+			case let .group(group):
+				GroupConversationSettingsScene(group)
+			}
+		case let .conversation(prefetchedData):
+			ConversationScene(prefetchedData)
+		case let .contactDetails(contact):
+			ContactDetailsScene(contact: contact)
+		case .currentUserDetails:
+			CurrentUserProfileView()
+		case let .view(_, node):
+			node.eraseToNode()
 		}
 	}
 }

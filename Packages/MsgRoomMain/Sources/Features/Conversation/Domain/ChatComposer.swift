@@ -193,7 +193,11 @@ extension ChatComposer {
 			await MainActor.run {
 				var text = self.inputText.text
 				for each in newLinks {
-					text = text.replace(each.url.absoluteString, with: "")
+					text = text
+						.replace(
+							each.url.absoluteString,
+							with: "**\(each.host)**"
+						)
 				}
 				self.inputText.text = text
 				self.setLoading(false)
@@ -356,9 +360,6 @@ private actor ChatComposerStateStore {
 
 	func appendAttachments(_ newItems: [Attachment]) -> ChatComposerSnapshot {
 		attachments.append(contentsOf: newItems)
-		if attachments.isEmpty == false {
-			source = .liary
-		}
 		return snapshot()
 	}
 

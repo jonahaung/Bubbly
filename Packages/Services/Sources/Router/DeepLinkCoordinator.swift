@@ -30,8 +30,13 @@ public final class DeepLinkCoordinator {
 		}
 	}
 
+	public func actions(link: Deeplink) -> [DeeplinkAction] {
+		planner.plan(link)
+	}
+
 	public func handle(link: Deeplink) {
 		let actions = planner.plan(link)
+
 		Task { [weak self] in
 			guard let self else { return }
 			do {
@@ -70,8 +75,9 @@ private extension DeepLinkCoordinator {
 }
 
 public extension DeepLinkCoordinator {
-	static let shared: DeepLinkCoordinator = {
-		let codec = DeeplinkCodec(
+	static let shared: DeepLinkCoordinator = .init(
+		router: Router.shared,
+		codec: DeeplinkCodec(
 			config: .init(
 				scheme: AppInformation.urlScheme,
 				supportedVersions: Set(["v1"]),
@@ -79,14 +85,8 @@ public extension DeepLinkCoordinator {
 			),
 			aliases: .init(routeAliases: ["conv": "conversation"]),
 			telemetry: .default
-		)
-		let planner = DeeplinkActionPlanner.default(tabMapping: .default, navMapping: .default)
-
-		return DeepLinkCoordinator(
-			router: Router.shared,
-			codec: codec,
-			planner: planner,
-			sideEffects: .default
-		)
-	}()
+		),
+		planner: .default(tabMapping: .default, navMapping: .default),
+		sideEffects: .default
+	)
 }

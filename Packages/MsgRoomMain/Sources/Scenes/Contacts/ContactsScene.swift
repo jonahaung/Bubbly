@@ -6,10 +6,11 @@ import SwiftUI
 import XUI
 
 public struct ContactsScene: View {
-	@Environment(ContactStore.self) private var store
+	let contactsRepository: ContactsRepositoryProtocol
+	let currentUserRepository: CurrentUserRepositoryProtocol
+	let router: Router
+
 	@State private var viewModel: ContactsViewModel = .init()
-	@Environment(Router.self) private var router
-	@Environment(\.currentUser) private var currentUser
 	@State private var executor = ToolExecutor()
 
 	enum DefaultContactDisplayType: String, CaseIterable {
@@ -22,7 +23,14 @@ public struct ContactsScene: View {
 		store: GroupStorage.shared.store
 	) private var defaultContactDisplay: DefaultContactDisplayType = .chat
 
-	public init() {}
+	public init(router: Router,
+	            contactsRepository: ContactsRepositoryProtocol,
+	            currentUserRepository: CurrentUserRepositoryProtocol)
+	{
+		self.router = router
+		self.contactsRepository = contactsRepository
+		self.currentUserRepository = currentUserRepository
+	}
 
 	public var body: some View {
 		List {
@@ -43,7 +51,7 @@ public struct ContactsScene: View {
 					selection: $defaultContactDisplay
 				) {
 					let options: [DefaultContactDisplayType] =
-						store.groups.isEmpty ? [.chat] : [.chat, .group]
+						(contactsRepository.groups.isEmpty) ? [.chat] : [.chat, .group]
 					ForEach(options, id: \.self) { each in
 						Text(each.rawValue)
 					}
@@ -60,10 +68,10 @@ public struct ContactsScene: View {
 			executeContactsSearch()
 		}
 		.task {
-			try? await store.fetchData()
+			try? await contactsRepository.fetchData()
 		}
 		.refreshable {
-			try? await store.refresh()
+			try? await contactsRepository.refresh()
 		}
 	}
 
@@ -75,14 +83,22 @@ public struct ContactsScene: View {
 			case .chat:
 				AsyncButton {
 					Loading.show(true)
-					await viewModel.syncContacts(store: store, currentUser: currentUser)
+					await viewModel
+						.syncContacts(
+							store: contactsRepository,
+							currentUser: currentUserRepository.model
+						)
 					Loading.show(false)
 				} label: {
 					Label("Sync Contact", systemSymbol: .personCropSquare)
 				}
 				AsyncButton {
 					Loading.show(true)
-					try await viewModel.syncGroups(store: store, currentUser: currentUser)
+					try await viewModel
+						.syncGroups(
+							store: contactsRepository,
+							currentUser: currentUserRepository.model
+						)
 					Loading.show(false)
 				} label: {
 					Label("Sync Groups", systemSymbol: .arrow2Squarepath)
@@ -98,7 +114,11 @@ public struct ContactsScene: View {
 					}
 				AsyncButton {
 					Loading.show(true)
-					try await viewModel.syncGroups(store: store, currentUser: currentUser)
+					try await viewModel
+						.syncGroups(
+							store: contactsRepository,
+							currentUser: currentUserRepository.model
+						)
 					Loading.show(false)
 				} label: {
 					Label("Sync Groups", systemSymbol: .arrow2Squarepath)
@@ -109,13 +129,13 @@ public struct ContactsScene: View {
 
 	private var groupsSection: some View {
 		Section {
-			if store.groups.isEmpty {
+			if contactsRepository.groups.isEmpty {
 				ContentUnavailableView(
 					"No Groups",
 					systemImage: "person.2.circle.fill"
 				)
 			} else {
-				ForEach(store.groups) { group in
+				ForEach(contactsRepository.groups) { group in
 					ConversationGroupCell(group: group)
 				}
 			}
@@ -123,8 +143,7 @@ public struct ContactsScene: View {
 	}
 
 	private var contactsSections: some View {
-		// Precompute sections with explicit type to help the type checker
-		let sections: [(String, [Contact])] = createSections(from: store.contacts)
+		let sections: [(String, [Contact])] = createSections(from: contactsRepository.contacts)
 		return ForEach(sections, id: \.0) { section in
 			Section(section.0) {
 				ForEach(section.1, id: \.uid) { contact in
@@ -138,7 +157,7 @@ public struct ContactsScene: View {
 	}
 
 	private func openConversation(for contact: Contact) async throws {
-		let id = ConversationIDGenerator.generate(contact.uid, currentUser.uid)
+		let id = ConversationIDGenerator.generate(contact.uid, currentUserRepository.model.uid)
 		if let url = DeepLinkCoordinator.shared.url(for: .conversation(id: id)) {
 			await MainActor.run {
 				UIApplication.shared.open(url)
@@ -152,7 +171,7 @@ public struct ContactsScene: View {
 				for index in offsets {
 					group.addTask {
 						if let item = contacts[safe: index] {
-							try await store.delete(uid: item.uid)
+							try await contactsRepository.delete(uid: item.uid)
 						}
 					}
 				}

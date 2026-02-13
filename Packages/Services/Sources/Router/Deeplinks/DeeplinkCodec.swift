@@ -1,3 +1,4 @@
+import Core
 import Foundation
 
 public struct DeeplinkCodec: Sendable {
@@ -5,6 +6,16 @@ public struct DeeplinkCodec: Sendable {
 		case customScheme(version: String? = nil)
 		case universalLink(host: String, version: String? = nil)
 	}
+
+	public static let standard = DeeplinkCodec(
+		config: .init(
+			scheme: AppInformation.urlScheme,
+			supportedVersions: Set(["v1"]),
+			queryValidation: .strict
+		),
+		aliases: .init(routeAliases: ["conv": "conversation"]),
+		telemetry: .default
+	)
 
 	public let config: DeeplinkConfiguration
 	public let aliases: DeeplinkAliases

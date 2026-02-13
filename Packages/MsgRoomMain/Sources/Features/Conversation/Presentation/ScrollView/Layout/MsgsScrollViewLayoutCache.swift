@@ -20,10 +20,6 @@ final class MsgsScrollViewLayoutCache: @unchecked Sendable {
 
 	init() {}
 
-	deinit {}
-
-	// MARK: - Size Cache
-
 	func size(for key: String) -> CGSize? {
 		lock.lock()
 		defer { lock.unlock() }

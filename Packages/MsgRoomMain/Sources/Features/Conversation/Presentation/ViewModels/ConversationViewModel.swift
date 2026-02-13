@@ -18,35 +18,20 @@ public final class ConversationViewModel: @MainActor Equatable {
 	let manager: ChatViewManager
 	@ObservationIgnored
 	let composer: ChatComposer
-	@ObservationIgnored
 	private let observeMessages: ObserveMessagesUseCase
-	@ObservationIgnored
 	private let sendMessage: SendMessageUseCase
-	@ObservationIgnored
 	private let loadMoreMessages: LoadMoreMessagesUseCase
-	@ObservationIgnored
 	private let retryMessage: RetryMessageUseCase
-	@ObservationIgnored
 	private let closeConversation: CloseConversationUseCase
-	@ObservationIgnored
 	private let openConversationDetails: OpenConversationDetailsUseCase
-	@ObservationIgnored
 	private let updateComposerSource: UpdateComposerSourceUseCase
-	@ObservationIgnored
 	private let appendEmoji: AppendEmojiUseCase
-	@ObservationIgnored
 	private let selectMessage: SelectMessageUseCase
-	@ObservationIgnored
 	private let openAvatar: OpenAvatarUseCase
-	@ObservationIgnored
 	private let markMessage: MarkMessageUseCase
-	@ObservationIgnored
 	private let focusMessageBubble: FocusMessageBubbleUseCase
-	@ObservationIgnored
 	private let sendUploadedMessage: SendUploadedMessageUseCase
-	@ObservationIgnored
 	private let reactToMessage: ReactToMessageUseCase
-	@ObservationIgnored
 	private let latestConversationSnapshot: LatestConversationSnapshotUseCase
 
 	public init(_ prefetchedData: ConversationInitializer.PrefetchedData) {

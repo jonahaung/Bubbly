@@ -16,7 +16,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
 		self.group = group
 		originalGroup = group
 		contacts = group.members
-			.compactMap { ContactStore.shared.contact(for: $0) }
+			.compactMap { ContactsRepository.shared.contact(for: $0) }
 	}
 
 	func setLoading(_ isLoading: Bool) {
@@ -32,7 +32,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
 		group = originalGroup
 		pickedPhoto = nil
 		contacts = group.members
-			.compactMap { ContactStore.shared.contact(for: $0) }
+			.compactMap { ContactsRepository.shared.contact(for: $0) }
 	}
 
 	func uploadImage(image: UIImage) async throws -> URL {

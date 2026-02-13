@@ -139,7 +139,7 @@ public struct CurrentUserProfileView: View {
 			viewModel.pickedPhoto = nil
 		}
 		try await viewModel.applyUpdates(for: currentUser)
-		CurrentUser.reload()
+		CurrentUserRepository.reload()
 	}
 
 	public func setFocus(_ isFocused: Bool) {

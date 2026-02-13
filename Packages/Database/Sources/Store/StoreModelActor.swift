@@ -8,8 +8,8 @@ public actor StoreModelActor<Model>: ModelActor
 	Model.UID == String,
 	Model.SendableType.UID == String
 {
-	nonisolated public let modelExecutor: any ModelExecutor
-	nonisolated public let modelContainer: ModelContainer
+	public nonisolated let modelExecutor: any ModelExecutor
+	public nonisolated let modelContainer: ModelContainer
 
 	private var context: ModelContext {
 		modelExecutor.modelContext

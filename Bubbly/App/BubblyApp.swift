@@ -7,11 +7,14 @@ import XUI
 
 @main
 struct BubblyApp: App {
-	private let appLauncher = AppLauncher()
-	private let pushNotificationServie = PushNotificationService()
+	private let pushNotificationServie: PushNotificationService
 
 	@UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 	@Environment(\.scenePhase) private var scenePhase
+
+	init() {
+		pushNotificationServie = .init()
+	}
 
 	var body: some Scene {
 		WindowGroup {
@@ -39,9 +42,7 @@ struct BubblyApp: App {
 					@unknown default:
 						AppStateStore.set(.unknown)
 					}
-					print(AppStateStore.read().rawValue)
 				}
 		}
-		.environment(appLauncher)
 	}
 }

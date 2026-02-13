@@ -25,8 +25,13 @@ struct MsgsScrollViewLayoutConfiguration {
 	}
 }
 
-struct MsgsScrollViewLayout: Layout {
-	private let layoutManager: MsgsScrollViewLayoutManager
+/// This layout is value-typed and only holds a reference to the layout manager for cache access.
+/// The manager itself is non-Sendable (legacy type), but the layout is used on the main thread
+/// by SwiftUI's layout system. We mark the struct as `@unchecked Sendable` and keep the
+/// `@preconcurrency` annotation on the stored property to acknowledge and control cross-actor
+/// usage without propagating Sendable requirements to the manager type.
+struct MsgsScrollViewLayout: Layout, @unchecked Sendable {
+	@preconcurrency private let layoutManager: MsgsScrollViewLayoutManager
 	private let config: MsgsScrollViewLayoutConfiguration
 
 	init(_ manager: MsgsScrollViewLayoutManager, config: MsgsScrollViewLayoutConfiguration) {
@@ -164,7 +169,7 @@ extension MsgsScrollViewLayout {
 
 		var currentY = config.contentInsets.top
 
-		for (index, subview) in subviews.enumerated() {
+		for subview in subviews {
 			let value = subview[MsgLayoutValueKey.self]
 
 			let size = getOrCalculateSize(

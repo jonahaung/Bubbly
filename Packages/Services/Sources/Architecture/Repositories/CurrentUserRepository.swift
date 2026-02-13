@@ -5,9 +5,8 @@ import FirebaseMessaging
 import Foundation
 import XUI
 
-@MainActor
 @Observable
-public final class CurrentUser {
+public final class CurrentUserRepository: CurrentUserRepositoryProtocol {
 	public enum XError: Error {
 		case notLoggedIn
 		case noDeviceToken
@@ -74,7 +73,7 @@ public final class CurrentUser {
 	}
 }
 
-public extension CurrentUser {
+public extension CurrentUserRepository {
 	static func reload() {
 		NotificationCenter.default.post(name: .reloadCurrentUser, object: nil)
 	}

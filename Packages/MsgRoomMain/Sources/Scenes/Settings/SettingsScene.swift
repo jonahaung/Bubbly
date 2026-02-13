@@ -10,8 +10,8 @@ import SwiftUI
 import XUI
 
 struct SettingsScene: View {
-	@Environment(AppLauncher.self) private var appLauncher
-	@Environment(\.currentUser) private var currentUser
+	let currentUserRepository: CurrentUserRepositoryProtocol
+	let appLauncher: AppLauncher
 
 	@AppStorage("fontName") private var fontName: String = UIFont.systemFontFamilyName
 
@@ -31,6 +31,7 @@ struct SettingsScene: View {
 	@AppStorage("askChatGPT") private var askChatGPT: Bool = false
 
 	var body: some View {
+		let currentUser = currentUserRepository.model
 		Form {
 			profilePhotoSection
 			Section(header: Text("Sign Out")) {
@@ -179,7 +180,7 @@ struct SettingsScene: View {
 				}
 				AsyncButton { @MainActor in
 					CryptoService.shared.forceReload(for: currentUser.uid)
-					CurrentUser.reload()
+					CurrentUserRepository.reload()
 				} label: {
 					Text("Reset Crypto Keys")
 				}
@@ -192,6 +193,7 @@ struct SettingsScene: View {
 
 	private var profilePhotoSection: some View {
 		Section {
+			let currentUser = currentUserRepository.model
 			ZStack(alignment: .bottomTrailing) {
 				ResizableImage(
 					currentUser.photoURL,

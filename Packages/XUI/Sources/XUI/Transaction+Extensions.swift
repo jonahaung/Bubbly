@@ -1,14 +1,13 @@
 import SwiftUI
 
 public extension Transaction {
-	static func withAnimation(_ animation: Animation = .spring)
+	static func withAnimation(_ animation: Animation = .easeInOut)
 		-> Transaction
 	{
 		var transition = Transaction(animation: animation)
 		transition.disablesAnimations = false
 		transition.scrollPositionUpdatePreservesVelocity = true
 		transition.scrollContentOffsetAdjustmentBehavior = .automatic
-//		transition.isContinuous = true
 		transition.tracksVelocity = true
 		return transition
 	}
@@ -18,7 +17,6 @@ public extension Transaction {
 		transition.disablesAnimations = true
 		transition.scrollPositionUpdatePreservesVelocity = true
 		transition.scrollContentOffsetAdjustmentBehavior = .automatic
-//		transition.isContinuous = true
 		transition.tracksVelocity = true
 		return transition
 	}()

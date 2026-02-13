@@ -7,49 +7,17 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "21F8EFBB-380E-421A-80B0-DBCFBB95DCCC"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../../var/folders/py/6gjf5_t53v96gtp51vrg0_2m0000gn/T/swift-generated-sources/@__swiftmacro_11MsgRoomMain12DynamicArrayC5items18ObservationTrackedfMa_.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1"
-            endingLineNumber = "1"
-            landmarkName = "unknown"
-            landmarkType = "0">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "5F4D7893-AC38-449A-B313-2A6B53468FC8"
+            uuid = "B7679E74-00C0-4241-969F-601CDE685682"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "../../../../var/folders/py/6gjf5_t53v96gtp51vrg0_2m0000gn/T/swift-generated-sources/@__swiftmacro_8Services13MsgSenderToolV9Arguments9GenerablefMm_.swift"
+            filePath = "Packages/MsgRoomMain/Sources/Scenes/Root/RootTabView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1"
-            endingLineNumber = "1"
-            landmarkName = "unknown"
-            landmarkType = "0">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            uuid = "A44C8AF7-042A-48E9-9B82-1FB37DA216C0"
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "../../../../var/folders/py/6gjf5_t53v96gtp51vrg0_2m0000gn/T/swift-generated-sources/@__swiftmacro_11MsgRoomMain12ChatResponse9GenerablefMe_.swift"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1"
-            endingLineNumber = "1"
-            landmarkName = "unknown"
-            landmarkType = "0">
+            startingLineNumber = "23"
+            endingLineNumber = "23"
+            landmarkName = "body"
+            landmarkType = "24">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

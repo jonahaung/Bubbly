@@ -8,6 +8,7 @@ struct Playground: View {
 	@State private var showModal = false
 	let text = Lorem.random()
 	@State private var fontName = ""
+	@State private var searchText = ""
 	var body: some View {
 		List {
 			Button("Show modal") {
@@ -35,6 +36,7 @@ struct Playground: View {
 			Label(text, systemImage: "bubble.right")
 		}
 		.navigationTitle("Playgound")
+		.searchable(text: $searchText)
 		.overlay {
 			if showModal {
 				ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {

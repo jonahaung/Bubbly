@@ -99,7 +99,7 @@ public extension ImagePipeline {
 		}
 	}
 
-	nonisolated private func _loadImage(with request: ImageRequest,
+	private nonisolated func _loadImage(with request: ImageRequest,
 	                                    isDataTask: Bool = false,
 	                                    progress: (
 	                                    	@MainActor @Sendable (ImageResponse?,

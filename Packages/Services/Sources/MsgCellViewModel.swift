@@ -96,7 +96,7 @@ public extension MsgCellViewModel {
 	}
 
 	func sender() -> Contact? {
-		ContactStore.shared.contact(for: msg.senderID)
+		ContactsRepository.shared.contact(for: msg.senderID)
 	}
 }
 

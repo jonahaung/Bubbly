@@ -17,7 +17,7 @@ extension MsgCell {
 			if msg.isSender {
 				return msg.date.formatted(date: .abbreviated, time: .shortened)
 			} else {
-				let name: String? = ContactStore.shared.contact(for: msg.senderID)?.name
+				let name: String? = ContactsRepository.shared.contact(for: msg.senderID)?.name
 				return name ?? "Unknown"
 			}
 		}

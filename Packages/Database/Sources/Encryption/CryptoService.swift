@@ -12,7 +12,7 @@ struct CryptoPayload: Codable, Sendable {
 }
 
 public class CryptoService {
-	nonisolated(unsafe) public static let shared = CryptoService()
+	public nonisolated(unsafe) static let shared = CryptoService()
 
 	private init() {}
 

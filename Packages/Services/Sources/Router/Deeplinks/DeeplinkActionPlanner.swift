@@ -8,7 +8,9 @@ public struct DeeplinkActionPlanner: Sendable {
 }
 
 public extension DeeplinkActionPlanner {
-	static func `default`(tabMapping: TabMapping, navMapping: NavMapping) -> DeeplinkActionPlanner {
+	static func `default`(tabMapping: TabMapping = .default,
+	                      navMapping: NavMapping = .default) -> DeeplinkActionPlanner
+	{
 		.init { link in
 			var actions = [DeeplinkAction]()
 

@@ -6,7 +6,6 @@ public struct VideoPickupButton<Label: View>: View {
 	@State private var model = VideoPickerViewModel()
 	@Binding private var asset: AVAsset?
 
-	/// Make the label builder main-actor–isolated, since it builds UI.
 	private let label: @MainActor (MediaPickerLoadingState<AVAsset>) -> Label
 
 	public init(pickedVideo asset: Binding<AVAsset?>,
@@ -17,7 +16,6 @@ public struct VideoPickupButton<Label: View>: View {
 		_asset = asset
 	}
 
-	@MainActor
 	public var body: some View {
 		// Build a concrete Label value on the main actor so the PhotosPicker
 		// closure doesn't capture Label.Type or MainActor state.

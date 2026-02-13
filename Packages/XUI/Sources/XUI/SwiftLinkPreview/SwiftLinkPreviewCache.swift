@@ -6,7 +6,7 @@ public protocol SwiftLinkPreviewCache {
 }
 
 public final class DisabledCache: SwiftLinkPreviewCache {
-	nonisolated(unsafe) public static let instance = DisabledCache()
+	public nonisolated(unsafe) static let instance = DisabledCache()
 
 	public func slp_getCachedResponse(url _: String) -> SwiftLinkPreviewResponse? {
 		nil

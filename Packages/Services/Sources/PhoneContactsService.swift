@@ -5,7 +5,7 @@ import Foundation
 import XUI
 
 public final class PhoneContactsService {
-	nonisolated(unsafe) public static let shared = PhoneContactsService()
+	public nonisolated(unsafe) static let shared = PhoneContactsService()
 
 	private var isSyncing = false
 

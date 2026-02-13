@@ -1,21 +1,22 @@
+import Services
 import SwiftUI
+import XUI
 
 public struct ContentView: View {
-	@Environment(AppLauncher.self) private var launcher
+	@LazyState private var appLauncher: AppLauncher
 
-	public init() {}
+	public init() {
+		_appLauncher = .init(wrappedValue: .init())
+	}
 
 	public var body: some View {
-		switch launcher.route {
+		switch appLauncher.route {
 		case .loading:
-			LaunchScreen()
-				.transition(.opacity)
+			LaunchScreen(appLauncher: appLauncher)
 		case .getStarted:
-			AuthFlow()
+			AuthFlow(appLauncher: appLauncher)
 		case let .main(currentUser):
-			RootView()
-				.transition(.invisible)
-				.msgRoomEntryPoint(currentUser)
+			ArchitecturalView(launcher: appLauncher, currentUser: currentUser)
 		}
 	}
 }

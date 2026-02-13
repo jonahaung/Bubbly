@@ -65,7 +65,7 @@ public final class ProducerConsumerQueue<T> {
 	/// Whether the queue is empty.
 	public var isEmpty: Bool {
 		lock.lock()
-		let result = self.count == 0
+		let result = isEmpty
 		lock.unlock()
 		return result
 	}
@@ -146,7 +146,7 @@ public actor AsyncProducerConsumerQueue<T: Sendable> {
 	}
 
 	/// Convenience: An async sequence interface for iterating.
-	nonisolated public var stream: AsyncStream<T> {
+	public nonisolated var stream: AsyncStream<T> {
 		AsyncStream { continuation in
 			Task {
 				while let value = await self.dequeue() {

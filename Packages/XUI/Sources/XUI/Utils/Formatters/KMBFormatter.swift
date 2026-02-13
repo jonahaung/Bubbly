@@ -15,7 +15,7 @@ public final class KMBFormatter: Sendable {
 		set { _shared.value = newValue }
 	}
 
-	nonisolated(unsafe) private static var _shared = Mutex(KMBFormatter())
+	private nonisolated(unsafe) static var _shared = Mutex(KMBFormatter())
 	private let numberFormatter = NumberFormatter()
 	private let unitSize: [Unit: Double] = [
 		.none: 1,

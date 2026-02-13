@@ -33,6 +33,9 @@ public struct ConversationScene: View {
 				GeometryReader { proxy in
 					MsgsScrollView(proxy: proxy)
 						.safeAreaPadding(.bottom, accessoryFrame.height)
+						.task {
+							await viewModel.send(.appear)
+						}
 				}
 			}
 			VStack {
@@ -56,9 +59,6 @@ public struct ConversationScene: View {
 					.environment(\.conversation, self.viewModel.state.conversation)
 					.environment(\.viewIsVisible, true)
 			}
-		}
-		.task {
-			await viewModel.send(.appear)
 		}
 		.toolbarVisibility(.hidden, for: .navigationBar)
 		.environment(viewModel)

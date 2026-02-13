@@ -8,7 +8,7 @@ import XUI
 
 public struct GroupConversationSettingsScene: View {
 	@State private var viewModel: GroupDetailsViewModel
-	@Environment(ContactStore.self) private var contactStore
+	@Environment(ContactsRepository.self) private var contactStore
 	@Environment(\.currentUser) private var currentUser
 	@FocusState private var isFocused: Bool
 

@@ -18,21 +18,21 @@ import Foundation
 public final class ImageTask: Hashable {
 	/// An identifier that uniquely identifies the task within a given pipeline.
 	/// Unique only within that pipeline.
-	nonisolated public let taskId: Int64
+	public nonisolated let taskId: Int64
 
 	/// The original request that the task was created with.
-	nonisolated public let request: ImageRequest
+	public nonisolated let request: ImageRequest
 
 	/// The priority of the task. The priority can be updated dynamically even
 	/// for a task that is already running.
-	nonisolated public var priority: ImageRequest.Priority {
+	public nonisolated var priority: ImageRequest.Priority {
 		get { nonisolatedState.withLock(\.priority) }
 		set { setPriority(newValue) }
 	}
 
 	/// Returns the current download progress. Returns zeros before the download
 	/// is started and the expected size of the resource is known.
-	nonisolated public var currentProgress: Progress {
+	public nonisolated var currentProgress: Progress {
 		nonisolatedState.withLock(\.progress)
 	}
 
@@ -69,7 +69,7 @@ public final class ImageTask: Hashable {
 	}
 
 	/// Returns `true` if the task cancellation is initiated.
-	nonisolated public var isCancelling: Bool {
+	public nonisolated var isCancelling: Bool {
 		nonisolatedState.withLock(\.isCancelling)
 	}
 
@@ -94,7 +94,7 @@ public final class ImageTask: Hashable {
 	}
 
 	/// The stream of progress updates.
-	nonisolated public var progress: AsyncStream<Progress> {
+	public nonisolated var progress: AsyncStream<Progress> {
 		makeStream {
 			if case let .progress(value) = $0 { return value }
 			return nil
@@ -105,7 +105,7 @@ public final class ImageTask: Hashable {
 	/// progressive decoding.
 	///
 	/// - seealso: ``ImagePipeline/Configuration-swift.struct/isProgressiveDecodingEnabled``
-	nonisolated public var previews: AsyncStream<ImageResponse> {
+	public nonisolated var previews: AsyncStream<ImageResponse> {
 		makeStream {
 			if case let .preview(value) = $0 { return value }
 			return nil
@@ -115,7 +115,7 @@ public final class ImageTask: Hashable {
 	// MARK: - Events
 
 	/// The events sent by the pipeline during the task execution.
-	nonisolated public var events: AsyncStream<Event> {
+	public nonisolated var events: AsyncStream<Event> {
 		makeStream { $0 }
 	}
 
@@ -137,7 +137,7 @@ public final class ImageTask: Hashable {
 	private let nonisolatedState: Mutex<ImageTaskState>
 	private let isDataTask: Bool
 	private let onEvent: (@Sendable (Event, ImageTask) -> Void)?
-	nonisolated(unsafe) private var task: Task<ImageResponse, Error>!
+	private nonisolated(unsafe) var task: Task<ImageResponse, Error>!
 	private weak var pipeline: ImagePipeline?
 
 	private var continuation: UnsafeContinuation<ImageResponse, Error>?
@@ -177,7 +177,7 @@ public final class ImageTask: Hashable {
 	///
 	/// The pipeline will immediately cancel any work associated with a task
 	/// unless there is an equivalent outstanding task running.
-	nonisolated public func cancel() {
+	public nonisolated func cancel() {
 		guard nonisolatedState.withLock({
 			guard !$0.isCancelling else { return false }
 			$0.isCancelling = true
@@ -188,7 +188,7 @@ public final class ImageTask: Hashable {
 		}
 	}
 
-	nonisolated private func setPriority(_ newValue: ImageRequest.Priority) {
+	private nonisolated func setPriority(_ newValue: ImageRequest.Priority) {
 		guard nonisolatedState.withLock({
 			guard $0.priority != newValue else { return false }
 			$0.priority = newValue
@@ -256,11 +256,11 @@ public final class ImageTask: Hashable {
 
 	// MARK: Hashable
 
-	nonisolated public func hash(into hasher: inout Hasher) {
+	public nonisolated func hash(into hasher: inout Hasher) {
 		hasher.combine(ObjectIdentifier(self).hashValue)
 	}
 
-	nonisolated public static func == (lhs: ImageTask, rhs: ImageTask) -> Bool {
+	public nonisolated static func == (lhs: ImageTask, rhs: ImageTask) -> Bool {
 		ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
 	}
 }
@@ -268,7 +268,7 @@ public final class ImageTask: Hashable {
 // MARK: - ImageTask (Private)
 
 extension ImageTask {
-	nonisolated private func makeStream<T>(of closure: @Sendable @escaping (Event) -> T?)
+	private nonisolated func makeStream<T>(of closure: @Sendable @escaping (Event) -> T?)
 		-> AsyncStream<T>
 	{
 		AsyncStream { continuation in

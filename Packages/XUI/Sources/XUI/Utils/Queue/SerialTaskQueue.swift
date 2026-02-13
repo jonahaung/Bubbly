@@ -12,9 +12,9 @@ public protocol SerialTaskQueueProtocol {
 public final class SerialTaskQueue: SerialTaskQueueProtocol, Sendable {
 	public typealias TaskClosure = (_ completion: @Sendable @escaping () -> Void) -> Void
 
-	nonisolated(unsafe) public private(set) var isBusy = false
-	nonisolated(unsafe) public private(set) var isStopped = true
-	nonisolated(unsafe) private var tasksQueue = [TaskClosure]()
+	public private(set) nonisolated(unsafe) var isBusy = false
+	public private(set) nonisolated(unsafe) var isStopped = true
+	private nonisolated(unsafe) var tasksQueue = [TaskClosure]()
 
 	public init() {
 		start()

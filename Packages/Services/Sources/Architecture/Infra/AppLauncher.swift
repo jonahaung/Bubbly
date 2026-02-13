@@ -2,12 +2,25 @@ import Database
 import FirebaseAuth
 import Foundation
 import Observation
-import Services
 
 @MainActor
 @Observable
-public final class AppLauncher {
-	public private(set) var route: Launching.MainRoute = .loading
+public final class AppLauncher: @MainActor Equatable {
+	public static func == (lhs: AppLauncher, rhs: AppLauncher) -> Bool {
+		lhs.route == rhs.route
+	}
+
+	public enum MainRoute: Equatable {
+		case loading
+		case getStarted
+		case main(_ user: CurrentUserModel)
+	}
+
+	enum DefaultKeys {
+		static let getStarted = "AppLauncher.getStarted"
+	}
+
+	public private(set) var route: MainRoute = .loading
 
 	public init() {}
 }
@@ -18,8 +31,8 @@ public extension AppLauncher {
 	}
 
 	@concurrent
-	private func evaluateRoute() async -> Launching.MainRoute {
-		let hasCompleted = UserDefaults.standard.bool(forKey: Launching.DefaultKeys.getStarted)
+	private func evaluateRoute() async -> MainRoute {
+		let hasCompleted = UserDefaults.standard.bool(forKey: DefaultKeys.getStarted)
 		if hasCompleted {
 			if let user = Auth.auth().currentUser {
 				if await !Store.shared.hasSetUp(for: user.uid) {
@@ -33,7 +46,7 @@ public extension AppLauncher {
 
 	func markGetStartedAsDone(user: CurrentUserModel) {
 		let defaults = UserDefaults.standard
-		defaults.set(true, forKey: Launching.DefaultKeys.getStarted)
+		defaults.set(true, forKey: DefaultKeys.getStarted)
 		route = .main(user)
 	}
 
@@ -41,7 +54,7 @@ public extension AppLauncher {
 		try? Auth.auth().signOut()
 		await Store.shared.destory()
 		let defaults = UserDefaults.standard
-		defaults.set(false, forKey: Launching.DefaultKeys.getStarted)
+		defaults.set(false, forKey: DefaultKeys.getStarted)
 		await startEvaluate()
 	}
 }

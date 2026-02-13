@@ -11,10 +11,10 @@ final class ContactsViewModel: ErrorPresenter {
 	init() {}
 
 	@concurrent
-	func syncContacts(store: ContactStore, currentUser _: CurrentUserModel) async {
+	func syncContacts(store: ContactsRepositoryProtocol?, currentUser _: CurrentUserModel) async {
 		await setLoading(true)
 		do {
-			try await store.syncContacts()
+			try await store?.syncContacts()
 			await setLoading(false)
 		} catch {
 			await showError(error)
@@ -23,10 +23,12 @@ final class ContactsViewModel: ErrorPresenter {
 	}
 
 	@concurrent
-	func syncGroups(store: ContactStore, currentUser: CurrentUserModel) async throws {
+	func syncGroups(store: ContactsRepositoryProtocol?,
+	                currentUser: CurrentUserModel) async throws
+	{
 		await setLoading(true)
 		do {
-			try await store.syncGroups(currentUser: currentUser)
+			try await store?.syncGroups(currentUser: currentUser)
 			await setLoading(false)
 		} catch {
 			await showError(error)

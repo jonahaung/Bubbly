@@ -6,7 +6,7 @@ import SwiftUI
 import XUI
 
 public struct CreateGroupScene: View {
-	@Environment(ContactStore.self) private var contactStore
+	@Environment(ContactsRepository.self) private var contactStore
 	@State private var viewModel = CreateGroupViewModel()
 	@Environment(\.dismiss) private var dismiss
 	@FocusState private var isFocused: Bool

@@ -5,13 +5,13 @@ import SwiftUI
 import XUI
 
 struct LaunchScreen: View {
-	@Environment(AppLauncher.self) private var launcher
+	let appLauncher: AppLauncher
 	var body: some View {
 		ZStack {
 			LoadingIndicator(40)
 		}
 		.task {
-			await launcher.startEvaluate()
+			await appLauncher.startEvaluate()
 		}
 		.statusBarHidden()
 	}

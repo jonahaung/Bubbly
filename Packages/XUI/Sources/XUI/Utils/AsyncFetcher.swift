@@ -237,7 +237,7 @@ public actor AsyncFetcher<T: Sendable> {
 		}
 	}
 
-	nonisolated private func handleCompletion(id: ID, result: Result<T, Error>) {
+	private nonisolated func handleCompletion(id: ID, result: Result<T, Error>) {
 		// Forward back to actor isolation to finalize state changes.
 		Task { await self.finalizeFetch(id: id, result: result) }
 	}

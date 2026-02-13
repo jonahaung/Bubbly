@@ -15,7 +15,7 @@ extension MsgCell {
 					let seenMembers = seenMembers()
 					if !seenMembers.isEmpty {
 						ForEach(seenMembers) { seenMember in
-							if let contact = ContactStore.shared.contact(
+							if let contact = ContactsRepository.shared.contact(
 								for: seenMember.uid
 							) {
 								ProfilePhoto(

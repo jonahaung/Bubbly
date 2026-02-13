@@ -12,18 +12,18 @@ import Foundation
 @ImagePipelineActor
 public final class ImagePipeline {
 	/// Returns the shared image pipeline.
-	nonisolated public static var shared: ImagePipeline {
+	public nonisolated static var shared: ImagePipeline {
 		get { _shared.value }
 		set { _shared.value = newValue }
 	}
 
-	nonisolated public static var dataCache: ImagePipeline {
+	public nonisolated static var dataCache: ImagePipeline {
 		get { _dataCache.value }
 		set { _dataCache.value = newValue }
 	}
 
-	nonisolated private static let _shared = Mutex(ImagePipeline(configuration: .withURLCache))
-	nonisolated private static let _dataCache = Mutex(
+	private nonisolated static let _shared = Mutex(ImagePipeline(configuration: .withURLCache))
+	private nonisolated static let _dataCache = Mutex(
 		ImagePipeline {
 			$0.dataLoader = DataLoader(configuration: {
 				let conf = DataLoader.defaultConfiguration
@@ -38,10 +38,10 @@ public final class ImagePipeline {
 	)
 
 	/// The pipeline configuration.
-	nonisolated public let configuration: Configuration
+	public nonisolated let configuration: Configuration
 
 	/// Provides access to the underlying caching subsystems.
-	nonisolated public var cache: ImagePipeline.Cache {
+	public nonisolated var cache: ImagePipeline.Cache {
 		.init(pipeline: self)
 	}
 
@@ -60,7 +60,7 @@ public final class ImagePipeline {
 
 	private var isInvalidated = false
 
-	nonisolated private let nextTaskId = Mutex<Int64>(0)
+	private nonisolated let nextTaskId = Mutex<Int64>(0)
 
 	let rateLimiter: RateLimiter?
 	let id = UUID()
@@ -77,7 +77,7 @@ public final class ImagePipeline {
 	/// - parameters:
 	///   - configuration: The pipeline configuration.
 	///   - delegate: Provides more ways to customize the pipeline behavior on per-request basis.
-	nonisolated public init(configuration: Configuration = Configuration(),
+	public nonisolated init(configuration: Configuration = Configuration(),
 	                        delegate: (any ImagePipeline.Delegate)? = nil)
 	{
 		self.configuration = configuration
@@ -109,7 +109,7 @@ public final class ImagePipeline {
 	/// - parameters:
 	///   - configuration: The pipeline configuration.
 	///   - delegate: Provides more ways to customize the pipeline behavior on per-request basis.
-	nonisolated public convenience init(delegate: (any ImagePipeline.Delegate)? = nil,
+	public convenience nonisolated init(delegate: (any ImagePipeline.Delegate)? = nil,
 	                                    _ configure: (inout ImagePipeline.Configuration) -> Void)
 	{
 		var configuration = ImagePipeline.Configuration()
@@ -119,7 +119,7 @@ public final class ImagePipeline {
 
 	/// Invalidates the pipeline and cancels all outstanding tasks. Any new
 	/// requests will immediately fail with ``ImagePipeline/Error/pipelineInvalidated`` error.
-	nonisolated public func invalidate() {
+	public nonisolated func invalidate() {
 		Task { @ImagePipelineActor in
 			guard !self.isInvalidated else { return }
 			self.isInvalidated = true
@@ -132,14 +132,14 @@ public final class ImagePipeline {
 	/// Creates a task with the given URL.
 	///
 	/// The task starts executing the moment it is created.
-	nonisolated public func imageTask(with url: URL) -> ImageTask {
+	public nonisolated func imageTask(with url: URL) -> ImageTask {
 		imageTask(with: ImageRequest(url: url))
 	}
 
 	/// Creates a task with the given request.
 	///
 	/// The task starts executing the moment it is created.
-	nonisolated public func imageTask(with request: ImageRequest) -> ImageTask {
+	public nonisolated func imageTask(with request: ImageRequest) -> ImageTask {
 		makeImageTask(with: request)
 	}
 

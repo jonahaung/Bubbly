@@ -35,8 +35,8 @@ extension ChatViewManager: ChatDatasourceDelegate {
 				}
 				ToastPresenter.show(toast)
 			} else {
-				if scrollController.scrolledPosition.nearBottom {
-					scrollController.setUpdateState(.appendingItem(msg.uid))
+				if scrollController.state.scrolledPosition.nearBottom {
+					scrollController.state.updateState = .appendingItem(msg.uid)
 				} else {
 					ToastPresenter.show(allowsBackgroundTap: false) {
 						VStack(alignment: .leading, spacing: 4) {
@@ -77,6 +77,7 @@ extension ChatViewManager: ChatDatasourceDelegate {
 				models.insert(msg: msg)
 			}
 		}
+		layoutIfNeeded()
 		await saveConversationChanges()
 	}
 
@@ -91,12 +92,13 @@ extension ChatViewManager: ChatDatasourceDelegate {
 	func datasource(didRemove snapshot: Message, animated _: Bool) async {
 		scrollController.setDefaultAnimation(.smooth)
 		models.remove(msg: snapshot)
+		layoutIfNeeded()
 	}
 
 	func datasource(didReceive status: Database.AnyMsgData.SeenStatusPayload) async {
 		conversation.properties.seenMembers.removeAll(where: { $0.uid == status.seenMember.uid })
 		conversation.properties.seenMembers.append(status.seenMember)
-//		layoutIfNeeded()
+		layoutIfNeeded()
 	}
 }
 
@@ -107,6 +109,7 @@ extension ChatViewManager {
 			guard let firstMsgID = conversationConfig.firstMsgID else { return true }
 			return msgs.contains(where: { $0.id == firstMsgID })
 		}()
+		layoutIfNeeded()
 	}
 
 	func reloadConversation() async throws {

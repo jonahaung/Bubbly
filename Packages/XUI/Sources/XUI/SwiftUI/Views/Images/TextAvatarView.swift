@@ -7,7 +7,7 @@ public struct TextAvatarView: View {
 	public init(text: String) {
 		self.text = text.words().compactMap(\.first).prefix(2).map { String($0).uppercased() }
 			.joined()
-		color = .gray
+		color = text.color
 	}
 
 	public init(fullText: String) {
@@ -17,13 +17,15 @@ public struct TextAvatarView: View {
 
 	public var body: some View {
 		GeometryReader { geo in
-			Circle()
-				.fill(color.gradient)
-				.overlay {
-					Text(text)
-						.font(.system(size: geo.size.height * 0.4, weight: .bold, design: .rounded))
-						.foregroundStyle(Color(uiColor: .systemBackground))
-				}
+			ZStack {
+				Circle().fill(color.gradient)
+				Text(text)
+					.font(
+						.system(size: geo.size.height * 0.5, weight: .medium)
+							.width(.condensed)
+					)
+					.foregroundStyle(.windowBackground)
+			}.aspectRatio(1, contentMode: .fit)
 		}
 		.equatable(by: text)
 	}

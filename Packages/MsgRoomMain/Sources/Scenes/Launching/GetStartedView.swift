@@ -4,7 +4,7 @@ import SwiftUI
 
 struct GetStartedView: View {
 	@Environment(AuthRouter.self) private var router
-	@Environment(AppLauncher.self) private var appLauncher
+	let appLauncher: AppLauncher
 
 	var body: some View {
 		VStack(spacing: 28) {

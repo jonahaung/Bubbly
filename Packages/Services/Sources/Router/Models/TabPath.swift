@@ -2,7 +2,11 @@ import Database
 import Foundation
 import XUI
 
-public enum TabPath: Sendable, Hashable, CaseIterable, CaseNameReflectable {
+public enum TabPath: Int, Sendable, CaseIterable, CaseNameReflectable, Identifiable {
+	public var id: Int {
+		rawValue
+	}
+
 	case inbox
 	case contacts
 	case test

@@ -12,10 +12,11 @@ public struct AuthUserProfileView: View {
 	@State private var viewModel: AuthUserProfileViewModel
 	@FocusState private var isFocused: Bool
 
-	@Environment(AppLauncher.self) private var appLauncher
+	let appLauncher: AppLauncher
 
-	public init(user: User) {
+	public init(user: User, appLauncher: AppLauncher) {
 		viewModel = .init(user: user)
+		self.appLauncher = appLauncher
 	}
 
 	public var body: some View {

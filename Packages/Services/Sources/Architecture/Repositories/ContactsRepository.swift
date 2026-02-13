@@ -5,25 +5,27 @@ import Foundation
 import SwiftData
 import XUI
 
-@MainActor
-@Observable
-public final class ContactStore: ErrorPresenter {
-	public static var shared: ContactStore {
+public final class ContactsRepository: ContactsRepositoryProtocol, Sendable, ErrorPresenter {
+	@MainActor
+	public static var shared: ContactsRepository {
 		get { sharedLock.value }
 		set { sharedLock.value = newValue }
 	}
 
-	private static let sharedLock = Mutex(ContactStore())
+	private static let sharedLock = Mutex(ContactsRepository())
 	private init() {}
 
 	public var contacts = [Contact]()
 	public var groups = [Group]()
 
 	public func delete(uid: String) async throws {
-		if let indext = contacts.firstIndex(where: { $0.uid == uid }) {
+		if let indext = await contacts.firstIndex(where: { $0.uid == uid }) {
 			try await Store.shared.contactStore?
 				.delete(uid: uid)
-			contacts.remove(at: indext)
+
+			Task { @MainActor in
+				contacts.remove(at: indext)
+			}
 		}
 	}
 
@@ -46,7 +48,7 @@ public final class ContactStore: ErrorPresenter {
 	}
 }
 
-public extension ContactStore {
+public extension ContactsRepository {
 	@concurrent func syncGroups(currentUser: CurrentUserModel) async throws {
 		let groups: [Group] = try await FirestoreRepo.getModels(
 			for: currentUser.uid,

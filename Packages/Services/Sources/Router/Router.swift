@@ -33,6 +33,10 @@ public class Router {
 			self.allPaths[tab] = newValue
 		})
 	}
+
+	public func tabPathBinding() -> Binding<TabPath> {
+		.init(get: { self.selectedTab }, set: { self.selectedTab = $0 })
+	}
 }
 
 extension Router: @MainActor Equatable {
@@ -95,5 +99,5 @@ public extension Router {
 }
 
 public extension Router {
-	static let shared: Router = .init(.contacts)
+	static let shared: Router = .init(.inbox)
 }
