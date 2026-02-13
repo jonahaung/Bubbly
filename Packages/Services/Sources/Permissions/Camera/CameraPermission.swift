@@ -1,10 +1,3 @@
-//
-//  CameraPermission.swift
-//  Services
-//
-//  Created by Aung Ko Min on 17/8/25.
-//
-
 import AVFoundation
 import Foundation
 

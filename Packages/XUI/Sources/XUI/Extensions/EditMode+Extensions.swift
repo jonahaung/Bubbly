@@ -1,10 +1,3 @@
-//
-//  EditMode+Extensions.swift
-//
-//
-//  Created by Aung Ko Min on 18/7/23.
-//
-
 import SwiftUI
 
 public extension EditMode {

@@ -1,10 +1,3 @@
-//
-//  ImageView.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 4/9/25.
-//
-
 import Database
 import ImageLoader
 import Services

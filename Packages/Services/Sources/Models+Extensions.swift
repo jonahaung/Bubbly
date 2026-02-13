@@ -1,10 +1,3 @@
-//
-//  Models+Extensions.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 4/9/25.
-//
-
 import Database
 import Foundation
 import ImageLoader
@@ -13,7 +6,7 @@ import XUI
 
 extension Contact: @retroactive ImageViewItem {
 	public var imageName: String? {
-		self.name
+		name
 	}
 
 	public var subFolders: [String] {
@@ -35,7 +28,7 @@ extension Contact: @retroactive ImageViewItem {
 
 extension Database.Group: @retroactive ImageViewItem {
 	public var imageName: String? {
-		self.name
+		name
 	}
 
 	public var subFolders: [String] {

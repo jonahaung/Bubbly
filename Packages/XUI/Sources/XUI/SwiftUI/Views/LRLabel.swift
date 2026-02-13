@@ -1,10 +1,3 @@
-//
-//  LRLabel.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 24/3/23.
-//
-
 import SFSafeSymbols
 import SwiftUI
 

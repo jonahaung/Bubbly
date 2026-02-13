@@ -1,10 +1,3 @@
-//
-//  GradientForegroundStyle.swift
-//  UI
-//
-//  Created by Aung Ko Min on 17/8/25.
-//
-
 import SwiftUI
 
 struct GradientForegroundStyle: ViewModifier {

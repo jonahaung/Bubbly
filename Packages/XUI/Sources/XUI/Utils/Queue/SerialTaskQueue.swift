@@ -1,10 +1,3 @@
-//
-//  SerialTaskQueue.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 27/9/25.
-//
-
 import Foundation
 
 public protocol SerialTaskQueueProtocol {

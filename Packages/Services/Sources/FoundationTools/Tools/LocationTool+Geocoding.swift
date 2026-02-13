@@ -1,7 +1,3 @@
-//
-//  LocationTool+Geocoding.swift
-//
-
 import CoreLocation
 import FoundationModels
 import MapKit

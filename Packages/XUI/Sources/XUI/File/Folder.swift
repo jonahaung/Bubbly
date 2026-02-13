@@ -1,10 +1,3 @@
-//
-//  Folder.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 21/10/25.
-//
-
 import Foundation
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
 	import AppKit

@@ -1,10 +1,3 @@
-//
-//  ContactPickerScene.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 24/8/25.
-//
-
 import Database
 import Services
 import SwiftUI

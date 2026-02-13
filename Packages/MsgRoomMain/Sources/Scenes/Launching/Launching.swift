@@ -1,10 +1,3 @@
-//
-//  Launching.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 19/11/25.
-//
-
 import Database
 import FirebaseAuth
 import Foundation

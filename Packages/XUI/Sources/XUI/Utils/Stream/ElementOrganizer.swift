@@ -1,10 +1,3 @@
-//
-//  ElementOrganizer.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 14/7/25.
-//
-
 public final class ElementOrganizer<Element> {
 	public struct Index {
 		public let index: Int

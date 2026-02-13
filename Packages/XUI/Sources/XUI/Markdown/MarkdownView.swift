@@ -1,10 +1,3 @@
-//
-//  MarkdownView.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 28/2/25.
-//
-
 import SwiftUI
 
 public struct NativeMarkdownView: View {

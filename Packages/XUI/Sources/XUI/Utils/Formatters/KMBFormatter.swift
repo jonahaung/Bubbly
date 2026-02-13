@@ -1,10 +1,3 @@
-//
-//  KMBFormatter.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 2/4/23.
-//
-
 import Foundation
 
 extension KMBFormatter {

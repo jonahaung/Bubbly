@@ -1,10 +1,3 @@
-//
-//  ModalOverlay.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 3/2/26.
-//
-
 import SwiftUI
 
 public struct ModalOverlay<Content: View>: View {

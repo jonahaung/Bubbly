@@ -1,10 +1,3 @@
-//
-//  ChangePredicatedAnimation.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 1/12/25.
-//
-
 import SwiftUI
 
 private struct ChangePredicatedAnimation<Value: Equatable>: ViewModifier {

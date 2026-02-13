@@ -1,10 +1,3 @@
-//
-//  AppContainer.swift
-//  Database
-//
-//  Created by Aung Ko Min on 14/7/25.
-//
-
 import Core
 import SwiftData
 

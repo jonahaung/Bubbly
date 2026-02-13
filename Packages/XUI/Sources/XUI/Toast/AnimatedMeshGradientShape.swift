@@ -1,24 +1,14 @@
-//
-//  AnimatedMeshGradientShape.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 12/2/26.
-//
-
-
 import SwiftUI
 
 public struct AnimatedMeshGradientShape: View {
-
 	public let theme: AnimatedGradientBackground.Theme
 	public let offsetX: Float
 	public let offsetY: Float
 
-	public init(
-		theme: AnimatedGradientBackground.Theme,
-		offsetX: Float,
-		offsetY: Float
-	) {
+	public init(theme: AnimatedGradientBackground.Theme,
+	            offsetX: Float,
+	            offsetY: Float)
+	{
 		self.theme = theme
 		self.offsetX = offsetX
 		self.offsetY = offsetY
@@ -47,7 +37,7 @@ public struct AnimatedMeshGradientShape: View {
 			SIMD2(0.7 + offsetX, 0.65),
 			SIMD2(1.0, 0.7),
 
-			SIMD2(0.0, 1.0), SIMD2(0.3, 1.0), SIMD2(0.7, 1.0), SIMD2(1.0, 1.0)
+			SIMD2(0.0, 1.0), SIMD2(0.3, 1.0), SIMD2(0.7, 1.0), SIMD2(1.0, 1.0),
 		]
 	}
 
@@ -58,20 +48,20 @@ public struct AnimatedMeshGradientShape: View {
 			base.opacity(0.25), base.opacity(0.4), .white, base.opacity(0.3),
 			.white, base.opacity(0.35), base.opacity(0.5), .white,
 			base.opacity(0.45), .white, base.opacity(0.3), base.opacity(0.55),
-			.white, base.opacity(0.4), base.opacity(0.35), base.opacity(0.5)
+			.white, base.opacity(0.4), base.opacity(0.35), base.opacity(0.5),
 		]
 	}
 
 	private var baseColor: Color {
 		switch theme {
-		case .blue: return .blue
-		case .red: return .red
-		case .orange: return .orange
-		case .grey: return .gray
-		case .brown: return .brown
-		case .green: return .green
-		case .purple: return .purple
-		case .yellow: return .yellow
+		case .blue: .blue
+		case .red: .red
+		case .orange: .orange
+		case .grey: .gray
+		case .brown: .brown
+		case .green: .green
+		case .purple: .purple
+		case .yellow: .yellow
 		}
 	}
 }

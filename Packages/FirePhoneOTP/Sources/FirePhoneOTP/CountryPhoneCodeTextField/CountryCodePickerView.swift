@@ -1,10 +1,3 @@
-//
-//  CountryCodePickerView.swift
-//  CountryPhoneCodePicker
-//
-//  Created by Aung Ko Min on 31/10/22.
-//
-
 import SwiftUI
 
 public struct CountryCodePickerView: View {

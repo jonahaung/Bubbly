@@ -1,10 +1,3 @@
-//
-//  DbQuery.swift
-//  Database
-//
-//  Created by Aung Ko Min on 13/7/25.
-//
-
 import SwiftData
 import SwiftUI
 

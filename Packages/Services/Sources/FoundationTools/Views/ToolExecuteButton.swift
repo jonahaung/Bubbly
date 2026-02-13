@@ -1,10 +1,3 @@
-//
-//  ToolExecuteButton.swift
-//  Core
-//
-//  Created by Aung Ko Min on 6/1/26.
-//
-
 import SwiftUI
 
 /// Standard execute button for tool views

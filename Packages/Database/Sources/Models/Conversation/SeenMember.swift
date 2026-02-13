@@ -1,10 +1,3 @@
-//
-//  SeenMember.swift
-//  Database
-//
-//  Created by Aung Ko Min on 30/8/25.
-//
-
 import Foundation
 
 public struct SeenMember: Codable, Sendable, Hashable {

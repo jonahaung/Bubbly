@@ -1,10 +1,3 @@
-//
-//  GroupConversationSettingsScene.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 24/8/25.
-//
-
 import Core
 import Database
 import ImageLoader

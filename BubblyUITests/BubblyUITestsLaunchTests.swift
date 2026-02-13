@@ -1,10 +1,3 @@
-//
-//  BubblyUITestsLaunchTests.swift
-//  BubblyUITests
-//
-//  Created by Aung Ko Min on 27/4/25.
-//
-
 import XCTest
 
 class BubblyUITestsLaunchTests: XCTestCase {

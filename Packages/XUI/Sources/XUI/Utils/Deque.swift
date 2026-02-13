@@ -1,10 +1,3 @@
-//
-//  Deque.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 19/10/25.
-//
-
 import Foundation
 
 /// A high-performance FIFO queue backed by a circular buffer.

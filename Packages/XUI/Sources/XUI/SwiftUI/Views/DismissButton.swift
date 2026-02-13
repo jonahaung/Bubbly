@@ -1,10 +1,3 @@
-//
-//  DismissButton.swift
-//
-//
-//  Created by Aung Ko Min on 20/2/23.
-//
-
 import SwiftUI
 
 public struct DismissButton: View {

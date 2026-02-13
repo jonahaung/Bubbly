@@ -1,10 +1,3 @@
-//
-//  AttachMentType.swift
-//  Database
-//
-//  Created by Aung Ko Min on 22/10/25.
-//
-
 import Foundation
 import XUI
 

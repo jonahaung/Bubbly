@@ -1,10 +1,3 @@
-//
-//  BorderedProminentButtonStyle.swift
-//
-//
-//  Created by Aung Ko Min on 20/2/23.
-//
-
 import SwiftUI
 
 private struct BorderedProminentButtonStyle: ViewModifier {

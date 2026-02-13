@@ -1,10 +1,3 @@
-//
-//  MsgRoomEntryPoint.swift
-//  Services
-//
-//  Created by Aung Ko Min on 3/2/25.
-//
-
 import Core
 import Database
 import FirebaseAuth

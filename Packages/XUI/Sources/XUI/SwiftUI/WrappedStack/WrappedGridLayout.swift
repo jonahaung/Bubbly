@@ -1,10 +1,3 @@
-//
-//  WrappedGridLayout.swift
-//
-//
-//  Created by Aung Ko Min on 14/9/24.
-//
-
 import SwiftUI
 
 public struct WrappedGridLayout: Layout {

@@ -1,7 +1,3 @@
-// The MIT License (MIT)
-//
-// Copyright (c) 2015-2024 Alexander Grebenyuk (github.com/kean).
-
 import Foundation
 
 /// Represents a task with support for multiple observers, cancellation,

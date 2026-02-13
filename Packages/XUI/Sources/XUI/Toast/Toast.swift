@@ -1,14 +1,7 @@
-//
-//  Toast.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 18/10/25.
-//
-
 import SwiftUI
 
 @MainActor
-public struct Toast: Sendable, @MainActor Identifiable, @MainActor Hashable {
+public struct Toast: @MainActor Identifiable, @MainActor Hashable {
 	public let id: AnyHashable
 	public let node: any RenderNode
 	public let duration: Double

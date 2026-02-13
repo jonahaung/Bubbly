@@ -1,10 +1,3 @@
-//
-//  NotificationAccess+userNotifcationAuthorizationOptions.swift
-//  Services
-//
-//  Created by Aung Ko Min on 17/8/25.
-//
-
 import UserNotifications
 
 extension PermissionKind.NotificationAccess {

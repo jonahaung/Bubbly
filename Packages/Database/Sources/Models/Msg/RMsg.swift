@@ -1,10 +1,3 @@
-//
-//  RMsg.swift
-//  Models
-//
-//  Created by Aung Ko Min on 25/5/25.
-//
-
 import Foundation
 import XUI
 

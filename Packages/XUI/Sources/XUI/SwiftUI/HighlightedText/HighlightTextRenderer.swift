@@ -1,10 +1,3 @@
-//
-//  HighlightTextRenderer.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 1/2/26.
-//
-
 import SwiftUI
 
 /// A custom TextRenderer that draws a background highlight

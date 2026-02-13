@@ -1,10 +1,3 @@
-//
-//  ToastPresentable.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 18/10/25.
-//
-
 import SwiftUI
 
 private struct ToastPresentableodifier: ViewModifier {
@@ -17,7 +10,7 @@ private struct ToastPresentableodifier: ViewModifier {
 					ModalOverlay(
 						toast.style.alignment,
 						from: toast.style.edge,
-						allowsBackgroundTap: toast.allowsBackgroundTap,
+						allowsBackgroundTap: toast.allowsBackgroundTap
 					) {
 						toast.node.eraseToNode()
 							.lineHeight(.multiple(factor: 1.1))

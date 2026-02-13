@@ -1,10 +1,3 @@
-//
-//  Badged.swift
-//  Device Monitor
-//
-//  Created by Aung Ko Min on 23/9/22.
-//
-
 import SwiftUI
 
 private struct XBadgedModifier: ViewModifier {

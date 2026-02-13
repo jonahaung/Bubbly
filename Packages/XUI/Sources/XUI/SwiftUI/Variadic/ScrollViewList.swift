@@ -1,10 +1,3 @@
-//
-//  ScrollViewList.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 11/6/24.
-//
-
 import SwiftUI
 
 public struct ScrollViewList<Content: View>: View {

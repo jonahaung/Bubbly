@@ -1,10 +1,3 @@
-//
-//  ImageGeneratingView.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 28/1/26.
-//
-
 import SFSafeSymbols
 import SwiftUI
 

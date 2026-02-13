@@ -1,10 +1,3 @@
-//
-//  SplashReduct.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 24/4/23.
-//
-
 import SwiftUI
 
 private struct SplashReductView: ViewModifier {

@@ -1,10 +1,3 @@
-//
-//  ConversationKind.swift
-//  Database
-//
-//  Created by Aung Ko Min on 25/10/25.
-//
-
 import Foundation
 
 public enum ConversationKind: Codable, Sendable, Hashable {

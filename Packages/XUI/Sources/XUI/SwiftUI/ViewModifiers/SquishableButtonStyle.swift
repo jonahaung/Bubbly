@@ -1,10 +1,3 @@
-//
-//  SquishableButtonStyle.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 10/11/24.
-//
-
 import SwiftUI
 
 public struct SquishableButtonStyle: ButtonStyle {

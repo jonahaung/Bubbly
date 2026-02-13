@@ -1,10 +1,3 @@
-//
-//  ZoomableScrollView.swift
-//  Msgr
-//
-//  Created by Aung Ko Min on 18/1/23.
-//
-
 import Combine
 import SwiftUI
 

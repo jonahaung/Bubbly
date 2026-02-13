@@ -1,10 +1,3 @@
-//
-//  QuakeRenderer.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 10/10/25.
-//
-
 import SwiftUI
 
 public struct QuakeRenderer: TextRenderer {

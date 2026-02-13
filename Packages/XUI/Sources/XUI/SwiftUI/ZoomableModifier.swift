@@ -1,10 +1,3 @@
-//
-//  ZoomableModifier.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 3/9/25.
-//
-
 import SwiftUI
 
 struct ZoomableModifier: ViewModifier {

@@ -1,10 +1,3 @@
-//
-//  Socket+Sent.swift
-//  Services
-//
-//  Created by Aung Ko Min on 26/8/25.
-//
-
 import Core
 import Database
 import FCM_V1
@@ -18,7 +11,7 @@ extension Socket {
 		}
 	}
 
-	func send(_ data: AnyMsgData, conversation: Conversation) async throws {
+	func send(_ data: AnyMsgData, conversation _: Conversation) async throws {
 		switch data {
 		case let .newMsg(rMsg):
 			let msg = Message(rMsg)

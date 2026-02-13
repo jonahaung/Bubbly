@@ -1,10 +1,3 @@
-//
-//  UnfairLock.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 27/10/24.
-//
-
 import Foundation
 
 public final class UnfairLock {

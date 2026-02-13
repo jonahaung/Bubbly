@@ -1,10 +1,3 @@
-//
-//  SeededRandomGenerator.swift
-//  XUI
-//
-//  Deterministic RandomNumberGenerator using SplitMix64
-//
-
 import Foundation
 
 public struct SeededRandomGenerator: RandomNumberGenerator {

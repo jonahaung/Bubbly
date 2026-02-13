@@ -1,10 +1,3 @@
-//
-//  PagerTabMenuBar.swift
-//  UI
-//
-//  Created by Aung Ko Min on 13/12/24.
-//
-
 import SwiftUI
 
 @available(iOS 18.0, *)

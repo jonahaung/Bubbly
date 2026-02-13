@@ -1,10 +1,3 @@
-//
-//  ProfilePhoto.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 27/8/25.
-//
-
 import Database
 import Services
 import SwiftUI

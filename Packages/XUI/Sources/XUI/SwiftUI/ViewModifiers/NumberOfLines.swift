@@ -1,10 +1,3 @@
-//
-//  NumberOfLines.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 17/1/26.
-//
-
 import SwiftUI
 
 struct OnNumberOfLinesChangeViewModifier: ViewModifier {

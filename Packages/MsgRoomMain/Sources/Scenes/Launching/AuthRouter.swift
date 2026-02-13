@@ -1,10 +1,3 @@
-//
-//  AuthRouter.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 19/11/25.
-//
-
 import Core
 import FirebaseAuth
 import FirePhoneOTP

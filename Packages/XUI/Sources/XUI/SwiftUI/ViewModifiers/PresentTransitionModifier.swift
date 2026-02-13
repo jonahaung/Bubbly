@@ -1,10 +1,3 @@
-//
-//  PresentTransitionModifier.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 20/10/25.
-//
-
 import SwiftUI
 
 private struct PresentTransitionModifier<Destination: View, Snapshot: View>: ViewModifier {

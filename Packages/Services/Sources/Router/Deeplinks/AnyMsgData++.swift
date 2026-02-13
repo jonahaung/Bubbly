@@ -1,10 +1,3 @@
-//
-//  AnyMsgData++.swift
-//  Services
-//
-//  Created by Aung Ko Min on 5/2/26.
-//
-
 import Database
 import Foundation
 

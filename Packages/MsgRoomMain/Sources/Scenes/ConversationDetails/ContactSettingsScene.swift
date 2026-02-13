@@ -1,10 +1,3 @@
-//
-//  ContactSettingsScene.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 23/10/24.
-//
-
 import Core
 import Database
 import Services

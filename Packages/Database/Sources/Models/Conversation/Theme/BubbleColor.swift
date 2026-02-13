@@ -1,10 +1,3 @@
-//
-//  BubbleColor.swift
-//  UI
-//
-//  Created by Aung Ko Min on 16/2/25.
-//
-
 import SwiftUI
 import XUI
 

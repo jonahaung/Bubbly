@@ -1,10 +1,3 @@
-//
-//  ScrolledPosition.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 28/2/25.
-//
-
 import Foundation
 import SwiftUI
 

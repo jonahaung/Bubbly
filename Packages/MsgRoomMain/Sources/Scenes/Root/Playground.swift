@@ -1,10 +1,3 @@
-//
-//  Playground.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 3/2/26.
-//
-
 import Core
 import Database
 import Services

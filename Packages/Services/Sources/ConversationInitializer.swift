@@ -1,10 +1,3 @@
-//
-//  ConversationInitializer.swift
-//  Services
-//
-//  Created by Aung Ko Min on 14/7/25.
-//
-
 import Core
 import Database
 import SwiftUI
@@ -25,7 +18,7 @@ public enum ConversationInitializer {
 
 		public let contentInsets = EdgeInsets(
 			top: ChatLayoutConstants.topBarHeight,
-			leading: 8,
+			leading: 4,
 			bottom: 0,
 			trailing: 8
 		)

@@ -1,10 +1,3 @@
-//
-//  UserDefaults.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 18/8/25.
-//
-
 import Foundation
 
 public extension UserDefaults {

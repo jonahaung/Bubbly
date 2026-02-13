@@ -1,11 +1,3 @@
-//
-//  Transcript+TokenCounting.swift
-//  FoundationModelsTools
-//
-//  Token counting and context window management utilities for Foundation Models transcripts.
-//  Uses Apple's guidance of 4.5 characters per token for estimation.
-//
-
 import Foundation
 import FoundationModels
 

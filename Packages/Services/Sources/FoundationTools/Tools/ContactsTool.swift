@@ -1,10 +1,3 @@
-//
-//  ContactsTool.swift
-//  FoundationLab
-//
-//  Created by Rudrank Riyam on 6/17/25.
-//
-
 @preconcurrency import Contacts
 import Foundation
 import FoundationModels

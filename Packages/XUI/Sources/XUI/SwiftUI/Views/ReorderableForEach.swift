@@ -1,10 +1,3 @@
-//
-//  ReorderableForEach.swift
-//
-//
-//  Created by Aung Ko Min on 8/5/23.
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 

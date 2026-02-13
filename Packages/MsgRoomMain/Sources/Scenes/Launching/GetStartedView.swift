@@ -1,10 +1,3 @@
-//
-//  GetStartedView.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 18/11/25.
-//
-
 import FirebaseAuth
 import Services
 import SwiftUI

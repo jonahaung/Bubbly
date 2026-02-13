@@ -1,10 +1,3 @@
-//
-//  StoreModelActor.swift
-//  Database
-//
-//  Created by Aung Ko Min on 12/7/25.
-//
-
 import Foundation
 import SwiftData
 

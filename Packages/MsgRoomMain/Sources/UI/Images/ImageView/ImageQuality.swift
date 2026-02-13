@@ -1,10 +1,3 @@
-//
-//  ImageQuality.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 12/12/25.
-//
-
 import Foundation
 
 public enum ImageQuality: Sendable, Codable {

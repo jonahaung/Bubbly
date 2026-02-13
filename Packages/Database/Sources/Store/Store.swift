@@ -1,9 +1,3 @@
-//
-//  Store.swift
-//
-//  Created by Aung Ko Min on 22/7/24.
-//
-
 import Foundation
 import SwiftData
 import XUI

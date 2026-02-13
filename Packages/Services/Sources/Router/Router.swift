@@ -1,10 +1,3 @@
-//
-//  Router.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 23/10/24.
-//
-
 import Combine
 import Core
 import Database
@@ -14,27 +7,20 @@ import XUI
 @MainActor
 @Observable
 public class Router {
-	private var allPaths: [TabPath: [NavPath]] = {
-		var dictionary: [TabPath: [NavPath]] = [:]
-		for item in TabPath.allCases {
-			dictionary[item] = []
-		}
-		return dictionary
-	}()
-
-	public var selectedTab: TabPath = .inbox
+	private var allPaths: [TabPath: [NavPath]]
+	public var selectedTab: TabPath
 	public var sheet: NavPath?
-	@ObservationIgnored
-	public var currentNavPaths: [NavPath]? {
-		allPaths[selectedTab]
-	}
 
-	@ObservationIgnored
-	public var visiblePath: NavPath {
-		allPaths[selectedTab]?.last ?? .currentUserDetails
+	public init(_ selected: TabPath) {
+		selectedTab = selected
+		allPaths = {
+			var dictionary: [TabPath: [NavPath]] = [:]
+			for item in TabPath.allCases {
+				dictionary[item] = []
+			}
+			return dictionary
+		}()
 	}
-
-	public init() {}
 
 	public func navPaths(for tab: TabPath) -> [NavPath] {
 		allPaths[tab] ?? []
@@ -49,9 +35,30 @@ public class Router {
 	}
 }
 
+extension Router: @MainActor Equatable {
+	public static func == (_: Router, _: Router) -> Bool {
+		true
+	}
+}
+
+private extension Router {
+	@ObservationIgnored
+	var currentNavPaths: [NavPath]? {
+		allPaths[selectedTab]
+	}
+}
+
 public extension Router {
+	func toolBarVisibility() -> Visibility {
+		currentNavPaths.isNilOrEmpty ? .automatic : .hidden
+	}
+
 	func selectTab(_ newValue: TabPath) {
 		selectedTab = newValue
+	}
+
+	func visiblePath() -> NavPath {
+		allPaths[selectedTab]?.last ?? .currentUserDetails
 	}
 
 	func pushToNav(_ path: NavPath) {
@@ -88,6 +95,5 @@ public extension Router {
 }
 
 public extension Router {
-	/// Shared instance for app-wide navigation
-	static let shared: Router = .init()
+	static let shared: Router = .init(.contacts)
 }

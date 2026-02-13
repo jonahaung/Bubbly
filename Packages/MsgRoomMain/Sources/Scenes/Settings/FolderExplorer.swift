@@ -1,10 +1,3 @@
-//
-//  FolderExplorer.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 20/10/25.
-//
-
 import SwiftUI
 import XUI
 

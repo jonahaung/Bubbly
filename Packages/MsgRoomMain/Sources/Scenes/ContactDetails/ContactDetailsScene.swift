@@ -1,10 +1,3 @@
-//
-//  ContactDetailsScene.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 15/6/25.
-//
-
 import Database
 import SwiftUI
 

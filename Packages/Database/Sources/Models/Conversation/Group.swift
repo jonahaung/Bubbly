@@ -1,10 +1,3 @@
-//
-//  Group.swift
-//  Database
-//
-//  Created by Aung Ko Min on 20/8/25.
-//
-
 import Foundation
 
 public struct Group: Codable, Sendable, Hashable, UIdentifiable {

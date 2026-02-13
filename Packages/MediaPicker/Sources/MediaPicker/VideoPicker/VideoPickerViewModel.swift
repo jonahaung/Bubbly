@@ -1,10 +1,3 @@
-//
-//  VideoPickerViewModel.swift
-//  MediaPicker
-//
-//  Created by Aung Ko Min on 2024/04/22.
-//
-
 @preconcurrency import AVFoundation
 import Foundation
 import PhotosUI

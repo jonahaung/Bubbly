@@ -1,10 +1,3 @@
-//
-//  ContactRepresentable.swift
-//  Database
-//
-//  Created by Aung Ko Min on 29/10/25.
-//
-
 import Foundation
 import XUI
 

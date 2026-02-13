@@ -1,10 +1,3 @@
-//
-//  Reaction.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 6/4/24.
-//
-
 import Core
 import Foundation
 import XUI

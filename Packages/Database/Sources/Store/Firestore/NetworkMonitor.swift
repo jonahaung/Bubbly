@@ -1,10 +1,3 @@
-//
-//  NetworkMonitor.swift
-//  Database
-//
-//  Created by Aung Ko Min on 4/11/25.
-//
-
 import Foundation
 import Network
 

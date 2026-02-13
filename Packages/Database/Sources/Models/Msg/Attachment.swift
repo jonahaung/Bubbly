@@ -1,10 +1,3 @@
-//
-//  Attachment.swift
-//  Database
-//
-//  Created by Aung Ko Min on 23/9/25.
-//
-
 import Foundation
 
 public struct Attachment: Codable, Sendable, Hashable, Identifiable {

@@ -1,10 +1,3 @@
-//
-//  ReactionAnimationModifier.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 14/6/24.
-//
-
 import SwiftUI
 
 @MainActor

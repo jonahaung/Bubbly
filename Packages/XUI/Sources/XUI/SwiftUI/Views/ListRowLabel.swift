@@ -1,10 +1,3 @@
-//
-//  ListRowLabel.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 28/7/23.
-//
-
 import SFSafeSymbols
 import SwiftUI
 

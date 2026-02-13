@@ -1,10 +1,3 @@
-//
-//  MsgCellLayout.swift
-//  Services
-//
-//  Created by Aung Ko Min on 10/10/25.
-//
-
 import Core
 import XUI
 

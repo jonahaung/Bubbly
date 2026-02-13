@@ -1,10 +1,3 @@
-//
-//  PhaseAnimation.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 13/5/24.
-//
-
 import SwiftUI
 
 private struct PhaseAnimationModifier: ViewModifier {

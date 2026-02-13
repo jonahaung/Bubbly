@@ -1,10 +1,3 @@
-//
-//  SettingsScene.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 16/5/25.
-//
-
 import Core
 import Database
 import FirebaseAuth

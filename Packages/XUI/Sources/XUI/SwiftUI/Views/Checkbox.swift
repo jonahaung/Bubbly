@@ -1,10 +1,3 @@
-//
-//  Checkbox.swift
-//
-//
-//  Created by Aung Ko Min on 19/7/23.
-//
-
 import SwiftUI
 
 struct Checkbox<Label: View>: View {

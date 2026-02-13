@@ -1,10 +1,3 @@
-//
-//  Contact.swift
-//  Models
-//
-//  Created by Aung Ko Min on 13/7/25.
-//
-
 import Contacts
 import Foundation
 import PhoneNumberKit

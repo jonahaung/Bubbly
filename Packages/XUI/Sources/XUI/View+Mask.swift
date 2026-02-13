@@ -1,10 +1,3 @@
-//
-//  View+Mask.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 27/9/25.
-//
-
 import Swift
 import SwiftUI
 

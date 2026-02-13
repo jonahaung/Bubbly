@@ -1,10 +1,3 @@
-//
-//  TapToPush.swift
-//  MyBike
-//
-//  Created by Aung Ko Min on 28/11/21.
-//
-
 import SwiftUI
 
 private struct PushViewModifier<Destination: View>: ViewModifier {

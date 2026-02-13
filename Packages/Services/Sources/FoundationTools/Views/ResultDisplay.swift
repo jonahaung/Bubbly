@@ -1,10 +1,3 @@
-//
-//  ResultDisplay.swift
-//  Core
-//
-//  Created by Aung Ko Min on 6/1/26.
-//
-
 import SwiftUI
 
 /// Result display component

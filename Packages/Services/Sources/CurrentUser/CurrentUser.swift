@@ -1,9 +1,3 @@
-//
-//  CurrentUser.swift
-//
-//  Created by Aung Ko Min on 2/7/24.
-//
-
 import Core
 import Database
 import FirebaseAuth

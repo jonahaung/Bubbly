@@ -1,10 +1,3 @@
-//
-//  FontNamePicker.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 15/12/25.
-//
-
 import SwiftUI
 
 struct FontNamePicker: View {

@@ -1,9 +1,3 @@
-//
-//  GroupStorage.swift
-//
-//  Created by Aung Ko Min on 16/6/25.
-//
-
 import Foundation
 
 public struct GroupStorage {

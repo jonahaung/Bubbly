@@ -1,10 +1,3 @@
-//
-//  String+Extensions.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 16/12/25.
-//
-
 import Foundation
 
 #if os(iOS) || os(watchOS) || os(tvOS)

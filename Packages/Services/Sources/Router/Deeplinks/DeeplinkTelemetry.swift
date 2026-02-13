@@ -1,10 +1,3 @@
-//
-//  DeeplinkTelemetry.swift
-//  Services
-//
-//  Created by Aung Ko Min on 29/1/26.
-//
-
 import Foundation
 
 public struct DeeplinkTelemetry: Sendable {

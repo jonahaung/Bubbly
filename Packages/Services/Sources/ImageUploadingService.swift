@@ -1,10 +1,3 @@
-//
-//  ImageUploadingService.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 23/8/25.
-//
-
 import FirebaseStorage
 import SwiftUI
 import UIKit

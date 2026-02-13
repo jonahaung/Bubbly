@@ -1,10 +1,3 @@
-//
-//  IDGenerator.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 31/12/25.
-//
-
 import Foundation
 
 public actor IDGenerator {

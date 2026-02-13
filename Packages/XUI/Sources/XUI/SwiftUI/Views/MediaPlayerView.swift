@@ -1,10 +1,3 @@
-//
-//  MediaPlayerView.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 30/1/23.
-//
-
 import AVKit
 import SwiftUI
 

@@ -1,10 +1,3 @@
-//
-//  AsyncButtonOptions.swift
-//
-//
-//  Created by Lorenzo Fiamingo on 27/06/22.
-//
-
 import Foundation
 
 public struct AsyncButtonOptions: OptionSet, Sendable {

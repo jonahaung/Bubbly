@@ -1,10 +1,3 @@
-//
-//  DigitFormatter.swift
-//
-//
-//  Created by Aung Ko Min on 21/4/24.
-//
-
 import Foundation
 
 public enum DigitFormatter {

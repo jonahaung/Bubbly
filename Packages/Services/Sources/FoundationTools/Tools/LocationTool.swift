@@ -1,10 +1,3 @@
-//
-//  LocationTool.swift
-//  FoundationLab
-//
-//  Created by Rudrank Riyam on 6/17/25.
-//
-
 @preconcurrency import CoreLocation
 import Foundation
 import FoundationModels

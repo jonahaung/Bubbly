@@ -1,10 +1,3 @@
-//
-//  TransitionSourceModifier.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 23/9/24.
-//
-
 import SwiftUI
 
 private struct TransitionSourceModifier: ViewModifier {

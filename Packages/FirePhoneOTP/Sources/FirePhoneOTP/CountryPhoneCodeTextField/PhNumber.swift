@@ -1,10 +1,3 @@
-//
-//  PhNumber.swift
-//  CountryPhoneCodePicker
-//
-//  Created by Aung Ko Min on 31/10/22.
-//
-
 import Foundation
 import PhoneNumberKit
 

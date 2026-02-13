@@ -1,10 +1,3 @@
-//
-//  SwiftLinkPreviewError.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 16/12/25.
-//
-
 import Foundation
 
 public enum SwiftLinkPreviewError: Error, Sendable, CustomStringConvertible {

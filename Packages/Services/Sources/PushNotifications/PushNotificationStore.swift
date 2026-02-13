@@ -1,10 +1,3 @@
-//
-//  PushNotificationStore.swift
-//  Services
-//
-//  Created by Aung Ko Min on 04/02/26.
-//
-
 import Core
 import Database
 import FirebaseAuth

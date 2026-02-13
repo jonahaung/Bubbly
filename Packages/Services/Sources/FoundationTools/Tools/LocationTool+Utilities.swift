@@ -1,7 +1,3 @@
-//
-//  LocationTool+Utilities.swift
-//
-
 import CoreLocation
 import FoundationModels
 import MapKit

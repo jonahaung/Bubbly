@@ -1,10 +1,3 @@
-//
-//  TapToPresent.swift
-//  MyBike
-//
-//  Created by Aung Ko Min on 29/11/21.
-//
-
 import SwiftUI
 
 private struct PresentSheetModifier<Destination: View>: ViewModifier {

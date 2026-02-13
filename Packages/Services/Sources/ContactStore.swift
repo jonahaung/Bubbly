@@ -1,10 +1,3 @@
-//
-//  ContactStore.swift
-//  Database
-//
-//  Created by Aung Ko Min on 15/8/25.
-//
-
 import Core
 import Database
 import FirebaseAuth

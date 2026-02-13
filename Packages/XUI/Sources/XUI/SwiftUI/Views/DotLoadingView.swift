@@ -1,10 +1,3 @@
-//
-//  DotLoadingView.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 02/02/23.
-//
-
 import SwiftUI
 
 public struct DotLoadingView: View {

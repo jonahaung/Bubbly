@@ -1,10 +1,3 @@
-//
-//  AppDelegate.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 28/4/25.
-//
-
 import Core
 import Database
 import FirebaseAuth
@@ -41,7 +34,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 	}
 
 	func application(_: UIApplication,
-	                 didReceiveRemoteNotification userInfo: [AnyHashable: Any]) async
+	                 didReceiveRemoteNotification _: [AnyHashable: Any]) async
 		-> UIBackgroundFetchResult
 	{
 		.noData

@@ -1,10 +1,3 @@
-//
-//  PMsg.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 11/7/24.
-//
-
 import Foundation
 import SwiftData
 import UIKit

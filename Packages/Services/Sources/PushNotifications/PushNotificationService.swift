@@ -1,10 +1,3 @@
-//
-//  PushNotificationService.swift
-//  Services
-//
-//  Created by Aung Ko Min on 2/5/25.
-//
-
 import Core
 import Database
 import FirebaseAuth
@@ -28,14 +21,13 @@ public final class PushNotificationService: NSObject {
 		UIApplication.shared.registerForRemoteNotifications()
 		Messaging.messaging().delegate = self
 		UNUserNotificationCenter.current().delegate = self
-		log("Registered for push notifications...")
 	}
 
 	@MainActor
 	public func applicationDidBecomeActive() async throws {
 		let datas = await PushNotificationStore.shared.consumePendingAnyMsgData()
 		if !datas.isEmpty {
-			let currentNavPath = Router.shared.visiblePath
+			let currentNavPath = Router.shared.visiblePath()
 			try await AsyncOrderedStream.mapOrdered(inputs: datas) { data in
 				switch currentNavPath {
 				case let .conversation(prefetchData):
@@ -61,7 +53,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
 		guard let data = try? AnyMsgData.parse(from: userInfo) else {
 			return [.badge, .banner, .list, .sound]
 		}
-		let currentNavPath = await MainActor.run { Router.shared.visiblePath }
+		let currentNavPath = await MainActor.run { Router.shared.visiblePath() }
 		switch currentNavPath {
 		case let .conversation(prefetchData):
 			if data.conID == prefetchData.configuration.conID {

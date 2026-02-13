@@ -1,10 +1,3 @@
-//
-//  ChatToastItem.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 19/4/24.
-//
-
 import Foundation
 import XUI
 

@@ -1,10 +1,3 @@
-//
-//  XPickable.swift
-//
-//
-//  Created by Aung Ko Min on 12/8/23.
-//
-
 import SwiftUI
 
 // public struct XBadge: Hashable, Sendable, Identifiable {

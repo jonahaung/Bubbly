@@ -1,10 +1,3 @@
-//
-//  Task+.swift
-//
-//
-//  Created by Aung Ko Min on 10/6/23.
-//
-
 import Foundation
 
 public extension Task where Success == Never, Failure == Never {

@@ -1,10 +1,3 @@
-//
-//  APNSNotification.swift
-//  FCM_V1
-//
-//  Created by Aung Ko Min on 13/7/25.
-//
-
 import Foundation
 
 public struct APNSNotification: Codable {

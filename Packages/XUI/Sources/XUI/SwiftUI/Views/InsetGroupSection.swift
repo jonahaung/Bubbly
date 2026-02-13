@@ -1,10 +1,3 @@
-//
-//  InsetGroupSection.swift
-//
-//
-//  Created by Aung Ko Min on 16/7/23.
-//
-
 import SwiftUI
 
 public struct InsetGroupSection<Content: View, Header: View, Footer: View>: View {

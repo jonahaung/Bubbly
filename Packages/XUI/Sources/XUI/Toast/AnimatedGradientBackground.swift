@@ -1,14 +1,6 @@
-//
-//  AnimatedGradientBackground.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 9/2/26.
-//
-
 import SwiftUI
 
 public struct AnimatedGradientBackground: View {
-
 	public enum Theme: CaseIterable, Sendable {
 		case blue
 		case red

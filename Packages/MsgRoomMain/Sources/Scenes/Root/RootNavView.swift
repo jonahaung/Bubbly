@@ -1,10 +1,3 @@
-//
-//  RootNavView.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 11/1/26.
-//
-
 import Core
 import Database
 import Services
@@ -18,24 +11,9 @@ struct RootNavView: View {
 		NavigationSplitView {
 			SidebarView()
 		} detail: {
-			tabDestination(for: router.selectedTab)
+			router.selectedTab.destination()
 		}
 		.navigationSplitViewStyle(.automatic)
-	}
-
-	func tabDestination(for tab: TabPath) -> some View {
-		MainNavView(tabPath: tab) {
-			switch tab {
-			case .test:
-				FolderExplorer()
-			case .inbox:
-				InboxScene()
-			case .contacts:
-				ContactsScene()
-			case .settings:
-				SettingsScene()
-			}
-		}
 	}
 }
 
@@ -45,16 +23,10 @@ struct SidebarView: View {
 	var body: some View {
 		List(selection: selection) {
 			Section {
-				ForEach(TabPath.allCases) { tabPath in
-					Button {
+				ForEach(TabPath.allCases, id: \.self) { tabPath in
+					SidebarRow(tabPath: tabPath, isSelected: router.selectedTab == tabPath) {
 						router.selectedTab = tabPath
-					} label: {
-						Label(tabPath.localizedName, systemImage: tabPath.systemName)
-							.symbolRenderingMode(router
-								.selectedTab == tabPath ? .multicolor : .hierarchical)
-							.symbolVariant(router.selectedTab == tabPath ? .fill : .none)
 					}
-					.buttonStyle(.borderless)
 					.id(tabPath)
 				}
 			}
@@ -69,5 +41,32 @@ struct SidebarView: View {
 				router.selectTab(newValue)
 			}
 		})
+	}
+}
+
+private struct SidebarRow: View {
+	let tabPath: TabPath
+	let isSelected: Bool
+	let action: () -> Void
+
+	var body: some View {
+		Button(action: action) {
+			rowLabel
+		}
+		.buttonStyle(.borderless)
+	}
+
+	@ViewBuilder
+	private var rowLabel: some View {
+		let name = tabPath.localizedName
+		let system = tabPath.systemName
+		if isSelected {
+			Label(name, systemImage: system)
+				.symbolRenderingMode(.multicolor)
+				.symbolVariant(.fill)
+		} else {
+			Label(name, systemImage: system)
+				.symbolRenderingMode(.hierarchical)
+		}
 	}
 }

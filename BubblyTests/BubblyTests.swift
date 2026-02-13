@@ -1,10 +1,3 @@
-//
-//  BubblyTests.swift
-//  BubblyTests
-//
-//  Created by Aung Ko Min on 27/4/25.
-//
-
 @testable import Bubbly
 import Testing
 

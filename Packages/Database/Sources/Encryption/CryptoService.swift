@@ -1,10 +1,3 @@
-//
-//  CryptoService.swift
-//  Services
-//
-//  Created by Aung Ko Min on 16/6/25.
-//
-
 import Core
 import Crypto
 import CryptoKit

@@ -1,10 +1,3 @@
-//
-//  SwiftLinkPreviewResponse.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 16/12/25.
-//
-
 import Foundation
 
 public struct SwiftLinkPreviewResponse: Sendable, Hashable {

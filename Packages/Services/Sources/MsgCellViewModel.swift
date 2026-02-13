@@ -1,10 +1,3 @@
-//
-//  MsgCellViewModel.swift
-//  Services
-//
-//  Created by Aung Ko Min on 14/8/25.
-//
-
 import Database
 import SwiftUI
 import XUI
@@ -15,7 +8,6 @@ public final class MsgCellViewModel: ViewReloadable {
 		public let id: String
 		public let text: String?
 		public let attachments: [Attachment]
-		public let isSelected: Bool
 		public let reactions: [Reaction]
 		public let isVisible: Bool
 	}
@@ -34,7 +26,6 @@ public final class MsgCellViewModel: ViewReloadable {
 			id: msg.uid,
 			text: msg.text,
 			attachments: msg.attachments,
-			isSelected: false,
 			reactions: msg.reactions,
 			isVisible: false
 		)
@@ -61,21 +52,7 @@ public final class MsgCellViewModel: ViewReloadable {
 		animationTrigger += 1
 	}
 
-	func recomputeRenderKey(selectedMsg: SelectedMsg?,
-	                        layout: MsgCellLayout)
-	{
-		let isSelected = (selectedMsg?.id == id)
-		contentRenderKey = ContentRenderKey(
-			id: id,
-			text: msg.text,
-			attachments: msg.attachments,
-			isSelected: isSelected,
-			reactions: msg.reactions,
-			isVisible: isVisible
-		)
-	}
-
-	func computeBubbleCOrner(selectedMsg: SelectedMsg?, isSender: Bool) -> BubbleCorner {
+	func computeBubbleCOrner(selectedMsg: SelectedMsg?, isSender _: Bool) -> BubbleCorner {
 		guard let selectedMsg else {
 			return layout.bubbleCorner
 		}
@@ -113,9 +90,11 @@ public extension MsgCellViewModel {
 	var horizontalAlignment: HorizontalAlignment {
 		isSender ? .trailing : .leading
 	}
+
 	var verticalAlignment: VerticalItemAlignment {
 		isSender ? .trailing : .leading
 	}
+
 	func sender() -> Contact? {
 		ContactStore.shared.contact(for: msg.senderID)
 	}
@@ -126,6 +105,7 @@ public extension HorizontalAlignment {
 		self == .leading ? .trailing : .leading
 	}
 }
+
 public enum VerticalItemAlignment: Sendable {
 	case leading
 	case trailing

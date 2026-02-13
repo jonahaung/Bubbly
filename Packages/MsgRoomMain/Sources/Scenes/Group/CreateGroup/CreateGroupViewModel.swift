@@ -1,10 +1,3 @@
-//
-//  CreateGroupViewModel.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 20/8/25.
-//
-
 import Core
 import Database
 import MediaPicker

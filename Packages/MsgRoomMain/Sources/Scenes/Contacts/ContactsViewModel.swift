@@ -1,10 +1,3 @@
-//
-//  ContactsViewModel.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 28/4/25.
-//
-
 import Database
 import Foundation
 import Services
@@ -18,7 +11,7 @@ final class ContactsViewModel: ErrorPresenter {
 	init() {}
 
 	@concurrent
-	func syncContacts(store: ContactStore, currentUser: CurrentUserModel) async {
+	func syncContacts(store: ContactStore, currentUser _: CurrentUserModel) async {
 		await setLoading(true)
 		do {
 			try await store.syncContacts()

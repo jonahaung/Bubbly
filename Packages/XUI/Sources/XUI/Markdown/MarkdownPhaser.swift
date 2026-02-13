@@ -1,10 +1,3 @@
-//
-//  MarkdownPhaser.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 17/2/25.
-//
-
 import Foundation
 
 // MARK: - Markdown Element Types

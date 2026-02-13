@@ -20,6 +20,7 @@ let package = Package(
 		.package(name: "FCM_V1", path: "../FCM_V1"),
 		.package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.4.0"),
 		.package(name: "FirePhoneOTP", path: "../FirePhoneOTP"),
+		.package(url: "https://github.com/nicklockwood/SwiftFormat", from: "0.59.1"),
 	],
 
 	targets: [

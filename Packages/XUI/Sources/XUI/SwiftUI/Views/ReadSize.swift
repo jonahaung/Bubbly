@@ -1,10 +1,3 @@
-//
-//  ReadSize.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 23/9/25.
-//
-
 import SwiftUI
 
 public extension View {

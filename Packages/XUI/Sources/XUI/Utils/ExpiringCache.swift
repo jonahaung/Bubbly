@@ -1,10 +1,3 @@
-//
-//  ExpiringCache.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 2/11/25.
-//
-
 import Foundation
 
 @MainActor

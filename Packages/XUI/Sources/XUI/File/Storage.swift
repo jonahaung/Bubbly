@@ -1,10 +1,3 @@
-//
-//  Storage.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 21/10/25.
-//
-
 import Foundation
 
 public final class Storage<LocationType: Location> {

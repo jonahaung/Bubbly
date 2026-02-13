@@ -1,10 +1,3 @@
-//
-//  RandomColorString.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 27/6/24.
-//
-
 import SwiftUI
 
 public extension Color {

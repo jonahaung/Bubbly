@@ -1,10 +1,3 @@
-//
-//  DeepLinkCoordinator.swift
-//  Services
-//
-//  Created by Aung Ko Min on 30/1/26.
-//
-
 import Core
 import Foundation
 import XUI

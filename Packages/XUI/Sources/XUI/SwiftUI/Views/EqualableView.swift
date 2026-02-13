@@ -1,10 +1,3 @@
-//
-//  EqualableView.swift
-//
-//
-//  Created by Aung Ko Min on 17/7/23.
-//
-
 import SwiftUI
 
 public struct EqualableView<Content: View, Value: Equatable>: @preconcurrency Equatable, View {

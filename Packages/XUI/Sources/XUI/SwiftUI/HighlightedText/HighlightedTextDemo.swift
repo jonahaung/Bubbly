@@ -1,10 +1,3 @@
-//
-//  HighlightedTextDemo.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 1/2/26.
-//
-
 import SwiftUI
 
 public struct HighlightedTextDemo: View {

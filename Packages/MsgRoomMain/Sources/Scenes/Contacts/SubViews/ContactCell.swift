@@ -1,10 +1,3 @@
-//
-//  ContactCell.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 14/7/25.
-//
-
 import Core
 import Database
 import Services

@@ -1,10 +1,3 @@
-//
-//  DocumentPicker.swift
-//  MoreUI
-//
-//  Created by Ryan Rudes on 10/29/21.
-//
-
 import SwiftUI
 import UniformTypeIdentifiers
 

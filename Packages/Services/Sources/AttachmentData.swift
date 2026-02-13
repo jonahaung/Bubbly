@@ -1,10 +1,3 @@
-//
-//  AttachmentData.swift
-//  Services
-//
-//  Created by Aung Ko Min on 20/10/25.
-//
-
 import Foundation
 import SwiftUI
 import XUI

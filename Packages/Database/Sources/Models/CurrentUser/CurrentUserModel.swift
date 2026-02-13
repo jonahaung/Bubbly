@@ -1,10 +1,3 @@
-//
-//  CurrentUserModel.swift
-//  Services
-//
-//  Created by Aung Ko Min on 29/10/25.
-//
-
 import Core
 import FirebaseAuth
 import FirebaseMessaging

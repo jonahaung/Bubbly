@@ -1,10 +1,3 @@
-//
-//  FoundationModelsError.swift
-//  Core
-//
-//  Created by Aung Ko Min on 6/1/26.
-//
-
 import Foundation
 import FoundationModels
 

@@ -1,10 +1,3 @@
-//
-//  VLabel.swift
-//
-//
-//  Created by Aung Ko Min on 23/4/23.
-//
-
 import SwiftUI
 
 public struct VLabel<Top: View, Bottom: View>: View {

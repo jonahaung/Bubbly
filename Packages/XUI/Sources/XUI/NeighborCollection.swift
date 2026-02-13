@@ -1,10 +1,3 @@
-//
-//  NeighborCollection.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 15/12/25.
-//
-
 public struct NeighborCollection<Base: BidirectionalCollection>: BidirectionalCollection {
 	public typealias Element = (
 		previous: Base.Element?,

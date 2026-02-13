@@ -1,10 +1,3 @@
-//
-//  SystemSound.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 10/2/26.
-//
-
 import AudioToolbox
 
 // public enum SystemSound: UInt32, Sendable {

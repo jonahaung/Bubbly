@@ -1,10 +1,3 @@
-//
-//  BubblyApp.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 27/4/25.
-//
-
 import Core
 import FirebaseAuth
 import MsgRoomMain

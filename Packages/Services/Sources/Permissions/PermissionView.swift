@@ -1,10 +1,3 @@
-//
-//  PermissionView.swift
-//  Services
-//
-//  Created by Aung Ko Min on 17/8/25.
-//
-
 import SwiftUI
 
 public struct PermissionView: View {

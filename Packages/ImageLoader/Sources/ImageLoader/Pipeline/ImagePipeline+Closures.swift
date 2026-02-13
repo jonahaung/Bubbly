@@ -1,10 +1,3 @@
-//
-//  ImagePipeline+Closures.swift
-//  ImageLoader
-//
-//  Created by Aung Ko Min on 12/9/25.
-//
-
 // The MIT License (MIT)
 //
 // Copyright (c) 2015-2024 Alexander Grebenyuk (github.com/kean).

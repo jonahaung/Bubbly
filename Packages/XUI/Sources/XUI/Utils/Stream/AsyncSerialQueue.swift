@@ -1,10 +1,3 @@
-//
-//  AsyncSerialQueue.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 31/10/25.
-//
-
 import Foundation
 
 public actor AsyncSerialQueue {

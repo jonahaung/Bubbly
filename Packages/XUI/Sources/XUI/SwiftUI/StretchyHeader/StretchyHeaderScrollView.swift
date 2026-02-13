@@ -1,10 +1,3 @@
-//
-//  StretchyHeaderScrollView.swift
-//
-//
-//  Created by Aung Ko Min on 31/5/24.
-//
-
 import SwiftUI
 
 @available(iOS 18.0, *)

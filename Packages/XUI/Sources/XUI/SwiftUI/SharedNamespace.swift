@@ -1,10 +1,3 @@
-//
-//  SharedNamespace.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 30/8/25.
-//
-
 import SwiftUI
 
 @Observable

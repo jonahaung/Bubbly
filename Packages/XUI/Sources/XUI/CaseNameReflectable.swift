@@ -1,10 +1,3 @@
-//
-//  CaseNameReflectable.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 6/11/25.
-//
-
 import Foundation
 import SwiftUI
 

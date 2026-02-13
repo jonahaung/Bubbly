@@ -1,10 +1,3 @@
-//
-//  Conversation.swift
-//  Database
-//
-//  Created by Aung Ko Min on 24/10/25.
-//
-
 import Core
 import Foundation
 import XUI

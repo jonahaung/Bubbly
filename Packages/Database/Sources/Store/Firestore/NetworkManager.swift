@@ -1,10 +1,3 @@
-//
-//  NetworkManager.swift
-//  Database
-//
-//  Created by Aung Ko Min on 2/11/25.
-//
-
 import Core
 import Foundation
 import Network

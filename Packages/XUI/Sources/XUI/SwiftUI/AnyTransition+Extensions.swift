@@ -1,10 +1,3 @@
-//
-//  AnyTransition+Extensions.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 31/12/25.
-//
-
 import SwiftUI
 
 public extension EnvironmentValues {

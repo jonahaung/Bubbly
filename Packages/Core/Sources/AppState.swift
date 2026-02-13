@@ -1,10 +1,3 @@
-//
-//  AppState.swift
-//  Core
-//
-//  Created by Aung Ko Min on 04/02/26.
-//
-
 import Foundation
 
 public enum AppLifecycleState: String {

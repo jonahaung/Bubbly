@@ -1,11 +1,3 @@
-//
-//  Lorem.swift
-//  HomeForYou
-//
-//  Semantic Lorem Generator
-//  Chat-aware, Emoji-aware, i18n-ready
-//
-
 import Foundation
 
 // MARK: - Public Configuration

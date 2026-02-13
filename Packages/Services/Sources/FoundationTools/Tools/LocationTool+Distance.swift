@@ -1,7 +1,3 @@
-//
-//  LocationTool+Distance.swift
-//
-
 import CoreLocation
 import FoundationModels
 

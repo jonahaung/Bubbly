@@ -1,10 +1,3 @@
-//
-//  FirestoreRepo.swift
-//  Database
-//
-//  Created by Aung Ko Min on 28/10/25.
-//
-
 import Core
 import Foundation
 import XUI

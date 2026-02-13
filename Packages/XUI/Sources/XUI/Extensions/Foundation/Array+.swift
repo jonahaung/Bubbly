@@ -1,18 +1,10 @@
-//
-//  Array+.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 16/3/25.
-//
-
 import Foundation
 
-extension Array {
+public extension Array {
 	@inlinable
-	public func insertionIndex(
-		for newElement: Element,
-		by keyPath: KeyPath<Element, some Comparable>
-	) -> Int {
+	func insertionIndex(for newElement: Element,
+	                    by keyPath: KeyPath<Element, some Comparable>) -> Int
+	{
 		var low = startIndex
 		var high = endIndex
 
@@ -30,35 +22,35 @@ extension Array {
 	}
 }
 
-extension Array {
-	public func random() -> Element {
+public extension Array {
+	func random() -> Element {
 		randomElement()!
 	}
 }
 
-extension Array {
+public extension Array {
 	@inlinable
-	public var enumerated: [(index: Int, element: Element)] {
+	var enumerated: [(index: Int, element: Element)] {
 		self.enumerated().map { (index: $0.offset, element: $0.element) }
 	}
 }
 
-extension Array where Element: Identifiable {
+public extension Array where Element: Identifiable {
 	@inlinable
-	public func elementsAround(id: Element.ID, radius: Int) -> [Element]? {
+	func elementsAround(id: Element.ID, radius: Int) -> [Element]? {
 		guard let index = firstIndex(where: { $0.id == id }) else {
 			return nil
 		}
 		let safeRadius = Swift.max(0, radius)
 		let lowerBound = Swift.max(0, index - safeRadius)
 		let upperBound = Swift.min(count - 1, index + safeRadius)
-		return Array(self[lowerBound...upperBound])
+		return Array(self[lowerBound ... upperBound])
 	}
 }
 
-extension Array where Element: Identifiable, Element.ID: Hashable {
+public extension Array where Element: Identifiable, Element.ID: Hashable {
 	@inlinable
-	public func duplicates() -> [Element] {
+	func duplicates() -> [Element] {
 		var seen = Set<Element.ID>()
 		var duplicates: [Element] = []
 		duplicates.reserveCapacity(count / 2)
@@ -71,22 +63,22 @@ extension Array where Element: Identifiable, Element.ID: Hashable {
 	}
 }
 
-extension Array {
+public extension Array {
 	@inlinable
-	public var middleElement: Element? {
+	var middleElement: Element? {
 		guard !isEmpty else { return nil }
 		return self[(count - 1) / 2]
 	}
 }
 
-extension Array where Element: Hashable {
+public extension Array where Element: Hashable {
 	@inlinable
-	public mutating func appendUnique(_ newElement: Element) {
+	mutating func appendUnique(_ newElement: Element) {
 		if !contains(newElement) { append(newElement) }
 	}
 
 	@inlinable
-	public mutating func appendUnique(contentsOf newElements: some Sequence<Element>) {
+	mutating func appendUnique(contentsOf newElements: some Sequence<Element>) {
 		var seen = Set(self)
 		for element in newElements where seen.insert(element).inserted {
 			append(element)
@@ -94,9 +86,9 @@ extension Array where Element: Hashable {
 	}
 }
 
-extension Array where Element: Identifiable {
+public extension Array where Element: Identifiable {
 	@inlinable
-	public mutating func appendUniqueByID(_ newElement: Element) {
+	mutating func appendUniqueByID(_ newElement: Element) {
 		if let index = firstIndex(where: { $0.id == newElement.id }) {
 			self[index] = newElement
 		} else {
@@ -105,50 +97,50 @@ extension Array where Element: Identifiable {
 	}
 }
 
-extension Array where Element: Identifiable {
+public extension Array where Element: Identifiable {
 	@inlinable
-	public func next(of index: Int) -> Element? {
+	func next(of index: Int) -> Element? {
 		guard index + 1 < count else { return nil }
 		return self[index + 1]
 	}
 
 	@inlinable
-	public func previous(of index: Int) -> Element? {
+	func previous(of index: Int) -> Element? {
 		guard index > 0 else { return nil }
 		return self[index - 1]
 	}
 
 	@inlinable
-	public func next(after item: Element) -> Element? {
+	func next(after item: Element) -> Element? {
 		guard let index = index(of: item.id), index + 1 < count else { return nil }
 		return next(of: index)
 	}
 
 	@inlinable
-	public func previous(before item: Element) -> Element? {
+	func previous(before item: Element) -> Element? {
 		guard let index = index(of: item.id), index > 0 else { return nil }
 		return previous(of: index)
 	}
 }
 
-extension Array where Element: Identifiable {
+public extension Array where Element: Identifiable {
 	@inlinable
-	public func index(of id: Element.ID) -> Int? {
+	func index(of id: Element.ID) -> Int? {
 		firstIndex(where: { $0.id == id })
 	}
 }
 
-extension Array {
+public extension Array {
 	// MARK: - Non-mutating: Removing
 
 	@inlinable
-	public func removingPrefix(_ count: Int) -> [Element] {
+	func removingPrefix(_ count: Int) -> [Element] {
 		guard count > 0 else { return self }
 		return Array(dropFirst(count))
 	}
 
 	@inlinable
-	public func removingSuffix(_ count: Int) -> [Element] {
+	func removingSuffix(_ count: Int) -> [Element] {
 		guard count > 0 else { return self }
 		return Array(dropLast(count))
 	}
@@ -156,13 +148,13 @@ extension Array {
 	// MARK: - Non-mutating: Taking
 
 	@inlinable
-	public func takingPrefix(_ count: Int) -> [Element] {
+	func takingPrefix(_ count: Int) -> [Element] {
 		guard count > 0 else { return [] }
 		return Array(prefix(count))
 	}
 
 	@inlinable
-	public func takingSuffix(_ count: Int) -> [Element] {
+	func takingSuffix(_ count: Int) -> [Element] {
 		guard count > 0 else { return [] }
 		return Array(suffix(count))
 	}
@@ -170,17 +162,17 @@ extension Array {
 	// MARK: - Non-mutating: Safe Slice
 
 	@inlinable
-	public func safeSlice(_ range: Range<Int>) -> [Element] {
+	func safeSlice(_ range: Range<Int>) -> [Element] {
 		let lower = Swift.max(range.lowerBound, startIndex)
 		let upper = Swift.min(range.upperBound, endIndex)
 		guard lower < upper else { return [] }
-		return Array(self[lower..<upper])
+		return Array(self[lower ..< upper])
 	}
 
 	// MARK: - Mutating
 
 	@inlinable
-	public mutating func removePrefix(_ count: Int) {
+	mutating func removePrefix(_ count: Int) {
 		guard count > 0 else { return }
 		if count >= self.count {
 			removeAll()
@@ -190,7 +182,7 @@ extension Array {
 	}
 
 	@inlinable
-	public mutating func removeSuffix(_ count: Int) {
+	mutating func removeSuffix(_ count: Int) {
 		guard count > 0 else { return }
 		if count >= self.count {
 			removeAll()
@@ -200,16 +192,15 @@ extension Array {
 	}
 }
 
-extension Array where Element: Identifiable, Element.ID: Hashable {
+public extension Array where Element: Identifiable, Element.ID: Hashable {
 	/// Appends elements from `newElements`, ensuring uniqueness.
 	/// - Parameters:
 	///   - newElements: The elements to append.
 	///   - replaceExisting: If `true`, replaces existing elements with the same ID.
 	@inlinable
-	public mutating func appendMerge(
-		contentsOf newElements: [Element],
-		replaceExisting: Bool = false
-	) {
+	mutating func appendMerge(contentsOf newElements: [Element],
+	                          replaceExisting: Bool = false)
+	{
 		guard !newElements.isEmpty else { return }
 
 		var indexByID: [Element.ID: Int] = [:]
@@ -237,11 +228,10 @@ extension Array where Element: Identifiable, Element.ID: Hashable {
 	///   - index: Insertion index in the array.
 	///   - replaceExisting: If `true`, replaces existing elements with the same ID.
 	@inlinable
-	public mutating func insertMerge(
-		contentsOf newElements: [Element],
-		at index: Int,
-		replaceExisting: Bool = false
-	) {
+	mutating func insertMerge(contentsOf newElements: [Element],
+	                          at index: Int,
+	                          replaceExisting: Bool = false)
+	{
 		guard !newElements.isEmpty else { return }
 
 		let insertionIndex = Swift.max(0, Swift.min(index, count))
@@ -265,7 +255,7 @@ extension Array where Element: Identifiable, Element.ID: Hashable {
 		let newIDs = Set(uniqueNewElements.map(\.id))
 
 		// Add elements before insertion point
-		for idx in 0..<insertionIndex {
+		for idx in 0 ..< insertionIndex {
 			let element = self[idx]
 			if replaceExisting, newIDs.contains(element.id) {
 				continue
@@ -281,7 +271,7 @@ extension Array where Element: Identifiable, Element.ID: Hashable {
 		}
 
 		// Add elements after insertion point
-		for idx in insertionIndex..<count {
+		for idx in insertionIndex ..< count {
 			let element = self[idx]
 			if replaceExisting, newIDs.contains(element.id) {
 				continue
@@ -299,7 +289,7 @@ extension Array where Element: Identifiable, Element.ID: Hashable {
 	///   - newElements: The elements to merge.
 	///   - replaceExisting: If `true`, replaces existing elements with the same ID.
 	@inlinable
-	public mutating func merge(contentsOf newElements: [Element], replaceExisting: Bool = false) {
+	mutating func merge(contentsOf newElements: [Element], replaceExisting: Bool = false) {
 		appendMerge(contentsOf: newElements, replaceExisting: replaceExisting)
 	}
 }

@@ -1,10 +1,3 @@
-//
-//  PagerScrollView.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 26/4/23.
-//
-
 import Combine
 import SwiftUI
 

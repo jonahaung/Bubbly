@@ -1,10 +1,3 @@
-//
-//  SwiftLinkPreviewCache.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 16/12/25.
-//
-
 import Foundation
 
 public protocol SwiftLinkPreviewCache {
@@ -15,11 +8,11 @@ public protocol SwiftLinkPreviewCache {
 public final class DisabledCache: SwiftLinkPreviewCache {
 	public nonisolated(unsafe) static let instance = DisabledCache()
 
-	public func slp_getCachedResponse(url: String) -> SwiftLinkPreviewResponse? {
+	public func slp_getCachedResponse(url _: String) -> SwiftLinkPreviewResponse? {
 		nil
 	}
 
-	public func slp_setCachedResponse(url: String, response: SwiftLinkPreviewResponse?) {}
+	public func slp_setCachedResponse(url _: String, response _: SwiftLinkPreviewResponse?) {}
 }
 
 public final class LinkPreviewInMemoryCache: SwiftLinkPreviewCache {

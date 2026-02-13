@@ -1,10 +1,3 @@
-//
-//  ConversationGroupCell.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 20/8/25.
-//
-
 import Database
 import Services
 import SwiftUI

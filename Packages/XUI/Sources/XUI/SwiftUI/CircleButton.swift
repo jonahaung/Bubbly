@@ -1,10 +1,3 @@
-//
-//  CircleButton.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 20/9/25.
-//
-
 import SFSafeSymbols
 import SwiftUI
 

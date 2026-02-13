@@ -1,10 +1,3 @@
-//
-//  MsgSenderInputSheet.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 7/1/26.
-//
-
 import Database
 import Services
 import SwiftUI

@@ -1,10 +1,3 @@
-//
-//  RenderNodeView.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 22/9/25.
-//
-
 import Combine
 import Swift
 import SwiftUI
@@ -103,5 +96,5 @@ public extension View {
 }
 
 public extension EnvironmentValues {
-	@Entry var anyObservable: AnyHashable? = nil
+	@Entry var anyObservable: AnyHashable?
 }

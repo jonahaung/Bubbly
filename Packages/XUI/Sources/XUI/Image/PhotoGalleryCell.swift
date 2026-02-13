@@ -1,10 +1,3 @@
-//
-//  PhotoGalleryCell.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 29/12/25.
-//
-
 import ImageLoader
 import SwiftUI
 
@@ -12,7 +5,7 @@ public struct PhotoGalleryCell: View {
 	private let item: any PhotoGalleryItem
 	@Environment(\.dismiss) private var dismiss
 
-	public init(_ item: any PhotoGalleryItem, title: String = "") {
+	public init(_ item: any PhotoGalleryItem, title _: String = "") {
 		self.item = item
 	}
 

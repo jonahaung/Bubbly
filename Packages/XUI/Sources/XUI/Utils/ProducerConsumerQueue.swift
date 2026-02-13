@@ -1,10 +1,3 @@
-//
-//  ProducerConsumerQueue.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 15/7/25.
-//
-
 import Foundation
 
 public final class ProducerConsumerQueue<T> {

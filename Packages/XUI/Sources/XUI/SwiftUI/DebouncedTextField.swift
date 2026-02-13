@@ -1,10 +1,3 @@
-//
-//  DebouncedTextField.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 12/9/25.
-//
-
 import SwiftUI
 
 public struct DebouncedTextViewConfiguration {

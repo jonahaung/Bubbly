@@ -1,10 +1,3 @@
-//
-//  OpaqueValue.swift
-//  OpaqueValue
-//
-//  Created by Thomas Asheim Smedmann on 14/07/2024.
-//
-
 import Foundation
 
 public enum OpaqueValue: Equatable {

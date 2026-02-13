@@ -1,10 +1,3 @@
-//
-//  RangedSliderView.swift
-//
-//
-//  Created by Aung Ko Min on 29/7/23.
-//
-
 import SwiftUI
 
 public struct RangedSliderView: View {

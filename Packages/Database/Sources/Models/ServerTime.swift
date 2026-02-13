@@ -1,10 +1,3 @@
-//
-//  ServerTime.swift
-//  Database
-//
-//  Created by Aung Ko Min on 22/8/25.
-//
-
 import Foundation
 
 public struct ServerTime: Codable, Hashable, Sendable, Comparable {

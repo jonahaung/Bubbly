@@ -1,10 +1,3 @@
-//
-//  CurrentUserProfileViewModel.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 24/5/25.
-//
-
 import Core
 import Database
 import FirebaseAuth

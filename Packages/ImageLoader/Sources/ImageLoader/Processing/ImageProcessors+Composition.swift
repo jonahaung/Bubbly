@@ -1,7 +1,3 @@
-// The MIT License (MIT)
-//
-// Copyright (c) 2015-2024 Alexander Grebenyuk (github.com/kean).
-
 import Foundation
 
 #if !os(macOS)
@@ -13,7 +9,9 @@ import Foundation
 public extension ImageProcessors {
 	/// Composes multiple processors.
 	struct Composition: ImageProcessing, Hashable, CustomStringConvertible {
-		public static func == (lhs: ImageProcessors.Composition, rhs: ImageProcessors.Composition) -> Bool {
+		public static func == (lhs: ImageProcessors.Composition,
+		                       rhs: ImageProcessors.Composition) -> Bool
+		{
 			lhs.identifier == rhs.identifier
 		}
 

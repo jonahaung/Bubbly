@@ -1,10 +1,3 @@
-//
-//  XRadioPicker.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 12/8/23.
-//
-
 import SwiftUI
 
 public struct XRadioPicker<Item: XPickable>: View {

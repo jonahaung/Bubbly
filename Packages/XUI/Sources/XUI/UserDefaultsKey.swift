@@ -1,10 +1,3 @@
-//
-//  UserDefaultsKey.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 15/12/25.
-//
-
 import Foundation
 
 public struct UserDefaultsKey<T: Codable> {

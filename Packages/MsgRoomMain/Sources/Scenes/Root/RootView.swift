@@ -1,10 +1,3 @@
-//
-//  RootView.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 28/4/25.
-//
-
 import Core
 import Database
 import Services
@@ -19,10 +12,7 @@ struct RootView: View {
 			.toastPresentable()
 			.loadingPresentable()
 			.sheet(item: sheet) { item in
-				NavigationStack {
-					item.destination()
-						.navigationTitle(item.localizedName)
-				}
+				item.destination()
 			}
 			.onOpenURL { url in
 				Task.detached(priority: .background) {
@@ -34,20 +24,23 @@ struct RootView: View {
 
 private extension RootView {
 	var sheet: Binding<NavPath?> {
-		.init(get: { router.sheet }, set: { newValue in
-			if let newValue {
-				router.presnetModel(newValue)
-			} else {
-				router.dismissModal()
+		.init(
+			get: { router.sheet },
+			set: { newValue in
+				if let newValue {
+					router.presnetModel(newValue)
+				} else {
+					router.dismissModal()
+				}
 			}
-		})
+		)
 	}
 }
 
 @MainActor
-public extension NavPath {
+extension NavPath {
 	@ViewBuilder
-	func destination() -> some View {
+	public func destination() -> some View {
 		switch self {
 		case let .conversationDetails(conversation):
 			conversationDestination(conversation)

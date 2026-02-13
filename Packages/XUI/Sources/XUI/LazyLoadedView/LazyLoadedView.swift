@@ -1,10 +1,3 @@
-//
-//  LazyLoadedView.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 1/12/25.
-//
-
 import SwiftUI
 
 public struct LazyLoadedView<Body: View>: View {
@@ -320,6 +313,7 @@ extension EnvironmentValues {
 	}
 }
 
+@MainActor
 @frozen
 @_documentation(visibility: internal)
 public struct ZeroSizeView: View {

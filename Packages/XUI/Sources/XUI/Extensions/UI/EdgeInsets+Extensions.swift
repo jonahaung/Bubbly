@@ -1,10 +1,3 @@
-//
-//  EdgeInsets+Extensions.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 28/9/25.
-//
-
 import SwiftUI
 
 public extension EdgeInsets {

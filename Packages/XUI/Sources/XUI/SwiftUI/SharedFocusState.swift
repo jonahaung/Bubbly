@@ -1,10 +1,3 @@
-//
-//  SharedFocusState.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 31/8/25.
-//
-
 import SwiftUI
 
 @MainActor

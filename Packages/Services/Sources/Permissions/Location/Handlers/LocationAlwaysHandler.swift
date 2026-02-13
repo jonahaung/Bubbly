@@ -1,10 +1,3 @@
-//
-//  LocationAlwaysHandler.swift
-//  Services
-//
-//  Created by Aung Ko Min on 17/8/25.
-//
-
 import Foundation
 import MapKit
 

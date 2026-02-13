@@ -1,10 +1,3 @@
-//
-//  MainNavView.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 2/11/25.
-//
-
 import Services
 import SwiftUI
 import XUI

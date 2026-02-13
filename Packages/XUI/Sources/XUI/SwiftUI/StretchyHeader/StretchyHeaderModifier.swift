@@ -1,10 +1,3 @@
-//
-//  StretchyHeaderModifier.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 28/5/24.
-//
-
 import SwiftUI
 
 private struct StretchyHeaderModifier<Header: View>: ViewModifier {

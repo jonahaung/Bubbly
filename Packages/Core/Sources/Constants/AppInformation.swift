@@ -1,10 +1,3 @@
-//
-//  AppInformation.swift
-//  Core
-//
-//  Created by Aung Ko Min on 15/8/25.
-//
-
 import Foundation
 
 public enum AppInformation {

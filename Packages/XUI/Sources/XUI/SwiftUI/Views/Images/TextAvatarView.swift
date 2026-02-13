@@ -1,10 +1,3 @@
-//
-//  TextAvatarView.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 6/10/24.
-//
-
 import SwiftUI
 
 public struct TextAvatarView: View {

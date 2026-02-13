@@ -1,15 +1,66 @@
+# =================================================
+# CORE
+# =================================================
+--swift-version 6
 --indent tab
---tab-width 4
---max-width 100
---swift-version 6.2.3
+--tabwidth 4
+--maxwidth 100
 --linebreaks lf
 --semicolons never
---self remove
---strip-unused-args closure-only
---import-grouping alpha
+
+# =================================================
+# RULES (enable only what matters)
+# =================================================
+--enable redundantSelf
+--enable redundantInit
+--enable redundantReturn
+--enable redundantLet
+--enable redundantType
+--enable redundantParens
+--enable redundantPattern
+--enable redundantClosure
+--enable redundantAsync
+--enable duplicateImports
+--enable trailingClosures
+--enable unusedArguments
+--enable extensionAccessControl
+--enable modifierOrder
+--enable elseOnSameLine
+--enable numberFormatting
+--enable linebreakAtEndOfFile
+
+# =================================================
+# WRAPPING OPTIONS
+# =================================================
+--wraparguments before-first
+--wrapparameters after-first
+--wrapcollections before-first
+--trailingcommas collections-only
+
+# =================================================
+# STYLE OPTIONS
+# =================================================
 --ranges spaced
---else-position same-line
---trailing-commas collections-only
---wrap-collections before-first
---wrap-parameters after-first
---wrap-arguments before-first
+
+# =================================================
+# UNUSED
+# =================================================
+--stripunusedargs closure-only
+
+# =================================================
+# COMMENTS
+# =================================================
+--header strip
+--doccomments preserve
+
+# =================================================
+# EXCLUDES
+# =================================================
+--exclude Pods
+--exclude Carthage
+--exclude .build
+--exclude DerivedData
+--exclude fastlane
+--exclude vendor
+--exclude "**/Generated"
+--exclude "**/*.generated.swift"

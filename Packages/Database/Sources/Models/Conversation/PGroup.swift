@@ -1,10 +1,3 @@
-//
-//  PGroup.swift
-//  Database
-//
-//  Created by Aung Ko Min on 23/10/25.
-//
-
 import Foundation
 import SwiftData
 

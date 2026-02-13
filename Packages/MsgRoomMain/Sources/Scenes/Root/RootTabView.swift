@@ -1,10 +1,3 @@
-//
-//  RootTabView.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 11/1/26.
-//
-
 import Core
 import Database
 import Services
@@ -16,17 +9,16 @@ struct RootTabView: View {
 
 	var body: some View {
 		TabView(selection: selection) {
-			ForEach(TabPath.allCases) { tabPath in
+			ForEach(TabPath.allCases, id: \.self) { tabPath in
 				Tab(
 					tabPath.localizedName,
 					systemImage: tabPath.systemName,
 					value: tabPath
 				) {
-					tabDestination(for: tabPath)
-						.toolbarVisibility(
-							router.currentNavPaths.isNilOrEmpty ? .automatic : .hidden,
-							for: .tabBar
-						)
+					MainNavView(tabPath: tabPath) {
+						tabPath.destination()
+					}
+					.toolbarVisibility(router.toolBarVisibility(), for: .tabBar)
 				}
 			}
 		}
@@ -39,25 +31,20 @@ private extension RootTabView {
 	var selection: Binding<TabPath> {
 		.init(get: { router.selectedTab }, set: { router.selectedTab = $0 })
 	}
+}
 
-	@ViewBuilder func tabDestination(for tabPath: TabPath) -> some View {
-		switch tabPath {
+public extension TabPath {
+	@MainActor
+	@ViewBuilder func destination() -> some View {
+		switch self {
 		case .test:
-			MainNavView(tabPath: tabPath) {
-				Playground()
-			}
+			Playground()
 		case .inbox:
-			MainNavView(tabPath: tabPath) {
-				InboxScene()
-			}
+			InboxScene(viewModel: .init())
 		case .contacts:
-			MainNavView(tabPath: tabPath) {
-				ContactsScene()
-			}
+			ContactsScene()
 		case .settings:
-			MainNavView(tabPath: tabPath) {
-				SettingsScene()
-			}
+			SettingsScene()
 		}
 	}
 }

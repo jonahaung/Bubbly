@@ -1,10 +1,3 @@
-//
-//  XNavPickerBar.swift
-//  Device Monitor
-//
-//  Created by Aung Ko Min on 21/9/22.
-//
-
 import SwiftUI
 
 public struct XNavPickerBar<T: XPickable>: View {

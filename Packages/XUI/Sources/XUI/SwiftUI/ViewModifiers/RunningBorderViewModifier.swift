@@ -1,10 +1,3 @@
-//
-//  RunningBorderViewModifier.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 4/7/25.
-//
-
 import SwiftUI
 
 struct RunningBorderViewModifier: ViewModifier {

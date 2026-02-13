@@ -1,10 +1,3 @@
-//
-//  PConversationProperties.swift
-//  Database
-//
-//  Created by Aung Ko Min on 10/12/25.
-//
-
 import SwiftData
 
 @Model

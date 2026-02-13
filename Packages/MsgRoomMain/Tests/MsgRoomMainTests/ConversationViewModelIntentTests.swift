@@ -1,8 +1,8 @@
-@testable import MsgRoomMain
 import Database
-@testable import Services
 import FirebaseCore
 import Foundation
+@testable import MsgRoomMain
+@testable import Services
 import Testing
 
 @MainActor
@@ -54,11 +54,10 @@ struct ConversationViewModelIntentTests {
 		#expect(sut.state.shouldDismiss)
 	}
 
-	private func makeFixture() -> (
-		conversation: Conversation,
-		messages: [Message],
-		prefetchedData: ConversationInitializer.PrefetchedData
-	) {
+	private func makeFixture() -> (conversation: Conversation,
+	                               messages: [Message],
+	                               prefetchedData: ConversationInitializer.PrefetchedData)
+	{
 		let conID = "con-1"
 		let conversation = Conversation(
 			kind: .contact(.empty),
@@ -117,7 +116,10 @@ struct ConversationViewModelIntentTests {
 		guard FirebaseApp.app() == nil else {
 			return
 		}
-		let options = FirebaseOptions(googleAppID: "1:1234567890:ios:test", gcmSenderID: "1234567890")
+		let options = FirebaseOptions(
+			googleAppID: "1:1234567890:ios:test",
+			gcmSenderID: "1234567890"
+		)
 		options.apiKey = "test-api-key"
 		options.projectID = "test-project-id"
 		FirebaseApp.configure(options: options)

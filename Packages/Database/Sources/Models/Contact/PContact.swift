@@ -1,10 +1,3 @@
-//
-//  PContact.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 14/7/24.
-//
-
 import Foundation
 import SwiftData
 

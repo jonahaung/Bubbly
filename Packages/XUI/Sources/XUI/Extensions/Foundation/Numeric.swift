@@ -1,10 +1,3 @@
-//
-//  Numeric.swift
-//
-//
-//  Created by Aung Ko Min on 10/6/23.
-//
-
 import Foundation
 import SwiftUI
 

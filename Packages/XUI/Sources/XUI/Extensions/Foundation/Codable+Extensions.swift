@@ -1,10 +1,3 @@
-//
-//  Codable+Extensions.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 7/4/24.
-//
-
 import Foundation
 
 public extension Encodable {

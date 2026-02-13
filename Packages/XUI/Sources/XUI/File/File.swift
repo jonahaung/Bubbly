@@ -1,10 +1,3 @@
-//
-//  File.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 20/10/25.
-//
-
 import Foundation
 
 public struct File: Location, Identifiable {

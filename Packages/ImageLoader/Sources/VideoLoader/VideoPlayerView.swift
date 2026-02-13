@@ -1,10 +1,3 @@
-//
-//  VideoPlayerView.swift
-//
-//
-//  Created by Aung Ko Min on 29/6/24.
-//
-
 @preconcurrency import AVKit
 import Foundation
 

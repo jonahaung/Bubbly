@@ -1,7 +1,3 @@
-//
-//  LocationTool+Current.swift
-//
-
 @preconcurrency import CoreLocation
 import FoundationModels
 import MapKit
@@ -219,7 +215,7 @@ final class PermissionRequester: NSObject, CLLocationManagerDelegate {
 		}
 	}
 
-	nonisolated func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+	nonisolated func locationManagerDidChangeAuthorization(_: CLLocationManager) {
 		let continuation = authorizationUpdated.continuation
 		Task { @MainActor in
 			continuation.yield()

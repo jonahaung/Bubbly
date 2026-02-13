@@ -1,10 +1,3 @@
-//
-//  XPhotoPageControl.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 4/7/23.
-//
-
 import SwiftUI
 
 public struct XPhotoPageControl: View {

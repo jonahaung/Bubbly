@@ -1,10 +1,3 @@
-//
-//  BadgeView.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 13/9/25.
-//
-
 import SwiftUI
 
 public extension View {

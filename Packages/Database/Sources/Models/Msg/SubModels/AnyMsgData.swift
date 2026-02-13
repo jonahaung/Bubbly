@@ -1,10 +1,3 @@
-//
-//  AnyMsgData.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 25/6/24.
-//
-
 import FirebaseAuth
 import Foundation
 import XUI

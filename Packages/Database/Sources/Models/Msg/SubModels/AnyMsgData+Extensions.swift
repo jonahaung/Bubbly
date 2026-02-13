@@ -1,10 +1,3 @@
-//
-//  AnyMsgData+Extensions.swift
-//  Services
-//
-//  Created by Aung Ko Min on 24/8/25.
-//
-
 import Core
 import Foundation
 

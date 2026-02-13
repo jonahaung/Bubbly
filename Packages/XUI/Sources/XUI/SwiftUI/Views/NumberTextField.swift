@@ -1,10 +1,3 @@
-//
-//  NumberTextField.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 30/1/23.
-//
-
 import SwiftUI
 
 public struct _NumberTextField: View {

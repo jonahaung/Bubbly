@@ -1,10 +1,3 @@
-//
-//  FirePhoneLoginProgressState.swift
-//  FirebasePhoneLogin
-//
-//  Created by Aung Ko Min on 21/4/24.
-//
-
 import FirebaseAuth
 import Foundation
 

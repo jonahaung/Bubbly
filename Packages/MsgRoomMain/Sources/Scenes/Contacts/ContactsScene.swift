@@ -1,10 +1,3 @@
-//
-//  ContactsScene.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 28/4/25.
-//
-
 import Core
 import Database
 import Services

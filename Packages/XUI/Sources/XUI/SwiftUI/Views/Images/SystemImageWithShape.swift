@@ -1,10 +1,3 @@
-//
-//  SystemImageWithShape.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 20/6/24.
-//
-
 import SFSafeSymbols
 import SwiftUI
 

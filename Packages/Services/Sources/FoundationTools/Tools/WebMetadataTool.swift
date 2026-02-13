@@ -1,10 +1,3 @@
-//
-//  WebMetadataTool.swift
-//  FoundationLab
-//
-//  Created by Rudrank Riyam on 6/29/25.
-//
-
 import Foundation
 import FoundationModels
 import XUI

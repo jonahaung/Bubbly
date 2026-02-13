@@ -1,10 +1,3 @@
-//
-//  Haptics.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 8/2/23.
-//
-
 import AudioToolbox
 import CoreHaptics
 import SwiftUI

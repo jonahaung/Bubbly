@@ -1,10 +1,3 @@
-//
-//  AsyncQueue.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 3/11/25.
-//
-
 import Foundation
 
 private protocol Cancelling {

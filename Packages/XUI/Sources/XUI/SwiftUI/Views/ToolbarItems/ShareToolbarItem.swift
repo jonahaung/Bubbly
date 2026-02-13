@@ -1,10 +1,3 @@
-//
-//  ShareToolbarItem.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 28/10/24.
-//
-
 import SwiftUI
 
 struct ShareToolbarItem: ToolbarContent, @unchecked Sendable {

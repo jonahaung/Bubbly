@@ -1,10 +1,3 @@
-//
-//  OnAppearAfter.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 26/4/23.
-//
-
 import SwiftUI
 
 private struct OnAppearAfterModifier: ViewModifier {

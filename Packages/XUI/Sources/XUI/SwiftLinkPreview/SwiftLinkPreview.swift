@@ -1,10 +1,3 @@
-//
-//  SwiftLinkPreview.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 16/12/25.
-//
-
 import Foundation
 
 public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
@@ -696,9 +689,9 @@ public extension SwiftLinkPreview {
 // MARK: - RedirectForcingDelegate
 
 private final class RedirectForcingDelegate: NSObject, URLSessionDataDelegate {
-	func urlSession(_ session: URLSession,
-	                task: URLSessionTask,
-	                willPerformHTTPRedirection response: HTTPURLResponse,
+	func urlSession(_: URLSession,
+	                task _: URLSessionTask,
+	                willPerformHTTPRedirection _: HTTPURLResponse,
 	                newRequest request: URLRequest,
 	                completionHandler: @escaping (URLRequest?) -> Void)
 	{

@@ -1,10 +1,3 @@
-//
-//  PermissionKind.swift
-//  Services
-//
-//  Created by Aung Ko Min on 18/8/25.
-//
-
 public enum PermissionKind {
 	case camera
 	case notification(access: Set<NotificationAccess>)

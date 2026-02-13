@@ -1,10 +1,3 @@
-//
-//  PhoneContactsService.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 27/6/24.
-//
-
 import Contacts
 import Database
 import Foundation
@@ -40,11 +33,10 @@ public final class PhoneContactsService {
 
 		var seenMobiles = Set<String>()
 		let mapped = results.compactMap { Contact(cnContact: $0) }
-		let deduped = mapped.filter { contact in
-		    guard !contact.mobile.isEmpty else { return false }
-		    return seenMobiles.insert(contact.mobile).inserted
+		return mapped.filter { contact in
+			guard !contact.mobile.isEmpty else { return false }
+			return seenMobiles.insert(contact.mobile).inserted
 		}
-		return deduped
 	}
 
 	@discardableResult
@@ -73,4 +65,3 @@ public final class PhoneContactsService {
 		return contacts.compactMap(\.self)
 	}
 }
-

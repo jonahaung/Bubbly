@@ -1,10 +1,3 @@
-//
-//  Socket.swift
-//  MsgRoom
-//
-//  Created by Aung Ko Min on 24/6/24.
-//
-
 import Core
 import Database
 import FCM_V1

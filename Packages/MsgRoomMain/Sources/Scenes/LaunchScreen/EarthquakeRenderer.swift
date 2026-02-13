@@ -1,10 +1,3 @@
-//
-//  EarthquakeRenderer.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 30/1/26.
-//
-
 import SwiftUI
 
 struct EarthquakeAttribute: TextAttribute {}

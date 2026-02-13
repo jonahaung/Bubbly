@@ -1,10 +1,3 @@
-//
-//  LinkButton.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 1/4/23.
-//
-
 import SwiftUI
 
 public struct LinkButton<Label: View>: View {

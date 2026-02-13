@@ -1,10 +1,3 @@
-//
-//  WaterfallLayout.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 21/12/24.
-//
-
 import SwiftUI
 
 public struct WaterfallLayout: Layout {

@@ -1,10 +1,3 @@
-//
-//  Flexible.swift
-//
-//
-//  Created by Aung Ko Min on 14/5/23.
-//
-
 import SwiftUI
 
 private struct FlexibleModifier: ViewModifier {

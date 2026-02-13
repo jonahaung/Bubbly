@@ -1,10 +1,3 @@
-//
-//  Variadic+Extensions.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 12/6/24.
-//
-
 import SwiftUI
 
 private struct ViewSelector: _VariadicView_MultiViewRoot {

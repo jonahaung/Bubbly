@@ -1,10 +1,3 @@
-//
-//  SafeStorage.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 13/10/25.
-//
-
 import Foundation
 
 public final class SafeStorage<T>: @unchecked Sendable {

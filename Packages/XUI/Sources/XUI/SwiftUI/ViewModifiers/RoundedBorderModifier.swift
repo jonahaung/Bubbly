@@ -1,10 +1,3 @@
-//
-//  RoundedBorderModifier.swift
-//  Msgr
-//
-//  Created by Aung Ko Min on 10/12/22.
-//
-
 import SwiftUI
 
 struct RoundedBorderModifier: ViewModifier {

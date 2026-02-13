@@ -1,10 +1,3 @@
-//
-//  Dictionary+.swift
-//
-//
-//  Created by Aung Ko Min on 10/6/23.
-//
-
 import Foundation
 
 public extension Dictionary {

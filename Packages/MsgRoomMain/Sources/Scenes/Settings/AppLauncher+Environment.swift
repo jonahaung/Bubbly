@@ -1,10 +1,3 @@
-//
-//  AppLauncher+Environment.swift
-//  Services
-//
-//  Created by Aung Ko Min on 16/5/25.
-//
-
 import SwiftUI
 
 public extension EnvironmentValues {
@@ -14,7 +7,7 @@ public extension EnvironmentValues {
 		)
 	}()
 
-	subscript(_ type: AppLauncher.Type) -> AppLauncher {
+	subscript(_: AppLauncher.Type) -> AppLauncher {
 		get { appLauncher }
 		set { appLauncher = newValue }
 	}

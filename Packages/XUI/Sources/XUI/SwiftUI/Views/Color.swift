@@ -1,9 +1,3 @@
-//
-//  Color.swift
-//  MoreUI
-//
-//  Created by Aung Ko Min on 10/27/21.
-
 import SwiftUI
 
 public extension Color {

@@ -1,10 +1,3 @@
-//
-//  ComfirmationDialouge.swift
-//  RoomRentalDemo
-//
-//  Created by Aung Ko Min on 19/1/23.
-//
-
 import SwiftUI
 
 private struct XDialogModifier<DialogContent: View>: ViewModifier {

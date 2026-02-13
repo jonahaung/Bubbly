@@ -1,10 +1,3 @@
-//
-//  AnimatedButton.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 27/1/26.
-//
-
 import SwiftUI
 
 public struct AnimatedButton<Label: View>: View {

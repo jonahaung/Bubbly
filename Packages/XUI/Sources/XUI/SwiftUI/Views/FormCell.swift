@@ -1,10 +1,3 @@
-//
-//  FormCell.swift
-//  RoomRentalDemo
-//
-//  Created by Aung Ko Min on 19/1/23.
-//
-
 import SwiftUI
 
 public struct FormCell: View {

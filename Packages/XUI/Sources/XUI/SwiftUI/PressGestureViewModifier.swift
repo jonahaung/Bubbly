@@ -1,10 +1,3 @@
-//
-//  PressGestureViewModifier.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 24/10/25.
-//
-
 import Combine
 import SwiftUI
 
@@ -73,7 +66,7 @@ public struct PressGestureViewModifier: ViewModifier {
 		displayLink.stop()
 	}
 
-	private func onUpdate(_ time: Double) {}
+	private func onUpdate(_: Double) {}
 
 	private func onTargetReached(_: Double) {}
 }

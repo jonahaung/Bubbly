@@ -1,7 +1,3 @@
-//
-//  Created by Aung Ko Min on 10/01/2021.
-//
-
 import CryptoKit
 import Foundation
 

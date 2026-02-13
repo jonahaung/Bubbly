@@ -1,10 +1,3 @@
-//
-//  Models.swift
-//  Database
-//
-//  Created by Aung Ko Min on 29/10/25.
-//
-
 import Foundation
 
 public struct FirestoreFilter {

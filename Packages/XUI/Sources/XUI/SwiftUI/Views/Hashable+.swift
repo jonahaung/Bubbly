@@ -1,11 +1,4 @@
 //
-//  Hashable+.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 22/9/25.
-//
-
-//
 // Copyright (c) Vatsal Manot
 //
 

@@ -1,7 +1,3 @@
-// The MIT License (MIT)
-//
-// Copyright (c) 2015-2024 Alexander Grebenyuk (github.com/kean).
-
 import Foundation
 
 /// Resumable data support. For more info see:
@@ -24,7 +20,8 @@ struct ResumableData: Sendable {
 			return nil
 		}
 
-		// NOTE: https://developer.apple.com/documentation/foundation/httpurlresponse/1417930-allheaderfields
+		// NOTE:
+		// https://developer.apple.com/documentation/foundation/httpurlresponse/1417930-allheaderfields
 		// HTTP headers are case insensitive. To simplify your code, certain
 		// header field names are canonicalized into their standard form.
 		// For example, if the server sends a content-length header,

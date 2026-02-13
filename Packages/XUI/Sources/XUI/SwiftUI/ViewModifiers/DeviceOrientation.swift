@@ -1,10 +1,3 @@
-//
-//  DeviceOrientation.swift
-//  HomeForYou
-//
-//  Created by Aung Ko Min on 3/6/23.
-//
-
 import SwiftUI
 
 private struct DeviceRotationViewModifier: ViewModifier {

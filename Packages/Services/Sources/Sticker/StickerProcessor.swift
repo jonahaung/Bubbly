@@ -1,10 +1,3 @@
-//
-//  StickerProcessor.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 1/10/25.
-//
-
 import CoreImage.CIFilterBuiltins
 import PhotosUI
 import SwiftUI

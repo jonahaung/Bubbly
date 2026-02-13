@@ -1,10 +1,3 @@
-//
-//  CreateGroupScene.swift
-//  Bubbly
-//
-//  Created by Aung Ko Min on 28/4/25.
-//
-
 import Database
 import ImageLoader
 import MediaPicker

@@ -1,10 +1,3 @@
-//
-//  Then.swift
-//  XUI
-//
-//  Created by Assistant on 16/1/26.
-//
-
 import Foundation
 
 public protocol Then {}

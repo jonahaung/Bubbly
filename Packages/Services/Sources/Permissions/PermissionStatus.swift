@@ -1,10 +1,3 @@
-//
-//  PermissionStatus.swift
-//  Services
-//
-//  Created by Aung Ko Min on 18/8/25.
-//
-
 import Foundation
 
 public enum PermissionStatus: Int, CustomStringConvertible {

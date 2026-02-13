@@ -1,10 +1,3 @@
-//
-//  TabMapping.swift
-//  Services
-//
-//  Created by Aung Ko Min on 29/1/26.
-//
-
 import Database
 import Foundation
 
