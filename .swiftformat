@@ -9,7 +9,7 @@
 --semicolons never
 
 # =================================================
-# RULES (enable only what matters)
+# RULES
 # =================================================
 --enable redundantSelf
 --enable redundantInit
@@ -28,11 +28,10 @@
 --enable elseOnSameLine
 --enable numberFormatting
 --enable linebreakAtEndOfFile
---enable modifierOrder
-
+--enable typeSugar
 
 # =================================================
-# WRAPPING OPTIONS
+# WRAPPING
 # =================================================
 --wraparguments before-first
 --wrapparameters after-first
@@ -40,7 +39,7 @@
 --trailingcommas collections-only
 
 # =================================================
-# STYLE OPTIONS
+# STYLE
 # =================================================
 --ranges spaced
 

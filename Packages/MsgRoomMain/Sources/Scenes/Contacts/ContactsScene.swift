@@ -10,7 +10,7 @@ public struct ContactsScene: View {
 	let currentUserRepository: CurrentUserRepositoryProtocol
 	let router: Router
 
-	@State private var viewModel: ContactsViewModel = .init()
+	@State private var viewModel: ContactsViewModel
 	@State private var executor = ToolExecutor()
 
 	enum DefaultContactDisplayType: String, CaseIterable {
@@ -30,6 +30,12 @@ public struct ContactsScene: View {
 		self.router = router
 		self.contactsRepository = contactsRepository
 		self.currentUserRepository = currentUserRepository
+		_viewModel = .init(
+			wrappedValue: ContactsViewModel(
+				contactsRepository: contactsRepository,
+				currentUserRepository: currentUserRepository
+			)
+		)
 	}
 
 	public var body: some View {
@@ -60,7 +66,12 @@ public struct ContactsScene: View {
 			}
 		}
 		.searchable(
-			text: $viewModel.searchText,
+			text: Binding(
+				get: { viewModel.state.searchText },
+				set: { newValue in
+					Task { await viewModel.send(.setSearchText(newValue)) }
+				}
+			),
 			placement: .toolbar,
 			prompt: "Search Contacts"
 		)
@@ -68,14 +79,12 @@ public struct ContactsScene: View {
 			executeContactsSearch()
 		}
 		.task {
-			try? await contactsRepository.fetchData()
+			await viewModel.send(.appear)
 		}
 		.refreshable {
-			try? await contactsRepository.refresh()
+			await viewModel.send(.refresh)
 		}
 	}
-
-	// MARK: - Sections
 
 	private var actionSection: some View {
 		Section {
@@ -83,22 +92,14 @@ public struct ContactsScene: View {
 			case .chat:
 				AsyncButton {
 					Loading.show(true)
-					await viewModel
-						.syncContacts(
-							store: contactsRepository,
-							currentUser: currentUserRepository.model
-						)
+					await viewModel.send(.syncContacts)
 					Loading.show(false)
 				} label: {
 					Label("Sync Contact", systemSymbol: .personCropSquare)
 				}
 				AsyncButton {
 					Loading.show(true)
-					try await viewModel
-						.syncGroups(
-							store: contactsRepository,
-							currentUser: currentUserRepository.model
-						)
+					await viewModel.send(.syncGroups)
 					Loading.show(false)
 				} label: {
 					Label("Sync Groups", systemSymbol: .arrow2Squarepath)
@@ -114,11 +115,7 @@ public struct ContactsScene: View {
 					}
 				AsyncButton {
 					Loading.show(true)
-					try await viewModel
-						.syncGroups(
-							store: contactsRepository,
-							currentUser: currentUserRepository.model
-						)
+					await viewModel.send(.syncGroups)
 					Loading.show(false)
 				} label: {
 					Label("Sync Groups", systemSymbol: .arrow2Squarepath)
@@ -192,12 +189,12 @@ public struct ContactsScene: View {
 			let executor = ToolExecutor()
 			await executor.execute(
 				tool: ContactsTool(),
-				prompt: "search contacts that has the name: \(viewModel.searchText)",
+				prompt: "search contacts that has the name: \(viewModel.state.searchText)",
 				type: [ContactsTool.Arguments].self
 			) { models in
 				models.map(\.generatedContent.jsonString).joined(separator: "\n - ")
 			} clearForm: {
-				viewModel.searchText = ""
+				Task { await viewModel.send(.setSearchText("")) }
 			}
 		}
 	}

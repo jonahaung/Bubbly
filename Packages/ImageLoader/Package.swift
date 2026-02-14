@@ -4,13 +4,23 @@ import PackageDescription
 
 let package = Package(
 	name: "ImageLoader",
-	platforms: [.iOS(.v17)],
+	platforms: [
+		.iOS(.v17),
+	],
 	products: [
 		.library(name: "ImageLoader", targets: ["ImageLoader"]),
 		.library(name: "VideoLoader", targets: ["VideoLoader"]),
 	],
 	targets: [
-		.target(name: "ImageLoader"),
-		.target(name: "VideoLoader", dependencies: ["ImageLoader"]),
+		// Core image loading target has no dependencies
+		.target(
+			name: "ImageLoader",
+			dependencies: []
+		),
+		// VideoLoader builds on top of ImageLoader
+		.target(
+			name: "VideoLoader",
+			dependencies: ["ImageLoader"]
+		),
 	]
 )

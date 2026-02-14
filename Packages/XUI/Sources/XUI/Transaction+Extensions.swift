@@ -4,21 +4,23 @@ public extension Transaction {
 	static func withAnimation(_ animation: Animation = .easeInOut)
 		-> Transaction
 	{
-		var transition = Transaction(animation: animation)
-		transition.disablesAnimations = false
-		transition.scrollPositionUpdatePreservesVelocity = true
-		transition.scrollContentOffsetAdjustmentBehavior = .automatic
-		transition.tracksVelocity = true
-		return transition
+		var transaction = Transaction(animation: animation)
+		transaction.disablesAnimations = false
+		transaction.scrollPositionUpdatePreservesVelocity = false
+		transaction.scrollContentOffsetAdjustmentBehavior = .disabled
+		transaction.tracksVelocity = false
+		transaction.scrollTargetAnchor = .none
+		return transaction
 	}
 
 	nonisolated(unsafe) static let withoutAnimation: Transaction = {
-		var transition = Transaction(animation: nil)
-		transition.disablesAnimations = true
-		transition.scrollPositionUpdatePreservesVelocity = true
-		transition.scrollContentOffsetAdjustmentBehavior = .automatic
-		transition.tracksVelocity = true
-		return transition
+		var transaction = Transaction(animation: nil)
+		transaction.disablesAnimations = true
+		transaction.scrollPositionUpdatePreservesVelocity = false
+		transaction.scrollContentOffsetAdjustmentBehavior = .disabled
+		transaction.tracksVelocity = false
+		transaction.scrollTargetAnchor = .none
+		return transaction
 	}()
 }
 

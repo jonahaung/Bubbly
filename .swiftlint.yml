@@ -44,6 +44,7 @@ opt_in_rules:
   - toggle_bool
   - unavailable_function
   - weak_delegate
+  - syntactic_sugar
 
 # ----------------------------------------
 # FORCE SAFETY
@@ -122,5 +123,6 @@ excluded:
   - DerivedData
   - fastlane
   - vendor
+  - Packages/Crypto
   - "**/Generated"
   - "**/*.generated.swift"

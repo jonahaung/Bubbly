@@ -1,3 +1,4 @@
+import Conversation
 import Database
 import Services
 import SwiftUI
@@ -35,7 +36,8 @@ public extension AppCoordinator {
 		case let .contactDetails(contact):
 			ContactDetailsScene(contact: contact)
 		case .currentUserDetails:
-			CurrentUserProfileView()
+			UserProfileView(viewModel: .init(currentUserRepository: container
+					.currentUserRepository))
 		case let .view(_, node):
 			node.eraseToNode()
 		}

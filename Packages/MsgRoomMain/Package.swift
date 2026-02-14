@@ -15,15 +15,21 @@ let package = Package(
 	dependencies: [
 		.package(name: "Services", path: "../Services"),
 		.package(name: "Database", path: "../Database"),
+		.package(name: "Conversation", path: "../Conversation"),
+		.package(name: "Inbox", path: "../Inbox"),
+		.package(name: "ContactsFeature", path: "../ContactsFeature"),
+		.package(name: "Settings", path: "../Settings"),
 	],
 	targets: [
 		.target(
 			name: "MsgRoomMain",
 			dependencies: [
 				.product(name: "Services", package: "Services"),
-			],
-			resources: [
-				.copy("Resources/emojis.json"),
+				.product(name: "Database", package: "Database"),
+				.product(name: "Conversation", package: "Conversation"),
+				.product(name: "Inbox", package: "Inbox"),
+				.product(name: "ContactsFeature", package: "ContactsFeature"),
+				.product(name: "Settings", package: "Settings"),
 			]
 		),
 		.testTarget(
@@ -32,6 +38,10 @@ let package = Package(
 				"MsgRoomMain",
 				.product(name: "Services", package: "Services"),
 				.product(name: "Database", package: "Database"),
+				.product(name: "Conversation", package: "Conversation"),
+				.product(name: "Inbox", package: "Inbox"),
+				.product(name: "ContactsFeature", package: "ContactsFeature"),
+				.product(name: "Settings", package: "Settings"),
 			]
 		),
 	]

@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint-and-format:
+    name: Lint and Format
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install SwiftLint and SwiftFormat
+        run: |
+          brew list swiftlint >/dev/null 2>&1 || brew install swiftlint
+          brew list swiftformat >/dev/null 2>&1 || brew install swiftformat
+
+      - name: SwiftLint
+        run: swiftlint lint --config .swiftlint.yml --reporter github-actions-logging
+
+      - name: SwiftFormat (lint mode)
+        run: swiftformat . --config .swiftformat --lint
+
+  resolve-packages:
+    name: Resolve Packages
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve package dependencies
+        run: xcodebuild -project Bubbly.xcodeproj -resolvePackageDependencies

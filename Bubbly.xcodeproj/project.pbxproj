@@ -57,6 +57,10 @@
 		475BAAC52DBE859E007B0876 /* BubblyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAACF2DBE859E007B0876 /* BubblyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAAE72DBE88CA007B0876 /* NotificationService.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationService.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4780E40E2F40E32E00860B99 /* Conversation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Conversation; sourceTree = "<group>"; };
+		4780E40F2F40E36E00860B99 /* Inbox */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Inbox; sourceTree = "<group>"; };
+		4780E4402F40EC6F00860B99 /* Settings */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Settings; sourceTree = "<group>"; };
+		4780E4412F40EC7A00860B99 /* ContactsFeature */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ContactsFeature; sourceTree = "<group>"; };
 		479C830E2DDE71D70019971C /* Crypto */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Crypto; sourceTree = "<group>"; };
 		47A653C52E99B92B005A2E50 /* FirePhoneOTP */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FirePhoneOTP; sourceTree = "<group>"; };
 		47AD343A2DCD650B00C4FA62 /* Core */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Core; sourceTree = "<group>"; };
@@ -192,6 +196,10 @@
 		47AD34452DCD650B00C4FA62 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				4780E4412F40EC7A00860B99 /* ContactsFeature */,
+				4780E4402F40EC6F00860B99 /* Settings */,
+				4780E40F2F40E36E00860B99 /* Inbox */,
+				4780E40E2F40E32E00860B99 /* Conversation */,
 				47A653C52E99B92B005A2E50 /* FirePhoneOTP */,
 				47AD343A2DCD650B00C4FA62 /* Core */,
 				47AD343B2DCD650B00C4FA62 /* Database */,

@@ -28,7 +28,6 @@ struct SettingsScene: View {
 		GroupStorageKey.limit(.minutesForChatMsgGrouping).value,
 		store: GroupStorage.shared.store
 	) var minutesForChatMsgGrouping: Int = 15
-	@AppStorage("askChatGPT") private var askChatGPT: Bool = false
 
 	var body: some View {
 		let currentUser = currentUserRepository.model
@@ -39,8 +38,14 @@ struct SettingsScene: View {
 					Router.shared
 						.pushToNav(
 							.view(
-								id: CurrentUserProfileView.typeName,
-								node: RenderNodeView(content: CurrentUserProfileView())
+								id: UserProfileView.typeName,
+								node: RenderNodeView(
+									content: UserProfileView(
+										viewModel: .init(
+											currentUserRepository: currentUserRepository
+										)
+									)
+								)
 							)
 						)
 				} label: {
@@ -118,9 +123,6 @@ struct SettingsScene: View {
 				Text("Permissions")
 			}
 			Section {
-				Toggle(isOn: $askChatGPT) {
-					Text("Ask Chat GPT")
-				}
 				Text(currentUser.preetyPrinted)
 			}
 			Section {
@@ -178,9 +180,9 @@ struct SettingsScene: View {
 				} label: {
 					Text("Delete Conversations")
 				}
-				AsyncButton { @MainActor in
+				AsyncButton {
 					CryptoService.shared.forceReload(for: currentUser.uid)
-					CurrentUserRepository.reload()
+					try await currentUserRepository.reload()
 				} label: {
 					Text("Reset Crypto Keys")
 				}

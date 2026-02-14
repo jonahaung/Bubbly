@@ -1,5 +1,6 @@
 import Core
 import Database
+import Inbox
 import Services
 import SwiftUI
 import XUI
@@ -56,9 +57,9 @@ public extension AppCoordinator {
 	@ViewBuilder func view(for tabPath: TabPath) -> some View {
 		switch tabPath {
 		case .test:
-			Playground()
+			PlaygroundView()
 		case .inbox:
-			InboxScene(viewModel: .init())
+			InboxScene(viewModel: .init(currentUserRepository: container.currentUserRepository))
 		case .contacts:
 			ContactsScene(
 				router: router, contactsRepository: container.contactsRepository,
