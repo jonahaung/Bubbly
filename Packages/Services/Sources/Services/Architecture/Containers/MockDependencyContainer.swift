@@ -1,10 +1,10 @@
 import Foundation
 
 public final class MockDependencyContainer: DependencyContainer {
-	public let currentUserRepository: any CurrentUserRepositoryProtocol
+	public let currentUserRepository: CurrentUserRepository
 	public let contactsRepository: any ContactsRepositoryProtocol
 
-	public init(currentUserRepository: any CurrentUserRepositoryProtocol,
+	public init(currentUserRepository: CurrentUserRepository,
 	            contactsRepository: any ContactsRepositoryProtocol)
 	{
 		self.currentUserRepository = currentUserRepository

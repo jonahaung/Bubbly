@@ -364,7 +364,7 @@ public final class ColorExtractor {
 	}
 }
 
-private nonisolated extension ColorExtractor {
+nonisolated private extension ColorExtractor {
 	/// Allocates the memory required for the distances matrix.
 	func allocateDistancesBuffer() {
 		if distances != nil {

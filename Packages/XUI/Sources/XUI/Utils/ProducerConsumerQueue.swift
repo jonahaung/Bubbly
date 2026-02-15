@@ -146,7 +146,7 @@ public actor AsyncProducerConsumerQueue<T: Sendable> {
 	}
 
 	/// Convenience: An async sequence interface for iterating.
-	public nonisolated var stream: AsyncStream<T> {
+	nonisolated public var stream: AsyncStream<T> {
 		AsyncStream { continuation in
 			Task {
 				while let value = await self.dequeue() {

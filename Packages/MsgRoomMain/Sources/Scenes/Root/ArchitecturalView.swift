@@ -21,7 +21,6 @@ public struct ArchitecturalView: View {
 
 	public var body: some View {
 		RootTabView(coordinator: coordinator)
-			.environment(\.currentUser, coordinator.container.currentUserRepository.model)
 			.task {
 				coordinator.start()
 			}

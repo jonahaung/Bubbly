@@ -1,3 +1,4 @@
+import Core
 import Database
 import ImageLoader
 import MediaPicker
@@ -10,7 +11,6 @@ public struct CreateGroupScene: View {
 	@State private var viewModel = CreateGroupViewModel()
 	@Environment(\.dismiss) private var dismiss
 	@FocusState private var isFocused: Bool
-	@Environment(\.currentUser) private var currentUser
 
 	public init() {}
 
@@ -72,9 +72,11 @@ public struct CreateGroupScene: View {
 			ToolbarItem(placement: .primaryAction) {
 				AsyncButton(role: .confirm) {
 					setFocus(false)
-					try await Task.sleep(seconds: 1)
-					try await viewModel.createGroup()
-					try await contactStore.syncGroups(currentUser: currentUser)
+					if let currentUserId {
+						try await Task.sleep(seconds: 1)
+						try await viewModel.createGroup()
+						try await contactStore.syncGroups(currentUserId: currentUserId)
+					}
 					dismiss()
 				} label: { _ in
 					if viewModel.isLoading {

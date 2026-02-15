@@ -3,7 +3,7 @@ import SwiftUI
 import XUI
 
 @Observable
-public final class MsgCellViewModel: ViewReloadable {
+public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
 	public struct ContentRenderKey: Hashable {
 		public let id: String
 		public let text: String?

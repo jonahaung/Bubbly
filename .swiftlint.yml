@@ -41,10 +41,10 @@ opt_in_rules:
   - prefer_self_type_over_type_of_self
   - reduce_boolean
   - redundant_nil_coalescing
+  - syntactic_sugar
   - toggle_bool
   - unavailable_function
   - weak_delegate
-  - syntactic_sugar
 
 # ----------------------------------------
 # FORCE SAFETY
@@ -121,8 +121,10 @@ excluded:
   - Carthage
   - .build
   - DerivedData
+  - SourcePackages
   - fastlane
   - vendor
   - Packages/Crypto
-  - "**/Generated"
+  - Generated
+  - DerivedData
   - "**/*.generated.swift"

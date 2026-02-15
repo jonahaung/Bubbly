@@ -5,8 +5,7 @@ import FirebaseMessaging
 import Foundation
 import XUI
 
-@Observable
-public final class CurrentUserRepository: CurrentUserRepositoryProtocol {
+public actor CurrentUserRepository {
 	public enum XError: Error {
 		case notLoggedIn
 		case noDeviceToken
@@ -17,7 +16,10 @@ public final class CurrentUserRepository: CurrentUserRepositoryProtocol {
 
 	public init(_ model: CurrentUserModel) {
 		self.model = model
-		observeReloadNotification()
+		Task { [weak self] in
+			guard let self else { return }
+			await observeReloadNotification()
+		}
 	}
 
 	@concurrent private func updateIfNeeded() async throws {

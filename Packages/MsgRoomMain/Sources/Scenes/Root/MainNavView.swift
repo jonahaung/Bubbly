@@ -1,6 +1,7 @@
 import Conversation
 import Database
 import Services
+import Settings
 import SwiftUI
 import XUI
 

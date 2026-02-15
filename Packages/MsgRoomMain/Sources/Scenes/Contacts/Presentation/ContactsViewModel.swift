@@ -18,7 +18,7 @@ final class ContactsViewModel: ErrorPresenter {
 	private let latestSnapshot: LatestContactsSnapshotUseCase
 
 	init(contactsRepository: ContactsRepositoryProtocol,
-	     currentUserRepository: CurrentUserRepositoryProtocol,
+	     currentUserRepository: CurrentUserRepository,
 	     reducer: ContactsReducer = ContactsReducerImpl())
 	{
 		let manager = ContactsManager()

@@ -2,7 +2,7 @@ import Foundation
 import FoundationModels
 
 /// Custom error types for Foundation Models operations
-public nonisolated enum FoundationModelsError: LocalizedError, Sendable {
+nonisolated public enum FoundationModelsError: LocalizedError, Sendable {
 	case sessionCreationFailed
 	case responseGenerationFailed(String)
 	case toolCallFailed(String)

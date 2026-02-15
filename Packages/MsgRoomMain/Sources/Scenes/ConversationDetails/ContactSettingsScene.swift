@@ -9,7 +9,6 @@ public struct ContactSettingsScene: View {
 	@State private var properties: ConversationProperties
 	@State private var updatingModelValueTask: Task<Void, Never>?
 	@State private var isSaving: Bool = false
-	@Environment(\.currentUser) private var currentUser
 
 	public init(_ contact: Contact) {
 		self.contact = contact
@@ -103,10 +102,12 @@ public struct ContactSettingsScene: View {
 			}
 		}
 		.task {
-			if let value = try? await ConversationPropertiesRepo.getOrCreate(
-				for: ConversationIDGenerator.generate(currentUser.uid, contact.uid)
-			) {
-				properties = value
+			if let currentUserId {
+				if let value = try? await ConversationPropertiesRepo.getOrCreate(
+					for: ConversationIDGenerator.generate(currentUserId, contact.uid)
+				) {
+					properties = value
+				}
 			}
 		}
 	}

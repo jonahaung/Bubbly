@@ -7,7 +7,7 @@ import XUI
 
 public struct ContactsScene: View {
 	let contactsRepository: ContactsRepositoryProtocol
-	let currentUserRepository: CurrentUserRepositoryProtocol
+	let currentUserRepository: CurrentUserRepository
 	let router: Router
 
 	@State private var viewModel: ContactsViewModel
@@ -25,7 +25,7 @@ public struct ContactsScene: View {
 
 	public init(router: Router,
 	            contactsRepository: ContactsRepositoryProtocol,
-	            currentUserRepository: CurrentUserRepositoryProtocol)
+	            currentUserRepository: CurrentUserRepository)
 	{
 		self.router = router
 		self.contactsRepository = contactsRepository
@@ -154,7 +154,10 @@ public struct ContactsScene: View {
 	}
 
 	private func openConversation(for contact: Contact) async throws {
-		let id = ConversationIDGenerator.generate(contact.uid, currentUserRepository.model.uid)
+		let id = await ConversationIDGenerator.generate(
+			contact.uid,
+			currentUserRepository.model.uid
+		)
 		if let url = DeepLinkCoordinator.shared.url(for: .conversation(id: id)) {
 			await MainActor.run {
 				UIApplication.shared.open(url)

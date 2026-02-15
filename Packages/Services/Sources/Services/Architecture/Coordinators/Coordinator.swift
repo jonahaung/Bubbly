@@ -2,7 +2,7 @@ import SwiftUI
 import XUI
 
 @MainActor
-public protocol Coordinator: Equatable {
+public protocol Coordinator {
 	var appLauncher: AppLauncher { get }
 	var router: Router { get }
 	var container: DependencyContainer { get }
@@ -34,10 +34,5 @@ public final class AppCoordinator: @MainActor Coordinator {
 		Task.detached(priority: .background) { [weak self] in
 			try await self?.container.contactsRepository.fetchData()
 		}
-	}
-
-	public static func == (lhs: AppCoordinator, rhs: AppCoordinator) -> Bool {
-		lhs.container.currentUserRepository.model.uid == rhs.container.currentUserRepository.model
-			.uid
 	}
 }

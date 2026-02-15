@@ -49,9 +49,9 @@ public final class ContactsRepository: ContactsRepositoryProtocol, Sendable, Err
 }
 
 public extension ContactsRepository {
-	@concurrent func syncGroups(currentUser: CurrentUserModel) async throws {
+	@concurrent func syncGroups(currentUserId: String) async throws {
 		let groups: [Group] = try await FirestoreRepo.getModels(
-			for: currentUser.uid,
+			for: currentUserId,
 			collection: .groups,
 			field: .members
 		)

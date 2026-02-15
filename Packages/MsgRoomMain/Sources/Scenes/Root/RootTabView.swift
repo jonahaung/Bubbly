@@ -2,6 +2,7 @@ import Core
 import Database
 import Inbox
 import Services
+import Settings
 import SwiftUI
 import XUI
 

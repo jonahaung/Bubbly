@@ -5,11 +5,11 @@ import Services
 struct ContactsRepositoryImpl: ContactsSceneRepository {
 	private let manager: ContactsManager
 	private let contactsRepository: ContactsRepositoryProtocol
-	private let currentUserRepository: CurrentUserRepositoryProtocol
+	private let currentUserRepository: CurrentUserRepository
 
 	init(manager: ContactsManager,
 	     contactsRepository: ContactsRepositoryProtocol,
-	     currentUserRepository: CurrentUserRepositoryProtocol)
+	     currentUserRepository: CurrentUserRepository)
 	{
 		self.manager = manager
 		self.contactsRepository = contactsRepository
@@ -43,7 +43,8 @@ struct ContactsRepositoryImpl: ContactsSceneRepository {
 	func syncGroups() async throws -> ContactsSnapshot {
 		manager.setLoading(true)
 		manager.setError(nil)
-		try await contactsRepository.syncGroups(currentUser: currentUserRepository.model)
+		let currentUserId = await currentUserRepository.model.uid
+		try await contactsRepository.syncGroups(currentUserId: currentUserId)
 		manager.setLoading(false)
 		return snapshot()
 	}

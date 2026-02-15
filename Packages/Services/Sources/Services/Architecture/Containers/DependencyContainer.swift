@@ -3,8 +3,8 @@ import Foundation
 
 @MainActor
 public protocol DependencyContainer: Sendable {
-	var currentUserRepository: CurrentUserRepositoryProtocol { get }
+	var currentUserRepository: CurrentUserRepository { get }
 	var contactsRepository: ContactsRepositoryProtocol { get }
-	init(currentUserRepository: any CurrentUserRepositoryProtocol,
+	init(currentUserRepository: CurrentUserRepository,
 	     contactsRepository: any ContactsRepositoryProtocol)
 }
