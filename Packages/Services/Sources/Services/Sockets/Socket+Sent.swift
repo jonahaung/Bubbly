@@ -5,10 +5,11 @@ import Foundation
 import XUI
 
 extension Socket {
-	public static func send(_ data: AnyMsgData, conversation: Conversation) {
-		Task { @SocketActor in
-			try? await Socket.shared.send(data, conversation: conversation)
+	public static func send(_ data: AnyMsgData, conversation: Conversation) async throws {
+		try await Task { @SocketActor in
+			try await Socket.shared.send(data, conversation: conversation)
 		}
+		.value
 	}
 
 	func send(_ data: AnyMsgData, conversation _: Conversation) async throws {
@@ -23,10 +24,9 @@ extension Socket {
 		case let .deleteMsg(rMsg: rMsg):
 			try await Store.shared.msgStore?.delete(uid: rMsg.uid)
 			notifyMessage(data)
-			if rMsg.uid == currentUserId {
+			if rMsg.senderID == currentUserId {
 				addToQueue()
 			}
-			addToQueue()
 		case let .reaction(payload):
 			try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in
 				let isSame = model.reactions.contains(
@@ -61,10 +61,14 @@ extension Socket {
 			guard let self else { return }
 			await queue.addOperation { [weak self] in
 				guard let self else { return }
-				debugPrint("dequeue")
-				try await performSend(data)
-				try await Task.sleep(seconds: 1)
-				await dequeueIfNeeded()
+				defer {
+					Task { [weak self] in
+						guard let self else { return }
+						try await Task.sleep(seconds: 1)
+						await self.dequeueIfNeeded()
+					}
+				}
+				try await self.performSend(data)
 			}
 		}
 	}

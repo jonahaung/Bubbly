@@ -1,5 +1,6 @@
 import FirebaseStorage
 import SwiftUI
+import UniformTypeIdentifiers
 import UIKit
 
 public struct ImageUploadingService: Sendable {
@@ -22,18 +23,13 @@ public struct ImageUploadingService: Sendable {
 		var childPath: String {
 			switch self {
 			case let .user(uid):
-				uid
+				uid.storagePathComponent
 			case let .group(groupID):
-				groupID
+				groupID.storagePathComponent
 			case let .conversation(conID, attachmentID):
-				conID + "/" + attachmentID
+				conID.storagePathComponent + "/" + attachmentID.storagePathComponent
 			}
 		}
-	}
-
-	public enum Error: Swift.Error {
-		case resizingFailed
-		case dataCreationFailed
 	}
 
 	public init() {}
@@ -76,25 +72,25 @@ public struct ImageUploadingService: Sendable {
 			.reference(withPath: path.path)
 			.child(path.childPath)
 		let metadata = StorageMetadata()
-		metadata.contentType = "image/png"
+		metadata.contentType = contentType(for: url)
 		_ = try await reference.putFileAsync(from: url, metadata: metadata, onProgress: onProgress)
 		return try await reference.downloadURL()
 	}
 
-	func shortenURL(_ longURL: String) async -> String {
-		guard let escaped = longURL.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-		else {
-			return longURL
+	private func contentType(for fileURL: URL) -> String {
+		let ext = fileURL.pathExtension
+		if ext.isEmpty {
+			return "application/octet-stream"
 		}
-		guard let endpoint = URL(string: "https://is.gd/create.php?format=simple&url=\(escaped)")
-		else {
-			return longURL
-		}
-		guard let response = try? await URLSession.shared.data(from: endpoint) else {
-			return longURL
-		}
-		let data = response.0
-		return String(decoding: data, as: UTF8.self)
+		return UTType(filenameExtension: ext)?.preferredMIMEType ?? "application/octet-stream"
+	}
+}
+
+private extension String {
+	var storagePathComponent: String {
+		let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.")
+		let scalars = unicodeScalars.map { allowed.contains($0) ? Character($0) : "_" }
+		return String(scalars)
 	}
 }
 

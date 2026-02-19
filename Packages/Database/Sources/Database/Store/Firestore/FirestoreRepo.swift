@@ -1,10 +1,8 @@
 import Core
-import Foundation
-import XUI
 
 @NetworkActor
 public enum FirestoreRepo {
-	@NetworkActor static let client = FirestoreRESTClient()
+	@NetworkActor private static let client = FirestoreRESTClient()
 
 	public static func add(_ item: some Codable & Sendable,
 	                       collectionPath: FirestoreCollectionPath,
