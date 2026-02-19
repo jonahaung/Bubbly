@@ -20,6 +20,7 @@ struct BubblyApp: App {
 		WindowGroup {
 			ContentView()
 				.task {
+					await Task.yield()
 					do {
 						try await pushNotificationServie.registerForPushNotifications()
 					} catch {

@@ -19,6 +19,7 @@ let package = Package(
 		.package(name: "Inbox", path: "../Inbox"),
 		.package(name: "ContactsFeature", path: "../ContactsFeature"),
 		.package(name: "Settings", path: "../Settings"),
+		.package(url: "https://github.com/apple/swift-collections", from: "1.1.0"),
 	],
 	targets: [
 		.target(
@@ -30,6 +31,7 @@ let package = Package(
 				.product(name: "Inbox", package: "Inbox"),
 				.product(name: "ContactsFeature", package: "ContactsFeature"),
 				.product(name: "Settings", package: "Settings"),
+				.product(name: "Collections", package: "swift-collections"),
 			]
 		),
 		.testTarget(
@@ -42,7 +44,9 @@ let package = Package(
 				.product(name: "Inbox", package: "Inbox"),
 				.product(name: "ContactsFeature", package: "ContactsFeature"),
 				.product(name: "Settings", package: "Settings"),
+				.product(name: "Collections", package: "swift-collections"),
 			]
 		),
 	]
 )
+

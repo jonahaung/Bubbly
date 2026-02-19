@@ -53,53 +53,49 @@ public struct ScrollLocation: Sendable, Hashable {
 		}
 	}
 }
+
 public indirect enum ScrollPositionValue: Hashable, Sendable {
 	case y(CGFloat)
 	case id(String?)
 	case layoutID(String?)
 	case edge(Edge)
-	case sequence(CGFloat, CGFloat)
+	case snapToY(CGFloat)
+	case snapToBottom
 }
+
 public struct ScrollPositionItem: Hashable, Sendable {
 	public let position: ScrollPositionValue
 	public let animation: Animation?
 
-	public init(_ position: ScrollPositionValue, animation: Animation? = .easeInOut(duration: 0.25)) {
+	public init(_ position: ScrollPositionValue, animation: Animation? = nil) {
 		self.position = position
 		self.animation = animation
 	}
 
-	public static func y(_ value: CGFloat, animation: Animation? = .easeInOut(duration: 0.25)) -> Self {
+	public static func y(_ value: CGFloat, animation: Animation? = nil) -> Self {
 		.init(.y(value), animation: animation)
 	}
-	public static func id(_ value: String?, animation: Animation? = .easeInOut(duration: 0.25)) -> Self {
+
+	public static func id(_ value: String?, animation: Animation? = nil) -> Self {
 		.init(.id(value), animation: animation)
 	}
-	public static func layoutID(_ value: String?, animation: Animation? = .easeInOut(duration: 0.25)) -> Self {
+
+	public static func layoutID(_ value: String?, animation: Animation? = nil) -> Self {
 		.init(.layoutID(value), animation: animation)
 	}
-	public static func edge(_ value: Edge, animation: Animation? = .easeInOut(duration: 0.25)) -> Self {
+
+	public static func edge(_ value: Edge, animation: Animation? = nil) -> Self {
 		.init(.edge(value), animation: animation)
 	}
-	public static func sequence(
-		_ first: CGFloat,
-		_ second: CGFloat,
-		animation: Animation? = .easeInOut(duration: 0.25)
-	) -> Self {
-		.init(.sequence(first, second), animation: animation)
+
+	public static func snapToBottom() -> Self {
+		.init(.snapToBottom, animation: nil)
+	}
+
+	public static func snapToY(_ y: CGFloat) -> Self {
+		.init(.snapToY(y), animation: nil)
 	}
 }
-//public indirect enum ScrollPositionItem: Hashable, Sendable {
-//	case offset(yPosition: CGFloat, animated: Bool = true, duration: Double? = nil)
-//	case id(value: String, anchor: UnitPoint? = nil, animated: Bool = true, duration: Double? = nil)
-//	case layoutID(
-//		value: String,
-//		anchor: UnitPoint? = nil,
-//		animated: Bool = true,
-//		duration: Double? = nil
-//	)
-//	case bottom(animated: Bool = true, duration: Double? = nil)
-//}
 
 public enum ScrolledPosition: Sendable, Hashable {
 	case none

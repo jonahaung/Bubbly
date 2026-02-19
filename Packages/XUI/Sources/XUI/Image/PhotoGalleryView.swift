@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-public protocol PhotoGalleryItem: Identifiable {
+public protocol PhotoGalleryItem: Identifiable, Equatable {
 	var galleryURL: URL? { get }
 	var galleryTitle: String? { get }
 	var id: String { get }

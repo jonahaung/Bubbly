@@ -1,6 +1,5 @@
 import UIKit
 
-@MainActor
 public final class DisplayLink {
 	public enum State {
 		case inactive

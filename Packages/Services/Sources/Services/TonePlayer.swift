@@ -1,5 +1,5 @@
 import AVFoundation
-import Foundation
+import SwiftUI
 
 @globalActor
 public struct TonePlayerActor {
@@ -74,5 +74,11 @@ final class TonePlayerImpl {
 		} catch {
 			return
 		}
+	}
+}
+
+public extension View {
+	func playTone(_ tone: Tone) {
+		TonePlayer.play(tone)
 	}
 }

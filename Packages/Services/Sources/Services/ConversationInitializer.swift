@@ -18,7 +18,7 @@ public enum ConversationInitializer {
 
 		public let contentInsets = EdgeInsets(
 			top: ChatLayoutConstants.topBarHeight,
-			leading: 4,
+			leading: 8,
 			bottom: 0,
 			trailing: 8
 		)

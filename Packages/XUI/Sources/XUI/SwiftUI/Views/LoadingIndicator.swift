@@ -3,47 +3,54 @@ import SwiftUI
 public struct LoadingIndicator: View {
 	private let size: CGFloat
 	private let lineWidth: CGFloat
-	private let colors: [Color]
+	private let gradient: AngularGradient
 	private let progress: Double?
+	@State private var isAnimating = false
 
-	public init(_ size: CGFloat,
-	            lineWidth: CGFloat = 2,
-	            colors: [Color] = [.white, .yellow, .orange, .red, .pink, .blue, .indigo],
-	            progress: Double? = nil)
-	{
+	public init(
+		_ size: CGFloat,
+		lineWidth: CGFloat = 2,
+		colors: [Color] = [.white, .yellow, .orange, .red, .pink, .blue, .indigo],
+		progress: Double? = nil
+	) {
 		self.size = size
 		self.lineWidth = lineWidth
-		self.colors = colors
 		self.progress = progress
+		self.gradient = AngularGradient(
+			gradient: Gradient(colors: colors),
+			center: .center
+		)
 	}
 
 	public var body: some View {
-		Group {
+		FixedSizeCenterLayout(square: size) {
 			if let progress {
 				determinate(progress: progress)
 			} else {
 				indeterminate
 			}
 		}
-		.frame(width: size, height: size)
 	}
 
 	private var indeterminate: some View {
-		TimelineView(.animation) { context in
-			let angle = context.date.timeIntervalSinceReferenceDate * 360
-			Circle()
-				.trim(from: 0.1, to: 1)
-				.stroke(
-					AngularGradient(
-						gradient: Gradient(colors: colors),
-						center: .center
-					),
-					style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
+		Circle()
+			.trim(from: 0.1, to: 1)
+			.stroke(
+				gradient,
+				style: StrokeStyle(
+					lineWidth: lineWidth,
+					lineCap: .round
 				)
-
-				.rotationEffect(.degrees(angle))
-		}
-		.transition(.scale(0.01, anchor: .center).animation(.bouncy))
+			)
+			.rotationEffect(.degrees(isAnimating ? 360 : 0))
+			.animation(
+				.linear(duration: 1)
+				.repeatForever(autoreverses: false),
+				value: isAnimating
+			)
+			.onAppear {
+				isAnimating = true
+			}
 	}
 
 	private func determinate(progress: Double) -> some View {
@@ -57,10 +64,7 @@ public struct LoadingIndicator: View {
 			Circle()
 				.trim(from: 0, to: clamped)
 				.stroke(
-					AngularGradient(
-						gradient: Gradient(colors: colors),
-						center: .center
-					),
+					gradient,
 					style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
 				)
 				.rotationEffect(.degrees(-90))

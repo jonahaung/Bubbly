@@ -11,8 +11,7 @@ import XUI
 class AppDelegate: NSObject, UIApplicationDelegate {
 	func application(_: UIApplication,
 	                 didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil)
-		-> Bool
-	{
+		-> Bool {
 		FirebaseApp.configure()
 		FirebaseKeychainSanitizer.sanitize()
 		FirebaseConfiguration.shared.setLoggerLevel(.error)
@@ -21,22 +20,19 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 	}
 
 	func application(_: UIApplication,
-	                 didFailToRegisterForRemoteNotificationsWithError error: any Error)
-	{
+	                 didFailToRegisterForRemoteNotificationsWithError error: any Error) {
 		debugPrint(error)
 	}
 
 	func application(_: UIApplication,
-	                 didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data)
-	{
+	                 didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
 		Auth.auth().setAPNSToken(deviceToken, type: .sandbox)
 		Messaging.messaging().apnsToken = deviceToken
 	}
 
 	func application(_: UIApplication,
 	                 didReceiveRemoteNotification _: [AnyHashable: Any]) async
-		-> UIBackgroundFetchResult
-	{
+		-> UIBackgroundFetchResult {
 		.noData
 //		guard let data = AnyMsgData(userInfo: userInfo) else {
 //			return .noData

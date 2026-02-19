@@ -8,7 +8,7 @@ import XUI
 
 public struct GroupConversationSettingsScene: View {
 	@State private var viewModel: GroupDetailsViewModel
-	@Environment(ContactsRepository.self) private var contactStore
+//	@Environment(ContactsRepository.self) private var contactStore
 	@Environment(\.currentUser) private var currentUser
 	@FocusState private var isFocused: Bool
 
@@ -68,18 +68,18 @@ public struct GroupConversationSettingsScene: View {
 					value: viewModel.group.createdDate.date,
 					format: .dateTime
 				)
-				if let admin: (any ContactRepresentable) = viewModel.group
-					.createdBy == currentUserId
-					? currentUser
-					: contactStore.contact(
-						for: viewModel.group.createdBy
-					)
-				{
-					LabeledContent(
-						"Admin",
-						value: admin.name
-					)
-				}
+//				if let admin: (any ContactRepresentable) = viewModel.group
+//					.createdBy == currentUserId
+//					? currentUser
+//					: contactStore.contact(
+//						for: viewModel.group.createdBy
+//					)
+//				{
+//					LabeledContent(
+//						"Admin",
+//						value: admin.name
+//					)
+//				}
 			}
 			Section {
 				ForEach(viewModel.contacts) { contact in

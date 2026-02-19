@@ -20,10 +20,7 @@ struct PlaygroundView: View {
 				Text(error)
 					.foregroundStyle(.red)
 			}
-			Text("RecyclingScrollingLazyView")
-				.presentFullScreen {
-					RecyclingDemoView()
-				}
+
 			Button("Show modal") {
 				showModal = true
 			}

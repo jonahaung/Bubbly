@@ -18,7 +18,9 @@ public struct ContactSettingsScene: View {
 	public var body: some View {
 		List {
 			Section {
-				FormCell("Name", contact.name)
+				LabeledContent("Name") {
+					Text(contact.name)
+				}
 			}
 			Section {
 				Section {

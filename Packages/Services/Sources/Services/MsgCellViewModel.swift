@@ -3,7 +3,7 @@ import SwiftUI
 import XUI
 
 @Observable
-public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
+public final class MsgCellViewModel: ViewReloadable, @preconcurrency Identifiable {
 	public struct ContentRenderKey: Hashable {
 		public let id: String
 		public let text: String?
@@ -46,6 +46,9 @@ public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
 	public func setVisibility(_ isVisible: Bool) {
 		guard self.isVisible != isVisible else { return }
 		self.isVisible = isVisible
+		if isVisible {
+			layoutIfNeeded()
+		}
 	}
 
 	public func animate() {
@@ -71,6 +74,12 @@ public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
 			return corner
 		}
 		return corner
+	}
+}
+
+extension MsgCellViewModel: @preconcurrency Equatable {
+	public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
+		lhs.id == rhs.id
 	}
 }
 
