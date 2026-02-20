@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+
+# Swift Package Manager
+.build/
+.swiftpm/
+
+# Xcode
+DerivedData/
+*.xcworkspace
+xcuserdata/
+*.xcuserstate
+
+# SwiftPM local build folders inside Packages
+Packages/**/.build/
+
+# Archives
+*.xcarchive
+
+# Logs
+*.log
