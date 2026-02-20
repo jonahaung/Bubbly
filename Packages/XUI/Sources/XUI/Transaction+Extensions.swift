@@ -26,16 +26,18 @@ public extension Transaction {
 		return transaction
 	}()
 
-	static func scrollView(anchor: UnitPoint) -> Transaction {
+	static func scrollView(preservePosition: Bool, completion: (() -> Void)? = nil) -> Transaction {
 		var transaction = Transaction()
 		transaction.animation = nil
-		transaction.tracksVelocity = false
-		transaction.scrollTargetAnchor = anchor
-		transaction.scrollPositionUpdatePreservesVelocity = false
+		transaction.tracksVelocity = true
+		transaction.scrollPositionUpdatePreservesVelocity = preservePosition
 		transaction.disablesAnimations = true
-		transaction.isContinuous = false
+		transaction.isContinuous = true
 		transaction.dismissBehavior = .destructive
 		transaction.scrollContentOffsetAdjustmentBehavior = .automatic
+		transaction.addAnimationCompletion(criteria: .removed) {
+			completion?()
+		}
 		return transaction
 	}
 }

@@ -60,7 +60,7 @@ public extension AppCoordinator {
 		case .test:
 			PlaygroundView()
 		case .inbox:
-			InboxScene(viewModel: .init(currentUserRepository: container.currentUserRepository))
+			InboxScene(viewModel: .init())
 		case .contacts:
 			ContactsScene(
 				router: router, contactsRepository: container.contactsRepository,

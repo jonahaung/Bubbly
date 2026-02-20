@@ -17,7 +17,6 @@ let package = Package(
 		.package(name: "Database", path: "../Database"),
 		.package(name: "Conversation", path: "../Conversation"),
 		.package(name: "Inbox", path: "../Inbox"),
-		.package(name: "ContactsFeature", path: "../ContactsFeature"),
 		.package(name: "Settings", path: "../Settings"),
 		.package(url: "https://github.com/apple/swift-collections", from: "1.1.0"),
 	],
@@ -29,7 +28,6 @@ let package = Package(
 				.product(name: "Database", package: "Database"),
 				.product(name: "Conversation", package: "Conversation"),
 				.product(name: "Inbox", package: "Inbox"),
-				.product(name: "ContactsFeature", package: "ContactsFeature"),
 				.product(name: "Settings", package: "Settings"),
 				.product(name: "Collections", package: "swift-collections"),
 			]
@@ -42,7 +40,6 @@ let package = Package(
 				.product(name: "Database", package: "Database"),
 				.product(name: "Conversation", package: "Conversation"),
 				.product(name: "Inbox", package: "Inbox"),
-				.product(name: "ContactsFeature", package: "ContactsFeature"),
 				.product(name: "Settings", package: "Settings"),
 				.product(name: "Collections", package: "swift-collections"),
 			]

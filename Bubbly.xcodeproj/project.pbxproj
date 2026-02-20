@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		47999F772F48286B00FD7DD8 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47999F762F48286B00FD7DD8 /* MsgRoomMain */; };
 		47B167E72E9AB3530020F282 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */; };
-		47CC12A62EE646EF00D3BDE8 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47CC12A52EE646EF00D3BDE8 /* MsgRoomMain */; };
 		47CC12A82EE655A600D3BDE8 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 47CC12A72EE655A600D3BDE8 /* Services */; };
 /* End PBXBuildFile section */
 
@@ -132,7 +132,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47CC12A62EE646EF00D3BDE8 /* MsgRoomMain in Frameworks */,
+				47999F772F48286B00FD7DD8 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,7 +236,7 @@
 			);
 			name = Bubbly;
 			packageProductDependencies = (
-				47CC12A52EE646EF00D3BDE8 /* MsgRoomMain */,
+				47999F762F48286B00FD7DD8 /* MsgRoomMain */,
 			);
 			productName = Bubbly;
 			productReference = 475BAAB42DBE859D007B0876 /* Bubbly.app */;
@@ -347,6 +347,7 @@
 			mainGroup = 475BAAAB2DBE859D007B0876;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				47999F752F48286B00FD7DD8 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 475BAAB52DBE859D007B0876 /* Products */;
@@ -840,8 +841,15 @@
 		};
 /* End XCConfigurationList section */
 
+/* Begin XCLocalSwiftPackageReference section */
+		47999F752F48286B00FD7DD8 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/MsgRoomMain;
+		};
+/* End XCLocalSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
-		47CC12A52EE646EF00D3BDE8 /* MsgRoomMain */ = {
+		47999F762F48286B00FD7DD8 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MsgRoomMain;
 		};

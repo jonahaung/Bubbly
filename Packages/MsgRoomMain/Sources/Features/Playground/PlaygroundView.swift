@@ -40,6 +40,9 @@ struct PlaygroundView: View {
 					print("tapped")
 				}
 			}
+			Text("Example View").tapToPush {
+				ExampleView1()
+			}
 			Button("Show Loading") {
 				Loading.show(true)
 			}
