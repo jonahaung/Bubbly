@@ -32,7 +32,7 @@ public extension Transaction {
 		transaction.tracksVelocity = true
 		transaction.scrollPositionUpdatePreservesVelocity = preservePosition
 		transaction.disablesAnimations = true
-		transaction.isContinuous = true
+		transaction.isContinuous = false
 		transaction.dismissBehavior = .destructive
 		transaction.scrollContentOffsetAdjustmentBehavior = .automatic
 		transaction.addAnimationCompletion(criteria: .removed) {

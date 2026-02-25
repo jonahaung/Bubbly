@@ -12,7 +12,7 @@ extension ComposeBar {
 				options: [.disallowParallelOperations, .showAlertOnError]
 			) {
 				if composer.hasContent {
-					await composer.send(conversation: manager.conversation)
+					composer.send(conversation: manager.conversation)
 				} else {
 					composer.inputText.text = Lorem.random()
 				}

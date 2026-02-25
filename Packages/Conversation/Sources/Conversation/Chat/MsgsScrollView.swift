@@ -5,19 +5,11 @@ import SwiftUI
 import XUI
 
 struct MsgsScrollView: View {
-	let accessoryFrame: CGRect
 	@Environment(\.selectedMsg) private var selectedMsg
 	var manager: ChatViewManager
 	var body: some View {
 		ScrollView(.vertical, showsIndicators: true) {
-			MsgsScrollViewLayout(
-				manager.layoutManager,
-				config: .init(
-					manager.conversationConfig.lineSpacing,
-					manager.conversationConfig.contentInsets,
-					boundsWidth: accessoryFrame.width
-				)
-			) {
+			MsgsScrollViewLayout(manager.layoutManager) {
 				if manager.presentation.showContactInfo {
 					ConversationHeaderView()
 				}
@@ -27,16 +19,20 @@ struct MsgsScrollView: View {
 						.id(viewModel.id)
 						.layoutValue(
 							key: MsgLayoutValueKey.self,
-							value: viewModel.msg.layoutValue()
+							value: viewModel.layoutValue
 						)
 				}
-			}.scrollTargetLayout()
+			}
+			.animation(.interactiveSpring, value: manager.animationSignature)
+			.scrollTargetLayout()
 		}
-		.frame(width: accessoryFrame.width)
-		.padding(.leading, accessoryFrame.minX)
+		.frame(width: manager.layoutManager.config.boundsWidth)
 		.tint(Color.link.mix(with: Color.accentColor, by: 0.3))
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.send(.onScrollPhaseChange(oldPhase, newPhase, context: context))
+		}
+		.onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) {
+			manager.send(.onScrollTargetVisibilityChange($0))
 		}
 		.onScrollGeometryChange(
 			for: VScrollGeometry.self,
@@ -44,12 +40,92 @@ struct MsgsScrollView: View {
 		) { oldValue, newValue in
 			manager.send(.onScrollGeometryChange(oldValue, newValue))
 		}
-		.onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) {
-			manager.send(.onScrollTargetVisibilityChange($0))
-		}
+		.scrollTargetBehavior(VelocityAwareChatScrollBehavior())
 		.scrollDismissesKeyboard(.never)
-		.defaultScrollAnchor(.bottom, for: .sizeChanges)
+		.defaultScrollAnchor(manager.scrollController.state.phase == .idle ? .bottom : .top)
 		.equatable(by: manager.layoutSignature)
 		.scrollPosition(manager.scrollController.scrollPosition, anchor: .none)
+	}
+}
+struct VelocityAwareChatScrollBehavior: ScrollTargetBehavior {
+
+	var thresholdRatio: CGFloat = 0.33
+	var velocityThreshold: CGFloat = 800
+
+	func updateTarget(_ target: inout ScrollTarget, context: TargetContext) {
+
+		let horizontal = context.axes.contains(.horizontal)
+		let vertical = context.axes.contains(.vertical)
+
+		guard horizontal || vertical else { return }
+
+		let dx = abs(context.originalTarget.rect.minX - target.rect.minX)
+		let dy = abs(context.originalTarget.rect.minY - target.rect.minY)
+		
+//
+//		let isHorizontal = horizontal && dx > dy
+//
+//		let pageSize = isHorizontal
+//		? context.containerSize.width
+//		: context.containerSize.height
+//
+//		let contentSize = isHorizontal
+//		? context.contentSize.width
+//		: context.contentSize.height
+//
+//		guard contentSize > pageSize else {
+//			if isHorizontal {
+//				target.rect.origin.x = 0
+//			} else {
+//				target.rect.origin.y = 0
+//			}
+//			return
+//		}
+//
+//		let maxOffset = contentSize - pageSize
+//
+//		let originalOffset = isHorizontal
+//		? context.originalTarget.rect.minX
+//		: context.originalTarget.rect.minY
+//
+//		let proposedOffset = isHorizontal
+//		? target.rect.minX
+//		: target.rect.minY
+//
+//		let velocity = isHorizontal
+//		? context.velocity.dx
+//		: context.velocity.dy
+//
+//		let dragDelta = proposedOffset - originalOffset
+//		let threshold = pageSize * thresholdRatio
+//
+//		var page = originalOffset / pageSize
+//
+//		// Flick
+//		if abs(velocity) > velocityThreshold {
+//			page += velocity > 0 ? 1 : -1
+//		}
+//		// Slow drag
+//		else if abs(dragDelta) > threshold {
+//			page += dragDelta > 0 ? 1 : -1
+//		}
+//		else {
+//			page = round(page)
+//		}
+//
+//		let destination = (round(page) * pageSize)
+//			.clamped(to: 0...maxOffset)
+//
+//		if isHorizontal {
+//			target.rect.origin.x = destination
+//		} else {
+//			target.rect.origin.y = destination
+//		}
+	}
+}
+extension Comparable {
+
+	func clamped(to range: ClosedRange<Self>) -> Self {
+		min(max(self, range.lowerBound), range.upperBound)
 	}
 }

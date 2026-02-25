@@ -108,7 +108,15 @@ public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
 		array[tailIndex] = element
 		count += 1
 	}
+	/// Adds an element to the front of the deque.
+	public mutating func enqueueFront(_ element: Element) {
+		if isFull { resize() }
 
+		// Move head backward (circularly)
+		head = (head - 1 + array.count) % array.count
+		array[head] = element
+		count += 1
+	}
 	/// Removes and returns the element at the front of the queue.
 	@discardableResult
 	public mutating func dequeue() -> Element? {

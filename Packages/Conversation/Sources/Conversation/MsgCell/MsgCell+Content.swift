@@ -61,11 +61,13 @@ extension MsgCell {
 					)
 
 					if let text = viewModel.msg.text, !text.isWhitespace {
-						TextContent(text: text)
+						SingleSubviewLayout {
+							TextContent(text: text)
+						}
 					}
 				}
 			} else if let text = viewModel.msg.text {
-				BubbleTextLayout {
+				SingleSubviewLayout {
 					TextContent(text: text)
 				}
 				.padding(theme.bubblePading)

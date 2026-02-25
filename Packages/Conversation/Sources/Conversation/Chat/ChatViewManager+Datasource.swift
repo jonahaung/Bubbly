@@ -52,7 +52,7 @@ private extension ChatViewManager {
 		guard datasourceFlushTask == nil else { return }
 		datasourceFlushTask = Task { [weak self] in
 			try? await Task.sleep(for: .milliseconds(30))
-			await self?.flushDatasourceMutations()
+			self?.flushDatasourceMutations()
 		}
 	}
 
@@ -80,7 +80,7 @@ private extension ChatViewManager {
 						}
 						ToastPresenter.show(toast)
 					} else {
-						if scrollController.state.position.nearBottom {
+						if scrollController.state.geometry.scrolledPosition.nearBottom {
 							scrollController.state.updateState = .appendingItem(msg.uid)
 						}
 						models.insert(msg: msg)

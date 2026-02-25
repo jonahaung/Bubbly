@@ -23,7 +23,7 @@ public enum ConversationRepo {
 	{
 		if conID.contains("|") {
 			let contactID = try resolveContactID(from: conID)
-			let contact = try await ContactRepo.getOrCreate(for: contactID, refetch: refetch)
+			let contact = try await ContactRepo.getOrCreate(uid: contactID, refetch: refetch)
 			return .contact(contact)
 		}
 

@@ -13,7 +13,7 @@ final class ChatPresentationState {
 	private(set) var typingStatusText: String?
 	var bottomAccessory: BottomAccessoryItem?
 	private(set) var floatingDateString: String?
-	var showContactInfo: Bool
+	@ObservationIgnored var showContactInfo: Bool
 	@ObservationIgnored private let dateCache = ExpiringCache<String>()
 	@ObservationIgnored private let id: String
 

@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 enum ScrollViewUpdatingState: Equatable {
-	case initial, notUpdating, updating, resetting
+	case initial, notUpdating, resetting
 	case insertingItems(_ edge: VerticalEdge)
 	case removingItems(_ edge: VerticalEdge)
 	case appendingItem(_ id: String)
@@ -21,18 +21,15 @@ extension ScrollViewUpdatingState {
 		!isUpdating
 	}
 	mutating func update(to newValue: Self) {
+		guard self != newValue else {
+			return
+		}
 		self = newValue
 	}
 	mutating func setHasViewLoaded() {
-		self = .notUpdating
-	}
-	mutating func endUpdating() {
-		guard self == .updating else {
+		guard self == .initial else {
 			return
 		}
 		self = .notUpdating
-	}
-	mutating func startUpdating() {
-		self = .updating
 	}
 }

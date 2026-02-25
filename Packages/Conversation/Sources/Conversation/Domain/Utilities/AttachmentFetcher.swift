@@ -1,14 +1,7 @@
-import Core
 import Database
 import Foundation
-import ImageLoader
 import Services
-import SwiftUI
-import VideoLoader
-import WebKit
 import XUI
-
-// MARK: - Scroll Intent
 
 public enum FetchIntent: Sendable {
 	case prefetch
@@ -19,31 +12,35 @@ public enum FetchIntent: Sendable {
 private extension FetchIntent {
 	var priority: TaskPriority {
 		switch self {
-		case .prefetch: .background
-		case .visible: .userInitiated
-		case .userInitiated: .high
+		case .prefetch:
+			.background
+		case .visible:
+			.userInitiated
+		case .userInitiated:
+			.high
 		}
 	}
 }
 
-// MARK: - AttachmentFetcher
-
 public actor AttachmentFetcher {
 	public static let shared = AttachmentFetcher()
 
-	public typealias Fetch = @Sendable (Attachment) async throws -> AttachmentData
 	public typealias Completion = @Sendable (Result<AttachmentData, Error>) -> Void
 
-	private let api = AttachmentDataAPI()
+	private struct QueueKey: Hashable {
+		let uid: String
+	}
 
+	private let api: AttachmentDataAPI
 	private var maxConcurrent: Int
 
-	private var tasks: [Attachment: Task<AttachmentData, Error>] = [:]
-	private var taskPriorities: [Attachment: TaskPriority] = [:]
-	private var completions: [Attachment: [Completion]] = [:]
-	private var pendingQueue = Deque<Attachment>()
-	private var pendingSet = Set<Attachment>()
-	private var waiters: [Attachment: [UUID: CheckedContinuation<AttachmentData, Error>]] = [:]
+	private var attachmentsByKey: [QueueKey: Attachment] = [:]
+	private var tasks: [QueueKey: Task<AttachmentData, Error>] = [:]
+	private var taskPriorities: [QueueKey: TaskPriority] = [:]
+	private var completions: [QueueKey: [Completion]] = [:]
+	private var pendingQueue = Deque<QueueKey>()
+	private var pendingSet = Set<QueueKey>()
+	private var waiters: [QueueKey: [UUID: CheckedContinuation<AttachmentData, Error>]] = [:]
 
 	private var inFlightCount: Int {
 		tasks.count
@@ -53,30 +50,29 @@ public actor AttachmentFetcher {
 		inFlightCount < maxConcurrent
 	}
 
-	// MARK: - Init
-
 	public init(maxConcurrent: Int = 10) {
 		precondition(maxConcurrent > 0, "maxConcurrent must be > 0")
 		self.maxConcurrent = maxConcurrent
+		api = AttachmentDataAPI()
 	}
-
-	// MARK: - Scroll Tuning
 
 	public func setScrolling(_ isScrolling: Bool) {
 		setMaxConcurrent(isScrolling ? 4 : 10)
 	}
 
 	public func markVisible(_ attachment: Attachment) {
-		promote(attachment)
+		let key = key(for: attachment)
+		attachmentsByKey[key] = attachment
+		promote(key)
 	}
 
 	public func cancelPrefetchOffscreen(keep visible: Set<Attachment>) {
-		for attachment in pendingSet where !visible.contains(attachment) {
-			cancel(attachment)
+		let visibleKeys = Set(visible.map(key(for:)))
+		let offscreen = pendingSet.filter { visibleKeys.contains($0) == false }
+		for key in offscreen {
+			cancel(key)
 		}
 	}
-
-	// MARK: - Concurrency
 
 	public func setMaxConcurrent(_ newValue: Int) {
 		precondition(newValue > 0, "maxConcurrent must be > 0")
@@ -88,112 +84,90 @@ public actor AttachmentFetcher {
 		tasks.isEmpty && pendingSet.isEmpty
 	}
 
-	// MARK: - Prefetch / Fetch
-
 	@discardableResult
-	public func prefetch(_ attachment: Attachment,
-	                     intent: FetchIntent = .prefetch,
-	                     completion: Completion? = nil) -> Bool
-	{
+	public func prefetch(
+		_ attachment: Attachment,
+		intent: FetchIntent = .prefetch,
+		completion: Completion? = nil
+	) -> Bool {
+		let key = key(for: attachment)
+		attachmentsByKey[key] = attachment
 		if let completion {
-			completions[attachment, default: []].append(completion)
+			completions[key, default: []].append(completion)
 		}
 
-		if tasks[attachment] != nil || pendingSet.contains(attachment) {
+		if tasks[key] != nil || pendingSet.contains(key) {
 			return false
 		}
 
-		taskPriorities[attachment] = intent.priority
-
+		taskPriorities[key] = intent.priority
 		if hasCapacity {
-			startTask(for: attachment)
+			startTask(for: key)
 			return true
-		} else {
-			enqueuePending(attachment)
-			return false
 		}
+
+		enqueuePending(key)
+		return false
 	}
 
-	public func fetch(_ attachment: Attachment,
-	                  intent: FetchIntent,
-	                  timeout: Duration? = .seconds(10)) async throws -> AttachmentData
-	{
-		if let existingTask = tasks[attachment] {
-			return try await awaitWithOptionalTimeout(
-				task: existingTask,
-				timeout: timeout
-			)
+	public func fetch(
+		_ attachment: Attachment,
+		intent: FetchIntent,
+		timeout: Duration? = .seconds(10)
+	) async throws -> AttachmentData {
+		let key = key(for: attachment)
+		attachmentsByKey[key] = attachment
+
+		if let existingTask = tasks[key] {
+			return try await awaitWithOptionalTimeout(task: existingTask, timeout: timeout)
 		}
 
-		if pendingSet.contains(attachment) {
-			return try await waitForPending(
-				attachment: attachment,
-				timeout: timeout
-			)
+		if pendingSet.contains(key) {
+			return try await waitForPending(key: key, timeout: timeout)
 		}
 
-		taskPriorities[attachment] = intent.priority
-
+		taskPriorities[key] = intent.priority
 		if hasCapacity {
-			startTask(for: attachment)
-			guard let task = tasks[attachment] else {
+			startTask(for: key)
+			guard let task = tasks[key] else {
 				throw CancellationError()
 			}
-			return try await awaitWithOptionalTimeout(
-				task: task,
-				timeout: timeout
-			)
-		} else {
-			enqueuePending(attachment)
-			return try await waitForPending(
-				attachment: attachment,
-				timeout: timeout
-			)
+			return try await awaitWithOptionalTimeout(task: task, timeout: timeout)
 		}
+
+		enqueuePending(key)
+		return try await waitForPending(key: key, timeout: timeout)
 	}
 
-	// MARK: - Cancellation
-
 	public func cancel(_ attachment: Attachment) {
-		removePending(attachment)
-		tasks.removeValue(forKey: attachment)?.cancel()
-		completions[attachment] = nil
-		taskPriorities[attachment] = nil
-
-		if let continuations = waiters.removeValue(forKey: attachment)?.values {
-			for cont in continuations {
-				cont.resume(throwing: CancellationError())
-			}
-		}
-		scheduleIfNeeded()
+		cancel(key(for: attachment))
 	}
 
 	public func cancelAll() {
 		for task in tasks.values {
 			task.cancel()
 		}
-		tasks.removeAll()
-		pendingQueue.removeAll()
-		pendingSet.removeAll()
-		taskPriorities.removeAll()
-		completions.removeAll()
+		tasks.removeAll(keepingCapacity: true)
+		taskPriorities.removeAll(keepingCapacity: true)
+		completions.removeAll(keepingCapacity: true)
+		pendingQueue.removeAll(keepingCapacity: true)
+		pendingSet.removeAll(keepingCapacity: true)
+		attachmentsByKey.removeAll(keepingCapacity: true)
 
 		for continuations in waiters.values {
-			for cont in continuations.values {
-				cont.resume(throwing: CancellationError())
+			for continuation in continuations.values {
+				continuation.resume(throwing: CancellationError())
 			}
 		}
-		waiters.removeAll()
+		waiters.removeAll(keepingCapacity: true)
 	}
 
-	// MARK: - Introspection
-
 	public func isFetching(_ attachment: Attachment) -> Bool {
-		tasks[attachment] != nil
+		tasks[key(for: attachment)] != nil
 	}
 
 	public func isPending(_ attachment: Attachment) -> Bool {
-		pendingSet.contains(attachment)
+		pendingSet.contains(key(for: attachment))
 	}
 
 	public var activeCount: Int {
@@ -204,95 +178,76 @@ public actor AttachmentFetcher {
 		pendingSet.count
 	}
 
-	// MARK: - Scheduling
-
 	public func promote(_ attachment: Attachment) {
-		guard pendingSet.contains(attachment) else { return }
-		var reordered = Deque<Attachment>(pendingQueue.count)
-		reordered.enqueue(attachment)
-		for candidate in pendingQueue where candidate != attachment {
+		let key = key(for: attachment)
+		attachmentsByKey[key] = attachment
+		promote(key)
+	}
+
+	private func promote(_ key: QueueKey) {
+		guard pendingSet.contains(key) else { return }
+		var reordered = Deque<QueueKey>(pendingQueue.count)
+		reordered.enqueue(key)
+		for candidate in pendingQueue where candidate != key {
 			reordered.enqueue(candidate)
 		}
 		pendingQueue = reordered
 
-		if let current = taskPriorities[attachment], current < .userInitiated {
-			taskPriorities[attachment] = .userInitiated
+		if let current = taskPriorities[key], current < .userInitiated {
+			taskPriorities[key] = .userInitiated
 		}
 		scheduleIfNeeded()
 	}
 
-	private func startTask(for attachment: Attachment) {
-		guard tasks[attachment] == nil else { return }
-
-		let task = createTask(
-			for: attachment,
-			priority: taskPriorities[attachment] ?? .background
-		)
-		tasks[attachment] = task
-
-			if let continuations = waiters.removeValue(forKey: attachment)?.values {
-				for cont in continuations {
-					Task {
-						let result = await task.result
-						switch result {
-					case let .success(value):
-						cont.resume(returning: value)
-					case let .failure(error):
-						cont.resume(throwing: error)
-					}
-				}
-			}
+	private func startTask(for key: QueueKey) {
+		guard tasks[key] == nil else { return }
+		guard let attachment = attachmentsByKey[key] else {
+			clearKeyState(key)
+			return
 		}
+
+		let priority = taskPriorities[key] ?? .background
+		tasks[key] = createTask(for: key, attachment: attachment, priority: priority)
 	}
 
-	private func createTask(for attachment: Attachment,
-	                        priority: TaskPriority) -> Task<AttachmentData, Error>
-	{
-		Task(priority: priority) {
+	private func createTask(
+		for key: QueueKey,
+		attachment: Attachment,
+		priority: TaskPriority
+	) -> Task<AttachmentData, Error> {
+		Task(priority: priority) { [api] in
 			do {
 				let data = try await api.fetchAttachmentData(for: attachment)
-				finalizeFetch(
-					attachment: attachment,
-					result: .success(data)
-				)
+				self.finalizeFetch(key: key, result: .success(data))
 				return data
 			} catch {
-				finalizeFetch(
-					attachment: attachment,
-					result: .failure(error)
-				)
+				self.finalizeFetch(key: key, result: .failure(error))
 				throw error
 			}
 		}
 	}
 
 	private func scheduleIfNeeded() {
-		while hasCapacity, !pendingSet.isEmpty {
-			guard let next = popPending() else { break }
-			if tasks[next] == nil {
-				startTask(for: next)
-			}
+		while hasCapacity, let next = popPending() {
+			startTask(for: next)
 		}
 	}
 
-	// MARK: - Waiting / Timeout
+	private func waitForPending(key: QueueKey, timeout: Duration?) async throws -> AttachmentData {
+		if let task = tasks[key] {
+			return try await awaitWithOptionalTimeout(task: task, timeout: timeout)
+		}
 
-	private func waitForPending(attachment: Attachment,
-	                            timeout: Duration?) async throws -> AttachmentData
-	{
-		if let task = tasks[attachment] {
-			return try await awaitWithOptionalTimeout(
-				task: task,
-				timeout: timeout
-			)
+		guard pendingSet.contains(key) else {
+			throw CancellationError()
 		}
 
 		guard let timeout else {
-			return try await waitForPendingWithoutTimeout(attachment: attachment)
+			return try await waitForPendingWithoutTimeout(key: key)
 		}
 
 		return try await withThrowingTaskGroup(of: AttachmentData.self) { group in
-			group.addTask { try await self.waitForPendingWithoutTimeout(attachment: attachment) }
+			group.addTask { try await self.waitForPendingWithoutTimeout(key: key) }
 			group.addTask {
 				try await Task.sleep(for: timeout)
 				throw TimeoutError()
@@ -306,22 +261,24 @@ public actor AttachmentFetcher {
 		}
 	}
 
-	private func waitForPendingWithoutTimeout(attachment: Attachment) async throws -> AttachmentData {
+	private func waitForPendingWithoutTimeout(key: QueueKey) async throws -> AttachmentData {
 		let waiterID = UUID()
 		return try await withTaskCancellationHandler {
 			try await withCheckedThrowingContinuation { continuation in
-				waiters[attachment, default: [:]][waiterID] = continuation
+				waiters[key, default: [:]][waiterID] = continuation
+				scheduleIfNeeded()
 			}
 		} onCancel: {
-			Task { [weak self] in
-				await self?.cancelWaiter(attachment: attachment, waiterID: waiterID)
+			Task {
+				await self.cancelWaiter(key: key, waiterID: waiterID)
 			}
 		}
 	}
 
-	private func awaitWithOptionalTimeout(task: Task<AttachmentData, Error>,
-	                                      timeout: Duration?) async throws -> AttachmentData
-	{
+	private func awaitWithOptionalTimeout(
+		task: Task<AttachmentData, Error>,
+		timeout: Duration?
+	) async throws -> AttachmentData {
 		guard let timeout else {
 			return try await task.value
 		}
@@ -341,24 +298,24 @@ public actor AttachmentFetcher {
 		}
 	}
 
-	private func cancelWaiter(attachment: Attachment, waiterID: UUID) {
-		guard var attachmentWaiters = waiters[attachment] else { return }
+	private func cancelWaiter(key: QueueKey, waiterID: UUID) {
+		guard var attachmentWaiters = waiters[key] else { return }
 		guard let continuation = attachmentWaiters.removeValue(forKey: waiterID) else { return }
 		if attachmentWaiters.isEmpty {
-			waiters[attachment] = nil
+			waiters[key] = nil
 		} else {
-			waiters[attachment] = attachmentWaiters
+			waiters[key] = attachmentWaiters
 		}
 		continuation.resume(throwing: CancellationError())
 	}
 
-	private func enqueuePending(_ attachment: Attachment) {
-		guard !pendingSet.contains(attachment) else { return }
-		pendingSet.insert(attachment)
-		pendingQueue.enqueue(attachment)
+	private func enqueuePending(_ key: QueueKey) {
+		guard pendingSet.contains(key) == false else { return }
+		pendingSet.insert(key)
+		pendingQueue.enqueue(key)
 	}
 
-	private func popPending() -> Attachment? {
+	private func popPending() -> QueueKey? {
 		while let next = pendingQueue.dequeue() {
 			if pendingSet.remove(next) != nil {
 				return next
@@ -367,35 +324,76 @@ public actor AttachmentFetcher {
 		return nil
 	}
 
-	private func removePending(_ attachment: Attachment) {
-		guard pendingSet.remove(attachment) != nil else { return }
-		var rebuilt = Deque<Attachment>(pendingQueue.count)
+	private func removePending(_ key: QueueKey) {
+		guard pendingSet.remove(key) != nil else { return }
+		var rebuilt = Deque<QueueKey>(pendingQueue.count)
 		for candidate in pendingQueue where pendingSet.contains(candidate) {
 			rebuilt.enqueue(candidate)
 		}
 		pendingQueue = rebuilt
 	}
 
-	// MARK: - Completion
+	private func finalizeFetch(key: QueueKey, result: Result<AttachmentData, Error>) {
+		tasks[key] = nil
+		taskPriorities[key] = nil
 
-	private func finalizeFetch(attachment: Attachment,
-	                           result: Result<AttachmentData, Error>)
-	{
-		tasks.removeValue(forKey: attachment)
-		taskPriorities[attachment] = nil
+		if let continuations = waiters.removeValue(forKey: key)?.values {
+			for continuation in continuations {
+				switch result {
+				case .success(let data):
+					continuation.resume(returning: data)
+				case .failure(let error):
+					continuation.resume(throwing: error)
+				}
+			}
+		}
 
-		if let handlers = completions.removeValue(forKey: attachment) {
+		if let handlers = completions.removeValue(forKey: key) {
 			Task(priority: .utility) {
 				for handler in handlers {
 					handler(result)
 				}
 			}
 		}
+
 		scheduleIfNeeded()
 	}
-}
 
-// MARK: - Errors
+	private func cancel(_ key: QueueKey) {
+		removePending(key)
+		if let task = tasks.removeValue(forKey: key) {
+			task.cancel()
+		}
+		taskPriorities[key] = nil
+
+		if let continuations = waiters.removeValue(forKey: key)?.values {
+			for continuation in continuations {
+				continuation.resume(throwing: CancellationError())
+			}
+		}
+
+		if let handlers = completions.removeValue(forKey: key) {
+			let result: Result<AttachmentData, Error> = .failure(CancellationError())
+			Task(priority: .utility) {
+				for handler in handlers {
+					handler(result)
+				}
+			}
+		}
+
+		clearKeyState(key)
+		scheduleIfNeeded()
+	}
+
+	private func clearKeyState(_ key: QueueKey) {
+		attachmentsByKey[key] = nil
+		pendingSet.remove(key)
+	}
+
+	private func key(for attachment: Attachment) -> QueueKey {
+		.init(uid: attachment.uid)
+	}
+}
 
 public extension AttachmentFetcher {
 	struct TimeoutError: Error, LocalizedError {
@@ -405,12 +403,8 @@ public extension AttachmentFetcher {
 	}
 }
 
-// MARK: - Convenience APIs
-
 public extension AttachmentFetcher {
-	func prefetch(_ attachments: [Attachment],
-	              intent: FetchIntent = .prefetch)
-	{
+	func prefetch(_ attachments: [Attachment], intent: FetchIntent = .prefetch) {
 		for attachment in attachments {
 			prefetch(attachment, intent: intent)
 		}

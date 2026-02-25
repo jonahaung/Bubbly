@@ -36,9 +36,6 @@ let package = Package(
 				.product(name: "MediaPicker", package: "MediaPicker"),
 				.product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
 			],
-			exclude: [
-				"Recovered"
-			]
 		),
 		.testTarget(
 			name: "ConversationTests",

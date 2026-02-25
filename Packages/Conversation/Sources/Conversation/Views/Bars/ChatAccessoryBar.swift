@@ -12,7 +12,7 @@ struct ChatAccessoryBar: View {
 				Spacer()
 				if accessory == .scrollDownButton {
 					AsyncButton {
-						manager.resetDatasource()
+						manager.handleScrollDownButtonTap()
 					} label: {
 						Image(systemName: "chevron.down")
 							.resizable()

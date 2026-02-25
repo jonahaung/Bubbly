@@ -11,7 +11,7 @@ public enum ContactRepo {
 	}
 
 	@discardableResult
-	public static func getOrCreate(for uid: String, refetch: Bool) async throws -> Contact {
+	public static func getOrCreate(uid: String, refetch: Bool) async throws -> Contact {
 		let localValue = try await Store.shared.contactStore?.fetch(uid: uid)
 		if let localValue, !refetch {
 			return localValue
@@ -50,7 +50,7 @@ public enum ContactRepo {
 			for uid in memberIDs {
 				group.addTask {
 					try await ContactRepo.getOrCreate(
-						for: uid,
+						uid: uid,
 						refetch: refatch
 					)
 				}

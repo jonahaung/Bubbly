@@ -17,6 +17,7 @@ public final class MsgCellViewModel: ViewReloadable, @preconcurrency Identifiabl
 	public private(set) var layout = MsgCellLayout()
 	public var reloadID: Int = 0
 	public var animationTrigger: Int = 0
+	public let layoutValue: MsgLayoutValue
 
 	public var contentRenderKey: ContentRenderKey
 
@@ -29,6 +30,7 @@ public final class MsgCellViewModel: ViewReloadable, @preconcurrency Identifiabl
 			reactions: msg.reactions,
 			isVisible: false
 		)
+		layoutValue = msg.layoutValue()
 	}
 
 	public func update(with msg: Message) {

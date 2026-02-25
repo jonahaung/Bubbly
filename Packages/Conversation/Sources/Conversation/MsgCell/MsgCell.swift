@@ -5,6 +5,7 @@ import SwiftUI
 import XUI
 
 struct MsgCell: View {
+
 	let viewModel: MsgCellViewModel
 	@Environment(\.selectedMsg) private var selectedMsg
 
@@ -29,14 +30,20 @@ struct MsgCell: View {
 			if isSelected {
 				Header()
 			}
-			HStack(alignment: .bottom, spacing: 0) {
-				if !viewModel.isSender {
+			HStack(alignment: .lastTextBaseline, spacing: 0) {
+				if viewModel.isSender {
+					Spacer(minLength: viewModel.msg.attachments.count == 0 ? 50 : 100)
+				} else {
 					IncomingAccessory()
 				}
 				GestureAware {
 					Content(viewModel: viewModel, theme: theme)
 				}
-				OutgoingAccessory()
+				if viewModel.isSender {
+					OutgoingAccessory()
+				} else {
+					Spacer(minLength: viewModel.msg.attachments.count == 0 ? 50 : 100)
+				}
 			}
 			if isSelected {
 				Footer()

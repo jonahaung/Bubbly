@@ -4,23 +4,22 @@ import XUI
 public struct VScrollGeometry: Sendable, Hashable {
 	public let contentHeight: CGFloat
 	public let boundsHeight: CGFloat
-	public var offsetY: CGFloat
+	public let offsetY: CGFloat
 	public let topInset: CGFloat
 	public let bottomInset: CGFloat
 }
 
-public extension VScrollGeometry {
-	init(_ geometry: ScrollGeometry) {
+extension VScrollGeometry {
+	public init(_ geometry: ScrollGeometry) {
 		self.init(
-			contentHeight: geometry.contentSize.height.rounded(toPlaces: 1),
-			boundsHeight: geometry.bounds.height.rounded(toPlaces: 1),
-			offsetY: geometry.contentOffset.y.rounded(toPlaces: 1) + geometry.contentInsets.top.rounded(toPlaces: 1),
-			topInset: geometry.contentInsets.top.rounded(toPlaces: 1),
-			bottomInset: geometry.contentInsets.bottom.rounded(toPlaces: 1)
+			contentHeight: geometry.contentSize.height,
+			boundsHeight: geometry.bounds.height,
+			offsetY: geometry.contentOffset.y + geometry.contentInsets.top,
+			topInset: geometry.contentInsets.top,
+			bottomInset: geometry.contentInsets.bottom
 		)
 	}
-
-	static let empty = VScrollGeometry(
+	public static let empty = VScrollGeometry(
 		contentHeight: .zero,
 		boundsHeight: .zero,
 		offsetY: .zero,
@@ -29,15 +28,15 @@ public extension VScrollGeometry {
 	)
 }
 
-public extension VScrollGeometry {
-	var bottomMostOffset: CGFloat {
+extension VScrollGeometry {
+	public var bottomMostOffset: CGFloat {
 		contentHeight - boundsHeight
 	}
-	var scrolledPosition: ScrolledPosition {
-		if offsetY == 0 {
+	public var scrolledPosition: ScrolledPosition {
+		if offsetY.rounded() == 0 {
 			return .atTop
 		}
-		if offsetY+boundsHeight == contentHeight {
+		if (offsetY + boundsHeight).rounded() == contentHeight.rounded() {
 			return .atBottom
 		}
 		return .none

@@ -17,7 +17,7 @@ public struct SideEffectHandler: Sendable {
 		case .requireAuth:
 			break
 		case let .prepareForContactDetails(id: id):
-			let contact = try await ContactRepo.getOrCreate(for: id, refetch: false)
+			let contact = try await ContactRepo.getOrCreate(uid: id, refetch: false)
 			await Router.shared.pushToNav(NavPath.contactDetails(contact))
 		}
 	}

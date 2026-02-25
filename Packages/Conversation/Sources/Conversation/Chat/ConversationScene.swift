@@ -18,13 +18,13 @@ public struct ConversationScene: View {
 	}
 
 	public var body: some View {
-		ZStack(alignment: .center) {
+		ZStack(alignment: .bottom) {
 			ConversationSceneBackground(color: manager.conversation.theme.background.color)
 				.backgroundExtensionEffect()
 
-			if let frame = manager.scrollController.inputAccessoryFrame, frame.minX >= 0 {
-				MsgsScrollView(accessoryFrame: frame, manager: manager)
-					.safeAreaPadding(.bottom, frame.height)
+			if manager.layoutManager.config.boundsWidth > 0 {
+				MsgsScrollView(manager: manager)
+					.safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
 					.task {
 						manager.send(.onVisibilityChange(visibility: .visible))
 					}
@@ -36,15 +36,21 @@ public struct ConversationScene: View {
 				ChatAccessoryBar()
 				ComposeBar(composer: composer)
 					.onGeometryChange(for: CGRect.self) { geometry in
-						let frame = geometry.globalFrame
+						let frame = geometry.frame(in: .global)
 						let insets = geometry.safeAreaInsets
-						let uiInsets = UIEdgeInsets(top: 0, left: insets.leading, bottom: 0, right: insets.trailing)
+						let uiInsets = UIEdgeInsets(
+							top: 0,
+							left: insets.leading,
+							bottom: 0,
+							right: insets.trailing
+						)
 						return frame.inset(by: uiInsets)
 					} action: { oldValue, newValue in
 						guard oldValue != newValue else { return }
+						manager.layoutManager.config.boundsWidth = newValue.width
 						manager.send(.onBottomBarFrameChage(oldValue, newValue))
 					}
-			}
+			}.layoutPriority(1)
 
 			if let frame = manager.presentation.overlayItem,
 			   let overlayViewModel = manager.models.element(withID: frame.id) {
@@ -73,27 +79,24 @@ public struct ConversationScene: View {
 
 private extension ConversationScene {
 	func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
-//		Task { @MainActor in
-//
-//			do {
-//				switch action {
-//				case let .onTapMsg(uid):
-//					await viewModel.send(.tapMessage(uid))
-//				case let .onTapAvatar(id):
-//					await viewModel.send(.tapAvatar(id))
-//				case let .onMarkMsg(data):
-//					await viewModel.send(.markMessage(data))
-//				case let .onFocusMsgBubble(item):
-//					await viewModel.send(.focusMsgBubble(item))
-//				case let .onUploadedAttachments(msg):
-//					await viewModel.send(.uploadedAttachments(msg))
-//				case let .onReact(msg, reaction):
-//					await viewModel.send(.react(msg, reaction))
-//				}
-//			} catch {
-//				// Handle message interaction errors gracefully
-//				print("Error handling message interaction: \(error)")
-//			}
-//		}
+		switch action {
+		case .onTapMsg(let string):
+			manager.setSelectedMsg(string)
+		case .onMarkMsg(let message):
+			break
+		case .onTapAvatar(let string):
+			
+			Task {
+				if let contact = try? await ContactRepo.getOrCreate(uid: string, refetch: false) {
+					Router.shared.pushToNav(.contactDetails(contact))
+				}
+			}
+		case .onFocusMsgBubble(let frame):
+			manager.presentation.updateFocusedFrame(frame)
+		case .onUploadedAttachments(let message):
+			break
+		case .onReact(let message, let reactionType):
+			break
+		}
 	}
 }

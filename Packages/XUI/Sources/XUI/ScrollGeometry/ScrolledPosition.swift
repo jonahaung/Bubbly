@@ -97,7 +97,7 @@ public struct ScrollPositionItem: Hashable, Sendable {
 	}
 }
 
-public enum ScrolledPosition: Hashable {
+public enum ScrolledPosition: Sendable, Hashable {
 	case none
 	case atBottom
 	case atTop

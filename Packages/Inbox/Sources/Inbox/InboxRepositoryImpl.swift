@@ -42,7 +42,7 @@ struct InboxRepositoryImpl: InboxRepository {
 				if let msg = try await ConversationRepo.lastMsg(conID: conversation.uid) {
 					let sender: any ContactRepresentableSendable =
 						if msg.receiptType == .receive {
-							try await ContactRepo.getOrCreate(for: msg.senderID, refetch: false)
+							try await ContactRepo.getOrCreate(uid: msg.senderID, refetch: false)
 						} else {
 							currentUser
 						}

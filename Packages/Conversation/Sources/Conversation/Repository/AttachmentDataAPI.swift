@@ -1,189 +1,203 @@
 import Database
-import LinkPresentation
+import Foundation
 import Services
 import UIKit
-import UniformTypeIdentifiers
 import XUI
 
 actor AttachmentDataAPI {
 	enum AttachmentError: LocalizedError {
 		case missingFileURL
-		case missingImageID
 		case invalidURL(String)
-		case imageDecodingFailed
-		case thumbnailCreationFailed
-		case fileWriteFailed(Error)
 		case invalidAttachmentState(AttachMentType)
-		case missingLinkImage
+		case imageDecodingFailed
+		case badResponse(Int)
 
-		var errorDescription: String {
+		var errorDescription: String? {
 			switch self {
-			case .missingImageID:
-				"Message is missing image ID"
-			case let .invalidURL(urlString):
-				"Invalid URL: \(urlString)"
-			case .imageDecodingFailed:
-				"Failed to decode image data"
-			case .thumbnailCreationFailed:
-				"Failed to create thumbnail"
-			case let .fileWriteFailed(error):
-				"Failed to write file: \(error.localizedDescription)"
-			case let .invalidAttachmentState(type):
-				"Invalid attachment state: \(type)"
-			case .missingLinkImage:
-				"Link preview image is missing"
 			case .missingFileURL:
 				"File URL is missing"
+			case .invalidURL(let urlString):
+				"Invalid URL: \(urlString)"
+			case .invalidAttachmentState(let type):
+				"Invalid attachment state: \(type)"
+			case .imageDecodingFailed:
+				"Failed to decode image data"
+			case .badResponse(let statusCode):
+				"Invalid server response: \(statusCode)"
 			}
 		}
 	}
 
 	private let mediaManager: MediaManager
 	private let urlSession: URLSession
-	private let swiftLinkPreview = SwiftLinkPreview()
+	private let swiftLinkPreview: SwiftLinkPreview
 
-	init(mediaManager: MediaManager = .shared, urlSession: URLSession = .shared) {
+	init(
+		mediaManager: MediaManager = .shared,
+		urlSession: URLSession = .shared,
+		swiftLinkPreview: SwiftLinkPreview = SwiftLinkPreview()
+	) {
 		self.mediaManager = mediaManager
 		self.urlSession = urlSession
+		self.swiftLinkPreview = swiftLinkPreview
 	}
 
 	func fetchAttachmentData(for attachment: Attachment) async throws -> AttachmentData {
-		if let cachedData = try await cachedData(for: attachment) {
-			return cachedData
-		}
-		return try await fetchDataAndCache(attachment)
-	}
-}
-
-// MARK: - Private Implementation
-
-private extension AttachmentDataAPI {
-	// MARK: - Cached Image Handling
-
-	func cachedData(for attachment: Attachment) async throws -> AttachmentData? {
 		switch attachment.attachmentType {
 		case .image:
-			if attachment
-				.fileExist(), let image = attachment
-				.thumbnailImage()
-			{
-				return .image(thumbnail: image)
+			if let cached = cachedImageThumbnail(for: attachment) {
+				return cached
 			}
-			return nil
-		case .link:
-			if attachment
-				.fileExist(), let image = attachment
-				.image()
-			{
-				return .link(thumbnail: image)
-			}
-			return nil
-		case .video:
-			if attachment
-				.fileExist(), let url = URL(string: attachment.url), let image = attachment
-				.thumbnailImage()
-			{
-				return .video(videoURL: url, thumbnail: image)
-			}
-			return nil
-			case .imageUploading:
-				if attachment
-					.fileExist(), let url = attachment.file()?.url, let image = attachment
-					.thumbnailImage()
-				{
-					return .imageUpload(localURL: url, thumbnail: image)
-				}
-				return nil
-			case .videoUploading:
-				throw AttachmentError.invalidAttachmentState(.videoUploading)
-			}
-		}
-
-	// MARK: - Attachment Processing
-
-	@concurrent
-	func fetchDataAndCache(_ attachment: Attachment) async throws -> AttachmentData {
-		switch attachment.attachmentType {
-		case .image:
 			return try await processImageAttachment(attachment)
-		case .imageUploading, .videoUploading:
-			throw AttachmentError.invalidAttachmentState(attachment.attachmentType)
+		case .imageUploading:
+			if let cached = cachedUploadingImage(for: attachment) {
+				return cached
+			}
+			throw AttachmentError.invalidAttachmentState(.imageUploading)
 		case .video:
+			if let cached = cachedVideo(for: attachment) {
+				return cached
+			}
 			return try await processVideoAttachment(attachment)
+		case .videoUploading:
+			throw AttachmentError.invalidAttachmentState(.videoUploading)
 		case .link:
+			if let cached = cachedLink(for: attachment) {
+				return cached
+			}
 			return try await processLinkAttachment(attachment)
 		}
 	}
 
-	func processVideoAttachment(_ attachment: Attachment) async throws -> AttachmentData {
-		guard let url = URL(string: attachment.url) else {
-			throw AttachmentError.invalidURL(attachment.url)
+	private func cachedImageThumbnail(for attachment: Attachment) -> AttachmentData? {
+		guard attachment.fileExist(), let thumbnail = attachment.thumbnailImage() else {
+			return nil
 		}
-		let image = try await VideoFactory.generateVideoThumbnail(from: url)
-		let thumbnail = try await saveImage(image, for: attachment)
-		guard let url = attachment.localURL() else {
-			throw AttachmentError.missingFileURL
-		}
-		return .video(videoURL: url, thumbnail: thumbnail)
-	}
-
-	// MARK: - Image Attachment
-
-	func processImageAttachment(_ attachment: Attachment) async throws -> AttachmentData {
-		let image = try await fetchImage(from: attachment.url)
-		let thumbnail = try await saveImage(image, for: attachment)
 		return .image(thumbnail: thumbnail)
 	}
 
-	func processLinkAttachment(_ attachment: Attachment) async throws -> AttachmentData {
+	private func cachedUploadingImage(for attachment: Attachment) -> AttachmentData? {
+		guard
+			attachment.fileExist(),
+			let localURL = attachment.file()?.url,
+			let thumbnail = attachment.thumbnailImage()
+		else {
+			return nil
+		}
+		return .imageUpload(localURL: localURL, thumbnail: thumbnail)
+	}
+
+	private func cachedVideo(for attachment: Attachment) -> AttachmentData? {
+		guard let thumbnail = attachment.thumbnailImage() else {
+			return nil
+		}
+
+		if attachment.fileExist(), let localURL = attachment.localURL() {
+			return .video(videoURL: localURL, thumbnail: thumbnail)
+		}
+
+		guard let remoteURL = URL(string: attachment.url) else {
+			return nil
+		}
+		return .video(videoURL: remoteURL, thumbnail: thumbnail)
+	}
+
+	private func cachedLink(for attachment: Attachment) -> AttachmentData? {
+		guard attachment.fileExist(), let image = attachment.image() else {
+			return nil
+		}
+		return .link(thumbnail: image)
+	}
+
+	private func processImageAttachment(_ attachment: Attachment) async throws -> AttachmentData {
+		let image = try await fetchImage(from: attachment.url)
+		let thumbnail = try await persistImageAndThumbnail(image, for: attachment)
+		return .image(thumbnail: thumbnail)
+	}
+
+	private func processVideoAttachment(_ attachment: Attachment) async throws -> AttachmentData {
+		guard let remoteURL = URL(string: attachment.url) else {
+			throw AttachmentError.invalidURL(attachment.url)
+		}
+		let thumbnail = try await VideoFactory.generateVideoThumbnail(from: remoteURL)
+		let persistedThumbnail = try await persistThumbnailOnly(thumbnail, for: attachment)
+		if attachment.fileExist(), let localURL = attachment.localURL() {
+			return .video(videoURL: localURL, thumbnail: persistedThumbnail)
+		}
+		return .video(videoURL: remoteURL, thumbnail: persistedThumbnail)
+	}
+
+	private func processLinkAttachment(_ attachment: Attachment) async throws -> AttachmentData {
 		let image: UIImage
 		if let thumbnailURLString = attachment.thumbnailUrl {
 			image = try await fetchImage(from: thumbnailURLString)
 		} else {
 			let linkData = try await swiftLinkPreview.preview(attachment.url)
-			let imageURL = linkData.imageURL
-
-			if let imageURL {
+			if let imageURL = linkData.imageURL {
 				image = try await fetchImage(from: imageURL.absoluteString)
 			} else {
 				image = UIImage(systemSymbol: .photoOnRectangleAngled)
 			}
 		}
-		try await saveImage(image, for: attachment)
+		try await persistImageOnly(image, for: attachment)
 		return .link(thumbnail: image)
 	}
 
-	func fetchImage(from urlString: String) async throws -> UIImage {
+	private func fetchImage(from urlString: String) async throws -> UIImage {
 		guard let url = URL(string: urlString) else {
 			throw AttachmentError.invalidURL(urlString)
 		}
-		let (data, response) = try await urlSession.data(from: url)
-		guard let httpResponse = response as? HTTPURLResponse,
-		      (200 ... 299).contains(httpResponse.statusCode)
-		else {
+
+		var request = URLRequest(url: url)
+		request.timeoutInterval = 30
+		let (data, response) = try await urlSession.data(for: request)
+
+		guard let http = response as? HTTPURLResponse else {
 			throw URLError(.badServerResponse)
 		}
+		guard (200 ... 299).contains(http.statusCode) else {
+			throw AttachmentError.badResponse(http.statusCode)
+		}
+		if let mimeType = http.mimeType, mimeType.hasPrefix("image/") == false {
+			throw URLError(.cannotDecodeContentData)
+		}
+
 		guard let image = UIImage(data: data) else {
 			throw AttachmentError.imageDecodingFailed
 		}
 		return image
 	}
 
-	// MARK: - File Operations
-
 	@discardableResult
-	func saveImage(_ uiImage: UIImage, for attachment: Attachment) async throws -> UIImage {
-		let data = try mediaManager.createData(from: uiImage)
-		let thumbnailData = try await mediaManager.createThumbnail(from: uiImage)
+	private func persistImageAndThumbnail(
+		_ image: UIImage,
+		for attachment: Attachment
+	) async throws -> UIImage {
+		let originalData = try mediaManager.createData(from: image)
+		let thumbnailData = try await mediaManager.createThumbnail(from: image)
 		guard let thumbnail = UIImage(data: thumbnailData) else {
 			throw AttachmentError.imageDecodingFailed
 		}
-		if attachment.fileExist() == false {
-			try attachment.file()?.write(data)
-			try attachment.thumbnailFile()?.write(thumbnailData)
-		} else {
-			log("existed")
+		try attachment.file()?.write(originalData)
+		try attachment.thumbnailFile()?.write(thumbnailData)
+		return thumbnail
+	}
+
+	private func persistImageOnly(_ image: UIImage, for attachment: Attachment) async throws {
+		let originalData = try mediaManager.createData(from: image)
+		try attachment.file()?.write(originalData)
+	}
+
+	@discardableResult
+	private func persistThumbnailOnly(
+		_ image: UIImage,
+		for attachment: Attachment
+	) async throws -> UIImage {
+		let thumbnailData = try await mediaManager.createThumbnail(from: image)
+		guard let thumbnail = UIImage(data: thumbnailData) else {
+			throw AttachmentError.imageDecodingFailed
 		}
+		try attachment.thumbnailFile()?.write(thumbnailData)
 		return thumbnail
 	}
 }

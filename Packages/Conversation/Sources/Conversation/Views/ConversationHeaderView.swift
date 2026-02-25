@@ -29,7 +29,7 @@ struct ConversationHeaderView: View {
 		.id(Self.typeName)
 		.layoutValue(
 			key: MsgLayoutValueKey.self,
-			value: .init(uid: manager.conversation.uid, recipient: .assistant, attachmentsCount: 0)
+			value: .init(uid: manager.conversation.uid)
 		)
 	}
 }

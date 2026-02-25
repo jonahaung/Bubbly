@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor
-public protocol ViewReloadable: AnyObject, Sendable {
+public protocol ViewReloadable: AnyObject {
 	var reloadID: Int { get set }
 	func layoutIfNeeded()
 }

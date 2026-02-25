@@ -10,29 +10,28 @@ extension MsgCell {
 		@Environment(\.sharedNamespace) private var namespace
 
 		var body: some View {
-			if viewModel.isSender {
-				VStack(alignment: .leading, spacing: 1) {
-					let seenMembers = seenMembers()
-					if !seenMembers.isEmpty {
-						ForEach(seenMembers) { seenMember in
-							if let contact = ContactsRepository.shared.contact(
-								for: seenMember.uid
-							) {
-								ProfilePhoto(
-									contact,
-									size: .custom(ChatLayoutConstants.Cell.defaultSpacing - 6)
-								)
-//								.matchedGeometryEffect(
-//									id: contact.uid,
-//									in: namespace.unsafelyUnwrapped.value,
-//									isSource: true
-//								)
-							}
+			VStack(alignment: .leading, spacing: 1) {
+				let seenMembers = seenMembers()
+				if !seenMembers.isEmpty {
+					ForEach(seenMembers) { seenMember in
+						if let contact = ContactsRepository.shared.contact(
+							for: seenMember.uid
+						) {
+							ProfilePhoto(
+								contact,
+								size: .custom(ChatLayoutConstants.Cell.defaultSpacing - 6)
+							)
+							//								.matchedGeometryEffect(
+							//									id: contact.uid,
+							//									in: namespace.unsafelyUnwrapped.value,
+							//									isSource: true
+							//								)
 						}
 					}
 				}
-				.frame(width: ChatLayoutConstants.Cell.defaultSpacing - 4)
 			}
+			.frame(width: ChatLayoutConstants.Cell.defaultSpacing - 4)
+			
 		}
 
 		private func seenMembers() -> [SeenMember] {
