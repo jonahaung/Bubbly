@@ -34,7 +34,7 @@ struct ChatTitleBar: View {
 					)
 			}
 			.onTapGesture {
-
+				Router.shared.pushToNav(.conversationDetails(manager.conversation))
 			}
 			HStack(alignment: .top) {
 				AsyncButton {
@@ -59,5 +59,6 @@ struct ChatTitleBar: View {
 			.padding(.bottom, 8)
 		}
 		.background(theme.backgroundColor)
+		.equatable(by: manager.conversation)
 	}
 }

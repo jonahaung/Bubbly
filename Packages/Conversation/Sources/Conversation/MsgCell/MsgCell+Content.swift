@@ -63,7 +63,8 @@ extension MsgCell {
 					if let text = viewModel.msg.text, !text.isWhitespace {
 						SingleSubviewLayout {
 							TextContent(text: text)
-						}
+						}.padding(8)
+							.background(theme.secondaryColor)
 					}
 				}
 			} else if let text = viewModel.msg.text {

@@ -6,6 +6,7 @@ import XUI
 
 struct MsgsScrollView: View {
 	@Environment(\.selectedMsg) private var selectedMsg
+	@Environment(\.sharedNamespace) private var namespace
 	var manager: ChatViewManager
 	var body: some View {
 		ScrollView(.vertical, showsIndicators: true) {
@@ -23,11 +24,11 @@ struct MsgsScrollView: View {
 						)
 				}
 			}
-			.animation(.interactiveSpring, value: manager.animationSignature)
 			.scrollTargetLayout()
 		}
 		.frame(width: manager.layoutManager.config.boundsWidth)
 		.tint(Color.link.mix(with: Color.accentColor, by: 0.3))
+		.animation(.interactiveSpring, value: manager.state.selectedMsgID)
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.send(.onScrollPhaseChange(oldPhase, newPhase, context: context))
 		}
@@ -42,8 +43,13 @@ struct MsgsScrollView: View {
 		}
 		.scrollTargetBehavior(VelocityAwareChatScrollBehavior())
 		.scrollDismissesKeyboard(.never)
-		.defaultScrollAnchor(manager.scrollController.state.phase == .idle ? .bottom : .top)
-		.equatable(by: manager.layoutSignature)
+
+		.defaultScrollAnchor(.bottom, for: .initialOffset)
+		.equatable(by: manager.state)
+		.defaultScrollAnchor(
+			manager.presentation.bottomAccessory == .scrollDownButton ? .top : .bottom,
+			for: .sizeChanges
+		)
 		.scrollPosition(manager.scrollController.scrollPosition, anchor: .none)
 	}
 }
@@ -59,8 +65,8 @@ struct VelocityAwareChatScrollBehavior: ScrollTargetBehavior {
 
 		guard horizontal || vertical else { return }
 
-		let dx = abs(context.originalTarget.rect.minX - target.rect.minX)
-		let dy = abs(context.originalTarget.rect.minY - target.rect.minY)
+		_ = abs(context.originalTarget.rect.minX - target.rect.minX)
+		_ = abs(context.originalTarget.rect.minY - target.rect.minY)
 		
 //
 //		let isHorizontal = horizontal && dx > dy

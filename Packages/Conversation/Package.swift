@@ -36,6 +36,9 @@ let package = Package(
 				.product(name: "MediaPicker", package: "MediaPicker"),
 				.product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
 			],
+			resources: [
+				.process("Resources")
+			]
 		),
 		.testTarget(
 			name: "ConversationTests",

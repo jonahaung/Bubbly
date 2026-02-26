@@ -22,27 +22,8 @@ struct ScrollReducer {
 				newValue: newValue,
 				canLoadOlder: canLoadOlder,
 				canLoadNewer: canLoadNewer)
-		case let .onScrollPhaseChange(oldValue, newValue, _):
-			switch newValue {
-			case .idle:
-				if state.updateState.isUpdating {
-					return .noAction
-				}
-				return .finalizeScrollViewUpdates
-			case .tracking:
-				return .noAction
-			case .interacting:
-				return .removePendingUpdates
-			case .decelerating:
-				if oldValue == .interacting, state.direction == .top && state.isFirstResponder {
-					Task { @MainActor in
-						UIApplication.shared.endEditing()
-					}
-				}
-				return .noAction
-			case .animating:
-				return .noAction
-			}
+		case .onScrollPhaseChange:
+			return .noAction
 		case .onScrollTargetVisibilityChange:
 			return .noAction
 		case let .onBottomBarFrameChage(oldValue, newValue):
@@ -62,7 +43,7 @@ private extension ScrollReducer {
 			return .noAction
 		}
 		
-		if state.updateState.isUpdating && newValue.contentHeight != oldValue.contentHeight {
+		if state.updateState.isUpdating, oldValue.contentHeight != newValue.contentHeight {
 			return handleUpdating(state: &state, oldValue: oldValue, newValue: newValue)
 		}
 
@@ -111,19 +92,14 @@ private extension ScrollReducer {
 		case .notUpdating:
 			break
 		case .resetting:
-			state.updateState.update(to: .notUpdating)
-			if state.phase.isScrolling {
-				return .scroll(item: .edge(.bottom))
-			}
-			return .scroll(item: .snapToBottom())
+			return .endUpdate(.reseting, scrollItem: .snapToBottom())
 		case let .insertingItems(edge):
 			guard difference != 0 else {
 				return .noAction
 			}
 			switch edge {
 			case .top:
-
-				let offsetY = newValue.offsetY + difference
+				let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
 				return .endUpdate(.insertItems(edge: .top), scrollItem: .y(offsetY))
 			case .bottom:
 				return .endUpdate(.insertItems(edge: .bottom), scrollItem: nil)
@@ -133,11 +109,14 @@ private extension ScrollReducer {
 			case .top:
 				return .noAction
 			case .bottom:
-				return .endUpdate(.removeItems(edge: .bottom), scrollItem: .y(newValue.offsetY))
+				return .endUpdate(
+					.removeItems(edge: .bottom),
+					scrollItem: .y(newValue.offsetY + (newValue.offsetY - oldValue.offsetY))
+				)
 			}
-		case .appendingItem:
+		case .appendingItem(_):
 			state.updateState.update(to: .notUpdating)
-			return .scroll(item: .y(newValue.bottomMostOffset, animation: .interactiveSpring))
+			return .scroll(item: .y(newValue.bottomMostOffset, animation: .snappy))
 		}
 		return .noAction
 	}

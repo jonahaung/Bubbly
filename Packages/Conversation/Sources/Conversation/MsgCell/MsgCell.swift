@@ -49,6 +49,7 @@ struct MsgCell: View {
 				Footer()
 			}
 		}
+		.fixedSize(horizontal: false, vertical: true)
 		.equatable(by: viewModel.reloadID)
 		.environment(\.viewIsVisible, viewModel.isVisible)
 	}

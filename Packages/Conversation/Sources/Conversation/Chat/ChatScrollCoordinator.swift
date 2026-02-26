@@ -2,12 +2,14 @@ import Combine
 import Core
 import Database
 import ImageLoader
+import OSLog
 import Services
 import SwiftUI
 import XUI
+import os.signpost
 
 @MainActor
-protocol ChatScrollCoordinatorDelegate: Sendable, AnyObject {
+protocol ChatScrollCoordinatorDelegate: AnyObject {
 	func scrollCoordinator(
 		_ coordinator: ChatScrollCoordinator,
 		shouldPaginateAt edge: VerticalEdge
@@ -22,28 +24,22 @@ protocol ChatScrollCoordinatorDelegate: Sendable, AnyObject {
 	)
 	func scrollCoordinator(
 		_ coordinator: ChatScrollCoordinator,
-		didFinalizeUpdateAt position: ScrolledPosition
+		didFinalizeUpdateAt state: ScrollState
 	)
+	func reloadData()
 }
 
 @MainActor
 @Observable
 final class ChatScrollCoordinator: ErrorPresenter {
-	let throttler = Throttler(interval: .seconds(0.5))
-	private var scrollTarget = ScrollPosition(edge: .bottom)
+
+	private var scrollTarget = ScrollPosition()
 	var scrollPosition: Binding<ScrollPosition> {
 		.init(
 			get: { [weak self] in
 				guard let self else { return .init() }
 				return self.scrollTarget
-			})
-		{ [weak self] newValue in
-			guard let self else { return }
-			if newValue.isPositionedByUser {
-			} else {
-				self.scrollTarget = .init()
-			}
-		}
+			}) { _ in }
 	}
 	var inputAccessoryFrame: CGRect?
 	@ObservationIgnored private var pendingScrollRequests = Deque<ScrollPositionItem>()
@@ -55,14 +51,7 @@ final class ChatScrollCoordinator: ErrorPresenter {
 	init() {
 		displayLink.onTargetReached = { [weak self] _ in
 			guard let self else { return }
-			switch state.phase {
-			case .idle:
-				finalizeScrollUpdates()
-			case .interacting:
-				Haptics.play(.light, 0.8)
-			default:
-				break
-			}
+			finalizeScrollUpdates()
 		}
 	}
 }
@@ -73,12 +62,13 @@ extension ChatScrollCoordinator {
 			.scrollCoordinator(
 				self,
 				shouldPaginateAt: .top
-			) == true
+			) == true && state.updateState.isNotUpdating
 	}
 
 	private var canLoadNewerMessages: Bool {
 		delegate?
 			.scrollCoordinator(self, shouldPaginateAt: .bottom) == true
+			&& state.updateState.isNotUpdating
 	}
 	func loadOlderMessagesIfNeeded() {
 		delegate?.scrollCoordinator(self, paginateAt: .top)
@@ -87,23 +77,28 @@ extension ChatScrollCoordinator {
 	private func loadNewerMessagesIfNeeded() {
 		delegate?.scrollCoordinator(self, paginateAt: .bottom)
 	}
+
+	private func onScrollDirectionChanged(_ newValue: VerticalDirection) {
+		print(newValue)
+	}
 }
 
 extension ChatScrollCoordinator {
 
 	func send(_ intent: ScrollViewIntent) {
-		prepare(intent)
-		let effect = reducer.reduce(
-			state: &state,
-			intent: intent,
-			canLoadOlder: canLoadOlderMessages,
-			canLoadNewer: canLoadNewerMessages
-		)
+		if prepare(intent) {
+			let effect = reducer.reduce(
+				state: &state,
+				intent: intent,
+				canLoadOlder: canLoadOlderMessages,
+				canLoadNewer: canLoadNewerMessages
+			)
 
-		perform(effect)
+			perform(effect)
+		}
 	}
 
-	private func prepare(_ intent: ScrollViewIntent) {
+	private func prepare(_ intent: ScrollViewIntent) -> Bool {
 		switch intent {
 		case .onVisibilityChange(let visibility):
 			switch visibility {
@@ -114,40 +109,72 @@ extension ChatScrollCoordinator {
 			case .hidden:
 				break
 			}
+			return false
 		case .onBottomBarFrameChage(let oldValue, let newValue):
 
-			guard newValue.origin.x >= 0 else { return }
+			guard newValue.origin.x >= 0 else { return false }
 			if inputAccessoryFrame == nil && newValue.maxX > 0 {
 				inputAccessoryFrame = newValue
-				return
+				return false
 			}
-			guard state.updateState.hasViewLoaded else { return }
+			guard state.updateState.hasViewLoaded else { return false }
 			if newValue.maxX != oldValue.maxX {
-				scrollTarget = .init()
 				inputAccessoryFrame = newValue
-				return
+				delegate?.reloadData()
+				return false
 			}
 			if newValue.height == oldValue.height && newValue.maxY != oldValue.maxY {
 				state.isFirstResponder = newValue.maxY < oldValue.maxY
 			}
-			guard state.updateState.isNotUpdating else { return }
-			guard newValue.maxY < oldValue.maxY else { return }
-			guard state.geometry.scrolledPosition != .atBottom else { return }
+			guard state.updateState.isNotUpdating else { return false }
+			guard newValue.maxY < oldValue.maxY else { return false }
+			guard state.geometry.scrolledPosition != .atBottom else { return false }
 			let targetY = state.geometry.offsetY + oldValue.maxY - newValue.maxY
 			if state.phase.isScrolling {
 				enqueueScroll(to: .y(targetY, animation: .interactiveSpring(duration: 0.2)))
 			} else {
 				scrollTarget.scrollTo(y: targetY)
 			}
+			return false
 		case .onScrollGeometryChange(let oldValue, let newValue):
 			state.geometry = newValue
-			state.direction = newValue.offsetY < oldValue.offsetY ? .top : .bottom
+			guard state.updateState.hasViewLoaded else { return false }
+			let direction: VerticalDirection = newValue.offsetY < oldValue.offsetY ? .up : .down
+			if state.direction != direction {
+				state.direction = direction
+				onScrollDirectionChanged(direction)
+			}
+			return true
 		case .onScrollPhaseChange(let oldValue, let newValue, let context):
-			displayLink.stop()
+			guard oldValue != newValue else { return false }
+
 			state.phase = newValue
+			switch newValue {
+			case .idle:
+				state.geometry = .init(context.geometry)
+				displayLink.start()
+			case .tracking:
+				break
+			case .interacting:
+				displayLink.stop()
+				if state.updateState.isUpdating {
+					pendingScrollRequests.removeAll()
+				}
+			case .decelerating:
+				if oldValue == .interacting, state.direction == .up && state.isFirstResponder {
+					Task { @MainActor in
+						UIApplication.shared.endEditing()
+					}
+				}
+			case .animating:
+				break
+			}
+
+			return false
 		case .onScrollTargetVisibilityChange(let newValue):
-			guard state.updateState.isNotUpdating else { return }
+			guard state.updateState.isNotUpdating else { return false }
 			state.visibleIDs = newValue
+			return false
 		}
 	}
 
@@ -155,7 +182,7 @@ extension ChatScrollCoordinator {
 		switch effect {
 		case .scroll(let item):
 			performScroll(to: item)
-		case let .begingUpdate(intent):
+		case .begingUpdate(let intent):
 			switch intent {
 			case .insertItems(let edge):
 				state.updateState.update(to: .insertingItems(edge))
@@ -168,14 +195,21 @@ extension ChatScrollCoordinator {
 			case .removeItems(let edge):
 				state.updateState.update(to: .removingItems(edge))
 				delegate?.scrollCoordinator(self, removeAt: edge)
+			case .reseting:
+				break
 			}
-		case let .endUpdate(intent, item):
+		case .endUpdate(let intent, let item):
 			if let item {
 				performScroll(to: item)
 			}
 			switch intent {
 			case .insertItems(let edge):
-				state.updateState.update(to: .notUpdating)
+				switch edge {
+				case .top:
+					state.updateState.update(to: .notUpdating)
+				case .bottom:
+					state.updateState.update(to: .notUpdating)
+				}
 			case .removeItems(let edge):
 				switch edge {
 				case .top:
@@ -184,6 +218,8 @@ extension ChatScrollCoordinator {
 					state.updateState.update(to: .insertingItems(.top))
 					loadOlderMessagesIfNeeded()
 				}
+			case .reseting:
+				state.updateState.update(to: .notUpdating)
 			}
 		case .finalizeScrollViewUpdates:
 			displayLink.start(0.5)
@@ -200,7 +236,7 @@ extension ChatScrollCoordinator {
 		let isEmpty = pendingScrollRequests.isEmpty
 		pendingScrollRequests.enqueue(newValue)
 		if isEmpty {
-			performPendingScrollIfNeeded()
+			displayLink.start(0.1)
 		}
 	}
 
@@ -210,14 +246,14 @@ extension ChatScrollCoordinator {
 		}
 		performScroll(to: newValue)
 	}
-
+	func forceScrollTo(to newValue: ScrollPositionItem) {
+		scroll(to: newValue)
+	}
 	func performScroll(to newValue: ScrollPositionItem) {
+
 		if let animation = newValue.animation {
 			let transaction = Transaction.withAnimation(animation) { [weak self] in
 				guard let self else { return }
-				guard state.updateState.isNotUpdating else {
-					return
-				}
 				displayLink.start(0.5)
 			}
 			withTransaction(transaction) {
@@ -228,9 +264,6 @@ extension ChatScrollCoordinator {
 				preservePosition: false
 			) { [weak self] in
 				guard let self else { return }
-				guard state.updateState.isNotUpdating else {
-					return
-				}
 				displayLink.start(0.5)
 			}
 			withTransaction(transaction) {
@@ -252,23 +285,24 @@ extension ChatScrollCoordinator {
 		case .snapToBottom:
 			let geometry = state.geometry
 			let offsetY = geometry.bottomMostOffset
-			let y = offsetY - geometry.boundsHeight / 2
-			if y > geometry.offsetY {
-				scrollTarget.scrollTo(y: y)
+			let y = offsetY - 200
+			if y > 0 {
+				scrollTarget = .init(y: y)
+				enqueueScroll(to: .y(offsetY, animation: .easeInOut))
+				return
 			}
 			enqueueScroll(to: .edge(.bottom, animation: .interpolatingSpring))
 		case .snapToY(let y):
 			let geometry = state.geometry
-			let halfViewport = geometry.boundsHeight * 0.5
+
 			let currentOffset = geometry.offsetY
 
-			let direction: CGFloat = y > currentOffset ? -1 : 1
-			let adjustedY = y + (direction * halfViewport)
+			let adjustedY = y - 200
 
-			let clampedY = max(0, min(adjustedY, geometry.bottomMostOffset))
-
-			scrollTarget.scrollTo(y: clampedY)
-			enqueueScroll(to: .y(clampedY, animation: .smooth))
+			if adjustedY > currentOffset && adjustedY < y {
+				scrollTarget.scrollTo(y: adjustedY)
+			}
+			enqueueScroll(to: .y(y, animation: .smooth))
 		}
 	}
 
@@ -277,10 +311,9 @@ extension ChatScrollCoordinator {
 			performPendingScrollIfNeeded()
 			return
 		}
-		delegate?.scrollCoordinator(self, didFinalizeUpdateAt: state.geometry.scrolledPosition)
+		delegate?.scrollCoordinator(self, didFinalizeUpdateAt: state)
 	}
 }
-
 
 //import Database
 //import Services

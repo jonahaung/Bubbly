@@ -9,5 +9,4 @@ public extension EnvironmentValues {
 	@Entry var conversation = Conversation.empty
 	@Entry var viewIsVisible = false
 	@Entry var selectedMsg: SelectedMsg?
-	@Entry var backgroundColor: Color = .systemBackground
 }

@@ -13,4 +13,5 @@ enum ScrollEffect: Hashable {
 enum ScrollUpdateIntent: Hashable {
 	case insertItems(edge: VerticalEdge)
 	case removeItems(edge: VerticalEdge)
+	case reseting
 }

@@ -33,7 +33,7 @@ public extension AppCoordinator {
 				GroupConversationSettingsScene(group)
 			}
 		case let .conversation(prefetchedData):
-			ConversationScene(prefetchedData)
+			ConversationScene(prefetchedData, coordinator: self)
 		case let .contactDetails(contact):
 			ContactDetailsScene(contact: contact)
 		case .currentUserDetails:

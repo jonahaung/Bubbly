@@ -12,7 +12,7 @@ struct MsgViewportWindowing {
 		}
 		let half = windowSize / 2
 		var lower = max(0, index - half)
-		var upper = min(totalCount, lower + windowSize)
+		let upper = min(totalCount, lower + windowSize)
 		if upper - lower < windowSize {
 			lower = max(0, upper - windowSize)
 		}

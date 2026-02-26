@@ -41,4 +41,13 @@ extension VScrollGeometry {
 		}
 		return .none
 	}
+
+	public func isNear(_ edge: VerticalEdge) -> Bool {
+		switch edge {
+		case .top:
+			offsetY < boundsHeight/2
+		case .bottom:
+			offsetY > (bottomMostOffset - (boundsHeight/2))
+		}
+	}
 }

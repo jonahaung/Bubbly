@@ -4,7 +4,7 @@ import SwiftUI
 import XUI
 
 struct MsgsScrollViewLayoutConfiguration {
-	let superTopSpace = CGFloat(50)
+	let superTopSpace = CGFloat(0)
 	let spacing: CGFloat
 	let contentInsets: EdgeInsets
 	var boundsWidth: CGFloat

@@ -2,25 +2,24 @@ import Database
 import SwiftUI
 import XUI
 
-public struct ConversationTheme: Sendable, Hashable, Equatable, EmptyRepresentable {
-	struct Theme {
+public struct ConversationTheme: Sendable, Equatable, EmptyRepresentable {
+	struct Theme: Equatable {
 		let bubbleCoor: Color
 		let shadowColor: Color
 		let foregroundStyle: Color
 	}
-
-	let theme: Database.ConversationTheme
 	let outgoing: Theme
 	let incoming: Theme
 	let backgroundColor: Color
 	let bubbleCornerRadius: CGFloat
 	let bubblePading: EdgeInsets
 	let font: Font
+	let secondaryColor: Color
 
 	public init(_ conversation: Conversation) {
 		let theme = conversation.properties.theme
 		backgroundColor = theme.background.color
-
+		secondaryColor = BubbleColor.allCases.random().value
 		outgoing = .init(
 			bubbleCoor: theme.outgoingBubbleColor,
 			shadowColor: theme.outgoingBubbleColor.mix(with: .primary, by: 0.1),
@@ -42,17 +41,12 @@ public struct ConversationTheme: Sendable, Hashable, Equatable, EmptyRepresentab
 			trailing: horizontalPadding
 		)
 		bubbleCornerRadius = max(16, uiFont.lineHeight * 0.75)
-		self.theme = conversation.theme
 	}
 
 	public static let empty = ConversationTheme(.empty)
 
 	public static func == (lhs: ConversationTheme, rhs: ConversationTheme) -> Bool {
-		lhs.theme == rhs.theme
-	}
-
-	public func hash(into hasher: inout Hasher) {
-		hasher.combine(theme)
+		lhs.outgoing == rhs.outgoing && lhs.incoming == rhs.incoming && lhs.backgroundColor == rhs.backgroundColor && lhs.bubbleCornerRadius == rhs.bubbleCornerRadius && lhs.bubblePading == rhs.bubblePading && lhs.font == rhs.font
 	}
 
 	public func bubbleColor(for isSender: Bool) -> some ShapeStyle {

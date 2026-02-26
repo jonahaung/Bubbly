@@ -6,44 +6,37 @@ import Services
 import SwiftUI
 import XUI
 
+struct ChatViewState: Equatable {
+	var reloadID: Int
+	let selectedMsgID: String?
+	let boundsWidth: CGFloat
+	let conversation: Conversation
+}
+
 @MainActor
 @Observable
 final class ChatViewManager: ErrorPresenter, ViewReloadable {
 
-	struct LayoutSignature: Equatable {
-		var reloadID: Int
-		let selectedMsgID: String?
-		let boundsWidth: CGFloat
-	}
-	enum DatasourceMutation: Sendable {
-		case insert(Message)
-		case update(Message)
-		case remove(Message)
-	}
 	@ObservationIgnored let messageSource: ChatDatasource
 	@ObservationIgnored let scrollController: ChatScrollCoordinator
 	@ObservationIgnored var presentation: ChatPresentationState
 	@ObservationIgnored let conversationConfig: ConversationInitializer.Configuration
 	@ObservationIgnored let attachments = AttachmentFetcher.shared
 	@ObservationIgnored let layoutManager: MsgsScrollViewLayoutManager
-	@ObservationIgnored private let currentUserID: String
 	@ObservationIgnored let debouncer = Debouncer(interval: .seconds(1))
-	@ObservationIgnored var pendingDatasourceMutations: [DatasourceMutation] = []
-	@ObservationIgnored var datasourceFlushTask: Task<Void, Never>?
 	@ObservationIgnored var conversation: Conversation
 	@ObservationIgnored var models: MsgModels
 	@ObservationIgnored var reloadID: Int = 0
-	var layoutSignature: LayoutSignature {
-		.init(
-			reloadID: reloadID,
-			selectedMsgID: layoutManager.selectedMsg?.id,
-			boundsWidth: layoutManager
-				.config.boundsWidth)
-	}
-	@ObservationIgnored var animationSignature: String? {
-		layoutManager.selectedMsg?.id
-	}
+	var theme: ConversationTheme
+	var state: ChatViewState
+
 	init(_ data: ConversationInitializer.PrefetchedData) {
+		state = .init(
+			reloadID: 0,
+			selectedMsgID: nil,
+			boundsWidth: 0,
+			conversation: data.conversation
+		)
 		layoutManager = .init(
 			config: .init(
 				data.configuration.lineSpacing,
@@ -56,8 +49,8 @@ final class ChatViewManager: ErrorPresenter, ViewReloadable {
 		scrollController = .init()
 		presentation = .init(data.configuration)
 		conversation = data.conversation
-		currentUserID = currentUserId ?? ""
 		models = .init(data.msgs)
+		theme = .init(conversation)
 		scrollController.delegate = self
 		messageSource.delegate = self
 	}
@@ -65,10 +58,27 @@ final class ChatViewManager: ErrorPresenter, ViewReloadable {
 	deinit {
 		log("Deinit")
 	}
+
+	func layoutIfNeeded() {
+		reloadID += 1
+		state = .init(
+			reloadID: reloadID,
+			selectedMsgID: layoutManager.selectedMsg?.id,
+			boundsWidth: layoutManager.config.boundsWidth,
+			conversation: conversation
+		)
+	}
 }
 
 extension ChatViewManager: ChatScrollCoordinatorDelegate {
-	func scrollCoordinator(_ coordinator: ChatScrollCoordinator, shouldPaginateAt edge: VerticalEdge) -> Bool {
+	func reloadData() {
+		layoutIfNeeded()
+	}
+
+	func scrollCoordinator(
+		_ coordinator: ChatScrollCoordinator,
+		shouldPaginateAt edge: VerticalEdge
+	) -> Bool {
 		switch edge {
 		case .top:
 			canLoadOlderMessages
@@ -92,7 +102,10 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 			Task {
 				do {
 
-					let msgs = try await messageSource.loadPrevious(before: query, conID: oldestMessage.conID)
+					let msgs = try await messageSource.loadPrevious(
+						before: query,
+						conID: oldestMessage.conID
+					)
 					reloadData(with: msgs, forceReset: false)
 				} catch {
 					revertState()
@@ -107,7 +120,10 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 			let query = ServerTime(newestMessage.date).value
 			Task {
 				do {
-					let msgs = try await self.messageSource.loadMore(after: query, conID: newestMessage.conID)
+					let msgs = try await self.messageSource.loadMore(
+						after: query,
+						conID: newestMessage.conID
+					)
 					reloadData(with: msgs, forceReset: false)
 				} catch {
 					revertState()
@@ -144,7 +160,7 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 				models.retainOldest(trimCount)
 			}
 			layoutIfNeeded()
-			
+
 		}
 	}
 
@@ -165,12 +181,13 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 		let safeTrim = min(trimCount, max(0, models.count - pageSize))
 		guard safeTrim > 0 else { return false }
 
-		let removeRange: Range<Int> = switch edge {
-		case .top:
-			0 ..< safeTrim
-		case .bottom:
-			(models.count - safeTrim) ..< models.count
-		}
+		let removeRange: Range<Int> =
+			switch edge {
+			case .top:
+				0..<safeTrim
+			case .bottom:
+				(models.count - safeTrim)..<models.count
+			}
 
 		let visible = Set(scrollController.state.visibleIDs)
 		for index in removeRange {
@@ -180,7 +197,6 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 		}
 		return true
 	}
-
 
 	var newestMessage: Database.Message? {
 		models.last?.msg
@@ -203,16 +219,15 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 	}
 
 	var canResetDatasource: Bool {
-		canLoadNewerMessages
+		canLoadNewerMessages && scrollController.state.updateState.isNotUpdating
 	}
 
-	func resetDatasource() { 
+	func resetDatasource() {
 		guard canResetDatasource else {
 			return
 		}
-		scrollController.performScroll(to: .y(scrollController.state.geometry.offsetY))
+		scrollController.state.updateState = .resetting
 		Task {
-			scrollController.state.updateState = .resetting
 			do {
 				let msgs = try await messageSource.reset(conID: conversationConfig.conID)
 				reloadData(with: msgs, forceReset: true)
@@ -230,18 +245,21 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 		}
 	}
 
-	func scrollCoordinator(_: ChatScrollCoordinator,
-	                       didFinalizeUpdateAt position: ScrolledPosition)
-	{
-		presentation.bottomAccessory = position != .atBottom ? .scrollDownButton : nil
-		if position == .atBottom {
+	func scrollCoordinator(
+		_ coordinator: ChatScrollCoordinator,
+		didFinalizeUpdateAt state: ScrollState
+	) {
+		presentation.bottomAccessory =
+			state.geometry
+				.isNear(.bottom) ? nil : .scrollDownButton
+		if state.geometry.scrolledPosition == .atBottom {
 			resetDatasourceIfNeeded()
 		}
 	}
 
 	private func resetDatasourceIfNeeded() {
 		if scrollController.state.updateState.isNotUpdating, !canLoadNewerMessages,
-		   models.count > conversationConfig.pageSize + 5
+			models.count > conversationConfig.pageSize + 5
 		{
 			models.retainNewest(conversationConfig.pageSize)
 			layoutIfNeeded()
@@ -262,12 +280,12 @@ extension ChatViewManager {
 		let previousMsg = models[safe: index - 1]?.msg
 		let newValue: SelectedMsg? =
 			oldValue?.id == uid
-				? nil
-				: SelectedMsg(
-					id: uid,
-					previous: previousMsg?.uid,
-					next: nextMsg?.uid
-				)
+			? nil
+			: SelectedMsg(
+				id: uid,
+				previous: previousMsg?.uid,
+				next: nextMsg?.uid
+			)
 		if let oldValue {
 			models.element(withID: oldValue.id)?.layoutIfNeeded()
 		}
@@ -275,13 +293,14 @@ extension ChatViewManager {
 			models.element(withID: newValue.id)?.layoutIfNeeded()
 		}
 		layoutManager.updateSelectedMsg(newValue)
+		layoutIfNeeded()
 	}
 }
 
 extension ChatViewManager {
 	func send(_ intent: ScrollViewIntent) {
 
-		if case let .onScrollTargetVisibilityChange(ids) = intent {
+		if case .onScrollTargetVisibilityChange(let ids) = intent {
 			Task {
 				await debouncer.run { [weak self] in
 					guard let self else { return }
@@ -291,10 +310,10 @@ extension ChatViewManager {
 						let differences = ids.difference(from: oldIDs)
 						differences.forEach { change in
 							switch change {
-							case let .insert(_, element, _):
+							case .insert(_, let element, _):
 								self.models.didChangeVisibility(for: element, isVisible: true)
 								self.models.element(withID: element)?.setVisibility(true)
-							case let .remove(_, element, _):
+							case .remove(_, let element, _):
 								self.models.didChangeVisibility(for: element, isVisible: false)
 								self.models.element(withID: element)?.setVisibility(false)
 							}

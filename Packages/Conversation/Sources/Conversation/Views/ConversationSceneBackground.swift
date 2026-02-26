@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ConversationSceneBackground: View {
+struct ConversationSceneBackground: View, Equatable {
 	let color: Color
 
     var body: some View {
@@ -19,7 +19,7 @@ struct ConversationSceneBackground: View {
 						AngularGradient(colors: Color.adaptableGrayColors, center: .topLeading)
 					)
 			}
-			.compositingGroup()
+			.backgroundExtensionEffect()
 			.equatable(by: true)
     }
 }

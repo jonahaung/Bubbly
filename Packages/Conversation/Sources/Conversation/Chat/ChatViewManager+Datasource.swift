@@ -23,7 +23,29 @@ extension ChatViewManager: ChatDatasourceDelegate {
 	}
 
 	func datasource(didInsert msg: Message) async {
-		enqueueDatasourceMutation(.insert(msg))
+		if let existingModel = models.element(withID: msg.uid) {
+			existingModel.update(with: msg)
+		} else {
+			if scrollController.state.geometry.isNear(.bottom) {
+				scrollController.state.updateState.update(to: .appendingItem(msg.uid))
+			} else {
+				let toast = Toast(
+					node: Text(msg.displayText).opaqueView(),
+					allowsBackgroundTap: false
+				) {
+					if self.canResetDatasource {
+						self.resetDatasource()
+					} else {
+						self.scrollController
+							.performScroll(to: .id(msg.uid, animation: .interpolatingSpring))
+					}
+				}
+				ToastPresenter.show(toast)
+			}
+			models.insert(msg: msg)
+			layoutIfNeeded()
+		}
+
 		await saveConversationChanges()
 	}
 
@@ -32,82 +54,86 @@ extension ChatViewManager: ChatDatasourceDelegate {
 	}
 
 	func datasource(didUpdate snapshot: Message, animated _: Bool) async {
-		enqueueDatasourceMutation(.update(snapshot))
+		models.update(msg: snapshot)
 	}
 
 	func datasource(didRemove snapshot: Message, animated _: Bool) async {
-		enqueueDatasourceMutation(.remove(snapshot))
+		models.remove(msg: snapshot)
+		layoutIfNeeded()
 	}
 
 	func datasource(didReceive status: AnyMsgData.SeenStatusPayload) async {
 		conversation.properties.seenMembers.removeAll(where: { $0.uid == status.seenMember.uid })
 		conversation.properties.seenMembers.append(status.seenMember)
+		await saveConversationChanges()
 		layoutIfNeeded()
 	}
 }
 
-private extension ChatViewManager {
-	func enqueueDatasourceMutation(_ mutation: DatasourceMutation) {
-		pendingDatasourceMutations.append(mutation)
-		guard datasourceFlushTask == nil else { return }
-		datasourceFlushTask = Task { [weak self] in
-			try? await Task.sleep(for: .milliseconds(30))
-			self?.flushDatasourceMutations()
-		}
-	}
-
-	func flushDatasourceMutations() {
-		datasourceFlushTask = nil
-		guard !pendingDatasourceMutations.isEmpty else { return }
-		let mutations = pendingDatasourceMutations
-		pendingDatasourceMutations.removeAll(keepingCapacity: true)
-		var shouldLayout = false
-		var transaction = Transaction()
-		transaction.disablesAnimations = true
-		withTransaction(transaction) {
-			for mutation in mutations {
-				switch mutation {
-				case let .insert(msg):
-					if let existingModel = models.element(withID: msg.uid) {
-						existingModel.update(with: msg)
-						shouldLayout = true
-					} else if canResetDatasource {
-						let toast = Toast(
-							node: Text(msg.displayText).opaqueView(),
-							allowsBackgroundTap: false
-						) {
-							self.resetDatasource()
-						}
-						ToastPresenter.show(toast)
-					} else {
-						if scrollController.state.geometry.scrolledPosition.nearBottom {
-							scrollController.state.updateState = .appendingItem(msg.uid)
-						}
-						models.insert(msg: msg)
-						shouldLayout = true
-					}
-				case let .update(msg):
-					models.update(msg: msg)
-					shouldLayout = true
-				case let .remove(msg):
-					models.remove(msg: msg)
-					shouldLayout = true
-				}
-			}
-		}
-		if shouldLayout {
-			layoutIfNeeded()
-		}
-	}
-}
+//private extension ChatViewManager {
+//	func enqueueDatasourceMutation(_ mutation: DatasourceMutation) {
+//		pendingDatasourceMutations.append(mutation)
+//		guard datasourceFlushTask == nil else { return }
+//		datasourceFlushTask = Task { [weak self] in
+//			try? await Task.sleep(for: .milliseconds(30))
+//			self?.flushDatasourceMutations()
+//		}
+//	}
+//
+//	func flushDatasourceMutations() {
+//		datasourceFlushTask = nil
+//		guard !pendingDatasourceMutations.isEmpty else { return }
+//		let mutations = pendingDatasourceMutations
+//		pendingDatasourceMutations.removeAll(keepingCapacity: true)
+//		var shouldLayout = false
+//		var transaction = Transaction()
+//		transaction.disablesAnimations = true
+//		withTransaction(transaction) {
+//			for mutation in mutations {
+//				switch mutation {
+//				case let .insert(msg):
+//					if let existingModel = models.element(withID: msg.uid) {
+//						existingModel.update(with: msg)
+//						shouldLayout = true
+//					} else if canResetDatasource {
+//						let toast = Toast(
+//							node: Text(msg.displayText).opaqueView(),
+//							allowsBackgroundTap: false
+//						) {
+//							self.resetDatasource()
+//						}
+//						ToastPresenter.show(toast)
+//					} else {
+//						if scrollController.state.geometry.scrolledPosition.nearBottom {
+//							scrollController.state.updateState = .appendingItem(msg.uid)
+//						}
+//						models.insert(msg: msg)
+//						shouldLayout = true
+//					}
+//				case let .update(msg):
+//					models.update(msg: msg)
+//					shouldLayout = true
+//				case let .remove(msg):
+//					models.remove(msg: msg)
+//					shouldLayout = true
+//				}
+//			}
+//		}
+//		if shouldLayout {
+//			layoutIfNeeded()
+//
+//		}
+//		updateReceiveMsgs()
+//	}
+//}
 
 extension ChatViewManager {
 	func reloadData(with msgs: [Message], forceReset: Bool) {
 		models.set(msgs: msgs, forceReset: forceReset)
-		presentation.showContactInfo = {
-			guard let firstMsgID = conversationConfig.firstMsgID else { return true }
-			return msgs.contains(where: { $0.id == firstMsgID })
-		}()
+//		presentation.showContactInfo = {
+//			guard let firstMsgID = conversationConfig.firstMsgID else { return true }
+//			return msgs.contains(where: { $0.id == firstMsgID })
+//		}()
 		layoutIfNeeded()
 	}
 

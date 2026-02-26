@@ -23,7 +23,7 @@ struct EmojiRepository {
 	// MARK: - Helpers
 
 	private func decodeEmojis() throws -> [Emoji] {
-		let bundle = Bundle.main
+		let bundle = Bundle.module
 		let url = bundle.url(
 			forResource: "emojis",
 			withExtension: "json"

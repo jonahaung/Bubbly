@@ -21,12 +21,10 @@ struct ChatAccessoryBar: View {
 							.frame(square: 40)
 							.background(.windowBackground, in: .circle)
 					}
-					.transition(
-						.scale(scale: 0).animation(.bouncy)
-					)
 				}
 			}
 		}
+		.frame(height: 40)
 		.padding(.horizontal, 16)
 		.geometryGroup()
 	}
