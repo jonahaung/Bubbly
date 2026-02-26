@@ -23,9 +23,9 @@ final class ChatViewManager: ErrorPresenter, ViewReloadable {
 	@ObservationIgnored let conversationConfig: ConversationInitializer.Configuration
 	@ObservationIgnored let attachments = AttachmentFetcher.shared
 	@ObservationIgnored let layoutManager: MsgsScrollViewLayoutManager
-	@ObservationIgnored let debouncer = Debouncer(interval: .seconds(1))
+	@ObservationIgnored let debouncer = Debouncer(interval: .seconds(0.3))
 	@ObservationIgnored var conversation: Conversation
-	@ObservationIgnored var models: MsgModels
+	@ObservationIgnored let models: MsgModels
 	@ObservationIgnored var reloadID: Int = 0
 	var theme: ConversationTheme
 	var state: ChatViewState
@@ -106,7 +106,7 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 						before: query,
 						conID: oldestMessage.conID
 					)
-					reloadData(with: msgs, forceReset: false)
+					await reloadData(with: msgs, forceReset: false)
 				} catch {
 					revertState()
 					await self.showError(error)
@@ -124,7 +124,7 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 						after: query,
 						conID: newestMessage.conID
 					)
-					reloadData(with: msgs, forceReset: false)
+					await reloadData(with: msgs, forceReset: false)
 				} catch {
 					revertState()
 					await self.showError(error)
@@ -230,7 +230,7 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
 		Task {
 			do {
 				let msgs = try await messageSource.reset(conID: conversationConfig.conID)
-				reloadData(with: msgs, forceReset: true)
+				await reloadData(with: msgs, forceReset: true)
 			} catch {
 				await self.showError(error)
 			}
@@ -312,10 +312,10 @@ extension ChatViewManager {
 							switch change {
 							case .insert(_, let element, _):
 								self.models.didChangeVisibility(for: element, isVisible: true)
-								self.models.element(withID: element)?.setVisibility(true)
+
 							case .remove(_, let element, _):
 								self.models.didChangeVisibility(for: element, isVisible: false)
-								self.models.element(withID: element)?.setVisibility(false)
+
 							}
 						}
 						scrollController.send(.onScrollTargetVisibilityChange(ids))
@@ -330,6 +330,7 @@ extension ChatViewManager {
 		conversation = try await conversation.reload(
 			refetch: !scrollController.state.updateState.hasViewLoaded
 		)
+		theme = .init(conversation)
 		updateReceiveMsgs()
 	}
 }

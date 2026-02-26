@@ -42,15 +42,12 @@ public final class MsgCellViewModel: ViewReloadable, @preconcurrency Identifiabl
 	public func update(layout: MsgCellLayout) {
 		guard self.layout != layout else { return }
 		self.layout = layout
-		layoutIfNeeded()
+//		layoutIfNeeded()
 	}
 
 	public func setVisibility(_ isVisible: Bool) {
 		guard self.isVisible != isVisible else { return }
 		self.isVisible = isVisible
-		if isVisible {
-			layoutIfNeeded()
-		}
 	}
 
 	public func animate() {

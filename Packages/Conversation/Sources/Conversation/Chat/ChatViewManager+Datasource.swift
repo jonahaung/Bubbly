@@ -128,12 +128,12 @@ extension ChatViewManager: ChatDatasourceDelegate {
 //}
 
 extension ChatViewManager {
-	func reloadData(with msgs: [Message], forceReset: Bool) {
-		models.set(msgs: msgs, forceReset: forceReset)
-//		presentation.showContactInfo = {
-//			guard let firstMsgID = conversationConfig.firstMsgID else { return true }
-//			return msgs.contains(where: { $0.id == firstMsgID })
-//		}()
+	func reloadData(with msgs: [Message], forceReset: Bool) async {
+		await models.setInBackground(msgs: msgs, forceReset: forceReset)
+		presentation.showContactInfo = {
+			guard let firstMsgID = conversationConfig.firstMsgID else { return true }
+			return msgs.contains(where: { $0.id == firstMsgID })
+		}()
 		layoutIfNeeded()
 	}
 

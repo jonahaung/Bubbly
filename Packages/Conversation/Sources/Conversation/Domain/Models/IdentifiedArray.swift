@@ -64,6 +64,27 @@ public struct IdentifiedArray<ID: Hashable, Element>: Sequence {
 		rebuildIndexes()
 	}
 
+	public mutating func insert(_ newElements: [Element], at index: Int) {
+		guard !newElements.isEmpty else { return }
+		elements.insert(contentsOf: newElements, at: index)
+		rebuildIndexes()
+	}
+
+	public mutating func append(_ element: Element) {
+		elements.append(element)
+		indexesByID[element[keyPath: idKeyPath]] = elements.count - 1
+	}
+
+	public mutating func append(_ newElements: [Element]) {
+		guard !newElements.isEmpty else { return }
+		let startIndex = elements.count
+		elements.append(contentsOf: newElements)
+		indexesByID.reserveCapacity(elements.count)
+		for (offset, element) in newElements.enumerated() {
+			indexesByID[element[keyPath: idKeyPath]] = startIndex + offset
+		}
+	}
+
 	public mutating func remove(id: ID) {
 		guard let index = indexesByID[id] else { return }
 		elements.remove(at: index)

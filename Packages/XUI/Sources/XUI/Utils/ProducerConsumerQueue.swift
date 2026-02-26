@@ -65,7 +65,7 @@ public final class ProducerConsumerQueue<T> {
 	/// Whether the queue is empty.
 	public var isEmpty: Bool {
 		lock.lock()
-		let result = isEmpty
+		let result = (count == 0)
 		lock.unlock()
 		return result
 	}

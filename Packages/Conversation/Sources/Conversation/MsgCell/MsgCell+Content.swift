@@ -63,32 +63,49 @@ extension MsgCell {
 					if let text = viewModel.msg.text, !text.isWhitespace {
 						SingleSubviewLayout {
 							TextContent(text: text)
-						}.padding(8)
-							.background(theme.secondaryColor)
+								.padding(theme.bubblePading)
+								.background {
+									bubbleBackground
+										.padding(
+											.init(
+												top: 0.2,
+												leading: viewModel.isSender ? 1 : 0.2,
+												bottom: 1,
+												trailing: viewModel
+													.isSender ? 0.2 : 1
+											)
+										)
+										.background(
+											theme.shadowColor(for: viewModel.isSender),
+											in: .rect(corners: .concentric)
+										)
+								}
+								.containerShape(bubbleShape)
+						}
 					}
 				}
 			} else if let text = viewModel.msg.text {
 				SingleSubviewLayout {
 					TextContent(text: text)
+						.padding(theme.bubblePading)
+						.background {
+							bubbleBackground
+								.padding(
+									.init(
+										top: 0.2,
+										leading: viewModel.isSender ? 1 : 0.2,
+										bottom: 1,
+										trailing: viewModel
+											.isSender ? 0.2 : 1
+									)
+								)
+								.background(
+									theme.shadowColor(for: viewModel.isSender),
+									in: .rect(corners: .concentric)
+								)
+						}
+						.containerShape(bubbleShape)
 				}
-				.padding(theme.bubblePading)
-				.background {
-					bubbleBackground
-						.padding(
-							.init(
-								top: 0.2,
-								leading: viewModel.isSender ? 1 : 0.2,
-								bottom: 1,
-								trailing: viewModel
-									.isSender ? 0.2 : 1
-							)
-						)
-						.background(
-							theme.shadowColor(for: viewModel.isSender),
-							in: .rect(corners: .concentric)
-						)
-				}
-				.containerShape(bubbleShape)
 			}
 		}
 

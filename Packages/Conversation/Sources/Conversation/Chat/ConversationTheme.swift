@@ -22,12 +22,12 @@ public struct ConversationTheme: Sendable, Equatable, EmptyRepresentable {
 		secondaryColor = BubbleColor.allCases.random().value
 		outgoing = .init(
 			bubbleCoor: theme.outgoingBubbleColor,
-			shadowColor: theme.outgoingBubbleColor.mix(with: .primary, by: 0.1),
+			shadowColor: Color(white: 0.85),
 			foregroundStyle: .darkText
 		)
 		incoming = .init(
 			bubbleCoor: theme.incomingBubbleColor,
-			shadowColor: theme.incomingBubbleColor.mix(with: .primary, by: 0.1),
+			shadowColor: Color(white: 0.8),
 			foregroundStyle: .primary
 		)
 		let uiFont = UIFont.preferredFont(forTextStyle: .body)
