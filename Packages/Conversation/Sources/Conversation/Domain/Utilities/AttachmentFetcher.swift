@@ -9,8 +9,8 @@ public enum FetchIntent: Sendable {
 	case userInitiated
 }
 
-private extension FetchIntent {
-	var priority: TaskPriority {
+extension FetchIntent {
+	fileprivate var priority: TaskPriority {
 		switch self {
 		case .prefetch:
 			.background
@@ -395,28 +395,28 @@ public actor AttachmentFetcher {
 	}
 }
 
-public extension AttachmentFetcher {
-	struct TimeoutError: Error, LocalizedError {
+extension AttachmentFetcher {
+	public struct TimeoutError: Error, LocalizedError {
 		public var errorDescription: String? {
 			"Operation timed out waiting for pending task to start"
 		}
 	}
 }
 
-public extension AttachmentFetcher {
-	func prefetch(_ attachments: [Attachment], intent: FetchIntent = .prefetch) {
+extension AttachmentFetcher {
+	public func prefetch(_ attachments: [Attachment], intent: FetchIntent = .prefetch) {
 		for attachment in attachments {
 			prefetch(attachment, intent: intent)
 		}
 	}
 
-	enum FetchState: Sendable {
+	public enum FetchState: Sendable {
 		case fetching
 		case pending
 		case idle
 	}
 
-	func state(for attachment: Attachment) -> FetchState {
+	public func state(for attachment: Attachment) -> FetchState {
 		if isFetching(attachment) { return .fetching }
 		if isPending(attachment) { return .pending }
 		return .idle

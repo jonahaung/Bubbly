@@ -4,7 +4,7 @@ import SwiftUI
 import XUI
 
 struct MsgsScrollViewLayoutConfiguration {
-	let superTopSpace = CGFloat(0)
+	let superTopSpace = CGFloat(100)
 	let spacing: CGFloat
 	let contentInsets: EdgeInsets
 	var boundsWidth: CGFloat
@@ -56,6 +56,28 @@ extension MsgsScrollViewLayout {
 			return
 		}
 		let x = bounds.minX + config.contentInsets.leading
+
+//		var currentY = config.contentInsets.top + config.superTopSpace
+//		let spacing = config.spacing
+//		let proposedWidth = config.boundsWidth
+//
+//		for subview in subviews {
+//			let value = subview[MsgLayoutValueKey.self]
+//
+//			let size = getOrCalculateSize(
+//				for: value,
+//				subview: subview,
+//				proposedWidth: proposedWidth
+//			)
+//			let point = CGPoint(x: x, y: currentY)
+//			subview.place(
+//				at: point,
+//				anchor: .topLeading,
+//				proposal: ProposedViewSize(size)
+//			)
+//			currentY += (size.height + spacing)
+//		}
+
 		for (index, subview) in subviews.enumerated() {
 			if let layout = cache.layouts[safe: index] {
 				subview.place(

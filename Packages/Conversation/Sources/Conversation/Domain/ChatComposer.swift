@@ -52,8 +52,8 @@ final class ChatComposer: ErrorPresenter, Equatable {
 	}
 }
 
-private extension ChatComposer {
-	func setLoading(_ value: Bool) {
+extension ChatComposer {
+	fileprivate func setLoading(_ value: Bool) {
 		isLoading = value
 	}
 }
@@ -86,9 +86,10 @@ extension ChatComposer: InputTextDelegate {
 }
 
 extension ChatComposer: PhotoPickerManagerDelegate {
-	func photoPickerManager(_: PhotoPickerManager,
-	                        didSelectImages images: [MediaPicker.SelectedImage])
-	{
+	func photoPickerManager(
+		_: PhotoPickerManager,
+		didSelectImages images: [MediaPicker.SelectedImage]
+	) {
 		Task {
 			await parseImages(selectedImages: images)
 		}
@@ -156,10 +157,11 @@ extension ChatComposer {
 		try await Socket.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
 	}
 
-	@concurrent func send(text: String,
-	                      attachments: [Attachment],
-	                      conversation: Conversation) async throws
-	{
+	@concurrent func send(
+		text: String,
+		attachments: [Attachment],
+		conversation: Conversation
+	) async throws {
 		try await worker.sendMessage(
 			text: text,
 			attachments: attachments,
@@ -193,7 +195,8 @@ extension ChatComposer {
 			await MainActor.run {
 				var text = self.inputText.text
 				for each in newLinks {
-					text = text
+					text =
+						text
 						.replace(
 							each.url.absoluteString,
 							with: "**\(each.host)**"
@@ -279,11 +282,12 @@ private actor ChatComposerWorker {
 		return try await AttachmentFactory.createImageAttachment(from: image)
 	}
 
-	func sendMessage(text: String,
-	                 attachments: [Attachment],
-	                 conversation: Conversation,
-	                 msgCreator: MsgCreator) async throws
-	{
+	func sendMessage(
+		text: String,
+		attachments: [Attachment],
+		conversation: Conversation,
+		msgCreator: MsgCreator
+	) async throws {
 		let sanitizedText = sanitizeText(text, attachments: attachments)
 		let msg = try await msgCreator.message(
 			text: sanitizedText,
@@ -371,9 +375,10 @@ private actor ChatComposerStateStore {
 		return snapshot()
 	}
 
-	func processSelectedImages(selectedImages: [SelectedImage],
-	                           worker: ChatComposerWorker) async -> ChatComposerSnapshot
-	{
+	func processSelectedImages(
+		selectedImages: [SelectedImage],
+		worker: ChatComposerWorker
+	) async -> ChatComposerSnapshot {
 		var items = attachments
 		var pickerItems = selectedImages
 		let pickerIDs = Set(pickerItems.map(\.id))

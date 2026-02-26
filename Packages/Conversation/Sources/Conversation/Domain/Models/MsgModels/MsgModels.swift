@@ -115,6 +115,7 @@ extension MsgModels {
 
 	public func setInBackground(msgs: [Message], forceReset: Bool) async {
 		let prepared = await mergeActor.prepare(msgs)
+
 		mergePrepared(prepared, forceReset: forceReset)
 	}
 
@@ -156,10 +157,10 @@ extension MsgModels {
 			guard storage.count > limit else { return }
 			var removedIDs: [MsgID] = []
 			removedIDs.reserveCapacity(storage.count - limit)
-			for index in limit ..< storage.count {
+			for index in limit..<storage.count {
 				removedIDs.append(storage[index].id)
 			}
-			storage.removeSubrange(limit ..< storage.count)
+			storage.removeSubrange(limit..<storage.count)
 			for id in removedIDs {
 				layoutCache.remove(id)
 			}
@@ -174,10 +175,10 @@ extension MsgModels {
 			let removeCount = storage.count - limit
 			var removedIDs: [MsgID] = []
 			removedIDs.reserveCapacity(removeCount)
-			for index in 0 ..< removeCount {
+			for index in 0..<removeCount {
 				removedIDs.append(storage[index].id)
 			}
-			storage.removeSubrange(0 ..< removeCount)
+			storage.removeSubrange(0..<removeCount)
 			for id in removedIDs {
 				layoutCache.remove(id)
 			}
@@ -287,6 +288,7 @@ extension MsgModels {
 		}
 	}
 
+	@discardableResult
 	private func layout(for id: MsgID) -> MsgCellLayout? {
 		guard let index = storage.index(id: id) else { return nil }
 		if let cached = layoutCache.get(id) {
@@ -304,24 +306,22 @@ extension MsgModels {
 	private func ensureLayouts(in range: Range<Int>) {
 		guard !range.isEmpty else { return }
 		for index in range {
-			_ = layout(for: storage[index].id)
+			layout(for: storage[index].id)
 		}
 	}
 
 	private func evictLayoutsIfNeeded() {
 		storage.forEach { each in
 			if each.layout.isEmpty {
-				if let layout = layout(for: each.id) {
-					print(layout)
-					each.update(layout: layout)
-				}
-
+				layout(for: each.id)
 			}
 		}
 	}
 
 	private func withBatchUpdate(_ work: () -> Void) {
 		var transaction = Transaction()
+		transaction.scrollPositionUpdatePreservesVelocity = false
+		transaction.tracksVelocity = false
 		transaction.disablesAnimations = true
 		withTransaction(transaction) {
 			work()
@@ -330,8 +330,22 @@ extension MsgModels {
 }
 
 actor MsgMergeActor {
+
+	private let bubbleFactory = BubbleFactory()
+
 	func prepare(_ msgs: [Message]) -> [Message] {
 		Self.prepareStatic(msgs)
+
+	}
+	func layout(_ msgs: [Message]) -> [MsgCellLayout] {
+		var layouts = [MsgCellLayout]()
+		msgs.forEach { msg in
+			let previous = msgs.previous(msg)
+			let next = msgs.next(after: msg)
+			let layout = bubbleFactory.style(for: msg, previous: previous, next: next)
+			layouts.append(layout)
+		}
+		return layouts
 	}
 
 	nonisolated static func prepareStatic(_ msgs: [Message]) -> [Message] {

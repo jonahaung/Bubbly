@@ -12,17 +12,28 @@ protocol InputTextDelegate: AnyObject {
 @Observable
 final class InputText: Equatable {
 	let id = 0
-	var text: String = .init() {
-		willSet {
-			let oldValue = text
-			if newValue.isEmpty || oldValue.isEmpty, oldValue != newValue {
-				delegate?.inputText(self, didBeganEditing: newValue)
+
+	var text: String = .init()
+	var bindableText: Binding<String> {
+		.init(
+			get: { self.text },
+			set: { newValue in
+
+				let oldValue = self.text
+				guard oldValue != newValue else {
+					return
+				}
+				self.text = newValue
+				if newValue.isEmpty || oldValue.isEmpty, oldValue != newValue {
+					self.delegate?.inputText(self, didBeganEditing: newValue)
+				}
+				self.parseLinks(newValue)
+
 			}
-			parseLinks(newValue)
-		}
+		)
 	}
 
-	private let throttler = Throttler(interval: .seconds(1))
+	private let throttler = Debouncer(interval: .seconds(1))
 	var selection: TextSelection?
 	var hasText: Bool {
 		!text.isWhitespace
@@ -40,7 +51,7 @@ final class InputText: Equatable {
 		let string = text
 		let start = string.startIndex
 		let end = string.endIndex
-		selection = TextSelection(range: start ..< end)
+		selection = TextSelection(range: start..<end)
 	}
 
 	private func parseLinks(_ string: String) {

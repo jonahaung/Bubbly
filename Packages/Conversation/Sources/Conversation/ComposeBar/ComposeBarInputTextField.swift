@@ -18,8 +18,8 @@ extension ComposeBar {
 		private func textField() -> some View {
 			TextField(
 				"\(composer.source.rawValue)",
-				text: $composer.inputText
-					.text, selection: $composer.inputText.selection, axis: .vertical
+				text: composer.inputText
+					.bindableText, selection: $composer.inputText.selection, axis: .vertical
 			)
 			.lineLimit(0 ... 10)
 			.font(.body)
