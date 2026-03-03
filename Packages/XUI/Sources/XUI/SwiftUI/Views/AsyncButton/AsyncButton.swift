@@ -1,162 +1,254 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import SwiftUI
 
-@MainActor
+// private enum Phase: Equatable {
+//	case idle
+//	case loading(Task<Void, Never>)
+//	case success
+//	case failure(Error)
+//
+//	static func == (lhs: Phase, rhs: Phase) -> Bool {
+//		switch (lhs, rhs) {
+//		case (.idle, .idle):
+//			return true
+//		case (.loading, .loading):
+//			return true
+//		case (.success, .success):
+//			return true
+//		case (.failure, .failure):
+//			return true
+//		default:
+//			return false
+//		}
+//	}
+// }
+//
+// @MainActor
+// public struct AsyncButton<Label: View>: View {
+//
+//	private let role: ButtonRole?
+//	private let options: AsyncButtonOptions
+//	private let transaction: Transaction
+//	private let action: () async throws -> Void
+//	private let label: () -> Label
+//
+//	@State private var phase: Phase = .idle
+//	@State private var tint: Color?
+//	@State private var showingError = false
+//	@State private var localizedError: AnyLocalizedError?
+//
+//	private var isLoading: Bool {
+//		if case .loading = phase { return true }
+//		return false
+//	}
+//
+//	public var body: some View {
+//		Button(role: role) {
+//			trigger()
+//		} label: {
+//			label()
+//				.opacity(showProgress ? 0 : 1)
+//				.overlay {
+//					if showProgress {
+//						ProgressView().controlSize(.mini)
+//					}
+//				}
+//		}
+//		.disabled(disableButton)
+//		.animation(transaction.animation, value: phase)
+//		.tint(tint)
+//		.alert(isPresented: $showingError, error: localizedError) { _ in
+//			Button(role: .cancel) {}
+//		} message: { error in
+//			Text(error.failureReason ??
+//				 error.recoverySuggestion ??
+//				 "An unexpected error occurred.")
+//		}
+//	}
+//
+//	private var showProgress: Bool {
+//		options.contains(.showProgressViewOnLoading) && isLoading
+//	}
+//
+//	private var disableButton: Bool {
+//		options.contains(.disableButtonOnLoading) && isLoading
+//	}
+//
+//	private func trigger() {
+//		if options.contains(.disallowParallelOperations), isLoading {
+//			return
+//		}
+//
+//		let task = Task {
+//			do {
+//				try await action()
+//				await handleSuccess()
+//			} catch {
+//				await handleFailure(error)
+//			}
+//		}
+//
+//		phase = .loading(task)
+//	}
+//
+//	private func handleSuccess() {
+//		phase = .success
+//
+//		if options.contains(.enableTintFeedback) {
+//			animateTint(.green)
+//		}
+//	}
+//
+//	private func handleFailure(_ error: Error) {
+//		phase = .failure(error)
+//
+//		if options.contains(.enableTintFeedback) {
+//			animateTint(.red)
+//		}
+//
+//		if options.contains(.showAlertOnError) {
+//			let localized = error as? LocalizedError ?? UnlocalizedError(error: error)
+//			localizedError = AnyLocalizedError(erasing: localized)
+//			showingError = true
+//		}
+//	}
+//
+//	private func animateTint(_ color: Color) {
+//		withAnimation(.linear(duration: 0.1)) {
+//			tint = color
+//		}
+//
+//		Task {
+//			try? await Task.sleep(for: .seconds(1.5))
+//			withAnimation(.linear(duration: 0.2)) {
+//				tint = nil
+//			}
+//		}
+//	}
+//
+//	public init(
+//		role: ButtonRole? = nil,
+//		options: AsyncButtonOptions = .automatic,
+//		transaction: Transaction = .withoutAnimation,
+//		action: @escaping () async throws -> Void,
+//		@ViewBuilder label: @escaping () -> Label
+//	) {
+//		self.role = role
+//		self.options = options
+//		self.transaction = transaction
+//		self.action = action
+//		self.label = label
+//	}
+// }
+import SwiftUI
+
+/// Modified from: https://swiftbysundell.com/articles/building-an-async-swiftui-button/
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 public struct AsyncButton<Label: View>: View {
-	private let role: ButtonRole?
-	private let options: AsyncButtonOptions
-	private let transaction: Transaction
-	private let action: () async throws -> Void
-	private let label: ([AsyncButtonOperation]) -> Label
+    private var role: ButtonRole?
+    private var action: () async throws -> Void
+    private var options: Set<AsyncButtonOption>
+    @ViewBuilder private var label: () -> Label
 
-	@State private var operations: [AsyncButtonOperation] = []
-	@State private var showingErrorAlert = false
-	@State private var localizedError: AnyLocalizedError?
-	@State private var tint: Color?
+    @State private var isDisabled = false
+    @State private var showProgressView = false
 
-	var operationIsLoading: Bool {
-		operations.contains {
-			if case .loading = $0 { return true }
-			return false
-		}
-	}
+    public var body: some View {
+        Button(
+            role: role,
+            action: {
+                if self.options.contains(.disableButton) {
+                    self.isDisabled = true
+                }
 
-	var showProgressView: Bool {
-		options.contains(.showProgressViewOnLoading) && operationIsLoading
-	}
+                Task {
+                    var progressViewTask: Task<Void, Error>?
 
-	var disableButton: Bool {
-		options.contains(.disableButtonOnLoading) && operationIsLoading
-	}
+                    if self.options.contains(.showProgressView) {
+                        progressViewTask = Task {
+                            try await Task.sleep(nanoseconds: 150_000_000)
+                            self.showProgressView = true
+                        }
+                    }
 
-	public var body: some View {
-		Button(
-			role: role,
-			action: {
-				if options.contains(.disallowParallelOperations) {
-					guard operationIsLoading == false else { return }
-				}
+                    // TODO: Handle error?
+                    try await action()
+                    progressViewTask?.cancel()
 
-				// Spawn the actual async action off the main actor.
-				let actionTask = Task {
-					try await action()
-				}
+                    self.isDisabled = false
+                    self.showProgressView = false
+                }
+            },
+            label: {
+                ZStack {
+                    self.label().opacity(self.showProgressView ? 0 : 1)
 
-				// Record as loading on the main actor.
-				operations.append(.loading(actionTask))
+                    if self.showProgressView {
+                        ProgressView()
+                    }
+                }
+            }
+        )
+        .disabled(isDisabled)
+    }
 
-				// Consume the result; confine all state mutations to MainActor.
-				Task { [options] in
-					let result = await actionTask.result
-
-					await MainActor.run {
-						// Replace the matching loading operation with completed; if not found,
-						// append.
-						if let idx = operations.lastIndex(where: {
-							if case let .loading(t) = $0 { return t == actionTask }
-							return false
-						}) {
-							operations[idx] = .completed(actionTask, result)
-						} else {
-							operations.append(.completed(actionTask, result))
-						}
-
-						if options.contains(.enableTintFeedback) {
-							withAnimation(.linear(duration: 0.1)) {
-								switch result {
-								case .success: tint = .green
-								case .failure: tint = .red
-								}
-							}
-							withAnimation(.linear(duration: 0.2).delay(1.5)) {
-								tint = nil
-							}
-						}
-
-						if options.contains(.showAlertOnError),
-						   case let .failure(error) = result
-						{
-							let localizedError = error as? LocalizedError ??
-								UnlocalizedError(error: error)
-							self.localizedError = AnyLocalizedError(erasing: localizedError)
-							showingErrorAlert = true
-						}
-					}
-				}
-			},
-			label: {
-				label(operations)
-					.opacity(showProgressView ? 0 : 1)
-					.overlay {
-						if showProgressView {
-							ProgressView()
-								.controlSize(.mini)
-						}
-					}
-			}
-		)
-		.sensoryFeedback(.press(.button), trigger: operations.count)
-		.disabled(disableButton)
-		.animation(transaction.animation, value: operations)
-		.tint(tint)
-		.alert(isPresented: $showingErrorAlert, error: localizedError, actions: { _ in
-			Button(role: .cancel) {
-				showingErrorAlert = false
-			}
-		}, message: { error in
-			let error = error as AnyLocalizedError
-			Text(error.failureReason ?? error.recoverySuggestion ?? "An unexpected error occurred.")
-		})
-	}
-
-	public init(role: ButtonRole? = nil,
-	            options: AsyncButtonOptions = .automatic,
-	            transaction: Transaction = .withoutAnimation,
-	            action: @escaping () async throws -> Void,
-	            @ViewBuilder label: @escaping ([AsyncButtonOperation]) -> Label)
-	{
-		self.role = role
-		self.options = options
-		self.transaction = transaction
-		self.action = action
-		self.label = label
-	}
+    public init(
+        role: ButtonRole? = nil,
+        action: @escaping () async throws -> Void,
+        options: Set<AsyncButtonOption> = .allCases,
+        @ViewBuilder label: @escaping () -> Label
+    ) {
+        self.role = role
+        self.action = action
+        self.options = options
+        self.label = label
+    }
 }
 
-public extension AsyncButton {
-	init(role: ButtonRole? = nil,
-	     options: AsyncButtonOptions = .automatic,
-	     transaction: Transaction = .withoutAnimation,
-	     action: @escaping () async throws -> Void,
-	     @ViewBuilder label: @escaping () -> Label)
-	{
-		self.init(role: role, options: options, transaction: transaction, action: action) { _ in
-			label()
-		}
-	}
+// MARK: - Supporting Types
+
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
+public enum AsyncButtonOption: CaseIterable {
+    case disableButton
+    case showProgressView
 }
 
+// MARK: - Extensions
+
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
 public extension AsyncButton where Label == Text {
-	init(_ titleKey: LocalizedStringKey,
-	     role: ButtonRole? = nil,
-	     options: AsyncButtonOptions = .automatic,
-	     transaction: Transaction = .withoutAnimation,
-	     action: @escaping () async throws -> Void)
-	{
-		self.init(role: role, options: options, transaction: transaction, action: action) { _ in
-			Text(titleKey)
-		}
-	}
+    init(
+        _ title: String,
+        role: ButtonRole? = nil,
+        options: Set<AsyncButtonOption> = .allCases,
+        action: @escaping () async throws -> Void
+    ) {
+        self.init(role: role, action: action) {
+            Text(title)
+        }
+    }
 }
 
-public extension AsyncButton where Label == Text {
-	init(_ title: some StringProtocol,
-	     role: ButtonRole?,
-	     options: AsyncButtonOptions = .automatic,
-	     transaction: Transaction = .withoutAnimation,
-	     action: @escaping () async throws -> Void)
-	{
-		self.init(role: role, options: options, transaction: transaction, action: action) { _ in
-			Text(title)
-		}
-	}
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
+public extension AsyncButton where Label == Image {
+    init(
+        systemImageName: String,
+        role: ButtonRole? = nil,
+        options: Set<AsyncButtonOption> = .allCases,
+        action: @escaping () async throws -> Void
+    ) {
+        self.init(role: role, action: action) {
+            Image(systemName: systemImageName)
+        }
+    }
+}
+
+@available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
+public extension Set where Element == AsyncButtonOption {
+    static var allCases: Self {
+        .init(Element.allCases)
+    }
 }

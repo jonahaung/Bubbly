@@ -1,212 +1,217 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 
 #if os(iOS) || os(tvOS) || os(visionOS)
-	import UIKit.UIApplication
+import UIKit.UIApplication
 #endif
 
 public final class Cache<Key: Hashable, Value>: @unchecked Sendable {
-	public struct Configuration {
-		public var costLimit: Int
-		public var countLimit: Int
-		public var ttl: TimeInterval?
-		public var entryCostLimit: Double
+    public struct Configuration {
+        public var costLimit: Int
+        public var countLimit: Int
+        public var ttl: TimeInterval?
+        public var entryCostLimit: Double
 
-		public init(costLimit: Int,
-		            countLimit: Int,
-		            ttl: TimeInterval? = nil,
-		            entryCostLimit: Double = 0.1)
-		{
-			self.costLimit = costLimit
-			self.countLimit = countLimit
-			self.ttl = ttl
-			self.entryCostLimit = entryCostLimit
-		}
-	}
+        public init(
+            costLimit: Int,
+            countLimit: Int,
+            ttl: TimeInterval? = nil,
+            entryCostLimit: Double = 0.1
+        ) {
+            self.costLimit = costLimit
+            self.countLimit = countLimit
+            self.ttl = ttl
+            self.entryCostLimit = entryCostLimit
+        }
+    }
 
-	public var conf: Configuration {
-		get { withLock { _conf } }
-		set { withLock { _conf = newValue } }
-	}
+    public var conf: Configuration {
+        get { withLock { _conf } }
+        set { withLock { _conf = newValue } }
+    }
 
-	private var _conf: Configuration {
-		didSet { _trim() }
-	}
+    private var _conf: Configuration {
+        didSet { _trim() }
+    }
 
-	public var totalCost: Int {
-		withLock { _totalCost }
-	}
+    public var totalCost: Int {
+        withLock { _totalCost }
+    }
 
-	public var totalCount: Int {
-		withLock { map.count }
-	}
+    public var totalCount: Int {
+        withLock { map.count }
+    }
 
-	private var _totalCost = 0
-	private var map = [Key: LinkedList<Entry>.Node]()
-	private let list = LinkedList<Entry>()
-	private let lock: os_unfair_lock_t
-	private let memoryPressure: DispatchSourceMemoryPressure
-	private var notificationObserver: AnyObject?
+    private var _totalCost = 0
+    private var map = [Key: LinkedList<Entry>.Node]()
+    private let list = LinkedList<Entry>()
+    private let lock: os_unfair_lock_t
+    private let memoryPressure: DispatchSourceMemoryPressure
+    private var notificationObserver: AnyObject?
 
-	public init(costLimit: Int, countLimit: Int) {
-		_conf = Configuration(costLimit: costLimit, countLimit: countLimit)
-		lock = .allocate(capacity: 1)
-		lock.initialize(to: os_unfair_lock())
-		memoryPressure = DispatchSource.makeMemoryPressureSource(
-			eventMask: [.warning, .critical],
-			queue: .main
-		)
-		memoryPressure.setEventHandler { [weak self] in
-			self?.removeAllCachedValues()
-		}
-		memoryPressure.resume()
+    public init(costLimit: Int, countLimit: Int) {
+        _conf = Configuration(costLimit: costLimit, countLimit: countLimit)
+        lock = .allocate(capacity: 1)
+        lock.initialize(to: os_unfair_lock())
+        memoryPressure = DispatchSource.makeMemoryPressureSource(
+            eventMask: [.warning, .critical],
+            queue: .main
+        )
+        memoryPressure.setEventHandler { [weak self] in
+            self?.removeAllCachedValues()
+        }
+        memoryPressure.resume()
 
-		#if os(iOS) || os(tvOS) || os(visionOS)
-			Task {
-				await registerForEnterBackground()
-			}
-		#endif
-	}
+        #if os(iOS) || os(tvOS) || os(visionOS)
+        Task {
+            await registerForEnterBackground()
+        }
+        #endif
+    }
 
-	deinit {
-		lock.deinitialize(count: 1)
-		lock.deallocate()
-		memoryPressure.cancel()
-	}
+    deinit {
+        lock.deinitialize(count: 1)
+        lock.deallocate()
+        memoryPressure.cancel()
+    }
 
-	#if os(iOS) || os(tvOS) || os(visionOS)
-		@MainActor private func registerForEnterBackground() {
-			notificationObserver = NotificationCenter.default.addObserver(
-				forName: UIApplication.didEnterBackgroundNotification,
-				object: nil,
-				queue: nil
-			) { [weak self] _ in
-				self?.clearCacheOnEnterBackground()
-			}
-		}
-	#endif
+    #if os(iOS) || os(tvOS) || os(visionOS)
+    @MainActor private func registerForEnterBackground() {
+        notificationObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.didEnterBackgroundNotification,
+            object: nil,
+            queue: nil
+        ) { [weak self] _ in
+            self?.clearCacheOnEnterBackground()
+        }
+    }
+    #endif
 
-	public func value(forKey key: Key) -> Value? {
-		os_unfair_lock_lock(lock)
-		defer { os_unfair_lock_unlock(lock) }
+    public func value(forKey key: Key) -> Value? {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
 
-		guard let node = map[key] else {
-			return nil
-		}
+        guard let node = map[key] else {
+            return nil
+        }
 
-		guard !node.value.isExpired else {
-			_remove(node: node)
-			return nil
-		}
+        guard !node.value.isExpired else {
+            _remove(node: node)
+            return nil
+        }
 
-		list.remove(node)
-		list.append(node)
-		return node.value.value
-	}
+        list.remove(node)
+        list.append(node)
+        return node.value.value
+    }
 
-	public func set(_ value: Value, forKey key: Key, cost: Int = 0, ttl: TimeInterval? = nil) {
-		os_unfair_lock_lock(lock)
-		defer { os_unfair_lock_unlock(lock) }
+    public func set(_ value: Value, forKey key: Key, cost: Int = 0, ttl: TimeInterval? = nil) {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
 
-		let sanitizedEntryLimit = max(0, min(_conf.entryCostLimit, 1))
-		guard _conf
-			.costLimit > 2_147_483_647 || cost < Int(sanitizedEntryLimit * Double(_conf.costLimit))
-		else {
-			return
-		}
+        let sanitizedEntryLimit = max(0, min(_conf.entryCostLimit, 1))
+        guard _conf
+            .costLimit > 2_147_483_647 || cost < Int(sanitizedEntryLimit * Double(_conf.costLimit))
+        else {
+            return
+        }
 
-		let ttl = ttl ?? _conf.ttl
-		let expiration = ttl.map { Date() + $0 }
-		let entry = Entry(value: value, key: key, cost: cost, expiration: expiration)
-		_add(entry)
-		_trim()
-	}
+        let ttl = ttl ?? _conf.ttl
+        let expiration = ttl.map { Date() + $0 }
+        let entry = Entry(value: value, key: key, cost: cost, expiration: expiration)
+        _add(entry)
+        _trim()
+    }
 
-	@discardableResult
-	public func removeValue(forKey key: Key) -> Value? {
-		os_unfair_lock_lock(lock)
-		defer { os_unfair_lock_unlock(lock) }
+    @discardableResult
+    public func removeValue(forKey key: Key) -> Value? {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
 
-		guard let node = map[key] else {
-			return nil
-		}
-		_remove(node: node)
-		return node.value.value
-	}
+        guard let node = map[key] else {
+            return nil
+        }
+        _remove(node: node)
+        return node.value.value
+    }
 
-	private func _add(_ element: Entry) {
-		if let existingNode = map[element.key] {
-			list.remove(existingNode)
-			_totalCost -= existingNode.value.cost
-		}
-		map[element.key] = list.append(element)
-		_totalCost += element.cost
-	}
+    private func _add(_ element: Entry) {
+        if let existingNode = map[element.key] {
+            list.remove(existingNode)
+            _totalCost -= existingNode.value.cost
+        }
+        map[element.key] = list.append(element)
+        _totalCost += element.cost
+    }
 
-	private func _remove(node: LinkedList<Entry>.Node) {
-		list.remove(node)
-		map[node.value.key] = nil
-		_totalCost -= node.value.cost
-	}
+    private func _remove(node: LinkedList<Entry>.Node) {
+        list.remove(node)
+        map[node.value.key] = nil
+        _totalCost -= node.value.cost
+    }
 
-	public func removeAllCachedValues() {
-		os_unfair_lock_lock(lock)
-		defer { os_unfair_lock_unlock(lock) }
+    public func removeAllCachedValues() {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
 
-		map.removeAll()
-		list.removeAllElements()
-		_totalCost = 0
-	}
+        map.removeAll()
+        list.removeAllElements()
+        _totalCost = 0
+    }
 
-	private dynamic func clearCacheOnEnterBackground() {
-		os_unfair_lock_lock(lock)
-		defer { os_unfair_lock_unlock(lock) }
+    private dynamic func clearCacheOnEnterBackground() {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
 
-		_trim(toCost: Int(Double(_conf.costLimit) * 0.1))
-		_trim(toCount: Int(Double(_conf.countLimit) * 0.1))
-	}
+        _trim(toCost: Int(Double(_conf.costLimit) * 0.1))
+        _trim(toCount: Int(Double(_conf.countLimit) * 0.1))
+    }
 
-	private func _trim() {
-		_trim(toCost: _conf.costLimit)
-		_trim(toCount: _conf.countLimit)
-	}
+    private func _trim() {
+        _trim(toCost: _conf.costLimit)
+        _trim(toCount: _conf.countLimit)
+    }
 
-	public func trim(toCost limit: Int) {
-		withLock { _trim(toCost: limit) }
-	}
+    public func trim(toCost limit: Int) {
+        withLock { _trim(toCost: limit) }
+    }
 
-	private func _trim(toCost limit: Int) {
-		_trim(while: { _totalCost > limit })
-	}
+    private func _trim(toCost limit: Int) {
+        _trim(while: { _totalCost > limit })
+    }
 
-	public func trim(toCount limit: Int) {
-		withLock { _trim(toCount: limit) }
-	}
+    public func trim(toCount limit: Int) {
+        withLock { _trim(toCount: limit) }
+    }
 
-	private func _trim(toCount limit: Int) {
-		_trim(while: { map.count > limit })
-	}
+    private func _trim(toCount limit: Int) {
+        _trim(while: { map.count > limit })
+    }
 
-	private func _trim(while condition: () -> Bool) {
-		while condition(), let node = list.first {
-			_remove(node: node)
-		}
-	}
+    private func _trim(while condition: () -> Bool) {
+        while condition(), let node = list.first {
+            _remove(node: node)
+        }
+    }
 
-	private func withLock<T>(_ closure: () -> T) -> T {
-		os_unfair_lock_lock(lock)
-		defer { os_unfair_lock_unlock(lock) }
-		return closure()
-	}
+    private func withLock<T>(_ closure: () -> T) -> T {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
+        return closure()
+    }
 
-	private struct Entry {
-		let value: Value
-		let key: Key
-		let cost: Int
-		let expiration: Date?
+    private struct Entry {
+        let value: Value
+        let key: Key
+        let cost: Int
+        let expiration: Date?
 
-		var isExpired: Bool {
-			guard let expiration else { return false }
-			return expiration.timeIntervalSinceNow < 0
-		}
-	}
+        var isExpired: Bool {
+            guard let expiration else { return false }
+            return expiration.timeIntervalSinceNow < 0
+        }
+    }
 }

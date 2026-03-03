@@ -1,46 +1,44 @@
 //
-//  ImageProcessingActor.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 14/2/26.
+// Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-
-import UIKit
-import PhotosUI
 import MediaPicker
+import PhotosUI
+import UIKit
 
 actor ImageProcessingActor {
 
-	static let shared = ImageProcessingActor()
+    static let shared = ImageProcessingActor()
 
-	private let cache = NSCache<NSString, UIImage>()
+    private let cache = NSCache<NSString, UIImage>()
 
-	init() {
-		cache.totalCostLimit = 150 * 1024 * 1024 // 150MB
-	}
-	func process(
-		item: SelectedPhotoItem,
-		thumbnailSize: CGFloat = 300,
-		fullSize: CGFloat = 1600
-	) async -> UIImage? {
+    init() {
+        cache.totalCostLimit = 150 * 1024 * 1024 // 150MB
+    }
 
-		let key = item.id as NSString
-		if let cached = cache.object(forKey: key) {
-			return cached
-		}
+    func process(
+        item: SelectedPhotoItem,
+        thumbnailSize: CGFloat = 300,
+        fullSize: CGFloat = 1600
+    ) async -> UIImage? {
 
-		guard let data = try? await item.loadTransferable(type: Data.self),
-		      let original = UIImage(data: data)
-		else { return nil }
+        let key = item.id as NSString
+        if let cached = cache.object(forKey: key) {
+            return cached
+        }
 
-		return original
-	}
+        guard let data = try? await item.loadTransferable(type: Data.self),
+              let original = UIImage(data: data)
+        else { return nil }
 
-	func removeFromCache(id: String) {
-		cache.removeObject(forKey: id as NSString)
-	}
-	func removeAllFromCache() {
-		cache.removeAllObjects()
-	}
+        return original
+    }
+
+    func removeFromCache(id: String) {
+        cache.removeObject(forKey: id as NSString)
+    }
+
+    func removeAllFromCache() {
+        cache.removeAllObjects()
+    }
 }

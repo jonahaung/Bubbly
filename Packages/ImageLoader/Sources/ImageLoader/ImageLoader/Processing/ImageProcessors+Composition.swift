@@ -1,66 +1,72 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 
 #if !os(macOS)
-	import UIKit
+import UIKit
 #else
-	import AppKit
+import AppKit
 #endif
 
 public extension ImageProcessors {
-	/// Composes multiple processors.
-	struct Composition: ImageProcessing, Hashable, CustomStringConvertible {
-		public static func == (lhs: ImageProcessors.Composition,
-		                       rhs: ImageProcessors.Composition) -> Bool
-		{
-			lhs.identifier == rhs.identifier
-		}
+    /// Composes multiple processors.
+    struct Composition: ImageProcessing, Hashable, CustomStringConvertible {
+        public static func == (
+            lhs: ImageProcessors.Composition,
+            rhs: ImageProcessors.Composition
+        ) -> Bool {
+            lhs.identifier == rhs.identifier
+        }
 
-		let processors: [any ImageProcessing]
+        let processors: [any ImageProcessing]
 
-		/// Composes multiple processors.
-		public init(_ processors: [any ImageProcessing]) {
-			// note: multiple compositions are not flatten by default.
-			self.processors = processors
-		}
+        /// Composes multiple processors.
+        public init(_ processors: [any ImageProcessing]) {
+            // note: multiple compositions are not flatten by default.
+            self.processors = processors
+        }
 
-		/// Processes the given image by applying each processor in an order in
-		/// which they were added. If one of the processors fails to produce
-		/// an image the processing stops and `nil` is returned.
-		public func process(_ image: PlatformImage) -> PlatformImage? {
-			processors.reduce(image) { image, processor in
-				autoreleasepool {
-					image.flatMap(processor.process)
-				}
-			}
-		}
+        /// Processes the given image by applying each processor in an order in
+        /// which they were added. If one of the processors fails to produce
+        /// an image the processing stops and `nil` is returned.
+        public func process(_ image: PlatformImage) -> PlatformImage? {
+            processors.reduce(image) { image, processor in
+                autoreleasepool {
+                    image.flatMap(processor.process)
+                }
+            }
+        }
 
-		/// Processes the given image by applying each processor in an order in
-		/// which they were added. If one of the processors fails to produce
-		/// an image the processing stops and an error is thrown.
-		public func process(_ container: ImageContainer,
-		                    context: ImageProcessingContext) throws -> ImageContainer
-		{
-			try processors.reduce(container) { container, processor in
-				try autoreleasepool {
-					try processor.process(container, context: context)
-				}
-			}
-		}
+        /// Processes the given image by applying each processor in an order in
+        /// which they were added. If one of the processors fails to produce
+        /// an image the processing stops and an error is thrown.
+        public func process(
+            _ container: ImageContainer,
+            context: ImageProcessingContext
+        ) throws -> ImageContainer {
+            try processors.reduce(container) { container, processor in
+                try autoreleasepool {
+                    try processor.process(container, context: context)
+                }
+            }
+        }
 
-		/// Returns combined identifier of all the underlying processors.
-		public var identifier: String {
-			processors.map(\.identifier).joined()
-		}
+        /// Returns combined identifier of all the underlying processors.
+        public var identifier: String {
+            processors.map(\.identifier).joined()
+        }
 
-		/// Creates a combined hash of all the given processors.
-		public func hash(into hasher: inout Hasher) {
-			for processor in processors {
-				hasher.combine(processor.hashableIdentifier)
-			}
-		}
+        /// Creates a combined hash of all the given processors.
+        public func hash(into hasher: inout Hasher) {
+            for processor in processors {
+                hasher.combine(processor.hashableIdentifier)
+            }
+        }
 
-		public var description: String {
-			"Composition(processors: \(processors))"
-		}
-	}
+        public var description: String {
+            "Composition(processors: \(processors))"
+        }
+    }
 }

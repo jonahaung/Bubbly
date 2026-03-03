@@ -1,18 +1,22 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import SwiftUI
 
 public struct CloseToolbarItem: ToolbarContent {
-	@Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss
 
-	public init() {}
+    public init() {}
 
-	public var body: some ToolbarContent {
-		ToolbarItem(placement: .navigationBarLeading) {
-			Button(action: {
-				dismiss()
-			}, label: {
-				Image(systemName: "xmark.circle")
-			})
-			.keyboardShortcut(.cancelAction)
-		}
-	}
+    public var body: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarLeading) {
+            Button(action: {
+                dismiss()
+            }, label: {
+                Image(systemName: "xmark.circle")
+            })
+            .keyboardShortcut(.cancelAction)
+        }
+    }
 }

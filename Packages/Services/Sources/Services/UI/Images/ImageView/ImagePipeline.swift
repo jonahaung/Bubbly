@@ -1,14 +1,18 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 import ImageLoader
 
 public extension ImagePipeline {
-	static let `default` = ImagePipeline {
-		$0.dataLoader = {
-			let config = URLSessionConfiguration.default
-			config.urlCache = nil
-			return DataLoader(configuration: config)
-		}()
-		$0.imageCache = ImageCache.shared
-		$0.isLocalResourcesSupportEnabled = true
-	}
+    static let `default` = ImagePipeline {
+        $0.dataLoader = {
+            let config = URLSessionConfiguration.default
+            config.urlCache = nil
+            return DataLoader(configuration: config)
+        }()
+        $0.imageCache = ImageCache.shared
+        $0.isLocalResourcesSupportEnabled = true
+    }
 }

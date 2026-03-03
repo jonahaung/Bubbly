@@ -1,42 +1,47 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import SwiftUI
 
 public struct VLabel<Top: View, Bottom: View>: View {
-	private let spacing: CGFloat
-	private var top: () -> Top
-	private var bottom: () -> Bottom
+    private let spacing: CGFloat
+    private var top: () -> Top
+    private var bottom: () -> Bottom
 
-	public init(spacing: CGFloat = 5,
-	            @ViewBuilder top: @escaping () -> Top,
-	            @ViewBuilder bottom: @escaping () -> Bottom)
-	{
-		self.spacing = spacing
-		self.top = top
-		self.bottom = bottom
-	}
+    public init(
+        spacing: CGFloat = 5,
+        @ViewBuilder top: @escaping () -> Top,
+        @ViewBuilder bottom: @escaping () -> Bottom
+    ) {
+        self.spacing = spacing
+        self.top = top
+        self.bottom = bottom
+    }
 
-	public init(spacing: CGFloat = 5, iconName: String, text: String) {
-		self.spacing = spacing
-		top = {
-			if let image = Image(systemName: iconName) as? Top {
-				image
-			} else {
-				fatalError("Could not cast Image to Top type")
-			}
-		}
-		bottom = {
-			if let textView = Text(text) as? Bottom {
-				textView
-			} else {
-				fatalError("Could not cast Text to Bottom type")
-			}
-		}
-	}
+    public init(spacing: CGFloat = 5, iconName: String, text: String) {
+        self.spacing = spacing
+        top = {
+            if let image = Image(systemName: iconName) as? Top {
+                image
+            } else {
+                fatalError("Could not cast Image to Top type")
+            }
+        }
+        bottom = {
+            if let textView = Text(text) as? Bottom {
+                textView
+            } else {
+                fatalError("Could not cast Text to Bottom type")
+            }
+        }
+    }
 
-	public var body: some View {
-		VStack(alignment: .leading, spacing: spacing) {
-			top()
-				.imageScale(.small)
-			bottom()
-		}
-	}
+    public var body: some View {
+        VStack(alignment: .leading, spacing: spacing) {
+            top()
+                .imageScale(.small)
+            bottom()
+        }
+    }
 }

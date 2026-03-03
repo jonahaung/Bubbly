@@ -1,46 +1,50 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 
 final class Mutex<T>: @unchecked Sendable {
-	private var _value: T
-	private let lock: os_unfair_lock_t
+    private var _value: T
+    private let lock: os_unfair_lock_t
 
-	init(_ value: T) {
-		_value = value
-		lock = .allocate(capacity: 1)
-		lock.initialize(to: os_unfair_lock())
-	}
+    init(_ value: T) {
+        _value = value
+        lock = .allocate(capacity: 1)
+        lock.initialize(to: os_unfair_lock())
+    }
 
-	deinit {
-		lock.deinitialize(count: 1)
-		lock.deallocate()
-	}
+    deinit {
+        lock.deinitialize(count: 1)
+        lock.deallocate()
+    }
 
-	var value: T {
-		get {
-			os_unfair_lock_lock(lock)
-			defer { os_unfair_lock_unlock(lock) }
-			return _value
-		}
-		set {
-			os_unfair_lock_lock(lock)
-			defer { os_unfair_lock_unlock(lock) }
-			_value = newValue
-		}
-	}
+    var value: T {
+        get {
+            os_unfair_lock_lock(lock)
+            defer { os_unfair_lock_unlock(lock) }
+            return _value
+        }
+        set {
+            os_unfair_lock_lock(lock)
+            defer { os_unfair_lock_unlock(lock) }
+            _value = newValue
+        }
+    }
 
-	func withLock<U>(_ closure: (inout T) -> U) -> U {
-		os_unfair_lock_lock(lock)
-		defer { os_unfair_lock_unlock(lock) }
-		return closure(&_value)
-	}
+    func withLock<U>(_ closure: (inout T) -> U) -> U {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
+        return closure(&_value)
+    }
 }
 
 extension Mutex where T: BinaryInteger {
-	func incremented() -> T {
-		withLock {
-			let value = $0
-			$0 += 1
-			return value
-		}
-	}
+    func incremented() -> T {
+        withLock {
+            let value = $0
+            $0 += 1
+            return value
+        }
+    }
 }

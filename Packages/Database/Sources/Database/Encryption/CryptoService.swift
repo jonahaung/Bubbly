@@ -1,3 +1,7 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Core
 import Crypto
 import CryptoKit
@@ -5,129 +9,131 @@ import FirebaseAuth
 import Foundation
 
 struct CryptoPayload: Codable, Sendable {
-	let v: Int
-	let salt: String
-	let publicKey: String
-	let ciphertext: String
+    let v: Int
+    let salt: String
+    let publicKey: String
+    let ciphertext: String
 }
 
 public class CryptoService {
-	nonisolated(unsafe) public static let shared = CryptoService()
+    public nonisolated(unsafe) static let shared = CryptoService()
 
-	private init() {}
+    private init() {}
 
-	@discardableResult
-	private func getPrivateKey(for userID: String) -> Curve25519.KeyAgreement.PrivateKey {
-		if let cached = getCachedPrivateKey(userID: userID) {
-			return cached
-		}
-		return makeNewPrivateKey(userID: userID)
-	}
+    @discardableResult
+    private func getPrivateKey(for userID: String) -> Curve25519.KeyAgreement.PrivateKey {
+        if let cached = getCachedPrivateKey(userID: userID) {
+            return cached
+        }
+        return makeNewPrivateKey(userID: userID)
+    }
 
-	private func getCachedPrivateKey(userID: String) -> Curve25519.KeyAgreement.PrivateKey? {
-		let storage = GroupStorage.shared
-		guard let bas64String = storage.string(for: .security(.privateKey(id: userID))) else {
-			return nil
-		}
-		return Crypto.privateKey(with: bas64String)
-	}
+    private func getCachedPrivateKey(userID: String) -> Curve25519.KeyAgreement.PrivateKey? {
+        let storage = GroupStorage.shared
+        guard let bas64String = storage.string(for: .security(.privateKey(id: userID))) else {
+            return nil
+        }
+        return Crypto.privateKey(with: bas64String)
+    }
 
-	private func makeNewPrivateKey(userID: String) -> Curve25519.KeyAgreement.PrivateKey {
-		let storage = GroupStorage.shared
-		let newPrivateKey = Crypto.newPrivateKeyInstance()
-		let newPublicKey = newPrivateKey.publicKey
-		let newBas64PrivateKeyString = Crypto.base64String(privateKey: newPrivateKey)
-		let newBas64PublicKeyString = Crypto.base64String(publicKey: newPublicKey)
-		storage.save(newBas64PrivateKeyString, for: .security(.privateKey(id: userID)))
-		storage.save(newBas64PublicKeyString, for: .security(.publicKey(id: userID)))
-		return newPrivateKey
-	}
+    private func makeNewPrivateKey(userID: String) -> Curve25519.KeyAgreement.PrivateKey {
+        let storage = GroupStorage.shared
+        let newPrivateKey = Crypto.newPrivateKeyInstance()
+        let newPublicKey = newPrivateKey.publicKey
+        let newBas64PrivateKeyString = Crypto.base64String(privateKey: newPrivateKey)
+        let newBas64PublicKeyString = Crypto.base64String(publicKey: newPublicKey)
+        storage.save(newBas64PrivateKeyString, for: .security(.privateKey(id: userID)))
+        storage.save(newBas64PublicKeyString, for: .security(.publicKey(id: userID)))
+        return newPrivateKey
+    }
 
-	public func base64PublicKeyString(for userID: String) -> String {
-		let publicKey = getPrivateKey(for: userID).publicKey
-		return Crypto.base64String(publicKey: publicKey)
-	}
+    public func base64PublicKeyString(for userID: String) -> String {
+        let publicKey = getPrivateKey(for: userID).publicKey
+        return Crypto.base64String(publicKey: publicKey)
+    }
 
-	public func forceReload(for userID: String) {
-		let storage = GroupStorage.shared
-		storage.delete(for: .security(.privateKey(id: userID)))
-		storage.delete(for: .security(.publicKey(id: userID)))
-		getPrivateKey(for: userID)
-	}
+    public func forceReload(for userID: String) {
+        let storage = GroupStorage.shared
+        storage.delete(for: .security(.privateKey(id: userID)))
+        storage.delete(for: .security(.publicKey(id: userID)))
+        getPrivateKey(for: userID)
+    }
 }
 
 public extension CryptoService {
-	func encrypt(dataString: String,
-	             recipientPublicKeyString: String,
-	             currentUserID: String) throws -> String
-	{
-		let salt = Crypto.generateSalt()
+    func encrypt(
+        dataString: String,
+        recipientPublicKeyString: String,
+        currentUserID: String
+    ) throws -> String {
+        let salt = Crypto.generateSalt()
 
-		guard
-			let foreignPublicKey = Crypto.publicKey(with: recipientPublicKeyString),
-			let symmetricKey = Crypto.generateSymmetricKeyBetween(
-				getPrivateKey(for: currentUserID),
-				and: foreignPublicKey,
-				salt: salt
-			),
-			let data = Crypto.humanFriendlyPlainMessageToDataPlainMessage(dataString),
-			let encryptedData = Crypto.encrypt(data: data, using: symmetricKey)
-		else {
-			throw CryptoError.encryptionFailed
-		}
+        guard
+            let foreignPublicKey = Crypto.publicKey(with: recipientPublicKeyString),
+            let symmetricKey = Crypto.generateSymmetricKeyBetween(
+                getPrivateKey(for: currentUserID),
+                and: foreignPublicKey,
+                salt: salt
+            ),
+            let data = Crypto.humanFriendlyPlainMessageToDataPlainMessage(dataString),
+            let encryptedData = Crypto.encrypt(data: data, using: symmetricKey)
+        else {
+            throw CryptoError.encryptionFailed
+        }
 
-		let payload = CryptoPayload(
-			v: 1,
-			salt: salt.base64EncodedString(),
-			publicKey: base64PublicKeyString(for: currentUserID),
-			ciphertext: Crypto.encondeForNetworkTransport(encrypted: encryptedData)
-		)
+        let payload = CryptoPayload(
+            v: 1,
+            salt: salt.base64EncodedString(),
+            publicKey: base64PublicKeyString(for: currentUserID),
+            ciphertext: Crypto.encondeForNetworkTransport(encrypted: encryptedData)
+        )
 
-		let encoded = try JSONEncoder().encode(payload)
-		return encoded.base64EncodedString()
-	}
+        let encoded = try JSONEncoder().encode(payload)
+        return encoded.base64EncodedString()
+    }
 }
 
 public extension CryptoService {
-	func decrypt(payloadString: String,
-	             currentUserID: String) throws -> String
-	{
-		guard
-			let payloadData = Data(base64Encoded: payloadString),
-			let payload = try? JSONDecoder().decode(CryptoPayload.self, from: payloadData),
-			payload.v == 1,
-			let salt = Data(base64Encoded: payload.salt),
-			let foreignPublicKey = Crypto.publicKey(with: payload.publicKey),
-			let symmetricKey = Crypto.generateSymmetricKeyBetween(
-				getPrivateKey(for: currentUserID),
-				and: foreignPublicKey,
-				salt: salt
-			),
-			let encryptedData = Crypto.decodeFromNetworkTransport(
-				string: payload.ciphertext
-			)
-		else {
-			throw CryptoError.decryptionFailed
-		}
+    func decrypt(
+        payloadString: String,
+        currentUserID: String
+    ) throws -> String {
+        guard
+            let payloadData = Data(base64Encoded: payloadString),
+            let payload = try? JSONDecoder().decode(CryptoPayload.self, from: payloadData),
+            payload.v == 1,
+            let salt = Data(base64Encoded: payload.salt),
+            let foreignPublicKey = Crypto.publicKey(with: payload.publicKey),
+            let symmetricKey = Crypto.generateSymmetricKeyBetween(
+                getPrivateKey(for: currentUserID),
+                and: foreignPublicKey,
+                salt: salt
+            ),
+            let encryptedData = Crypto.decodeFromNetworkTransport(
+                string: payload.ciphertext
+            )
+        else {
+            throw CryptoError.decryptionFailed
+        }
 
-		let decrypted = Crypto.decrypt(
-			encryptedData: encryptedData,
-			using: symmetricKey
-		)
+        let decrypted = Crypto.decrypt(
+            encryptedData: encryptedData,
+            using: symmetricKey
+        )
 
-		guard let message = Crypto.dataPlainMessageToHumanFriendlyPlainMessage(decrypted)
-		else {
-			throw CryptoError.invalidPlaintext
-		}
+        guard let message = Crypto.dataPlainMessageToHumanFriendlyPlainMessage(decrypted)
+        else {
+            throw CryptoError.invalidPlaintext
+        }
 
-		return message
-	}
+        return message
+    }
 }
 
 public enum CryptoError: Error, Sendable {
-	case encryptionFailed
-	case decryptionFailed
-	case invalidPlaintext
+    case encryptionFailed
+    case decryptionFailed
+    case invalidPlaintext
 }
 
 /*

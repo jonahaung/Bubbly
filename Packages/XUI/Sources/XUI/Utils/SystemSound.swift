@@ -1,3 +1,7 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import AudioToolbox
 
 // public enum SystemSound: UInt32, Sendable {

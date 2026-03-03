@@ -1,4 +1,8 @@
 //
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
+//
 //  DeeplinkAliases.swift
 //  Services
 //
@@ -7,15 +11,15 @@
 import Foundation
 
 public struct DeeplinkAliases: Sendable, Equatable {
-	public var routeAliases: [String: String] // alias -> canonical
+    public var routeAliases: [String: String] // alias -> canonical
 
-	public init(routeAliases: [String: String] = [:]) {
-		self.routeAliases = routeAliases
-	}
+    public init(routeAliases: [String: String] = [:]) {
+        self.routeAliases = routeAliases
+    }
 
-	public func canonicalRoute(for route: String) -> String {
-		routeAliases[route.lowercased()] ?? route.lowercased()
-	}
+    public func canonicalRoute(for route: String) -> String {
+        routeAliases[route.lowercased()] ?? route.lowercased()
+    }
 }
 
 /*

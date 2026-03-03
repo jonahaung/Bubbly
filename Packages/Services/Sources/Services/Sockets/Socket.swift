@@ -1,3 +1,7 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Core
 import Database
 import FCM_V1
@@ -6,24 +10,24 @@ import XUI
 
 @globalActor
 public struct SocketActor {
-	public actor SocketActor {}
-	public static let shared = SocketActor()
+    public actor SocketActor {}
+    public static let shared = SocketActor()
 }
 
 @SocketActor
 public final class Socket: Sendable {
-	@SocketActor public static let shared = Socket()
+    @SocketActor public static let shared = Socket()
 
-	let cryptoService = CryptoService.shared
-	let pushNotificationSender = PushNotificationSender(suitName: AppInformation.groupID)
+    let cryptoService = CryptoService.shared
+    let pushNotificationSender = PushNotificationSender(suitName: AppInformation.groupID)
 
-	private init() {}
+    private init() {}
 
-	let queue = AsyncSerialQueue()
-	var sendingQueue = Deque<AnyMsgData>()
+    let queue = AsyncSerialQueue()
+    var sendingQueue = Deque<AnyMsgData>()
 
-	enum SocketError: Error {
-		case encodingFailed
-		case encryptionFailed
-	}
+    enum SocketError: Error {
+        case encodingFailed
+        case encryptionFailed
+    }
 }

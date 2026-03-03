@@ -1,4 +1,8 @@
 //
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
+//
 //  PhotoPickerView.swift
 //  MsgRoomMain
 //
@@ -8,18 +12,18 @@ import PhotosUI
 import SwiftUI
 
 struct PhotoPickerView: View {
-	@Environment(PhotoPickerManager.self) private var manager
-	var body: some View {
-		PhotosPicker(
-			selection: manager.photoPickerItems,
-			maxSelectionCount: 5,
-			selectionBehavior: .continuousAndOrdered,
-			preferredItemEncoding: .automatic,
-			photoLibrary: .shared()
-		) {
-			EmptyView()
-		}
-		.photosPickerStyle(.inline)
-		.photosPickerDisabledCapabilities(.collectionNavigation)
-	}
+    @Environment(PhotoPickerManager.self) private var manager
+    var body: some View {
+        PhotosPicker(
+            selection: manager.photoPickerItems,
+            maxSelectionCount: 5,
+            selectionBehavior: .continuousAndOrdered,
+            preferredItemEncoding: .automatic,
+            photoLibrary: .shared()
+        ) {
+            EmptyView()
+        }
+        .photosPickerStyle(.inline)
+        .photosPickerDisabledCapabilities(.collectionNavigation)
+    }
 }

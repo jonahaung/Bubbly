@@ -1,4 +1,8 @@
 //
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
+//
 //  JWTHeader.swift
 //  FCM_V1
 //
@@ -7,6 +11,6 @@
 import Foundation
 
 struct JWTHeader: Encodable {
-	let alg = "HS256"
-	let typ = "JWT"
+    let alg = "HS256"
+    let typ = "JWT"
 }

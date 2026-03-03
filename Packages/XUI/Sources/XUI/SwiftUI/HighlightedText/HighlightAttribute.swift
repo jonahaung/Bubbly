@@ -1,10 +1,14 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import SwiftUI
 
 /// Marker attribute used to identify highlighted text runs
 public struct HighlightAttribute: TextAttribute {
-	public init() {}
+    public init() {}
 }
 
 public struct EmptyAttribute: TextAttribute {
-	public init() {}
+    public init() {}
 }

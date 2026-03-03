@@ -1,31 +1,35 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Database
 import Services
 import SwiftUI
 import XUI
 
 struct ConversationGroupCell: View {
-	let group: Database.Group
+    let group: Database.Group
 
-	var body: some View {
-		AsyncButton {
-			try await ConversationInitializer.start(conversation: Conversation(
-				.group(group),
-				properties: group.conversationProperties
-			))
-		} label: {
-			HStack(spacing: 20) {
-				ProfilePhoto(
-					group
-				)
-				.padding(.vertical, 2)
-				Text(group.name)
-					.frame(maxWidth: .infinity, alignment: .leading)
-				Text("\(group.members.count) members")
-					.font(.caption)
-					.foregroundStyle(.secondary)
-			}
-		}
-		.buttonStyle(.borderless)
-		.foregroundStyle(Color.primary)
-	}
+    var body: some View {
+        AsyncButton {
+            try await ConversationInitializer.start(conversation: Conversation(
+                .group(group),
+                properties: group.conversationProperties
+            ))
+        } label: {
+            HStack(spacing: 20) {
+                ProfilePhoto(
+                    group
+                )
+                .padding(.vertical, 2)
+                Text(group.name)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                Text("\(group.members.count) members")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .buttonStyle(.borderless)
+        .foregroundStyle(Color.primary)
+    }
 }

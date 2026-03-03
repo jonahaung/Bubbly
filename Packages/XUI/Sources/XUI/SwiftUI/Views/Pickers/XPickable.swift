@@ -1,3 +1,7 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import SwiftUI
 
 // public struct XBadge: Hashable, Sendable, Identifiable {
@@ -12,38 +16,38 @@ import SwiftUI
 // }
 
 public protocol XPickable: Hashable, Identifiable, Sendable, EmptyRepresentable, CaseIterable {
-	var title: String { get }
-	@MainActor
-	var badge: RenderNode? { get }
+    var title: String { get }
+    @MainActor
+    var badge: RenderNode? { get }
 }
 
 public extension XPickable {
-	var badge: RenderNode? {
-		nil
-	}
+    var badge: RenderNode? {
+        nil
+    }
 }
 
 extension XPickable {
-	var isEmpty: Bool {
-		self == Self.empty
-	}
+    var isEmpty: Bool {
+        self == Self.empty
+    }
 }
 
 public protocol EmptyRepresentable: Sendable {
-	static var empty: Self { get }
+    static var empty: Self { get }
 }
 
 extension String: @retroactive CaseIterable {}
 extension String: XPickable {
-	public static var allCases: [String] {
-		[""]
-	}
+    public static var allCases: [String] {
+        [""]
+    }
 
-	public static var empty: String {
-		""
-	}
+    public static var empty: String {
+        ""
+    }
 
-	public var title: String {
-		replacingOccurrences(of: "_", with: " ").capitalized
-	}
+    public var title: String {
+        replacingOccurrences(of: "_", with: " ").capitalized
+    }
 }

@@ -1,71 +1,75 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 
 public struct ServerTime: Codable, Hashable, Sendable, Comparable {
-	public let value: String
+    public let value: String
 
-	public var date: Date {
-		Self.utcFormatter.date(from: value) ?? .distantPast
-	}
+    public var date: Date {
+        Self.utcFormatter.date(from: value) ?? .distantPast
+    }
 
-	public init(_ date: Date = .now) {
-		value = Self.utcFormatter.string(from: date)
-	}
+    public init(_ date: Date = .now) {
+        value = Self.utcFormatter.string(from: date)
+    }
 
-	public init(_ isoDate: String) {
-		value = isoDate
-	}
+    public init(_ isoDate: String) {
+        value = isoDate
+    }
 
-	public static func < (lhs: ServerTime, rhs: ServerTime) -> Bool {
-		lhs.date < rhs.date
-	}
+    public static func < (lhs: ServerTime, rhs: ServerTime) -> Bool {
+        lhs.date < rhs.date
+    }
 }
 
 public extension ServerTime {
-	static var now: ServerTime {
-		.init(.now)
-	}
+    static var now: ServerTime {
+        .init(.now)
+    }
 
-	static func localizedString(from value: String) -> String {
-		guard let date = utcFormatter.date(from: value) else { return value }
-		return localFormatter.string(from: date)
-	}
+    static func localizedString(from value: String) -> String {
+        guard let date = utcFormatter.date(from: value) else { return value }
+        return localFormatter.string(from: date)
+    }
 }
 
 private extension ServerTime {
-	static var utcFormatter: ISO8601DateFormatter {
-		ThreadLocal.utcFormatter.value
-	}
+    static var utcFormatter: ISO8601DateFormatter {
+        ThreadLocal.utcFormatter.value
+    }
 
-	static var localFormatter: ISO8601DateFormatter {
-		ThreadLocal.localFormatter.value
-	}
+    static var localFormatter: ISO8601DateFormatter {
+        ThreadLocal.localFormatter.value
+    }
 }
 
 private enum ThreadLocal {
-	private static let utcKey = "ServerTime.utcFormatter"
-	private static let localKey = "ServerTime.localFormatter"
+    private static let utcKey = "ServerTime.utcFormatter"
+    private static let localKey = "ServerTime.localFormatter"
 
-	static var utcFormatter: ThreadLocalFormatter {
-		.init(key: utcKey, timeZone: .gmt)
-	}
+    static var utcFormatter: ThreadLocalFormatter {
+        .init(key: utcKey, timeZone: .gmt)
+    }
 
-	static var localFormatter: ThreadLocalFormatter {
-		.init(key: localKey, timeZone: .current)
-	}
+    static var localFormatter: ThreadLocalFormatter {
+        .init(key: localKey, timeZone: .current)
+    }
 }
 
 private struct ThreadLocalFormatter {
-	let key: String
-	let timeZone: TimeZone
+    let key: String
+    let timeZone: TimeZone
 
-	var value: ISO8601DateFormatter {
-		if let existing = Thread.current.threadDictionary[key] as? ISO8601DateFormatter {
-			return existing
-		}
-		let formatter = ISO8601DateFormatter()
-		formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-		formatter.timeZone = timeZone
-		Thread.current.threadDictionary[key] = formatter
-		return formatter
-	}
+    var value: ISO8601DateFormatter {
+        if let existing = Thread.current.threadDictionary[key] as? ISO8601DateFormatter {
+            return existing
+        }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        formatter.timeZone = timeZone
+        Thread.current.threadDictionary[key] = formatter
+        return formatter
+    }
 }

@@ -1,3 +1,7 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Combine
 import Core
 import Database
@@ -7,97 +11,96 @@ import XUI
 @MainActor
 @Observable
 public class Router {
-	private var allPaths: [TabPath: [NavPath]]
-	public var selectedTab: TabPath
-	public var sheet: NavPath?
+    private var allPaths: [TabPath: [NavPath]]
+    public var selectedTab: TabPath
+    public var sheet: NavPath?
 
-	public init(_ selected: TabPath) {
-		selectedTab = selected
-		allPaths = {
-			var dictionary: [TabPath: [NavPath]] = [:]
-			for item in TabPath.allCases {
-				dictionary[item] = []
-			}
-			return dictionary
-		}()
-	}
+    public init(_ selected: TabPath) {
+        selectedTab = selected
+        allPaths = {
+            var dictionary: [TabPath: [NavPath]] = [:]
+            for item in TabPath.allCases {
+                dictionary[item] = []
+            }
+            return dictionary
+        }()
+    }
 
-	public func navPaths(for tab: TabPath) -> [NavPath] {
-		allPaths[tab] ?? []
-	}
+    public func navPaths(for tab: TabPath) -> [NavPath] {
+        allPaths[tab] ?? []
+    }
 
-	public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
-		.init(get: {
-			self.navPaths(for: tab)
-		}, set: { newValue in
-			self.allPaths[tab] = newValue
-		})
-	}
+    public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
+        .init(get: {
+            self.navPaths(for: tab)
+        }, set: { newValue in
+            self.allPaths[tab] = newValue
+        })
+    }
 
-	public func tabPathBinding() -> Binding<TabPath> {
-		.init(get: { self.selectedTab }, set: { self.selectedTab = $0 })
-	}
+    public func tabPathBinding() -> Binding<TabPath> {
+        .init(get: { self.selectedTab }, set: { self.selectedTab = $0 })
+    }
 }
 
 extension Router: @MainActor Equatable {
-	public static func == (_: Router, _: Router) -> Bool {
-		true
-	}
+    public static func == (_: Router, _: Router) -> Bool {
+        true
+    }
 }
 
 private extension Router {
-	@ObservationIgnored
-	var currentNavPaths: [NavPath]? {
-		allPaths[selectedTab]
-	}
+    @ObservationIgnored
+    var currentNavPaths: [NavPath]? {
+        allPaths[selectedTab]
+    }
 }
 
 public extension Router {
-	func toolBarVisibility() -> Visibility {
-		currentNavPaths.isNilOrEmpty ? .automatic : .hidden
-	}
+    func toolBarVisibility() -> Visibility {
+        currentNavPaths.isNilOrEmpty ? .automatic : .hidden
+    }
 
-	func selectTab(_ newValue: TabPath) {
-		selectedTab = newValue
-	}
+    func selectTab(_ newValue: TabPath) {
+        selectedTab = newValue
+    }
 
-	func visiblePath() -> NavPath {
-		allPaths[selectedTab]?.last ?? .currentUserDetails
-	}
+    func visiblePath() -> NavPath {
+        allPaths[selectedTab]?.last ?? .currentUserDetails
+    }
 
-	func pushToNav(_ path: NavPath) {
-		Task(priority: .background) {
-			var allPaths = self.allPaths
-			if let index = allPaths[selectedTab]?.firstIndex(of: path),
-			   let array = allPaths[selectedTab]
-			{
-				allPaths[selectedTab] = Array(array[0 ... index])
-				return
-			}
-			allPaths[selectedTab]?.append(path)
-			Task { @MainActor in
-				self.allPaths = allPaths
-			}
-		}
-	}
+    func pushToNav(_ path: NavPath) {
+        Task(priority: .background) {
+            var allPaths = self.allPaths
+            if let index = allPaths[selectedTab]?.firstIndex(of: path),
+               let array = allPaths[selectedTab] {
+                allPaths[selectedTab] = Array(array[0...index])
+                return
+            }
+            allPaths[selectedTab]?.append(path)
+            Task { @MainActor in
+                self.allPaths = allPaths
+            }
+        }
+    }
 
-	func pop() {
-		allPaths[selectedTab] = allPaths[selectedTab]?.dropLast()
-	}
+    func pop() {
+        allPaths[selectedTab] = allPaths[selectedTab]?.dropLast()
+    }
 
-	func popToRoot() {
-		allPaths[selectedTab] = []
-	}
+    func popToRoot() {
+        allPaths[selectedTab] = []
+    }
 
-	func presnetModel(_ value: NavPath) {
-		sheet = value
-	}
+    func presnetModel(_ value: NavPath) {
+        sheet = value
+    }
 
-	func dismissModal() {
-		sheet = nil
-	}
+    func dismissModal() {
+        sheet = nil
+    }
 }
 
 public extension Router {
-	static let shared: Router = .init(.inbox)
+    static let shared: Router = .init(.inbox)
 }

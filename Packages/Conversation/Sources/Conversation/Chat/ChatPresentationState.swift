@@ -1,3 +1,7 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Database
 import Foundation
 import Services
@@ -8,68 +12,92 @@ import XUI
 @Observable
 final class ChatPresentationState {
 
-	var overlayItem: ChatOverlayView.Item?
-	private(set) var toastItem: ChatToastItem = .none
-	private(set) var typingStatusText: String?
-	var bottomAccessory: BottomAccessoryItem?
-	private(set) var floatingDateString: String?
-	@ObservationIgnored var showContactInfo: Bool
-	@ObservationIgnored private let dateCache = ExpiringCache<String>()
-	@ObservationIgnored private let id: String
+    enum Intent {
+        case toast(_ newValue: ChatToastItem?)
+        case date(_ newValue: Date)
+        case overlayItem(_ newValue: ChatOverlayView.Item?)
+        case bottomAccessory(_ newValue: BottomAccessoryItem?)
+        case showContactInfo(_ newValue: Bool)
+        case typing(_ newValue: AnyMsgData.TypingStatusPayload?)
+    }
 
-	init(_ config: ConversationInitializer.Configuration) {
-		id = config.conID
-		showContactInfo = !config.canPaginate
-	}
+    struct State: Equatable {
+        var toast: ChatToastItem?
+        var dateText: String?
+        var overlayItem: ChatOverlayView.Item?
+        var bottomAccessory: BottomAccessoryItem?
+        var typingStatus: AnyMsgData.TypingStatusPayload?
+        var showContactInfo: Bool
+    }
 
-	func updateToast(_ item: ChatToastItem) {
-		toastItem = item
-	}
+    private(set) var state: State
+    @ObservationIgnored
+    private var ignoredState: State
 
-	func updateFocusedFrame(_ item: ChatOverlayView.Item?) {
-		withTransaction(.withoutAnimation) {
-			overlayItem = item
-		}
-	}
+    @ObservationIgnored
+    private let displayLink = DisplayLink(0.5)
+    @ObservationIgnored
+    private let dateCache = ExpiringCache<Date, String>()
 
-	func updateShowContactInfo(_ show: Bool) {
-		showContactInfo = show
-	}
+    init(_ config: ConversationInitializer.Configuration) {
+        let initialState = State(
+            toast: nil,
+            dateText: nil,
+            overlayItem: nil,
+            bottomAccessory: nil,
+            typingStatus: nil,
+            showContactInfo: !config.canPaginate
+        )
+        state = initialState
+        ignoredState = initialState
 
-	func updateFloatingDate(_ value: String?) {
-		floatingDateString = value
-	}
+        displayLink.onTargetReached = { [weak self] _ in
+            guard let self else { return }
+            self.state = ignoredState
+        }
+    }
+}
 
-	func updateTypingStatus(_ status: AnyMsgData.TypingStatusPayload) {
-		if status.isTyping, let contact = ContactsRepository.shared.contact(for: status.senderID) {
-			typingStatusText = "\(contact.name) is typing..."
-		} else {
-			typingStatusText = nil
-		}
-	}
+extension ChatPresentationState {
+    func send(_ intent: Intent) {
+        switch intent {
+        case let .toast(newValue):
+            ignoredState.toast = newValue
+        case let .date(newValue):
+            ignoredState.dateText = formattedFloatingDate(from: newValue)
 
-	func updateFloatingDate(_ date: Date) {
-		floatingDateString = formattedFloatingDate(from: date)
-	}
+            func formattedFloatingDate(from date: Date) -> String {
 
-	private func formattedFloatingDate(from date: Date) -> String {
-		if let cached = dateCache.value(forKey: date) {
-			return cached
-		}
-		let string: String =
-			switch true {
-			case date.isInToday:
-				date.formatted(.dateTime.hour().minute())
-			case date.isInYesterday:
-				"Yesterday " + date.formatted(.dateTime.hour().minute())
-			case date.isInThisWeek:
-				date.formatted(.dateTime.weekday(.short).hour().minute())
-			case date.isInThisMonth:
-				date.formatted(.dateTime.day().hour().minute())
-			default:
-				date.formatted(.dateTime.day().month(.abbreviated).hour().minute())
-			}
-		dateCache.setValue(string, forKey: date)
-		return string
-	}
+                if let cached = dateCache.value(forKey: date) {
+                    return cached
+                }
+
+                let formatter = Date.FormatStyle.dateTime
+                let string: String
+
+                if date.isInToday {
+                    string = date.formatted(formatter.hour().minute())
+                } else if date.isInYesterday {
+                    string = "Yesterday " + date.formatted(formatter.hour().minute())
+                } else if date.isInThisWeek {
+                    string = date.formatted(formatter.weekday(.short).hour().minute())
+                } else if date.isInThisMonth {
+                    string = date.formatted(formatter.day().hour().minute())
+                } else {
+                    string = date.formatted(formatter.day().month(.abbreviated).hour().minute())
+                }
+                dateCache.setValue(string, forKey: date)
+                return string
+            }
+        case let .overlayItem(newValue):
+            ignoredState.overlayItem = newValue
+        case let .bottomAccessory(newValue):
+            ignoredState.bottomAccessory = newValue
+        case let .showContactInfo(newValue):
+            ignoredState.showContactInfo = newValue
+        case let .typing(newValue):
+            ignoredState.typingStatus = newValue
+        }
+        displayLink.start()
+    }
 }

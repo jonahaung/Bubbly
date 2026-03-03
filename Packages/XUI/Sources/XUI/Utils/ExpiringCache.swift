@@ -1,35 +1,36 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 
-@MainActor
-public final class ExpiringCache<Value> {
-	private struct Entry {
-		let value: Value
-		let expiry: Date
-	}
+public final class ExpiringCache<Key: Hashable, Value> {
+    private struct Entry {
+        let value: Value
+        let expiry: UInt64
+    }
 
-	private var storage: [AnyHashable: Entry] = [:]
+    private var storage: [Key: Entry] = [:]
 
-	public init() {}
+    public init() {}
 
-	public func setValue(_ value: Value,
-	                     forKey key: AnyHashable,
-	                     expiresAt timeInterval: TimeInterval = .oneMinute)
-	{
-		storage[key] = Entry(value: value, expiry: .now + timeInterval)
-	}
+    public func setValue(
+        _ value: Value,
+        forKey key: Key,
+        expiresIn seconds: UInt64 = 60
+    ) {
+        let expiry = DispatchTime.now().uptimeNanoseconds + seconds * 1_000_000_000
+        storage[key] = Entry(value: value, expiry: expiry)
+    }
 
-	public func value(forKey key: AnyHashable) -> Value? {
-		purgeExpired(forKey: key)
-		return storage[key]?.value
-	}
+    public func value(forKey key: Key) -> Value? {
+        guard let entry = storage[key] else { return nil }
 
-	public func removeValue(forKey key: AnyHashable) {
-		storage.removeValue(forKey: key)
-	}
+        if DispatchTime.now().uptimeNanoseconds >= entry.expiry {
+            storage.removeValue(forKey: key)
+            return nil
+        }
 
-	private func purgeExpired(forKey key: AnyHashable) {
-		if let entry = storage[key], entry.expiry <= Date() {
-			storage.removeValue(forKey: key)
-		}
-	}
+        return entry.value
+    }
 }

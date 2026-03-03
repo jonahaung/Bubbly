@@ -1,3 +1,7 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Core
 import Database
 import Services
@@ -5,141 +9,136 @@ import SwiftUI
 import XUI
 
 extension MsgCell {
-	struct Content: View, @MainActor Equatable {
-		static func == (lhs: Self, rhs: Self) -> Bool {
-			lhs.viewModel.contentRenderKey == rhs.viewModel.contentRenderKey
-		}
+    struct Content: View, @MainActor Equatable {
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.viewModel.contentRenderKey == rhs.viewModel.contentRenderKey
+        }
 
-		let viewModel: MsgCellViewModel
-		let theme: ConversationTheme
-		@Environment(\.viewIsVisible) private var viewIsVisible
+        let viewModel: MsgCellViewModel
+        let theme: ConversationTheme
+        @Environment(\.viewIsVisible) private var viewIsVisible
 
-		var body: some View {
-			let alignment = Alignment(
-				horizontal: viewModel.horizontalAlignment.inverted,
-				vertical: .top
-			)
-			ZStack(alignment: alignment) {
-				StableBubbleView(
-					viewModel: viewModel,
-					theme: theme
-				)
-				.foregroundStyle(theme.foregroundStyle(for: viewModel.isSender))
+        var body: some View {
+            let alignment = Alignment(
+                horizontal: viewModel.horizontalAlignment.inverted,
+                vertical: .top
+            )
+            ZStack(alignment: alignment) {
+                StableBubbleView(
+                    viewModel: viewModel
+                )
+                .foregroundStyle(theme.foregroundStyle(for: viewModel.isSender))
 
-				OverlayBubbleView(
-					viewModel: viewModel,
-					isVisible: viewIsVisible
-				)
-			}
-			.font(theme.font)
-		}
-	}
+                OverlayBubbleView(
+                    viewModel: viewModel,
+                    isVisible: viewIsVisible
+                )
+            }
+            .font(theme.font)
+        }
+    }
 
-	struct StableBubbleView: View, @MainActor Equatable {
-		static func == (lhs: Self, rhs: Self) -> Bool {
-			lhs.renderKey == rhs.renderKey
-		}
+    struct StableBubbleView: View, @MainActor Equatable {
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.renderKey == rhs.renderKey
+        }
 
-		let viewModel: MsgCellViewModel
-		let theme: ConversationTheme
-		@Environment(\.selectedMsg) private var selectedMsg
+        let viewModel: MsgCellViewModel
+        @Environment(\.selectedMsg) private var selectedMsg
+		@Environment(\.conversationTheme) private var theme
 
-		private var renderKey: MsgCellViewModel.ContentRenderKey {
-			viewModel.contentRenderKey
-		}
+        private var renderKey: MsgCellViewModel.ContentRenderKey {
+            viewModel.contentRenderKey
+        }
 
-		private var layout: MsgCellLayout {
-			viewModel.layout
-		}
+        private var layout: MsgCellLayout {
+            viewModel.layout
+        }
 
-		var body: some View {
-			if !viewModel.msg.attachments.isEmpty {
-				VStack(alignment: viewModel.horizontalAlignment, spacing: 0) {
-					MsgAttachmentsView(
-						attachments: viewModel.msg.attachments,
-						alignment: viewModel.horizontalAlignment
-					)
+        var body: some View {
+            if !viewModel.msg.attachments.isEmpty {
+                VStack(alignment: viewModel.horizontalAlignment, spacing: 0) {
+                    MsgAttachmentsView(
+                        attachments: viewModel.msg.attachments,
+                        alignment: viewModel.horizontalAlignment
+                    )
 
-					if let text = viewModel.msg.text, !text.isWhitespace {
-						SingleSubviewLayout {
-							TextContent(text: text)
-								.padding(theme.bubblePading)
-								.background {
-									bubbleBackground
-										.padding(
-											.init(
-												top: 0.2,
-												leading: viewModel.isSender ? 1 : 0.2,
-												bottom: 1,
-												trailing: viewModel
-													.isSender ? 0.2 : 1
-											)
-										)
-										.background(
-											theme.shadowColor(for: viewModel.isSender),
-											in: .rect(corners: .concentric)
-										)
-								}
-								.containerShape(bubbleShape)
-						}
-					}
-				}
-			} else if let text = viewModel.msg.text {
-				SingleSubviewLayout {
-					TextContent(text: text)
-						.padding(theme.bubblePading)
-						.background {
-							bubbleBackground
-								.padding(
-									.init(
-										top: 0.2,
-										leading: viewModel.isSender ? 1 : 0.2,
-										bottom: 1,
-										trailing: viewModel
-											.isSender ? 0.2 : 1
-									)
-								)
-								.background(
-									theme.shadowColor(for: viewModel.isSender),
-									in: .rect(corners: .concentric)
-								)
-						}
-						.containerShape(bubbleShape)
-				}
-			}
-		}
+                    if let text = viewModel.msg.text, !text.isWhitespace {
+                        TextContent(text: text)
+                            .padding(theme.bubblePading)
+                            .background {
+                                bubbleBackground
+                                    .padding(
+                                        .init(
+                                            top: 0.2,
+                                            leading: viewModel.isSender ? 1 : 0.2,
+                                            bottom: 1,
+                                            trailing: viewModel
+                                                .isSender ? 0.2 : 1
+                                        )
+                                    )
+                                    .background(
+                                        theme.shadowColor(for: viewModel.isSender),
+                                        in: .rect(corners: .concentric)
+                                    )
+                            }
+                            .containerShape(bubbleShape)
+                    }
+                }
+            } else if let text = viewModel.msg.text {
+                TextContent(text: text)
+                    .padding(theme.bubblePading)
+                    .background {
+                        bubbleBackground
+                            .padding(
+                                .init(
+                                    top: 0.2,
+                                    leading: viewModel.isSender ? 1 : 0.2,
+                                    bottom: 1,
+                                    trailing: viewModel
+                                        .isSender ? 0.2 : 1
+                                )
+                            )
+                            .background(
+                                theme.shadowColor(for: viewModel.isSender),
+                                in: .rect(corners: .concentric)
+                            )
+                    }
+                    .containerShape(bubbleShape)
+            }
+        }
 
-		private var bubbleBackground: some View {
-			ConcentricRectangle(corners: .concentric)
-				.fill(theme.bubbleColor(for: viewModel.isSender))
-		}
+        private var bubbleBackground: some View {
+            ConcentricRectangle(corners: .concentric)
+                .fill(theme.bubbleColor(for: viewModel.isSender))
+        }
 
-		private var bubbleShape: UnevenRoundedRectangle {
-			computeBubbleCorner()
-				.roundedRectange(cornerRadius: theme.bubbleCornerRadius)
-		}
+        private var bubbleShape: UnevenRoundedRectangle {
+            computeBubbleCorner()
+                .roundedRectange(cornerRadius: theme.bubbleCornerRadius)
+        }
 
-		private func computeBubbleCorner() -> BubbleCorner {
-			if selectedMsg?.id == viewModel.id {
-				return .all
-			}
-			var corner = layout.bubbleCorner
-			if selectedMsg?.previous == viewModel.id { corner.append(.bottom) }
-			if selectedMsg?.next == viewModel.id { corner.append(.top) }
-			return corner
-		}
-	}
+        private func computeBubbleCorner() -> BubbleCorner {
+            if selectedMsg?.id == viewModel.id {
+                return .all
+            }
+            var corner = layout.bubbleCorner
+            if selectedMsg?.previous == viewModel.id { corner.append(.bottom) }
+            if selectedMsg?.next == viewModel.id { corner.append(.top) }
+            return corner
+        }
+    }
 
-	struct OverlayBubbleView: View {
-		let viewModel: MsgCellViewModel
-		let isVisible: Bool
+    struct OverlayBubbleView: View {
+        let viewModel: MsgCellViewModel
+        let isVisible: Bool
 
-		var body: some View {
-			if isVisible, !viewModel.msg.reactions.isEmpty {
-				Reactions()
-					.fixedSize()
-					.allowsHitTesting(false)
-			}
-		}
-	}
+        var body: some View {
+            if isVisible, !viewModel.msg.reactions.isEmpty {
+                Reactions()
+                    .fixedSize()
+                    .allowsHitTesting(false)
+            }
+        }
+    }
 }

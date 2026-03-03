@@ -1,73 +1,79 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import SwiftUI
 
 public struct ModalOverlay<Content: View>: View {
-	private let alignment: Alignment
-	private let edge: Edge
-	private let allowsBackgroundTap: Bool
-	@ViewBuilder private let content: () -> Content
-	private let onClose: () -> Void
+    private let alignment: Alignment
+    private let edge: Edge
+    private let allowsBackgroundTap: Bool
+    @ViewBuilder private let content: () -> Content
+    private let onClose: () -> Void
 
-	public init(_ alignment: Alignment,
-	            from edge: Edge,
-	            allowsBackgroundTap: Bool,
-	            @ViewBuilder _ content: @escaping () -> Content,
-	            onClose: @escaping () -> Void)
-	{
-		self.alignment = alignment
-		self.edge = edge
-		self.allowsBackgroundTap = allowsBackgroundTap
-		self.content = content
-		self.onClose = onClose
-	}
+    public init(
+        _ alignment: Alignment,
+        from edge: Edge,
+        allowsBackgroundTap: Bool,
+        @ViewBuilder _ content: @escaping () -> Content,
+        onClose: @escaping () -> Void
+    ) {
+        self.alignment = alignment
+        self.edge = edge
+        self.allowsBackgroundTap = allowsBackgroundTap
+        self.content = content
+        self.onClose = onClose
+    }
 
-	public var body: some View {
-		ModalContentView(alignment, allowsBackgroundTap: allowsBackgroundTap, {
-			content()
-		}, onClose: onClose)
-			.transition(
-				.asymmetric(
-					insertion: .move(edge: edge, curve: .interpolatingSpring(duration: 0.4)),
-					removal: .move(edge: edge, curve: .linear)
-				)
-			)
-	}
+    public var body: some View {
+        ModalContentView(alignment, allowsBackgroundTap: allowsBackgroundTap, {
+            content()
+        }, onClose: onClose)
+            .transition(
+                .asymmetric(
+                    insertion: .move(edge: edge, curve: .interpolatingSpring(duration: 0.4)),
+                    removal: .move(edge: edge, curve: .linear)
+                )
+            )
+    }
 }
 
 public struct ModalContentView<Content: View>: View {
-	private let alignment: Alignment
-	private let allowsBackgroundTap: Bool
-	@ViewBuilder private let content: () -> Content
-	private let onClose: () -> Void
-	@Environment(\.dismiss) private var dismiss
-	public init(_ alignment: Alignment,
-	            allowsBackgroundTap: Bool,
-	            @ViewBuilder _ content: @escaping () -> Content,
-	            onClose: @escaping () -> Void)
-	{
-		self.alignment = alignment
-		self.allowsBackgroundTap = allowsBackgroundTap
-		self.content = content
-		self.onClose = onClose
-	}
+    private let alignment: Alignment
+    private let allowsBackgroundTap: Bool
+    @ViewBuilder private let content: () -> Content
+    private let onClose: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    public init(
+        _ alignment: Alignment,
+        allowsBackgroundTap: Bool,
+        @ViewBuilder _ content: @escaping () -> Content,
+        onClose: @escaping () -> Void
+    ) {
+        self.alignment = alignment
+        self.allowsBackgroundTap = allowsBackgroundTap
+        self.content = content
+        self.onClose = onClose
+    }
 
-	public var body: some View {
-		ZStack(alignment: alignment) {
-			if allowsBackgroundTap {
-				Color.clear
-					.contentShape(ContainerRelativeShape())
-					.ignoresSafeArea()
-					.backgroundExtensionEffect()
-					.gesture(backgroundTapGesture)
-			} else {
-				Color.clear.hidden()
-			}
-			content()
-		}
-	}
+    public var body: some View {
+        ZStack(alignment: alignment) {
+            if allowsBackgroundTap {
+                Color.clear
+                    .contentShape(ContainerRelativeShape())
+                    .ignoresSafeArea()
+                    .backgroundExtensionEffect()
+                    .gesture(backgroundTapGesture)
+            } else {
+                Color.clear.hidden()
+            }
+            content()
+        }
+    }
 
-	private var backgroundTapGesture: some Gesture {
-		TapGesture().onEnded {
-			onClose()
-		}
-	}
+    private var backgroundTapGesture: some Gesture {
+        TapGesture().onEnded {
+            onClose()
+        }
+    }
 }

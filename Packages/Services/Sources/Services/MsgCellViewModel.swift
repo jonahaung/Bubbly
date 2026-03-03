@@ -1,120 +1,124 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Database
 import SwiftUI
 import XUI
 
 @Observable
 public final class MsgCellViewModel: ViewReloadable, @preconcurrency Identifiable {
-	public struct ContentRenderKey: Hashable {
-		public let id: String
-		public let text: String?
-		public let attachments: [Attachment]
-		public let reactions: [Reaction]
-		public let isVisible: Bool
-	}
+    public struct ContentRenderKey: Hashable {
+        public let id: String
+        public let text: String?
+        public let attachments: [Attachment]
+        public let reactions: [Reaction]
+        public let isVisible: Bool
+    }
 
-	public var msg: Message
-	public private(set) var isVisible = false
-	public private(set) var layout = MsgCellLayout()
-	public var reloadID: Int = 0
-	public var animationTrigger: Int = 0
-	public let layoutValue: MsgLayoutValue
+    public var msg: Message
+    public private(set) var isVisible = false
+    public private(set) var layout = MsgCellLayout()
+    public var reloadID: Int = 0
+    public var animationTrigger: Int = 0
+    public let layoutValue: MsgLayoutValue
 
-	public var contentRenderKey: ContentRenderKey
+    public var contentRenderKey: ContentRenderKey
 
-	public init(_ msg: Message) {
-		self.msg = msg
-		contentRenderKey = .init(
-			id: msg.uid,
-			text: msg.text,
-			attachments: msg.attachments,
-			reactions: msg.reactions,
-			isVisible: false
-		)
-		layoutValue = msg.layoutValue()
-	}
+    public init(_ msg: Message) {
+        self.msg = msg
+        contentRenderKey = .init(
+            id: msg.uid,
+            text: msg.text,
+            attachments: msg.attachments,
+            reactions: msg.reactions,
+            isVisible: false
+        )
+        layoutValue = msg.layoutValue()
+    }
 
-	public func update(with msg: Message) {
-		guard self.msg != msg else { return }
-		self.msg = msg
-		layoutIfNeeded()
-	}
+    public func update(with msg: Message) {
+        guard self.msg != msg else { return }
+        self.msg = msg
+        layoutIfNeeded()
+    }
 
-	public func update(layout: MsgCellLayout) {
-		guard self.layout != layout else { return }
-		self.layout = layout
-//		layoutIfNeeded()
-	}
+    public func update(layout: MsgCellLayout) {
+        guard self.layout != layout else { return }
+        self.layout = layout
+        //		layoutIfNeeded()
+    }
 
-	public func setVisibility(_ isVisible: Bool) {
-		guard self.isVisible != isVisible else { return }
-		self.isVisible = isVisible
-	}
+    public func setVisibility(_ isVisible: Bool) {
+        guard self.isVisible != isVisible else { return }
+        self.isVisible = isVisible
+    }
 
-	public func animate() {
-		animationTrigger += 1
-	}
+    public func animate() {
+        animationTrigger += 1
+    }
 
-	func computeBubbleCOrner(selectedMsg: SelectedMsg?, isSender _: Bool) -> BubbleCorner {
-		guard let selectedMsg else {
-			return layout.bubbleCorner
-		}
-		let isSelected = selectedMsg.id == id
-		if isSelected {
-			return .all
-		}
-		var corner = layout.bubbleCorner
+    func computeBubbleCOrner(selectedMsg: SelectedMsg?, isSender _: Bool) -> BubbleCorner {
+        guard let selectedMsg else {
+            return layout.bubbleCorner
+        }
+        let isSelected = selectedMsg.id == id
+        if isSelected {
+            return .all
+        }
+        var corner = layout.bubbleCorner
 
-		if selectedMsg.previous == id {
-			corner.append(.bottom)
-			return corner
-		}
-		if selectedMsg.next == id {
-			corner.append(.top)
-			return corner
-		}
-		return corner
-	}
+        if selectedMsg.previous == id {
+            corner.append(.bottom)
+            return corner
+        }
+        if selectedMsg.next == id {
+            corner.append(.top)
+            return corner
+        }
+        return corner
+    }
 }
 
 extension MsgCellViewModel: @preconcurrency Equatable {
-	public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
-		lhs.id == rhs.id
-	}
+    public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
 public extension MsgCellViewModel {
-	var id: String {
-		msg.uid
-	}
+    var id: String {
+        msg.uid
+    }
 
-	var isSender: Bool {
-		msg.isSender
-	}
+    var isSender: Bool {
+        msg.isSender
+    }
 
-	var foregroundStyle: Color {
-		isSender ? .black : .primary
-	}
+    var foregroundStyle: Color {
+        isSender ? .black : .primary
+    }
 
-	var horizontalAlignment: HorizontalAlignment {
-		isSender ? .trailing : .leading
-	}
+    var horizontalAlignment: HorizontalAlignment {
+        isSender ? .trailing : .leading
+    }
 
-	var verticalAlignment: VerticalItemAlignment {
-		isSender ? .trailing : .leading
-	}
+    var verticalAlignment: VerticalItemAlignment {
+        isSender ? .trailing : .leading
+    }
 
-	func sender() -> Contact? {
-		ContactsRepository.shared.contact(for: msg.senderID)
-	}
+    func sender() -> Contact? {
+        ContactsRepository.shared.contact(for: msg.senderID)
+    }
 }
 
 public extension HorizontalAlignment {
-	var inverted: HorizontalAlignment {
-		self == .leading ? .trailing : .leading
-	}
+    var inverted: HorizontalAlignment {
+        self == .leading ? .trailing : .leading
+    }
 }
 
 public enum VerticalItemAlignment: Sendable {
-	case leading
-	case trailing
+    case leading
+    case trailing
 }

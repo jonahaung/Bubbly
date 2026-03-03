@@ -1,10 +1,14 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 
 extension URL {
-	/// For `myapp://conversation?id=123`, `host` is `conversation`.
-	/// For `myapp://v1/conversation?id=123`, `host` is `v1` and first path component is
-	/// `conversation`.
-	var pathParts: [String] {
-		pathComponents.filter { $0 != "/" }
-	}
+    /// For `myapp://conversation?id=123`, `host` is `conversation`.
+    /// For `myapp://v1/conversation?id=123`, `host` is `v1` and first path component is
+    /// `conversation`.
+    var pathParts: [String] {
+        pathComponents.filter { $0 != "/" }
+    }
 }

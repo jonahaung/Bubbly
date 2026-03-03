@@ -1,41 +1,46 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import SwiftData
 
 @Model
 public final class PConversationProperties {
-	@Attribute(.unique)
-	public var uid: String
-	public var theme: ConversationTheme
-	public var seenMembers: [SeenMember]
+    @Attribute(.unique)
+    public var uid: String
+    public var theme: ConversationTheme
+    public var seenMembers: [SeenMember]
 
-	public init(uid: String,
-	            theme: ConversationTheme,
-	            seenMembers: [SeenMember])
-	{
-		self.uid = uid
-		self.theme = theme
-		self.seenMembers = seenMembers
-	}
+    public init(
+        uid: String,
+        theme: ConversationTheme,
+        seenMembers: [SeenMember]
+    ) {
+        self.uid = uid
+        self.theme = theme
+        self.seenMembers = seenMembers
+    }
 }
 
 extension PConversationProperties: CollectionDocument, SendableDocument {
-	public func update(from item: ConversationProperties) {
-		theme = item.theme
-		seenMembers = item.seenMembers
-	}
+    public func update(from item: ConversationProperties) {
+        theme = item.theme
+        seenMembers = item.seenMembers
+    }
 
-	public convenience init(from sendable: ConversationProperties) {
-		self.init(
-			uid: sendable.uid,
-			theme: sendable.theme,
-			seenMembers: sendable.seenMembers
-		)
-	}
+    public convenience init(from sendable: ConversationProperties) {
+        self.init(
+            uid: sendable.uid,
+            theme: sendable.theme,
+            seenMembers: sendable.seenMembers
+        )
+    }
 
-	public func toSendable() -> ConversationProperties {
-		.init(
-			uid: uid,
-			theme: theme,
-			seenMembers: seenMembers
-		)
-	}
+    public func toSendable() -> ConversationProperties {
+        .init(
+            uid: uid,
+            theme: theme,
+            seenMembers: seenMembers
+        )
+    }
 }

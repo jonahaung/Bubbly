@@ -1,40 +1,45 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 import os
 
-func signpost(_ object: AnyObject,
-              _ name: StaticString,
-              _ type: OSSignpostType,
-              _ message: @autoclosure () -> String)
-{
-	guard ImagePipeline.Configuration.isSignpostLoggingEnabled else { return }
+func signpost(
+    _ object: AnyObject,
+    _ name: StaticString,
+    _ type: OSSignpostType,
+    _ message: @autoclosure () -> String
+) {
+    guard ImagePipeline.Configuration.isSignpostLoggingEnabled else { return }
 
-	let log = log.value
-	let signpostId = OSSignpostID(log: log, object: object)
-	os_signpost(type, log: log, name: name, signpostID: signpostId, "%{public}s", message())
+    let log = log.value
+    let signpostId = OSSignpostID(log: log, object: object)
+    os_signpost(type, log: log, name: name, signpostID: signpostId, "%{public}s", message())
 }
 
 func signpost<T>(_ name: StaticString, _ work: () throws -> T) rethrows -> T {
-	guard ImagePipeline.Configuration.isSignpostLoggingEnabled else { return try work() }
+    guard ImagePipeline.Configuration.isSignpostLoggingEnabled else { return try work() }
 
-	let log = log.value
-	let signpostId = OSSignpostID(log: log)
-	os_signpost(.begin, log: log, name: name, signpostID: signpostId)
-	let result = try work()
-	os_signpost(.end, log: log, name: name, signpostID: signpostId)
-	return result
+    let log = log.value
+    let signpostId = OSSignpostID(log: log)
+    os_signpost(.begin, log: log, name: name, signpostID: signpostId)
+    let result = try work()
+    os_signpost(.end, log: log, name: name, signpostID: signpostId)
+    return result
 }
 
 private let log = Mutex(OSLog(
-	subsystem: "com.github.kean.Nuke.ImagePipeline",
-	category: "Image Loading"
+    subsystem: "com.github.kean.Nuke.ImagePipeline",
+    category: "Image Loading"
 ))
 
 enum Formatter {
-	static func bytes(_ count: Int) -> String {
-		bytes(Int64(count))
-	}
+    static func bytes(_ count: Int) -> String {
+        bytes(Int64(count))
+    }
 
-	static func bytes(_ count: Int64) -> String {
-		ByteCountFormatter().string(fromByteCount: count)
-	}
+    static func bytes(_ count: Int64) -> String {
+        ByteCountFormatter().string(fromByteCount: count)
+    }
 }

@@ -1,8 +1,12 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import SwiftUI
 import XUI
 
 public enum MsgRecipient: Int, Codable, Sendable, Hashable {
-	case send
-	case receive
-	case assistant
+    case send
+    case receive
+    case assistant
 }

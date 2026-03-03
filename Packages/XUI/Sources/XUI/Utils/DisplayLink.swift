@@ -1,59 +1,63 @@
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import UIKit
 
 public final class DisplayLink {
-	public enum State {
-		case inactive
-		case running
-	}
+    public enum State {
+        case inactive
+        case running
+    }
 
-	private var displayLink: CADisplayLink?
-	private var startTime: CFTimeInterval = 0
-	public private(set) var state: State = .inactive
+    private var displayLink: CADisplayLink?
+    private var startTime: CFTimeInterval = 0
+    public private(set) var state: State = .inactive
 
-	private var targetInterval: CFTimeInterval
+    private var targetInterval: CFTimeInterval
 
-	public init(_ interval: CFTimeInterval = 1) {
-		targetInterval = interval
-	}
+    public init(_ interval: CFTimeInterval = 1) {
+        targetInterval = interval
+    }
 
-	public var onUpdate: ((Double) -> Void)?
+    public var onUpdate: ((Double) -> Void)?
 
-	public var onTargetReached: ((Double) -> Void)?
+    public var onTargetReached: ((Double) -> Void)?
 
-	public func start(_ interval: CFTimeInterval? = nil) {
-		if let interval {
-			targetInterval = interval
-		}
-		if state == .running {
-			stop()
-		}
+    public func start(_ interval: CFTimeInterval? = nil) {
+        if let interval {
+            targetInterval = interval
+        }
+        if state == .running {
+            stop()
+        }
 
-		state = .running
-		startTime = CACurrentMediaTime()
+        state = .running
+        startTime = CACurrentMediaTime()
 
-		let link = CADisplayLink(target: self, selector: #selector(handleFrame))
-		link.preferredFrameRateRange = .init(minimum: 60, maximum: 60)
-		link.add(to: .main, forMode: .common)
-		displayLink = link
-	}
+        let link = CADisplayLink(target: self, selector: #selector(handleFrame))
+        link.preferredFrameRateRange = .init(minimum: 60, maximum: 60)
+		link.add(to: .current, forMode: .tracking)
+        displayLink = link
+    }
 
-	public func stop() {
-		guard state == .running else { return }
-		displayLink?.invalidate()
-		displayLink = nil
-		state = .inactive
-		startTime = 0
-	}
+    public func stop() {
+        guard state == .running else { return }
+        displayLink?.invalidate()
+        displayLink = nil
+        state = .inactive
+        startTime = 0
+    }
 
-	@objc private func handleFrame() {
-		guard state == .running else { return }
+    @objc private func handleFrame() {
+        guard state == .running else { return }
 
-		let elapsed = CACurrentMediaTime() - startTime
-		onUpdate?(elapsed)
+        let elapsed = CACurrentMediaTime() - startTime
+        onUpdate?(elapsed)
 
-		if elapsed >= targetInterval {
-			stop()
-			onTargetReached?(elapsed)
-		}
-	}
+        if elapsed >= targetInterval {
+            stop()
+            onTargetReached?(elapsed)
+        }
+    }
 }
