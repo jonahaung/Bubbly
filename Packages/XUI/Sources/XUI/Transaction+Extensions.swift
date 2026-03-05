@@ -4,8 +4,11 @@
 
 import SwiftUI
 
-public extension Transaction {
-    static func withAnimation(_ animation: Animation = .easeInOut, completion: (() -> Void)? = nil)
+extension Transaction {
+    public static func withAnimation(
+        _ animation: Animation = .easeInOut,
+        completion: (() -> Void)? = nil
+    )
         -> Transaction {
         var transaction = Transaction(animation: animation)
         transaction.disablesAnimations = false
@@ -13,23 +16,31 @@ public extension Transaction {
         transaction.scrollContentOffsetAdjustmentBehavior = .automatic
         transaction.tracksVelocity = true
         transaction.scrollTargetAnchor = .center
-        transaction.addAnimationCompletion(criteria: .removed) {
-            completion?()
+        if let completion {
+            transaction.addAnimationCompletion(criteria: .removed) {
+                completion()
+            }
         }
         return transaction
     }
 
-    @MainActor static let withoutAnimation: Transaction = {
+    public static func withoutAnimation(completion: (() -> Void)? = nil) -> Transaction {
         var transaction = Transaction(animation: nil)
         transaction.disablesAnimations = true
         transaction.scrollPositionUpdatePreservesVelocity = false
         transaction.scrollContentOffsetAdjustmentBehavior = .disabled
         transaction.tracksVelocity = false
         transaction.scrollTargetAnchor = .none
+        if let completion {
+            transaction.addAnimationCompletion(criteria: .removed) {
+                completion()
+            }
+        }
         return transaction
-    }()
+    }
 
-    static func scrollView(preservePosition: Bool, completion: (() -> Void)? = nil) -> Transaction {
+    public static func scrollView(preservePosition: Bool, completion: (() -> Void)? = nil)
+        -> Transaction {
         var transaction = Transaction()
         transaction.animation = nil
         transaction.tracksVelocity = true
@@ -38,8 +49,10 @@ public extension Transaction {
         transaction.isContinuous = true
         transaction.dismissBehavior = .destructive
         transaction.scrollContentOffsetAdjustmentBehavior = .automatic
-        transaction.addAnimationCompletion(criteria: .removed) {
-            completion?()
+        if let completion {
+            transaction.addAnimationCompletion(criteria: .removed) {
+                completion()
+            }
         }
         return transaction
     }

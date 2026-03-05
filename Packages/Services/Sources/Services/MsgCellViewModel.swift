@@ -7,33 +7,16 @@ import SwiftUI
 import XUI
 
 @Observable
-public final class MsgCellViewModel: ViewReloadable, @preconcurrency Identifiable {
-    public struct ContentRenderKey: Hashable {
-        public let id: String
-        public let text: String?
-        public let attachments: [Attachment]
-        public let reactions: [Reaction]
-        public let isVisible: Bool
-    }
+public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
 
     public var msg: Message
-    public private(set) var isVisible = false
-    public private(set) var layout = MsgCellLayout()
     public var reloadID: Int = 0
-    public var animationTrigger: Int = 0
     public let layoutValue: MsgLayoutValue
-
-    public var contentRenderKey: ContentRenderKey
+    public var state: State
 
     public init(_ msg: Message) {
+        state = .init(msg: msg)
         self.msg = msg
-        contentRenderKey = .init(
-            id: msg.uid,
-            text: msg.text,
-            attachments: msg.attachments,
-            reactions: msg.reactions,
-            isVisible: false
-        )
         layoutValue = msg.layoutValue()
     }
 
@@ -44,71 +27,96 @@ public final class MsgCellViewModel: ViewReloadable, @preconcurrency Identifiabl
     }
 
     public func update(layout: MsgCellLayout) {
-        guard self.layout != layout else { return }
-        self.layout = layout
-        //		layoutIfNeeded()
+        guard state.layout != layout else { return }
+        if layout.showAvatar, state.sender == nil {
+            state.sender = ContactsRepository.shared.contact(for: msg.senderID)
+        }
+        state.layout = layout
     }
 
     public func setVisibility(_ isVisible: Bool) {
-        guard self.isVisible != isVisible else { return }
-        self.isVisible = isVisible
+        guard state.isVisible != isVisible else { return }
+        state.isVisible = isVisible
     }
 
-    public func animate() {
-        animationTrigger += 1
-    }
-
-    func computeBubbleCOrner(selectedMsg: SelectedMsg?, isSender _: Bool) -> BubbleCorner {
-        guard let selectedMsg else {
-            return layout.bubbleCorner
-        }
-        let isSelected = selectedMsg.id == id
-        if isSelected {
-            return .all
-        }
-        var corner = layout.bubbleCorner
-
-        if selectedMsg.previous == id {
-            corner.append(.bottom)
-            return corner
-        }
-        if selectedMsg.next == id {
-            corner.append(.top)
-            return corner
-        }
-        return corner
-    }
-}
-
-extension MsgCellViewModel: @preconcurrency Equatable {
-    public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
-        lhs.id == rhs.id
+    public func update(selectedMsg: SelectedMsg?) {
+        state.selectedMsg = selectedMsg
+        layoutIfNeeded()
     }
 }
 
 public extension MsgCellViewModel {
+    struct State: Equatable {
+        public let id: String
+        public let text: String?
+        public let attachments: [Attachment]
+        public let isSender: Bool
+        public var sender: Contact?
+        public var layout: MsgCellLayout
+        public var isVisible: Bool
+        public let bubblePadding: EdgeInsets
+        public var selectedMsg: SelectedMsg?
+        public var reactions: [Reaction]?
+
+        public init(msg: Message) {
+            id = msg.id
+            text = msg.text
+            attachments = msg.attachments
+            isSender = msg.isSender
+            sender = nil
+            layout = .init()
+            isVisible = false
+            reactions = msg.reactions.isEmpty ? nil : msg.reactions
+            let uiFont = UIFont.preferredFont(forTextStyle: .body)
+            let verticalPadding = uiFont.chatVerticalPadding
+            let horizontalPadding = uiFont.chatHorizontalPadding
+            bubblePadding = .init(
+                top: verticalPadding,
+                leading: horizontalPadding,
+                bottom: verticalPadding,
+                trailing: horizontalPadding
+            )
+            selectedMsg = nil
+        }
+
+        public func computeBubbleCorner() -> BubbleCorner {
+            if selectedMsg?.id == id {
+                return .all
+            }
+            var corner = layout.bubbleCorner
+            if selectedMsg?.previous == id { corner.append(.bottom) }
+            if selectedMsg?.next == id { corner.append(.top) }
+            return corner
+        }
+
+        public var verticalAlignment: VerticalItemAlignment {
+            isSender ? .trailing : .leading
+        }
+
+        public var horizontalAlignment: HorizontalAlignment {
+            isSender ? .trailing : .leading
+        }
+
+        public var foregroundStyle: Color {
+            isSender ? .black : .primary
+        }
+
+        public var contentPadding: EdgeInsets {
+            .init(
+                top: 0.2,
+                leading: isSender ? 1 : 0.2,
+                bottom: 1,
+                trailing: isSender ? 0.2 : 1
+            )
+        }
+
+        public var isSelected: Bool {
+            selectedMsg?.id == id
+        }
+    }
+
     var id: String {
-        msg.uid
-    }
-
-    var isSender: Bool {
-        msg.isSender
-    }
-
-    var foregroundStyle: Color {
-        isSender ? .black : .primary
-    }
-
-    var horizontalAlignment: HorizontalAlignment {
-        isSender ? .trailing : .leading
-    }
-
-    var verticalAlignment: VerticalItemAlignment {
-        isSender ? .trailing : .leading
-    }
-
-    func sender() -> Contact? {
-        ContactsRepository.shared.contact(for: msg.senderID)
+        state.id
     }
 }
 
@@ -121,4 +129,20 @@ public extension HorizontalAlignment {
 public enum VerticalItemAlignment: Sendable {
     case leading
     case trailing
+}
+
+extension UIFont {
+    var chatOpticalOffset: CGFloat {
+        let topExtra = ascender - capHeight // space above capital letters
+        let bottom = abs(descender)
+        return (topExtra * 0.18) - (bottom * 0.06)
+    }
+
+    var chatVerticalPadding: CGFloat {
+        max(10, lineHeight * 0.34)
+    }
+
+    var chatHorizontalPadding: CGFloat {
+        max(12, lineHeight * 0.55)
+    }
 }

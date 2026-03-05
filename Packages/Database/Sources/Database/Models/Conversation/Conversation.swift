@@ -12,13 +12,10 @@ public struct Conversation: Codable, Sendable, Hashable, Equatable, UIdentifiabl
     public let name: String
     public let photoURL: String
     public let members: [String]
-    public var properties: ConversationProperties
 
-    public init(kind: ConversationKind, uid: String, properties: ConversationProperties) {
+    public init(kind: ConversationKind, uid: String) {
         self.kind = kind
         self.uid = uid
-        self.properties = properties
-
         switch kind {
         case let .contact(contact):
             name = contact.name
@@ -33,16 +30,12 @@ public struct Conversation: Codable, Sendable, Hashable, Equatable, UIdentifiabl
 }
 
 extension Conversation: EmptyRepresentable {
-    public static let empty: Conversation = .init(.contact(.empty), properties: .empty)
+    public static let empty: Conversation = .init(.contact(.empty))
 }
 
 public extension Conversation {
-    var theme: ConversationTheme {
-        get { properties.theme }
-        set { properties.theme = newValue }
-    }
 
-    init(_ kind: ConversationKind, properties: ConversationProperties) {
+    init(_ kind: ConversationKind) {
         guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
             preconditionFailure("Missing currentUserID in GroupAppStorage")
         }
@@ -51,15 +44,13 @@ public extension Conversation {
             let uid = ConversationIDGenerator.generate(currentUserID, contact.uid)
             self.init(
                 kind: kind,
-                uid: uid,
-                properties: properties
+                uid: uid
             )
         case let .group(group):
             let uid = group.uid
             self.init(
                 kind: kind,
-                uid: uid,
-                properties: properties
+                uid: uid
             )
         }
     }
@@ -72,8 +63,15 @@ public extension Conversation {
 
     @concurrent
     func saveChanges() async throws {
-        try await Store.shared.conversationPropertiesStore?.updateAndSave(uid: uid) { value in
-            value.update(from: properties)
+        switch kind {
+        case let .contact(contact):
+            try await Store.shared.contactStore?.updateAndSave(uid: contact.uid) { value in
+                value.update(from: contact)
+            }
+        case let .group(group):
+            try await Store.shared.groupStore?.updateAndSave(uid: group.uid) { value in
+                value.update(from: group)
+            }
         }
     }
 }

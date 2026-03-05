@@ -49,11 +49,15 @@ extension PGroup: CollectionDocument, UIdentifiable {
         if members.sorted() != conversation.members.sorted() {
             members = conversation.members
         }
-        if theme != conversation.properties.theme {
-            theme = conversation.properties.theme
+    }
+
+    public func update(with properties: ConversationProperties) {
+
+        if theme != properties.theme {
+            theme = properties.theme
         }
-        if seenMembers != conversation.properties.seenMembers {
-            seenMembers = conversation.properties.seenMembers
+        if seenMembers != properties.seenMembers {
+            seenMembers = properties.seenMembers
         }
     }
 

@@ -18,8 +18,7 @@ public enum ConversationRepo {
     @discardableResult
     public static func getOrCreate(for conID: String, refetch: Bool) async throws -> Conversation {
         let kind = try await getConversationKind(for: conID, refetch: refetch)
-        let properties = try await ConversationPropertiesRepo.getOrCreate(for: conID)
-        return Conversation(kind, properties: properties)
+        return Conversation(kind)
     }
 
     public static func getConversationKind(
@@ -185,24 +184,12 @@ public enum ConversationRepo {
         currentUserId: String
     ) async throws -> Conversation? {
         if let contact = try await ContactRepo.search(named: name) {
-            await Conversation(
-                .contact(contact),
-                properties: ConversationPropertiesRepo.getOrCreateMain(
-                    for: ConversationIDGenerator.generate(
-                        currentUserId,
-                        contact.uid
-                    )
-                )
+            Conversation(
+                .contact(contact)
             )
         } else if let group = try await ContactRepo.searchGroup(named: name) {
-            await Conversation(
-                .group(group),
-                properties: ConversationPropertiesRepo.getOrCreateMain(
-                    for: ConversationIDGenerator.generate(
-                        currentUserId,
-                        group.uid
-                    )
-                )
+            Conversation(
+                .group(group)
             )
         } else {
             nil

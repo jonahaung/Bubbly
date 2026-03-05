@@ -30,8 +30,8 @@ public final class AppCoordinator: @MainActor Coordinator {
         )
     }
 
-    public func handleDeeplink(_ url: URL) {
-        deeplinkCoordinator.onOpenURL(url: url)
+    public func handleDeeplink(_ url: URL) async {
+        await deeplinkCoordinator.onOpenURL(url: url)
     }
 
     public func start() {

@@ -6,7 +6,7 @@ import Foundation
 import SwiftUI
 import XUI
 
-struct ScrollReducer {
+enum ScrollReducer {
 
     typealias State = ChatScrollCoordinator.State
     typealias Intent = ChatScrollCoordinator.Intent
@@ -27,7 +27,8 @@ extension ScrollReducer {
         state: inout State,
         intent: Intent,
         canLoadOlder: Bool,
-        canLoadNewer: Bool
+        canLoadNewer: Bool,
+        shouldAdjustWindow: Bool
     ) -> Effect {
         switch intent {
         case let .onVisibilityChange(visibility):
@@ -43,18 +44,9 @@ extension ScrollReducer {
                 oldValue: oldValue,
                 newValue: newValue,
                 canLoadOlder: canLoadOlder,
-                canLoadNewer: canLoadNewer
+                canLoadNewer: canLoadNewer,
+                canRemove: shouldAdjustWindow
             )
-        case let .onScrollPhaseChange(oldValue, newValue, context):
-            guard oldValue != newValue else { return .noAction }
-            if newValue == .idle {
-                let geometry = VScrollGeometry(context.geometry)
-                let y = geometry.offsetY
-                if canLoadOlder, y < geometry.boundsHeight {
-                    return .begingUpdate(.remove(edge: .bottom))
-                }
-            }
-            return .noAction
         default:
             return .noAction
         }
@@ -67,7 +59,8 @@ extension ScrollReducer {
         oldValue: VScrollGeometry,
         newValue: VScrollGeometry,
         canLoadOlder: Bool,
-        canLoadNewer: Bool
+        canLoadNewer: Bool,
+        canRemove: Bool
     ) -> Effect {
 
         guard state.updateState.hasViewLoaded else {
@@ -83,8 +76,26 @@ extension ScrollReducer {
             oldValue: oldValue,
             newValue: newValue,
             canLoadOlder: canLoadOlder,
-            canLoadNewer: canLoadNewer
+            canLoadNewer: canLoadNewer,
+            shouldAdjustWindow: canRemove
         )
+    }
+
+    private func paginateIfNeeded(
+        _ state: ScrollReducer.State,
+        _ newValue: VScrollGeometry,
+        _ canLoadOlder: Bool,
+        _ canLoadNewer: Bool,
+        shouldAdjustWindow: Bool
+    ) -> ScrollReducer.Effect {
+        if state.direction == .up, canLoadOlder, newValue.canPaginate(at: .top) {
+            return .begingUpdate(shouldAdjustWindow ? .remove(edge: .bottom) : .insert(edge: .top))
+        }
+        if state.direction == .down, canLoadNewer,
+           newValue.canPaginate(at: .bottom) {
+            return .begingUpdate(shouldAdjustWindow ? .remove(edge: .top) : .insert(edge: .bottom))
+        }
+        return .noAction
     }
 
     private func handleIdle(
@@ -92,24 +103,24 @@ extension ScrollReducer {
         oldValue: VScrollGeometry,
         newValue: VScrollGeometry,
         canLoadOlder: Bool,
-        canLoadNewer: Bool
+        canLoadNewer: Bool,
+        shouldAdjustWindow: Bool
     ) -> Effect {
 
-        guard state.updateState.isNotUpdating, state.phase == .decelerating,
+        guard state.updateState.isNotUpdating,
+              [ScrollPhase.decelerating, .interacting]
+              .contains(state.phase),
               oldValue.contentHeight == newValue.contentHeight
         else {
             return .noAction
         }
-        if state.direction == .up, canLoadOlder, newValue.offsetY < newValue.boundsHeight / 2 {
-            return .begingUpdate(.remove(edge: .bottom))
-        }
-        if state.direction == .down, canLoadNewer,
-           newValue
-           .offsetY + (newValue.boundsHeight + newValue.boundsHeight / 2)
-           > newValue.contentHeight {
-            return .begingUpdate(.insert(edge: .bottom))
-        }
-        return .noAction
+        return paginateIfNeeded(
+            state,
+            newValue,
+            canLoadOlder,
+            canLoadNewer,
+            shouldAdjustWindow: shouldAdjustWindow
+        )
     }
 
     private func handleUpdating(
@@ -121,33 +132,37 @@ extension ScrollReducer {
 
         switch state.updateState {
         case .resetting:
+            guard difference != 0 else {
+                return .scroll(item: .y(newValue.offsetY))
+            }
             return .endUpdate(.reset, scrollItem: .snapToBottom())
         case let .insertingItems(edge):
-            guard difference != 0 else {
-                return .noAction
-            }
             switch edge {
             case .top:
                 let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
-                return .endUpdate(.insert(edge: .top), scrollItem: .y(offsetY))
+                return .endUpdate(.insert(edge: edge), scrollItem: .y(offsetY))
             case .bottom:
-                return .endUpdate(.insert(edge: .bottom), scrollItem: nil)
+                return .endUpdate(.insert(edge: edge), scrollItem: nil)
             }
         case let .removingItems(edge):
             switch edge {
             case .top:
-                return .noAction
+
+                let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
+                return .endUpdate(
+                    .remove(edge: edge),
+                    scrollItem: .y(offsetY)
+                )
             case .bottom:
                 return .endUpdate(
-                    .remove(edge: .bottom),
-                    scrollItem: .y(oldValue.offsetY)
+                    .remove(edge: edge),
+                    scrollItem: .y(newValue.offsetY)
                 )
             }
         case let .appendingItem(id):
-            let offsetY = newValue.bottomMostOffset
             return .endUpdate(
                 .append(id: id),
-                scrollItem: .y(offsetY, animation: .easeIn(duration: 0.22))
+                scrollItem: .id(id, animation: .interactiveSpring(duration: 0.4))
             )
         default:
             return .noAction

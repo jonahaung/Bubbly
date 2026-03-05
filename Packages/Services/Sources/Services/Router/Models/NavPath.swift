@@ -7,12 +7,12 @@ import Foundation
 import SwiftUI
 import XUI
 
-public enum NavPath: Hashable, @unchecked Sendable, Identifiable, CaseNameReflectable {
+public enum NavPath: Sendable, Hashable, Equatable, Identifiable, CaseNameReflectable {
     case conversationDetails(_ conversation: Conversation)
     case conversation(_ prefatchData: ConversationInitializer.PrefetchedData)
     case contactDetails(_ contact: Contact)
     case currentUserDetails
-    case view(id: AnyHashable, node: RenderNode)
+    case view(id: String, node: RenderNode)
 
     public var id: String {
         hashValue.description

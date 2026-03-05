@@ -2,7 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import Combine
 import Core
 import Database
 import SwiftUI
@@ -10,20 +9,17 @@ import XUI
 
 @MainActor
 @Observable
-public class Router {
+public final class Router {
+
     private var allPaths: [TabPath: [NavPath]]
     public var selectedTab: TabPath
     public var sheet: NavPath?
 
     public init(_ selected: TabPath) {
         selectedTab = selected
-        allPaths = {
-            var dictionary: [TabPath: [NavPath]] = [:]
-            for item in TabPath.allCases {
-                dictionary[item] = []
-            }
-            return dictionary
-        }()
+        allPaths = Dictionary(
+            uniqueKeysWithValues: TabPath.allCases.map { ($0, []) }
+        )
     }
 
     public func navPaths(for tab: TabPath) -> [NavPath] {
@@ -31,21 +27,17 @@ public class Router {
     }
 
     public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
-        .init(get: {
-            self.navPaths(for: tab)
-        }, set: { newValue in
-            self.allPaths[tab] = newValue
-        })
+        Binding(
+            get: { self.allPaths[tab] ?? [] },
+            set: { self.allPaths[tab] = $0 }
+        )
     }
 
     public func tabPathBinding() -> Binding<TabPath> {
-        .init(get: { self.selectedTab }, set: { self.selectedTab = $0 })
-    }
-}
-
-extension Router: @MainActor Equatable {
-    public static func == (_: Router, _: Router) -> Bool {
-        true
+        Binding(
+            get: { self.selectedTab },
+            set: { self.selectedTab = $0 }
+        )
     }
 }
 
@@ -57,11 +49,9 @@ private extension Router {
 }
 
 public extension Router {
-    func toolBarVisibility() -> Visibility {
-        currentNavPaths.isNilOrEmpty ? .automatic : .hidden
-    }
 
     func selectTab(_ newValue: TabPath) {
+        guard selectedTab != newValue else { return }
         selectedTab = newValue
     }
 
@@ -70,29 +60,25 @@ public extension Router {
     }
 
     func pushToNav(_ path: NavPath) {
-        Task(priority: .background) {
-            var allPaths = self.allPaths
-            if let index = allPaths[selectedTab]?.firstIndex(of: path),
-               let array = allPaths[selectedTab] {
-                allPaths[selectedTab] = Array(array[0...index])
-                return
-            }
-            allPaths[selectedTab]?.append(path)
-            Task { @MainActor in
-                self.allPaths = allPaths
-            }
+
+        if let index = allPaths[selectedTab]?.firstIndex(of: path),
+           let array = allPaths[selectedTab] {
+            allPaths[selectedTab] = Array(array[0...index])
+            return
         }
+
+        allPaths[selectedTab]?.append(path)
     }
 
     func pop() {
-        allPaths[selectedTab] = allPaths[selectedTab]?.dropLast()
+        allPaths[selectedTab]?.removeLast()
     }
 
     func popToRoot() {
         allPaths[selectedTab] = []
     }
 
-    func presnetModel(_ value: NavPath) {
+    func presentModel(_ value: NavPath) {
         sheet = value
     }
 

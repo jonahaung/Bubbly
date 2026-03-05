@@ -8,6 +8,7 @@ import XUI
 
 @MainActor
 public final class DeepLinkCoordinator {
+
     private let codec: DeeplinkCodec
     private let planner: DeeplinkActionPlanner
     private let sideEffects: SideEffectHandler
@@ -26,10 +27,10 @@ public final class DeepLinkCoordinator {
         self.sideEffects = sideEffects
     }
 
-    public func onOpenURL(url: URL) {
+    public func onOpenURL(url: URL) async {
         switch codec.parse(url) {
         case let .success(link):
-            handle(link: link)
+            await handle(link: link)
         case let .failure(error):
             log(error)
         }
@@ -39,18 +40,13 @@ public final class DeepLinkCoordinator {
         planner.plan(link)
     }
 
-    public func handle(link: Deeplink) {
+    public func handle(link: Deeplink) async {
         let actions = planner.plan(link)
 
-        Task { [weak self] in
-            guard let self else { return }
-            do {
-                try await AsyncOrderedStream.mapOrdered(inputs: actions) { action in
-                    try await self.handleDeepLinkAction(action)
-                }
-            } catch {
-                log(error)
-            }
+        do {
+            try await AsyncOrderedStream.mapOrdered(inputs: actions, transform: handleDeepLinkAction)
+        } catch {
+            log(error)
         }
     }
 
@@ -68,8 +64,8 @@ private extension DeepLinkCoordinator {
             await router.selectTab(tab)
         case let .pushToNav(path):
             await router.pushToNav(path)
-        case let .presnetModel(path):
-            await router.presnetModel(path)
+        case let .presentModel(path):
+            await router.presentModel(path)
         case let .sideEffect(effect):
             // Run off the main actor but preserve ordering by awaiting
             try await Task.detached { [sideEffects] in

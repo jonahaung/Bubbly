@@ -37,7 +37,7 @@ public final class DisplayLink {
 
         let link = CADisplayLink(target: self, selector: #selector(handleFrame))
         link.preferredFrameRateRange = .init(minimum: 60, maximum: 60)
-		link.add(to: .current, forMode: .tracking)
+        link.add(to: .current, forMode: .common)
         displayLink = link
     }
 
@@ -53,8 +53,9 @@ public final class DisplayLink {
         guard state == .running else { return }
 
         let elapsed = CACurrentMediaTime() - startTime
-        onUpdate?(elapsed)
-
+        if let onUpdate {
+            onUpdate(elapsed)
+        }
         if elapsed >= targetInterval {
             stop()
             onTargetReached?(elapsed)

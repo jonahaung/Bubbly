@@ -30,7 +30,7 @@ public struct ConversationScene: View {
 
     public var body: some View {
         ZStack(alignment: .bottom) {
-            ConversationSceneBackground(color: manager.conversation.theme.background.color)
+            ConversationSceneBackground(color: manager.state.properties.theme.background.color)
                 .layoutPriority(1)
             if manager.layoutManager.boundsWidth > 0 {
                 MsgsScrollView(manager: manager)
@@ -77,22 +77,23 @@ public struct ConversationScene: View {
             if let frame = manager.presentation.state.overlayItem,
                let overlayViewModel = manager.models.element(withID: frame.id) {
                 ChatOverlayView(item: frame)
+                    .font(.system(size: UIFont.preferredFont(forTextStyle: .body).pointSize))
                     .environment(overlayViewModel)
                     .environment(\.conversation, manager.conversation)
-                    .environment(\.viewIsVisible, true)
+                    .environment(\.isVisible, true)
             }
         }
         .task {
             try? await manager.onViewAppear()
         }
-
+        .toolbarVisibility(.hidden, for: .tabBar)
         .environment(manager)
         .environment(composer)
         .toolbarVisibility(.hidden, for: .navigationBar)
-        .environment(\.conversationTheme, manager.state.theme)
+        .environment(\.seenMembers, manager.state.properties.seenMembers)
         .environment(\.conversation, manager.conversation)
-        .environment(\.attachmentFetcher, manager.attachments)
-        .environment(\.selectedMsg, manager.layoutManager.selectedMsg)
+        .environment(\.conversationTheme, manager.state.properties.theme)
+        .environment(\.attachmentFetcher, manager.attachmentFetcher)
         .environment(\.sharedFocusState, SharedFocusState($focusState))
         .environment(\.sharedNamespace, SharedNamespace(namespace))
         .environment(\.msgCellActions, MsgCellAction(action: handleMsgCellInteraction))
@@ -125,7 +126,7 @@ private extension ConversationScene {
                             reaction: .init(
                                 reaction: .init(
                                     rawValue: reactionType.rawValue,
-                                    senderID: message.senderID,
+                                    senderID: currentUserId ?? "",
                                     date: .now
                                 ),
                                 msgID: message.uid,

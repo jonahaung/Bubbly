@@ -59,12 +59,7 @@ final class ImageViewManager {
     }
 
     func getURL() -> URL? {
-        if let url = URL(
-            string: "https://media2.dev.to/dynamic/image/width=800%2Cheight=%2Cfit=scale-down%2Cgravity=auto%2Cformat=auto/https%3A%2F%2Fi.pravatar.cc%2F250%3Fu%3Dmail%40ashallendesign.co.uk"
-        ) {
-            return url
-        }
-        return item.remoteURL
+        item.remoteURL
     }
 
     @concurrent

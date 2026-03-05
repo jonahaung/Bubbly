@@ -13,8 +13,7 @@ struct ConversationGroupCell: View {
     var body: some View {
         AsyncButton {
             try await ConversationInitializer.start(conversation: Conversation(
-                .group(group),
-                properties: group.conversationProperties
+                .group(group)
             ))
         } label: {
             HStack(spacing: 20) {

@@ -8,7 +8,7 @@ import XUI
 public struct MsgCellLayout: Conformable {
     public let showTimeSeparator: Bool
     public let showTopPadding: Bool
-    public let bubbleCorner: BubbleCorner
+    public var bubbleCorner: BubbleCorner
 
     public init(
         showTimeSeparator: Bool,

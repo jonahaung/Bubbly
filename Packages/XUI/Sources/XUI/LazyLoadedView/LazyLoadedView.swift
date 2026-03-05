@@ -197,7 +197,7 @@ public struct LazyAppearView<Content: View>: View {
                     self.appearance = appearance
                 }
             } else {
-                withTransaction(.withoutAnimation) {
+                withTransaction(.withoutAnimation()) {
                     self.appearance = appearance
                 }
             }

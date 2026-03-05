@@ -20,20 +20,20 @@ struct RootTabView: View {
                     MainNavView(tabPath: tabPath, coordinator: coordinator) {
                         coordinator.view(for: tabPath)
                     }
-                    .equatable(by: tabPath == coordinator.router.selectedTab)
-                    .toolbarVisibility(coordinator.router.toolBarVisibility(), for: .tabBar)
                 } label: {
                     Image(systemName: tabPath.systemName)
                 }
             }
         }
-        .symbolRenderingMode(.multicolor)
-        .equatable(by: coordinator.router.selectedTab)
         .tabBarMinimizeBehavior(.onScrollDown)
         .toastPresentable()
         .loadingPresentable()
         .sheet(item: sheet) { coordinator.view(for: $0) }
-        .onOpenURL { coordinator.handleDeeplink($0) }
+        .onOpenURL { url in
+            Task {
+                await coordinator.handleDeeplink(url)
+            }
+        }
     }
 }
 
@@ -49,7 +49,7 @@ private extension RootTabView {
             get: { coordinator.router.sheet },
             set: { newValue in
                 if let newValue {
-                    coordinator.router.presnetModel(newValue)
+                    coordinator.router.presentModel(newValue)
                 } else {
                     coordinator.router.dismissModal()
                 }

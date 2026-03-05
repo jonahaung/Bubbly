@@ -6,7 +6,7 @@ import Database
 import Foundation
 import XUI
 
-public enum TabPath: Int, Sendable, CaseIterable, CaseNameReflectable, Identifiable {
+public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, Identifiable {
     public var id: Int {
         rawValue
     }

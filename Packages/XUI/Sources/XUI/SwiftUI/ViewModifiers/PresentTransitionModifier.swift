@@ -24,7 +24,7 @@ private struct PresentTransitionModifier<Destination: View, Snapshot: View>: Vie
                             action: { _, newValue in
                                 Task { @MainActor in
                                     canObserveFocusedFrame = false
-                                    withTransaction(.withoutAnimation) {
+                                    withTransaction(.withoutAnimation()) {
                                         frame = newValue
                                     }
                                 }
@@ -74,7 +74,7 @@ private struct TransitionOverlayView<Content: View, Snapshot: View>: View {
 
     private var blurredBackground: some View {
         BlurredBackgroundView {
-            withTransaction(.withoutAnimation) {
+            withTransaction(.withoutAnimation()) {
                 dismiss()
             }
         }

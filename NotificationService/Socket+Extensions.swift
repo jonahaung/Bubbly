@@ -46,16 +46,20 @@ extension Socket {
                 msgId: status.msgID,
                 date: ServerTime.now.value
             )
-            var conversation = try await ConversationRepo.getOrCreate(
-                for: status.conID,
-                refetch: false
-            )
-            conversation.properties.seenMembers.appendUnique(seenMember)
+
+            if var properties = try await Store.shared.conversationPropertiesStore?.fetch(
+                uid: status.conID
+            ) {
+                properties.seenMembers.appendUnique(seenMember)
+                try await Store.shared.conversationPropertiesStore?
+                    .updateAndSave(uid: status.conID) { model in
+                        model.update(from: properties)
+                    }
+            }
 
             try await Store.shared.msgStore?.updateAndSave(uid: status.msgID) { msg in
                 msg.outgoingStatus[status.userID] = .sent
             }
-            try await conversation.saveChanges()
         }
 
         let appState = AppStateStore.read()

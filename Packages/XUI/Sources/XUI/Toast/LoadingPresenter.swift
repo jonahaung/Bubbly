@@ -12,7 +12,7 @@ public final class LoadingPresenter {
 
     public func loading(_ value: Bool) {
         guard value != showLoading else { return }
-        withTransaction(.withoutAnimation) {
+        withTransaction(.withoutAnimation()) {
             showLoading = value
         }
     }

@@ -48,7 +48,7 @@ public struct ImageView: View {
                             return
                         }
                         fetchImage.processors = config.processors
-                        fetchImage.transaction = .withoutAnimation
+                        fetchImage.transaction = .withoutAnimation()
                         fetchImage.pipeline = .shared
                         fetchImage.onStart = manager.onStart
                         fetchImage.onCompletion = manager.onCompletion(_:)

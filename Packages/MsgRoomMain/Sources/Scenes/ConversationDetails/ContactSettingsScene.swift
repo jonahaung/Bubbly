@@ -47,8 +47,7 @@ public struct ContactSettingsScene: View {
             Section {
                 AsyncButton {
                     try await ConversationRepo.deleteMessages(conID: Conversation(
-                        .contact(contact),
-                        properties: properties
+                        .contact(contact)
                     ).uid)
                 } label: {
                     Text("Delete Messages")

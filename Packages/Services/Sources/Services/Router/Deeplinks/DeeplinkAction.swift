@@ -7,7 +7,7 @@ import Foundation
 public enum DeeplinkAction: Sendable, Equatable {
     case selectTab(TabPath)
     case pushToNav(NavPath)
-    case presnetModel(NavPath)
+    case presentModel(NavPath)
     case sideEffect(SideEffect)
 
     public enum SideEffect: Sendable, Equatable, Hashable {

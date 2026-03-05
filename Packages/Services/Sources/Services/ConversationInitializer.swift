@@ -14,7 +14,7 @@ public enum ConversationInitializer {
         public let lineSpacing: CGFloat
         public let lastMsgID: String?
         public let firstMsgID: String?
-        public let totalMsgsCount: Int
+        public var totalMsgsCount: Int
         public let canPaginate: Bool
         public var maxNumberOfMsgsToDisplay: Int {
             pageSize * 2
@@ -30,15 +30,18 @@ public enum ConversationInitializer {
 
     public struct PrefetchedData: Sendable {
         public let conversation: Conversation
+        public let properties: ConversationProperties
         public let msgs: [Message]
         public let configuration: Configuration
 
         public init(
             conversation: Conversation,
+            properties: ConversationProperties,
             msgs: [Message],
             configuration: Configuration
         ) {
             self.conversation = conversation
+            self.properties = properties
             self.msgs = msgs
             self.configuration = configuration
         }
@@ -58,8 +61,9 @@ public extension ConversationInitializer {
             limit: pageSize
         )
         let firstMsg = try await ConversationRepo.firstMsg(conID: conID)
+        let properties = try await ConversationPropertiesRepo.getOrCreate(for: conID)
         return PrefetchedData(
-            conversation: conversation,
+            conversation: conversation, properties: properties,
             msgs: msgs,
             configuration: .init(
                 conID: conversation.uid,

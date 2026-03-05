@@ -28,7 +28,7 @@ private struct PresentFullScreenModifier<Destination: View>: ViewModifier {
     func body(content: Content) -> some View {
         content
             .onTapGesture {
-                withTransaction(.withoutAnimation) {
+                withTransaction(.withoutAnimation()) {
                     isPresented = true
                 }
             }

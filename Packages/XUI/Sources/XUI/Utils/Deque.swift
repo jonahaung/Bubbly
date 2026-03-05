@@ -4,57 +4,34 @@
 
 import Foundation
 
-/// A high-performance FIFO queue backed by a circular buffer.
-/// Enqueue adds elements to the back; dequeue removes from the front.
 @frozen
-public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
+public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomStringConvertible {
+
     // MARK: - Storage
 
-    private var array: [Element?]
-    private var head: Int = 0
+    @usableFromInline
+    var buffer: [Element?]
+
+    @usableFromInline
+    var head: Int = 0
+
     public private(set) var count: Int = 0
 
-    // MARK: - Initialization
+    // MARK: - Init
 
-    /// Creates an empty queue with an optional initial capacity.
-    public init(_ capacity: Int = 10) {
-        array = Array(repeating: nil, count: Swift.max(1, capacity))
+    public init(_ capacity: Int = 16) {
+        buffer = Array(repeating: nil, count: Swift.max(1, capacity))
     }
 
-    /// Creates a queue from a sequence of elements.
-    public init(_ sequence: some Sequence<Element>) {
+    public init<S: Sequence>(_ sequence: S) where S.Element == Element {
         let elements = Array(sequence)
-        array = Array(repeating: nil, count: Swift.max(1, elements.count))
-        for e in elements {
-            enqueue(e)
+        buffer = Array(repeating: nil, count: Swift.max(1, elements.count))
+        for element in elements {
+            enqueue(element)
         }
     }
 
-    // MARK: - Properties
-
-    public var isFull: Bool {
-        count == array.count
-    }
-
-    public var capacity: Int {
-        array.count
-    }
-
-    public var utilization: Double {
-        Double(count) / Double(capacity)
-    }
-
-    public var front: Element? {
-        peek()
-    }
-
-    public var back: Element? {
-        guard !isEmpty else { return nil }
-        let tailIndex = (head + count - 1) % array.count
-        return array[tailIndex]
-    }
-
-    // MARK: - Indexing (Collection)
+    // MARK: - Collection
 
     public var startIndex: Int {
         0
@@ -68,87 +45,136 @@ public struct Deque<Element>: Collection, Sequence, CustomStringConvertible {
         i + 1
     }
 
+    public func index(before i: Int) -> Int {
+        i - 1
+    }
+
     public subscript(position: Int) -> Element {
-        precondition(position >= 0 && position < count, "Index out of range")
-        let index = (head + position) % array.count
-        return array[index]! // Safe after precondition check
-    }
-
-    // MARK: - Description
-
-    public var description: String {
-        "[" + map { "\($0)" }.joined(separator: ", ") + "]"
-    }
-
-    // MARK: - Internal Helpers
-
-    @inline(__always)
-    private func nextIndex(_ i: Int) -> Int {
-        (i + 1) % array.count
-    }
-
-    // MARK: - Resizing
-
-    private mutating func resize() {
-        let newSize = array.count * 2
-        var newArray = [Element?](repeating: nil, count: newSize)
-
-        let rightCount = Swift.min(array.count - head, count)
-        newArray[0..<rightCount] = array[head..<head + rightCount]
-        if count > rightCount {
-            newArray[rightCount..<count] = array[0..<count - rightCount]
+        get {
+            precondition(position >= 0 && position < count, "Index out of range")
+            return buffer[physicalIndex(position)]!
         }
+        set {
+            precondition(position >= 0 && position < count, "Index out of range")
+            buffer[physicalIndex(position)] = newValue
+        }
+    }
 
-        head = 0
-        array = newArray
+    // MARK: - Properties
+
+    public var isEmpty: Bool {
+        count == 0
+    }
+
+    public var capacity: Int {
+        buffer.count
+    }
+
+    public var utilization: Double {
+        Double(count) / Double(capacity)
+    }
+
+    public var front: Element? {
+        isEmpty ? nil : buffer[head]
+    }
+
+    public var back: Element? {
+        guard !isEmpty else { return nil }
+        return buffer[physicalIndex(count - 1)]
     }
 
     // MARK: - Core Operations
 
-    /// Adds an element to the back of the queue.
     public mutating func enqueue(_ element: Element) {
-        if isFull { resize() }
-        let tailIndex = (head + count) % array.count
-        array[tailIndex] = element
+        ensureCapacityForInsert()
+        buffer[physicalIndex(count)] = element
         count += 1
     }
 
-    /// Adds an element to the front of the deque.
     public mutating func enqueueFront(_ element: Element) {
-        if isFull { resize() }
-
-        // Move head backward (circularly)
-        head = (head - 1 + array.count) % array.count
-        array[head] = element
+        ensureCapacityForInsert()
+        head = previousIndex(head)
+        buffer[head] = element
         count += 1
     }
 
-    /// Removes and returns the element at the front of the queue.
     @discardableResult
     public mutating func dequeue() -> Element? {
         guard !isEmpty else { return nil }
-        let element = array[head]
-        array[head] = nil
+        let element = buffer[head]
+        buffer[head] = nil
         head = nextIndex(head)
         count -= 1
         return element
     }
 
-    /// Returns the front element without removing it.
-    public func peek() -> Element? {
-        isEmpty ? nil : array[head]
+    @discardableResult
+    public mutating func dequeueBack() -> Element? {
+        guard !isEmpty else { return nil }
+        let index = physicalIndex(count - 1)
+        let element = buffer[index]
+        buffer[index] = nil
+        count -= 1
+        return element
     }
 
-    // MARK: - Utility
+    public func peek() -> Element? {
+        front
+    }
 
-    /// Removes all elements from the queue.
+    // MARK: - Utilities
+
     public mutating func removeAll(keepingCapacity: Bool = false) {
         if keepingCapacity {
-            array = Array(repeating: nil, count: array.count)
+            for i in 0..<buffer.count {
+                buffer[i] = nil
+            }
         } else {
-            array = Array(repeating: nil, count: Swift.max(1, array.count / 2))
+            buffer = Array(repeating: nil, count: 16)
         }
         head = 0
         count = 0
+    }
+
+    public var description: String {
+        "[" + map { "\($0)" }.joined(separator: ", ") + "]"
+    }
+}
+
+// MARK: - Private Helpers
+
+private extension Deque {
+
+    @inline(__always)
+    func nextIndex(_ i: Int) -> Int {
+        (i + 1) % buffer.count
+    }
+
+    @inline(__always)
+    func previousIndex(_ i: Int) -> Int {
+        (i - 1 + buffer.count) % buffer.count
+    }
+
+    @inline(__always)
+    func physicalIndex(_ logicalIndex: Int) -> Int {
+        (head + logicalIndex) % buffer.count
+    }
+
+    mutating func ensureCapacityForInsert() {
+        if count == buffer.count {
+            resize()
+        }
+    }
+
+    mutating func resize() {
+        let newCapacity = buffer.count << 1
+        var newBuffer = [Element?](repeating: nil, count: newCapacity)
+
+        for i in 0..<count {
+            newBuffer[i] = buffer[physicalIndex(i)]
+        }
+
+        buffer = newBuffer
+        head = 0
     }
 }

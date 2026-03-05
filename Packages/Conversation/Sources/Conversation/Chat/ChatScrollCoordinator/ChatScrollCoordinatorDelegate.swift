@@ -6,6 +6,9 @@ import SwiftUI
 
 @MainActor
 protocol ChatScrollCoordinatorDelegate: AnyObject {
+    func scrollCoordinatorShouldRemove(
+        _ coordinator: ChatScrollCoordinator
+    ) -> Bool
     func scrollCoordinator(
         _ coordinator: ChatScrollCoordinator,
         shouldPaginateAt edge: VerticalEdge

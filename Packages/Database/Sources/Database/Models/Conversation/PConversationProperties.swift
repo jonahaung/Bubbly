@@ -24,8 +24,12 @@ public final class PConversationProperties {
 
 extension PConversationProperties: CollectionDocument, SendableDocument {
     public func update(from item: ConversationProperties) {
-        theme = item.theme
-        seenMembers = item.seenMembers
+        if theme != item.theme {
+            theme = item.theme
+        }
+        if seenMembers != item.seenMembers {
+            seenMembers = item.seenMembers
+        }
     }
 
     public convenience init(from sendable: ConversationProperties) {
