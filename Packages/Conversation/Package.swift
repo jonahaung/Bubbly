@@ -21,7 +21,8 @@ let package = Package(
         .package(
             url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
             .upToNextMajor(from: "5.3.0")
-        )
+        ),
+		.package(url: "https://github.com/gonzalezreal/textual", from: "0.1.0")
     ],
     targets: [
         .target(
@@ -34,7 +35,8 @@ let package = Package(
                 .product(name: "ImageLoader", package: "ImageLoader"),
                 .product(name: "VideoLoader", package: "ImageLoader"),
                 .product(name: "MediaPicker", package: "MediaPicker"),
-                .product(name: "SFSafeSymbols", package: "SFSafeSymbols")
+                .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
+				.product(name: "Textual", package: "Textual")
             ],
             resources: [
                 .process("Resources")

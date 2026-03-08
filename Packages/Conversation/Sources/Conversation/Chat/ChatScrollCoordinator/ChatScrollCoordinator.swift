@@ -72,10 +72,10 @@ extension ChatScrollCoordinator {
             }
         ) { [weak self] newValue in
             guard let self else { return }
-            if newValue.isPositionedByUser {
-            } else {
-                self.scrollPosition = .init()
-            }
+//            if newValue.isPositionedByUser {
+//            } else {
+//                self.scrollPosition = .init()
+//            }
         }
     }
 
@@ -105,7 +105,7 @@ extension ChatScrollCoordinator {
         delegate?.scrollCoordinator(self, paginateAt: .bottom)
     }
 
-    private func onScrollDirectionChanged(_ newValue: VerticalDirection) {
+    private func onScrollDirectionChanged(_ newValue: ScrollDirection) {
         pendingScrollRequests.removeAll()
     }
 }
@@ -159,7 +159,7 @@ extension ChatScrollCoordinator {
         case let .onScrollGeometryChange(oldValue, newValue):
             ignoredState.geometry = newValue
             guard ignoredState.updateState.hasViewLoaded else { return false }
-            let direction: VerticalDirection = newValue.offsetY < oldValue.offsetY ? .up : .down
+            let direction: ScrollDirection = newValue.offsetY < oldValue.offsetY ? .up : .down
             if ignoredState.direction != direction {
                 ignoredState.direction = direction
                 onScrollDirectionChanged(direction)
@@ -223,17 +223,10 @@ extension ChatScrollCoordinator {
     }
 
     func begin(updates: DataUpdate) {
-        displayLink.stop()
-
         switch updates {
         case let .insert(edge):
             ignoredState.updateState.update(to: .insertingItems(edge))
-            switch edge {
-            case .top:
-                loadOlderMessagesIfNeeded()
-            case .bottom:
-                loadNewerMessagesIfNeeded()
-            }
+			delegate?.scrollCoordinator(self, paginateAt: edge)
         case let .remove(edge):
             ignoredState.updateState.update(to: .removingItems(edge))
             delegate?.scrollCoordinator(self, removeAt: edge)
@@ -262,19 +255,17 @@ extension ChatScrollCoordinator {
                 loadOlderMessagesIfNeeded()
             }
         case .reset:
-
             ignoredState.updateState.update(to: .notUpdating)
         case .append:
             ignoredState.updateState.update(to: .notUpdating)
         }
-        displayLink.start()
+
     }
 
     private func finalizeScrollUpdates() {
         if ignoredState.updateState.isUpdating {
             ignoredState.updateState.update(to: .notUpdating)
         }
-        ignoredState.updateState.update(to: .notUpdating)
         delegate?.scrollCoordinator(self, finalizeUpdate: state, newState: ignoredState)
         state = ignoredState
     }
@@ -339,14 +330,14 @@ extension ChatScrollCoordinator {
             scrollPosition = .init(y: adjustedY)
             Task { @MainActor in
                 await Task.yield()
-                enqueueScroll(to: .edge(.bottom, animation: .default))
+				enqueueScroll(to: .edge(.bottom, animation: .mySpring()))
             }
         case let .snapToY(y):
             let adjustedY = max(0, (y - 100))
             scrollPosition = .init(y: adjustedY)
             Task { @MainActor in
                 await Task.yield()
-                enqueueScroll(to: .y(y, animation: .default))
+                enqueueScroll(to: .y(y, animation: .mySpring()))
             }
         }
     }

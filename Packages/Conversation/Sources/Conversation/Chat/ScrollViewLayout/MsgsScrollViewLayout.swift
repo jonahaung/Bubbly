@@ -25,80 +25,31 @@ extension MsgsScrollViewLayout {
         calculateCache(for: subviews)
     }
 
-    func sizeThatFits(
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout Cache
-    ) -> CGSize {
-        guard layoutManager.config.boundsWidth > 0 else {
-            return .zero
-        }
-        let size = proposal.replacingUnspecifiedDimensions()
-        return CGSize(
-            width: size.width,
-            height: cache.totalHeight
-        )
-    }
+	func sizeThatFits(
+		proposal: ProposedViewSize,
+		subviews: Subviews,
+		cache: inout Cache
+	) -> CGSize {
+		guard layoutManager.config.boundsWidth > 0 else { return .zero }
+		let size = proposal.replacingUnspecifiedDimensions()
+		return CGSize(width: size.width, height: cache.totalHeight)
+	}
 
-    func placeSubviews(
-        in bounds: CGRect,
-        proposal proposedViewSize: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout Cache
-    ) {
-        guard layoutManager.config.boundsWidth > 0 else {
-            return
-        }
-        let key = makeCacheKey(subviews: subviews)
-        if cache.key == key {
-            switch config.layoutDirection {
-            case .top:
-                for (subview, row) in zip(subviews, cache.rows) {
-                    subview.place(at: row.rect.origin, proposal: .init(row.rect.size))
-                }
-            case .bottom:
-                let rows = cache.rows.reversed()
-                for (subview, row) in zip(subviews, rows) {
-                    subview.place(at: row.rect.origin, proposal: .init(row.rect.size))
-                }
-            }
-        } else {
-            let proposedSize = proposedViewSize.replacingUnspecifiedDimensions()
-            let x = bounds.minX + config.contentInsets.leading
-            let values = subviews.map { $0[MsgLayoutValueKey.self] }
+	func placeSubviews(
+		in bounds: CGRect,
+		proposal proposedViewSize: ProposedViewSize,
+		subviews: Subviews,
+		cache: inout Cache
+	) {
+		guard layoutManager.config.boundsWidth > 0 else { return }
+		let key = makeCacheKey(subviews: subviews)
+		if cache.key != key { cache = makeCache(subviews: subviews) }
 
-            let spacing = config.spacing
-            switch config.layoutDirection {
-            case .top:
-                var currentY = config.contentInsets.top + config.superTopSpace
-                let spacing = config.spacing
-
-                for (index, subview) in subviews.enumerated() {
-                    let value = values[index]
-                    let size = getOrCalculateSize(
-                        for: value,
-                        subview: subview,
-                        proposedWidth: proposedSize.width
-                    )
-                    subview.place(at: .init(x: x, y: currentY), proposal: .init(size))
-                    currentY += size.height + spacing
-                }
-            case .bottom:
-                var currentY = cache.totalHeight - config.contentInsets.bottom
-                for (index, subview) in subviews.reversed().enumerated() {
-                    let value = values[values.count - 1 - index]
-                    let size = getOrCalculateSize(
-                        for: value,
-                        subview: subview,
-                        proposedWidth: proposedSize.width
-                    )
-                    currentY -= size.height
-                    subview.place(at: .init(x: x, y: currentY), proposal: .init(size))
-                    currentY -= spacing
-                }
-            }
-        }
-    }
+		let rowsToPlace = config.layoutDirection == .top ? cache.rows : cache.rows.reversed()
+		for (subview, row) in zip(subviews, rowsToPlace) {
+			subview.place(at: row.rect.origin, proposal: .init(row.rect.size))
+		}
+	}
 
     func updateCache(_ cache: inout Cache, subviews: Subviews) {
         guard layoutManager.config.boundsWidth > 0 else {
@@ -109,7 +60,7 @@ extension MsgsScrollViewLayout {
             return
         }
         let oldIDs = ids(fromRows: cache.rows, direction: config.layoutDirection)
-        let newIDs = subviews.map { $0[MsgLayoutValueKey.self].id }
+		let newIDs = orderedIDs(from: subviews)
 
         if shouldUseIncrementalUpdate(
             oldIDs: oldIDs,
@@ -132,47 +83,57 @@ extension MsgsScrollViewLayout {
 
 extension MsgsScrollViewLayout {
 
-    private func shouldUseIncrementalUpdate(
-        oldIDs: [String],
-        newIDs: [String],
-        oldKey: CacheKey,
-        newKey: CacheKey
-    ) -> Bool {
-        if oldKey.selectedMsgId != newKey.selectedMsgId {
-            return false
-        }
-        if oldKey.normalizedWidth != newKey.normalizedWidth {
-            return false
-        }
-        if oldIDs == newIDs {
-            return true
-        }
-        let oldSet = Set(oldIDs)
-        let newSet = Set(newIDs)
-        let oldKept = oldIDs.filter { newSet.contains($0) }
-        let newKept = newIDs.filter { oldSet.contains($0) }
-        if oldKept != newKept {
-            return false
-        }
-        let inserted = newIDs.filter { !oldSet.contains($0) }
-        if !inserted.isEmpty {
-            let topCount = newIDs.prefix(while: { !oldSet.contains($0) }).count
-            let bottomCount = newIDs.reversed().prefix(while: { !oldSet.contains($0) }).count
-            if topCount + bottomCount != inserted.count {
-                return false
-            }
-        }
-        let removed = oldIDs.filter { !newSet.contains($0) }
-        if !removed.isEmpty {
-            let topCount = oldIDs.prefix(while: { !newSet.contains($0) }).count
-            let bottomCount = oldIDs.reversed().prefix(while: { !newSet.contains($0) }).count
-            if topCount + bottomCount != removed.count {
-                return false
-            }
-        }
-        return true
-    }
+	private func shouldUseIncrementalUpdate(
+		oldIDs: [String],
+		newIDs: [String],
+		oldKey: CacheKey,
+		newKey: CacheKey
+	) -> Bool {
+		guard oldKey.selectedMsgId == newKey.selectedMsgId,
+			  oldKey.normalizedWidth == newKey.normalizedWidth else { return false }
+		return detectEdgeMutation(oldIDs: oldIDs, newIDs: newIDs) != nil
+	}
 
+	private func orderedIDs(from subviews: Subviews) -> [String] {
+		switch config.layoutDirection {
+		case .top:
+			subviews.map { $0[MsgLayoutValueKey.self].id }
+		case .bottom:
+			subviews.reversed().map { $0[MsgLayoutValueKey.self].id }
+		}
+	}
+
+	private enum EdgeMutation {
+		case prependOne
+		case appendOne
+		case removeFirstOne
+		case removeLastOne
+		case replaceFirstOne
+		case replaceLastOne
+	}
+
+	private func detectEdgeMutation(oldIDs: [String], newIDs: [String]) -> EdgeMutation? {
+		if newIDs.count == oldIDs.count + 1 {
+			if Array(newIDs.dropLast()) == oldIDs { return .appendOne }
+			if Array(newIDs.dropFirst()) == oldIDs { return .prependOne }
+			return nil
+		}
+		if oldIDs.count == newIDs.count + 1 {
+			if Array(oldIDs.dropLast()) == newIDs { return .removeLastOne }
+			if Array(oldIDs.dropFirst()) == newIDs { return .removeFirstOne }
+			return nil
+		}
+		guard oldIDs.count == newIDs.count, oldIDs.isEmpty == false else {
+			return nil
+		}
+		if oldIDs.first != newIDs.first, Array(oldIDs.dropFirst()) == Array(newIDs.dropFirst()) {
+			return .replaceFirstOne
+		}
+		if oldIDs.last != newIDs.last, Array(oldIDs.dropLast()) == Array(newIDs.dropLast()) {
+			return .replaceLastOne
+		}
+		return nil
+	}
     private func ids(fromRows rows: [Cache.Row], direction: VerticalEdge) -> [String] {
         switch direction {
         case .top:
@@ -313,7 +274,7 @@ extension MsgsScrollViewLayout {
             var currentY = config.contentInsets.top + config.superTopSpace
             let spacing = config.spacing
 
-            for (index, subview) in subviews.enumerated() {
+			for index in subviews.indices {
                 let value = values[index]
                 let size = sizes[index]
                 let origin = CGPoint(x: x, y: currentY)
@@ -324,7 +285,7 @@ extension MsgsScrollViewLayout {
         case .bottom:
             sizes = sizes.reversed()
             var currentY = totalHeight - config.contentInsets.bottom
-            for (index, subview) in subviews.reversed().enumerated() {
+			for index in subviews.indices {
                 let value = values[values.count - 1 - index]
                 let size = sizes[index]
                 currentY -= size.height
@@ -335,20 +296,6 @@ extension MsgsScrollViewLayout {
             }
         }
         return (totalHeight, rows)
-    }
-
-    func spacing(subviews: Subviews, cache: inout Cache) -> ViewSpacing {
-        .init()
-    }
-
-    func explicitAlignment(
-        of guide: HorizontalAlignment,
-        in bounds: CGRect,
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout ()
-    ) -> CGFloat? {
-        nil
     }
 }
 
@@ -361,6 +308,7 @@ extension MsgsScrollViewLayout {
     ) -> CGSize {
         let key = SubviewKey(
             uid: layoutValue.id,
+            signature: layoutValue.signature,
             isSelected: layoutValue.id == layoutManager.selectedMsg?.id,
             boundsWidth: proposedWidth
         )
@@ -403,21 +351,25 @@ extension MsgsScrollViewLayout {
         subviews: LayoutSubviews
     ) -> CacheKey {
         var idsHasher = Hasher()
+        var layoutHasher = Hasher()
         var idsCount = 0
         var firstID: String?
         var lastID: String?
         for subview in subviews {
-            let id = subview[MsgLayoutValueKey.self].id
+            let value = subview[MsgLayoutValueKey.self]
+            let id = value.id
             if firstID == nil {
                 firstID = id
             }
             lastID = id
             idsCount += 1
             idsHasher.combine(id)
+            layoutHasher.combine(value)
         }
         return .init(
             normalizedWidth: Int(layoutManager.boundsWidth.rounded(.toNearestOrAwayFromZero)),
             idsHash: idsHasher.finalize(),
+            layoutHash: layoutHasher.finalize(),
             idsCount: idsCount,
             firstID: firstID,
             lastID: lastID,
@@ -429,6 +381,7 @@ extension MsgsScrollViewLayout {
 extension MsgsScrollViewLayout {
     struct SubviewKey: Hashable {
         let uid: String
+        let signature: Int
         let isSelected: Bool
         let boundsWidth: CGFloat
     }
@@ -436,6 +389,7 @@ extension MsgsScrollViewLayout {
     struct CacheKey: Hashable {
         let normalizedWidth: Int
         let idsHash: Int
+        let layoutHash: Int
         let idsCount: Int
         let firstID: String?
         let lastID: String?

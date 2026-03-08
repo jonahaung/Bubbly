@@ -6,7 +6,7 @@ import Foundation
 import SwiftUI
 import XUI
 
-enum ScrollReducer {
+struct ScrollReducer {
 
     typealias State = ChatScrollCoordinator.State
     typealias Intent = ChatScrollCoordinator.Intent
@@ -139,6 +139,9 @@ extension ScrollReducer {
         case let .insertingItems(edge):
             switch edge {
             case .top:
+				guard difference != 0 else {
+					return .scroll(item: .y(newValue.offsetY))
+				}
                 let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
                 return .endUpdate(.insert(edge: edge), scrollItem: .y(offsetY))
             case .bottom:
@@ -147,7 +150,9 @@ extension ScrollReducer {
         case let .removingItems(edge):
             switch edge {
             case .top:
-
+				guard difference != 0 else {
+					return .scroll(item: .y(newValue.offsetY))
+				}
                 let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
                 return .endUpdate(
                     .remove(edge: edge),
@@ -162,7 +167,7 @@ extension ScrollReducer {
         case let .appendingItem(id):
             return .endUpdate(
                 .append(id: id),
-                scrollItem: .id(id, animation: .interactiveSpring(duration: 0.4))
+				scrollItem: .id(id, animation: .mySpring(0.22))
             )
         default:
             return .noAction

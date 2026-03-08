@@ -6,13 +6,13 @@ import SwiftUI
 
 struct MsgsScrollViewLayoutConfiguration {
 	
-    let superTopSpace = CGFloat(50)
+    let superTopSpace = CGFloat(0)
     let spacing: CGFloat
     let contentInsets: EdgeInsets
     var boundsWidth: CGFloat
     var layoutDirection: VerticalEdge
 
-    init(_ spacing: CGFloat, _ contentInsets: EdgeInsets, direction: VerticalEdge = .bottom) {
+	init(_ spacing: CGFloat, _ contentInsets: EdgeInsets, direction: VerticalEdge = .top) {
         self.spacing = spacing
         self.contentInsets = contentInsets
         boundsWidth = 0

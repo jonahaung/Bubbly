@@ -6,111 +6,146 @@ import Foundation
 
 public final class LRUCache<Key: Hashable, Value>: @unchecked Sendable {
 
-    private final class Node {
-        let key: Key
-        var value: Value
-        var prev: Node?
-        var next: Node?
+	// MARK: Node
 
-        init(key: Key, value: Value) {
-            self.key = key
-            self.value = value
-        }
-    }
+	private final class Node: @unchecked Sendable {
+		let key: Key
+		var value: Value
+		var prev: Node?
+		var next: Node?
 
-    private let capacity: Int
-    private var dict: [Key: Node] = [:]
-    private var head: Node?
-    private var tail: Node?
+		init(key: Key, value: Value) {
+			self.key = key
+			self.value = value
+		}
+	}
 
-    // MARK: - Init
+	// MARK: Properties
 
-    public init(capacity: Int) {
-        self.capacity = max(1, capacity)
-    }
+	private let capacity: Int
+	private var dict: [Key: Node] = [:]
 
-    // MARK: - Public API
+	private var head: Node?
+	private var tail: Node?
 
-    public var count: Int {
-        dict.count
-    }
+	private let lock = NSLock()
 
-    public func get(_ key: Key) -> Value? {
-        guard let node = dict[key] else { return nil }
-        moveToTail(node)
-        return node.value
-    }
+	// MARK: Init
 
-    public func set(_ key: Key, value: Value) {
-        if let node = dict[key] {
-            node.value = value
-            moveToTail(node)
-            return
-        }
+	public init(capacity: Int = 300) {
+		self.capacity = max(1, capacity)
+	}
 
-        let node = Node(key: key, value: value)
-        dict[key] = node
-        append(node)
+	deinit {
+		removeAll()
+	}
 
-        if dict.count > capacity {
-            removeHead()
-        }
-    }
+	// MARK: Public API
 
-    public func remove(_ key: Key) {
-        guard let node = dict[key] else { return }
-        remove(node)
-        dict[key] = nil
-    }
+	public var count: Int {
+		lock.lock()
+		defer { lock.unlock() }
+		return dict.count
+	}
 
-    public func removeAll() {
-        dict.removeAll()
-        head = nil
-        tail = nil
-    }
+	public func get(_ key: Key) -> Value? {
+		lock.lock()
+		defer { lock.unlock() }
 
-    // MARK: - Private Helpers
+		guard let node = dict[key] else { return nil }
 
-    private func append(_ node: Node) {
-        if let tail {
-            tail.next = node
-            node.prev = tail
-            self.tail = node
-        } else {
-            head = node
-            tail = node
-        }
-    }
+		moveToTail(node)
 
-    private func moveToTail(_ node: Node) {
-        guard tail !== node else { return }
-        remove(node)
-        append(node)
-    }
+		return node.value
+	}
 
-    private func removeHead() {
-        guard let head else { return }
-        remove(head)
-        dict[head.key] = nil
-    }
+	public func set(_ key: Key, value: Value) {
+		lock.lock()
+		defer { lock.unlock() }
 
-    private func remove(_ node: Node) {
-        let prev = node.prev
-        let next = node.next
+		if let node = dict[key] {
+			node.value = value
+			moveToTail(node)
+			return
+		}
 
-        if let prev {
-            prev.next = next
-        } else {
-            head = next
-        }
+		let node = Node(key: key, value: value)
 
-        if let next {
-            next.prev = prev
-        } else {
-            tail = prev
-        }
+		dict[key] = node
+		append(node)
 
-        node.prev = nil
-        node.next = nil
-    }
+		if dict.count > capacity {
+			removeHead()
+		}
+	}
+
+	public func remove(_ key: Key) {
+		lock.lock()
+		defer { lock.unlock() }
+
+		guard let node = dict[key] else { return }
+
+		remove(node)
+
+		dict.removeValue(forKey: key)
+	}
+
+	public func removeAll() {
+		lock.lock()
+		defer { lock.unlock() }
+
+		dict.removeAll()
+
+		head = nil
+		tail = nil
+	}
+
+	// MARK: Private Helpers
+
+	private func append(_ node: Node) {
+		if let tail {
+			tail.next = node
+			node.prev = tail
+			self.tail = node
+		} else {
+			head = node
+			tail = node
+		}
+	}
+
+	private func moveToTail(_ node: Node) {
+		guard tail !== node else { return }
+
+		remove(node)
+
+		append(node)
+	}
+
+	private func removeHead() {
+		guard let head else { return }
+
+		remove(head)
+
+		dict.removeValue(forKey: head.key)
+	}
+
+	private func remove(_ node: Node) {
+		let prev = node.prev
+		let next = node.next
+
+		if let prev {
+			prev.next = next
+		} else {
+			head = next
+		}
+
+		if let next {
+			next.prev = prev
+		} else {
+			tail = prev
+		}
+
+		node.prev = nil
+		node.next = nil
+	}
 }

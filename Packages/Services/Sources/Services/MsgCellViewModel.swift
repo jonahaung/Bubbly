@@ -8,10 +8,12 @@ import XUI
 
 @Observable
 public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
-
+	@ObservationIgnored
     public var msg: Message
     public var reloadID: Int = 0
-    public let layoutValue: MsgLayoutValue
+	@ObservationIgnored
+    public var layoutValue: MsgLayoutValue
+	@ObservationIgnored
     public var state: State
 
     public init(_ msg: Message) {
@@ -37,6 +39,9 @@ public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
     public func setVisibility(_ isVisible: Bool) {
         guard state.isVisible != isVisible else { return }
         state.isVisible = isVisible
+		if isVisible {
+			layoutIfNeeded()
+		}
     }
 
     public func update(selectedMsg: SelectedMsg?) {
@@ -46,7 +51,7 @@ public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
 }
 
 public extension MsgCellViewModel {
-    struct State: Equatable {
+	struct State: Equatable, Sendable {
         public let id: String
         public let text: String?
         public let attachments: [Attachment]

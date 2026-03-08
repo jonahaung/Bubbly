@@ -12,10 +12,6 @@ public extension ScrollGeometry {
         contentInsets: .init(),
         containerSize: .zero
     )
-    var scrolledPosition: ScrolledPosition {
-        ScrolledPosition(self)
-    }
-
     var location: ScrollLocation {
         let edge = centerLocation < 0.45 ? VerticalEdge.top : .bottom
         switch edge {
@@ -105,21 +101,20 @@ public enum ScrolledPosition: Sendable, Hashable {
     case none
     case atBottom
     case atTop
-    case position(ScrollLocation)
 
-    public init(_ geometry: ScrollGeometry) {
-        if geometry.contentSize.height < geometry.bounds.height {
-            self = .atBottom
-            return
-        }
-        let location = geometry.location
-        switch location.edge {
-        case .top:
-            self = location.fraction <= 0 ? .atTop : .position(location)
-        case .bottom:
-            self = location.fraction <= 0 ? .atBottom : .position(location)
-        }
-    }
+//    public init(_ geometry: ScrollGeometry) {
+//        if geometry.contentSize.height < geometry.bounds.height {
+//            self = .atBottom
+//            return
+//        }
+//        let location = geometry.location
+//        switch location.edge {
+//        case .top:
+//            self = location.fraction <= 0 ? .atTop : .position(location)
+//        case .bottom:
+//            self = location.fraction <= 0 ? .atBottom : .position(location)
+//        }
+//    }
 
     public var description: String {
         switch self {
@@ -129,8 +124,6 @@ public enum ScrolledPosition: Sendable, Hashable {
             "atBottom"
         case .atTop:
             "atTop"
-        case let .position(location):
-            location.description
         }
     }
 
@@ -138,13 +131,6 @@ public enum ScrolledPosition: Sendable, Hashable {
         switch self {
         case .atBottom:
             true
-        case let .position(location):
-            switch location.edge {
-            case .top:
-                false
-            case .bottom:
-                location.fraction < 0.1
-            }
         default:
             false
         }

@@ -32,6 +32,27 @@ public struct ConversationScene: View {
         ZStack(alignment: .bottom) {
             ConversationSceneBackground(color: manager.state.properties.theme.background.color)
                 .layoutPriority(1)
+
+			ForEach(manager.state.properties.seenMembers, id: \.self) { item in
+				if manager.scrollController.state.visibleIDs.contains(item.msgId) {
+					if let contact = ContactsRepository.shared.contact(
+						for: item.uid
+					) {
+						ProfilePhoto(
+							contact,
+							size: .custom(10)
+						)
+						.matchedGeometryEffect(
+							id: item.msgId,
+							in: namespace,
+							properties: .position,
+							anchor: .bottomLeading,
+							isSource: false
+						)
+					}
+				}
+			}
+
             if manager.layoutManager.boundsWidth > 0 {
                 MsgsScrollView(manager: manager)
                     .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
@@ -83,12 +104,13 @@ public struct ConversationScene: View {
                     .environment(\.isVisible, true)
             }
         }
-        .task {
-            try? await manager.onViewAppear()
-        }
+
+		.task {
+			try? await manager.onViewAppear()
+		}
+		.environment(manager)
+		.environment(composer)
         .toolbarVisibility(.hidden, for: .tabBar)
-        .environment(manager)
-        .environment(composer)
         .toolbarVisibility(.hidden, for: .navigationBar)
         .environment(\.seenMembers, manager.state.properties.seenMembers)
         .environment(\.conversation, manager.conversation)

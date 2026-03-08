@@ -16,7 +16,9 @@ extension ComposeBar {
                 textField()
             }
             .background(.windowBackground, in: .containerRelative)
-            .containerShape(RoundedRectangle(cornerRadius: 12))
+			.containerShape(
+				RoundedRectangle(cornerRadius: UIFont.preferredFont(forTextStyle: .body).pointSize)
+			)
         }
 
         private func textField() -> some View {

@@ -10,7 +10,7 @@ extension MsgCell {
     struct TextContent: View, @MainActor Equatable {
         static let font = UIFont.preferredFont(forTextStyle: .body)
         let text: String
-
+		let formatter = DefaultMarkdownFormatter()
         var body: some View {
             let extraTop =
                 text.containsTallMarksOrEmoji
@@ -18,8 +18,18 @@ extension MsgCell {
                         1,
                         (Self.font.ascender - Self.font.capHeight) * 0.25
                     ) : 0
+
+			let attributes: AttributeContainer = {
+				var container = AttributeContainer()
+				container.font = Self.font
+				container.lineHeight = .multiple(factor: 1.2)
+				return container
+			}()
+
             if text.containsMarkdown {
-                Text(LocalizedStringKey(text))
+				Text(
+					formatter.format(text, attributes: attributes, layoutDirection: .leftToRight)
+				)
                     .lineSpacing(extraTop)
                     .fixedSize(horizontal: false, vertical: true)
 
@@ -47,4 +57,87 @@ extension String {
         }
         return false
     }
+}
+/// Converts markdown string to AttributedString with styling attributes.
+open class DefaultMarkdownFormatter {
+
+	let fonts = Fonts()
+
+	private let markdownParser: Markdown
+
+	public init() {
+		markdownParser = Markdown()
+	}
+
+	@available(iOS 15, *)
+	open func format(
+		_ string: String,
+		attributes: AttributeContainer,
+		layoutDirection: LayoutDirection
+	) -> AttributedString {
+		do {
+			return try markdownParser.style(
+				markdown: string,
+				options: Markdown.ParsingOptions(layoutDirectionLeftToRight: layoutDirection == .leftToRight),
+				attributes: attributes,
+				inlinePresentationIntentAttributes: inlinePresentationIntentAttributes(for:),
+				presentationIntentAttributes: presentationIntentAttributes(for:in:)
+			)
+		} catch {
+
+			return AttributedString(string, attributes: attributes)
+		}
+	}
+
+	// MARK: - Styling Attributes
+
+	@available(iOS 15, *)
+	private func inlinePresentationIntentAttributes(
+		for inlinePresentationIntent: InlinePresentationIntent
+	) -> AttributeContainer? {
+		nil // use default attributes
+	}
+
+	@available(iOS 15, *)
+	private func presentationIntentAttributes(
+		for presentationKind: PresentationIntent.Kind,
+		in presentationIntent: PresentationIntent
+	) -> AttributeContainer? {
+		switch presentationKind {
+		case .blockQuote:
+			return AttributeContainer()
+				.foregroundColor(Color.secondary)
+		case .codeBlock:
+			return AttributeContainer()
+				.font(fonts.body)
+		case let .header(level):
+			let font: Font = {
+				switch level {
+				case 1:
+					return fonts.title
+				case 2:
+					return fonts.title2
+				case 3:
+					return fonts.title3
+				case 4:
+					return fonts.headline
+				case 5:
+					return fonts.subheadline
+				default:
+					return fonts.footnote
+				}
+			}()
+			let foregroundColor: Color? = level >= 6 ? Color.secondary : nil
+			if let foregroundColor {
+				return AttributeContainer()
+					.font(font)
+					.foregroundColor(foregroundColor)
+			} else {
+				return AttributeContainer()
+					.font(font)
+			}
+		default:
+			return nil
+		}
+	}
 }

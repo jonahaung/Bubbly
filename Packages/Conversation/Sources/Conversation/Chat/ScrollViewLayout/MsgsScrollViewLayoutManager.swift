@@ -6,14 +6,13 @@ import Database
 import Services
 import SwiftUI
 
-@Observable
 final class MsgsScrollViewLayoutManager: @unchecked Sendable {
 
     private(set) var selectedMsg: SelectedMsg?
 
     private(set) var config: MsgsScrollViewLayoutConfiguration
-    @ObservationIgnored private var sizeStore = [MsgsScrollViewLayout.SubviewKey: CGSize]()
-    @ObservationIgnored private var cacheStore = [MsgsScrollViewLayout.CacheKey: MsgsScrollViewLayout.Cache]()
+    private var sizeStore = [MsgsScrollViewLayout.SubviewKey: CGSize]()
+   private var cacheStore = [MsgsScrollViewLayout.CacheKey: MsgsScrollViewLayout.Cache]()
     init(config: MsgsScrollViewLayoutConfiguration) {
         self.config = config
     }

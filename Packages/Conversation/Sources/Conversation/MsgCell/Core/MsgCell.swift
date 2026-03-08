@@ -11,7 +11,7 @@ import XUI
 struct MsgCell: View {
 
     let viewModel: MsgCellViewModel
-
+	@Environment(\.sharedNamespace) private var namespace
     private var isSelected: Bool {
         viewModel.state.isSelected
     }
@@ -35,6 +35,12 @@ struct MsgCell: View {
                 }
                 GestureAware {
                     Content(state: viewModel.state)
+						.matchedGeometryEffect(
+							id: viewModel.id,
+							in: namespace.unsafelyUnwrapped.value,
+							anchor: .bottomTrailing,
+							isSource: true
+						)
                 }
                 if viewModel.state.isSender {
                     OutgoingAccessory()
@@ -46,8 +52,8 @@ struct MsgCell: View {
                 Footer()
             }
         }
-        .fixedSize(horizontal: false, vertical: true)
+		.fixedSize(horizontal: false, vertical: true)
         .environment(\.isVisible, viewModel.state.isVisible)
-        .equatable(by: viewModel.reloadID)
+		.equatable(by: viewModel.reloadID)
     }
 }

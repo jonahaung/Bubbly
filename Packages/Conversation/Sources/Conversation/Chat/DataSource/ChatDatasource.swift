@@ -26,7 +26,6 @@ actor ChatDatasource {
     weak var delegate: ChatDatasourceDelegate?
 
     private let pageSize: Int
-    private let boundaryState = PaginationBoundaryState()
 
     private let queue = SerialTaskQueue()
     private let cancelBag = CancelBag()
@@ -59,17 +58,6 @@ actor ChatDatasource {
     deinit {
         cancelBag.cancel()
     }
-
-    // MARK: Public State
-
-    func canLoadOlder() async -> Bool {
-        await boundaryState.canLoadOlder()
-    }
-
-    func canLoadNewer() async -> Bool {
-        await boundaryState.canLoadNewer()
-    }
-
     // MARK: Public API
 
     func reset(conID: String) async throws -> [Message] {
@@ -79,12 +67,6 @@ actor ChatDatasource {
             limit: pageSize
         )
 
-        await boundaryState.reset()
-
-        if messages.count < pageSize {
-            await boundaryState.set(hasOlder: false)
-        }
-
         return messages
     }
 
@@ -92,21 +74,11 @@ actor ChatDatasource {
         before date: String,
         conID: String
     ) async throws -> [Message] {
-
-        guard await boundaryState.canLoadOlder() else {
-            return []
-        }
-
         let messages = try await fetchPrevious(
             before: date,
             conID: conID,
             limit: pageSize
         )
-
-        if messages.count < pageSize {
-            await boundaryState.set(hasOlder: false)
-        }
-
         return messages
     }
 
@@ -114,20 +86,11 @@ actor ChatDatasource {
         after date: String,
         conID: String
     ) async throws -> [Message] {
-
-        guard await boundaryState.canLoadNewer() else {
-            return []
-        }
-
         let messages = try await fetchMore(
             after: date,
             conID: conID,
             limit: pageSize
         )
-
-        if messages.count < pageSize {
-            await boundaryState.set(hasNewer: false)
-        }
 
         return messages
     }

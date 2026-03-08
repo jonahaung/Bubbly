@@ -24,7 +24,7 @@ extension ChatViewManager: ChatScrollCoordinatorDelegate {
     }
 
     func scrollCoordinatorShouldRemove(_ coordinator: ChatScrollCoordinator) -> Bool {
-        models.count >= conversationConfig.pageSize * 3
+        models.count > conversationConfig.pageSize + 10
     }
 
     func scrollCoordinator(

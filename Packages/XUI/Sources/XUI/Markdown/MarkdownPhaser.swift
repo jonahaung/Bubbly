@@ -154,37 +154,56 @@ public enum MarkdownParser {
         }
         return nil
     }
+	private static func parseInlineElements(_ text: String) -> [MarkdownElement] {
+		var result: [MarkdownElement] = []
 
-    // New: Parse inline elements like mentions and hashtags
-    private static func parseInlineElements(_ text: String) -> [MarkdownElement] {
-        var elements: [MarkdownElement] = []
-        let nsText = text as NSString
+		let pattern = #"(@\w+|#\w+)"#
+		guard let regex = try? NSRegularExpression(pattern: pattern) else {
+			return [.paragraph(text: text)]
+		}
 
-        // Parse mentions
-        let mentionMatches = mentionRegex.matches(
-            in: text,
-            range: NSRange(location: 0, length: nsText.length)
-        )
-        for match in mentionMatches {
-            let username = nsText.substring(with: match.range(at: 1))
-            elements.append(.mention(username: username))
-        }
+		let nsText = text as NSString
+		let matches = regex.matches(in: text, range: NSRange(location: 0, length: nsText.length))
 
-        // Parse hashtags
-        let hashtagMatches = hashtagRegex.matches(
-            in: text,
-            range: NSRange(location: 0, length: nsText.length)
-        )
-        for match in hashtagMatches {
-            let topic = nsText.substring(with: match.range(at: 1))
-            elements.append(.hashtag(topic: topic))
-        }
+		var lastIndex = 0
 
-        // If no mentions or hashtags are found, return the entire text as a paragraph
-        if elements.isEmpty {
-            elements.append(.paragraph(text: text))
-        }
+		for match in matches {
+			let range = match.range
 
-        return elements
-    }
+			// Text before mention/hashtag
+			if range.location > lastIndex {
+				let substring = nsText.substring(
+					with: NSRange(location: lastIndex, length: range.location - lastIndex)
+				)
+
+				if !substring.trimmingCharacters(in: .whitespaces).isEmpty {
+					result.append(.paragraph(text: substring))
+				}
+			}
+
+			let token = nsText.substring(with: range)
+
+			if token.hasPrefix("@") {
+				result.append(.mention(username: String(token.dropFirst())))
+			} else if token.hasPrefix("#") {
+				result.append(.hashtag(topic: String(token.dropFirst())))
+			}
+
+			lastIndex = range.location + range.length
+		}
+
+		// Remaining text
+		if lastIndex < nsText.length {
+			let substring = nsText.substring(from: lastIndex)
+			if !substring.trimmingCharacters(in: .whitespaces).isEmpty {
+				result.append(.paragraph(text: substring))
+			}
+		}
+
+		if result.isEmpty {
+			result.append(.paragraph(text: text))
+		}
+
+		return result
+	}
 }

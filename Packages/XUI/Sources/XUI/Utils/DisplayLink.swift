@@ -37,7 +37,7 @@ public final class DisplayLink {
 
         let link = CADisplayLink(target: self, selector: #selector(handleFrame))
         link.preferredFrameRateRange = .init(minimum: 60, maximum: 60)
-        link.add(to: .current, forMode: .common)
+		link.add(to: .main, forMode: .common)
         displayLink = link
     }
 

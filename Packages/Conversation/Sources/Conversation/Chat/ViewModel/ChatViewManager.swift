@@ -15,24 +15,21 @@ struct ChatViewState: Equatable {
     var conversation: Conversation
     var theme: ChatTheme
     var properties: ConversationProperties
-
-    static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.reloadID == rhs.reloadID
-    }
 }
 
 @MainActor
 @Observable
 final class ChatViewManager: ErrorPresenter {
 
-    @ObservationIgnored let messageSource: ChatDatasource
-    @ObservationIgnored let scrollController: ChatScrollCoordinator
+    @ObservationIgnored var messageSource: ChatDatasource
+    @ObservationIgnored var scrollController: ChatScrollCoordinator
     @ObservationIgnored var presentation: ChatPresentationState
     @ObservationIgnored var conversationConfig: ConversationInitializer.Configuration
     @ObservationIgnored let attachmentFetcher: AttachmentFetcher
-    @ObservationIgnored let layoutManager: MsgsScrollViewLayoutManager
+    @ObservationIgnored var layoutManager: MsgsScrollViewLayoutManager
 
-    @ObservationIgnored let models: MsgModels
+    @ObservationIgnored var models: MsgModels
+
     var state: ChatViewState
     var conversation: Conversation {
         state.conversation

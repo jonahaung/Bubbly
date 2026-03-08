@@ -6,12 +6,15 @@ import Database
 import SwiftUI
 import XUI
 
+enum ScrollDirection: Sendable, Hashable {
+	case up, down, none
+}
 extension ChatScrollCoordinator {
 
     struct State: Sendable, Hashable {
         var updateState: ScrollViewUpdate
         var geometry: VScrollGeometry
-        var direction: VerticalDirection
+        var direction: ScrollDirection
         var phase: ScrollPhase
         var isFirstResponder: Bool
         var visibleIDs: [String]

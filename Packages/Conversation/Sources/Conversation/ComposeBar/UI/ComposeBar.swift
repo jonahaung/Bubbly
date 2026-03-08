@@ -10,7 +10,7 @@ import XUI
 struct ComposeBar: View {
 
     let composer: ChatComposer
-
+	@State private var menuIsOpen: Bool = false
     var body: some View {
         VStack(spacing: 0) {
             switch composer.source {
@@ -22,29 +22,30 @@ struct ComposeBar: View {
                 }
             }
             HStack(alignment: .bottom, spacing: 4) {
-                switch composer.source {
-                case .menu:
-                    HStack(alignment: .center, spacing: -8) {
-                        ComposeBarSourceButton(source: .camera)
+				HamburgerButton(isOpen: $menuIsOpen, size: 38)
+				if menuIsOpen {
+					switch composer.source {
+					case .liary:
+						ComposeBarSourceButton(source: .text)
+						photoPickerButton()
+						Text(composer.photoPicker.selectedImages.count.description + " photos")
+							.flexible(.horizontal)
+					default:
+						HStack(alignment: .center, spacing: -8) {
+							ComposeBarSourceButton(source: .camera)
 
-                        photoPickerButton()
-                        ComposeBarSourceButton(source: .audio)
-                    }
-                    .frame(height: 44)
+							photoPickerButton()
+							ComposeBarSourceButton(source: .audio)
+						}
+						.frame(height: 44)
 
-                    HStack(alignment: .center, spacing: -8) {
-                        ComposeBarSourceButton(source: .machineImag)
-                        ComposeBarSourceButton(source: .emoji)
-                    }
-                    .frame(height: 44)
-                case .liary:
-                    ComposeBarSourceButton(source: .text)
-                    photoPickerButton()
-                    Text(composer.photoPicker.selectedImages.count.description + " photos")
-                        .flexible(.horizontal)
-                default:
-                    ComposeBarSourceButton(source: composer.source)
-                }
+						HStack(alignment: .center, spacing: -8) {
+							ComposeBarSourceButton(source: .machineImag)
+							ComposeBarSourceButton(source: .emoji)
+						}
+						.frame(height: 44)
+					}
+				}
                 ComposeBarInputTextField(composer: composer)
                 ComposeBarSendButton()
             }
@@ -52,7 +53,6 @@ struct ComposeBar: View {
             .padding(.init(top: 0, leading: 8, bottom: 0, trailing: 8))
         }
         .ignoresSafeArea(.container, edges: .bottom)
-        .equatable(by: composer.source)
     }
 
     private func photoPickerButton() -> some View {

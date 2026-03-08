@@ -35,7 +35,7 @@ struct MsgsScrollView: View {
         .frame(width: manager.layoutManager.boundsWidth)
         .font(.system(size: UIFont.preferredFont(forTextStyle: .body).pointSize))
         .tint(Color.link.mix(with: Color.accentColor, by: 0.3))
-        .animation(.interactiveSpring, value: manager.layoutManager.selectedMsg)
+		.animation(.mySpring(0.3), value: manager.layoutManager.selectedMsg)
         .onScrollPhaseChange { oldPhase, newPhase, context in
             guard oldPhase != newPhase else { return }
             manager.send(.onScrollPhaseChange(oldPhase, newPhase, context: context))
@@ -52,11 +52,11 @@ struct MsgsScrollView: View {
         }
         .scrollDismissesKeyboard(.never)
         .defaultScrollAnchor(.bottom, for: .initialOffset)
-        .equatable(by: manager.state)
-        .defaultScrollAnchor(
-            manager.presentation.state.bottomAccessory == .scrollDownButton ? .top : .bottom,
-            for: .sizeChanges
-        )
+		.defaultScrollAnchor(
+			manager.presentation.state.bottomAccessory == .scrollDownButton ? .top : .bottom,
+			for: .sizeChanges
+		)
+		.equatable(by: manager.state.reloadID)
         .scrollPosition(manager.scrollController.scrollPositionBindable, anchor: .none)
     }
 }
