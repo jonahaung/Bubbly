@@ -62,7 +62,7 @@ extension VScrollGeometry {
         case .top:
 			offsetY < boundsHeight/4
         case .bottom:
-            offsetY + (boundsHeight + boundsHeight/8) > contentHeight
+            offsetY + boundsHeight+50 > contentHeight
         }
     }
 }

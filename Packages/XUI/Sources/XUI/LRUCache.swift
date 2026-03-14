@@ -32,7 +32,7 @@ public final class LRUCache<Key: Hashable, Value>: @unchecked Sendable {
 
 	// MARK: Init
 
-	public init(capacity: Int = 300) {
+	public init(capacity: Int = 500) {
 		self.capacity = max(1, capacity)
 	}
 

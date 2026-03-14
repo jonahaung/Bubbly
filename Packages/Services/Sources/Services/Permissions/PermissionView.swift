@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import XUI
 
 public struct PermissionView: View {
     let permission: any Permission
@@ -13,30 +14,25 @@ public struct PermissionView: View {
     }
 
     public var body: some View {
-        HStack(alignment: .center) {
-            Image(systemName: permission.kind.imageName)
-                .resizable()
-                .scaledToFit()
-                .foregroundStyle(.secondary)
-                .frame(square: 24)
-                .padding(8)
-
-            Text(permission.kind.name + "\n" + permission.kind.description)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .italic()
-
-            Spacer()
-
-            Button {
-                handleButtonAction()
-            } label: {
-                Text(permission.ctaText)
-                    .font(.footnote)
-            }
-            .fixedSize(horizontal: true, vertical: false)
-        }
-        .buttonStyle(.borderless)
+		Label {
+			HStack(spacing: 4) {
+				Text(permission.kind.name)
+				Spacer()
+				Button {
+					handleButtonAction()
+				} label: {
+					Text(permission.ctaText)
+						.font(.footnote)
+				}
+			}
+			Text(permission.kind.description)
+				.italic()
+		} icon: {
+			IconView {
+				Image(systemName: permission.kind.imageName)
+			}
+			.foregroundStyle(RandomShapeStyle.style(for: permission.kind.name))
+		}
         .id(reload)
     }
 

@@ -1,12 +1,9 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
-
 import Database
 import SwiftUI
 import XUI
 
 struct AttachmentsDeck<Content: View>: View {
+	
     let items: [Attachment]
     let alignment: HorizontalAlignment
     let content: (Attachment) -> Content
@@ -15,24 +12,15 @@ struct AttachmentsDeck<Content: View>: View {
         ZStack(alignment: .bottom) {
             ForEach(Array(items.enumerated()), id: \.element) { index, item in
                 content(item)
-                    .roundWithBorder(color: .systemBackground)
-                    .scaleEffect(
-                        scale(for: index),
-                        anchor: alignment == .trailing ? .bottomLeading : .bottomTrailing
-                    )
                     .offset(x: offsetX(for: index), y: offsetY(for: index))
                     .rotationEffect(
                         .degrees(rotation(for: index)),
                         anchor: alignment == .trailing ? .leading : .trailing
                     )
-                    // .shadow(color: shadow(for: index), radius: 30, y: 20)
                     .zIndex(zIndex(for: index))
             }
         }
-        .padding(
-            alignment == .trailing ? .leading : .trailing,
-            xSpacing * items.count.cgFloat * 0.5
-        )
+		.equatable(by: items)
     }
 
     private var xSpacing: CGFloat {

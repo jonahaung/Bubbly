@@ -5,7 +5,7 @@
 import SwiftData
 import SwiftUI
 
-public struct DbQuery<T>: View where T: PersistentModel & CollectionDocument & SendableDocument {
+public struct DbQuery<T>: View where T: PersistentModel & SendableTransformable {
     @Query private var items: [T]
     private let content: (_ items: [T]) -> AnyView
 

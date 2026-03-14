@@ -45,8 +45,8 @@ public struct SettingsScene: View {
 
                 Stepper(
                     value: paginationPageSizeBinding,
-                    in: 20...100,
-                    step: 10
+                    in: 50...1000,
+                    step: 50
                 ) {
                     Text("Pagination Page Size: \(viewModel.state.paginationPageSize)")
                 }

@@ -6,22 +6,18 @@ import Core
 import Foundation
 import XUI
 
-@MainActor
-public final class DeepLinkCoordinator {
+public struct DeepLinkCoordinator: Sendable {
 
     private let codec: DeeplinkCodec
     private let planner: DeeplinkActionPlanner
     private let sideEffects: SideEffectHandler
 
-    private unowned let router: Router
-
+	@MainActor
     public init(
-        router: Router,
-        codec: DeeplinkCodec,
-        planner: DeeplinkActionPlanner,
-        sideEffects: SideEffectHandler
+		codec: DeeplinkCodec = .standard,
+		planner: DeeplinkActionPlanner = .default(),
+		sideEffects: SideEffectHandler = .default
     ) {
-        self.router = router
         self.codec = codec
         self.planner = planner
         self.sideEffects = sideEffects
@@ -59,6 +55,7 @@ public final class DeepLinkCoordinator {
 private extension DeepLinkCoordinator {
     @concurrent
     func handleDeepLinkAction(_ action: DeeplinkAction) async throws {
+		let router = await Router.shared
         switch action {
         case let .selectTab(tab):
             await router.selectTab(tab)
@@ -76,18 +73,18 @@ private extension DeepLinkCoordinator {
 }
 
 public extension DeepLinkCoordinator {
-    static let shared: DeepLinkCoordinator = .init(
-        router: Router.shared,
-        codec: DeeplinkCodec(
-            config: .init(
-                scheme: AppInformation.urlScheme,
-                supportedVersions: Set(["v1"]),
-                queryValidation: .strict
-            ),
-            aliases: .init(routeAliases: ["conv": "conversation"]),
-            telemetry: .default
-        ),
-        planner: .default(tabMapping: .default, navMapping: .default),
-        sideEffects: .default
-    )
+//    static let shared: DeepLinkCoordinator = .init(
+//        router: Router.shared,
+//        codec: DeeplinkCodec(
+//            config: .init(
+//                scheme: AppInformation.urlScheme,
+//                supportedVersions: Set(["v1"]),
+//                queryValidation: .strict
+//            ),
+//            aliases: .init(routeAliases: ["conv": "conversation"]),
+//            telemetry: .default
+//        ),
+//        planner: .default(tabMapping: .default, navMapping: .default),
+//        sideEffects: .default
+//    )
 }

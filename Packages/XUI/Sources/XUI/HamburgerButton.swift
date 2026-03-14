@@ -57,6 +57,7 @@ public struct HamburgerButton: View {
 			.contentShape(Rectangle())
 		}
 		.buttonStyle(.plain)
+		
 	}
 
 	private var bar: some View {

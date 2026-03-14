@@ -9,7 +9,7 @@ import XUI
 
 @MainActor
 @Observable
-public final class Router {
+public final class Router: Sendable {
 
     private var allPaths: [TabPath: [NavPath]]
     public var selectedTab: TabPath
@@ -88,5 +88,9 @@ public extension Router {
 }
 
 public extension Router {
-    static let shared: Router = .init(.inbox)
+    @MainActor
+    private static var _shared: Router = .init(.inbox)
+
+    @MainActor
+    static var shared: Router { _shared }
 }

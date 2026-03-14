@@ -13,10 +13,11 @@ public final class DisplayLink {
     private var displayLink: CADisplayLink?
     private var startTime: CFTimeInterval = 0
     public private(set) var state: State = .inactive
-
+	private let fixedInterval: CFTimeInterval
     private var targetInterval: CFTimeInterval
 
     public init(_ interval: CFTimeInterval = 1) {
+		fixedInterval = interval
         targetInterval = interval
     }
 
@@ -27,7 +28,9 @@ public final class DisplayLink {
     public func start(_ interval: CFTimeInterval? = nil) {
         if let interval {
             targetInterval = interval
-        }
+		} else {
+			targetInterval = fixedInterval
+		}
         if state == .running {
             stop()
         }

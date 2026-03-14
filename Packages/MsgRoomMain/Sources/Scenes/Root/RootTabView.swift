@@ -12,9 +12,9 @@ import XUI
 
 struct RootTabView: View {
     let coordinator: AppCoordinator
-
+	private var router: Router { coordinator.router }
     var body: some View {
-        TabView(selection: coordinator.router.tabPathBinding()) {
+        TabView(selection: router.tabPathBinding()) {
             ForEach(TabPath.allCases) { tabPath in
                 Tab(value: tabPath, role: role(for: tabPath)) {
                     MainNavView(tabPath: tabPath, coordinator: coordinator) {
@@ -39,19 +39,19 @@ struct RootTabView: View {
 
 private extension RootTabView {
     func role(for tabPath: TabPath) -> TabRole? {
-        tabPath == .test ? .search : nil
+		tabPath == .contacts ? .search : nil
     }
 }
 
 private extension RootTabView {
     var sheet: Binding<NavPath?> {
         .init(
-            get: { coordinator.router.sheet },
+            get: { router.sheet },
             set: { newValue in
                 if let newValue {
-                    coordinator.router.presentModel(newValue)
+                    router.presentModel(newValue)
                 } else {
-                    coordinator.router.dismissModal()
+                    router.dismissModal()
                 }
             }
         )
@@ -64,12 +64,9 @@ public extension AppCoordinator {
         case .test:
             PlaygroundView()
         case .inbox:
-            InboxScene(viewModel: .init())
+			InboxScene(coordinator: self)
         case .contacts:
-            ContactsScene(
-                router: router, contactsRepository: container.contactsRepository,
-                currentUserRepository: container.currentUserRepository
-            )
+			ContactsScene(coordinator: self)
         case .settings:
             SettingsScene(
                 currentUserRepository: container.currentUserRepository,

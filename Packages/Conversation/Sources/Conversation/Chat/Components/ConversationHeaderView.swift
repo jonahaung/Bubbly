@@ -24,9 +24,5 @@ struct ConversationHeaderView: View {
         .background(.windowBackground, in: RoundedRectangle(cornerRadius: 12))
         .padding()
         .id(Self.typeName)
-        .layoutValue(
-            key: MsgLayoutValueKey.self,
-            value: .init(uid: manager.conversation.uid)
-        )
     }
 }

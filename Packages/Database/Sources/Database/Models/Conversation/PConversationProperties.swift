@@ -22,7 +22,7 @@ public final class PConversationProperties {
     }
 }
 
-extension PConversationProperties: CollectionDocument, SendableDocument {
+extension PConversationProperties: SendableTransformable {
     public func update(from item: ConversationProperties) {
         if theme != item.theme {
             theme = item.theme

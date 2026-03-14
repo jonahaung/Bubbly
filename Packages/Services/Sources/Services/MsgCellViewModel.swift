@@ -7,19 +7,19 @@ import SwiftUI
 import XUI
 
 @Observable
-public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
-	@ObservationIgnored
-    public var msg: Message
-    public var reloadID: Int = 0
-	@ObservationIgnored
-    public var layoutValue: MsgLayoutValue
-	@ObservationIgnored
-    public var state: State
+public final class MsgCellViewModel: ViewReloadable, Identifiable, Equatable {
+
+	public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
+		lhs.msg == rhs.msg && lhs.state == rhs.state
+	}
+
+	@ObservationIgnored public var msg: Message
+	public var state: State
+	public var reloadID: Int = 0
 
     public init(_ msg: Message) {
         state = .init(msg: msg)
         self.msg = msg
-        layoutValue = msg.layoutValue()
     }
 
     public func update(with msg: Message) {
@@ -28,25 +28,28 @@ public final class MsgCellViewModel: ViewReloadable, @MainActor Identifiable {
         layoutIfNeeded()
     }
 
+	@MainActor
     public func update(layout: MsgCellLayout) {
         guard state.layout != layout else { return }
+		var state = self.state
         if layout.showAvatar, state.sender == nil {
             state.sender = ContactsRepository.shared.contact(for: msg.senderID)
         }
         state.layout = layout
+		self.state = state
+		layoutIfNeeded()
     }
 
     public func setVisibility(_ isVisible: Bool) {
         guard state.isVisible != isVisible else { return }
         state.isVisible = isVisible
-		if isVisible {
-			layoutIfNeeded()
-		}
     }
 
     public func update(selectedMsg: SelectedMsg?) {
         state.selectedMsg = selectedMsg
-        layoutIfNeeded()
+		if state.isVisible {
+			layoutIfNeeded()
+		}
     }
 }
 
@@ -59,9 +62,9 @@ public extension MsgCellViewModel {
         public var sender: Contact?
         public var layout: MsgCellLayout
         public var isVisible: Bool
-        public let bubblePadding: EdgeInsets
         public var selectedMsg: SelectedMsg?
         public var reactions: [Reaction]?
+		public var containsMarkdown: Bool
 
         public init(msg: Message) {
             id = msg.id
@@ -72,16 +75,8 @@ public extension MsgCellViewModel {
             layout = .init()
             isVisible = false
             reactions = msg.reactions.isEmpty ? nil : msg.reactions
-            let uiFont = UIFont.preferredFont(forTextStyle: .body)
-            let verticalPadding = uiFont.chatVerticalPadding
-            let horizontalPadding = uiFont.chatHorizontalPadding
-            bubblePadding = .init(
-                top: verticalPadding,
-                leading: horizontalPadding,
-                bottom: verticalPadding,
-                trailing: horizontalPadding
-            )
             selectedMsg = nil
+			containsMarkdown = msg.text?.containsMarkdown == true
         }
 
         public func computeBubbleCorner() -> BubbleCorner {
@@ -105,16 +100,6 @@ public extension MsgCellViewModel {
         public var foregroundStyle: Color {
             isSender ? .black : .primary
         }
-
-        public var contentPadding: EdgeInsets {
-            .init(
-                top: 0.2,
-                leading: isSender ? 1 : 0.2,
-                bottom: 1,
-                trailing: isSender ? 0.2 : 1
-            )
-        }
-
         public var isSelected: Bool {
             selectedMsg?.id == id
         }

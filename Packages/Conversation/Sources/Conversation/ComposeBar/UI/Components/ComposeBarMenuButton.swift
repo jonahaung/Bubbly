@@ -12,21 +12,19 @@ extension ComposeBar {
         @Environment(\.sharedFocusState) private var sharedFocus
 
         var body: some View {
-            SingleSubviewLayout {
-                AsyncButton {
-                    let isMenu = composer.source == .menu
-                    composer.updateSource(isMenu ? .text : .menu)
-                } label: {
-                    TwoLinesShape()
-                        .frame(square: 24)
-                        .frame(square: 44)
-                        .background(
-                            .windowBackground,
-                            in: RoundedRectangle(cornerRadius: 22, style: .circular)
-                        )
-                }
-                .buttonStyle(.plain)
-            }
+			AsyncButton {
+				let isMenu = composer.source == .menu
+				composer.updateSource(isMenu ? .text : .menu)
+			} label: {
+				TwoLinesShape()
+					.frame(square: 24)
+					.frame(square: 44)
+					.background(
+						.windowBackground,
+						in: RoundedRectangle(cornerRadius: 22, style: .circular)
+					)
+			}
+			.buttonStyle(.plain)
         }
     }
 }

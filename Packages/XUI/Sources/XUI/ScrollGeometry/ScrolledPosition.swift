@@ -54,46 +54,37 @@ public struct ScrollLocation: Sendable, Hashable {
     }
 }
 
-public indirect enum ScrollPositionValue: Hashable, Sendable {
+public indirect enum ScrollPositionValue: Hashable {
     case y(CGFloat)
     case id(String?)
     case layoutID(String?)
-    case edge(Edge)
-    case snapToY(CGFloat)
-    case snapToBottom
+	case edge(VerticalEdge)
 }
 
 public struct ScrollPositionItem: Hashable, Equatable {
     public let position: ScrollPositionValue
-    public let animation: Animation?
+    public let properties: Properties
 
-    public init(_ position: ScrollPositionValue, animation: Animation? = nil) {
+	public enum Properties: Hashable, Equatable {
+		case animated(Animation)
+		case notAnimated
+		case scroll
+	}
+
+    public init(_ position: ScrollPositionValue, properties: Properties) {
         self.position = position
-        self.animation = animation
+		self.properties = properties
     }
 
-    public static func y(_ value: CGFloat, animation: Animation? = nil) -> Self {
-        .init(.y(value), animation: animation)
+	public static func y(_ value: CGFloat, properties: Properties = .notAnimated) -> Self {
+		.init(.y(value), properties: properties)
     }
 
-    public static func id(_ value: String?, animation: Animation? = nil) -> Self {
-        .init(.id(value), animation: animation)
+    public static func id(_ value: String?, properties: Properties = .notAnimated) -> Self {
+		.init(.id(value), properties: properties)
     }
-
-    public static func layoutID(_ value: String?, animation: Animation? = nil) -> Self {
-        .init(.layoutID(value), animation: animation)
-    }
-
-    public static func edge(_ value: Edge, animation: Animation? = nil) -> Self {
-        .init(.edge(value), animation: animation)
-    }
-
-    public static func snapToBottom() -> Self {
-        .init(.snapToBottom, animation: nil)
-    }
-
-    public static func snapToY(_ y: CGFloat) -> Self {
-        .init(.snapToY(y), animation: nil)
+    public static func edge(_ value: VerticalEdge, properties: Properties = .notAnimated) -> Self {
+		.init(.edge(value), properties: properties)
     }
 }
 
@@ -101,38 +92,4 @@ public enum ScrolledPosition: Sendable, Hashable {
     case none
     case atBottom
     case atTop
-
-//    public init(_ geometry: ScrollGeometry) {
-//        if geometry.contentSize.height < geometry.bounds.height {
-//            self = .atBottom
-//            return
-//        }
-//        let location = geometry.location
-//        switch location.edge {
-//        case .top:
-//            self = location.fraction <= 0 ? .atTop : .position(location)
-//        case .bottom:
-//            self = location.fraction <= 0 ? .atBottom : .position(location)
-//        }
-//    }
-
-    public var description: String {
-        switch self {
-        case .none:
-            "none"
-        case .atBottom:
-            "atBottom"
-        case .atTop:
-            "atTop"
-        }
-    }
-
-    public var nearBottom: Bool {
-        switch self {
-        case .atBottom:
-            true
-        default:
-            false
-        }
-    }
 }

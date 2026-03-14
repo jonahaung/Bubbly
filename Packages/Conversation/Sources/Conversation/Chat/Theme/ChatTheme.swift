@@ -6,7 +6,7 @@ import Database
 import SwiftUI
 import XUI
 
-public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
+public struct ChatTheme: Equatable, EmptyRepresentable {
     struct Theme: Equatable {
         let bubbleCoor: Color
         let shadowColor: Color
@@ -25,13 +25,13 @@ public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
         backgroundColor = theme.background.color
         secondaryColor = BubbleColor.allCases.random().value
         outgoing = .init(
-            bubbleCoor: theme.outgoingBubbleColor,
-            shadowColor: Color(white: 0.85),
+			bubbleCoor: theme.bubbleColor.value,
+			shadowColor: theme.background.color.darker(byPercentage: 10),
             foregroundStyle: .darkText
         )
         incoming = .init(
-            bubbleCoor: theme.incomingBubbleColor,
-            shadowColor: Color(white: 0.8),
+            bubbleCoor: .tertiarySystemBackground,
+			shadowColor: theme.background.color.darker(byPercentage: 10),
             foregroundStyle: .primary
         )
         let uiFont = UIFont.preferredFont(forTextStyle: .body)
@@ -44,7 +44,7 @@ public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
             bottom: verticalPadding,
             trailing: horizontalPadding
         )
-        bubbleCornerRadius = max(16, uiFont.lineHeight * 0.75)
+		bubbleCornerRadius = theme.bubbleCornorRadius
     }
 
     public static let empty = ChatTheme(.default)
@@ -60,6 +60,15 @@ public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
     public func shadowColor(for isSender: Bool) -> some ShapeStyle {
         isSender ? outgoing.shadowColor : incoming.shadowColor
     }
+
+	public func shadowPadding(for isSender: Bool) -> EdgeInsets {
+		.init(
+			top: 0.2,
+			leading: isSender ? 1 : 0.2,
+			bottom: 1,
+			trailing: isSender ? 0.2 : 1
+		)
+	}
 }
 
 extension UIFont {

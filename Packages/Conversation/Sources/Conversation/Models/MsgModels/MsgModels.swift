@@ -9,29 +9,20 @@ import Services
 import SwiftUI
 import XUI
 
-//@Observable
 @MainActor
 public final class MsgModels {
-  
-    public struct ScrollCompensation: Sendable, Equatable {
-        public let anchorID: String?
-        public let insertedBeforeAnchor: Int
-    }
-
-    private struct UpsertResult {
-        let index: Int
-        let inserted: Bool
-    }
 
 	private var storage = [MsgCellViewModel]()
-    private let modelCache = LRUCache<String, MsgCellViewModel>()
-    private let layoutCache = LRUCache<String, MsgCellLayout>()
-    private let bubbleFactory = BubbleFactory()
+	private let modelCache = LRUCache<String, MsgCellViewModel>()
+	private let layoutCache = LRUCache<String, MsgCellLayout>()
+	private let bubbleFactory = BubbleFactory()
 
-    private let mergeActor = MsgMergeActor()
-    init(_ msgs: [Message] = []) {
-        set(msgs: msgs, forceReset: true)
-    }
+	init(_ msgs: [Message] = []) {
+		storage = msgs.map({ msg in
+			model(for: msg)
+		})
+		evictLayoutsIfNeeded()
+	}
 
 	deinit {
 		modelCache.removeAll()
@@ -41,314 +32,202 @@ public final class MsgModels {
 }
 
 extension MsgModels {
-    public var count: Int {
-        storage.count
-    }
+	public var count: Int {
+		storage.count
+	}
 
-    public var first: MsgCellViewModel? {
-        storage.first
-    }
+	public var first: MsgCellViewModel? {
+		storage.first
+	}
 
-    public var last: MsgCellViewModel? {
-        storage.last
-    }
+	public var last: MsgCellViewModel? {
+		storage.last
+	}
 
-    public var isEmpty: Bool {
-        storage.isEmpty
-    }
+	public var isEmpty: Bool {
+		storage.isEmpty
+	}
 
-    public var renderedModels: [MsgCellViewModel] {
+	public var renderedModels: [MsgCellViewModel] {
 		storage
-    }
+	}
 
-    public func contains(withID id: String) -> Bool {
+	public func contains(withID id: String) -> Bool {
 		storage.contains(where: { $0.id == id })
-    }
+	}
 
-    public func index(of id: String) -> Int? {
+	public func index(of id: String) -> Int? {
 		storage.firstIndex(where: { $0.id == id })
-    }
+	}
 
-    public subscript(position: Int) -> MsgCellViewModel? {
-        storage.indices.contains(position) ? storage[position] : nil
-    }
+	public subscript(position: Int) -> MsgCellViewModel? {
+		storage.indices.contains(position) ? storage[position] : nil
+	}
 
-    public subscript(safe position: Int) -> MsgCellViewModel? {
-        storage.indices.contains(position) ? storage[position] : nil
-    }
+	public subscript(safe position: Int) -> MsgCellViewModel? {
+		storage.indices.contains(position) ? storage[position] : nil
+	}
 
-    public func element(withID id: String) -> MsgCellViewModel? {
+	public func element(withID id: String) -> MsgCellViewModel? {
 		storage.first(where: { $0.id == id }) ?? modelCache.get(id)
-    }
+	}
 
-    public func msgs() -> [Message] {
-        var result: [Message] = []
-        result.reserveCapacity(storage.count)
-        for model in storage {
-            result.append(model.msg)
-        }
-        return result
-    }
+	public func msgs() -> [Message] {
+		var result: [Message] = []
+		result.reserveCapacity(storage.count)
+		for model in storage {
+			result.append(model.msg)
+		}
+		return result
+	}
 }
 
 extension MsgModels {
 
-    public func didChangeVisibility(for id: String, isVisible: Bool) {
-        element(withID: id)?.setVisibility(isVisible)
-    }
+	public func didChangeVisibility(for id: String, isVisible: Bool) {
+		element(withID: id)?.setVisibility(isVisible)
+	}
 
-    public func didChangeSelection(_ selectedMsg: SelectedMsg?, for id: String) {
-        element(withID: id)?.update(selectedMsg: selectedMsg)
-    }
+	public func didChangeSelection(_ selectedMsg: SelectedMsg?, for id: String) {
+		element(withID: id)?.update(selectedMsg: selectedMsg)
+	}
 
-    public func cached(for id: String) -> MsgCellViewModel? {
-        modelCache.get(id)
-    }
+	public func cached(for id: String) -> MsgCellViewModel? {
+		modelCache.get(id)
+	}
 
-    public func model(for msg: Message) -> MsgCellViewModel {
-        if let cached = modelCache.get(msg.uid) { return cached }
-        let model = MsgCellViewModel(msg)
-        modelCache.set(msg.uid, value: model)
-        return model
-    }
+	public func model(for msg: Message) -> MsgCellViewModel {
+		if let cached = modelCache.get(msg.uid) { return cached }
+		let model = MsgCellViewModel(msg)
+		modelCache.set(msg.uid, value: model)
+		return model
+	}
 
-    public func set(msgs: [Message], forceReset: Bool) {
-        merge(msgs: msgs, forceReset: forceReset)
-    }
-
-    public func setInBackground(msgs: [Message], forceReset: Bool) async {
-        let prepared = await mergeActor.prepare(msgs)
-
-        mergePrepared(prepared, forceReset: forceReset)
-    }
-
-    @discardableResult
-    public func prepend(msgs: [Message], preserveAnchor anchorID: String?) -> ScrollCompensation {
-		let beforeIndex = anchorID.flatMap { index(of: $0) }
-        merge(msgs: msgs, forceReset: false)
-        let afterIndex = anchorID.flatMap { index(of: $0) }
-        let insertedBeforeAnchor = max(0, (afterIndex ?? 0) - (beforeIndex ?? afterIndex ?? 0))
-        return .init(anchorID: anchorID, insertedBeforeAnchor: insertedBeforeAnchor)
-    }
-
-    public func insert(msg: Message) {
-		_ = upsert(msg)
+	public func set(msgs: [Message]) {
+		storage = msgs.map({ msg in
+			model(for: msg)
+		})
 		evictLayoutsIfNeeded()
-    }
+	}
 
-    public func update(msg: Message) {
-		_ = upsert(msg)
-    }
+	public func insert(msg: Message) {
+		let index = insertionIndex(for: msg)
+		let model = model(for: msg)
+		storage.insert(model, at: index)
+		invalidateLayoutsForUpdate(at: index)
+	}
 
-    public func remove(msg: Message) {
-		guard let removedIndex = storage.index(of: msg.uid) else { return }
+	public func update(msg: Message) {
+		modelCache.get(msg.uid)?.update(with: msg)
+	}
+
+	public func remove(msg: Message) {
+		guard let removedIndex = index(of: msg.uid) else { return }
 		storage.removeAll(where: { $0.id == msg.id })
 		layoutCache.remove(msg.uid)
 		invalidateLayoutsAround(index: removedIndex)
-		evictLayoutsIfNeeded()
-    }
+	}
 
-    public func retainOldest(_ limit: Int) {
-        guard limit >= 0 else { return }
+	public func prepend(_ msgs: [Message]) {
+		storage.insert(contentsOf: msgs.map { model(for: $0) }, at: 0)
+		evictLayoutsIfNeeded()
+	}
+	public func append(_ msgs: [Message]) {
+		storage.append(contentsOf: msgs.map { model(for: $0) })
+		evictLayoutsIfNeeded()
+	}
+	public func retainOldest(_ limit: Int) {
+		guard limit >= 0 else { return }
 		guard storage.count > limit else { return }
-		var removedIDs: [String] = []
-		removedIDs.reserveCapacity(storage.count - limit)
-		for index in limit..<storage.count {
-			removedIDs.append(storage[index].id)
-		}
 		storage.removeSubrange(limit..<storage.count)
-		for id in removedIDs {
-			layoutCache.remove(id)
-		}
-		evictLayoutsIfNeeded()
-    }
+	}
 
-    public func retainNewest(_ limit: Int) {
-        guard limit >= 0 else { return }
+	public func retainNewest(_ limit: Int) {
+		guard limit >= 0 else { return }
 		guard storage.count > limit else { return }
 		let removeCount = storage.count - limit
-		var removedIDs: [String] = []
-		removedIDs.reserveCapacity(removeCount)
-		for index in 0..<removeCount {
-			removedIDs.append(storage[index].id)
-		}
 		storage.removeSubrange(0..<removeCount)
-		for id in removedIDs {
-			layoutCache.remove(id)
-		}
-		evictLayoutsIfNeeded()
-    }
+	}
 }
 
 extension MsgModels {
-    private func merge(msgs: [Message], forceReset: Bool) {
-        let sortedMsgs = MsgMergeActor.prepareStatic(msgs)
-        mergePrepared(sortedMsgs, forceReset: forceReset)
-    }
+	private func insertionIndex(for msg: Message) -> Int {
+		msgs().insertionIndex(for: msg, by: \.date)
+//		var low = 0
+//		var high = storage.count
+//		while low < high {
+//			let mid = (low + high) / 2
+//			if precedes(storage[mid].msg, msg) {
+//				low = mid + 1
+//			} else {
+//				high = mid
+//			}
+//		}
+//		return low
+	}
 
-    private func mergePrepared(_ sortedMsgs: [Message], forceReset: Bool) {
-        guard !sortedMsgs.isEmpty || forceReset else { return }
-		if forceReset {
-			storage.removeAll(keepingCapacity: true)
-			layoutCache.removeAll()
+	private func precedes(_ lhs: Message, _ rhs: Message) -> Bool {
+		if lhs.date != rhs.date {
+			return lhs.date < rhs.date
 		}
+		return lhs.uid < rhs.uid
+	}
 
-		for msg in sortedMsgs {
-			_ = upsert(msg)
+	private func invalidateLayoutsForUpdate(at index: Int) {
+		invalidateLayoutsAround(index: index)
+		let lower = max(index - 1, 0)
+		let upper = min(index + 2, storage.count)
+		if lower < upper {
+			ensureLayouts(in: lower..<upper)
 		}
+	}
 
-		if storage.isEmpty {
+	private func invalidateLayoutsForMove(from oldIndex: Int, to newIndex: Int) {
+		invalidateLayoutsAround(index: oldIndex)
+		invalidateLayoutsAround(index: newIndex)
+		let lower = max(min(oldIndex, newIndex) - 1, 0)
+		let upper = min(max(oldIndex, newIndex) + 2, storage.count)
+		if lower < upper {
+			ensureLayouts(in: lower..<upper)
+		}
+	}
+
+	private func invalidateLayoutsAround(index: Int) {
+		guard !storage.isEmpty else { return }
+		let lower = max(0, index - 1)
+		let upper = min(storage.count - 1, index + 1)
+		if lower > upper { return }
+		for index in lower...upper {
+			layoutCache.remove(storage[index].id)
+		}
+	}
+
+	private func layout(for id: String) {
+		guard let index = index(of: id) else { return }
+		if let cached = layoutCache.get(id) {
+			if storage[index].state.layout.isEmpty {
+				storage[index].update(layout: cached)
+			}
 			return
 		}
-		ensureLayouts(in: 0..<storage.count)
-		evictLayoutsIfNeeded()
-    }
 
-    private func upsert(_ msg: Message) -> UpsertResult {
-		if let existingIndex = index(of: msg.uid) {
-            let model = storage[existingIndex]
-            let previousMessage = model.msg
-            model.update(with: msg)
-            let sameOrderKey = previousMessage.date == msg.date && previousMessage.uid == msg.uid
-            if sameOrderKey {
-                invalidateLayoutsForUpdate(at: existingIndex)
-                return .init(index: existingIndex, inserted: false)
-            }
-			storage.removeAll(where: { $0.id == msg.uid })
-            let newIndex = insertionIndex(for: msg)
-            storage.insert(model, at: newIndex)
-            invalidateLayoutsForMove(from: existingIndex, to: newIndex)
-            return .init(index: newIndex, inserted: false)
-        }
+		let prevMsg = index > 0 ? storage[index - 1].msg : nil
+		let nextMsg = index + 1 < storage.count ? storage[index + 1].msg : nil
+		let style = bubbleFactory.style(for: storage[index].msg, previous: prevMsg, next: nextMsg)
+		layoutCache.set(id, value: style)
+		storage[index].update(layout: style)
+	}
 
-        let model = model(for: msg)
-        model.update(with: msg)
-        let index = insertionIndex(for: msg)
-        storage.insert(model, at: index)
-        invalidateLayoutsAround(index: index)
-        return .init(index: index, inserted: true)
-    }
+	private func ensureLayouts(in range: Range<Int>) {
+		guard !range.isEmpty else { return }
+		for index in range {
+			layout(for: storage[index].id)
+		}
+	}
 
-    private func insertionIndex(for msg: Message) -> Int {
-        var low = 0
-        var high = storage.count
-        while low < high {
-            let mid = (low + high) / 2
-            if precedes(storage[mid].msg, msg) {
-                low = mid + 1
-            } else {
-                high = mid
-            }
-        }
-        return low
-    }
-
-    private func precedes(_ lhs: Message, _ rhs: Message) -> Bool {
-        if lhs.date != rhs.date {
-            return lhs.date < rhs.date
-        }
-        return lhs.uid < rhs.uid
-    }
-
-    private func invalidateLayoutsForUpdate(at index: Int) {
-        invalidateLayoutsAround(index: index)
-        let lower = max(index - 1, 0)
-        let upper = min(index + 2, storage.count)
-        if lower < upper {
-            ensureLayouts(in: lower..<upper)
-        }
-    }
-
-    private func invalidateLayoutsForMove(from oldIndex: Int, to newIndex: Int) {
-        invalidateLayoutsAround(index: oldIndex)
-        invalidateLayoutsAround(index: newIndex)
-        let lower = max(min(oldIndex, newIndex) - 1, 0)
-        let upper = min(max(oldIndex, newIndex) + 2, storage.count)
-        if lower < upper {
-            ensureLayouts(in: lower..<upper)
-        }
-    }
-
-    private func invalidateLayoutsAround(index: Int) {
-        guard !storage.isEmpty else { return }
-        let lower = max(0, index - 1)
-        let upper = min(storage.count - 1, index + 1)
-        if lower > upper { return }
-        for index in lower...upper {
-            layoutCache.remove(storage[index].id)
-        }
-    }
-
-    private func layout(for id: String) {
-		guard let index = index(of: id) else { return }
-        if let cached = layoutCache.get(id) {
-            if storage[index].state.layout.isEmpty {
-                storage[index].update(layout: cached)
-            }
-            return
-        }
-
-        let prevMsg = index > 0 ? storage[index - 1].msg : nil
-        let nextMsg = index + 1 < storage.count ? storage[index + 1].msg : nil
-        let style = bubbleFactory.style(for: storage[index].msg, previous: prevMsg, next: nextMsg)
-        layoutCache.set(id, value: style)
-        storage[index].update(layout: style)
-    }
-
-    private func ensureLayouts(in range: Range<Int>) {
-        guard !range.isEmpty else { return }
-        for index in range {
-            layout(for: storage[index].id)
-        }
-    }
-
-    private func evictLayoutsIfNeeded() {
-        for each in storage {
-            layout(for: each.id)
-        }
-    }
-
-//    private func withBatchUpdate(_ work: () -> Void) {
-//		work()
-//    }
-}
-
-actor MsgMergeActor {
-
-    private let bubbleFactory = BubbleFactory()
-
-    func prepare(_ msgs: [Message]) -> [Message] {
-        Self.prepareStatic(msgs)
-    }
-
-    func layout(_ msgs: [Message]) -> [MsgCellLayout] {
-        var layouts = [MsgCellLayout]()
-        for msg in msgs {
-            let previous = msgs.previous(msg)
-            let next = msgs.next(after: msg)
-            let layout = bubbleFactory.style(for: msg, previous: previous, next: next)
-            layouts.append(layout)
-        }
-        return layouts
-    }
-
-    nonisolated static func prepareStatic(_ msgs: [Message]) -> [Message] {
-        guard msgs.count > 1 else { return msgs }
-        var alreadySorted = true
-        for index in 1..<msgs.count where precedes(msgs[index], msgs[index - 1]) {
-            alreadySorted = false
-            break
-        }
-        if alreadySorted {
-            return msgs
-        }
-        return msgs.sorted(by: precedes)
-    }
-
-    private nonisolated static func precedes(_ lhs: Message, _ rhs: Message) -> Bool {
-        if lhs.date != rhs.date {
-            return lhs.date < rhs.date
-        }
-        return lhs.uid < rhs.uid
-    }
+	private func evictLayoutsIfNeeded() {
+		for each in storage {
+			layout(for: each.id)
+		}
+	}
 }

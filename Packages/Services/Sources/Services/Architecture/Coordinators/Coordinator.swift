@@ -22,12 +22,7 @@ public final class AppCoordinator: @MainActor Coordinator {
         self.appLauncher = appLauncher
         self.container = container
         self.router = .shared
-        deeplinkCoordinator = .init(
-            router: router,
-            codec: .standard,
-            planner: .default(),
-            sideEffects: .default
-        )
+		deeplinkCoordinator = .init()
     }
 
     public func handleDeeplink(_ url: URL) async {

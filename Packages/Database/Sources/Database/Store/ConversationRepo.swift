@@ -2,197 +2,282 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
+//
+// Copyright © 2026 Stream.io Inc. All rights reserved.
+//
+
 import Core
 import Foundation
 import SwiftData
 import XUI
 
 public enum ConversationRepo {
-    enum XError: Error {
-        case noCurrentUserID
-        case invalidConversationID
-        case savingFailed
-        case noConversationGroupFound
-    }
 
-    @discardableResult
-    public static func getOrCreate(for conID: String, refetch: Bool) async throws -> Conversation {
-        let kind = try await getConversationKind(for: conID, refetch: refetch)
-        return Conversation(kind)
-    }
+	enum XError: Error {
+		case noCurrentUserID
+		case invalidConversationID
+		case savingFailed
+		case noConversationGroupFound
+	}
 
-    public static func getConversationKind(
-        for conID: String,
-        refetch: Bool
-    ) async throws -> ConversationKind {
-        if conID.contains("|") {
-            let contactID = try resolveContactID(from: conID)
-            let contact = try await ContactRepo.getOrCreate(uid: contactID, refetch: refetch)
-            return .contact(contact)
-        }
+	// MARK: - Conversation
 
-        if !refetch, let existing: PGroup.SendableType = try await Store.shared.groupStore?.fetch(
-            uid: conID
-        ) {
-            return .group(existing)
-        }
+	@discardableResult
+	public static func getOrCreate(
+		for conID: String,
+		refetch: Bool
+	) async throws -> Conversation {
+		let kind = try await getConversationKind(for: conID, refetch: refetch)
+		return Conversation(kind)
+	}
 
-        let group: Database.Group? = try await FirestoreRepo.getModel(
-            for: conID,
-            collection: .groups,
-            field: .uid
-        )
-        guard let group else {
-            throw XError.noConversationGroupFound
-        }
+	public static func getConversationKind(
+		for conID: String,
+		refetch: Bool
+	) async throws -> ConversationKind {
 
-        if try await Store.shared.groupStore?.exists(uid: conID) == false {
-            try await Store.shared.groupStore?.insert(group)
-        } else {
-            try await Store.shared.groupStore?.updateAndSave(uid: conID) { model in
-                model.update(from: group)
-            }
-        }
-        try await ContactRepo.getOrCreate(for: group.members, refatch: refetch)
-        return .group(group)
-    }
+		// Contact conversation
+		if conID.contains("|") {
+			let contactID = try resolveContactID(from: conID)
+			let contact = try await ContactRepo.getOrCreate(uid: contactID, refetch: refetch)
+			return .contact(contact)
+		}
 
-    static func resolveContactID(from conID: String) throws -> String {
-        var components = conID.components(separatedBy: "|")
-        guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
-            throw XError.noCurrentUserID
-        }
-        components.removeAll(where: { $0 == currentUserID })
-        guard let contactID = components.first, !contactID.isEmpty else {
-            throw XError.noConversationGroupFound
-        }
-        return contactID
-    }
+		// Local cache
+		if !refetch,
+		   let existing: PGroup.SendableType = try await Store.shared.groupStore?.fetch(uid: conID) {
+			return .group(existing)
+		}
 
-    static func messagesPredicate(for conID: String) -> Predicate<PMsg> {
-        #Predicate<PMsg> { $0.conID == conID }
-    }
+		// Fetch from server
+		let group: Database.Group? = try await FirestoreRepo.getModel(
+			for: conID,
+			collection: .groups,
+			field: .uid
+		)
 
-    static func statusNotPredicate(for status: MsgIncomingStatus) -> Predicate<PMsg> {
-        let readRawValue = status.rawValue
-        return #Predicate<PMsg> { $0.incomingStatus < readRawValue }
-    }
+		guard let group else {
+			throw XError.noConversationGroupFound
+		}
 
-    static func senderIDNotPredicate(for uid: String) -> Predicate<PMsg> {
-        #Predicate<PMsg> { $0.senderID != uid }
-    }
+		let groupStore = await Store.shared.groupStore
 
-    static func descriptor(
-        for conID: String,
-        order: SortOrder,
-        limit: Int? = nil,
-        offset: Int? = nil
-    ) -> FetchDescriptor<PMsg> {
-        var descriptor = FetchDescriptor<PMsg>(predicate: messagesPredicate(for: conID))
-        descriptor.sortBy = [.init(\.date, order: order)]
-        if let limit { descriptor.fetchLimit = limit }
-        if let offset { descriptor.fetchOffset = offset }
-        return descriptor
-    }
+		if try await groupStore?.exists(uid: conID) == true {
+			try await groupStore?.updateAndSave(uid: conID) { model in
+				model.update(from: group)
+			}
+		} else {
+			try await groupStore?.insert(group)
+		}
 
-    public static func fetchMessages(
-        conID: String,
-        offset: Int? = nil,
-        limit: Int? = nil
-    ) async throws -> [Message] {
-        let descriptor = descriptor(for: conID, order: .reverse, limit: limit, offset: offset)
-        let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
-        return snapshots.reversed()
-    }
+		try await ContactRepo.getOrCreate(for: group.members, refatch: refetch)
 
-    public static func deleteMessages(conID: String) async throws {
-        try await Store.shared.msgStore?.delete(where: messagesPredicate(for: conID))
-    }
+		return .group(group)
+	}
 
-    public static func lastMsg(conID: String) async throws -> Message? {
-        let descriptor = descriptor(for: conID, order: .reverse, limit: 1)
-        return try await Store.shared.msgStore?.fetch(descriptor).first
-    }
+	// MARK: - Helpers
 
-    public static func firstMsg(conID: String) async throws -> Message? {
-        let descriptor = descriptor(for: conID, order: .forward, limit: 1)
-        return try await Store.shared.msgStore?.fetch(descriptor).first
-    }
+	static func resolveContactID(from conID: String) throws -> String {
 
-    public static func totalMsgsCount(conID: String) async throws -> Int {
-        let descriptor = FetchDescriptor<PMsg>(predicate: messagesPredicate(for: conID))
-        return try await Store.shared.msgStore?.fetchCount(descriptor) ?? 0
-    }
+		var components = conID.components(separatedBy: "|")
 
-    public static func countUnreadMsgs(conID: String, currentUserID: String) async throws -> Int {
-        let predicate = unreadMsgsPredicate(conID: conID, currentUserID: currentUserID)
-        let descriptor = FetchDescriptor<PMsg>(predicate: predicate)
-        return try await Store.shared.msgStore?.fetchCount(descriptor) ?? 0
-    }
+		guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
+			throw XError.noCurrentUserID
+		}
 
-    public static func unreadMsgsPredicate(
-        conID: String,
-        currentUserID: String
-    ) -> Predicate<PMsg> {
-        let conPredicate = messagesPredicate(for: conID)
-        let recipientPredicate = senderIDNotPredicate(for: currentUserID)
-        let statusPredicate = statusNotPredicate(for: .read)
+		components.removeAll { $0 == currentUserID }
 
-        let predicate = #Predicate<PMsg> {
-            conPredicate.evaluate($0) && recipientPredicate.evaluate($0) && statusPredicate
-                .evaluate($0)
-        }
-        return predicate
-    }
+		guard let contactID = components.first, !contactID.isEmpty else {
+			throw XError.invalidConversationID
+		}
 
-    public static func fetchUnreadMessages(
-        conID: String,
-        limit: Int? = nil,
-        currentUserID: String
-    ) async throws -> [Message] {
-        let predicate = unreadMsgsPredicate(conID: conID, currentUserID: currentUserID)
-        var descriptor = FetchDescriptor<PMsg>(predicate: predicate)
-        if let limit {
-            descriptor.fetchLimit = limit
-        }
-        descriptor.sortBy = [.init(\.date, order: .forward)]
-        return try await Store.shared.msgStore?.fetch(descriptor) ?? []
-    }
+		return contactID
+	}
 
-    public static func updateReceiveMsgs(
-        for conID: String,
-        currentUserID: String
-    ) async throws -> [Message] {
-        let unreadMsgs = try await fetchUnreadMessages(conID: conID, currentUserID: currentUserID)
-        guard !unreadMsgs.isEmpty else { return [] }
+	// MARK: - Predicates
 
-        let msgStore = await Store.shared.msgStore
+	static func messagesPredicate(for conID: String) -> Predicate<PMsg> {
+		#Predicate<PMsg> { $0.conID == conID }
+	}
 
-        // Transform each message and let mapOrdered collect the results.
-        return try await AsyncOrderedStream.mapOrdered(inputs: unreadMsgs) { msg in
-            var msg = msg
-            msg.incomingStatus = .read
-            try await msgStore?.updateAndSave(uid: msg.uid) { model in
-                model.update(from: msg)
-            }
-            return msg
-        }
-    }
+	static func unreadMsgsPredicate(
+		conID: String,
+		currentUserID: String
+	) -> Predicate<PMsg> {
 
-    public static func search(
-        form name: String,
-        currentUserId: String
-    ) async throws -> Conversation? {
-        if let contact = try await ContactRepo.search(named: name) {
-            Conversation(
-                .contact(contact)
-            )
-        } else if let group = try await ContactRepo.searchGroup(named: name) {
-            Conversation(
-                .group(group)
-            )
-        } else {
-            nil
-        }
-    }
+		let readRaw = MsgIncomingStatus.read.rawValue
+
+		return #Predicate<PMsg> {
+			$0.conID == conID &&
+			$0.senderID != currentUserID &&
+			$0.incomingStatus < readRaw
+		}
+	}
+
+	// MARK: - Descriptor
+
+	static func descriptor(
+		for conID: String,
+		order: SortOrder,
+		limit: Int? = nil,
+		offset: Int? = nil
+	) -> FetchDescriptor<PMsg> {
+
+		var descriptor = FetchDescriptor<PMsg>(
+			predicate: messagesPredicate(for: conID)
+		)
+
+		descriptor.sortBy = [.init(\.date, order: order)]
+
+		if let limit {
+			descriptor.fetchLimit = limit
+		}
+
+		if let offset {
+			descriptor.fetchOffset = offset
+		}
+
+		return descriptor
+	}
+
+	// MARK: - Messages
+
+	public static func fetchMessages(
+		conID: String,
+		offset: Int? = nil,
+		limit: Int? = nil
+	) async throws -> [Message] {
+
+		guard let msgStore = await Store.shared.msgStore else { return [] }
+
+		let descriptor = descriptor(
+			for: conID,
+			order: .reverse,
+			limit: limit,
+			offset: offset
+		)
+
+		let snapshots = try await msgStore.fetch(descriptor)
+
+		return snapshots.reversed()
+	}
+
+	public static func deleteMessages(conID: String) async throws {
+		try await Store.shared.msgStore?.delete(where: messagesPredicate(for: conID))
+	}
+
+	public static func lastMsg(conID: String) async throws -> Message? {
+
+		guard let msgStore = await Store.shared.msgStore else { return nil }
+
+		let descriptor = descriptor(for: conID, order: .reverse, limit: 1)
+
+		return try await msgStore.fetch(descriptor).first
+	}
+
+	public static func firstMsg(conID: String) async throws -> Message? {
+
+		guard let msgStore = await Store.shared.msgStore else { return nil }
+
+		let descriptor = descriptor(for: conID, order: .forward, limit: 1)
+
+		return try await msgStore.fetch(descriptor).first
+	}
+
+	public static func totalMsgsCount(conID: String) async throws -> Int {
+
+		guard let msgStore = await Store.shared.msgStore else { return 0 }
+
+		let descriptor = FetchDescriptor<PMsg>(
+			predicate: messagesPredicate(for: conID)
+		)
+
+		return try await msgStore.fetchCount(descriptor)
+	}
+
+	public static func countUnreadMsgs(
+		conID: String,
+		currentUserID: String
+	) async throws -> Int {
+
+		guard let msgStore = await Store.shared.msgStore else { return 0 }
+
+		let predicate = unreadMsgsPredicate(
+			conID: conID,
+			currentUserID: currentUserID
+		)
+
+		let descriptor = FetchDescriptor<PMsg>(predicate: predicate)
+
+		return try await msgStore.fetchCount(descriptor)
+	}
+
+	public static func fetchUnreadMessages(
+		conID: String,
+		limit: Int? = nil,
+		currentUserID: String
+	) async throws -> [Message] {
+
+		guard let msgStore = await Store.shared.msgStore else { return [] }
+
+		let predicate = unreadMsgsPredicate(
+			conID: conID,
+			currentUserID: currentUserID
+		)
+
+		var descriptor = FetchDescriptor<PMsg>(predicate: predicate)
+
+		if let limit {
+			descriptor.fetchLimit = limit
+		}
+
+		descriptor.sortBy = [.init(\.date, order: .forward)]
+
+		return try await msgStore.fetch(descriptor)
+	}
+
+	public static func updateReceiveMsgs(
+		for conID: String,
+		currentUserID: String
+	) async throws -> [Message] {
+
+		let unreadMsgs = try await fetchUnreadMessages(
+			conID: conID,
+			currentUserID: currentUserID
+		)
+
+		guard !unreadMsgs.isEmpty else { return [] }
+
+		guard let msgStore = await Store.shared.msgStore else { return [] }
+
+		return try await AsyncOrderedStream.mapOrdered(inputs: unreadMsgs) { msg in
+
+			var updated = msg
+			updated.incomingStatus = .read
+
+			try await msgStore.updateAndSave(uid: updated.uid) { model in
+				model.update(from: updated)
+			}
+
+			return updated
+		}
+	}
+
+	// MARK: - Search
+
+	public static func search(
+		from name: String,
+		currentUserId: String
+	) async throws -> Conversation? {
+
+		if let contact = try await ContactRepo.search(named: name) {
+			return Conversation(.contact(contact))
+		}
+
+		if let group = try await ContactRepo.searchGroup(named: name) {
+			return Conversation(.group(group))
+		}
+
+		return nil
+	}
 }

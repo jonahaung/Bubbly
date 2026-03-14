@@ -18,7 +18,7 @@ public struct SeenMember: Codable, Sendable, Hashable {
 
 extension SeenMember: Identifiable {
     public var id: String {
-        uid + msgId
+        uid
     }
 }
 

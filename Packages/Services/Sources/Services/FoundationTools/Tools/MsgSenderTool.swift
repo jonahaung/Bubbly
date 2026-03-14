@@ -45,7 +45,7 @@ public struct MsgSenderTool: Tool {
             return createErrorOutput(error: LocalError.accessDenied)
         }
         guard let conversation = try await ConversationRepo.search(
-            form: name,
+			from: name,
             currentUserId: currentUserId
         ) else {
             return createErrorOutput(error: LocalError.conversationNotFoune)

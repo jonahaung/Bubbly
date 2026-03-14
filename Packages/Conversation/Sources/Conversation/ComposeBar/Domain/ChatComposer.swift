@@ -47,7 +47,7 @@ final class ChatComposer: ErrorPresenter, Equatable {
             await MainActor.run {
                 self.applySnapshot(snapshot)
             }
-            await worker.playTone(.tap1)
+           
         }
     }
 
@@ -139,7 +139,7 @@ extension ChatComposer {
             await MainActor.run {
                 self.resetDraft()
             }
-            await worker.playTone(.tap1)
+
             do {
                 try await send(
                     text: text,
@@ -315,10 +315,6 @@ private actor ChatComposerWorker {
             updated = updated.replace(each.url, with: "")
         }
         return updated.trimmed
-    }
-
-    func playTone(_ tone: Tone) {
-        TonePlayer.play(tone)
     }
 }
 

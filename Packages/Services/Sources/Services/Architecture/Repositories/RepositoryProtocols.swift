@@ -20,6 +20,4 @@ public protocol ContactsRepositoryProtocol: Observable, Sendable {
     func contact(for uid: String) -> Contact?
     @concurrent
     func delete(uid: String) async throws
-    @concurrent
-    func refresh() async throws
 }

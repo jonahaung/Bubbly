@@ -10,11 +10,10 @@ import SwiftUI
 import XUI
 
 public struct ContactsScene: View {
-    let contactsRepository: ContactsRepositoryProtocol
-    let currentUserRepository: CurrentUserRepository
-    let router: Router
 
-    @State private var viewModel: ContactsViewModel
+	let coordinator: AppCoordinator
+	var currentUserRepository: CurrentUserRepository { coordinator.container.currentUserRepository }
+	@State private var viewModel = ContactsViewModel()
     @State private var executor = ToolExecutor()
 
     enum DefaultContactDisplayType: String, CaseIterable {
@@ -28,67 +27,58 @@ public struct ContactsScene: View {
     ) private var defaultContactDisplay: DefaultContactDisplayType = .chat
 
     public init(
-        router: Router,
-        contactsRepository: ContactsRepositoryProtocol,
-        currentUserRepository: CurrentUserRepository
+		coordinator: AppCoordinator
     ) {
-        self.router = router
-        self.contactsRepository = contactsRepository
-        self.currentUserRepository = currentUserRepository
-        _viewModel = .init(
-            wrappedValue: ContactsViewModel(
-                contactsRepository: contactsRepository,
-                currentUserRepository: currentUserRepository
-            )
-        )
+		self.coordinator = coordinator
     }
 
     public var body: some View {
         List {
-            actionSection
+			Picker(
+				"Contact Display",
+				selection: $defaultContactDisplay
+			) {
+				let options: [DefaultContactDisplayType] = [.chat, .group]
+				ForEach(options, id: \.self) { each in
+					Text(each.rawValue)
+				}
+			}
+			.pickerStyle(.palette)
+			.listRowBackground(Color.clear)
+			.listRowInsets(.init())
             switch defaultContactDisplay {
             case .group:
                 groupsSection
             case .chat:
+
                 contactsSections
             }
         }
+		.redacted(reason: viewModel.isLoading ? [.placeholder] : [])
         .listSectionIndexVisibility(.visible)
         .navigationTitle("Contacts")
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Picker(
-                    "Contact Display",
-                    selection: $defaultContactDisplay
-                ) {
-                    let options: [DefaultContactDisplayType] =
-                        (contactsRepository.groups.isEmpty) ? [.chat] : [.chat, .group]
-                    ForEach(options, id: \.self) { each in
-                        Text(each.rawValue)
-                    }
-                }
-                .pickerStyle(.palette)
+				actionSection
+
             }
         }
         .searchable(
-            text: Binding(
-                get: { viewModel.state.searchText },
-                set: { newValue in
-                    Task { await viewModel.send(.setSearchText(newValue)) }
-                }
-            ),
+			text: $viewModel.searchText,
             placement: .toolbar,
             prompt: "Search Contacts"
         )
         .onSubmit(of: .search) {
             executeContactsSearch()
         }
-        .task {
-            await viewModel.send(.appear)
-        }
-        .refreshable {
-            await viewModel.send(.refresh)
-        }
+		.task {
+			await viewModel.task()
+		}
+		.refreshable {
+			
+			await viewModel.refresh()
+		}
+
     }
 
     private var actionSection: some View {
@@ -97,14 +87,15 @@ public struct ContactsScene: View {
             case .chat:
                 AsyncButton {
                     Loading.show(true)
-                    await viewModel.send(.syncContacts)
+					await viewModel.syncContacts()
                     Loading.show(false)
                 } label: {
                     Label("Sync Contact", systemSymbol: .personCropSquare)
                 }
                 AsyncButton {
                     Loading.show(true)
-                    await viewModel.send(.syncGroups)
+					await viewModel
+						.syncGroups(currentUserId: currentUserRepository.model.uid)
                     Loading.show(false)
                 } label: {
                     Label("Sync Groups", systemSymbol: .arrow2Squarepath)
@@ -120,7 +111,8 @@ public struct ContactsScene: View {
                     }
                 AsyncButton {
                     Loading.show(true)
-                    await viewModel.send(.syncGroups)
+					await viewModel
+						.syncGroups(currentUserId: currentUserRepository.model.uid)
                     Loading.show(false)
                 } label: {
                     Label("Sync Groups", systemSymbol: .arrow2Squarepath)
@@ -131,13 +123,13 @@ public struct ContactsScene: View {
 
     private var groupsSection: some View {
         Section {
-            if contactsRepository.groups.isEmpty {
+			if viewModel.groups.isEmpty {
                 ContentUnavailableView(
                     "No Groups",
                     systemImage: "person.2.circle.fill"
                 )
             } else {
-                ForEach(contactsRepository.groups) { group in
+				ForEach(viewModel.groups) { group in
                     ConversationGroupCell(group: group)
                 }
             }
@@ -145,7 +137,7 @@ public struct ContactsScene: View {
     }
 
     private var contactsSections: some View {
-        let sections: [(String, [Contact])] = createSections(from: contactsRepository.contacts)
+		let sections: [(String, [Contact])] = createSections(from: viewModel.displayContacts)
         return ForEach(sections, id: \.0) { section in
             Section(section.0) {
                 ForEach(section.1, id: \.uid) { contact in
@@ -163,7 +155,7 @@ public struct ContactsScene: View {
             contact.uid,
             currentUserRepository.model.uid
         )
-        if let url = DeepLinkCoordinator.shared.url(for: .conversation(id: id)) {
+        if let url = DeepLinkCoordinator().url(for: .conversation(id: id)) {
             await MainActor.run {
                 UIApplication.shared.open(url)
             }
@@ -176,7 +168,7 @@ public struct ContactsScene: View {
                 for index in offsets {
                     group.addTask {
                         if let item = contacts[safe: index] {
-                            try await contactsRepository.delete(uid: item.uid)
+//							try await viewModel.delete(uid: item.uid)
                         }
                     }
                 }
@@ -197,12 +189,12 @@ public struct ContactsScene: View {
             let executor = ToolExecutor()
             await executor.execute(
                 tool: ContactsTool(),
-                prompt: "search contacts that has the name: \(viewModel.state.searchText)",
+				prompt: "search contacts that has the name: \(viewModel.searchText)",
                 type: [ContactsTool.Arguments].self
             ) { models in
                 models.map(\.generatedContent.jsonString).joined(separator: "\n - ")
             } clearForm: {
-                Task { await viewModel.send(.setSearchText("")) }
+
             }
         }
     }

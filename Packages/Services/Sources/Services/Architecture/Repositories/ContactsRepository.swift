@@ -37,7 +37,6 @@ public final class ContactsRepository: ContactsRepositoryProtocol, Sendable, Err
         contacts.first(where: { $0.uid == uid })
     }
 
-    @concurrent
     public func fetchData() async throws {
         let contacts = try await Store.shared.contactStore?.fetchAll() ?? []
         let groups = try await Store.shared.groupStore?.fetchAll() ?? []

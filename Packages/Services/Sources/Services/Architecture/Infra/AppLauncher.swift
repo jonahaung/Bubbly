@@ -9,11 +9,7 @@ import Observation
 
 @MainActor
 @Observable
-public final class AppLauncher: @MainActor Equatable {
-    public static func == (lhs: AppLauncher, rhs: AppLauncher) -> Bool {
-        lhs.route == rhs.route
-    }
-
+public final class AppLauncher {
     public enum MainRoute: Equatable {
         case loading
         case getStarted

@@ -12,5 +12,5 @@ public extension EnvironmentValues {
     @Entry var seenMembers = [SeenMember]()
     @Entry var isVisible = false
     @Entry var attachmentFetcher: AttachmentFetcher? = nil
-    @Entry var conversationTheme: ConversationTheme = .default
+	@Entry var conversationTheme: ChatTheme = .empty
 }

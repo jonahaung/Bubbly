@@ -37,7 +37,10 @@ let package = Package(
                 .product(name: "FirePhoneOTP", package: "FirePhoneOTP"),
                 .product(name: "Crypto", package: "Crypto")
 
-            ],
+			],
+			resources: [
+				.process("Resources")
+			],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency")
             ]

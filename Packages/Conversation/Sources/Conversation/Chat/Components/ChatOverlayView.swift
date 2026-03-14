@@ -63,7 +63,7 @@ struct ChatOverlayView: View {
                 x: item.frame.midX,
                 y: item.frame.minY - (transitionState == .didAppear ? 15 : -15)
             )
-            MsgCell.Content(state: viewModel.state)
+            MsgCell.Content()
                 .frame(size: item.frame.size)
                 .position(x: item.frame.midX, y: item.frame.midY)
 

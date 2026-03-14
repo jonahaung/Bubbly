@@ -16,7 +16,7 @@ struct MainNavView<Content: View>: View {
 
     var body: some View {
         NavigationStack(
-            path: coordinator.router.navPathsBinding(for: tabPath) as Binding<[NavPath]>
+			path: Router.shared.navPathsBinding(for: tabPath) as Binding<[NavPath]>
         ) {
             content()
                 .navigationDestination(for: NavPath.self) { navPath in

@@ -1,7 +1,3 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
-
 import _AVKit_SwiftUI
 import Database
 import ImageLoader
@@ -19,14 +15,14 @@ struct AttachmentPreview: View {
     @Environment(\.isVisible) private var viewIsVisible
     @Environment(\.conversation) private var conversation
     @Environment(\.msgCellActions) private var sendMsgCellInteraction
-    @State private var model: AttachmentPreviewViewModel
+	@LazyState private var model: AttachmentPreviewViewModel
 
     init(
         attachment: Attachment,
         onSelect: @escaping (_: Attachment) -> Void,
         onCompleteUpload: ((_ newValue: Attachment) -> Void)? = nil
     ) {
-        model = .init(attachment: attachment)
+		_model = .init(wrappedValue: .init(attachment: attachment))
         self.onSelect = onSelect
         self.onCompleteUpload = onCompleteUpload
     }

@@ -19,11 +19,11 @@ public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, 
     public var systemName: String {
         switch self {
         case .inbox:
-            "app.badge"
+            "message"
         case .contacts:
             "at"
         case .test:
-            "magnifyingglass"
+            "app.badge"
         case .settings:
             "shield"
         }

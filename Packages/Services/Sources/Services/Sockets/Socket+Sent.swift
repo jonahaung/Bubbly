@@ -63,7 +63,7 @@ extension Socket {
         guard let data = sendingQueue.dequeue() else { return }
         Task { [weak self] in
             guard let self else { return }
-            await queue.addOperation { [weak self] in
+            try await queue.sync { [weak self] in
                 guard let self else { return }
                 defer {
                     Task { [weak self] in

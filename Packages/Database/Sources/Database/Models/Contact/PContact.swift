@@ -6,7 +6,7 @@ import Foundation
 import SwiftData
 
 @Model
-public final class PContact: ContactRepresentable, CollectionDocument, SendableDocument {
+public final class PContact: ContactRepresentable, SendableTransformable {
     @Attribute(.unique)
     public var uid: String
     public var name: String

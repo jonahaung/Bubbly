@@ -26,16 +26,26 @@ public struct MsgLayoutValueKey: LayoutValueKey {
 }
 
 extension Message {
-    public func layoutValue() -> MsgLayoutValue {
-        var hasher = Hasher()
-        hasher.combine(uid)
-        hasher.combine(text)
-        hasher.combine(attachments)
-        hasher.combine(reactions)
-        hasher.combine(isSender)
+	public func layoutValue(cellLayout: MsgCellLayout) -> MsgLayoutValue {
+		var hasher = Hasher()
+		hasher.combine(uid)
+		hasher.combine(text?.count ?? 0)
+		hasher.combine(isSender)
+		hasher.combine(cellLayout.showTimeSeparator)
+		hasher.combine(cellLayout.showTopPadding)
+		hasher.combine(cellLayout.showAvatar)
+		hasher.combine(attachments.count)
+		for attachment in attachments {
+			hasher.combine(attachment.attachMentTypeRaw)
+			hasher.combine(Int((attachment.aspectRatio * 1000).rounded()))
+			hasher.combine(attachment.title?.count ?? 0)
+			hasher.combine(attachment.subTitle?.count ?? 0)
+		}
+		hasher.combine(reactions.isEmpty == false)
+		let signature = hasher.finalize()
 		return MsgLayoutValue(
 			uid: uid,
-			signature: hasher.finalize()
+			signature: signature
 		)
     }
 }

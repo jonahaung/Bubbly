@@ -103,7 +103,7 @@ extension MsgCell {
                 .offset(x: round(model.draggedOffset))
                 .highPriorityGesture(dragGesture, including: .gesture)
                 .simultaneousGesture(doubleTapGesture)
-                .overlay(alignment: .topLeading) {
+                .background {
                     longPressOverlay
                 }
                 .onPressingChanged(in: .local) { _ in

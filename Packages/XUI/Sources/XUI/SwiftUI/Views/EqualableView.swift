@@ -4,7 +4,7 @@
 
 import SwiftUI
 
-public struct EqualableView<Content: View, Value: Equatable>: @preconcurrency Equatable, View {
+public struct EqualableView<Content: View, Value: Equatable>: @MainActor Equatable, View {
     public let content: Content
     public let value: Value
 
@@ -23,11 +23,8 @@ public struct EqualableView<Content: View, Value: Equatable>: @preconcurrency Eq
 }
 
 public extension View {
-    /// Prevents the view from updating its child view when its new given value is the same as its
-    /// old given value.
     func equatable(by value: some Equatable) -> some View {
         EqualableView(content: self, value: value)
-            .equatable()
     }
 }
 

@@ -23,6 +23,8 @@ struct ComposeBar: View {
             }
             HStack(alignment: .bottom, spacing: 4) {
 				HamburgerButton(isOpen: $menuIsOpen, size: 38)
+					.soundEffect(.tock, trigger: menuIsOpen)
+
 				if menuIsOpen {
 					switch composer.source {
 					case .liary:
@@ -52,7 +54,7 @@ struct ComposeBar: View {
             .animation(.interactiveSpring, value: composer.source)
             .padding(.init(top: 0, leading: 8, bottom: 0, trailing: 8))
         }
-        .ignoresSafeArea(.container, edges: .bottom)
+		.soundEffect(.tock, trigger: composer.source)
     }
 
     private func photoPickerButton() -> some View {

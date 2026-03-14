@@ -4,59 +4,48 @@
 
 import SwiftUI
 import XUI
+import Services
 
 extension MsgCell {
 
-    struct TextContent: View, @MainActor Equatable {
-        static let font = UIFont.preferredFont(forTextStyle: .body)
-        let text: String
-		let formatter = DefaultMarkdownFormatter()
-        var body: some View {
-            let extraTop =
-                text.containsTallMarksOrEmoji
-                    ? max(
-                        1,
-                        (Self.font.ascender - Self.font.capHeight) * 0.25
-                    ) : 0
+	struct TextContent: View {
 
-			let attributes: AttributeContainer = {
-				var container = AttributeContainer()
-				container.font = Self.font
-				container.lineHeight = .multiple(factor: 1.2)
-				return container
-			}()
+		@Environment(MsgCellViewModel.self) private var viewModel
+		private var state: MsgCellViewModel.State { viewModel.state }
 
-            if text.containsMarkdown {
-				Text(
-					formatter.format(text, attributes: attributes, layoutDirection: .leftToRight)
-				)
-                    .lineSpacing(extraTop)
-                    .fixedSize(horizontal: false, vertical: true)
-
-            } else {
-                Text(text)
-                    .customAttribute(HighlightAttribute())
-                    .lineSpacing(extraTop)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-
-        static func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.text == rhs.text
-        }
-    }
+		var body: some View {
+			if let text = state.text {
+				Group {
+					if state.containsMarkdown {
+						Text(
+							DefaultMarkdownFormatter()
+								.format(
+									text,
+									attributes: .init(),
+									layoutDirection: .leftToRight
+								)
+						)
+					} else {
+						Text(text)
+					}
+				}
+				.fixedSize(horizontal: false, vertical: true)
+//				.equatable(by: state.id)
+			}
+		}
+	}
 }
 
 extension String {
-    var containsTallMarksOrEmoji: Bool {
-        for character in self {
-            for scalar in character.unicodeScalars {
-                if scalar.properties.generalCategory == .nonspacingMark { return true }
-                if scalar.properties.isEmojiPresentation { return true }
-            }
-        }
-        return false
-    }
+	var containsTallMarksOrEmoji: Bool {
+		for character in self {
+			for scalar in character.unicodeScalars {
+				if scalar.properties.generalCategory == .nonspacingMark { return true }
+				if scalar.properties.isEmojiPresentation { return true }
+			}
+		}
+		return false
+	}
 }
 /// Converts markdown string to AttributedString with styling attributes.
 open class DefaultMarkdownFormatter {

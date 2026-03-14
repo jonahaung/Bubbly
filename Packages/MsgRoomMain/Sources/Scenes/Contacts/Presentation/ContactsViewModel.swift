@@ -5,156 +5,94 @@
 import Database
 import Observation
 import Services
+import XUI
 
 @MainActor
 @Observable
 final class ContactsViewModel: ErrorPresenter {
-    private(set) var state: ContactsViewState
 
-    private let manager: ContactsManager
-    private let reducer: ContactsReducer
-    private let taskRegistry = ContactsTaskRegistry()
-    private let loadContacts: LoadContactsUseCase
-    private let refreshContacts: RefreshContactsUseCase
-    private let syncContacts: SyncContactsUseCase
-    private let syncGroups: SyncGroupsUseCase
-    private let setSearchText: SetContactsSearchTextUseCase
-    private let latestSnapshot: LatestContactsSnapshotUseCase
+	var isLoading: Bool = false
+	var searchText: String = ""
+	private var contacts = [Contact]()
+	var groups = [Group]()
 
-    init(
-        contactsRepository: ContactsRepositoryProtocol,
-        currentUserRepository: CurrentUserRepository,
-        reducer: ContactsReducer = ContactsReducerImpl()
-    ) {
-        let manager = ContactsManager()
-        self.manager = manager
-        self.reducer = reducer
-        let repository = ContactsRepositoryImpl(
-            manager: manager,
-            contactsRepository: contactsRepository,
-            currentUserRepository: currentUserRepository
-        )
-        loadContacts = LoadContactsUseCaseImpl(repository: repository)
-        refreshContacts = RefreshContactsUseCaseImpl(repository: repository)
-        syncContacts = SyncContactsUseCaseImpl(repository: repository)
-        syncGroups = SyncGroupsUseCaseImpl(repository: repository)
-        setSearchText = SetContactsSearchTextUseCaseImpl(repository: repository)
-        latestSnapshot = LatestContactsSnapshotUseCaseImpl(repository: repository)
-        state = ContactsViewState(isLoading: false, error: nil, searchText: "")
-        observeManagerChanges()
-    }
+	var displayContacts: [Contact] {
+		if searchText.isEmpty {
+			return contacts
+		}
+		return contacts.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+	}
+	init() {}
 
-    func send(_ intent: ContactsIntent) async {
-        switch intent {
-        case .appear:
-            await taskRegistry.run(key: .appear) { [weak self] in
-                guard let self else { return }
-                await handleAppear()
-            }
-        case .refresh:
-            await taskRegistry.run(key: .refresh) { [weak self] in
-                guard let self else { return }
-                await handleRefresh()
-            }
-        case .syncContacts:
-            await taskRegistry.run(key: .syncContacts) { [weak self] in
-                guard let self else { return }
-                await handleSyncContacts()
-            }
-        case .syncGroups:
-            await taskRegistry.run(key: .syncGroups) { [weak self] in
-                guard let self else { return }
-                await handleSyncGroups()
-            }
-        case let .setSearchText(value):
-            await handleSetSearchText(value)
-        }
-    }
+	func task() async {
+		loading(true)
+		do {
+			contacts = try await Store.shared.contactStore?.fetchAll() ?? []
+			groups = try await Store.shared.groupStore?.fetchAll() ?? []
+		} catch {
+			await showError(error)
+		}
+		loading(false)
+	}
 
-    private func handleAppear() async {
-        dispatch(.setLoading(true))
-        dispatch(.setError(nil))
-        do {
-            let snapshot = try await loadContacts.execute()
-            dispatch(.applySnapshot(snapshot))
-        } catch {
-            dispatch(.setLoading(false))
-            dispatch(.setError(error.localizedDescription))
-            await showError(error)
-        }
-    }
+	func refresh() async {
+		loading(true)
+		try? await Task.sleep(seconds: 2)
+		await task()
+	}
+	func syncContacts() async {
+		do {
+			loading(true)
+			try await PhoneContactsService.shared.syncContacts()
+			await refresh()
+		} catch {
+			await showError(error)
+		}
+	}
 
-    private func handleRefresh() async {
-        dispatch(.setLoading(true))
-        dispatch(.setError(nil))
-        do {
-            let snapshot = try await refreshContacts.execute()
-            dispatch(.applySnapshot(snapshot))
-        } catch {
-            dispatch(.setLoading(false))
-            dispatch(.setError(error.localizedDescription))
-            await showError(error)
-        }
-    }
+	func syncGroups(currentUserId: String) async {
+		loading(true)
+		do {
+			let groups: [Group] = try await FirestoreRepo.getModels(
+				for: currentUserId,
+				collection: .groups,
+				field: .members
+			)
+			let store = await Store.shared.groupStore
 
-    private func handleSyncContacts() async {
-        dispatch(.setLoading(true))
-        dispatch(.setError(nil))
-        do {
-            let snapshot = try await syncContacts.execute()
-            dispatch(.applySnapshot(snapshot))
-        } catch {
-            dispatch(.setLoading(false))
-            dispatch(.setError(error.localizedDescription))
-            await showError(error)
-        }
-    }
+			try await withThrowingTaskGroup(of: Void.self) { taskGroup in
+				for group in groups {
+					taskGroup.addTask {
+						if try await store?.exists(uid: group.uid) == false {
+							try await store?.insert(group)
+						} else {
+							try await store?.updateAndSave(uid: group.uid) { model in
+								model.update(from: group)
+							}
+						}
+						try await ContactRepo.getOrCreate(for: group.members, refatch: false)
+					}
+				}
+				try await taskGroup.waitForAll()
+			}
+			await refresh()
+		} catch {
+			loading(false)
+			await showError(error)
+		}
+	}
+	func loading(_ isLoading: Bool) {
+		guard self.isLoading != isLoading else { return }
+		self.isLoading = isLoading
+	}
 
-    private func handleSyncGroups() async {
-        dispatch(.setLoading(true))
-        dispatch(.setError(nil))
-        do {
-            let snapshot = try await syncGroups.execute()
-            dispatch(.applySnapshot(snapshot))
-        } catch {
-            dispatch(.setLoading(false))
-            dispatch(.setError(error.localizedDescription))
-            await showError(error)
-        }
-    }
-
-    private func handleSetSearchText(_ value: String) async {
-        let snapshot = await setSearchText.execute(value)
-        dispatch(.applySnapshot(snapshot))
-    }
-
-    private func observeManagerChanges() {
-        withObservationTracking {
-            _ = manager.isLoading
-            _ = manager.error
-            _ = manager.searchText
-        } onChange: { [weak self] in
-            guard let self else {
-                return
-            }
-            Task { @MainActor in
-                let snapshot = await latestSnapshot.execute()
-                dispatch(.applySnapshot(snapshot))
-                observeManagerChanges()
-            }
-        }
-    }
-
-    private func dispatch(_ action: ContactsAction) {
-        reducer.reduce(state: &state, action: action)
-    }
 }
 
 public extension Contact {
-    var firstCharacter: String {
-        if let first = name.first {
-            return String(first).uppercased()
-        }
-        return ""
-    }
+	var firstCharacter: String {
+		if let first = name.first {
+			return String(first).uppercased()
+		}
+		return ""
+	}
 }

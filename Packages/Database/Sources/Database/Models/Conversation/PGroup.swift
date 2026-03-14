@@ -38,7 +38,7 @@ public final class PGroup {
     }
 }
 
-extension PGroup: CollectionDocument, UIdentifiable {
+extension PGroup: UIdentifiable {
     public func update(with conversation: Conversation) {
         if name != conversation.name {
             name = conversation.name
@@ -80,7 +80,7 @@ extension PGroup: CollectionDocument, UIdentifiable {
     }
 }
 
-extension PGroup: SendableDocument {
+extension PGroup: SendableTransformable {
     public typealias SendableType = Group
 
     public convenience init(from snapshot: SendableType) {

@@ -7,7 +7,7 @@ import SwiftData
 import UIKit
 
 @Model
-public final class PMsg: CollectionDocument {
+public final class PMsg {
     @Attribute(.unique)
     public var uid = String()
     public var senderID = String()
@@ -58,7 +58,7 @@ public extension PMsg {
     }
 }
 
-extension PMsg: SendableDocument {
+extension PMsg: SendableTransformable {
     public typealias SendableType = Message
 
     public convenience init(from snapshot: SendableType) {

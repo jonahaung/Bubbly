@@ -5,23 +5,16 @@
 import Foundation
 import SwiftData
 
-public actor StoreModelActor<Model>: ModelActor
-    where
-    Model: PersistentModel & CollectionDocument & SendableDocument,
-    Model.SendableType: Sendable,
-    Model.UID == String,
-    Model.SendableType.UID == String {
-    public nonisolated let modelExecutor: any ModelExecutor
-    public nonisolated let modelContainer: ModelContainer
+public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UID == String, T.SendableType.UID == String {
+
+    public let modelExecutor: any ModelExecutor
+    public let modelContainer: ModelContainer
 
     private var context: ModelContext {
         modelExecutor.modelContext
     }
 
-    /// Debounced save task
     private var saveTask: Task<Void, Never>?
-
-    // MARK: - Init
 
     public init(
         modelContainer: ModelContainer,
@@ -31,34 +24,26 @@ public actor StoreModelActor<Model>: ModelActor
         self.modelExecutor = modelExecutor
     }
 
-    // MARK: - Create
-
-    public func insert(_ data: Model.SendableType) throws {
+    public func insert(_ data: T.SendableType) throws {
         if let existing = try getModel(for: data.uid) {
-            existing.update(from: data) // you’d add this API on Model
+            existing.update(from: data)
         } else {
-            context.insert(Model(from: data))
+            context.insert(T(from: data))
         }
         try save()
     }
 
-    // MARK: - Read
-
-    public func fetch(id: PersistentIdentifier) -> Model.SendableType? {
-        self[id, as: Model.self]?.toSendable()
-    }
-
-    public func fetch(uid: String) throws -> Model.SendableType? {
+    public func fetch(uid: String) throws -> T.SendableType? {
         try getModel(for: uid)?.toSendable()
     }
 
-    public func fetch(_ descriptor: FetchDescriptor<Model>) throws -> [Model.SendableType] {
+    public func fetch(_ descriptor: FetchDescriptor<T>) throws -> [T.SendableType] {
         try context
             .fetch(descriptor)
             .map { $0.toSendable() }
     }
 
-    public func fetchAll() throws -> [Model.SendableType] {
+    public func fetchAll() throws -> [T.SendableType] {
         try fetch(.init())
     }
 
@@ -76,7 +61,7 @@ public actor StoreModelActor<Model>: ModelActor
         )
     }
 
-    public func fetchCount(_ descriptor: FetchDescriptor<Model>) throws -> Int {
+    public func fetchCount(_ descriptor: FetchDescriptor<T>) throws -> Int {
         try context.fetchCount(descriptor)
     }
 
@@ -84,7 +69,7 @@ public actor StoreModelActor<Model>: ModelActor
 
     public func updateAndSave<Result: Sendable>(
         uid: String,
-        _ update: sending (inout Model) -> Result
+        _ update: sending (inout T) -> Result
     ) throws
         -> Result? {
         guard var model = try getModel(for: uid) else {
@@ -98,7 +83,7 @@ public actor StoreModelActor<Model>: ModelActor
 
     public func updateAndSaveDebounced<Result: Sendable>(
         uid: String,
-        _ update: @escaping (inout Model)
+        _ update: @escaping (inout T)
             -> Result
     ) throws -> Result? {
         guard var model = try getModel(for: uid) else {
@@ -113,7 +98,7 @@ public actor StoreModelActor<Model>: ModelActor
     // MARK: - Delete
 
     public func delete(id: PersistentIdentifier) throws {
-        guard let model = self[id, as: Model.self] else {
+        guard let model = self[id, as: T.self] else {
             return
         }
 
@@ -130,8 +115,8 @@ public actor StoreModelActor<Model>: ModelActor
         try save()
     }
 
-    public func delete(where predicate: Predicate<Model>) throws {
-        try context.delete(model: Model.self, where: predicate)
+    public func delete(where predicate: Predicate<T>) throws {
+        try context.delete(model: T.self, where: predicate)
         try save()
     }
 
@@ -158,8 +143,8 @@ public actor StoreModelActor<Model>: ModelActor
 
     // MARK: - Private Helpers
 
-    private func getModel(for uid: String) throws -> Model? {
-        let descriptor = FetchDescriptor<Model>(
+    private func getModel(for uid: String) throws -> T? {
+        let descriptor = FetchDescriptor<T>(
             predicate: #Predicate {
                 $0.uid == uid
             }

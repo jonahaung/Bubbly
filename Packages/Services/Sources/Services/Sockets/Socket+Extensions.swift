@@ -11,9 +11,9 @@ public extension Socket {
         case let .newMsg(rMsg):
             Task { @SocketActor [weak self] in
                 guard let self else { return }
-                await queue.addOperation {
+				try await queue.sync {
                     if try await Store.shared.msgStore?.exists(uid: rMsg.uid) == true {
-                        TonePlayer.play(.tap1)
+                        
                         await self.notifyMessage(data)
                     }
                 }
@@ -21,37 +21,35 @@ public extension Socket {
         case .updatedMsg:
             Task { @SocketActor [weak self] in
                 guard let self else { return }
-                await queue.addOperation {
+				await queue.sync {
                     await self.notifyMessage(data)
                 }
             }
         case .typingStatus:
             Task { @SocketActor [weak self] in
                 guard let self else { return }
-                await queue.addOperation {
+				await queue.sync {
                     await self.notifyMessage(data)
                 }
             }
         case .reaction:
             Task { @SocketActor [weak self] in
                 guard let self else { return }
-                await queue.addOperation {
+				await queue.sync {
                     await self.notifyMessage(data)
                 }
             }
         case .deleteMsg:
             Task { @SocketActor [weak self] in
                 guard let self else { return }
-                await queue.addOperation {
+				await queue.sync {
                     await self.notifyMessage(data)
                 }
             }
         case .seenStatus:
             Task { @SocketActor [weak self] in
                 guard let self else { return }
-                await queue.addOperation {
-                    await self.notifyMessage(data)
-                }
+				
             }
         }
     }

@@ -10,12 +10,15 @@ import SwiftUI
 import XUI
 
 public struct InboxScene: View {
-    @Environment(\.currentUser) private var currentUser
 
+
+    @Environment(\.currentUser) private var currentUser
     @State private var viewModel: InboxViewModel
 
-    public init(viewModel: InboxViewModel) {
-        self.viewModel = viewModel
+	let coordinator: AppCoordinator
+    public init(coordinator: AppCoordinator) {
+		self.coordinator = coordinator
+		_viewModel = .init(wrappedValue: .init())
     }
 
     public var body: some View {

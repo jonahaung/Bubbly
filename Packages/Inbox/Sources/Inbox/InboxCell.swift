@@ -13,7 +13,7 @@ struct InboxCell: View {
 
     var body: some View {
         Button {
-            if let url = DeepLinkCoordinator.shared
+            if let url = DeepLinkCoordinator()
                 .url(for: .conversation(id: item.conversation.uid)) {
                 UIApplication.shared.open(url)
             }
