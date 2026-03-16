@@ -29,14 +29,17 @@ public struct ConversationScene: View {
 
 			if let frame = manager.layout.bottomBarFrame {
 				ChatScrollView(manager: manager)
-					.safeAreaPadding(
-						.init(
-							top: ChatLayoutConstants.topBarHeight,
-							leading: 8,
-							bottom: ChatLayoutConstants.bottomBarHeight,
-							trailing: 8
-						)
-					)
+					.contentMargins(.horizontal, 8, for: .scrollContent)
+					.contentMargins(.bottom, frame.height, for: .scrollContent)
+					.contentMargins(.top, ChatLayoutConstants.topBarHeight, for: .scrollContent)
+//					.safeAreaPadding(
+//						.init(
+//							top: ChatLayoutConstants.topBarHeight,
+//							leading: 0,
+//							bottom: frame.height,
+//							trailing: 0
+//						)
+//					)
 					.layoutPriority(5)
 			}
             VStack(alignment: .center, spacing: 0) {

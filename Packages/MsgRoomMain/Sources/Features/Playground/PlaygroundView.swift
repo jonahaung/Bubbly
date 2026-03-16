@@ -14,71 +14,64 @@ struct PlaygroundView: View {
     @State private var searchText = ""
     @State private var text = ""
     var body: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                if viewModel.state.isLoading {
-                    ProgressView()
-                }
+        List {
+			if viewModel.state.isLoading {
+				ProgressView()
+			}
 
-                if let error = viewModel.state.error {
-                    Text(error)
-                        .foregroundStyle(.red)
-                }
+			if let error = viewModel.state.error {
+				Text(error)
+					.foregroundStyle(.red)
+			}
 
-                Button("Show modal") {
-                    showModal = true
-                }
-                Button("Font Picker") {
-                    Router.shared.presentModel(.view(FontPicker(selection: $fontName).opaqueView()))
-                }
-                Button("Markdown View") {
-                    Router.shared.presentModel(.view(MarkdownView.ExampleView().opaqueView()))
-                }
-                Button("System Sounds") {
-                    Router.shared.presentModel(.view(SystemSoundTesterView().opaqueView()))
-                }
-                Button("Show Toast") {
-                    ToastPresenter.show(allowsBackgroundTap: true) {
-                        Text(Lorem.random())
-                    } action: {
-                        print("tapped")
-                    }
-                }
-                Text("Example View").tapToPush {
-                    ExampleView1()
-                }
-                Button("Show Loading") {
-                    Loading.show(true)
-                }
-                Label(text, systemImage: "bubble.right")
-                Spacer()
-                Button("Submit") {
-                    Task {
-                        await viewModel.send(.submit)
-                    }
-                }
-            }
+			Button("Show modal") {
+				text = Lorem.random()
+				showModal = true
+			}
+			Button("Font Picker") {
+				Router.shared.presentModel(.view(FontPicker(selection: $fontName).opaqueView()))
+			}
+			Button("Markdown View") {
+				Router.shared.presentModel(.view(MarkdownView.ExampleView().opaqueView()))
+			}
+			Button("System Sounds") {
+				Router.shared.presentModel(.view(SystemSoundTesterView().opaqueView()))
+			}
+			Button("Show Toast") {
+				ToastPresenter.show(allowsBackgroundTap: true) {
+					Text(Lorem.random())
+				} action: {
+					print("tapped")
+				}
+			}
+			Text("Example View").tapToPush {
+				ExampleView1()
+			}
+			Button("Show Loading") {
+				Loading.show(true)
+			}
+			Label(text, systemImage: "bubble.right")
+			Spacer()
+			Button("Submit") {
+				Task {
+					await viewModel.send(.submit)
+				}
+			}
         }
-        .safeAreaInset(
-            edge: .bottom,
-            content: {
-                ExpandingTextEditor(text: $text, maxLines: 5, font: .body)
-            }
-        )
-        .padding()
-        .flexible(.all)
-        .navigationTitle("Playground")
+		.navigationTitle(Self.defaultTitle)
         .searchable(text: $searchText)
         .overlay {
             if showModal {
-                ModalOverlay(.top, from: .top, allowsBackgroundTap: true) {
-                    Text(Lorem.random())
+				ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {
+					Text(text)
                         .padding()
                         .background(.bar, in: .rect)
+						.foregroundStyle(Color.pink.minimumContrast(over: Color.primary))
                         .colorScheme(.dark)
+
                 } onClose: {
                     showModal = false
-                }
+				}
             }
         }
         .task {

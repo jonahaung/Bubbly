@@ -92,7 +92,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"Resources/GoogleService-Info.plist",
-				Resources/Tones/paper.wav,
 			);
 			target = 475BAAE62DBE88CA007B0876 /* NotificationService */;
 		};

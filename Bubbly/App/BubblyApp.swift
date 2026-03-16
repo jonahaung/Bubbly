@@ -11,8 +11,8 @@ import XUI
 
 @main
 struct BubblyApp: App {
-    private let pushNotificationServie: PushNotificationService
 
+    private let pushNotificationServie: PushNotificationService
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
 

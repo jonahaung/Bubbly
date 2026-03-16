@@ -19,7 +19,6 @@ extension ScrollCoordinator {
 		var direction: ScrollDirection
 		var phase: ScrollPhase
 		var isFirstResponder: Bool
-		var visibleIDs: [String]
 	}
 
 	enum Intent {
@@ -30,7 +29,6 @@ extension ScrollCoordinator {
 			_ newPhase: ScrollPhase,
 			context: ScrollPhaseChangeContext
 		)
-		case onScrollTargetVisibilityChange(_ newValue: [String])
 		case onBottomBarFrameChage(_ oldValue: CGRect, _ newValue: CGRect)
 	}
 

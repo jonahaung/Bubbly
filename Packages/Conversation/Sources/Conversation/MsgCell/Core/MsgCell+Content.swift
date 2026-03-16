@@ -22,8 +22,7 @@ extension MsgCell {
 				BubbleView()
 				OverlayBubbleView()
 			}
-			.foregroundStyle(state.foregroundStyle)
-//			.equatable(by: viewModel.id)
+			.foregroundStyle(state.foregroundStyle.minimumContrast(over: Color.primary))
 		}
 	}
 
@@ -35,7 +34,6 @@ extension MsgCell {
 				Reactions(reactions: reactions)
 					.fixedSize()
 					.allowsHitTesting(false)
-					.equatable(by: state.reactions)
 			}
 		}
 	}

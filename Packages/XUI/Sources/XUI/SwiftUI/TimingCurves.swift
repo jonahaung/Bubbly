@@ -68,8 +68,6 @@ public extension Animation {
     }
 }
 
-#if os(iOS) && DEBUG
-@available(iOS 15.0, *)
 struct TimingCurves_Previews: PreviewProvider {
     struct Preview: View {
         @State
@@ -109,4 +107,3 @@ struct TimingCurves_Previews: PreviewProvider {
         Preview()
     }
 }
-#endif

@@ -28,16 +28,13 @@ extension MsgCell {
 							.containerShape(bubbleShape)
 					}
 				}
-//				.equatable(by: viewModel.id)
 			} else if state.text != nil {
 				TextContent()
 					.padding(theme.bubblePading)
 					.background(theme.bubbleColor(for: state.isSender))
 					.padding(theme.shadowPadding(for: state.isSender))
 					.background(theme.shadowColor(for: state.isSender))
-//					.equatable(by: viewModel.id)
 					.containerShape(bubbleShape)
-//					.equatable(by: viewModel.reloadID)
 			}
 		}
 

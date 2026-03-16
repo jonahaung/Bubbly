@@ -31,8 +31,8 @@ public struct ModalOverlay<Content: View>: View {
         }, onClose: onClose)
             .transition(
                 .asymmetric(
-                    insertion: .move(edge: edge, curve: .interpolatingSpring(duration: 0.4)),
-                    removal: .move(edge: edge, curve: .linear)
+					insertion: .modal(edge: edge, curve: .easeOutExponential(duration: 0.5)),
+					removal: .modal(edge: edge, curve: .easeInExponential(duration: 0.5))
                 )
             )
     }

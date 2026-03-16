@@ -29,6 +29,7 @@ struct ChatScrollView: View {
 				}
 			}
 			.scrollTargetLayout()
+
 		}
 		.font(.system(size: UIFont.preferredFont(forTextStyle: .body).pointSize))
 		.tint(Color.link.mix(with: Color.accentColor, by: 0.3))
@@ -42,11 +43,10 @@ struct ChatScrollView: View {
 		) { oldValue, newValue in
 			manager.send(.onScrollGeometryChange(oldValue, newValue))
 		}
-//		.onScrollTargetVisibilityChange(idType: String.self, threshold: 0.01) { ids in
-//			manager.send(.onScrollTargetVisibilityChange(ids))
-//		}
 		.scrollDismissesKeyboard(.never)
 		.defaultScrollAnchor(.bottom, for: .sizeChanges)
+		.equatable(by: manager.state)
 		.scrollPosition(manager.scrollController.scrollPositionBindable, anchor: .none)
+
 	}
 }

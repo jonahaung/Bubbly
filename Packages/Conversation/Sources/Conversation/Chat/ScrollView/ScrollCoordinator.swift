@@ -35,8 +35,7 @@ final class ScrollCoordinator: ErrorPresenter {
 			geometry: .empty,
 			direction: .down,
 			phase: .idle,
-			isFirstResponder: false,
-			visibleIDs: []
+			isFirstResponder: false
 		)
 		state = initialState
 		ignoredState = initialState
@@ -86,18 +85,6 @@ extension ScrollCoordinator {
 
 	private var shouldAdjustWindow: Bool {
 		delegate?.scrollCoordinatorShouldRemove(self) == true
-	}
-
-	func loadOlderMessagesIfNeeded() {
-		delegate?.scrollCoordinator(self, paginateAt: .top)
-	}
-
-	private func loadNewerMessagesIfNeeded() {
-		delegate?.scrollCoordinator(self, paginateAt: .bottom)
-	}
-
-	private func onScrollDirectionChanged(_ newValue: ScrollDirection) {
-		pendingScrollRequests.removeAll()
 	}
 }
 
@@ -165,7 +152,7 @@ extension ScrollCoordinator {
 				pendingScrollRequests.removeAll()
 			case .decelerating:
 				if oldValue == .interacting,
-					ignoredState.direction == .up && ignoredState.isFirstResponder
+				   ignoredState.direction == .up && ignoredState.isFirstResponder
 				{
 					Task { @MainActor in
 						UIApplication.shared.endEditing()
@@ -174,9 +161,6 @@ extension ScrollCoordinator {
 			case .animating, .tracking:
 				break
 			}
-			return false
-		case .onScrollTargetVisibilityChange(let newValue):
-			ignoredState.visibleIDs = newValue
 			return false
 		}
 	}
@@ -227,7 +211,6 @@ extension ScrollCoordinator {
 	}
 
 	private func finalizeScrollUpdates() {
-		print(ignoredState.geometry.offsetY)
 		delegate?.scrollCoordinator(self, finalizeUpdate: state, newState: ignoredState)
 		state = ignoredState
 	}

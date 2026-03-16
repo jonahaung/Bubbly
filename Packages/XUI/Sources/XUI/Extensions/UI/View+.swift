@@ -57,6 +57,25 @@ public extension View {
     static var typeName: String {
         String(describing: self)
     }
+
+	@inlinable
+	static var defaultTitle: String {
+		var raw = String(describing: Self.self)
+			.split(separator: ".")
+			.last
+			.map(String.init) ?? ""
+
+		if raw.hasSuffix("View") {
+			raw.removeLast(4)
+		}
+
+		return raw.reduce(into: "") { result, char in
+			if result.last?.isLowercase == true && char.isUppercase {
+				result.append(" ")
+			}
+			result.append(char)
+		}
+	}
 }
 
 public extension AnyView {

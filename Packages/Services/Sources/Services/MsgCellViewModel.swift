@@ -7,15 +7,14 @@ import SwiftUI
 import XUI
 
 @Observable
-public final class MsgCellViewModel: ViewReloadable, Identifiable, Equatable {
+public final class MsgCellViewModel: Identifiable {
 
 	public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
 		lhs.msg == rhs.msg && lhs.state == rhs.state
 	}
 
-	@ObservationIgnored public var msg: Message
+	public var msg: Message
 	public var state: State
-	public var reloadID: Int = 0
 
     public init(_ msg: Message) {
         state = .init(msg: msg)
@@ -25,7 +24,7 @@ public final class MsgCellViewModel: ViewReloadable, Identifiable, Equatable {
     public func update(with msg: Message) {
         guard self.msg != msg else { return }
         self.msg = msg
-        layoutIfNeeded()
+
     }
 
 	@MainActor
@@ -37,7 +36,7 @@ public final class MsgCellViewModel: ViewReloadable, Identifiable, Equatable {
         }
         state.layout = layout
 		self.state = state
-		layoutIfNeeded()
+
     }
 
     public func setVisibility(_ isVisible: Bool) {
@@ -47,9 +46,7 @@ public final class MsgCellViewModel: ViewReloadable, Identifiable, Equatable {
 
     public func update(selectedMsg: SelectedMsg?) {
         state.selectedMsg = selectedMsg
-		if state.isVisible {
-			layoutIfNeeded()
-		}
+
     }
 }
 

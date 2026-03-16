@@ -49,7 +49,7 @@ public struct ChatTheme: Equatable, EmptyRepresentable {
 
     public static let empty = ChatTheme(.default)
 
-    public func bubbleColor(for isSender: Bool) -> some ShapeStyle {
+	public func bubbleColor(for isSender: Bool) -> Color {
         isSender ? outgoing.bubbleCoor : incoming.bubbleCoor
     }
 

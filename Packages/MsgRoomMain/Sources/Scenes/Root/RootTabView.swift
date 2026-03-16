@@ -62,7 +62,7 @@ public extension AppCoordinator {
     @ViewBuilder func view(for tabPath: TabPath) -> some View {
         switch tabPath {
         case .test:
-            PlaygroundView()
+			PlaygroundView()
         case .inbox:
 			InboxScene(coordinator: self)
         case .contacts:

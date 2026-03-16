@@ -30,7 +30,6 @@ extension MsgCell {
 					}
 				}
 				.fixedSize(horizontal: false, vertical: true)
-//				.equatable(by: state.id)
 			}
 		}
 	}

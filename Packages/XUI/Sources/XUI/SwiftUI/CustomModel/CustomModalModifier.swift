@@ -53,7 +53,7 @@ extension AnyTransition {
 	}
 }
 public extension AnyTransition {
-	static func move(
+	static func modal(
 		edge: Edge,
 		curve: Animation? = nil
 	) -> AnyTransition {

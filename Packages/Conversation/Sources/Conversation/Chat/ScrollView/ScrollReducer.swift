@@ -66,7 +66,7 @@ extension ScrollReducer {
 		}
 		if oldValue.contentHeight == newValue.contentHeight {
 			guard state.updateState.isNotUpdating, state.phase == .decelerating,
-				oldValue.contentHeight == newValue.contentHeight
+				  oldValue.contentHeight == newValue.contentHeight
 			else {
 				return .noAction
 			}
@@ -144,7 +144,7 @@ extension ScrollReducer {
 				return .endUpdate(.insert(edge: edge), scrollItem: nil)
 			}
 		case .removingItems(let edge):
-
+			
 			switch edge {
 			case .top:
 				guard difference != 0 else {
