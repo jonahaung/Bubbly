@@ -22,39 +22,47 @@ public struct ConversationScene: View {
     }
 
     public var body: some View {
-        ZStack(alignment: .bottom) {
+		ZStack {
             ConversationSceneBackground(color: manager.state.properties.theme.background.color)
-                .layoutPriority(1)
 				.equatable(by: manager.state.properties.theme.background)
+			ChatScrollView(manager: manager)
+				.contentMargins(
+					.all,
+					.init(
+						top: ChatLayoutConstants.topBarHeight,
+						leading: 8,
+						bottom: manager.layout.bottomBarFrame?.height ?? 0,
+						trailing: 8
+					), for: .scrollContent
+				)
 
-			if let frame = manager.layout.bottomBarFrame {
-				ChatScrollView(manager: manager)
-					.contentMargins(.horizontal, 8, for: .scrollContent)
-					.contentMargins(.bottom, frame.height, for: .scrollContent)
-					.contentMargins(.top, ChatLayoutConstants.topBarHeight, for: .scrollContent)
-//					.safeAreaPadding(
-//						.init(
-//							top: ChatLayoutConstants.topBarHeight,
-//							leading: 0,
-//							bottom: frame.height,
-//							trailing: 0
-//						)
-//					)
-					.layoutPriority(5)
+			VStack(alignment: .center, spacing: 4) {
+				ChatTitleBar()
+				FloatingDateView()
 			}
-            VStack(alignment: .center, spacing: 0) {
-                ChatTitleBar()
-                FloatingDateView()
-                Spacer()
+			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+
+            VStack(alignment: .center, spacing: 8) {
                 ChatAccessoryBar()
-				ComposeBar(composer: composer)
+				ComposeBar()
+					.background(
+						LinearGradient(
+							colors: [
+								.clear,
+								manager.state.properties.theme.background.color
+							],
+							startPoint: .top,
+							endPoint: .bottom
+						)
+					)
 					.onGeometryChange(for: CGRect.self) { geometry in
 						geometry.frame(in: .global)
 					} action: { oldValue, newValue in
-						manager.send(.onBottomBarFrameChage(oldValue, newValue))
+						manager.onBottomBarFrameChage(oldValue, newValue)
 					}
             }
-            .layoutPriority(10)
+			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+			.environment(composer)
 
             if let frame = manager.presentation.state.overlayItem,
                let overlayViewModel = manager.models.element(withID: frame.id) {
@@ -62,7 +70,6 @@ public struct ConversationScene: View {
                     .font(.system(size: UIFont.preferredFont(forTextStyle: .body).pointSize))
                     .environment(overlayViewModel)
                     .environment(\.conversation, manager.conversation)
-                    .environment(\.isVisible, true)
             }
         }
 		.toolbarVisibility(.hidden, for: .tabBar)
@@ -75,7 +82,6 @@ public struct ConversationScene: View {
         .environment(\.sharedNamespace, SharedNamespace(namespace))
         .environment(\.msgCellActions, MsgCellAction(action: handleMsgCellInteraction))
 		.environment(manager)
-		.environment(composer)
 		.task {
 			await manager.onViewAppear()
 		}

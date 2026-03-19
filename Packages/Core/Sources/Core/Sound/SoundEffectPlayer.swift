@@ -105,10 +105,6 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
         guard let engine else { return }
 
         do {
-            #if DEBUG
-            print("Stopping engine")
-            #endif
-
             try await engine.stop()
         } catch {
             throw error
@@ -125,9 +121,6 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
                 newRegisteredSound.count += 1
                 registeredSounds[url] = newRegisteredSound
             } else {
-                #if DEBUG
-                print("Registering \(audio)")
-                #endif
                 let resourceID = try engine.registerAudioResource(url)
 
                 let reference = SoundEffectReference(resourceID: resourceID)
@@ -143,10 +136,6 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
             registeredSounds[url]?.count -= 1
 
             if registeredSounds[url]?.count == 0 {
-                #if DEBUG
-                print("Unregistering \(audio)")
-                #endif
-
                 if let resourceID = registeredSounds[url]?.resourceID {
                     try engine.unregisterAudioResource(resourceID)
                 }
@@ -227,10 +216,6 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
     }
 
     private func tearDown() throws {
-        #if DEBUG
-        print("Stopping engine")
-        #endif
-
         guard shouldDeactivateAudioSession else { return }
 
         let audioSession = AVAudioSession.sharedInstance()
@@ -245,9 +230,6 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
             updatedSound.count += 1
             registeredSounds[audio] = updatedSound
         } else {
-            #if DEBUG
-            print("Registering \(audio)")
-            #endif
             let id = UUID()
             let sound = SoundEffectReference(id: id, count: 1)
             registeredSounds[audio] = sound
@@ -260,10 +242,6 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
         registeredSound.count -= 1
 
         if registeredSound.count == 0 {
-            #if DEBUG
-            print("Unregistering \(audio)")
-            #endif
-
             registeredSounds[audio] = nil
         } else {
             registeredSounds[audio] = registeredSound
@@ -350,4 +328,3 @@ private class AVAudioPlayerWithCompletionHandler: NSObject, AVAudioPlayerDelegat
         tearDown()
     }
 }
-

@@ -62,23 +62,16 @@ extension ChatViewManager {
 		state.reloadID += 1
 	}
 
-	func send(_ intent: ScrollCoordinator.Intent) {
-		if scrollController.updateState(is: .initial) {
-			if case .onBottomBarFrameChage(let oldValue, let newValue) = intent {
-				if layout.bottomBarFrame == nil, newValue.width == oldValue.width,
-					newValue.minY == oldValue.minY
-				{
-					layout.update(bottomBarFrame: newValue)
-					Task {
-						scrollController.send(.onVisibilityChange(visibility: .visible))
-					}
-				} else {
-					scrollController.send(intent)
-				}
-			}
+	func onBottomBarFrameChage(_ oldValue: CGRect, _ newValue: CGRect) {
+		if layout.bottomBarFrame == nil, newValue.origin.x >= 0 {
+			layout.update(bottomBarFrame: newValue)
+			scrollController.send(.onVisibilityChange(visibility: .visible))
 		} else {
-			scrollController.send(intent)
+			scrollController.send(.onBottomBarFrameChage(oldValue, newValue))
 		}
+	}
+	func send(_ intent: ScrollCoordinator.Intent) {
+		scrollController.send(intent)
 	}
 
 	func handleScrollDownButtonTap() {
@@ -106,26 +99,35 @@ extension ChatViewManager {
 				previous: previousMsg?.uid,
 				next: nextMsg?.uid
 			)
-		layout.selectedMsg = newValue
-		if let oldValue {
-			models.didChangeSelection(newValue, for: oldValue.id)
-			if let id = oldValue.next {
-				models.didChangeSelection(newValue, for: id)
+
+		withAnimation(.interactiveSpring) {
+			if let oldValue {
+				models.didChangeSelection(newValue, for: oldValue.id)
 			}
-			if let id = oldValue.previous {
-				models.didChangeSelection(newValue, for: id)
+			if let newValue {
+				models.didChangeSelection(newValue, for: newValue.id)
+			}
+			layoutIfNeeded()
+		} completion: { [self] in
+			layout.selectedMsg = newValue
+			if let oldValue {
+				if let id = oldValue.next {
+					models.didChangeSelection(newValue, for: id)
+				}
+				if let id = oldValue.previous {
+					models.didChangeSelection(newValue, for: id)
+				}
+			}
+			if let newValue {
+				if let id = newValue.next {
+					models.didChangeSelection(newValue, for: id)
+				}
+				if let id = newValue.previous {
+					models.didChangeSelection(newValue, for: id)
+				}
 			}
 		}
-		if let newValue {
-			models.didChangeSelection(newValue, for: newValue.id)
-			if let id = newValue.next {
-				models.didChangeSelection(newValue, for: id)
-			}
-			if let id = newValue.previous {
-				models.didChangeSelection(newValue, for: id)
-			}
-		}
-		layoutIfNeeded()
+
 	}
 
 	func onViewAppear() async {

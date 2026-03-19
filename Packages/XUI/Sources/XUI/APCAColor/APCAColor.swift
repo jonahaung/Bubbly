@@ -101,6 +101,35 @@ struct APCADerivedForegroundColor: ViewModifier {
     }
 }
 
+public extension View {
+    @available(iOS 18.0, *)
+    func apcaForeground(
+        _ foreground: Color,
+        over background: Color,
+        fontSize: CGFloat,
+        relativeTo textStyle: Font.TextStyle = .body,
+        weight: Font.Weight = .regular
+    ) -> some View {
+        modifier(
+            APCADerivedForegroundColor(
+                foregroundColor: foreground,
+                backgroundColor: background,
+                fontSize: fontSize,
+                relativeTo: textStyle,
+                weight: weight
+            )
+        )
+    }
+
+    @available(iOS 26.0, *)
+    func apcaForeground<Foreground: ShapeStyle, Background: ShapeStyle>(
+        _ foreground: Foreground,
+        over background: Background
+    ) -> some View where Foreground.Resolved == Color.Resolved, Background.Resolved == Color.Resolved {
+        foregroundStyle(foreground.minimumContrast(over: background))
+    }
+}
+
 extension Color.Resolved {
     public static func APCAContrast(text: Color.Resolved, background: Color.Resolved) -> Float {
         let text = text.over(background)

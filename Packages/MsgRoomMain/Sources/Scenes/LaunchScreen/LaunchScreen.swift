@@ -12,7 +12,7 @@ struct LaunchScreen: View {
     let appLauncher: AppLauncher
     var body: some View {
         ZStack {
-			TextDemo()
+			AnimatedText(text: "Bubbly", preset: .spring)
         }
         .task {
 			try? await Task.sleep(seconds: 1)
@@ -22,129 +22,145 @@ struct LaunchScreen: View {
     }
 }
 
-struct TextDemo: View {
+import SwiftUI
 
-	let letters = Array("Bubbly")
+public struct AnimatedText: View {
 
-	@State private var enabled = false
-	@State private var dragAmount = CGSize(width: 0, height: UIApplication.shared.screenSize().height)
+	public enum AnimationPreset {
+		case spring
+		case wave
+		case bounce
+		case typewriter
+	}
 
-	var body: some View {
+	public let letters: [Character]
+
+	@State private var isVisible = false
+	@State private var offset: CGSize
+	@State private var isDisappearing = false
+
+	private let preset: AnimationPreset
+	private let initialOffset: CGSize
+	private let delayStep: Double
+	private let jitter: CGFloat
+	private let style: (Character) -> Text
+
+	public init(
+		text: String,
+		preset: AnimationPreset = .spring,
+		initialOffset: CGSize = CGSize(width: 0, height: 300),
+		delayStep: Double = 0.05,
+		jitter: CGFloat = 0,
+		@ViewBuilder style: @escaping (Character) -> Text = { Text(String($0)).font(.largeTitle.bold()) }
+	) {
+		self.letters = Array(text)
+		self.preset = preset
+		self.initialOffset = initialOffset
+		self.delayStep = delayStep
+		self.jitter = jitter
+		self.style = style
+		self._offset = State(initialValue: initialOffset)
+	}
+
+	// MARK: - Body
+
+	public var body: some View {
 		HStack(spacing: 0) {
-			ForEach(0..<letters.count, id: \.self) { num in
-				Text(String(letters[num]))
-					.font(.largeTitle.bold())
-					.rotationEffect(.degrees(enabled ? 0 : 360), anchor: .bottom)
-					.offset(dragAmount)
-					.animation(.interpolatingSpring(stiffness: 170, damping: 15).delay(Double(num) / 20), value: dragAmount)
+			ForEach(letters.indices, id: \.self) { index in
+				style(letters[index])
+					.rotationEffect(rotation(for: index), anchor: .bottom)
+					.offset(offsetFor(index))
+					.opacity(opacity(for: index))
+					.animation(
+						animation(for: index),
+						value: offset
+					)
 			}
 		}
 		.padding()
 		.onAppear {
-			dragAmount = .zero
-			enabled.toggle()
-		}
-	}
-}
-struct ChainedSpring: View {
-	@State private var moving = false
-
-	// Added constants for common values
-	private let baseSize: CGFloat = 20
-	private let sizeIncrement: CGFloat = 30
-	private let delayIncrement: CGFloat = 0.05
-	private let circleCount = 8
-
-	// Added AnimatedCircle view component
-	private struct AnimatedCircle: View {
-		let size: CGFloat
-		let delay: Double
-		let moving: Bool
-
-		var body: some View {
-			Circle()
-				.stroke(lineWidth: 5)
-				.frame(width: size, height: size)
-				.rotation3DEffect(.degrees(75), axis: (x: 1, y: 0, z: 0))
-				.offset(y: moving ? 150 : -180)
-				.animation(
-					.bouncy(duration: 0.5, extraBounce: 0.25).repeatForever(autoreverses: true)
-					.delay(delay),
-					value: moving
-				)
-		}
-	}
-
-	var body: some View {
-		ZStack {
-			ForEach(0..<circleCount, id: \.self) { index in
-				AnimatedCircle(
-					size: baseSize + (CGFloat(index) * sizeIncrement),
-					delay: Double(index) * delayIncrement,
-					moving: moving
-				)
+			isDisappearing = false
+			withAnimation {
+				offset = .zero
+				isVisible = true
 			}
 		}
-		.onAppear {
-			moving.toggle()
+		.onDisappear {
+			isDisappearing = true
+			withAnimation {
+				offset = initialOffset
+				isVisible = false
+			}
 		}
 	}
 }
 
-enum AnimationPhase {
-	case initial, drawCircle, scaleGreen, showCheckmark
+private extension AnimatedText {
+
+	func animation(for index: Int) -> Animation {
+		baseAnimation()
+			.delay(staggerDelay(for: index))
+	}
+
+	func baseAnimation() -> Animation {
+		switch preset {
+		case .spring:
+			return .interpolatingSpring(stiffness: 170, damping: 15)
+		case .wave:
+			return .easeInOut(duration: 0.6)
+		case .bounce:
+			return .spring(response: 0.4, dampingFraction: 0.5)
+		case .typewriter:
+			return .easeOut(duration: 0.2)
+		}
+	}
+
+	func staggerDelay(for index: Int) -> Double {
+		if isDisappearing {
+			return Double(letters.count - index) * delayStep
+		} else {
+			return Double(index) * delayStep
+		}
+	}
 }
 
-struct ActivityProgressAnimation: View {
-	// Add state for animation control
-	@Binding var isAnimating: Bool
+private extension AnimatedText {
 
-	var body: some View {
-		VStack {
-			ZStack {
-				Circle() // Blue circle
-					.trim(from: 0.0, to: isAnimating ? 0.99 : 0.0)
-					.stroke(style: StrokeStyle(lineWidth: 6, lineCap: .round))
-					.frame(width: 100, height: 100)
+	func offsetFor(_ index: Int) -> CGSize {
+		var base = offset
 
-					.rotationEffect(.degrees(-90))
-					.phaseAnimator([AnimationPhase.initial, .drawCircle], trigger: isAnimating) { content, phase in
-						content
-					} animation: { phase in
-							.bouncy(duration: 1)
-					}
+		// Add jitter if enabled
+		if jitter > 0 {
+			let randomX = CGFloat.random(in: -jitter...jitter)
+			let randomY = CGFloat.random(in: -jitter...jitter)
+			base.width += randomX
+			base.height += randomY
+		}
 
-//				Circle() // Green circle
-//					.frame(width: 96, height: 96)
-//
-//					.scaleEffect(isAnimating ? 1 : 0)
-//					.phaseAnimator([AnimationPhase.drawCircle, .scaleGreen], trigger: isAnimating) { content, phase in
-//						content
-//					} animation: { phase in
-//							.bouncy(duration: 0.5, extraBounce: 0.1).delay(0.3)
-//					}
+		// Wave effect
+		if preset == .wave {
+			let wave = sin(Double(index)) * 10
+			base.height += isVisible ? 0 : CGFloat(wave)
+		}
 
-					Image(systemName: "text.bubble.fill") // Checkmark
-						.font(.largeTitle)
-						.bold()
+		return base
+	}
 
-						.scaleEffect(isAnimating ? 1 : 0)
-						.rotationEffect(.degrees(isAnimating ? 0 : -60), anchor: .bottom)
-						.phaseAnimator([AnimationPhase.scaleGreen, .showCheckmark], trigger: isAnimating) { content, phase in
-							content
-						} animation: { phase in
-								.bouncy(duration: 0.4, extraBounce: 0.4).delay(0.6)
-						}
-			}
-			Button {
-				isAnimating.toggle()
-			} label: {
-				ZStack {
-					Text("Go")
-				}
-			}
-			.padding()
-			.buttonStyle(.borderedProminent)
+	func rotation(for index: Int) -> Angle {
+		switch preset {
+		case .bounce:
+			return .degrees(isVisible ? 0 : 180)
+		default:
+			return .degrees(isVisible ? 0 : 360)
+		}
+	}
+
+	func opacity(for index: Int) -> Double {
+		switch preset {
+		case .typewriter:
+			return isVisible ? 1 : 0
+		default:
+			return 1
 		}
 	}
 }

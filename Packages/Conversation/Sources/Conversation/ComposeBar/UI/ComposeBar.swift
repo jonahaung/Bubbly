@@ -9,8 +9,10 @@ import XUI
 
 struct ComposeBar: View {
 
-    let composer: ChatComposer
-	@State private var menuIsOpen: Bool = false
+	@State private var viewModel = ComposeBarViewModel()
+	@Environment(ChatComposer.self) private var composer
+	@Environment(\.sharedFocusState) private var focusState
+
     var body: some View {
         VStack(spacing: 0) {
             switch composer.source {
@@ -22,10 +24,10 @@ struct ComposeBar: View {
                 }
             }
             HStack(alignment: .bottom, spacing: 4) {
-				HamburgerButton(isOpen: $menuIsOpen, size: 38)
-					.soundEffect(.tock, trigger: menuIsOpen)
-
-				if menuIsOpen {
+				HamburgerButton(isOpen: $viewModel.isMenuOpened, size: 38)
+					.disabled(focusState?.value != nil)
+					.soundEffect(.tick, trigger: viewModel.isMenuOpened)
+				if viewModel.isMenuOpened {
 					switch composer.source {
 					case .liary:
 						ComposeBarSourceButton(source: .text)
@@ -51,10 +53,15 @@ struct ComposeBar: View {
                 ComposeBarInputTextField(composer: composer)
                 ComposeBarSendButton()
             }
-            .animation(.interactiveSpring, value: composer.source)
+			.animation(.easeInExponential, value: viewModel.isMenuOpened)
             .padding(.init(top: 0, leading: 8, bottom: 0, trailing: 8))
         }
-		.soundEffect(.tock, trigger: composer.source)
+
+		.onChange(of: focusState?.value) { oldValue, newValue in
+			if newValue != nil {
+				viewModel.isMenuOpened = false
+			}
+		}
     }
 
     private func photoPickerButton() -> some View {

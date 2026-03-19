@@ -7,6 +7,11 @@ import Services
 import SwiftUI
 
 extension ChatViewManager: ScrollCoordinatorDelegate {
+
+	func scrollCoordinatorLayoutIfNeeded(_ coordinator: ScrollCoordinator) {
+		layoutIfNeeded()
+	}
+
 	var isPaginatorEnabled: Bool {
 		conversationConfig.canPaginate
 	}
@@ -77,7 +82,9 @@ extension ChatViewManager: ScrollCoordinatorDelegate {
 				)
 				models.append(msgs)
 				coordinator.updateStateUpdate(to: .insertingItems(edge))
-				layoutIfNeeded()
+				withAnimation {
+					layoutIfNeeded()
+				}
 			}
 		}
 
@@ -93,12 +100,17 @@ extension ChatViewManager: ScrollCoordinatorDelegate {
 			let pageSize = conversationConfig.pageSize
 			switch edge {
 			case .top:
-				models.retainNewest(pageSize)
+				models.retainNewest(pageSize*2)
+				coordinator.updateStateUpdate(to: .removingItems(edge))
+				layoutIfNeeded()
 			case .bottom:
-				models.retainOldest(pageSize)
+				models.retainOldest(pageSize*2)
+				coordinator.updateStateUpdate(to: .removingItems(edge))
+				withAnimation {
+					layoutIfNeeded()
+				}
 			}
-			coordinator.updateStateUpdate(to: .removingItems(edge))
-			layoutIfNeeded()
+
 		}
 
 	}

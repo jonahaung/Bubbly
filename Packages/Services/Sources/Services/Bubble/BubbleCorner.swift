@@ -112,10 +112,10 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
     @MainActor
     public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle {
         UnevenRoundedRectangle(
-            topLeadingRadius: topLeadingRadius ? cornerRadius : 4,
-            bottomLeadingRadius: bottomLeadingRadius ? cornerRadius : 4,
-            bottomTrailingRadius: bottomTrailingRadius ? cornerRadius : 4,
-            topTrailingRadius: topTrailingRadius ? cornerRadius : 4,
+            topLeadingRadius: topLeadingRadius ? cornerRadius : 0,
+            bottomLeadingRadius: bottomLeadingRadius ? cornerRadius : 0,
+            bottomTrailingRadius: bottomTrailingRadius ? cornerRadius : 0,
+            topTrailingRadius: topTrailingRadius ? cornerRadius : 0,
             style: .continuous
         )
     }

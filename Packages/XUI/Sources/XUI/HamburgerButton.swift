@@ -37,9 +37,7 @@ public struct HamburgerButton: View {
 		let offset = (thickness + spacing) / 2
 
 		Button {
-			withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-				isOpen.toggle()
-			}
+			isOpen.toggle()
 		} label: {
 			VStack(spacing: spacing) {
 				bar
@@ -55,9 +53,10 @@ public struct HamburgerButton: View {
 			.padding(.vertical, padding)
 			.padding(.horizontal, padding/2)
 			.contentShape(Rectangle())
+			.animation(.anticipateOvershoot, value: isOpen)
+			.geometryGroup()
 		}
 		.buttonStyle(.plain)
-		
 	}
 
 	private var bar: some View {

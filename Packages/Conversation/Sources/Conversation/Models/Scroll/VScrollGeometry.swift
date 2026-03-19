@@ -60,7 +60,7 @@ extension VScrollGeometry {
     public func canPaginate(at edge: VerticalEdge) -> Bool {
         switch edge {
         case .top:
-			offsetY < boundsHeight/4
+			offsetY < boundsHeight*4
         case .bottom:
             offsetY + boundsHeight+50 > contentHeight
         }

@@ -13,6 +13,7 @@ extension MsgCell {
 	struct Content: View {
 
 		@Environment(MsgCellViewModel.self) private var viewModel
+		@Environment(\.conversationTheme) private var theme
 		private var state: MsgCellViewModel.State { viewModel.state }
 
 		var body: some View {
@@ -22,7 +23,10 @@ extension MsgCell {
 				BubbleView()
 				OverlayBubbleView()
 			}
-			.foregroundStyle(state.foregroundStyle.minimumContrast(over: Color.primary))
+			.apcaForeground(
+				state.foregroundStyle,
+				over: theme.bubbleColor(for: state.isSender)
+			)
 		}
 	}
 

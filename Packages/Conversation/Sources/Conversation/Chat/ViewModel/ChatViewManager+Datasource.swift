@@ -48,7 +48,7 @@ extension ChatViewManager: ChatDatasourceDelegate {
 						self.resetData()
 					}
 					ToastPresenter.show(toast)
-
+					
 				} else {
 					models.insert(msg: msg)
 					layoutIfNeeded()

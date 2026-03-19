@@ -19,6 +19,7 @@ extension ScrollCoordinator {
 		var direction: ScrollDirection
 		var phase: ScrollPhase
 		var isFirstResponder: Bool
+		var scrolledPosition = ScrolledPosition.atBottom
 	}
 
 	enum Intent {

@@ -81,7 +81,6 @@ extension ScrollReducer {
 		} else {
 			return .noAction
 		}
-
 	}
 
 	private func paginateIfNeeded(
@@ -124,20 +123,16 @@ extension ScrollReducer {
 		newValue: VScrollGeometry
 	) -> Effect {
 		let difference = newValue.contentHeight - oldValue.contentHeight
+		guard difference != 0 else {
+			return .noAction
+		}
 		switch state.updateState {
 		case .resetting:
 			let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
-			if difference == 0 {
-				return .scroll(item: .y(newValue.offsetY))
-			} else {
-				return .endUpdate(.reset, scrollItem: .y(offsetY))
-			}
+			return .endUpdate(.reset, scrollItem: .y(offsetY))
 		case .insertingItems(let edge):
 			switch edge {
 			case .top:
-				guard difference != 0 else {
-					return .scroll(item: .y(newValue.offsetY, properties: .scroll))
-				}
 				let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
 				return .endUpdate(.insert(edge: edge), scrollItem: .y(offsetY, properties: .scroll))
 			case .bottom:
@@ -147,9 +142,6 @@ extension ScrollReducer {
 			
 			switch edge {
 			case .top:
-				guard difference != 0 else {
-					return .scroll(item: .y(newValue.offsetY))
-				}
 				let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
 				return .endUpdate(
 					.remove(edge: edge),

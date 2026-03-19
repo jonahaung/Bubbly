@@ -5,6 +5,7 @@
 import Services
 import SwiftUI
 import XUI
+import Core
 
 extension ComposeBar {
     struct ComposeBarInputTextField: View {
@@ -17,7 +18,7 @@ extension ComposeBar {
             }
             .background(.windowBackground, in: .containerRelative)
 			.containerShape(
-				RoundedRectangle(cornerRadius: UIFont.preferredFont(forTextStyle: .body).pointSize)
+				RoundedRectangle(cornerRadius: 18)
 			)
         }
 

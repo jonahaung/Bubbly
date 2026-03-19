@@ -22,18 +22,16 @@ struct ChatScrollView: View {
 				if manager.presentation.state.showContactInfo {
 					ConversationHeaderView()
 				}
-				ForEach(manager.models.renderedModels) { viewModel in
-					MsgCell(viewModel: viewModel)
-						.environment(viewModel)
-						.id(viewModel.id)
+				ForEach(manager.models.renderedModels) {
+					MsgCell(viewModel: $0)
+						.environment($0)
+						.id($0.id)
 				}
 			}
 			.scrollTargetLayout()
-
 		}
 		.font(.system(size: UIFont.preferredFont(forTextStyle: .body).pointSize))
 		.tint(Color.link.mix(with: Color.accentColor, by: 0.3))
-		.animation(.interactiveSpring, value: manager.layout.selectedMsg)
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.send(.onScrollPhaseChange(oldPhase, newPhase, context: context))
 		}
@@ -45,8 +43,7 @@ struct ChatScrollView: View {
 		}
 		.scrollDismissesKeyboard(.never)
 		.defaultScrollAnchor(.bottom, for: .sizeChanges)
-		.equatable(by: manager.state)
+		.equatable(by: manager.state.reloadID)
 		.scrollPosition(manager.scrollController.scrollPositionBindable, anchor: .none)
-
 	}
 }

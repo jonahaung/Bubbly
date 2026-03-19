@@ -20,11 +20,25 @@ final class ScrollCoordinator: ErrorPresenter {
 	@ObservationIgnored private var pendingScrollRequests = Deque<ScrollPositionItem>()
 	@ObservationIgnored weak var delegate: ScrollCoordinatorDelegate?
 	@ObservationIgnored private let reducer = ScrollReducer()
-	@ObservationIgnored private let displayLink = DisplayLink(1)
+	@ObservationIgnored private let displayLink = DisplayLink(0.5)
 
-	var scrollPosition = ScrollPosition(edge: .bottom)
+	private var scrollPosition = ScrollPosition()
 	var scrollPositionBindable: Binding<ScrollPosition> {
-		.init(get: { self.scrollPosition }, set: { _ in self.scrollPosition = .init() })
+		.init(
+			get: {
+				if self.ignoredState.updateState.hasViewLoaded {
+					return self.scrollPosition
+				}
+				return .init(edge: .bottom)
+			},
+			set: { [self] newValue in
+				if newValue.isPositionedByUser {
+					scrollPosition = newValue
+				} else {
+					scrollPosition = .init()
+				}
+			}
+		)
 	}
 	private(set) var state: State
 	@ObservationIgnored private var ignoredState: State
@@ -111,18 +125,20 @@ extension ScrollCoordinator {
 		case .onVisibilityChange(let visibility):
 			switch visibility {
 			case .visible:
-				scroll(to: .edge(.bottom, properties: .notAnimated))
 				ignoredState.updateState.setHasViewLoaded()
-				displayLink.start()
 			case .hidden, .automatic:
 				break
 			}
 			return false
 		case .onBottomBarFrameChage(let oldValue, let newValue):
+			guard ignoredState.updateState.hasViewLoaded else {
+				return false
+			}
 			if newValue.height == oldValue.height && newValue.maxY != oldValue.maxY {
 				ignoredState.isFirstResponder = newValue.maxY < oldValue.maxY
 			}
 			guard ignoredState.updateState.isNotUpdating else { return false }
+
 			guard newValue.maxY < oldValue.maxY else { return false }
 			guard ignoredState.geometry.scrolledPosition != .atBottom else { return false }
 			let targetY = ignoredState.geometry.offsetY + oldValue.maxY - newValue.maxY
@@ -134,11 +150,20 @@ extension ScrollCoordinator {
 			return false
 		case .onScrollGeometryChange(let oldValue, let newValue):
 			ignoredState.geometry = newValue
+			guard ignoredState.updateState.hasViewLoaded else {
+				return false
+			}
 			ignoredState.direction = newValue.offsetY < oldValue.offsetY ? .up : .down
 			return true
 		case .onScrollPhaseChange(let oldValue, let newValue, _):
+			guard ignoredState.updateState.hasViewLoaded else {
+				return false
+			}
 			ignoredState.phase = newValue
 			displayLink.stop()
+			if ignoredState.updateState == .willEndUpdates {
+				ignoredState.updateState.update(to: .notUpdating)
+			}
 			switch newValue {
 			case .idle:
 				if ignoredState.updateState.isNotUpdating {
@@ -146,9 +171,7 @@ extension ScrollCoordinator {
 					displayLink.start()
 				}
 			case .interacting:
-				if ignoredState.updateState == .willEndUpdates {
-					ignoredState.updateState.update(to: .notUpdating)
-				}
+
 				pendingScrollRequests.removeAll()
 			case .decelerating:
 				if oldValue == .interacting,
@@ -200,7 +223,13 @@ extension ScrollCoordinator {
 
 	private func end(updates: DataUpdate) {
 		switch updates {
-		case .insert, .remove, .append:
+		case .insert(let edge):
+			if edge == .top {
+				ignoredState.updateState.update(to: .willEndUpdates)
+			} else {
+				ignoredState.updateState.update(to: .notUpdating)
+			}
+		case .remove, .append:
 			ignoredState.updateState.update(to: .notUpdating)
 		case .reset:
 			ignoredState.updateState.update(to: .notUpdating)
