@@ -19,3 +19,6 @@ Packages/**/.build/
 
 # Logs
 *.log
+
+# Local secrets
+Bubbly/Resources/FirebaseServiceAccount.json

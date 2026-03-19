@@ -1,7 +1,3 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
-
 import Foundation
 
 public struct ServiceAccountCredentials: Codable, Sendable {
@@ -31,29 +27,55 @@ public struct ServiceAccountCredentials: Codable, Sendable {
         case universeDomain = "universe_domain"
     }
 
+    private static let empty = ServiceAccountCredentials(
+        type: "",
+        projectID: "",
+        privateKeyID: "",
+        privateKey: "",
+        clientEmail: "",
+        clientID: "",
+        authURI: "",
+        tokenURI: "",
+        authProviderX509CertURL: "",
+        clientX509CertURL: "",
+        universeDomain: ""
+    )
+
     public static let shared: ServiceAccountCredentials = {
         do {
             return try load()
         } catch {
-            debugPrint("Error loading service account credentials: \(error)")
-            // Return a fallback empty credential that will fail gracefully later
-            return ServiceAccountCredentials(
-                type: "", projectID: "", privateKeyID: "", privateKey: "",
-                clientEmail: "", clientID: "", authURI: "", tokenURI: "",
-                authProviderX509CertURL: "", clientX509CertURL: "", universeDomain: ""
-            )
+            return empty
         }
     }()
 
     private static func load() throws -> ServiceAccountCredentials {
-        guard let path = Bundle.main.path(
-            forResource: "FirebaseServiceAccount",
-            ofType: "json"
-        ) else {
+        let environment = ProcessInfo.processInfo.environment
+
+        if let json = environment["FIREBASE_SERVICE_ACCOUNT_JSON"],
+           let data = json.data(using: .utf8) {
+            return try decode(from: data)
+        }
+
+        if let path = environment["FIREBASE_SERVICE_ACCOUNT_PATH"],
+           !path.isEmpty {
+            let data = try Data(contentsOf: URL(fileURLWithPath: path))
+            return try decode(from: data)
+        }
+
+        if let encoded = environment["FIREBASE_SERVICE_ACCOUNT_JSON_BASE64"],
+           let data = Data(base64Encoded: encoded) {
+            return try decode(from: data)
+        }
+
+        throw PushNotificationError.serviceAccountNotFound
+    }
+
+    private static func decode(from data: Data) throws -> ServiceAccountCredentials {
+        guard !data.isEmpty else {
             throw PushNotificationError.serviceAccountNotFound
         }
 
-        let data = try Data(contentsOf: URL(fileURLWithPath: path))
         return try JSONDecoder().decode(ServiceAccountCredentials.self, from: data)
     }
 }
