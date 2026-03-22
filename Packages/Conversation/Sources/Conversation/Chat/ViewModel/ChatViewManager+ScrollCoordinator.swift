@@ -8,11 +8,7 @@ import SwiftUI
 
 extension ChatViewManager: ScrollCoordinatorDelegate {
 
-	func scrollCoordinatorLayoutIfNeeded(_ coordinator: ScrollCoordinator) {
-		layoutIfNeeded()
-	}
-
-	var isPaginatorEnabled: Bool {
+	private var isPaginatorEnabled: Bool {
 		conversationConfig.canPaginate
 	}
 
@@ -39,17 +35,12 @@ extension ChatViewManager: ScrollCoordinatorDelegate {
 		finalizeUpdate state: ScrollCoordinator.State,
 		newState: ScrollCoordinator.State
 	) {
-		let newVisibleIDs = models.renderedModels.filter{ $0.state.isVisible }.map(\.id)
-		if let first = newVisibleIDs.first, let date = models.element(withID: first)?.msg.date {
-			presentation.send(.date(date))
-		}
 		presentation
 			.send(.bottomAccessory(newState.geometry.isNear(.bottom) ? nil : .scrollDownButton))
-
 	}
 
 	func scrollCoordinator(_ coordinator: ScrollCoordinator, paginateAt edge: VerticalEdge) {
-		guard coordinator.updateState(is: .willUpdate) else { return }
+		guard coordinator.updatedState(is: .willBeginUpdates) else { return }
 		switch edge {
 		case .top:
 			serialQueue.addOperation { [weak self] in
@@ -59,7 +50,7 @@ extension ChatViewManager: ScrollCoordinatorDelegate {
 					return
 				}
 				let query = ServerTime(oldestMessage.date).value
-				let msgs = try await messageSource.loadPrevious(
+				let msgs = try await datasource.loadPrevious(
 					before: query,
 					conID: oldestMessage.conID
 				)
@@ -76,7 +67,7 @@ extension ChatViewManager: ScrollCoordinatorDelegate {
 					return
 				}
 				let query = ServerTime(newestMessage.date).value
-				let msgs = try await messageSource.loadMore(
+				let msgs = try await datasource.loadMore(
 					after: query,
 					conID: newestMessage.conID
 				)
@@ -89,12 +80,12 @@ extension ChatViewManager: ScrollCoordinatorDelegate {
 		}
 
 		func revertState() {
-			scrollController.updateStateUpdate(to: .notUpdating)
+			scrollController.updateStateUpdate(to: .didEndUpdates)
 		}
 	}
 
 	func scrollCoordinator(_ coordinator: ScrollCoordinator, removeAt edge: VerticalEdge) {
-		guard coordinator.updateState(is: .willUpdate) else { return }
+		guard coordinator.updatedState(is: .willBeginUpdates) else { return }
 		serialQueue.addOperation { [weak self] in
 			guard let self else { return }
 			let pageSize = conversationConfig.pageSize
@@ -110,9 +101,7 @@ extension ChatViewManager: ScrollCoordinatorDelegate {
 					layoutIfNeeded()
 				}
 			}
-
 		}
-
 	}
 
 	func reloadScrollView(for _: ScrollCoordinator) {
@@ -157,8 +146,9 @@ extension ChatViewManager {
 		layoutIfNeeded()
 	}
 	func resetData() {
-		Task { @MainActor in
-			let msgs = try await messageSource.reset(conID: conversationConfig.conID)
+		serialQueue.addOperation { [weak self] in
+			guard let self else { return }
+			let msgs = try await datasource.reset(conID: conversationConfig.conID)
 			models.set(msgs: msgs)
 			layoutIfNeeded()
 		}

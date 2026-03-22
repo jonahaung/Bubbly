@@ -1,0 +1,93 @@
+//
+//  Throttler.swift
+//  XUI
+//
+//  Created by Aung Ko Min on 21/3/26.
+//
+
+
+import Foundation
+
+public class Throttler {
+
+	public enum ThrottlerOption {
+		case leading
+		case trailing
+		case both
+	}
+
+	private let queue: DispatchQueue
+	private let delay: TimeInterval
+	private let option: ThrottlerOption
+	private var workItem: DispatchWorkItem?
+	private var lastExecutionTime: Date?
+	private var pendingExecution: Bool = false
+
+	public init(delay: TimeInterval, option: ThrottlerOption = .trailing, queue: DispatchQueue = .main) {
+		self.delay = delay
+		self.option = option
+		self.queue = queue
+	}
+
+	public func throttle(_ block: @escaping () -> Void) {
+		switch option {
+		case .leading:
+			throttleLeading(block)
+		case .trailing:
+			throttleTrailing(block)
+		case .both:
+			throttleBoth(block)
+		}
+	}
+
+	private func throttleLeading(_ block: @escaping () -> Void) {
+		let now = Date()
+
+		if lastExecutionTime == nil || now.timeIntervalSince(lastExecutionTime!) >= delay {
+			execute(block)
+		}
+	}
+
+	private func throttleTrailing(_ block: @escaping () -> Void) {
+		workItem?.cancel()
+		let newWorkItem = DispatchWorkItem { [weak self] in
+			self?.execute(block)
+		}
+
+		workItem = newWorkItem
+		queue.asyncAfter(deadline: .now() + delay, execute: newWorkItem)
+	}
+
+	private func throttleBoth(_ block: @escaping () -> Void) {
+		let now = Date()
+		if lastExecutionTime == nil || now.timeIntervalSince(lastExecutionTime!) >= delay {
+			execute(block)
+			return
+		}
+		if pendingExecution {
+			return
+		}
+
+		pendingExecution = true
+
+		let remainingDelay = delay - now.timeIntervalSince(lastExecutionTime!)
+		let newWorkItem = DispatchWorkItem { [weak self] in
+			self?.pendingExecution = false
+			self?.execute(block)
+		}
+
+		workItem = newWorkItem
+		queue.asyncAfter(deadline: .now() + remainingDelay, execute: newWorkItem)
+	}
+
+	private func execute(_ block: () -> Void) {
+		lastExecutionTime = Date()
+		block()
+	}
+
+	public func cancel() {
+		workItem?.cancel()
+		workItem = nil
+		pendingExecution = false
+	}
+}

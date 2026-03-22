@@ -50,6 +50,9 @@ extension Socket {
             if var properties = try await Store.shared.conversationPropertiesStore?.fetch(
                 uid: status.conID
             ) {
+				if let index = properties.seenMembers.firstIndex(where: { $0.msgId == status.msgID || $0.uid == status.userID }) {
+					properties.seenMembers.remove(at: index)
+				}
                 properties.seenMembers.appendUnique(seenMember)
                 try await Store.shared.conversationPropertiesStore?
                     .updateAndSave(uid: status.conID) { model in

@@ -29,6 +29,7 @@ extension MsgCell {
                 }
             }
             .frame(width: ChatLayoutConstants.Cell.defaultSpacing + 4)
+			.padding(.leading, 8)
             .equatable(by: layout)
         }
     }

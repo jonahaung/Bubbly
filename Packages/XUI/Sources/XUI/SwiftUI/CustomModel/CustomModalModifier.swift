@@ -24,7 +24,7 @@ extension AnyTransition {
 		public func body(content: Content) -> some View {
 			GeometryReader { proxy in
 				content
-					.transformEffect(transform(for: proxy.ignoreSafeAreaSize))
+					.transformEffect(transform(for: proxy.size))
 					.environment(\.transitionProgress, progress)
 					.sensoryFeedback(
 						.impact(weight: .medium, intensity: 0.7),

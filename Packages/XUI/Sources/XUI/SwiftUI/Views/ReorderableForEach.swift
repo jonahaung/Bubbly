@@ -28,7 +28,7 @@ public struct ReorderableForEach<Data: Hashable & Identifiable, Content: View>: 
             if allowReordering {
                 content(item, hasChangedLocation && draggedItem == item)
                     .onDrag {
-                        Haptics.play(.light, 0.8)
+//                        Haptics.play(.light, 0.8)
                         draggedItem = item
                         return NSItemProvider(object: "\(item.id)" as NSString)
                     }
@@ -64,7 +64,7 @@ public struct ReorderableForEach<Data: Hashable & Identifiable, Content: View>: 
                     fromOffsets: IndexSet(integer: from),
                     toOffset: (to > from) ? to + 1 : to
                 )
-                Haptics.play(.light, 0.8)
+                
             }
         }
 

@@ -15,24 +15,21 @@ extension ComposeBar {
 					composer.inputText.text = Lorem.random()
 				}
 			} label: {
-				Image(systemName: imageName)
-					.resizable()
-					.scaledToFit()
-					.frame(square: 24)
-			}
-			.soundEffect(.latch1, trigger: composer.inputText.text.isEmpty)
-			.frame(width: 44, height: 44, alignment: .center)
-			.background(.windowBackground, in: .circle)
-			.overlay {
-				if composer.isLoading {
-					LoadingIndicator(43)
-						.opacity(0.5)
-				}
-			}
-		}
+				ZStack {
+					Image(systemName: "paperplane")
+						.resizable()
+						.scaledToFit()
+						.frame(square: 24)
 
-		var imageName: String {
-			composer.hasContent ? "paperplane.fill" : "character.cursor.ibeam"
+					if composer.isLoading {
+						LoadingIndicator(43)
+							.opacity(0.5)
+					}
+				}
+				.frame(width: 44, height: 44, alignment: .center)
+				.background(.windowBackground, in: .circle)
+				.symbolVariant(composer.inputText.hasText ? .fill : .none)
+			}
 		}
 	}
 }

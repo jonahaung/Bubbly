@@ -1,4 +1,11 @@
-import _AVKit_SwiftUI
+//
+//  AttachmentPreview.swift
+//  Conversation
+//
+//  Created by Aung Ko Min on 21/3/26.
+//
+
+
 import Database
 import ImageLoader
 import QuickLook

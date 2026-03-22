@@ -29,8 +29,9 @@ final class ChatPresentationState {
 		var typingStatus: AnyMsgData.TypingStatusPayload?
 		var showContactInfo: Bool
 	}
-
-	private(set) var state: State
+	@ObservationIgnored var visibleIDs = [String]()
+	
+	var state: State
 	@ObservationIgnored
 	private var ignoredState: State
 
@@ -53,7 +54,8 @@ final class ChatPresentationState {
 
 		displayLink.onTargetReached = { [weak self] _ in
 			guard let self else { return }
-			self.state = ignoredState
+			ignoredState.dateText = state.dateText
+			state = ignoredState
 		}
 	}
 }
@@ -64,8 +66,8 @@ extension ChatPresentationState {
 		case .toast(let newValue):
 			ignoredState.toast = newValue
 		case .date(let newValue):
-			ignoredState.dateText = formattedFloatingDate(from: newValue)
-
+			let dateText = formattedFloatingDate(from: newValue)
+			state.dateText = dateText
 			func formattedFloatingDate(from date: Date) -> String {
 
 				if let cached = dateCache.value(forKey: date) {

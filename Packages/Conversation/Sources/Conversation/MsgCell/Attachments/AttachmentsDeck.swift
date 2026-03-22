@@ -1,3 +1,10 @@
+//
+//  AttachmentsDeck.swift
+//  Conversation
+//
+//  Created by Aung Ko Min on 21/3/26.
+//
+
 import Database
 import SwiftUI
 import XUI

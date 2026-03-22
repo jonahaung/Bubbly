@@ -10,7 +10,7 @@ import SwiftUI
 public struct HamburgerButton: View {
 
 	@Binding private var isOpen: Bool
-
+	private let action: (Bool) -> Void
 	private let size: CGFloat
 	private let color: Color
 	private let padding: CGFloat
@@ -24,8 +24,10 @@ public struct HamburgerButton: View {
 		isOpen: Binding<Bool>,
 		size: CGFloat = 48,
 		color: Color = .accentColor,
-		padding: CGFloat = 14
+		padding: CGFloat = 14,
+		action: @escaping (Bool) -> Void
 	) {
+		self.action = action
 		self._isOpen = isOpen
 		self.size = size
 		self.color = color
@@ -36,27 +38,30 @@ public struct HamburgerButton: View {
 
 		let offset = (thickness + spacing) / 2
 
-		Button {
-			isOpen.toggle()
-		} label: {
-			VStack(spacing: spacing) {
-				bar
-					.rotationEffect(.degrees(isOpen ? 45 : 0))
-					.offset(y: isOpen ? offset : 0)
-
-				bar
-					.rotationEffect(.degrees(isOpen ? -45 : 0))
-					.offset(y: isOpen ? -offset : 0)
-
-			}
-			.frame(width: width, height: height)
-			.padding(.vertical, padding)
-			.padding(.horizontal, padding/2)
-			.contentShape(Rectangle())
-			.animation(.anticipateOvershoot, value: isOpen)
-			.geometryGroup()
+		VStack(spacing: spacing) {
+			bar
+				.rotationEffect(.degrees(isOpen ? 45 : 0))
+				.offset(y: isOpen ? offset : 0)
+			bar
+				.rotationEffect(.degrees(isOpen ? -45 : 0))
+				.offset(y: isOpen ? -offset : 0)
 		}
-		.buttonStyle(.plain)
+		.frame(width: width, height: height)
+		.padding(.vertical, padding)
+		.padding(.horizontal, padding/2)
+		.animation(.anticipateOvershoot, value: isOpen)
+		.sensoryFeedback(
+			.selection,
+			trigger: isOpen
+		)
+		._onButtonGesture { pressing in
+			if !pressing {
+				isOpen.toggle()
+			}
+		} perform: {
+			action(isOpen)
+		}
+		.geometryGroup()
 	}
 
 	private var bar: some View {

@@ -1,3 +1,11 @@
+//
+//  AttachmentPreviewViewModel.swift
+//  Conversation
+//
+//  Created by Aung Ko Min on 21/3/26.
+//
+
+
 import Database
 import Foundation
 import Services

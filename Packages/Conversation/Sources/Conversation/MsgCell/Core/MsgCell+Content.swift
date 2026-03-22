@@ -23,10 +23,7 @@ extension MsgCell {
 				BubbleView()
 				OverlayBubbleView()
 			}
-			.apcaForeground(
-				state.foregroundStyle,
-				over: theme.bubbleColor(for: state.isSender)
-			)
+			.foregroundStyle(state.foregroundStyle)
 		}
 	}
 

@@ -15,27 +15,32 @@ extension MsgCell {
         @Environment(\.sharedNamespace) private var namespace
 
         var body: some View {
-            VStack(alignment: .leading, spacing: 1) {
-				ForEach(members()) { seenMember in
+			ZStack(alignment: .bottom) {
+				Color.primary.hidden()
+				ForEach(Array(members().enumerated), id: \.element) { index, seenMember in
 					if let contact = ContactsRepository.shared.contact(
 						for: seenMember.uid
 					) {
 						ProfilePhoto(
 							contact,
-							size: .custom(ChatLayoutConstants.Cell.defaultSpacing - 6)
-						)
+							size: .custom(10)
+						).offset(y: index.cgFloat * -9)
 					}
 				}
+
             }
-            .frame(width: ChatLayoutConstants.Cell.defaultSpacing - 4)
-			.background(.fill)
-			.equatable(by: viewModel.id)
+            .frame(width: 12)
+			.flexible(.vertical)
+			.padding(.trailing, 8)
+			.allowsHitTesting(false)
+			.equatable(by: members())
         }
 
         private func members() -> [SeenMember] {
-			seenMembers.removeDuplicates(by: { $0.msgId == $1.msgId || $0.uid == $1.uid }).filter {
-                $0.msgId == viewModel.id
-			}.removeDuplicates(by: \.uid)
+			seenMembers.filter{ $0.msgId == viewModel.id }
+//			seenMembers.removeDuplicates(by: { $0.msgId == $1.msgId || $0.uid == $1.uid }).filter {
+//                $0.msgId == viewModel.id
+//			}.removeDuplicates(by: \.uid)
         }
     }
 }

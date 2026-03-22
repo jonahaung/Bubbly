@@ -22,39 +22,31 @@ public struct ConversationScene: View {
     }
 
     public var body: some View {
-		ZStack {
+		ZStack(alignment: .bottom) {
             ConversationSceneBackground(color: manager.state.properties.theme.background.color)
 				.equatable(by: manager.state.properties.theme.background)
-			ChatScrollView(manager: manager)
-				.contentMargins(
-					.all,
-					.init(
-						top: ChatLayoutConstants.topBarHeight,
-						leading: 8,
-						bottom: manager.layout.bottomBarFrame?.height ?? 0,
-						trailing: 8
-					), for: .scrollContent
-				)
-
-			VStack(alignment: .center, spacing: 4) {
-				ChatTitleBar()
-				FloatingDateView()
+			if manager.layout.bottomBarFrame != nil {
+				ChatScrollView(manager: manager)
+					.contentMargins(
+						.all,
+						.init(
+							top: ChatLayoutConstants.topBarHeight,
+							leading: 0,
+							bottom: ChatLayoutConstants.bottomBarHeight,
+							trailing: 0
+						), for: .scrollContent
+					)
+					.onAppear {
+						manager.send(.onVisibilityChange(visibility: .visible))
+					}
 			}
-			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
 
             VStack(alignment: .center, spacing: 8) {
+				ChatTitleBar()
+				FloatingDateView()
+				Spacer()
                 ChatAccessoryBar()
 				ComposeBar()
-					.background(
-						LinearGradient(
-							colors: [
-								.clear,
-								manager.state.properties.theme.background.color
-							],
-							startPoint: .top,
-							endPoint: .bottom
-						)
-					)
 					.onGeometryChange(for: CGRect.self) { geometry in
 						geometry.frame(in: .global)
 					} action: { oldValue, newValue in
@@ -84,6 +76,9 @@ public struct ConversationScene: View {
 		.environment(manager)
 		.task {
 			await manager.onViewAppear()
+		}
+		.onDisappear {
+			manager.onViewDisappear()
 		}
     }
 }

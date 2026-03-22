@@ -139,7 +139,6 @@ extension ScrollReducer {
 				return .endUpdate(.insert(edge: edge), scrollItem: nil)
 			}
 		case .removingItems(let edge):
-			
 			switch edge {
 			case .top:
 				let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
@@ -151,9 +150,10 @@ extension ScrollReducer {
 				return .endUpdate(.remove(edge: .bottom), scrollItem: nil)
 			}
 		case .appendingItem(let id):
+			let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
 			return .endUpdate(
 				.append(id: id),
-				scrollItem: .id(id, properties: .animated(.easeOutExponential(duration: 0.3)))
+				scrollItem: .y(offsetY, properties: .animated(.easeOut(duration: 0.22)))
 			)
 		default:
 			return .noAction

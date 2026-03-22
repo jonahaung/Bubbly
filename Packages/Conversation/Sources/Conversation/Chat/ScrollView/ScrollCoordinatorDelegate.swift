@@ -28,9 +28,6 @@ protocol ScrollCoordinatorDelegate: AnyObject {
 		_ coordinator: ScrollCoordinator,
 		resetAt edge: VerticalEdge
 	)
-	func scrollCoordinatorLayoutIfNeeded(
-		_ coordinator: ScrollCoordinator
-	)
 	func scrollCoordinator(
 		_ coordinator: ScrollCoordinator,
 		finalizeUpdate state: ScrollCoordinator.State,

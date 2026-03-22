@@ -74,7 +74,7 @@ public struct CreateGroupScene: View {
         .ignoresSafeArea(.keyboard)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                AsyncButton(role: .confirm) {
+                AsyncButton {
                     setFocus(false)
                     if let currentUserId {
                         try await Task.sleep(seconds: 1)

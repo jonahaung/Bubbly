@@ -19,7 +19,6 @@ extension ScrollCoordinator {
 		var direction: ScrollDirection
 		var phase: ScrollPhase
 		var isFirstResponder: Bool
-		var scrolledPosition = ScrolledPosition.atBottom
 	}
 
 	enum Intent {
@@ -41,7 +40,7 @@ extension ScrollCoordinator {
 	}
 
 	enum ScrollViewUpdate: Hashable {
-		case initial, notUpdating, resetting, willUpdate, willEndUpdates
+		case initial, didEndUpdates, resetting, willBeginUpdates, willEndUpdates
 		case insertingItems(_ edge: VerticalEdge)
 		case removingItems(_ edge: VerticalEdge)
 		case appendingItem(_ id: String)
@@ -49,9 +48,8 @@ extension ScrollCoordinator {
 		var hasViewLoaded: Bool {
 			self != .initial
 		}
-
 		var isUpdating: Bool {
-			self != .notUpdating
+			self != .didEndUpdates
 		}
 
 		var isNotUpdating: Bool {
@@ -69,7 +67,7 @@ extension ScrollCoordinator {
 			guard self == .initial else {
 				return
 			}
-			self = .notUpdating
+			self = .didEndUpdates
 		}
 	}
 }

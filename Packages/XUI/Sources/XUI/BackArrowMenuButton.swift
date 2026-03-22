@@ -30,7 +30,7 @@ public struct BackArrowMenuButton: View {
 	private var barSpacing: CGFloat { size * 0.22 }
 
 	private var springAnimation: Animation {
-		let spring = Spring(mass: 1, stiffness: 200, damping: 20)
+		let spring = SwiftUI.Spring(mass: 1, stiffness: 200, damping: 20)
 		return Animation.spring(spring)
 	}
 

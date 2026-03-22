@@ -224,7 +224,7 @@ public extension AsyncQueue {
 
 public extension AsyncQueue {
     /// Cancel all pending tasks.
-    func cancelAllPendingTasks() {
+    func cancel() {
         lock.lock()
         defer { lock.unlock() }
 

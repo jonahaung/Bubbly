@@ -5,26 +5,38 @@
 import SFSafeSymbols
 import SwiftUI
 import XUI
+import Pow
 
 struct ChatAccessoryBar: View {
     @Environment(ChatViewManager.self) private var manager
     @Namespace private var chatNoticeView
+	@State private var buttonPressed = false
 
     var body: some View {
         HStack(alignment: .bottom) {
+			Spacer()
             if let accessory = manager.presentation.state.bottomAccessory {
-                Spacer()
                 if accessory == .scrollDownButton {
-                    AsyncButton {
-                        manager.handleScrollDownButtonTap()
-                    } label: {
-                        Image(systemName: "chevron.down")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(12)
-                            .frame(square: 40)
-                            .background(.windowBackground, in: .circle)
-                    }
+
+					Image(systemName: "chevron.down")
+						.resizable()
+						.scaledToFit()
+						.padding(12)
+						.frame(square: 40)
+						.background(.windowBackground, in: .circle)
+						.changeEffect(
+							.pulse(
+								shape: .circle,
+								style: .yellow,
+								drawingMode: .stroke
+							),
+							value: buttonPressed
+						)
+						._onButtonGesture {_ in
+							buttonPressed.toggle()
+						} perform: {
+							manager.handleScrollDownButtonTap()
+						}
                 }
             }
         }

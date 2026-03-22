@@ -46,6 +46,21 @@ public struct ContactsScene: View {
 			.pickerStyle(.palette)
 			.listRowBackground(Color.clear)
 			.listRowInsets(.init())
+			AsyncButton {
+				Loading.show(true)
+				await viewModel.syncContacts()
+				Loading.show(false)
+			} label: {
+				Label("Sync Contact", systemSymbol: .personCropSquare)
+			}
+			AsyncButton {
+				Loading.show(true)
+				await viewModel
+					.syncGroups(currentUserId: currentUserRepository.model.uid)
+				Loading.show(false)
+			} label: {
+				Label("Sync Groups", systemSymbol: .arrow2Squarepath)
+			}
             switch defaultContactDisplay {
             case .group:
                 groupsSection
@@ -57,12 +72,7 @@ public struct ContactsScene: View {
 		.redacted(reason: viewModel.isLoading ? [.placeholder] : [])
         .listSectionIndexVisibility(.visible)
         .navigationTitle("Contacts")
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-				actionSection
 
-            }
-        }
         .searchable(
 			text: $viewModel.searchText,
             placement: .toolbar,

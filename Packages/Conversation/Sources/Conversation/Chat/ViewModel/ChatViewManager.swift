@@ -10,38 +10,37 @@ import Services
 import SwiftUI
 import XUI
 
-struct ChatViewState: Equatable {
-	var reloadID: Int
-	var conversation: Conversation
-	var theme: ChatTheme
-	var properties: ConversationProperties
-}
-
 @MainActor
 @Observable
 final class ChatViewManager: ErrorPresenter {
 
-	@ObservationIgnored var messageSource: ChatDatasource
-	@ObservationIgnored var scrollController: ScrollCoordinator
-	@ObservationIgnored var presentation: ChatPresentationState
-	@ObservationIgnored var conversationConfig: ConversationInitializer.Configuration
-	@ObservationIgnored let attachmentFetcher: AttachmentFetcher
-	@ObservationIgnored var models: MsgModels
-	@ObservationIgnored let serialQueue = AsyncQueue(attributes: .init())
-	@ObservationIgnored let layout = ChatViewLayout()
-	var state: ChatViewState
-	var conversation: Conversation {
-		state.conversation
+	struct State: Equatable {
+		var reloadID: Int
+		var conversation: Conversation
+		var theme: ChatTheme
+		var properties: ConversationProperties
 	}
+
+	@ObservationIgnored let datasource: ChatDatasource
+	@ObservationIgnored let scrollController: ScrollCoordinator
+	@ObservationIgnored let presentation: ChatPresentationState
+	@ObservationIgnored let conversationConfig: ConversationInitializer.Configuration
+	@ObservationIgnored let attachmentFetcher: AttachmentFetcher
+	@ObservationIgnored let models: MsgModels
+	@ObservationIgnored let serialQueue = AsyncQueue(attributes: [.concurrent])
+	@ObservationIgnored let layout = ChatViewLayout()
+	@ObservationIgnored private let throttler = XUI.Throttler(delay: 1, option: .leading)
+
+	var state: State
+	var conversation: Conversation { state.conversation }
 
 	init(_ data: ConversationInitializer.PrefetchedData) {
 		conversationConfig = data.configuration
-		messageSource = .init(data.configuration)
+		datasource = .init(data.configuration)
 		scrollController = .init()
 		presentation = .init(data.configuration)
 		attachmentFetcher = .init()
 		models = .init(data.msgs)
-
 		state = .init(
 			reloadID: 0,
 			conversation: data.conversation,
@@ -49,7 +48,7 @@ final class ChatViewManager: ErrorPresenter {
 			properties: data.properties
 		)
 		scrollController.delegate = self
-		messageSource.delegate = self
+		datasource.delegate = self
 	}
 
 	deinit {
@@ -61,11 +60,9 @@ extension ChatViewManager {
 	func layoutIfNeeded() {
 		state.reloadID += 1
 	}
-
 	func onBottomBarFrameChage(_ oldValue: CGRect, _ newValue: CGRect) {
 		if layout.bottomBarFrame == nil, newValue.origin.x >= 0 {
 			layout.update(bottomBarFrame: newValue)
-			scrollController.send(.onVisibilityChange(visibility: .visible))
 		} else {
 			scrollController.send(.onBottomBarFrameChage(oldValue, newValue))
 		}
@@ -74,9 +71,31 @@ extension ChatViewManager {
 		scrollController.send(intent)
 	}
 
+	func onScrollTargetVisibilityChange(_ newValue: [String]) {
+		throttler.throttle { [weak self] in
+			guard let self else { return }
+			let oldValues = presentation.visibleIDs
+			let differences = newValue.difference(from: oldValues)
+			var newIDs = [String]()
+			differences.forEach { difference in
+				switch difference {
+				case .insert(_, let element, _):
+					models.didChangeVisibility(for: element, isVisible: true)
+					newIDs.append(element)
+				case .remove(_, let element, _):
+					models.didChangeVisibility(for: element, isVisible: false)
+				}
+			}
+			presentation.visibleIDs = newValue
+			if let last = newValue.last, let date = models.element(withID: last)?.msg.date {
+				presentation.send(.date(date))
+			}
+		}
+	}
+
 	func handleScrollDownButtonTap() {
 		if canResetDatasource {
-			scrollController.begin(updates: .reset)
+			scrollController.handleResetData()
 		} else {
 			scrollController
 				.enqueueScroll(
@@ -127,11 +146,15 @@ extension ChatViewManager {
 				}
 			}
 		}
-
 	}
 
 	func onViewAppear() async {
-		try? await reloadConversation(refetch: scrollController.updateState(is: .initial))
+		try? await reloadConversation(refetch: true)
 		updateReceiveMsgs()
+	}
+	func onViewDisappear() {
+		serialQueue.cancel()
+		throttler.cancel()
+		scrollController.send(.onVisibilityChange(visibility: .hidden))
 	}
 }

@@ -15,6 +15,7 @@ public struct ConversationProperties: Codable, Sendable, Hashable, Equatable, UI
         self.uid = uid
         self.theme = theme
         self.seenMembers = seenMembers
+		print(seenMembers)
     }
 
     public init(uid: String) {

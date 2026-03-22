@@ -13,7 +13,7 @@ extension MsgCell {
 		@Environment(MsgCellViewModel.self) private var viewModel
 		private var state: MsgCellViewModel.State { viewModel.state }
 		@Environment(\.conversationTheme) private var theme
-		
+
 		var body: some View {
 			if !state.attachments.isEmpty {
 				VStack(alignment: state.horizontalAlignment, spacing: 0) {
@@ -37,7 +37,6 @@ extension MsgCell {
 					.containerShape(bubbleShape)
 			}
 		}
-
 
 		private var bubbleShape: UnevenRoundedRectangle {
 			state.computeBubbleCorner()

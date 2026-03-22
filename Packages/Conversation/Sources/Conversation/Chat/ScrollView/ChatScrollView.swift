@@ -12,8 +12,7 @@ import SwiftUI
 import XUI
 
 struct ChatScrollView: View {
-
-	@Environment(\.sharedNamespace) private var namespace
+	
 	var manager: ChatViewManager
 
 	var body: some View {
@@ -22,10 +21,10 @@ struct ChatScrollView: View {
 				if manager.presentation.state.showContactInfo {
 					ConversationHeaderView()
 				}
-				ForEach(manager.models.renderedModels) {
-					MsgCell(viewModel: $0)
-						.environment($0)
-						.id($0.id)
+				ForEach(manager.models.renderedModels) { model in
+					MsgCell(viewModel: model)
+						.environment(model)
+						.id(model.id)
 				}
 			}
 			.scrollTargetLayout()
@@ -41,6 +40,10 @@ struct ChatScrollView: View {
 		) { oldValue, newValue in
 			manager.send(.onScrollGeometryChange(oldValue, newValue))
 		}
+		.onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) { newValue in
+			manager.onScrollTargetVisibilityChange(newValue)
+		}
+		.scrollClipDisabled()
 		.scrollDismissesKeyboard(.never)
 		.defaultScrollAnchor(.bottom, for: .sizeChanges)
 		.equatable(by: manager.state.reloadID)

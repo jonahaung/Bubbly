@@ -19,7 +19,8 @@ let package = Package(
         .package(name: "MediaPicker", path: "../MediaPicker"),
         .package(name: "FCM_V1", path: "../FCM_V1"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.4.0"),
-        .package(name: "FirePhoneOTP", path: "../FirePhoneOTP")
+        .package(name: "FirePhoneOTP", path: "../FirePhoneOTP"),
+		.package(url: "https://github.com/EmergeTools/Pow", from: "1.0.5")
     ],
 
     targets: [
@@ -35,7 +36,8 @@ let package = Package(
                 .product(name: "FirebaseMessaging", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseStorage", package: "firebase-ios-sdk"),
                 .product(name: "FirePhoneOTP", package: "FirePhoneOTP"),
-                .product(name: "Crypto", package: "Crypto")
+                .product(name: "Crypto", package: "Crypto"),
+				.product(name: "Pow", package: "Pow")
 
 			],
 			resources: [

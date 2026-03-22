@@ -24,7 +24,7 @@ struct MsgCell: View {
 			if isSelected {
 				Header()
 			}
-			HStack(alignment: .lastTextBaseline, spacing: 0) {
+			HStack(alignment: .bottom, spacing: 0) {
 				if viewModel.state.isSender {
 					Spacer(minLength: 50)
 				} else {
@@ -45,10 +45,6 @@ struct MsgCell: View {
 			}
 		}
 		.environment(\.isVisible, viewModel.state.isVisible)
-		.onAppear {
-			viewModel.setVisibility(true)
-		}.onDisappear {
-			viewModel.setVisibility(false)
-		}
+		
 	}
 }

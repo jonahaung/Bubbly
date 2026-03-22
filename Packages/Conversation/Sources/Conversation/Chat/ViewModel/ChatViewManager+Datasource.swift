@@ -110,7 +110,7 @@ extension ChatViewManager {
 			return
 		}
 
-		serialQueue.addOperation { [self] in
+		Task {
 			do {
 				let msgs = try await ConversationRepo.updateReceiveMsgs(
 					for: lastMsg.conID,
