@@ -44,23 +44,13 @@ public enum ContactRepo {
 
     @discardableResult
     public static func getOrCreate(for uids: [String], refatch: Bool) async throws -> [Contact] {
-        guard let currentUserId else {
-            throw XError.noCurrentUserID
-        }
-        let memberIDs = uids.filter {
-            !$0.isWhitespace && $0 != currentUserId
-        }
-        return try await withThrowingTaskGroup(of: Contact.self) { group -> [Contact] in
-            for uid in memberIDs {
-                group.addTask {
-                    try await ContactRepo.getOrCreate(
-                        uid: uid,
-                        refetch: refatch
-                    )
-                }
-            }
-            return try await group.map(\.self).reduce(into: []) { $0.append($1) }
-        }
+		let contacts = try await AsyncOrderedStream.mapOrdered(inputs: uids) { uid in
+			return try await ContactRepo.getOrCreate(
+				uid: uid,
+				refetch: refatch
+			)
+		}
+		return contacts
     }
 
     public static func search(named name: String) async throws -> Contact? {

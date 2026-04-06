@@ -14,8 +14,7 @@ public final class PGroup {
     public var photoURL: String
     public var members: [String]
     public var createdBy: String
-    public var theme: ConversationTheme
-    public var seenMembers: [SeenMember]
+//    public var theme: ConversationTheme
 
     public init(
         uid: String,
@@ -25,7 +24,6 @@ public final class PGroup {
         members: [String],
         createdBy: String,
         theme: ConversationTheme = ConversationTheme(),
-        seenMembers: [SeenMember]
     ) {
         self.uid = uid
         self.name = name
@@ -33,8 +31,6 @@ public final class PGroup {
         self.photoURL = photoURL
         self.members = members
         self.createdBy = createdBy
-        self.theme = theme
-        self.seenMembers = seenMembers
     }
 }
 
@@ -52,13 +48,7 @@ extension PGroup: UIdentifiable {
     }
 
     public func update(with properties: ConversationProperties) {
-
-        if theme != properties.theme {
-            theme = properties.theme
-        }
-        if seenMembers != properties.seenMembers {
-            seenMembers = properties.seenMembers
-        }
+		
     }
 
     public func update(from item: Group) {
@@ -68,14 +58,8 @@ extension PGroup: UIdentifiable {
         if photoURL != item.photoURL {
             photoURL = item.photoURL ?? photoURL
         }
-        if members.sorted() != item.members.sorted() {
-            members = item.members
-        }
-        if theme != item.theme {
-            theme = item.theme
-        }
-        if seenMembers != item.seenMembers {
-            seenMembers = item.seenMembers
+		if members.uniqued().sorted() != item.members.uniqued().sorted() {
+			members = item.members.uniqued().sorted()
         }
     }
 }
@@ -87,11 +71,10 @@ extension PGroup: SendableTransformable {
         self.init(
             uid: snapshot.uid,
             name: snapshot.name,
-            createdDate: snapshot.createdDate.value,
+			createdDate: snapshot.createdDate,
             photoURL: snapshot.photoURL ?? "",
             members: snapshot.members,
-            createdBy: snapshot.createdBy,
-            seenMembers: snapshot.seenMembers
+            createdBy: snapshot.createdBy
         )
     }
 
@@ -102,9 +85,7 @@ extension PGroup: SendableTransformable {
             createdDate: .init(createdDate),
             photoURL: photoURL,
             members: members,
-            createdBy: createdBy,
-            theme: theme,
-            seenMembers: seenMembers
+            createdBy: createdBy
         )
     }
 }

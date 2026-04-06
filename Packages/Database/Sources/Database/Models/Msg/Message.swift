@@ -19,8 +19,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
     public let conID: String
     public var text: String?
     public let date: Date
-    public var incomingStatus: MsgIncomingStatus
-    public var outgoingStatus = [String: MsgOutgoingStatus]()
+    public var deliveryStatus: DeliveryStatus
     public var attachments: [Attachment]
     public var reactions: [Reaction]
 
@@ -30,8 +29,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         conID: String,
         text: String?,
         date: Date,
-        incomingStatus: MsgIncomingStatus,
-        outgoingStatus: [String: MsgOutgoingStatus],
+        deliveryStatus: DeliveryStatus,
         attachments: [Attachment],
         reactions: [Reaction]
     ) {
@@ -40,8 +38,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         self.conID = conID
         self.text = text
         self.date = date
-        self.incomingStatus = incomingStatus
-        self.outgoingStatus = outgoingStatus
+        self.deliveryStatus = deliveryStatus
         self.attachments = attachments
         self.reactions = reactions
     }
@@ -53,8 +50,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
             conID: rMsg.conID,
             text: rMsg.text,
             date: ServerTime(rMsg.date).date,
-            incomingStatus: rMsg.incomingStatus,
-            outgoingStatus: rMsg.outgoingStatus,
+            deliveryStatus: rMsg.deliveryStatus,
             attachments: rMsg.attachments,
             reactions: rMsg.reactions
         )
@@ -63,13 +59,13 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
 
 public extension Message {
     var receiptType: MsgRecipient {
-        senderID == currentUserId
-            ? .send
-            : .receive
+        senderID == currentUserID
+            ? .outgoing
+            : .incoming
     }
 
     var isSender: Bool {
-        senderID == currentUserId
+        senderID == currentUserID
     }
 }
 

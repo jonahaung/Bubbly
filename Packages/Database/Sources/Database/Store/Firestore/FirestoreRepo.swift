@@ -32,6 +32,18 @@ public enum FirestoreRepo {
         )
     }
 
+    public static func set(
+        _ item: some Codable & Sendable,
+        collectionPath: FirestoreCollectionPath,
+        documentID: String
+    ) async throws {
+        try await client.setDocument(
+            item,
+            collectionPath: collectionPath.rawValue,
+            documentID: documentID
+        )
+    }
+
     public static func getDocument<T: Codable & Sendable>(
         collection: FirestoreCollectionPath,
         documentID: String
@@ -70,6 +82,7 @@ public enum FirestoreRepo {
             value: .string(uid)
         )
         let items: [T] = try await client.query(collection: collection, filter: filter)
+			
         return items.first
     }
 

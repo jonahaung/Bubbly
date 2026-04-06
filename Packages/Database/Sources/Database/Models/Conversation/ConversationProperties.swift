@@ -15,14 +15,9 @@ public struct ConversationProperties: Codable, Sendable, Hashable, Equatable, UI
         self.uid = uid
         self.theme = theme
         self.seenMembers = seenMembers
-		print(seenMembers)
     }
 
     public init(uid: String) {
         self.init(uid: uid, theme: .default, seenMembers: [])
     }
-}
-
-extension ConversationProperties: EmptyRepresentable {
-    public static let empty: ConversationProperties = .init(uid: "")
 }

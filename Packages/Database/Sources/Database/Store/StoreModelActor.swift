@@ -25,11 +25,13 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
     }
 
     public func insert(_ data: T.SendableType) throws {
-        if let existing = try getModel(for: data.uid) {
-            existing.update(from: data)
-        } else {
-            context.insert(T(from: data))
-        }
+		if try exists(uid: data.uid) {
+			try updateAndSave(uid: data.uid) { model in
+				model.update(from: data)
+			}
+			return
+		}
+		context.insert(T(from: data))
         try save()
     }
 
@@ -98,11 +100,7 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
     // MARK: - Delete
 
     public func delete(id: PersistentIdentifier) throws {
-        guard let model = self[id, as: T.self] else {
-            return
-        }
-
-        context.delete(model)
+		context.delete(context.model(for: id))
         try save()
     }
 
@@ -111,8 +109,7 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
             return
         }
 
-        context.delete(model)
-        try save()
+		try delete(id: model.persistentModelID)
     }
 
     public func delete(where predicate: Predicate<T>) throws {
@@ -123,10 +120,12 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
     // MARK: - Save
 
     public func save() throws {
-        try context.save()
+		if context.hasChanges {
+			try context.save()
+		}
     }
 
-    public func saveDebounced(after delay: TimeInterval = 1) {
+	public func saveDebounced(after delay: TimeInterval = 0.5) {
         saveTask?.cancel()
 
         saveTask = Task {
@@ -135,8 +134,10 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
             guard !Task.isCancelled else {
                 return
             }
+			if context.hasChanges {
+				try? context.save()
+			}
 
-            try? context.save()
             saveTask = nil
         }
     }
@@ -144,11 +145,12 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
     // MARK: - Private Helpers
 
     private func getModel(for uid: String) throws -> T? {
-        let descriptor = FetchDescriptor<T>(
+        var descriptor = FetchDescriptor<T>(
             predicate: #Predicate {
                 $0.uid == uid
             }
         )
+		descriptor.fetchLimit = 1
         return try context.fetch(descriptor).first
     }
 }

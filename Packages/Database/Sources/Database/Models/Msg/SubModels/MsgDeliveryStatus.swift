@@ -5,16 +5,16 @@
 import Foundation
 import XUI
 
-public enum MsgOutgoingStatus: Int, Codable, Sendable, Hashable, CaseNameReflectable {
-    case sending, sent, sendingFailed
+public enum DeliveryStatus: Int, Conformable, Codable, CaseNameReflectable {
+	case received, read, sending, delivered, sendingFailed
 }
 
-public extension MsgOutgoingStatus {
-    var description: String {
-        localizedName
-    }
-}
+public struct Delivery: Codable, Conformable {
+	public let contactID: String
+	public let status: DeliveryStatus
 
-public enum MsgIncomingStatus: Int, Conformable, Codable, CaseNameReflectable {
-    case none, delivered, read
+	public init(contactID: String, status: DeliveryStatus) {
+		self.contactID = contactID
+		self.status = status
+	}
 }

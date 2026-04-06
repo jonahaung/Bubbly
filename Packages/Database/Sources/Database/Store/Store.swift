@@ -5,8 +5,10 @@
 import Foundation
 import SwiftData
 import XUI
+import Core
 
-public actor Store {
+public final actor Store: Sendable {
+
     public static let shared = Store()
 
     public var appContainer: AppContainer?

@@ -11,8 +11,7 @@ public struct RMsg: Codable, Sendable, Hashable {
     public let senderID: String
     public let date: String
     public let text: String?
-    public let incomingStatus: MsgIncomingStatus
-    public var outgoingStatus = [String: MsgOutgoingStatus]()
+    public let deliveryStatus: DeliveryStatus
     public let attachments: [Attachment]
     public let reactions: [Reaction]
 
@@ -22,8 +21,7 @@ public struct RMsg: Codable, Sendable, Hashable {
         senderID: String,
         date: String,
         text: String?,
-        incomingStatus: MsgIncomingStatus,
-        outgoingStatus: [String: MsgOutgoingStatus],
+        incomingStatus: DeliveryStatus,
         attachments: [Attachment],
         reactions: [Reaction]
     ) {
@@ -32,8 +30,7 @@ public struct RMsg: Codable, Sendable, Hashable {
         self.senderID = senderID
         self.date = date
         self.text = text
-        self.incomingStatus = incomingStatus
-        self.outgoingStatus = outgoingStatus
+        self.deliveryStatus = incomingStatus
         self.attachments = attachments
         self.reactions = reactions
     }
@@ -45,8 +42,7 @@ public struct RMsg: Codable, Sendable, Hashable {
             senderID: msg.senderID,
             date: ServerTime(msg.date).value,
             text: msg.text,
-            incomingStatus: msg.incomingStatus,
-            outgoingStatus: msg.outgoingStatus,
+            incomingStatus: msg.deliveryStatus,
             attachments: msg.attachments,
             reactions: msg.reactions
         )

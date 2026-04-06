@@ -11,7 +11,7 @@ public struct Attachment: Codable, Sendable, Hashable, Identifiable {
 
     public let uid: String
     public var url: String
-    public var thumbnailUrl: String?
+    public var thumbnailURL: String?
     public var attachMentTypeRaw: Int
     public let aspectRatio: Double
     public let title: String?
@@ -28,7 +28,7 @@ public struct Attachment: Codable, Sendable, Hashable, Identifiable {
     ) {
         self.uid = uid
         self.url = url
-        self.thumbnailUrl = thumbnailUrl
+        self.thumbnailURL = thumbnailUrl
         self.attachMentTypeRaw = attachMentTypeRaw
         self.aspectRatio = aspectRatio
         self.title = title

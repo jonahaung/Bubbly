@@ -152,13 +152,41 @@ public final class FirestoreRESTClient {
         to documentID: String
     ) async throws {
         let token = try await getValidAuthToken()
-        let url = try makeDocumentURL(path: "\(collectionPath)/\(documentID)")
         let payload: [String: Any]
         do {
             payload = try ["fields": makeFirestoreFields(from: value)]
         } catch {
             throw FirestoreError.encodingError(error)
         }
+        let url = try makeUpdateDocumentURL(
+            path: "\(collectionPath)/\(documentID)",
+            fieldPaths: payload.firestoreFieldPaths
+        )
+        _ = try await performRequest(
+            url: url,
+            method: "PATCH",
+            body: payload,
+            retry: true,
+            token: token
+        )
+    }
+
+    public func setDocument(
+        _ data: some Codable,
+        collectionPath: String,
+        documentID: String
+    ) async throws {
+        let token = try await getValidAuthToken()
+        let payload: [String: Any]
+        do {
+            payload = try makeDocumentPayload(from: data)
+        } catch {
+            throw FirestoreError.encodingError(error)
+        }
+        let url = try makeUpdateDocumentURL(
+            path: "\(collectionPath)/\(documentID)",
+            fieldPaths: payload.firestoreFieldPaths
+        )
         _ = try await performRequest(
             url: url,
             method: "PATCH",
@@ -351,6 +379,23 @@ public final class FirestoreRESTClient {
         return url
     }
 
+    private func makeUpdateDocumentURL(
+        path: String,
+        fieldPaths: [String]
+    ) throws -> URL {
+        let documentURL = try makeDocumentURL(path: path)
+        guard var components = URLComponents(url: documentURL, resolvingAgainstBaseURL: false) else {
+            throw FirestoreError.invalidURL
+        }
+        var queryItems = [URLQueryItem(name: "currentDocument.exists", value: "true")]
+        queryItems.append(contentsOf: fieldPaths.map { URLQueryItem(name: "updateMask.fieldPaths", value: $0) })
+        components.queryItems = queryItems
+        guard let url = components.url else {
+            throw FirestoreError.invalidURL
+        }
+        return url
+    }
+
     private func makeDocumentPayload(from data: some Codable) throws -> [String: Any] {
         let encoded: Data
         do {
@@ -407,6 +452,9 @@ public final class FirestoreRESTClient {
         }
         if let arrayValue = value as? [Any] {
             let values = try arrayValue.map { try makeFirestoreValue($0) }
+            if values.isEmpty {
+                return ["arrayValue": [:]]
+            }
             return ["arrayValue": ["values": values]]
         }
         if let mapValue = value as? [String: Any] {
@@ -437,6 +485,40 @@ public final class FirestoreRESTClient {
             return message
         }
         return "Unknown server error"
+    }
+}
+
+private extension Dictionary where Key == String, Value == Any {
+    var firestoreFieldPaths: [String] {
+        let fields = self["fields"] as? [String: Any] ?? [:]
+        return fields.keys.sorted()
+    }
+}
+
+extension FirestoreRESTClient.FirestoreError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            "Firestore request URL is invalid."
+        case .invalidResponse:
+            "Firestore returned a response the client could not interpret."
+        case .networkError(let error):
+            "Firestore network request failed: \(error.localizedDescription)"
+        case .serverError(let message):
+            "Firestore server error: \(message)"
+        case .notAuthenticated:
+            "Firestore request requires an authenticated Firebase user."
+        case .encodingError(let error):
+            "Firestore request encoding failed: \(error.localizedDescription)"
+        case .decodingError(let error):
+            "Firestore response decoding failed: \(error.localizedDescription)"
+        }
+    }
+}
+
+extension FirestoreRESTClient.FirestoreError: CustomStringConvertible {
+    public var description: String {
+        errorDescription ?? String(describing: self)
     }
 }
 

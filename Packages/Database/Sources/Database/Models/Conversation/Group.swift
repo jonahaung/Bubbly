@@ -7,12 +7,10 @@ import Foundation
 public struct Group: Codable, Sendable, Hashable, UIdentifiable {
     public var uid: String
     public var name: String
-    public var createdDate: ServerTime
+	public var createdDate: String
     public var photoURL: String?
     public var members: [String]
     public var createdBy: String
-    public var theme: ConversationTheme = .init()
-    public var seenMembers: [SeenMember] = []
 
     public init(
         uid: String,
@@ -20,18 +18,14 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         createdDate: ServerTime,
         photoURL: String?,
         members: [String],
-        createdBy: String,
-        theme: ConversationTheme,
-        seenMembers: [SeenMember]
+        createdBy: String
     ) {
         self.uid = uid
         self.name = name
-        self.createdDate = createdDate
+		self.createdDate = createdDate.value
         self.photoURL = photoURL
         self.members = members
         self.createdBy = createdBy
-        self.theme = theme
-        self.seenMembers = seenMembers
     }
 
     enum CodingKeys: String, CodingKey {
@@ -41,10 +35,9 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         case photoURL
         case members
         case createdBy
-        case theme
     }
 
-    public var conversationProperties: ConversationProperties {
-        ConversationProperties(uid: uid, theme: theme, seenMembers: seenMembers)
+	public func conversationProperties() async -> ConversationProperties {
+		await ConversationPropertiesRepo.getOrCreateMain(for: uid)
     }
 }

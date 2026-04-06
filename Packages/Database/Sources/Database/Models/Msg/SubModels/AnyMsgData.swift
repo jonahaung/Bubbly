@@ -53,11 +53,13 @@ public extension AnyMsgData {
         public let msgID: String
         public let userID: String
         public let conID: String
+		public let date: String
 
-        public init(msgID: String, userID: String, conID: String) {
+		public init(msgID: String, userID: String, conID: String, date: String) {
             self.msgID = msgID
             self.userID = userID
             self.conID = conID
+			self.date = date
         }
     }
 }

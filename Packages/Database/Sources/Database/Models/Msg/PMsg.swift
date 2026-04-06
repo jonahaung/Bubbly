@@ -14,19 +14,17 @@ public final class PMsg {
     public var conID = String()
     public var text: String?
     public var date = String()
-    public var incomingStatus = MsgIncomingStatus.none.rawValue
-    public var outgoingStatus = [String: MsgOutgoingStatus]()
+	public var deliveryStatus: Int
     public var attachments = [Attachment]()
     public var reactions = [Reaction]()
 
     public init(
-        uid: String = UUID().uuidString,
+        uid: String,
         senderID: String,
         conID: String,
         text: String?,
         date: String,
-        incomingStatus: MsgIncomingStatus,
-        outgoingStatus: [String: MsgOutgoingStatus],
+        deliveryStatus: DeliveryStatus,
         attachments: [Attachment],
         reactions: [Reaction]
     ) {
@@ -35,8 +33,7 @@ public final class PMsg {
         self.conID = conID
         self.text = text
         self.date = date
-        self.incomingStatus = incomingStatus.rawValue
-        self.outgoingStatus = outgoingStatus
+        self.deliveryStatus = deliveryStatus.rawValue
         self.attachments = attachments
         self.reactions = reactions
     }
@@ -44,15 +41,13 @@ public final class PMsg {
 
 public extension PMsg {
     func update(with rMsg: RMsg) {
-        incomingStatus = rMsg.incomingStatus.rawValue
-        outgoingStatus = rMsg.outgoingStatus
+        deliveryStatus = rMsg.deliveryStatus.rawValue
         attachments = rMsg.attachments
         reactions = rMsg.reactions
     }
 
     func update(from item: Message) {
-        incomingStatus = item.incomingStatus.rawValue
-        outgoingStatus = item.outgoingStatus
+        deliveryStatus = item.deliveryStatus.rawValue
         attachments = item.attachments
         reactions = item.reactions
     }
@@ -68,8 +63,7 @@ extension PMsg: SendableTransformable {
             conID: snapshot.conID,
             text: snapshot.text,
             date: ServerTime(snapshot.date).value,
-            incomingStatus: snapshot.incomingStatus,
-            outgoingStatus: snapshot.outgoingStatus,
+            deliveryStatus: snapshot.deliveryStatus,
             attachments: snapshot.attachments,
             reactions: snapshot.reactions
         )
@@ -82,8 +76,7 @@ extension PMsg: SendableTransformable {
             conID: conID,
             text: text,
             date: ServerTime(date).date,
-            incomingStatus: .init(rawValue: incomingStatus) ?? .none,
-            outgoingStatus: outgoingStatus,
+			deliveryStatus: .init(rawValue: deliveryStatus) ?? .received,
             attachments: attachments,
             reactions: reactions
         )

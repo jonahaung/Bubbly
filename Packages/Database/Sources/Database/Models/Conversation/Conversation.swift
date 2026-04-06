@@ -7,6 +7,7 @@ import Foundation
 import XUI
 
 public struct Conversation: Codable, Sendable, Hashable, Equatable, UIdentifiable {
+	
     public let kind: ConversationKind
     public let uid: String
     public let name: String
