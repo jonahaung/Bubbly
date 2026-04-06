@@ -8,6 +8,7 @@ import MsgRoomMain
 import Services
 import SwiftUI
 import XUI
+import BackgroundTasks
 
 @main
 struct BubblyApp: App {
@@ -23,6 +24,7 @@ struct BubblyApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+				.tint(Color.accent)
                 .task {
                     await Task.yield()
                     do {
@@ -35,6 +37,7 @@ struct BubblyApp: App {
                     switch scenePhase {
                     case .background:
                         AppStateStore.set(.background)
+						scheduleAppRefresh()
                     case .inactive:
                         AppStateStore.set(.inactive)
                     case .active:
@@ -49,5 +52,21 @@ struct BubblyApp: App {
                     }
                 }
         }
+		.defaultAppStorage(.init(suiteName: AppInformation.groupID) ?? .standard)
+		.backgroundTask(.appRefresh(AppInformation.appID)) {
+			do {
+				try await PhoneContactsService.shared.syncContacts()
+				await LocalNotificationService.sendAlert(title: "Contact Sync Complete")
+			} catch {
+				log(error)
+			}
+		}
     }
+
+	func scheduleAppRefresh() {
+		let request = BGAppRefreshTaskRequest(identifier: AppInformation.appID)
+		try? BGTaskScheduler.shared.submit(request)
+		log(request)
+	}
+
 }
