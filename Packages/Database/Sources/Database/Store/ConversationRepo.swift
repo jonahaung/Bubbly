@@ -50,14 +50,13 @@ public enum ConversationRepo {
 		}
 
 		// Fetch from server
-		let group: Database.Group? = try await FirestoreRepo.getModel(
-			for: conID,
-			collection: .groups,
-			field: .uid
-		)
-
-		guard let group else {
-			throw XError.noConversationGroupFound
+		let group: Database.Group
+		do {
+			group = try await FirestoreRepo.getDocument(collection: .groups, documentID: conID)
+		} catch {
+			guard let fetched: Database.Group = try await FirestoreRepo.getModel(for: conID, collection: .groups, field: .uid)
+			else { throw XError.noConversationGroupFound }
+			group = fetched
 		}
 
 		let groupStore = await Store.shared.groupStore

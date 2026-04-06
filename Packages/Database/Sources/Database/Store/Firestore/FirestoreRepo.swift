@@ -32,6 +32,16 @@ public enum FirestoreRepo {
         )
     }
 
+    public static func getDocument<T: Codable & Sendable>(
+        collection: FirestoreCollectionPath,
+        documentID: String
+    ) async throws -> T {
+        try await client.getDocument(
+            at: "\(collection.rawValue)/\(documentID)",
+            as: T.self
+        )
+    }
+
     public static func getModels<T: Codable & Sendable>(
         for uid: String,
         collection: FirestoreCollectionPath,
