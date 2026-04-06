@@ -19,14 +19,13 @@ public struct ArchitecturalView: View {
             currentUserRepository: currentUserRepository,
             contactsRepository: contactsRepository
         )
-        let router = Router.shared
-        coordinator = AppCoordinator(appLauncher: launcher, container: container, router: router)
+        coordinator = AppCoordinator(appLauncher: launcher, container: container, router: Router.shared)
     }
 
     public var body: some View {
         RootTabView(coordinator: coordinator)
             .task {
-                coordinator.start()
+				await coordinator.start()
             }
     }
 }

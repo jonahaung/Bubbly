@@ -87,7 +87,7 @@ public struct BubbleFactory: Sendable {
                 showTopPadding: false,
                 bubbleCorner: resolveCorner(
                     msg: msg,
-                    isSent: msg.receiptType == .send,
+                    isSent: msg.receiptType == .outgoing,
                     previousMsg: nil,
                     nextMsg: next
                 )
@@ -99,7 +99,7 @@ public struct BubbleFactory: Sendable {
         let showTopPadding = !showTimeSeparator && !canGroupWithPrevious
         let bubbleCorner = resolveCorner(
             msg: msg,
-            isSent: msg.receiptType == .send,
+            isSent: msg.receiptType == .outgoing,
             previousMsg: previous,
             nextMsg: next
         )

@@ -58,7 +58,7 @@ public extension ContactsRepository {
             collection: .groups,
             field: .members
         )
-        let store = await Store.shared.groupStore
+		let store = await Store.shared.groupStore
 
         try await withThrowingTaskGroup(of: Void.self) { taskGroup in
             for group in groups {

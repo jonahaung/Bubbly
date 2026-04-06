@@ -38,7 +38,7 @@ public struct InboxScene: View {
         .onDisappear {
             Task { await viewModel.send(.disappear) }
         }
-        .navigationTitle("pencil.line")
+		.navigationTitle(TabPath.inbox.name)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {} label: {

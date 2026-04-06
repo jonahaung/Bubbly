@@ -15,7 +15,6 @@ struct LaunchScreen: View {
 			AnimatedText(text: "Bubbly", preset: .spring)
         }
         .task {
-			try? await Task.sleep(seconds: 1)
             await appLauncher.startEvaluate()
         }
         .statusBarHidden()

@@ -8,7 +8,7 @@ import SwiftUI
 import XUI
 
 public struct ContactPickerScene: View {
-    @Environment(ContactsRepository.self) private var contactStore
+
     @Environment(\.dismiss) private var dismiss
     @Binding var selection: [Contact]
     @State private var searchText = ""
@@ -60,9 +60,9 @@ public struct ContactPickerScene: View {
 
     private var contacts: [Contact] {
         guard !searchText.isWhitespace else {
-            return contactStore.contacts
+			return ContactsRepository.shared.contacts
         }
-        return contactStore.contacts.filter {
+        return ContactsRepository.shared.contacts.filter {
             $0.name.lowercased().contains(searchText.lowercased())
         }
     }

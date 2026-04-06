@@ -7,90 +7,100 @@ import Database
 import SwiftUI
 import XUI
 
+public struct Route: Sendable, Hashable, Identifiable {
+	public var tabPath: TabPath
+	public var navPaths: [NavPath]
+	public var id: TabPath { tabPath }
+}
 @MainActor
 @Observable
-public final class Router: Sendable {
+public final class Router {
 
-    private var allPaths: [TabPath: [NavPath]]
-    public var selectedTab: TabPath
-    public var sheet: NavPath?
+	public var routes: [Route]
+	@ObservationIgnored
+	public var selectedTab: TabPath
+	public var sheet: NavPath?
+	public var toolbarVisibility: Visibility = .visible
 
-    public init(_ selected: TabPath) {
-        selectedTab = selected
-        allPaths = Dictionary(
-            uniqueKeysWithValues: TabPath.allCases.map { ($0, []) }
-        )
-    }
+	public init(_ selected: TabPath) {
+		selectedTab = selected
+		routes = TabPath.allCases.map { .init(tabPath: $0, navPaths: []) }
+	}
 
-    public func navPaths(for tab: TabPath) -> [NavPath] {
-        allPaths[tab] ?? []
-    }
+	public func navPaths(for tab: TabPath) -> [NavPath] {
+		routes.first(where: { $0.tabPath == tab })?.navPaths ?? []
+	}
 
-    public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
-        Binding(
-            get: { self.allPaths[tab] ?? [] },
-            set: { self.allPaths[tab] = $0 }
-        )
-    }
+	public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
+		Binding(
+			get: { self.navPaths(for: tab) },
+			set: { newValue in
+				if let index = self.routes.firstIndex(where: { $0.tabPath == tab }) {
+					self.routes[index].navPaths = newValue
+				}
+			}
+		)
+	}
 
-    public func tabPathBinding() -> Binding<TabPath> {
-        Binding(
-            get: { self.selectedTab },
-            set: { self.selectedTab = $0 }
-        )
-    }
+	public func tabPathBinding() -> Binding<TabPath> {
+		Binding(
+			get: { self.selectedTab },
+			set: { self.selectedTab = $0 }
+		)
+	}
 }
 
-private extension Router {
-    @ObservationIgnored
-    var currentNavPaths: [NavPath]? {
-        allPaths[selectedTab]
-    }
+extension Router {
+	@ObservationIgnored
+	fileprivate var currentNavPaths: [NavPath] {
+		routes.first(where: { $0.tabPath == selectedTab })?.navPaths ?? []
+	}
 }
 
-public extension Router {
+extension Router {
+	public func setTabBar(visibility: Visibility) {
+		toolbarVisibility = visibility
+	}
+	public func selectTab(_ newValue: TabPath) {
+		guard selectedTab != newValue else { return }
+		selectedTab = newValue
+	}
 
-    func selectTab(_ newValue: TabPath) {
-        guard selectedTab != newValue else { return }
-        selectedTab = newValue
-    }
+	public func visiblePath() -> NavPath? {
+		navPaths(for: selectedTab).last
+	}
 
-    func visiblePath() -> NavPath {
-        allPaths[selectedTab]?.last ?? .currentUserDetails
-    }
+	public func pushToNav(_ path: NavPath) {
+		var paths = navPaths(for: selectedTab)
+		if let index = paths.firstIndex(where: { $0.id == path.id }) {
+			paths = Array(paths[...index])
+			navPathsBinding(for: selectedTab).wrappedValue = paths
+			return
+		}
+		navPathsBinding(for: selectedTab).wrappedValue.append(path)
+	}
 
-    func pushToNav(_ path: NavPath) {
+	public func pop() {
+		navPathsBinding(for: selectedTab).wrappedValue.removeLast()
+	}
 
-        if let index = allPaths[selectedTab]?.firstIndex(of: path),
-           let array = allPaths[selectedTab] {
-            allPaths[selectedTab] = Array(array[0...index])
-            return
-        }
+	public func popToRoot() {
+		navPathsBinding(for: selectedTab).wrappedValue = []
+	}
 
-        allPaths[selectedTab]?.append(path)
-    }
+	public func presentModel(_ value: NavPath) {
+		sheet = value
+	}
 
-    func pop() {
-        allPaths[selectedTab]?.removeLast()
-    }
-
-    func popToRoot() {
-        allPaths[selectedTab] = []
-    }
-
-    func presentModel(_ value: NavPath) {
-        sheet = value
-    }
-
-    func dismissModal() {
-        sheet = nil
-    }
+	public func dismissModal() {
+		sheet = nil
+	}
 }
 
-public extension Router {
-    @MainActor
-    private static var _shared: Router = .init(.inbox)
+extension Router {
+	@MainActor
+	private static var _shared: Router = .init(.inbox)
 
-    @MainActor
-    static var shared: Router { _shared }
+	@MainActor
+	public static var shared: Router { _shared }
 }

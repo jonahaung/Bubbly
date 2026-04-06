@@ -7,12 +7,13 @@ import Foundation
 import SwiftUI
 import XUI
 
-public enum NavPath: Sendable, Hashable, Equatable, Identifiable, CaseNameReflectable {
+public enum NavPath: Sendable, Hashable, Identifiable, CaseNameReflectable {
+
     case conversationDetails(_ conversation: Conversation)
     case conversation(_ prefatchData: ConversationInitializer.PrefetchedData)
     case contactDetails(_ contact: Contact)
     case currentUserDetails
-    case view(id: String, node: RenderNode)
+    case view(node: RenderNode)
 
     public var id: String {
         hashValue.description
@@ -31,20 +32,12 @@ public enum NavPath: Sendable, Hashable, Equatable, Identifiable, CaseNameReflec
             hasher.combine(snapshot.uid)
         case .currentUserDetails:
             hasher.combine(3)
-        case let .view(id, _):
-            hasher.combine(4)
-            hasher.combine(id)
+		case .view:
+			hasher.combine("view")
         }
     }
 
     public static func == (lhs: NavPath, rhs: NavPath) -> Bool {
         lhs.id == rhs.id
-    }
-}
-
-public extension NavPath {
-    @MainActor static func view(_ node: RenderNode) -> NavPath {
-        let id = (node.renderID() as? String) ?? UUID().uuidString
-        return .view(id: id, node: node)
     }
 }

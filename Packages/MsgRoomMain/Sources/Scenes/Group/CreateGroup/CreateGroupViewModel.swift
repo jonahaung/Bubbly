@@ -31,7 +31,7 @@ final class CreateGroupViewModel {
     }
 
     func createGroup() async throws {
-        guard let currentUserID = currentUserId, let image = pickedPhoto?.uiImage else {
+        guard let currentUserID, let image = pickedPhoto?.uiImage else {
             fatalError("explanation")
         }
         setLoading(true)
@@ -50,8 +50,7 @@ final class CreateGroupViewModel {
             photoURL: url.absoluteString,
             members: memberIDs,
             createdBy: currentUserID,
-            theme: .init(),
-            seenMembers: []
+//            theme: .init()
         )
         try await FirestoreRepo.add(group, collectionPath: .groups, documentID: group.uid)
         try await Store.shared.groupStore?.insert(group)

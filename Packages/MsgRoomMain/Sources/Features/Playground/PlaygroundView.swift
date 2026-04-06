@@ -29,13 +29,13 @@ struct PlaygroundView: View {
 				showModal = true
 			}
 			Button("Font Picker") {
-				Router.shared.presentModel(.view(FontPicker(selection: $fontName).opaqueView()))
+//				Router.shared.presentModel(.view(FontPicker(selection: $fontName).opaqueView()))
 			}
 			Button("Markdown View") {
-				Router.shared.presentModel(.view(MarkdownView.ExampleView().opaqueView()))
+//				Router.shared.presentModel(.view(MarkdownView.ExampleView().opaqueView()))
 			}
 			Button("System Sounds") {
-				Router.shared.presentModel(.view(SystemSoundTesterView().opaqueView()))
+//				Router.shared.presentModel(.view(SystemSoundTesterView().opaqueView()))
 			}
 			Button("Show Toast") {
 				ToastPresenter.show(allowsBackgroundTap: true) {
@@ -66,7 +66,7 @@ struct PlaygroundView: View {
 					Text(text)
                         .padding()
                         .background(.bar, in: .rect)
-						.foregroundStyle(Color.pink.minimumContrast(over: Color.primary))
+						.foregroundStyle(Color.white)
                         .colorScheme(.dark)
 
                 } onClose: {

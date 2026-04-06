@@ -8,7 +8,7 @@ import SwiftUI
 
 public struct ContactDetailsScene: View {
     let contact: Contact
-    public init(contact: Contact) {
+    public init(contact: Contact, coordinator: AppCoordinator) {
         self.contact = contact
     }
 

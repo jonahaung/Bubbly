@@ -22,16 +22,18 @@ final class ImageViewManager {
         item.fileExist()
     }
 
-    @concurrent func loadLocalImage() async {
-        guard await image == nil else {
+
+	func loadLocalImage(isThumbnil: Bool) async {
+        guard image == nil else {
             return
         }
-        guard await isLocallyCached() else { return }
-        if let image = item.thumbnailImage() {
-            await MainActor.run {
-                self.image = image
-            }
-        }
+//        guard isLocallyCached() else { return }
+		if isThumbnil {
+			image = item.thumbnailImage()
+		} else {
+			image = item.image()
+		}
+
     }
 
     func onCompletion(_ result: Result<ImageResponse, Error>) {
@@ -40,7 +42,7 @@ final class ImageViewManager {
             Task {
                 do {
                     try await self.saveImage(success.image)
-                    await loadLocalImage()
+					await loadLocalImage(isThumbnil: true)
                 } catch {
                     log(error)
                 }

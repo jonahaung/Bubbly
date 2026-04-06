@@ -8,13 +8,16 @@ import ImageLoader
 import MediaPicker
 import SwiftUI
 import XUI
+import Services
 
 public struct UserProfileView: View {
     @LazyState private var viewModel: UserProfileViewModel
     @FocusState private var isFocused: Bool
 
-    public init(viewModel: UserProfileViewModel) {
-        _viewModel = .init(wrappedValue: viewModel)
+    public init(coordinator: AppCoordinator) {
+		_viewModel = .init(
+			wrappedValue: .init(currentUserRepository: coordinator.container.currentUserRepository)
+		)
     }
 
     public var body: some View {

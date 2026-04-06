@@ -49,7 +49,9 @@ public extension Socket {
         case .seenStatus:
             Task { @SocketActor [weak self] in
                 guard let self else { return }
-				
+				await queue.sync {
+					await self.notifyMessage(data)
+				}
             }
         }
     }

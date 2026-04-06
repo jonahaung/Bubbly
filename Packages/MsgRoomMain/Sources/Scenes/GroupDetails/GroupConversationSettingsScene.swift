@@ -12,11 +12,10 @@ import XUI
 
 public struct GroupConversationSettingsScene: View {
     @State private var viewModel: GroupDetailsViewModel
-    //	@Environment(ContactsRepository.self) private var contactStore
     @Environment(\.currentUser) private var currentUser
     @FocusState private var isFocused: Bool
 
-    public init(_ group: Database.Group) {
+    public init(_ group: Database.Group, coordinator: AppCoordinator) {
         _viewModel = .init(wrappedValue: .init(group: group))
     }
 
@@ -50,17 +49,17 @@ public struct GroupConversationSettingsScene: View {
                 XNavPickerBar<BubbleColor>(
                     "Bubble Color",
                     BubbleColor.allCases,
-                    $viewModel.group.theme.bubbleColor
+					$viewModel.properties.theme.bubbleColor
                 )
                 XNavPickerBar<ChatBackground>(
                     "Chat Background",
                     ChatBackground.allCases,
-                    $viewModel.group.theme.background
+					$viewModel.properties.theme.background
                 )
             }
             Section {
                 AsyncButton {
-                    try await ConversationRepo.deleteMessages(conID: viewModel.group.uid)
+                    try await MsgRepo.deleteMessages(conID: viewModel.group.uid)
                     Router.shared.popToRoot()
                 } label: {
                     Text("Delete Messages")
@@ -69,21 +68,19 @@ public struct GroupConversationSettingsScene: View {
             Section {
                 LabeledContent(
                     "Created",
-                    value: viewModel.group.createdDate.date,
+					value: ServerTime(viewModel.group.createdDate).date,
                     format: .dateTime
                 )
-                //				if let admin: (any ContactRepresentable) = viewModel.group
-                //					.createdBy == currentUserId
-                //					? currentUser
-                //					: contactStore.contact(
-                //						for: viewModel.group.createdBy
-                //					)
-                //				{
-                //					LabeledContent(
-                //						"Admin",
-                //						value: admin.name
-                //					)
-                //				}
+				if let admin: (any ContactRepresentable) = viewModel.group
+					.createdBy == currentUser.uid
+					? currentUser
+					: ContactsRepository.shared.contact(for: viewModel.group.createdBy)
+				{
+					LabeledContent(
+						"Admin",
+						value: admin.name
+					)
+				}
             }
             Section {
                 ForEach(viewModel.contacts) { contact in
@@ -95,6 +92,9 @@ public struct GroupConversationSettingsScene: View {
                 Label("Add Member...", systemImage: "plus.circle.fill")
                     .presentFullScreen {
                         ContactPickerScene(selection: $viewModel.contacts)
+							.onDisappear {
+								viewModel.group.members = viewModel.contacts.map(\.uid).sorted()
+							}
                     }
             }
 
@@ -137,5 +137,17 @@ public struct GroupConversationSettingsScene: View {
         }
         .scrollDismissesKeyboard(.immediately)
         .navigationBarBackButtonHidden(viewModel.hasChanges)
+		.task {
+			await viewModel.task()
+		}
+		.onChange(of: viewModel.properties, { oldValue, newValue in
+			Task {
+				let properties = viewModel.properties
+				try? await Store.shared.conversationPropertiesStore?
+					.updateAndSave(uid: viewModel.group.uid, { model in
+						model.update(from: properties)
+					})
+			}
+		})
     }
 }

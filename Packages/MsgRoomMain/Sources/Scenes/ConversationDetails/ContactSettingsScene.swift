@@ -14,7 +14,7 @@ public struct ContactSettingsScene: View {
     @State private var updatingModelValueTask: Task<Void, Never>?
     @State private var isSaving: Bool = false
 
-    public init(_ contact: Contact) {
+    public init(_ contact: Contact, coordinator: AppCoordinator) {
         self.contact = contact
         properties = .init(uid: "")
     }
@@ -46,7 +46,7 @@ public struct ContactSettingsScene: View {
             }
             Section {
                 AsyncButton {
-                    try await ConversationRepo.deleteMessages(conID: Conversation(
+                    try await MsgRepo.deleteMessages(conID: Conversation(
                         .contact(contact)
                     ).uid)
                 } label: {
@@ -107,9 +107,10 @@ public struct ContactSettingsScene: View {
             }
         }
         .task {
-            if let currentUserId {
+            if let currentUserID {
                 if let value = try? await ConversationPropertiesRepo.getOrCreate(
-                    for: ConversationIDGenerator.generate(currentUserId, contact.uid)
+					for: ConversationIDGenerator
+						.generate(currentUserID, contact.uid), refetch: false
                 ) {
                     properties = value
                 }

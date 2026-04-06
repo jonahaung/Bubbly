@@ -44,17 +44,18 @@ struct InboxRepositoryImpl: InboxRepository {
     ) async throws -> [InboxItem] {
         let items: [InboxItem?] = try await AsyncOrderedStream
             .mapOrdered(inputs: conversations) { conversation in
-                if let msg = try await ConversationRepo.lastMsg(conID: conversation.uid) {
+				if let msg = try await MsgRepo.lastMsg(conID: conversation.uid) {
                     let sender: any ContactRepresentableSendable =
-                        if msg.receiptType == .receive {
+                        if msg.receiptType == .incoming {
                             try await ContactRepo.getOrCreate(uid: msg.senderID, refetch: false)
                         } else {
                             currentUser
                         }
-                    let unreadMsgsCount = try await ConversationRepo.countUnreadMsgs(
+					let unreadMsgsCount = try await MsgRepo.incomingUnreadMsgsCount(
                         conID: conversation.uid,
                         currentUserID: currentUser.uid
                     )
+					print(unreadMsgsCount)
                     return InboxItem(
                         conversation: conversation,
                         msg: msg,

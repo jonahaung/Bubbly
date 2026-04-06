@@ -7,7 +7,7 @@ import Foundation
 import SwiftUI
 
 @MainActor
-public protocol ContactsRepositoryProtocol: Observable, Sendable {
+public protocol ContactsRepositoryProtocol: Observable, Sendable, AnyObject {
     var contacts: [Contact] { get set }
     var groups: [Database.Group] { get set }
 

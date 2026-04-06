@@ -22,6 +22,14 @@ public struct ProfilePhoto: View {
         )
     }
 
+	public init(
+		_ item: any ImageViewItem,
+		config: ImageViewConfig
+	) {
+		self.item = item
+		self.config = config
+	}
+
     public var body: some View {
         ImageView(item, config: config)
             .clipShape(.circle)

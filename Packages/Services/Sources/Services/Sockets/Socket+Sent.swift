@@ -28,21 +28,13 @@ extension Socket {
         case let .deleteMsg(rMsg: rMsg):
             try await Store.shared.msgStore?.delete(uid: rMsg.uid)
             notifyMessage(data)
-            if rMsg.senderID == currentUserId {
+            if rMsg.senderID == currentUserID {
                 addToQueue()
             }
         case let .reaction(payload):
             try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in
-                let isSame = model.reactions.contains(
-                    where: {
-                        $0.senderID == payload.reaction.senderID && $0.rawValue == payload.reaction
-                            .rawValue
-                    }
-                )
                 model.reactions.removeAll(where: { $0.senderID == payload.reaction.senderID })
-                if !isSame {
-                    model.reactions.append(payload.reaction)
-                }
+				model.reactions.append(payload.reaction)
             }
             notifyMessage(data)
             addToQueue()
@@ -85,7 +77,7 @@ extension Socket {
         switch data {
         case let .newMsg(rMsg):
             var msg = Message(rMsg)
-            msg.outgoingStatus = try await sendToRemote(
+			msg.deliveryStatus = try await sendToRemote(
                 .newMsg(rMsg: rMsg),
                 conversation: conversation
             )
@@ -129,13 +121,11 @@ extension Socket {
     @discardableResult public func sendToRemote(
         _ data: AnyMsgData,
         conversation: Conversation
-    ) async throws -> [
-        String: MsgOutgoingStatus
-    ] {
+    ) async throws -> DeliveryStatus {
         let contacts = try await getContacts(
             from: conversation
         ).filter {
-            $0.uid != currentUserId
+            $0.uid != currentUserID
                 && isValidDeviceToken(
                     $0.pushToken
                 )
@@ -143,7 +133,11 @@ extension Socket {
         let title = data.pushNotificationTitle(for: conversation)
         return try await sendToRemote(
             data,
-            alert: .init(title: title, body: data.pushNotificationSubtitle),
+			alert: .init(
+				title: title,
+				subtitle: nil,
+				body: data.pushNotificationBody
+			),
             contacts: contacts
         )
     }
@@ -161,9 +155,7 @@ extension Socket {
         _ data: AnyMsgData,
         alert: APNSAlert,
         contacts: [Contact]
-    ) async throws -> [
-        String: MsgOutgoingStatus
-    ] {
+    ) async throws -> DeliveryStatus {
         let encoded = try JSONEncoder().encode(data)
         guard let encodedString = String(data: encoded, encoding: .utf8) else {
             throw SocketError.encodingFailed
@@ -185,12 +177,7 @@ extension Socket {
             let success = try? await self.pushNotificationSender.send(notification: notification)
             return (contact, success != nil)
         }
-        var outgoingStatus = [String: MsgOutgoingStatus]()
-        for (contact, isSuccess) in results {
-            outgoingStatus[contact.uid] = isSuccess ? .sent : .sendingFailed
-        }
-
-        return outgoingStatus
+		return results.contains(where: { $0.1 == true }) ? .delivered : .sendingFailed
     }
 
     private func encrypt(_ dataString: String, publicKeyString: String) async throws -> String {

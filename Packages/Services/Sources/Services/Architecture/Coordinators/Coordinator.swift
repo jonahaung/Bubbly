@@ -29,9 +29,7 @@ public final class AppCoordinator: @MainActor Coordinator {
         await deeplinkCoordinator.onOpenURL(url: url)
     }
 
-    public func start() {
-        Task.detached(priority: .background) { [weak self] in
-            try await self?.container.contactsRepository.fetchData()
-        }
+	public func start() async {
+		try? await container.contactsRepository.fetchData()
     }
 }

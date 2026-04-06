@@ -10,7 +10,6 @@ public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, 
     public var id: Int {
         rawValue
     }
-
     case inbox
     case contacts
     case test
@@ -28,4 +27,17 @@ public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, 
             "shield"
         }
     }
+
+	public var name: String {
+		switch self {
+		case .inbox: String(localized: "Inbox", comment: "Tab title")
+		case .contacts: String(localized: "Contact", comment: "Tab title")
+		case .test: String(localized: "Tests", comment: "Tab title")
+		case .settings: String(localized: "Settings", comment: "Tab title")
+		}
+	}
+
+	public var customizationID: String {
+		return "com.example.apple-samplecode.DestinationVideo." + self.name
+	}
 }

@@ -4,6 +4,6 @@
 
 import FirebaseAuth
 
-public var currentUserId: String? {
+public var currentUserID: String? {
     Auth.auth().currentUser?.uid ?? GroupStorage.shared.string(for: .auth(.currentUserID))
 }

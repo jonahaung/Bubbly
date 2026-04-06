@@ -11,7 +11,6 @@ import SwiftUI
 import XUI
 
 public struct CreateGroupScene: View {
-    @Environment(ContactsRepository.self) private var contactStore
     @State private var viewModel = CreateGroupViewModel()
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isFocused: Bool
@@ -76,10 +75,10 @@ public struct CreateGroupScene: View {
             ToolbarItem(placement: .primaryAction) {
                 AsyncButton {
                     setFocus(false)
-                    if let currentUserId {
+                    if let currentUserID {
                         try await Task.sleep(seconds: 1)
                         try await viewModel.createGroup()
-                        try await contactStore.syncGroups(currentUserId: currentUserId)
+						try await ContactsRepository.shared.syncGroups(currentUserId: currentUserID)
                     }
                     dismiss()
                 } label: {

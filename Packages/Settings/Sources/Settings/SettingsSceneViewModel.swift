@@ -14,18 +14,19 @@ import XUI
 final class SettingsSceneViewModel: ErrorPresenter {
     private(set) var state: SettingsViewState
 
-    private let currentUserRepository: CurrentUserRepository
-    private let appLauncher: AppLauncher
+	private var currentUserRepository: CurrentUserRepository {
+		coordinator.container.currentUserRepository
+	 }
+	private var appLauncher: AppLauncher { coordinator.appLauncher }
     private let reducer: SettingsReducer
+	private let coordinator: AppCoordinator
 
     init(
-        currentUserRepository: CurrentUserRepository,
-        appLauncher: AppLauncher,
-        reducer: SettingsReducer = SettingsReducerImpl()
+        reducer: SettingsReducer = SettingsReducerImpl(),
+		coordinator: AppCoordinator
     ) {
-        self.currentUserRepository = currentUserRepository
-        self.appLauncher = appLauncher
         self.reducer = reducer
+		self.coordinator = coordinator
         state = SettingsViewState(
             currentUser: .empty,
             fontName: Self.readFontName(),
@@ -90,13 +91,8 @@ final class SettingsSceneViewModel: ErrorPresenter {
         Router.shared
             .pushToNav(
                 .view(
-                    id: "UserProfileView",
                     node: RenderNodeView(
-                        content: UserProfileView(
-                            viewModel: .init(
-                                currentUserRepository: currentUserRepository
-                            )
-                        )
+						content: UserProfileView(coordinator: coordinator)
                     )
                 )
             )
@@ -128,23 +124,23 @@ final class SettingsSceneViewModel: ErrorPresenter {
     }
 
     private func handleOpenFileSystem() {
-        Router.shared
-            .pushToNav(
-                .view(
-                    id: FolderExplorer.typeName,
-                    node: RenderNodeView(content: FolderExplorer())
-                )
-            )
+//        Router.shared
+//            .pushToNav(
+//                .view(
+//                    id: FolderExplorer.typeName,
+//                    node: RenderNodeView(content: FolderExplorer())
+//                )
+//            )
     }
 
     private func handleOpenFontPicker() {
-        Router.shared
-            .pushToNav(
-                .view(
-                    id: FontPicker.typeName,
-                    node: RenderNodeView(content: XUI.FontPicker(selection: fontNameBinding))
-                )
-            )
+//        Router.shared
+//            .pushToNav(
+//                .view(
+//                    id: FontPicker.typeName,
+//                    node: RenderNodeView(content: XUI.FontPicker(selection: fontNameBinding))
+//                )
+//            )
     }
 
     private func handleCleanUpFileSystem() async {
@@ -184,7 +180,7 @@ final class SettingsSceneViewModel: ErrorPresenter {
     }
 
     private func deleteAll<Model: PersistentModel>(_ type: Model.Type) async {
-        guard let context = await Store.shared.modelContainer?.mainContext else {
+		guard let context = await Store.shared.modelContainer?.mainContext else {
             return
         }
         do {

@@ -1,7 +1,3 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
-
 import Core
 import Database
 import Inbox
@@ -11,67 +7,68 @@ import SwiftUI
 import XUI
 
 struct RootTabView: View {
-    let coordinator: AppCoordinator
+	let coordinator: AppCoordinator
 	private var router: Router { coordinator.router }
-    var body: some View {
-        TabView(selection: router.tabPathBinding()) {
-            ForEach(TabPath.allCases) { tabPath in
-                Tab(value: tabPath, role: role(for: tabPath)) {
-                    MainNavView(tabPath: tabPath, coordinator: coordinator) {
-                        coordinator.view(for: tabPath)
-                    }
-                } label: {
-                    Image(systemName: tabPath.systemName)
-                }
-            }
-        }
-        .tabBarMinimizeBehavior(.onScrollDown)
-        .toastPresentable()
-        .loadingPresentable()
-        .sheet(item: sheet) { coordinator.view(for: $0) }
-        .onOpenURL { url in
-            Task {
-                await coordinator.handleDeeplink(url)
-            }
-        }
-    }
+	var body: some View {
+		TabView(selection: router.tabPathBinding()) {
+			ForEach(router.routes) { route in
+				let tabPath = route.tabPath
+				Tab(value: tabPath, role: role(for: tabPath)) {
+					MainNavView(tabPath: tabPath, coordinator: coordinator) {
+						coordinator.view(for: tabPath)
+							.navigationDestination(for: NavPath.self) { navPath in
+								coordinator.view(for: navPath)
+							}
+					}
+				} label: {
+					Label(tabPath.name, systemImage: tabPath.systemName)
+						.labelStyle(.iconOnly)
+				}
+			}
+		}
+		.tabBarMinimizeBehavior(.onScrollDown)
+		.toastPresentable()
+		.fullScreenCover(item: fullScreenCover) { coordinator.view(for: $0) }
+		.onOpenURL { url in
+			Task.detached {
+				await coordinator.handleDeeplink(url)
+			}
+		}
+	}
 }
 
-private extension RootTabView {
-    func role(for tabPath: TabPath) -> TabRole? {
-		tabPath == .contacts ? .search : nil
-    }
+extension RootTabView {
+	private func role(for tabPath: TabPath) -> TabRole? {
+		tabPath == .settings ? .search : nil
+	}
 }
 
-private extension RootTabView {
-    var sheet: Binding<NavPath?> {
-        .init(
-            get: { router.sheet },
-            set: { newValue in
-                if let newValue {
-                    router.presentModel(newValue)
-                } else {
-                    router.dismissModal()
-                }
-            }
-        )
-    }
+extension RootTabView {
+	fileprivate var fullScreenCover: Binding<NavPath?> {
+		.init(
+			get: { router.sheet },
+			set: { newValue in
+				if let newValue {
+					router.presentModel(newValue)
+				} else {
+					router.dismissModal()
+				}
+			}
+		)
+	}
 }
 
-public extension AppCoordinator {
-    @ViewBuilder func view(for tabPath: TabPath) -> some View {
-        switch tabPath {
-        case .test:
+extension AppCoordinator {
+	@ViewBuilder public func view(for tabPath: TabPath) -> some View {
+		switch tabPath {
+		case .test:
 			PlaygroundView()
-        case .inbox:
+		case .inbox:
 			InboxScene(coordinator: self)
-        case .contacts:
+		case .contacts:
 			ContactsScene(coordinator: self)
-        case .settings:
-            SettingsScene(
-                currentUserRepository: container.currentUserRepository,
-                appLauncher: appLauncher
-            )
-        }
-    }
+		case .settings:
+			SettingsScene(coordinator: self)
+		}
+	}
 }

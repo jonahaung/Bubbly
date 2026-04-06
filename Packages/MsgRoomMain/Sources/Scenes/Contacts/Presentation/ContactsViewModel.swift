@@ -11,7 +11,6 @@ import XUI
 @Observable
 final class ContactsViewModel: ErrorPresenter {
 
-	var isLoading: Bool = false
 	var searchText: String = ""
 	private var contacts = [Contact]()
 	var groups = [Group]()
@@ -43,8 +42,8 @@ final class ContactsViewModel: ErrorPresenter {
 	func syncContacts() async {
 		do {
 			loading(true)
-			try await PhoneContactsService.shared.syncContacts()
-			await refresh()
+			contacts = try await PhoneContactsService.shared.syncContacts()
+			loading(false)
 		} catch {
 			await showError(error)
 		}
@@ -59,31 +58,23 @@ final class ContactsViewModel: ErrorPresenter {
 				field: .members
 			)
 			let store = await Store.shared.groupStore
-
-			try await withThrowingTaskGroup(of: Void.self) { taskGroup in
-				for group in groups {
-					taskGroup.addTask {
-						if try await store?.exists(uid: group.uid) == false {
-							try await store?.insert(group)
-						} else {
-							try await store?.updateAndSave(uid: group.uid) { model in
-								model.update(from: group)
-							}
-						}
-						try await ContactRepo.getOrCreate(for: group.members, refatch: false)
-					}
-				}
-				try await taskGroup.waitForAll()
+			try await AsyncOrderedStream.mapOrdered(inputs: groups) { group in
+				try await store?.insert(group)
 			}
-			await refresh()
+			let ids = groups.flatMap{ $0.members }.removeDuplicates()
+			try await AsyncOrderedStream.mapOrdered(inputs: ids) { uid in
+				try await ContactRepo.getOrCreate(uid: uid, refetch: false)
+			}
+			self.groups = groups
+			loading(false)
+			await task()
 		} catch {
 			loading(false)
 			await showError(error)
 		}
 	}
 	func loading(_ isLoading: Bool) {
-		guard self.isLoading != isLoading else { return }
-		self.isLoading = isLoading
+		Loading.show(isLoading)
 	}
 
 }

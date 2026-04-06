@@ -29,8 +29,6 @@ public extension AppLauncher {
     func startEvaluate() async {
         route = await evaluateRoute()
     }
-
-    @concurrent
     private func evaluateRoute() async -> MainRoute {
         let hasCompleted = UserDefaults.standard.bool(forKey: DefaultKeys.getStarted)
         if hasCompleted {

@@ -20,7 +20,9 @@ extension Socket {
                 for: rMsg.conID,
                 refetch: false
             )
-            try await Store.shared.msgStore?.insert(Message(rMsg))
+			var msg = Message(rMsg)
+			msg.deliveryStatus = .received
+			try await Store.shared.msgStore?.insert(msg)
         case let .updatedMsg(rMsg):
             try await Store.shared.msgStore?.updateAndSave(uid: rMsg.uid) { pMsg in
                 pMsg.update(with: rMsg)
@@ -41,16 +43,17 @@ extension Socket {
         case .typingStatus:
             break
         case let .seenStatus(status: status):
+
             let seenMember = SeenMember(
                 uid: status.userID,
-                msgId: status.msgID,
-                date: ServerTime.now.value
+				msgId: status.msgID,
+				date: status.date
             )
 
             if var properties = try await Store.shared.conversationPropertiesStore?.fetch(
                 uid: status.conID
             ) {
-				if let index = properties.seenMembers.firstIndex(where: { $0.msgId == status.msgID || $0.uid == status.userID }) {
+				if let index = properties.seenMembers.firstIndex(where: { $0.uid == status.userID }) {
 					properties.seenMembers.remove(at: index)
 				}
                 properties.seenMembers.appendUnique(seenMember)
@@ -59,9 +62,8 @@ extension Socket {
                         model.update(from: properties)
                     }
             }
-
             try await Store.shared.msgStore?.updateAndSave(uid: status.msgID) { msg in
-                msg.outgoingStatus[status.userID] = .sent
+				msg.deliveryStatus = DeliveryStatus.read.rawValue
             }
         }
 

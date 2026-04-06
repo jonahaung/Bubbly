@@ -15,14 +15,17 @@ public final class GroupDetailsViewModel: ErrorPresenter {
     var originalGroup: Database.Group
     var pickedPhoto: PickedPhoto?
     var isLoading = false
-
+	var properties: ConversationProperties
     init(group: Database.Group) {
         self.group = group
         originalGroup = group
         contacts = group.members
             .compactMap { ContactsRepository.shared.contact(for: $0) }
+		properties = .init(uid: group.uid)
     }
-
+	func task() async {
+		properties = await ConversationPropertiesRepo.getOrCreateMain(for: group.uid)
+	}
     func setLoading(_ isLoading: Bool) {
         self.isLoading = isLoading
     }
@@ -55,20 +58,17 @@ public final class GroupDetailsViewModel: ErrorPresenter {
         setLoading(true)
         UIApplication.shared.endEditing()
 
-        // Capture an immutable snapshot on the main actor before any suspension.
-        let updatedGroup = group
+		let updatedGroup = group
         let originalUID = originalGroup.uid
 
-        // Sleep off the main thread but keep isolation by hopping back to the main actor after.
         try await Task.sleep(seconds: 1)
 
-        // Perform the update using the captured snapshot to avoid sending non-Sendable references across actors.
         try await Store.shared.groupStore?
             .updateAndSave(uid: originalUID) { model in
                 model.update(from: updatedGroup)
             }
 
-        try await FirestoreRepo.add(updatedGroup, collectionPath: .groups, documentID: updatedGroup.uid)
+        try await FirestoreRepo.set(updatedGroup, collectionPath: .groups, documentID: updatedGroup.uid)
         setLoading(false)
     }
 }

@@ -39,6 +39,6 @@ struct ContactCell: View {
     }
 
     private var isEnabled: Bool {
-        contact.isChatAvailable && contact.uid != currentUserId
+        contact.isChatAvailable && contact.uid != currentUserID
     }
 }

@@ -8,15 +8,12 @@ import SwiftUI
 import XUI
 
 public struct SettingsScene: View {
+	
     @State private var viewModel: SettingsSceneViewModel
+	@AppStorage("Lazy Scroll View") private var lazyScrollView: Bool = true
 
-    public init(currentUserRepository: CurrentUserRepository, appLauncher: AppLauncher) {
-        _viewModel = State(
-            initialValue: SettingsSceneViewModel(
-                currentUserRepository: currentUserRepository,
-                appLauncher: appLauncher
-            )
-        )
+    public init(coordinator: AppCoordinator) {
+		_viewModel = .init(wrappedValue: .init(coordinator: coordinator))
     }
 
     public var body: some View {
@@ -39,6 +36,7 @@ public struct SettingsScene: View {
                 }
             }
             Section {
+				Toggle.init("Lazy Scroll View", isOn: $lazyScrollView)
                 Stepper(value: chatCellVerticalSpacingBinding) {
                     Text("Chat Cell Vertical Spacing: \(viewModel.state.chatCellVerticalSpacing)")
                 }

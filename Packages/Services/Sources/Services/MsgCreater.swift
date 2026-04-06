@@ -34,21 +34,9 @@ public actor MsgCreator {
             conID: conversation.uid,
             text: text,
             date: .now,
-            incomingStatus: .none,
-            outgoingStatus: makeOutgoingStatus(for: conversation),
+			deliveryStatus: .sending,
             attachments: attachments,
             reactions: []
         )
-    }
-}
-
-private extension MsgCreator {
-    func makeOutgoingStatus(for conversation: Conversation) -> [String: MsgOutgoingStatus] {
-        var dict = [String: MsgOutgoingStatus]()
-        dict.reserveCapacity(conversation.members.count)
-        for member in conversation.members where member != currentUserId {
-            dict[member] = .sending
-        }
-        return dict
     }
 }
