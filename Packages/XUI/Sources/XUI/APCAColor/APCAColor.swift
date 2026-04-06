@@ -76,7 +76,7 @@ public extension ShapeStyle where Resolved == Color.Resolved {
 }
 
 @available(iOS 18.0, *)
-struct APCADerivedForegroundColor: ViewModifier {
+public struct APCADerivedForegroundColor: ViewModifier {
     @ScaledMetric var fontSize: CGFloat
 
     var weight: Font.Weight
@@ -87,14 +87,14 @@ struct APCADerivedForegroundColor: ViewModifier {
 
     @Environment(\.self) var environment
 
-    init(foregroundColor: Color, backgroundColor: Color, fontSize: CGFloat, relativeTo textStyle: Font.TextStyle = .body, weight: Font.Weight = .regular) {
+	public init(foregroundColor: Color, backgroundColor: Color, fontSize: CGFloat, relativeTo textStyle: Font.TextStyle = .body, weight: Font.Weight = .regular) {
         self.foreground = foregroundColor
         self.background = backgroundColor
         self._fontSize = .init(wrappedValue: fontSize, relativeTo: textStyle)
         self.weight = weight
     }
 
-    func body(content: Content) -> some View {
+	public func body(content: Content) -> some View {
         let contrast = Font.APCAContrastTarget(for: fontSize, weight: weight)
 
         content.foregroundStyle(foreground.minimumContrast(contrast, over: background))

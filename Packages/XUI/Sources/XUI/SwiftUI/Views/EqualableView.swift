@@ -4,7 +4,9 @@
 
 import SwiftUI
 
-public struct EquatableView<Content: View, Value: Equatable>: View, Equatable {
+public struct EquatableView<Content: View, Value: Equatable & SendableMetatype>: View,
+	@MainActor Equatable
+{
 
 	private let content: () -> Content
 	public let value: Value
@@ -21,7 +23,6 @@ public struct EquatableView<Content: View, Value: Equatable>: View, Equatable {
 		content()
 	}
 
-	nonisolated
 	public static func == (
 		lhs: EquatableView<Content, Value>,
 		rhs: EquatableView<Content, Value>
@@ -32,10 +33,8 @@ public struct EquatableView<Content: View, Value: Equatable>: View, Equatable {
 
 // MARK: - View Extension
 
-public extension View {
-
-	/// Prevents unnecessary view updates unless `value` changes.
-	func equatable<Value: Equatable>(
+extension View {
+	public func equatable<Value: Equatable & SendableMetatype>(
 		by value: Value
 	) -> some View {
 		EquatableView(value: value) {

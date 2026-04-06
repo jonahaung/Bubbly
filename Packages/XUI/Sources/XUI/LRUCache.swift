@@ -149,3 +149,25 @@ public final class LRUCache<Key: Hashable, Value>: @unchecked Sendable {
 		node.next = nil
 	}
 }
+public final class DicCache<Key: Hashable, Value>: @unchecked Sendable {
+	private var dict: [Key: Value] = [:]
+
+	public init() {
+	}
+
+	public func get(_ key: Key) -> Value? {
+		dict[key]
+	}
+
+	public func set(_ key: Key, value: Value) {
+		dict[key] = value
+	}
+
+	public func remove(_ key: Key) {
+		dict[key] = nil
+	}
+
+	public func removeAll() {
+		dict.removeAll()
+	}
+}

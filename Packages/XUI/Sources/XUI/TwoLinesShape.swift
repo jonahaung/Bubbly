@@ -1,5 +1,8 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  TwoLinesShape.swift
+//  XUI
+//
+//  Created by Aung Ko Min on 5/4/26.
 //
 
 import SwiftUI

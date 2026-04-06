@@ -59,7 +59,7 @@ public struct PressGestureViewModifier: ViewModifier {
         guard displayLink.state == .inactive else {
             return
         }
-        displayLink.onUpdate = onUpdate(_:)
+//        displayLink.onUpdate = onUpdate(_:)
         displayLink.onTargetReached = onTargetReached(_:)
         displayLink.start()
     }

@@ -14,6 +14,6 @@ public func log(
     #if DEBUG
     guard let object else { return }
     let file = (filename as NSString).lastPathComponent
-    print("\(file), \(line)\t\t\t\t\t\t\t\t\t\t\t\t\t\(object)")
+    print("\("♻️") \(file)|\(line)\n\(object)")
     #endif
 }

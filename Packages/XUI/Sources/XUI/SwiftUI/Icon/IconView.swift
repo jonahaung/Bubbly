@@ -26,7 +26,7 @@ public struct IconView<Content: View>: View {
                 .brightness(colorScheme == .dark ? -0.2 : -0.03)
 
             content
-                .foregroundStyle(.white)
+				.foregroundStyle(.windowBackground)
         }
         .font(.system(size: 18))
         .imageScale(.small)

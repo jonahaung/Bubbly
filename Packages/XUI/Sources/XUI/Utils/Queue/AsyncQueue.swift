@@ -65,7 +65,7 @@ public final class AsyncQueue: @unchecked Sendable {
     /// include any `CancellationError`s thrown.
     public let errorSequence: ErrorSequence
 
-    public init(attributes: Attributes = []) {
+	public init(attributes: Attributes = [.concurrent]) {
         self.attributes = attributes
         lock.name = "AsyncQueue"
 

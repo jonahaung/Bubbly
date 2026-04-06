@@ -5,38 +5,24 @@
 import SwiftUI
 
 private struct ToastPresentableodifier: ViewModifier {
-    @State private var toastPresenter = ToastPresenter.shared
-    func body(content: Content) -> some View {
-        content
-            .statusBarHidden(toastPresenter.toast?.style.edge == .top)
-            .overlay {
-                if let toast = toastPresenter.toast {
-                    ModalOverlay(
-                        toast.style.alignment,
-                        from: toast.style.edge,
-                        allowsBackgroundTap: toast.allowsBackgroundTap
-                    ) {
-                        toast.node.eraseToNode()
-                            .lineHeight(.multiple(factor: 1.1))
-                            .onTapGesture {
-                                toastPresenter.dismiss()
-                                toast.action?()
-                            }
-                            .padding(16)
-                            .glassEffect(.regular, in: .containerRelative)
-                            .runningBorder(lineWidth: 2, cornerRadius: 12)
-                            .containerShape(RoundedRectangle(cornerRadius: 12))
-                            .padding(2)
-                    } onClose: {
-                        toastPresenter.dismiss()
-                    }
-                }
-            }
-    }
+	@State private var toastPresenter = ToastPresenter.shared
+	@State private var loadingPresenter = LoadingPresenter.shared
+	func body(content: Content) -> some View {
+		content
+			.ignoresSafeArea(.keyboard)
+			.overlay {
+				if let toast = toastPresenter.toast {
+					ToastHolderView(toast: toast)
+				}
+				if loadingPresenter.showLoading {
+					LoadingIndicator(20)
+				}
+			}
+	}
 }
 
-public extension View {
-    func toastPresentable() -> some View {
-        modifier(ToastPresentableodifier())
-    }
+extension View {
+	public func toastPresentable() -> some View {
+		modifier(ToastPresentableodifier())
+	}
 }

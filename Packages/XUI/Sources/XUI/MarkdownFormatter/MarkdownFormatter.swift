@@ -6,6 +6,11 @@ public struct MarkdownFormatter {
 		var container = AttributeContainer()
 		container.font = .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize)
 		container.lineHeight = .multiple(factor: 1.2)
+		var paragraph = NSMutableParagraphStyle()
+		paragraph.lineBreakMode = .byWordWrapping
+		paragraph.lineSpacing = 0
+		paragraph.paragraphSpacing = 0
+		container.paragraphStyle = paragraph
 		return container
 	}()
 
@@ -49,35 +54,64 @@ public struct MarkdownFormatter {
 	) -> AttributeContainer? {
 		switch presentationKind {
 		case .blockQuote:
-			return AttributeContainer()
-				.foregroundColor(Color.secondary)
+			var container = AttributeContainer()
+			container.font =
+				.system(
+					size: UIFont.preferredFont(forTextStyle: .callout).pointSize,
+					weight: .regular, design: .serif
+				).italic()
+				.leading(.tight)
+			return container
 		case .codeBlock:
-			return AttributeContainer()
-				.font(font)
+			var container = AttributeContainer()
+			container.font =
+				.system(
+					size: UIFont.preferredFont(forTextStyle: .caption1).pointSize,
+					weight: .medium, design: .monospaced
+				)
+				.width(.condensed)
+				.leading(.tight)
+
+			return container
 		case .header(let level):
 			let font: Font = {
 				switch level {
 				case 1:
-					return .title
+					return .system(
+						size: UIFont.preferredFont(forTextStyle: .title1).pointSize,
+						weight: .semibold
+					)
 				case 2:
-					return .title2
+					return .system(
+						size: UIFont.preferredFont(forTextStyle: .title2).pointSize,
+						weight: .semibold
+					)
 				case 3:
-					return .title3
+					return .system(
+						size: UIFont.preferredFont(forTextStyle: .title3).pointSize,
+						weight: .semibold
+					)
 				case 4:
-					return .headline
+					return .system(
+						size: UIFont.preferredFont(forTextStyle: .headline).pointSize,
+						weight: .medium
+					)
 				case 5:
-					return .subheadline
+					return .system(
+						size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize,
+						weight: .regular
+					)
 				default:
 					return .footnote
 				}
 			}()
 			let foregroundColor: Color? = level >= 6 ? Color.secondary : nil
 			if let foregroundColor {
-				return AttributeContainer()
+				return attributes
 					.font(font)
 					.foregroundColor(foregroundColor)
 			} else {
-				return AttributeContainer()
+				return attributes
 					.font(font)
 			}
 		default:

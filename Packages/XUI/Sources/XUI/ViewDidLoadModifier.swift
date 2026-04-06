@@ -22,8 +22,30 @@ public struct ViewDidLoadModifier: ViewModifier {
     }
 }
 
+public struct ViewDidTaskModifier: ViewModifier {
+	@State private var didTask = false
+	private let action:  () async -> Void
+
+	public init(perform action: @escaping () async -> Void) {
+		self.action = action
+	}
+
+	public func body(content: Content) -> some View {
+		content.task {
+			if didTask == false {
+				didTask = true
+				await action()
+			}
+		}
+	}
+}
+
+
 public extension View {
     func onLoad(perform action: @escaping () -> Void) -> some View {
         modifier(ViewDidLoadModifier(perform: action))
     }
+	func onTask(perform action: @escaping () async -> Void) -> some View {
+		modifier(ViewDidTaskModifier(perform: action))
+	}
 }

@@ -38,35 +38,34 @@ public struct HamburgerButton: View {
 
 		let offset = (thickness + spacing) / 2
 
-		VStack(spacing: spacing) {
-			bar
+		ZStack(alignment: .center) {
+			RoundedRectangle(cornerRadius: thickness / 2)
+				.fill(color.gradient)
+				.frame(width: width, height: thickness)
 				.rotationEffect(.degrees(isOpen ? 45 : 0))
-				.offset(y: isOpen ? offset : 0)
-			bar
+				.offset(y: isOpen ? 0 : -offset)
+			RoundedRectangle(cornerRadius: thickness / 2)
+				.fill(color.gradient)
+				.frame(width: isOpen ? width : width*0.3, height: thickness)
 				.rotationEffect(.degrees(isOpen ? -45 : 0))
-				.offset(y: isOpen ? -offset : 0)
+				.offset(y: isOpen ? 0 : offset)
 		}
 		.frame(width: width, height: height)
 		.padding(.vertical, padding)
 		.padding(.horizontal, padding/2)
+		.background(.fill.opacity(0.0001))
 		.animation(.anticipateOvershoot, value: isOpen)
-		.sensoryFeedback(
-			.selection,
-			trigger: isOpen
-		)
+		.geometryGroup()
 		._onButtonGesture { pressing in
-			if !pressing {
-				isOpen.toggle()
+			if pressing {
+			} else {
+				UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
 			}
 		} perform: {
-			action(isOpen)
+			isOpen.toggle()
 		}
-		.geometryGroup()
-	}
-
-	private var bar: some View {
-		RoundedRectangle(cornerRadius: thickness / 2)
-			.fill(color)
-			.frame(width: width, height: thickness)
+		.onChange(of: isOpen) { oldValue, newValue in
+			action(newValue)
+		}
 	}
 }

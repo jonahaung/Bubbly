@@ -12,9 +12,7 @@ public final class LoadingPresenter {
 
     public func loading(_ value: Bool) {
         guard value != showLoading else { return }
-        withTransaction(.withoutAnimation()) {
-            showLoading = value
-        }
+		showLoading = value
     }
 
     public static let shared: LoadingPresenter = .init()

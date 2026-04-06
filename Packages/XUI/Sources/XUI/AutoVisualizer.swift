@@ -56,7 +56,7 @@ private struct AutoVisualizer: ViewModifier {
 	@State var cancellable: AnyCancellable?
 
 	@State var isCaptured: Bool = false
-
+	@Environment(\.isSceneCaptured) private var isSceneCaptured
 	func body(content: Content) -> some View {
 		content
 			#if targetEnvironment(simulator)
@@ -64,7 +64,7 @@ private struct AutoVisualizer: ViewModifier {
 			#else
 				.visualizeTouches(isCaptured)
 				.onAppear {
-					isCaptured = UIScreen.main.isCaptured
+					isCaptured = self.isSceneCaptured
 
 					cancellable = NotificationCenter.default
 					.publisher(for: UIScreen.capturedDidChangeNotification)

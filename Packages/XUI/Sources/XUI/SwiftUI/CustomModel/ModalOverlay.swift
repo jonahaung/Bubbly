@@ -14,7 +14,7 @@ public struct ModalOverlay<Content: View>: View {
     public init(
         _ alignment: Alignment,
         from edge: Edge,
-        allowsBackgroundTap: Bool,
+        allowsBackgroundTap: Bool = true,
         @ViewBuilder _ content: @escaping () -> Content,
         onClose: @escaping () -> Void
     ) {
@@ -31,8 +31,8 @@ public struct ModalOverlay<Content: View>: View {
         }, onClose: onClose)
             .transition(
                 .asymmetric(
-					insertion: .modal(edge: edge, curve: .easeOutExponential(duration: 0.5)),
-					removal: .modal(edge: edge, curve: .easeInExponential(duration: 0.5))
+					insertion: .modal(edge: edge, curve: .easeOut(duration: 0.5)),
+					removal: .modal(edge: edge, curve: .easeIn(duration: 0.4))
                 )
             )
     }

@@ -2,8 +2,6 @@
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
-
 // private enum Phase: Equatable {
 //	case idle
 //	case loading(Task<Void, Never>)
@@ -144,6 +142,7 @@ import SwiftUI
 //	}
 // }
 import SwiftUI
+import Pow
 
 public struct AsyncButton<Label: View>: View {
 	private var action: () async throws -> Void
@@ -153,21 +152,16 @@ public struct AsyncButton<Label: View>: View {
 	@State private var isDisabled = false
 
 	public var body: some View {
-		label()
-			.fixedSize()
-			.opacity(isDisabled ? 0.2 : 1)
-			._onButtonGesture { pressing in
-				guard !isDisabled else { return }
-			if pressing {
-				isDisabled = true
-			} else {
-				UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: 0.7)
-			}
-		} perform: {
+		Button {
 			Task {
-				try await action()
-				isDisabled = false
+				do {
+					try await action()
+				} catch {
+					ToastPresenter.show(error.localizedDescription, allowsBackgroundTap: true)
+				}
 			}
+		} label: {
+			label()
 		}
 	}
 
@@ -186,8 +180,8 @@ public enum AsyncButtonOption: CaseIterable {
 	case disableButton
 	case showProgressView
 }
-public extension AsyncButton where Label == Text {
-	init(
+extension AsyncButton where Label == Text {
+	public init(
 		_ title: String,
 		options: Set<AsyncButtonOption> = .allCases,
 		action: @escaping () async throws -> Void
@@ -197,8 +191,8 @@ public extension AsyncButton where Label == Text {
 		}
 	}
 }
-public extension AsyncButton where Label == Image {
-	init(
+extension AsyncButton where Label == Image {
+	public init(
 		systemImageName: String,
 		options: Set<AsyncButtonOption> = .allCases,
 		action: @escaping () async throws -> Void
@@ -210,8 +204,8 @@ public extension AsyncButton where Label == Image {
 }
 
 @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-public extension Set where Element == AsyncButtonOption {
-	static var allCases: Self {
+extension Set where Element == AsyncButtonOption {
+	public static var allCases: Self {
 		.init(Element.allCases)
 	}
 }

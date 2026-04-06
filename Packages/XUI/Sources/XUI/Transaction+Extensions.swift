@@ -7,27 +7,25 @@ import SwiftUI
 extension Transaction {
 	public static func withAnimation(
 		_ animation: Animation = .anticipateOvershoot(duration: 0.35),
-		completion: (@MainActor () -> Void)? = nil
+		completion: (() -> Void)? = nil
 	)
 	-> Transaction {
 		var transaction = Transaction(animation: animation)
 		transaction.disablesAnimations = false
-		transaction.scrollPositionUpdatePreservesVelocity = false
+		transaction.scrollPositionUpdatePreservesVelocity = true
 		transaction.scrollContentOffsetAdjustmentBehavior = .disabled
 		transaction.tracksVelocity = true
 		transaction.scrollTargetAnchor = .none
 		if let completion {
-			transaction.addAnimationCompletion(criteria: .removed) {
-				Task { @MainActor in
-					completion()
-				}
+			transaction.addAnimationCompletion(criteria: .logicallyComplete) {
+				completion()
 			}
 		}
 		return transaction
 	}
 
 
-	public static func withoutAnimation(completion: (@MainActor () -> Void)? = nil) -> Transaction {
+	public static func withoutAnimation(completion: (() -> Void)? = nil) -> Transaction {
 		var transaction = Transaction(animation: nil)
 		transaction.disablesAnimations = true
 		transaction.scrollPositionUpdatePreservesVelocity = false
@@ -35,35 +33,30 @@ extension Transaction {
 		transaction.tracksVelocity = false
 		transaction.scrollTargetAnchor = .none
 		if let completion {
-			transaction.addAnimationCompletion(criteria: .removed) {
-				Task { @MainActor in
-					completion()
-				}
+			transaction.addAnimationCompletion(criteria: .logicallyComplete) {
+				completion()
 			}
 		}
 		return transaction
 	}
 
-	@MainActor public static let scrollPositionPreserved: Transaction = {
+	@MainActor public static func scrollPositionPreserved() -> Transaction {
 		var transaction = Transaction()
 		transaction.animation = nil
 		transaction.tracksVelocity = true
 		transaction.scrollPositionUpdatePreservesVelocity = true
 		transaction.disablesAnimations = true
 		transaction.isContinuous = false
-		transaction.dismissBehavior = .destructive
 		transaction.scrollContentOffsetAdjustmentBehavior = .disabled
-		transaction.scrollTargetAnchor = .bottom
+		transaction.scrollTargetAnchor = .none
 		return transaction
-	}()
+	}
 
-	@MainActor public static func scrollView(completion: (@MainActor () -> Void)? = nil) -> Transaction {
-		var transaction = Self.scrollPositionPreserved
+	@MainActor public static func scrollView(completion: (() -> Void)? = nil) -> Transaction {
+		var transaction = Self.scrollPositionPreserved()
 		if let completion {
-			transaction.addAnimationCompletion(criteria: .removed) {
-				Task { @MainActor in
-					completion()
-				}
+			transaction.addAnimationCompletion(criteria: .logicallyComplete) {
+				completion()
 			}
 		}
 		return transaction

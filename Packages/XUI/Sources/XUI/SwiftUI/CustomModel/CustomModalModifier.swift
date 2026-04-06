@@ -26,10 +26,6 @@ extension AnyTransition {
 				content
 					.transformEffect(transform(for: proxy.size))
 					.environment(\.transitionProgress, progress)
-					.sensoryFeedback(
-						.impact(weight: .medium, intensity: 0.7),
-						trigger: progress == 0
-					)
 			}
 		}
 

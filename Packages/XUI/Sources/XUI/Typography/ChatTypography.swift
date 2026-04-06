@@ -35,7 +35,7 @@ public struct Typography: Sendable {
 
 public extension Typography {
     static let `default` = Typography(
-        body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize),
+		body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize).leading(.tight),
         callout: .system(size: UIFont.preferredFont(forTextStyle: .callout).pointSize),
         subHeadline: .system(size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize),
         headLine:

@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct DimensionLabel<Content: View>: View {
+struct DimensionLabel<Content: View & SendableMetatype>: View {
     @ViewBuilder var content: Content
 
     var edge: Edge?
@@ -22,6 +22,7 @@ struct DimensionLabel<Content: View>: View {
             .background(.foreground, in: LabelBackground(edge: edge))
             .fixedSize()
             .alignmentGuide(HorizontalAlignment.dimensionLabel) { d in
+				
                 switch edge {
                 case .top, .bottom, nil: d[HorizontalAlignment.center]
                 case .leading: d[.leading] - 8
