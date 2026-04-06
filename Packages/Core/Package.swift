@@ -5,7 +5,10 @@ import PackageDescription
 
 let package = Package(
     name: "Core",
-    platforms: [.iOS(.v26)],
+    platforms: [
+        .iOS(.v26),
+        .macOS(.v12)
+    ],
     products: [
         .library(
             name: "Core",
@@ -19,8 +22,7 @@ let package = Package(
         .package(name: "MediaPicker", path: "../MediaPicker"),
         .package(name: "FCM_V1", path: "../FCM_V1"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.4.0"),
-        .package(name: "FirePhoneOTP", path: "../FirePhoneOTP"),
-		.package(url: "https://github.com/EmergeTools/Pow", from: "1.0.5")
+        .package(name: "FirePhoneOTP", path: "../FirePhoneOTP")
     ],
 
     targets: [
@@ -37,7 +39,7 @@ let package = Package(
                 .product(name: "FirebaseStorage", package: "firebase-ios-sdk"),
                 .product(name: "FirePhoneOTP", package: "FirePhoneOTP"),
                 .product(name: "Crypto", package: "Crypto"),
-				.product(name: "Pow", package: "Pow")
+				
 
 			],
 			resources: [

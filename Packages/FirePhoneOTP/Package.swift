@@ -5,7 +5,10 @@ import PackageDescription
 
 let package = Package(
     name: "FirePhoneOTP",
-    platforms: [.iOS(.v18)],
+    platforms: [
+        .iOS(.v18),
+        .macOS(.v12)
+    ],
     products: [
         .library(
             name: "FirePhoneOTP",

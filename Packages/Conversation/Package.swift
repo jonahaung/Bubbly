@@ -4,11 +4,17 @@ import PackageDescription
 
 let package = Package(
     name: "Conversation",
-    platforms: [.iOS(.v26)],
+    platforms: [
+        .iOS(.v26)
+    ],
     products: [
         .library(
             name: "Conversation",
             targets: ["Conversation"]
+        ),
+        .library(
+            name: "ConversationTestingSupport",
+            targets: ["ConversationTestingSupport"]
         )
     ],
     dependencies: [
@@ -18,35 +24,31 @@ let package = Package(
         .package(name: "XUI", path: "../XUI"),
         .package(name: "ImageLoader", path: "../ImageLoader"),
         .package(name: "MediaPicker", path: "../MediaPicker"),
-        .package(
-            url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
-            .upToNextMajor(from: "5.3.0")
-        ),
-		.package(url: "https://github.com/gonzalezreal/textual", from: "0.1.0")
+
     ],
     targets: [
         .target(
             name: "Conversation",
             dependencies: [
-                .product(name: "Core", package: "Core"),
-                .product(name: "Database", package: "Database"),
-                .product(name: "Services", package: "Services"),
-                .product(name: "XUI", package: "XUI"),
-                .product(name: "ImageLoader", package: "ImageLoader"),
-                .product(name: "VideoLoader", package: "ImageLoader"),
-                .product(name: "MediaPicker", package: "MediaPicker"),
-                .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
-				.product(name: "Textual", package: "Textual")
+                .product(name: "Core", package: "Core", condition: .when(platforms: [.iOS])),
+                .product(name: "Database", package: "Database", condition: .when(platforms: [.iOS])),
+                .product(name: "Services", package: "Services", condition: .when(platforms: [.iOS])),
+                .product(name: "XUI", package: "XUI", condition: .when(platforms: [.iOS])),
+                .product(name: "ImageLoader", package: "ImageLoader", condition: .when(platforms: [.iOS])),
+                .product(name: "VideoLoader", package: "ImageLoader", condition: .when(platforms: [.iOS])),
+                .product(name: "MediaPicker", package: "MediaPicker", condition: .when(platforms: [.iOS]))
             ],
             resources: [
                 .process("Resources")
             ]
         ),
+        .target(
+            name: "ConversationTestingSupport"
+        ),
         .testTarget(
             name: "ConversationTests",
             dependencies: [
-                "Conversation",
-                .product(name: "Database", package: "Database")
+                "ConversationTestingSupport"
             ]
         )
     ]
