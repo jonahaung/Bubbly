@@ -1,12 +1,14 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
+import XUI
 
 struct EmojiPicker: View {
     var onSelect: (Emoji) -> Void
-    @State private var emojis = [Emoji]()
+	private let emojis = EmojiRepository.shared.emojis
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             LazyHGrid(rows: rows) {
@@ -16,17 +18,18 @@ struct EmojiPicker: View {
                     } label: {
                         Text(emoji.value)
                             .font(.title3)
-                    }
+					}
+					.id(emoji.id)
                 }
             }.padding(.leading, 8)
         }
         .fixedSize(horizontal: false, vertical: true)
-        .task {
-            emojis = EmojiRepository.shared.emojis
-        }
+		.equatable(by: 1)
     }
 
     var rows: [GridItem] {
         Array(repeating: GridItem(.fixed(30)), count: 4)
     }
 }
+
+#endif

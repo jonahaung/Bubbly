@@ -24,13 +24,11 @@ protocol ScrollCoordinatorDelegate: AnyObject {
 		_ coordinator: ScrollCoordinator,
 		removeAt edge: VerticalEdge
 	)
-	func scrollCoordinator(
-		_ coordinator: ScrollCoordinator,
-		resetAt edge: VerticalEdge
-	)
+	
 	func scrollCoordinator(
 		_ coordinator: ScrollCoordinator,
 		finalizeUpdate state: ScrollCoordinator.State,
 		newState: ScrollCoordinator.State
 	)
+	func layoutIfNeeded()
 }

@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
@@ -12,8 +13,7 @@ extension ChatComposer {
         var id: Self {
             self
         }
-
-        case menu, text, camera, liary, audio, document, machineImag, emoji
+        case camera, liary, audio, document, machineImag, emoji
     }
 }
 
@@ -24,8 +24,6 @@ extension ChatComposer.Source {
             "microphone.and.signal.meter.fill"
         case .machineImag:
             "apple.intelligence"
-        case .text:
-            "text.line.2.summary"
         case .liary:
             "photo.stack.fill"
         case .camera:
@@ -34,28 +32,25 @@ extension ChatComposer.Source {
             "text.document"
         case .emoji:
             "heart.fill"
-        case .menu:
-            "plus"
         }
     }
 
-    var foreGroundStyle: AnyShapeStyle {
-        switch self {
-        case .camera, .liary, .audio, .text, .menu, .document:
-            AnyShapeStyle(
-                Color.accentColor.gradient
-            )
-        case .machineImag:
-            AnyShapeStyle(AngularGradient(
-                gradient: Gradient(
-                    colors: [.indigo, .blue, .red, .orange, .indigo]
-                ),
-                center: .center
-            ))
-        case .emoji:
-            AnyShapeStyle(
-                Color.red.gradient
-            )
-        }
-    }
+	var color: Color {
+		switch self {
+		case .emoji:
+			Color(.systemPink)
+		case .audio:
+			Color(.orange)
+		case .machineImag:
+			Color(.systemPurple)
+		case .liary:
+			Color(.systemBlue)
+		case .camera:
+			Color(.systemBlue)
+		case .document:
+			Color(.systemTeal)
+		}
+	}
 }
+
+#endif

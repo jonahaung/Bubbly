@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
@@ -6,86 +7,81 @@ import PhotosUI
 import Services
 import SwiftUI
 import XUI
+import _AVKit_SwiftUI
+import Core
 
 struct ComposeBar: View {
 
-	@State private var viewModel = ComposeBarViewModel()
 	@Environment(ChatComposer.self) private var composer
+	@Environment(ChatManager.self) private var manager
 	@Environment(\.sharedFocusState) private var focusState
 	@Environment(\.conversationTheme) private var theme
 
 	var body: some View {
 		VStack(spacing: 0) {
-			switch composer.source {
-			case .emoji:
-				EmojiPanel()
-			default:
-				if !composer.attachments.isEmpty {
+			if let source = composer.state.source {
+				switch source {
+				case .emoji:
+					ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {
+						EmojiPanel()
+					} onClose: {
+						composer.updateSource(nil)
+					}
+				case .camera:
+					ComposeBarAttachmentView()
+				case .document:
+					Text(.init(composer.fileContent))
+				default:
 					ComposeBarAttachmentView()
 				}
 			}
 			HStack(alignment: .bottom, spacing: 4) {
-				HamburgerButton(isOpen: $viewModel.isMenuOpened, size: 38) { newValue in
-					if newValue {
-						focusState?.defocus()
+				HamburgerButton(
+					isOpen: .init(
+						get: { composer.state.menuIsOpened },
+						set: { composer.state.menuIsOpened = $0 }),
+					size: 38
+				) { newValue in
+					if !newValue {
+						composer.updateSource(nil)
 					}
 				}
-				if viewModel.isMenuOpened {
-					switch composer.source {
-					case .liary:
-						ComposeBarSourceButton(source: .text)
-						photoPickerButton()
-						Text(composer.photoPicker.selectedImages.count.description + " photos")
-							.flexible(.horizontal)
-					default:
+				if composer.state.menuIsOpened {
+					if composer.state.source == nil {
 						HStack(alignment: .center, spacing: -8) {
-							ComposeBarSourceButton(source: .camera)
-
-							photoPickerButton()
-							ComposeBarSourceButton(source: .audio)
+							ComposerSourceButton(source: .camera)
+							ComposerSourceButton(source: .liary)
+							ComposerSourceButton(source: .audio)
 						}
-						.frame(height: 44)
+						.frame(height: ChatLayoutConstants.bottomBarHeight)
 
 						HStack(alignment: .center, spacing: -8) {
-							ComposeBarSourceButton(source: .machineImag)
-							ComposeBarSourceButton(source: .emoji)
+							ComposerSourceButton(source: .document)
+							ComposerSourceButton(source: .machineImag)
+							ComposerSourceButton(source: .emoji)
 						}
-						.frame(height: 44)
+						.frame(height: ChatLayoutConstants.bottomBarHeight)
 					}
 				}
 				ComposeBarInputTextField(composer: composer)
 				ComposeBarSendButton()
 			}
-			.animation(.easeInExponential, value: viewModel.isMenuOpened)
-			.padding(.init(top: 0, leading: 16, bottom: 4, trailing: 16))
-		}
-		.background(
-			LinearGradient(
-				colors: [
-					.clear,
-					theme.backgroundColor
-				],
-				startPoint: .top,
-				endPoint: .bottom
+			.animation(.easeIn(duration: 0.20), value: composer.state.menuIsOpened)
+			.animation(.easeIn(duration: 0.20), value: composer.state.source == nil)
+			.padding(.init(top: 0, leading: 8, bottom: 0, trailing: 8))
+			.background(
+				LinearGradient(
+					colors: [
+						.clear,
+						theme.backgroundColor,
+					],
+					startPoint: .top,
+					endPoint: .bottom
+				), ignoresSafeAreaEdges: .all
 			)
-		)
-
-	}
-
-	private func photoPickerButton() -> some View {
-		Button {
-			Router.shared
-				.presentModel(
-					NavPath.view(PhotoPickerView().environment(composer.photoPicker).opaqueView())
-				)
-		} label: {
-			Image(systemName: ChatComposer.Source.liary.systemImageName)
-				.resizable()
-				.frame(square: 20)
-				.foregroundStyle(ChatComposer.Source.liary.foreGroundStyle)
+			.geometryGroup()
 		}
-		.frame(square: 38)
-		.background(.windowBackground, in: .circle)
+		.frame(maxWidth: .infinity, alignment: .bottom)
 	}
 }
 
@@ -97,7 +93,10 @@ extension ComposeBar {
 			EmojiPicker { emoji in
 				composer.inputText.text.append(emoji.value)
 			}
-			.background(.regularMaterial, ignoresSafeAreaEdges: .bottom)
+			.background(.regularMaterial, in: .rect)
+			
 		}
 	}
 }
+
+#endif

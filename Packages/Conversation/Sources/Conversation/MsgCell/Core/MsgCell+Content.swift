@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -12,30 +12,44 @@ extension MsgCell {
 
 	struct Content: View {
 
-		@Environment(MsgCellViewModel.self) private var viewModel
-		@Environment(\.conversationTheme) private var theme
-		private var state: MsgCellViewModel.State { viewModel.state }
+		// MARK: Internal
 
 		var body: some View {
 			ZStack(
-				alignment: .init(horizontal: state.horizontalAlignment.inverted, vertical: .top)
+				alignment: .init(horizontal: state.horizontalAlignment.inverted, vertical: .top),
 			) {
 				BubbleView()
+					.layoutPriority(1)
 				OverlayBubbleView()
 			}
 			.foregroundStyle(state.foregroundStyle)
 		}
+
+		// MARK: Private
+
+		@Environment(MsgCellViewModel.self) private var viewModel
+
+		private var state: MsgCellViewModel.State {
+			viewModel.state
+		}
 	}
 
 	struct OverlayBubbleView: View {
-		@Environment(MsgCellViewModel.self) private var viewModel
-		private var state: MsgCellViewModel.State { viewModel.state }
+
+		// MARK: Internal
+
 		var body: some View {
-			if viewModel.state.isVisible, let reactions = state.reactions {
-				Reactions(reactions: reactions)
-					.fixedSize()
-					.allowsHitTesting(false)
-			}
+			Reactions(reactions: viewModel.state.reactions)
+				.fixedSize()
+				.equatable(by: viewModel.state.reactions)
+		}
+
+		// MARK: Private
+
+		@Environment(MsgCellViewModel.self) private var viewModel
+
+		private var state: MsgCellViewModel.State {
+			viewModel.state
 		}
 	}
 }

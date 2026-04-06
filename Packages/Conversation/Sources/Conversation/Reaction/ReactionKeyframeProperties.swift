@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
@@ -82,3 +83,5 @@ public extension View {
         modifier(ReactionKeyframeModifier(trigger: trigger))
     }
 }
+
+#endif

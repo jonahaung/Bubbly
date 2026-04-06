@@ -1,35 +1,44 @@
+#if os(iOS)
 import Database
 import SwiftUI
 import XUI
+import Core
 
 extension ComposeBar {
 	struct ComposeBarSendButton: View {
 		@Environment(ChatComposer.self) private var composer: ChatComposer
-		@Environment(ChatViewManager.self) private var manager
+		@Environment(ChatManager.self) private var manager
 
 		var body: some View {
 			AsyncButton {
 				if composer.hasContent {
-					composer.send(conversation: manager.conversation)
+					withTransaction(.withoutAnimation()) {
+						composer.send(conversation: manager.state.conversation)
+					}
 				} else {
 					composer.inputText.text = Lorem.random()
 				}
 			} label: {
 				ZStack {
-					Image(systemName: "paperplane")
+					let hasText = composer.inputText.hasText
+					Image(systemName: "paperplane.fill")
 						.resizable()
 						.scaledToFit()
 						.frame(square: 24)
-
-					if composer.isLoading {
-						LoadingIndicator(43)
-							.opacity(0.5)
-					}
+						.foregroundStyle(hasText ? .primary : .secondary)
+						.padding()
+						.rotationEffect(
+							.degrees(hasText ? -45 : -180),
+							anchor: .center
+						)
+						.animation(.anticipateOvershoot, value: hasText)
 				}
-				.frame(width: 44, height: 44, alignment: .center)
+				.frame(width: ChatLayoutConstants.bottomBarHeight, height: ChatLayoutConstants.bottomBarHeight, alignment: .center)
 				.background(.windowBackground, in: .circle)
-				.symbolVariant(composer.inputText.hasText ? .fill : .none)
+				.geometryGroup()
 			}
 		}
 	}
 }
+
+#endif

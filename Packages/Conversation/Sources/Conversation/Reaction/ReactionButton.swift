@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
@@ -60,3 +61,5 @@ private struct ReactionButtonStyle: ButtonStyle {
             .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
+
+#endif

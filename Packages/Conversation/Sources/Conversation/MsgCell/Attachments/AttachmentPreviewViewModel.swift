@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AttachmentPreviewViewModel.swift
 //  Conversation
@@ -71,3 +72,5 @@ public final class AttachmentPreviewViewModel {
         }
     }
 }
+
+#endif

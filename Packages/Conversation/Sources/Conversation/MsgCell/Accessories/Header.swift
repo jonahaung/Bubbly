@@ -1,6 +1,3 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
 
 import Core
 import Database
@@ -11,28 +8,28 @@ import XUI
 extension MsgCell {
     struct Header: View {
         @Environment(MsgCellViewModel.self) private var viewModel
-        private var msg: Message {
-            viewModel.msg
+		private var state: MsgCellViewModel.State {
+			viewModel.state
         }
 
         @Environment(\.typography) private var typography
 
         private var headerText: String {
-            if msg.isSender {
-                return msg.date.formatted(date: .abbreviated, time: .shortened)
+            if state.isSender {
+                return state.date.formatted(date: .abbreviated, time: .shortened)
             } else {
-                let name: String? = ContactsRepository.shared.contact(for: msg.senderID)?.name
+                let name: String? = ContactsRepository.shared.contact(for: state.senderID)?.name
                 return name ?? "Unknown"
             }
         }
 
         var body: some View {
-            let hPadding: CGFloat = ChatLayoutConstants.Cell.defaultSpacing + 4 + 8
             Text(headerText)
                 .font(typography.caption1)
-                .padding(.horizontal, hPadding)
+                .padding(.horizontal, 35)
                 .fixedSize(horizontal: false, vertical: true)
-                .equatable(by: msg.uid)
+				.allowsHitTesting(false)
+                .equatable(by: state.id)
         }
     }
 }

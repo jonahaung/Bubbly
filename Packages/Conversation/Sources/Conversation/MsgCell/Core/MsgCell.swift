@@ -1,3 +1,7 @@
+//
+// Copyright © 2026 Aung Ko Min. All rights reserved.
+//
+
 import Core
 import Database
 import Services
@@ -6,12 +10,9 @@ import XUI
 
 struct MsgCell: View {
 
-	let viewModel: MsgCellViewModel
-	private var isSelected: Bool {
-		viewModel.state.isSelected
-	}
+	// MARK: Internal
 
-	var layout: MsgCellLayout { viewModel.state.layout }
+	let viewModel: MsgCellViewModel
 
 	var body: some View {
 		VStack(alignment: viewModel.state.horizontalAlignment, spacing: 0) {
@@ -26,7 +27,7 @@ struct MsgCell: View {
 			}
 			HStack(alignment: .bottom, spacing: 0) {
 				if viewModel.state.isSender {
-					Spacer(minLength: 50)
+					Spacer(minLength: viewModel.state.attachments.isEmpty ? 50 : 120)
 				} else {
 					IncomingAccessory()
 				}
@@ -36,7 +37,7 @@ struct MsgCell: View {
 				if viewModel.state.isSender {
 					OutgoingAccessory()
 				} else {
-					Spacer(minLength: 50)
+					Spacer(minLength: viewModel.state.attachments.isEmpty ? 50 : 120)
 				}
 			}
 
@@ -45,6 +46,17 @@ struct MsgCell: View {
 			}
 		}
 		.environment(\.isVisible, viewModel.state.isVisible)
-		
+		.environment(viewModel)
+		.equatable(by: viewModel.state)
+	}
+
+	// MARK: Private
+
+	private var isSelected: Bool {
+		viewModel.state.isSelected
+	}
+
+	private var layout: MsgCellLayout {
+		viewModel.state.layout
 	}
 }

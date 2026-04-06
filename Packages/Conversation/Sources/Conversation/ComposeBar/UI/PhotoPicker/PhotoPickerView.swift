@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
@@ -25,5 +26,8 @@ struct PhotoPickerView: View {
         }
         .photosPickerStyle(.inline)
         .photosPickerDisabledCapabilities(.collectionNavigation)
+		.ignoresSafeArea()
     }
 }
+
+#endif

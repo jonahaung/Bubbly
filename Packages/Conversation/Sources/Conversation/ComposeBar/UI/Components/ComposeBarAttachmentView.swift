@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
@@ -12,7 +13,7 @@ extension ComposeBar {
         var body: some View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    ForEach(composer.attachments) { attachment in
+					ForEach(composer.state.attachments) { attachment in
                         AttachmentPreview(attachment: attachment) {
                             log($0)
                         }
@@ -36,7 +37,7 @@ extension ComposeBar {
                 .fixedSize(horizontal: false, vertical: true)
                 .scrollTargetLayout()
             }
-            .scrollPosition(id: .constant(composer.attachments.last?.uid))
+			.scrollPosition(id: .constant(composer.state.attachments.last?.uid))
             .scrollBounceBehavior(.basedOnSize)
             .scrollClipDisabled()
             .contentMargins(.leading, 16, for: .scrollContent)
@@ -45,3 +46,5 @@ extension ComposeBar {
         }
     }
 }
+
+#endif

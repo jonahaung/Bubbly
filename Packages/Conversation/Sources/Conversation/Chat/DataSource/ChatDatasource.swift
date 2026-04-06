@@ -1,8 +1,8 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
 
-import Combine
 import Core
 import Database
 import Foundation
@@ -10,189 +10,60 @@ import Services
 import SwiftData
 import XUI
 
-protocol ChatDatasourceDelegate: AnyObject, Sendable {
-	func datasource(didInsert snapshot: Message) async
-	func datasource(didReceiveMsg snapshot: Message) async
-	func datasource(didRemove snapshot: Message, animated: Bool) async
-	func datasource(didUpdate snapshot: Message, animated: Bool) async
-	func datasource(didReceive status: AnyMsgData.SeenStatusPayload) async
-	func datasource(didReceive typingStatus: AnyMsgData.TypingStatusPayload) async
-	func datasource(didRecieveError error: Error) async
-}
-
 actor ChatDatasource {
 
-	@MainActor
-	weak var delegate: ChatDatasourceDelegate?
 	private let pageSize: Int
-	private let queue = SerialTaskQueue()
-	private let cancelBag = CancelBag()
 
-	init(
-		_ config: ConversationInitializer.Configuration
-	) {
-		pageSize = config.pageSize
-		NotificationCenter.default
-			.publisher(for: .msgNoti(for: config.conID))
-			.compactMap(\.anyMsgData)
-			.sink { [weak self] data in
-				guard let self else { return }
-
-				self.queue.addTask { [weak self] completion in
-					guard let self else { return }
-
-					Task {
-						await self.performUpdate(data)
-						try? await Task.sleep(seconds: 0.5)
-						completion()
-					}
-				}
-			}
-			.store(in: cancelBag)
+	init(pageSize: Int) {
+		self.pageSize = pageSize
 	}
-
-	deinit {
-		cancelBag.cancel()
-	}
-
+	
 	func reset(conID: String) async throws -> [Message] {
-
-		let messages = try await ConversationRepo.fetchMessages(
+		let messages = try await MsgRepo.msgs(
 			conID: conID,
 			limit: pageSize
 		)
-
 		return messages
 	}
 
-	func loadPrevious(
+	func previous(
 		before date: String,
 		conID: String
 	) async throws -> [Message] {
-		let messages = try await fetchPrevious(
-			before: date,
-			conID: conID,
-			limit: pageSize
-		)
-		return messages
-	}
-
-	func loadMore(
-		after date: String,
-		conID: String
-	) async throws -> [Message] {
-		let messages = try await fetchMore(
-			after: date,
-			conID: conID,
-			limit: pageSize
-		)
-
-		return messages
-	}
-}
-
-private extension ChatDatasource {
-
-	func fetchPrevious(
-		before date: String,
-		conID: String,
-		limit: Int
-	) async throws -> [Message] {
-
 		var descriptor = FetchDescriptor<PMsg>(
-			predicate: makePredicate(
-				conID: conID,
-				date: date,
-				comparison: .lessThan
-			)
+			predicate: .msgs(conID: conID, date: date, comparison: .lessThan),
+			sortBy: [.init(\.date, order: .reverse)]
 		)
-
-		descriptor.sortBy = [.init(\.date, order: .reverse)]
-		descriptor.fetchLimit = limit
-
+		descriptor.fetchLimit = pageSize
 		let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
 
 		return Array(snapshots.reversed())
 	}
 
-	func fetchMore(
+	func msg(
+		from date: String,
+		conID: String
+	) async throws -> [Message] {
+		var descriptor = FetchDescriptor<PMsg>(
+			predicate: .msgs(conID: conID, date: date, comparison: .lessThanOrEqual),
+			sortBy: [.init(\.date, order: .reverse)]
+		)
+		descriptor.fetchLimit = pageSize
+		let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
+
+		return Array(snapshots.reversed())
+	}
+	func more(
 		after date: String,
 		conID: String,
-		limit: Int
 	) async throws -> [Message] {
-
 		var descriptor = FetchDescriptor<PMsg>(
-			predicate: makePredicate(
-				conID: conID,
-				date: date,
-				comparison: .greaterThan
-			)
+			predicate: .msgs(conID: conID, date: date, comparison: .greaterThan),
+			sortBy: [.init(\.date, order: .forward)]
 		)
-
-		descriptor.sortBy = [.init(\.date, order: .forward)]
-		descriptor.fetchLimit = limit
-
+		descriptor.fetchLimit = pageSize
 		return try await Store.shared.msgStore?.fetch(descriptor) ?? []
 	}
-
-	func performUpdate(_ data: AnyMsgData) async {
-
-		switch data {
-
-		case let .newMsg(rMsg):
-			let msg = Message(rMsg)
-			await delegate?.datasource(didInsert: msg)
-			if !msg.isSender {
-				await delegate?.datasource(didReceiveMsg: msg)
-			}
-
-		case let .updatedMsg(rMsg):
-			await delegate?.datasource(didUpdate: Message(rMsg), animated: false)
-
-		case let .reaction(reaction):
-			if let msg = try? await Store.shared.msgStore?.fetch(uid: reaction.msgID) {
-				await delegate?.datasource(didUpdate: msg, animated: false)
-			}
-
-		case let .typingStatus(status):
-			await delegate?.datasource(didReceive: status)
-
-		case let .deleteMsg(rMsg):
-			do {
-				try await Store.shared.msgStore?.delete(uid: rMsg.uid)
-				await delegate?.datasource(didRemove: Message(rMsg), animated: true)
-			} catch {
-				await delegate?.datasource(didRecieveError: error)
-			}
-
-		case let .seenStatus(status):
-			await delegate?.datasource(didReceive: status)
-		}
-	}
-
-	func makePredicate(
-		conID: String,
-		date: String,
-		comparison: PredicateExpressions.ComparisonOperator
-	) -> Predicate<PMsg> {
-		Predicate<PMsg> {
-			PredicateExpressions.Conjunction(
-				lhs: PredicateExpressions.build_Equal(
-					lhs: PredicateExpressions.build_KeyPath(
-						root: PredicateExpressions.build_Arg($0),
-						keyPath: \.conID
-					),
-					rhs: PredicateExpressions.build_Arg(conID)
-				),
-				rhs: PredicateExpressions.build_Comparison(
-					lhs: PredicateExpressions.build_KeyPath(
-						root: PredicateExpressions.build_Arg($0),
-						keyPath: \.date
-					),
-					rhs: PredicateExpressions.build_Arg(date),
-					op: comparison
-				)
-			)
-		}
-	}
 }
+
+#endif

@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Database
@@ -10,16 +10,14 @@ extension MsgCell {
 
 	struct BubbleView: View {
 
-		@Environment(MsgCellViewModel.self) private var viewModel
-		private var state: MsgCellViewModel.State { viewModel.state }
-		@Environment(\.conversationTheme) private var theme
+		// MARK: Internal
 
 		var body: some View {
 			if !state.attachments.isEmpty {
 				VStack(alignment: state.horizontalAlignment, spacing: 0) {
 					MsgAttachmentsView(
 						attachments: state.attachments,
-						alignment: state.horizontalAlignment
+						alignment: state.horizontalAlignment,
 					)
 					if state.text != nil {
 						TextContent()
@@ -38,8 +36,17 @@ extension MsgCell {
 			}
 		}
 
+		// MARK: Private
+
+		@Environment(MsgCellViewModel.self) private var viewModel
+		@Environment(\.conversationTheme) private var theme
+
+		private var state: MsgCellViewModel.State {
+			viewModel.state
+		}
+
 		private var bubbleShape: UnevenRoundedRectangle {
-			state.computeBubbleCorner()
+			state.bubbleCornor
 				.roundedRectange(cornerRadius: theme.bubbleCornerRadius)
 		}
 	}

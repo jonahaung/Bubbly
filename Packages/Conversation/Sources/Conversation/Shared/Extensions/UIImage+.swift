@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
@@ -27,3 +28,5 @@ extension UIImage {
         }
     }
 }
+
+#endif

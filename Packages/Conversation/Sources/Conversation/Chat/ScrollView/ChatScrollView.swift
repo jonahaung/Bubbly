@@ -12,41 +12,70 @@ import SwiftUI
 import XUI
 
 struct ChatScrollView: View {
-	
-	var manager: ChatViewManager
+
+	// MARK: Internal
 
 	var body: some View {
-		ScrollView(.vertical, showsIndicators: true) {
-			LazyVStack(spacing: manager.conversationConfig.lineSpacing) {
-				if manager.presentation.state.showContactInfo {
-					ConversationHeaderView()
+		ScrollView {
+			if lazyScrollView {
+				LazyVStack(spacing: manager.conversationConfig.lineSpacing) {
+					if manager.presentation.state.showContactInfo {
+						HeaderProfileView()
+					}
+					ForEach(manager.models.renderedModels) { identified in
+						let model = identified.value
+						MsgCell(viewModel: model)
+							.onScrollVisibilityChange { isVisible in
+								model.setVisibility(isVisible)
+								if isVisible, model.state.layout.showTopPadding {
+									manager.presentation.send(.date(model.msg.date))
+								}
+							}
+							.id(identified.id)
+					}
 				}
-				ForEach(manager.models.renderedModels) { model in
-					MsgCell(viewModel: model)
-						.environment(model)
-						.id(model.id)
+				.equatable(by: manager.state.reloadID)
+				.geometryGroup()
+			} else {
+				VStack(spacing: manager.conversationConfig.lineSpacing) {
+					if manager.presentation.state.showContactInfo {
+						HeaderProfileView()
+					}
+					ForEach(manager.models.renderedModels) { identified in
+						let model = identified.value
+						MsgCell(viewModel: model)
+							.id(identified.id)
+							.onScrollVisibilityChange { isVisible in
+								model.setVisibility(isVisible)
+								if isVisible, model.state.layout.showTimeSeparator {
+									manager.presentation.send(.date(model.msg.date))
+								}
+							}
+					}
 				}
+				.equatable(by: manager.state.reloadID)
+				.geometryGroup()
 			}
-			.scrollTargetLayout()
 		}
-		.font(.system(size: UIFont.preferredFont(forTextStyle: .body).pointSize))
-		.tint(Color.link.mix(with: Color.accentColor, by: 0.3))
+		.contentMargins(.vertical, ChatLayoutConstants.bottomBarHeight)
+		.scrollDismissesKeyboard(.never)
+		.defaultScrollAnchor(.bottom, for: .sizeChanges)
 		.onScrollPhaseChange { oldPhase, newPhase, context in
 			manager.send(.onScrollPhaseChange(oldPhase, newPhase, context: context))
 		}
 		.onScrollGeometryChange(
 			for: VScrollGeometry.self,
-			of: { .init($0) }
+			of: { .init($0) },
 		) { oldValue, newValue in
 			manager.send(.onScrollGeometryChange(oldValue, newValue))
 		}
-		.onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) { newValue in
-			manager.onScrollTargetVisibilityChange(newValue)
-		}
-		.scrollClipDisabled()
-		.scrollDismissesKeyboard(.never)
-		.defaultScrollAnchor(.bottom, for: .sizeChanges)
 		.equatable(by: manager.state.reloadID)
 		.scrollPosition(manager.scrollController.scrollPositionBindable, anchor: .none)
 	}
+
+	// MARK: Private
+
+	@Environment(ChatManager.self) private var manager
+	@AppStorage("Lazy Scroll View") private var lazyScrollView: Bool = true
+
 }

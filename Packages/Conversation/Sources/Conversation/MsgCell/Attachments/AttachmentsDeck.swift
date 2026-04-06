@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AttachmentsDeck.swift
 //  Conversation
@@ -71,3 +72,5 @@ struct AttachmentsDeck<Content: View>: View {
         return .black.opacity(opacity)
     }
 }
+
+#endif

@@ -1,7 +1,3 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
-
 import Core
 import Foundation
 import SwiftUI
@@ -14,147 +10,148 @@ struct ScrollReducer {
 	typealias DataUpdate = ScrollCoordinator.DataUpdate
 
 	enum Effect: Equatable {
-		case scroll(item: ScrollPositionItem)
-		case begingUpdate(_ updates: DataUpdate)
-		case endUpdate(_ updates: DataUpdate, scrollItem: ScrollPositionItem?)
-		case finalizeScrollViewUpdates
-		case removePendingUpdates
+		case begingUpdate(DataUpdate)
+		case endUpdate(DataUpdate, scrollItem: ScrollPositionItem?)
 		case noAction
 	}
 }
 
 extension ScrollReducer {
+
 	func reduce(
 		state: State,
 		intent: Intent,
 		canLoadOlder: Bool,
 		canLoadNewer: Bool,
-		shouldAdjustWindow: Bool
+		shouldAdjustWindow: Bool,
 	) -> Effect {
 		switch intent {
-		case .onScrollGeometryChange(let oldValue, let newValue):
-			return reduceGeometry(
+		case .onScrollGeometryChange(let old, let new):
+			reduceGeometry(
 				state: state,
-				oldValue: oldValue,
-				newValue: newValue,
+				oldValue: old,
+				newValue: new,
 				canLoadOlder: canLoadOlder,
 				canLoadNewer: canLoadNewer,
-				shouldAdjustWindow: shouldAdjustWindow
+				shouldAdjustWindow: shouldAdjustWindow,
 			)
 		default:
-			return .noAction
+			.noAction
 		}
 	}
 }
 
 extension ScrollReducer {
+
 	private func reduceGeometry(
 		state: State,
 		oldValue: VScrollGeometry,
 		newValue: VScrollGeometry,
 		canLoadOlder: Bool,
 		canLoadNewer: Bool,
-		shouldAdjustWindow: Bool
+		shouldAdjustWindow: Bool,
 	) -> Effect {
-
-		guard state.updateState.hasViewLoaded else {
-			return .noAction
-		}
 
 		if state.updateState.isUpdating {
 			return handleUpdating(state: state, oldValue: oldValue, newValue: newValue)
 		}
-		if oldValue.contentHeight == newValue.contentHeight {
-			guard state.updateState.isNotUpdating, state.phase == .decelerating,
-				  oldValue.contentHeight == newValue.contentHeight
-			else {
-				return .noAction
-			}
+
+		if newValue.offsetY != oldValue.offsetY,
+		   state.phase == .interacting || state.phase == .decelerating
+		{
+
+			let direction: ScrollCoordinator.ScrollDirection =
+				newValue.offsetY > oldValue.offsetY ? .up : .down
 
 			return paginateIfNeeded(
+				direction: direction,
 				state,
 				newValue,
 				canLoadOlder,
 				canLoadNewer,
-				shouldAdjustWindow: shouldAdjustWindow
+				shouldAdjustWindow: shouldAdjustWindow,
 			)
-		} else {
-			return .noAction
 		}
+
+		return .noAction
 	}
 
 	private func paginateIfNeeded(
-		_ state: ScrollReducer.State,
-		_ newValue: VScrollGeometry,
+		direction: ScrollCoordinator.ScrollDirection,
+		_ state: State,
+		_ new: VScrollGeometry,
 		_ canLoadOlder: Bool,
 		_ canLoadNewer: Bool,
-		shouldAdjustWindow: Bool
-	) -> ScrollReducer.Effect {
-		if state.direction == .up, newValue.canPaginate(at: .top) {
+		shouldAdjustWindow: Bool,
+	) -> Effect {
+
+		switch direction {
+
+		case .down:
+			guard new.offsetY <= ChatLayoutConstants.paginationTrashold else {
+				return .noAction
+			}
+
 			if canLoadOlder {
 				return .begingUpdate(
-					shouldAdjustWindow ? .remove(edge: .bottom) : .insert(edge: .top)
+					shouldAdjustWindow ? .remove(edge: .bottom) : .insert(edge: .top),
 				)
 			}
-			if shouldAdjustWindow {
-				return .begingUpdate(.remove(edge: .bottom))
+			return shouldAdjustWindow ? .begingUpdate(.remove(edge: .bottom)) : .noAction
+
+		case .up:
+			let atBottom =
+				new.offsetY.rounded() > (new.contentHeight - new.boundsHeight).rounded()
+
+			guard atBottom else {
+				return .noAction
 			}
-			return .noAction
-		}
-		if state.direction == .down, newValue.canPaginate(at: .bottom) {
+
 			if canLoadNewer {
 				return .begingUpdate(
-					shouldAdjustWindow ? .remove(edge: .top) : .insert(edge: .bottom)
+					shouldAdjustWindow ? .remove(edge: .top) : .insert(edge: .bottom),
 				)
 			}
 
-			if shouldAdjustWindow {
-				return .begingUpdate(.remove(edge: .top))
-			}
-			return .noAction
+			return shouldAdjustWindow ? .begingUpdate(.remove(edge: .top)) : .noAction
 
+		case .none:
+			return .noAction
 		}
-		return .noAction
 	}
 
 	private func handleUpdating(
 		state: State,
 		oldValue: VScrollGeometry,
-		newValue: VScrollGeometry
+		newValue: VScrollGeometry,
 	) -> Effect {
-		let difference = newValue.contentHeight - oldValue.contentHeight
-		guard difference != 0 else {
+
+		let diff = newValue.contentHeight - oldValue.contentHeight
+		guard diff != 0 else {
 			return .noAction
 		}
 		switch state.updateState {
-		case .resetting:
-			let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
-			return .endUpdate(.reset, scrollItem: .y(offsetY))
 		case .insertingItems(let edge):
-			switch edge {
-			case .top:
-				let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
-				return .endUpdate(.insert(edge: edge), scrollItem: .y(offsetY, properties: .scroll))
-			case .bottom:
-				return .endUpdate(.insert(edge: edge), scrollItem: nil)
+			if edge == .top {
+				let y = diff + (newValue.offsetY - oldValue.offsetY) + newValue.offsetY
+				return .endUpdate(.insert(edge: edge), scrollItem: .y(y, properties: .scroll))
 			}
+			return .endUpdate(.insert(edge: edge), scrollItem: nil)
+
 		case .removingItems(let edge):
-			switch edge {
-			case .top:
-				let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
-				return .endUpdate(
-					.remove(edge: edge),
-					scrollItem: .y(offsetY, properties: .scroll)
-				)
-			case .bottom:
-				return .endUpdate(.remove(edge: .bottom), scrollItem: nil)
+			if edge == .top {
+				let y = newValue.offsetY + diff + (newValue.offsetY - oldValue.offsetY)
+				return .endUpdate(.remove(edge: edge), scrollItem: .y(y, properties: .scroll))
 			}
+			return .endUpdate(.remove(edge: .bottom), scrollItem: nil)
+
 		case .appendingItem(let id):
-			let offsetY = newValue.offsetY + difference + (newValue.offsetY - oldValue.offsetY)
+			let y = newValue.offsetY + diff + (newValue.offsetY - oldValue.offsetY)
 			return .endUpdate(
 				.append(id: id),
-				scrollItem: .y(offsetY, properties: .animated(.easeOut(duration: 0.22)))
+				scrollItem: .y(y, properties: .animated(.easeOut(duration: 0.22))),
 			)
+
 		default:
 			return .noAction
 		}

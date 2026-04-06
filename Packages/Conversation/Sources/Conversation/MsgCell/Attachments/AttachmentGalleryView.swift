@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AttachmentGalleryView.swift
 //  Conversation
@@ -76,3 +77,5 @@ public struct AttachmentGalleryView: View {
         }
     }
 }
+
+#endif

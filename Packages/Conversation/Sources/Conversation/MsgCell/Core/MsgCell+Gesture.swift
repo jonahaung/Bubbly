@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Database
@@ -17,19 +17,18 @@ extension MsgCell {
 	@Observable
 	final class GestureViewModel {
 
+		// MARK: Internal
+
 		var draggedOffset: CGFloat = 0
 		var isLongPressActive = false
 
 		@ObservationIgnored
 		private(set) var draggedLimitReached = false
 
-		@ObservationIgnored
-		private var lastAppliedOffset: CGFloat = 0
-
 		func applyDrag(
 			translation: CGFloat,
 			isSender: Bool,
-			onMark: () -> Void
+			onMark: () -> Void,
 		) {
 			guard isValidDirection(translation, isSender: isSender) else {
 				resetOffsetIfNeeded()
@@ -39,13 +38,15 @@ extension MsgCell {
 			let magnitude = abs(translation)
 
 			if !draggedLimitReached,
-				magnitude > MsgCellGestureThresholds.markTrigger
+			   magnitude > MsgCellGestureThresholds.markTrigger
 			{
 				draggedLimitReached = true
 				onMark()
 			}
 
-			guard !draggedLimitReached else { return }
+			guard !draggedLimitReached else {
+				return
+			}
 
 			let rounded = round(translation)
 
@@ -58,7 +59,9 @@ extension MsgCell {
 		func reset(animated: Bool) {
 			draggedLimitReached = false
 
-			guard draggedOffset != 0 else { return }
+			guard draggedOffset != 0 else {
+				return
+			}
 
 			if animated {
 				withTransaction(.init(animation: .interactiveSpring)) {
@@ -71,9 +74,14 @@ extension MsgCell {
 			}
 		}
 
+		// MARK: Private
+
+		@ObservationIgnored
+		private var lastAppliedOffset: CGFloat = 0
+
 		private func isValidDirection(
 			_ translation: CGFloat,
-			isSender: Bool
+			isSender: Bool,
 		) -> Bool {
 			isSender
 				? translation < -MsgCellGestureThresholds.dragMinDistance
@@ -81,7 +89,9 @@ extension MsgCell {
 		}
 
 		private func resetOffsetIfNeeded() {
-			guard !draggedLimitReached else { return }
+			guard !draggedLimitReached else {
+				return
+			}
 			draggedOffset = 0
 			lastAppliedOffset = 0
 		}
@@ -92,10 +102,7 @@ extension MsgCell {
 
 	struct GestureAware<Content: View>: View {
 
-		@Environment(MsgCellViewModel.self) private var viewModel
-		@Environment(\.msgCellActions) private var sendInteraction
-
-		@State private var model = GestureViewModel()
+		// MARK: Internal
 
 		let content: () -> Content
 
@@ -112,6 +119,14 @@ extension MsgCell {
 				}
 
 		}
+
+		// MARK: Private
+
+		@Environment(MsgCellViewModel.self) private var viewModel
+		@Environment(\.msgCellActions) private var sendInteraction
+
+		@State private var model: GestureViewModel = .init()
+
 	}
 }
 
@@ -127,12 +142,12 @@ extension MsgCell.GestureAware {
 	private var dragGesture: some Gesture {
 		DragGesture(
 			minimumDistance: MsgCell.MsgCellGestureThresholds.dragMinDistance,
-			coordinateSpace: .local
+			coordinateSpace: .local,
 		)
 		.onChanged { value in
 			model.applyDrag(
 				translation: value.translation.width,
-				isSender: viewModel.state.isSender
+				isSender: viewModel.state.isSender,
 			) {
 				sendInteraction?(.onMarkMsg(viewModel.msg))
 			}
@@ -156,8 +171,8 @@ extension MsgCell.GestureAware {
 						withTransaction(.withoutAnimation()) {
 							sendInteraction?(
 								.onFocusMsgBubble(
-									.init(id: viewModel.id, frame: frame)
-								)
+									.init(id: viewModel.id, frame: frame),
+								),
 							)
 						}
 					}
@@ -166,7 +181,9 @@ extension MsgCell.GestureAware {
 	}
 
 	private func activateLongPressIfNeeded() {
-		guard !model.isLongPressActive else { return }
+		guard !model.isLongPressActive else {
+			return
+		}
 		DispatchQueue.main.async {
 			model.isLongPressActive = true
 		}

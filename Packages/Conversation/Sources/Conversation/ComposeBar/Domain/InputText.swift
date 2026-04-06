@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 // Copyright © 2026 Stream.io Inc. All rights reserved.
 //
@@ -14,28 +15,29 @@ protocol InputTextDelegate: AnyObject {
 
 @MainActor
 @Observable
-final class InputText: Equatable {
-    let id = 0
-
+final class InputText {
+	
     var text: String = .init()
     var bindableText: Binding<String> {
         .init(
             get: { self.text },
             set: { newValue in
-
-                let oldValue = self.text
+				let oldValue = self.text
+				self.text = newValue
                 guard oldValue != newValue else {
                     return
                 }
-                self.text = newValue
-                if newValue.isEmpty || oldValue.isEmpty, oldValue != newValue {
-                    self.delegate?.inputText(self, didBeganEditing: newValue)
-                }
+				self.delegate?.inputText(self, didBeganEditing: newValue)
                 self.parseLinks(newValue)
             }
         )
     }
-	
+
+	func set(text: String) {
+		bindableText.wrappedValue = text
+		selectAll()
+	}
+
     var selection: TextSelection?
     var hasText: Bool {
         !text.isWhitespace
@@ -69,10 +71,6 @@ final class InputText: Equatable {
             delegate?.inputText(self, didInsertLinks: links)
         }
     }
-
-    nonisolated static func == (lhs: InputText, rhs: InputText) -> Bool {
-        lhs.id == rhs.id
-    }
 }
 
 private actor LinkExtractorWorker {
@@ -80,3 +78,5 @@ private actor LinkExtractorWorker {
         LinkExtractor.extractLinks(from: text)
     }
 }
+
+#endif

@@ -1,3 +1,4 @@
+#if os(iOS)
 //
 //  AttachmentPreview.swift
 //  Conversation
@@ -133,3 +134,5 @@ struct AttachmentPreview: View {
             }
     }
 }
+
+#endif

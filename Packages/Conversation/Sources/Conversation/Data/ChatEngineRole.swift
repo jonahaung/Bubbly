@@ -1,6 +1,3 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
 
 import Database
 import FoundationModels
@@ -16,12 +13,10 @@ public enum ChatEngineRole: String, Codable, Hashable, CaseIterable {
 extension MsgRecipient {
     var role: ChatEngineRole {
         switch self {
-        case .send:
+		case .outgoing:
             .sender
-        case .receive:
+		case .incoming:
             .user
-        case .assistant:
-            .assistant
         }
     }
 }
