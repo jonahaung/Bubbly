@@ -1,32 +1,26 @@
-//
-//  Throttler.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 21/3/26.
-//
-
+// © 2026 Aung Ko Min
 
 import Foundation
 
-public class Throttler {
+public final class Throttler {
+	// MARK: Lifecycle
+
+	public init(
+		delay: TimeInterval,
+		option: ThrottlerOption = .trailing,
+		queue: DispatchQueue = .main,
+	) {
+		self.delay = delay
+		self.option = option
+		self.queue = queue
+	}
+
+	// MARK: Public
 
 	public enum ThrottlerOption {
 		case leading
 		case trailing
 		case both
-	}
-
-	private let queue: DispatchQueue
-	private let delay: TimeInterval
-	private let option: ThrottlerOption
-	private var workItem: DispatchWorkItem?
-	private var lastExecutionTime: Date?
-	private var pendingExecution: Bool = false
-
-	public init(delay: TimeInterval, option: ThrottlerOption = .trailing, queue: DispatchQueue = .main) {
-		self.delay = delay
-		self.option = option
-		self.queue = queue
 	}
 
 	public func throttle(_ block: @escaping () -> Void) {
@@ -39,6 +33,21 @@ public class Throttler {
 			throttleBoth(block)
 		}
 	}
+
+	public func cancel() {
+		workItem?.cancel()
+		workItem = nil
+		pendingExecution = false
+	}
+
+	// MARK: Private
+
+	private let queue: DispatchQueue
+	private let delay: TimeInterval
+	private let option: ThrottlerOption
+	private var workItem: DispatchWorkItem? = nil
+	private var lastExecutionTime: Date? = nil
+	private var pendingExecution: Bool = false
 
 	private func throttleLeading(_ block: @escaping () -> Void) {
 		let now = Date()
@@ -83,11 +92,5 @@ public class Throttler {
 	private func execute(_ block: () -> Void) {
 		lastExecutionTime = Date()
 		block()
-	}
-
-	public func cancel() {
-		workItem?.cancel()
-		workItem = nil
-		pendingExecution = false
 	}
 }

@@ -1,7 +1,4 @@
-#if os(iOS)
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -11,22 +8,24 @@ import Services
 import SwiftUI
 import XUI
 
+// MARK: - ChatComposer
+
 @MainActor
 @Observable
 final class ChatComposer: ErrorPresenter {
+    struct State: Hashable, Sendable, Equatable {
+        var attachments: [Attachment] = []
+        var menuIsOpened = false
+        var source: ChatComposer.Source? = nil
+    }
 
-	struct State: Hashable, Sendable, Equatable {
-		var attachments = [Attachment]()
-		var menuIsOpened = false
-		var source: ChatComposer.Source?
-	}
-	var fileContent: String = ""
-    @ObservationIgnored var inputText = InputText()
-    @ObservationIgnored var photoPicker = PhotoPickerManager()
+    var fileContent: String = ""
+    @ObservationIgnored var inputText: InputText = .init()
+    @ObservationIgnored var photoPicker: PhotoPickerManager = .init()
     @ObservationIgnored private let msgCreator: MsgCreator
-    @ObservationIgnored private let worker = ChatComposerWorker()
+    @ObservationIgnored private let worker: ChatComposerWorker = .init()
 
-	var state = State()
+    var state: State = .init()
 
     init() {
         msgCreator = .init(currentUserId: currentUserID ?? "")
@@ -39,23 +38,25 @@ final class ChatComposer: ErrorPresenter {
     }
 
     var hasContent: Bool {
-		inputText.hasText || !state.attachments.isEmpty
+        inputText.hasText || !state.attachments.isEmpty
     }
 
     func updateSource(_ source: ChatComposer.Source?) {
-		if state.source == source {
-			state.source = nil
-			return
-		}
-		state.source = source
+        if state.source == source {
+            state.source = nil
+            return
+        }
+        state.source = source
     }
 }
 
 extension ChatComposer {
-    private func setLoading(_ value: Bool) {
+    private func setLoading(_: Bool) {
 //        isLoading = value
     }
 }
+
+// MARK: InputTextDelegate
 
 extension ChatComposer: InputTextDelegate {
     func inputText(_: InputText, didInsertLinks links: [ExtractedLink]) {
@@ -64,17 +65,19 @@ extension ChatComposer: InputTextDelegate {
         }
     }
 
-    func inputText(_ inputText: InputText, didBeganEditing text: String) {
-		if state.menuIsOpened {
-			state.menuIsOpened = false
-		}
+    func inputText(_: InputText, didBeganEditing _: String) {
+        if state.menuIsOpened {
+            state.menuIsOpened = false
+        }
     }
 }
+
+// MARK: PhotoPickerManagerDelegate
 
 extension ChatComposer: PhotoPickerManagerDelegate {
     func photoPickerManager(
         _: PhotoPickerManager,
-        didSelectImages images: [MediaPicker.SelectedImage]
+        didSelectImages images: [MediaPicker.SelectedImage],
     ) {
         Task {
             await parseImages(selectedImages: images)
@@ -85,8 +88,8 @@ extension ChatComposer: PhotoPickerManagerDelegate {
 extension ChatComposer {
     func handlePrimaryAction(_ conversation: Conversation) {
         let text = inputText.text
-		if text.isWhitespace, state.attachments.isEmpty {
-			inputText.set(text: Lorem.random())
+        if text.isWhitespace, state.attachments.isEmpty {
+            inputText.set(text: Lorem.random())
             return
         }
 
@@ -102,25 +105,25 @@ extension ChatComposer {
     }
 
     func resetSource() {
-		state.source = nil
+        state.source = nil
     }
 
     func send(conversation: Conversation) {
         let text = inputText.text.trimmed
         if text.isWhitespace {
-			inputText.set(text: Lorem.random())
+            inputText.set(text: Lorem.random())
             return
         }
         Task {
-			resetDraft()
+            resetDraft()
 
             do {
-				try await worker.sendMessage(
-					text: text,
-					attachments: state.attachments,
-					conversation: conversation,
-					msgCreator: msgCreator
-				)
+                try await worker.sendMessage(
+                    text: text,
+                    attachments: state.attachments,
+                    conversation: conversation,
+                    msgCreator: msgCreator,
+                )
             } catch {
                 await showError(error)
             }
@@ -131,7 +134,7 @@ extension ChatComposer {
         let msg = try await msgCreator.message(
             text: msg.content,
             attachments: [],
-            in: conversation
+            in: conversation,
         )
         try await Socket.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
     }
@@ -144,45 +147,51 @@ extension ChatComposer {
 
 extension ChatComposer {
     func parseLinks(links: [ExtractedLink]) async {
-		var state = self.state
-		let existingURLs = state.attachments.map { $0.url }
+        var state = state
+        let existingURLs = state.attachments.map(\.url)
         let newLinks = links.filter { existingURLs.contains($0.url.absoluteString) == false }
-        guard newLinks.isEmpty == false else { return }
-		setLoading(true)
+        guard newLinks.isEmpty == false else {
+            return
+        }
+
+        setLoading(true)
         if let attachments = await worker.makeLinkAttachments(from: newLinks) {
-			state.attachments.append(contentsOf: attachments)
-			setLoading(false)
-			self.state = state
+            state.attachments.append(contentsOf: attachments)
+            setLoading(false)
+            self.state = state
         } else {
-			setLoading(false)
+            setLoading(false)
         }
     }
 
     @concurrent
     func parseImages(selectedImages: [SelectedImage]) async {
-		var state = await self.state
+        var state = await state
         await MainActor.run { self.setLoading(true) }
-		await worker.processSelectedImages(
+        await worker.processSelectedImages(
             selectedImages: selectedImages,
-			attachments: &state.attachments
+            attachments: &state.attachments,
         )
         await MainActor.run {
             self.setLoading(false)
-			self.state = state
+            self.state = state
         }
     }
 
     @concurrent
     func generateImage(prompt: String) async throws {
-        guard prompt.isWhitespace == false else { return }
-		var state = await self.state
+        guard prompt.isWhitespace == false else {
+            return
+        }
+
+        var state = await state
         await MainActor.run { self.setLoading(true) }
         if let attachment = try await worker.makeGeneratedImageAttachment(prompt: prompt) {
-			state.attachments.append(attachment)
+            state.attachments.append(attachment)
             await MainActor.run {
                 self.inputText.clear()
-				self.setLoading(false)
-				self.state = state
+                self.setLoading(false)
+                self.state = state
             }
         } else {
             await MainActor.run { self.setLoading(false) }
@@ -190,12 +199,14 @@ extension ChatComposer {
     }
 
     func removeAttachment(id: String) {
-		var state = self.state
+        var state = state
         photoPicker.remove(for: id)
-		state.attachments.removeAll(where: { $0.id == id })
-		self.state = state
+        state.attachments.removeAll(where: { $0.id == id })
+        self.state = state
     }
 }
+
+// MARK: - ChatComposerWorker
 
 private actor ChatComposerWorker {
     func makeLinkAttachments(from links: [ExtractedLink]) async -> [Attachment]? {
@@ -211,7 +222,7 @@ private actor ChatComposerWorker {
         let createdImages = imageCreator.images(
             for: [.text(prompt)],
             style: .animation,
-            limit: 1
+            limit: 1,
         )
         var image: UIImage?
         for try await created in createdImages {
@@ -220,6 +231,7 @@ private actor ChatComposerWorker {
         guard let image else {
             return nil
         }
+
         return try await AttachmentFactory.createImageAttachment(from: image)
     }
 
@@ -227,13 +239,13 @@ private actor ChatComposerWorker {
         text: String,
         attachments: [Attachment],
         conversation: Conversation,
-        msgCreator: MsgCreator
+        msgCreator: MsgCreator,
     ) async throws {
         let sanitizedText = sanitizeText(text, attachments: attachments)
         let msg = try await msgCreator.message(
             text: sanitizedText,
             attachments: attachments,
-            in: conversation
+            in: conversation,
         )
         if msg.attachments.contains(where: { $0.attachmentType == .imageUploading }) {
             await Socket.shared.notifyMessage(.newMsg(rMsg: .init(msg)))
@@ -243,7 +255,10 @@ private actor ChatComposerWorker {
     }
 
     private func sanitizeText(_ text: String, attachments: [Attachment]) -> String {
-        guard attachments.isEmpty == false else { return text }
+        guard attachments.isEmpty == false else {
+            return text
+        }
+
         var updated = text
         if updated == attachments.first?.url {
             return ""
@@ -254,22 +269,20 @@ private actor ChatComposerWorker {
         return updated.trimmed
     }
 
-	func processSelectedImages(
-		selectedImages: [SelectedImage],
-		attachments: inout [Attachment]
-	) async {
-		var items = attachments
-		var pickerItems = selectedImages
-		let pickerIDs = Set(pickerItems.map(\.id))
-		items.removeAll { pickerIDs.contains($0.uid) == false }
-		pickerItems.removeAll { item in items.contains { $0.uid == item.id } }
+    func processSelectedImages(
+        selectedImages: [SelectedImage],
+        attachments: inout [Attachment],
+    ) async {
+        var items = attachments
+        var pickerItems = selectedImages
+        let pickerIDs = Set(pickerItems.map(\.id))
+        items.removeAll { pickerIDs.contains($0.uid) == false }
+        pickerItems.removeAll { item in items.contains { $0.uid == item.id } }
 
-		if let newItems = await makeImageAttachments(from: pickerItems) {
-			items.append(contentsOf: newItems)
-		}
+        if let newItems = await makeImageAttachments(from: pickerItems) {
+            items.append(contentsOf: newItems)
+        }
 
-		attachments = items
-	}
+        attachments = items
+    }
 }
-
-#endif

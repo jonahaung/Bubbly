@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -9,47 +7,38 @@ import SwiftUI
 import XUI
 
 extension MsgCell {
+    struct Content: View {
+        // MARK: Internal
 
-	struct Content: View {
+        var body: some View {
+            ZStack(
+                alignment: .init(horizontal: state.horizontalAlignment.inverted, vertical: .top),
+            ) {
+                BubbleView()
+                    .layoutPriority(1)
+                OverlayBubbleView()
+            }
+        }
 
-		// MARK: Internal
+        // MARK: Private
 
-		var body: some View {
-			ZStack(
-				alignment: .init(horizontal: state.horizontalAlignment.inverted, vertical: .top),
-			) {
-				BubbleView()
-					.layoutPriority(1)
-				OverlayBubbleView()
-			}
-			.foregroundStyle(state.foregroundStyle)
-		}
+        @Environment(MsgCellViewModel.self) private var viewModel
+        private var state: MsgCellViewModel.State {
+            viewModel.state
+        }
+    }
 
-		// MARK: Private
+    struct OverlayBubbleView: View {
+        // MARK: Internal
 
-		@Environment(MsgCellViewModel.self) private var viewModel
+        var body: some View {
+            Reactions(reactions: viewModel.state.reactions)
+                .fixedSize()
+                .equatable(by: viewModel.state.reactions)
+        }
 
-		private var state: MsgCellViewModel.State {
-			viewModel.state
-		}
-	}
+        // MARK: Private
 
-	struct OverlayBubbleView: View {
-
-		// MARK: Internal
-
-		var body: some View {
-			Reactions(reactions: viewModel.state.reactions)
-				.fixedSize()
-				.equatable(by: viewModel.state.reactions)
-		}
-
-		// MARK: Private
-
-		@Environment(MsgCellViewModel.self) private var viewModel
-
-		private var state: MsgCellViewModel.State {
-			viewModel.state
-		}
-	}
+        @Environment(MsgCellViewModel.self) private var viewModel
+    }
 }

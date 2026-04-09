@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -9,52 +7,57 @@ import SwiftUI
 import XUI
 
 extension ChatManager {
-	func reloadConversation(refetch: Bool) async throws {
-		var state = state
-		state.properties =
-			try await ConversationPropertiesRepo
-				.getOrCreate(for: conversationConfig.conID, refetch: refetch)
-		state.conversation = try await state.conversation.reload(refetch: refetch)
-		state.theme = .init(state.properties.theme)
-		self.state = state
-		layoutIfNeeded()
-	}
+    func reloadConversation(refetch: Bool) async throws {
+        state =
+            try await conversationDataUpdater
+                .reloadConversation(currentState: state, refetch: refetch)
+    }
 
-	func updateReceiveMsgs() {
-		Task.detached(priority: .background) { [weak self] in
-			guard let self else {
-				return
-			}
-			guard let currentUserID else {
-				return
-			}
-			do {
-				let unreadMsgs = try await MsgRepo.updateReceiveMsgs(
-					for: conversationConfig.conID,
-					currentUserID: currentUserID,
-				)
-				guard let lastUnreadMsg = unreadMsgs.last else {
-					return
-				}
-				try await Socket.send(
-					.seenStatus(
-						status: .init(
-							msgID: lastUnreadMsg.uid,
-							userID: currentUserID,
-							conID: lastUnreadMsg.conID,
-							date: ServerTime.now.value,
-						),
-					),
-					conversation: state.conversation,
-				)
-				await MainActor.run {
-					for msg in unreadMsgs {
-						models.update(msg: msg)
-					}
-				}
-			} catch {
-				await showError(error)
-			}
-		}
-	}
+    func setIncomingMsgsAsRead() async throws {
+        guard let currentUserID = await currentUserRepository?.model.uid else {
+            return
+        }
+
+        let updatedMsgs = try await conversationDataUpdater.updateMsgs(
+            before: .now,
+            of: .incoming,
+            from: .received,
+            to: .read,
+            currentState: state,
+            currentUserID: currentUserID,
+        )
+        for msg in updatedMsgs {
+            models.update(msg: msg)
+        }
+        if let lastReadMsg = updatedMsgs.last {
+            try await conversationDataUpdater
+                .sendSeenStatus(
+                    lastReadMsg: lastReadMsg,
+                    currentUserID: currentUserID,
+                    conversation: state
+                        .conversation,
+                )
+        }
+    }
+
+    func setOutgoingMsgsAsRead(status: AnyMsgData.SeenStatusPayload) async throws {
+        guard let msg = try await Store.shared.msgStore?.fetch(uid: status.msgID) else {
+            return
+        }
+
+        let msgIDs = models.renderedModels
+            .filter {
+                $0.msg.receiptType == .outgoing && $0.state.date <= msg.date
+                    && $0.state.deliveryStatus == .delivered
+            }
+            .map(\.value.id)
+
+        let msgs = try await AsyncOrderedStream.mapOrdered(inputs: msgIDs) { msgID in
+            try await Store.shared.msgStore?.fetch(uid: msgID)
+        }.compactMap(\.self)
+
+        for msg in msgs {
+            models.update(msg: msg)
+        }
+    }
 }

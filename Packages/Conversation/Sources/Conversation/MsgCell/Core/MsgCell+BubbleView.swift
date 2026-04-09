@@ -1,53 +1,50 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Services
 import SwiftUI
 
 extension MsgCell {
+    struct BubbleView: View {
+        // MARK: Internal
 
-	struct BubbleView: View {
+        var body: some View {
+            if !state.attachments.isEmpty {
+                VStack(alignment: state.horizontalAlignment, spacing: .zero) {
+                    MsgAttachmentsView(
+                        attachments: state.attachments,
+                        alignment: state.horizontalAlignment,
+                    )
+                    if state.attributedText != nil {
+                        TextContent()
+                            .padding(theme.bubblePading)
+                            .background(theme.bubbleColor(for: state.isSender))
+                            .containerShape(bubbleShape)
+                    }
+                }.equatable(by: viewModel.state.attachments)
+            } else if state.attributedText != nil {
+                TextContent()
+                    .padding(theme.bubblePading)
+                    .background(theme.bubbleColor(for: state.isSender))
+                    .padding(theme.shadowPadding(for: state.isSender))
+                    .background(Color.shadow)
+                    .containerShape(bubbleShape)
+                    .equatable(by: viewModel.state.selectedMsg?.id == viewModel.id)
+            }
+        }
 
-		// MARK: Internal
+        // MARK: Private
 
-		var body: some View {
-			if !state.attachments.isEmpty {
-				VStack(alignment: state.horizontalAlignment, spacing: 0) {
-					MsgAttachmentsView(
-						attachments: state.attachments,
-						alignment: state.horizontalAlignment,
-					)
-					if state.text != nil {
-						TextContent()
-							.padding(theme.bubblePading)
-							.background(theme.bubbleColor(for: state.isSender))
-							.containerShape(bubbleShape)
-					}
-				}
-			} else if state.text != nil {
-				TextContent()
-					.padding(theme.bubblePading)
-					.background(theme.bubbleColor(for: state.isSender))
-					.padding(theme.shadowPadding(for: state.isSender))
-					.background(theme.shadowColor(for: state.isSender))
-					.containerShape(bubbleShape)
-			}
-		}
+        @Environment(MsgCellViewModel.self) private var viewModel
+        @Environment(\.conversationTheme) private var theme
 
-		// MARK: Private
+        private var state: MsgCellViewModel.State {
+            viewModel.state
+        }
 
-		@Environment(MsgCellViewModel.self) private var viewModel
-		@Environment(\.conversationTheme) private var theme
-
-		private var state: MsgCellViewModel.State {
-			viewModel.state
-		}
-
-		private var bubbleShape: UnevenRoundedRectangle {
-			state.bubbleCornor
-				.roundedRectange(cornerRadius: theme.bubbleCornerRadius)
-		}
-	}
+        private var bubbleShape: UnevenRoundedRectangle {
+            state.bubbleCornor
+                .roundedRectange(cornerRadius: theme.bubbleCornerRadius)
+        }
+    }
 }

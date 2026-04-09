@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - GroupStorageKey
 
 public enum GroupStorageKey: Hashable, Sendable {
     case device(Device)
@@ -21,11 +21,13 @@ public extension GroupStorageKey {
     }
 
     enum Device: String, Hashable, Sendable {
-        case deviceToken, anyMsgData
+        case deviceToken
+        case anyMsgData
     }
 
     enum Auth: String, Hashable, Sendable {
-        case currentUserID, authToken
+        case currentUserID
+        case authToken
     }
 
     enum Layout: String, Hashable, Sendable {

@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Foundation
@@ -9,7 +7,9 @@ import XUI
 
 public enum ConversationPropertiesRepo {
     @discardableResult
-    public static func getOrCreate(for conID: String, refetch: Bool) async throws -> ConversationProperties {
+    public static func getOrCreate(for conID: String,
+                                   refetch _: Bool) async throws -> ConversationProperties
+    {
         let existing = try await Store.shared.conversationPropertiesStore?.fetch(uid: conID)
         if let existing {
             return existing
@@ -20,7 +20,7 @@ public enum ConversationPropertiesRepo {
     }
 
     @MainActor
-	public static func getOrCreateMain(for conID: String) async -> ConversationProperties {
+    public static func getOrCreateMain(for conID: String) async -> ConversationProperties {
         // Hop into the Store actor to safely read its modelContainer
         let container = await Store.shared.modelContainer
 

@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -29,7 +27,7 @@ struct InboxRepositoryImpl: InboxRepository {
         return snapshot()
     }
 
-    func latestSnapshot() async -> InboxSnapshot {
+    func latestSnapshot() -> InboxSnapshot {
         snapshot()
     }
 
@@ -40,27 +38,27 @@ struct InboxRepositoryImpl: InboxRepository {
 
     private func fetchInboxItems(
         _ conversations: [Conversation],
-        currentUser: CurrentUserModel
+        currentUser: CurrentUserModel,
     ) async throws -> [InboxItem] {
         let items: [InboxItem?] = try await AsyncOrderedStream
             .mapOrdered(inputs: conversations) { conversation in
-				if let msg = try await MsgRepo.lastMsg(conID: conversation.uid) {
+                if let msg = try await MsgRepo.lastMsg(conID: conversation.uid) {
                     let sender: any ContactRepresentableSendable =
                         if msg.receiptType == .incoming {
                             try await ContactRepo.getOrCreate(uid: msg.senderID, refetch: false)
                         } else {
                             currentUser
                         }
-					let unreadMsgsCount = try await MsgRepo.incomingUnreadMsgsCount(
+                    let unreadMsgsCount = try await MsgRepo.incomingUnreadMsgsCount(
                         conID: conversation.uid,
-                        currentUserID: currentUser.uid
+                        currentUserID: currentUser.uid,
                     )
-					print(unreadMsgsCount)
+                    print(unreadMsgsCount)
                     return InboxItem(
                         conversation: conversation,
                         msg: msg,
                         sender: sender,
-                        unreadMsgsCount: unreadMsgsCount
+                        unreadMsgsCount: unreadMsgsCount,
                     )
                 }
                 return nil

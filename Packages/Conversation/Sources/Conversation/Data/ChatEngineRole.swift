@@ -1,7 +1,10 @@
+// © 2026 Aung Ko Min
 
 import Database
 import FoundationModels
 import SwiftData
+
+// MARK: - ChatEngineRole
 
 @Generable
 public enum ChatEngineRole: String, Codable, Hashable, CaseIterable {
@@ -13,9 +16,9 @@ public enum ChatEngineRole: String, Codable, Hashable, CaseIterable {
 extension MsgRecipient {
     var role: ChatEngineRole {
         switch self {
-		case .outgoing:
+        case .outgoing:
             .sender
-		case .incoming:
+        case .incoming:
             .user
         }
     }

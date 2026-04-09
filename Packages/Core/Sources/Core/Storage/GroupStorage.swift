@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 
@@ -10,7 +8,7 @@ public struct GroupStorage {
             return GroupStorage(store: defaults)
         } else {
             assertionFailure(
-                "UserDefaults suiteName \(AppInformation.groupID) is nil. Falling back to .standard. Check App Group entitlements for this target/scheme."
+                "UserDefaults suiteName \(AppInformation.groupID) is nil. Falling back to .standard. Check App Group entitlements for this target/scheme.",
             )
             return GroupStorage(store: .standard)
         }
@@ -24,9 +22,9 @@ public struct GroupStorage {
     }
 
     @usableFromInline
-    static let defaultEncoder = JSONEncoder()
+    static let defaultEncoder: JSONEncoder = .init()
     @usableFromInline
-    static let defaultDecoder = JSONDecoder()
+    static let defaultDecoder: JSONDecoder = .init()
 
     // MARK: - Delete
 
@@ -80,12 +78,13 @@ public struct GroupStorage {
     public func save(
         _ value: (some Encodable)?,
         for key: GroupStorageKey,
-        encoder: JSONEncoder = GroupStorage.defaultEncoder
+        encoder: JSONEncoder = GroupStorage.defaultEncoder,
     ) {
         guard let value else {
             delete(for: key)
             return
         }
+
         do {
             let data = try encoder.encode(value)
             store.set(data, forKey: key.value)
@@ -130,9 +129,12 @@ public struct GroupStorage {
     public func codable<T: Decodable>(
         _ type: T.Type,
         for key: GroupStorageKey,
-        decoder: JSONDecoder = GroupStorage.defaultDecoder
+        decoder: JSONDecoder = GroupStorage.defaultDecoder,
     ) -> T? {
-        guard let data = data(for: key) else { return nil }
+        guard let data = data(for: key) else {
+            return nil
+        }
+
         do {
             return try decoder.decode(type, from: data)
         } catch {
@@ -144,7 +146,9 @@ public struct GroupStorage {
     // MARK: - Requiring values
 
     public func requireString(for key: GroupStorageKey) throws -> String {
-        if let value = string(for: key) { return value }
+        if let value = string(for: key) {
+            return value
+        }
         throw MissingValueError(key: key)
     }
 
@@ -153,9 +157,11 @@ public struct GroupStorage {
         _ type: T.Type,
         for key: GroupStorageKey,
         decoder: JSONDecoder = GroupStorage
-            .defaultDecoder
+            .defaultDecoder,
     ) throws -> T {
-        if let value = codable(type, for: key, decoder: decoder) { return value }
+        if let value = codable(type, for: key, decoder: decoder) {
+            return value
+        }
         throw MissingValueError(key: key)
     }
 

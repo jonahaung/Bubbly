@@ -1,12 +1,11 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 @testable import Database
-import XCTest
+import Foundation
+import Testing
 
-final class DatabaseTests: XCTestCase {
-    func testGroupDecodesLegacyDocumentWithoutTheme() throws {
+final class DatabaseTests {
+    @Test func groupDecodesLegacyDocumentWithoutTheme() throws {
         let data = """
         {
           "uid": "group-1",
@@ -20,12 +19,12 @@ final class DatabaseTests: XCTestCase {
 
         let group = try JSONDecoder().decode(Group.self, from: data)
 
-        XCTAssertEqual(group.uid, "group-1")
-        XCTAssertEqual(group.theme, .default)
-        XCTAssertNil(group.seenMembers)
+        #expect(group.uid == "group-1")
+        #expect(group.theme == .default)
+        #expect(group.seenMembers == nil)
     }
 
-    func testGroupDecodesLegacyStringCreatedDate() throws {
+    @Test func groupDecodesLegacyStringCreatedDate() throws {
         let data = """
         {
           "uid": "group-3",
@@ -43,10 +42,10 @@ final class DatabaseTests: XCTestCase {
 
         let group = try JSONDecoder().decode(Group.self, from: data)
 
-        XCTAssertEqual(group.createdDate.value, "2026-04-06T12:34:56.789Z")
+        #expect(group.createdDate.value == "2026-04-06T12:34:56.789Z")
     }
 
-    func testGroupRoundTripPreservesSeenMembers() throws {
+    @Test func groupRoundTripPreservesSeenMembers() throws {
         let original = Group(
             uid: "group-2",
             name: "Team",
@@ -55,12 +54,12 @@ final class DatabaseTests: XCTestCase {
             members: ["u1", "u2"],
             createdBy: "u1",
             theme: .init(),
-            seenMembers: [.init(uid: "u2", msgId: "m1", date: "2026-04-06T12:35:56.789Z")]
+            seenMembers: [.init(uid: "u2", msgId: "m1", date: "2026-04-06T12:35:56.789Z")],
         )
 
         let data = try JSONEncoder().encode(original)
         let decoded = try JSONDecoder().decode(Group.self, from: data)
 
-        XCTAssertEqual(decoded, original)
+        #expect(decoded == original)
     }
 }

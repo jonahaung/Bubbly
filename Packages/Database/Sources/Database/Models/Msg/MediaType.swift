@@ -1,11 +1,12 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 
 public enum MediaType: Hashable, CaseIterable {
-    case png, video, audio, data
+    case png
+    case video
+    case audio
+    case data
     public var fileExtension: String {
         switch self {
         case .png: ".png"

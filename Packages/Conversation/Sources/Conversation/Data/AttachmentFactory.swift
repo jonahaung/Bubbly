@@ -1,9 +1,13 @@
+// © 2026 Aung Ko Min
+
 import AVFoundation
 import Database
 import MediaPicker
 import Services
 import UIKit
 import XUI
+
+// MARK: - AttachmentFactory
 
 public struct AttachmentFactory {
     public init() {}
@@ -25,11 +29,12 @@ extension AttachmentFactory {
             uid: item.id,
             url: "",
             attachMentTypeRaw: AttachMentType.imageUploading.rawValue,
-            aspectRatio: image.aspectRatio
+            aspectRatio: image.aspectRatio,
         )
         guard let url = attachment.file()?.url else {
             throw CocoaError(.fileReadUnknown)
         }
+
         attachment.url = url.absoluteString
         try attachment.file()?.write(imageData)
         try attachment.thumbnailFile()?.write(thumbnailData)
@@ -50,11 +55,12 @@ extension AttachmentFactory {
             uid: IDGenerator.shared.make(),
             url: "",
             attachMentTypeRaw: AttachMentType.imageUploading.rawValue,
-            aspectRatio: uiImage.aspectRatio
+            aspectRatio: uiImage.aspectRatio,
         )
         guard let url = attachment.file()?.url else {
             throw CocoaError(.fileReadUnknown)
         }
+
         try attachment.file()?.write(imageData)
         try attachment.thumbnailFile()?.write(thumbnailData)
         attachment.url = url.absoluteString
@@ -69,20 +75,24 @@ extension AttachmentFactory {
         }.compactMap(\.self)
     }
 
-    static func createLinkAttachment(from url: URL) async throws -> Attachment? {
+    static func createLinkAttachment(from url: URL) async -> Attachment? {
         if await isVideoURLByContentType(url) {
             return await makeVideoAttachment(from: url.absoluteString)
         }
         let swiftLinkPreview = SwiftLinkPreview()
         let extracted: SwiftLinkPreviewResponse? = try? await swiftLinkPreview.preview(
-            url.absoluteString
+            url.absoluteString,
         )
-        guard let extracted else { return nil }
-        guard let imageURL = extracted.imageURL,
-              let image = try? await getImage(from: imageURL)
-        else {
+        guard let extracted else {
             return nil
         }
+
+        guard let imageURL = extracted.imageURL,
+              let image = try? await getImage(from: imageURL) else
+        {
+            return nil
+        }
+
         return await Attachment(
             uid: IDGenerator.shared.make(),
             url: url.absoluteString,
@@ -90,12 +100,15 @@ extension AttachmentFactory {
             attachMentTypeRaw: AttachMentType.link.rawValue,
             aspectRatio: image.aspectRatio,
             title: extracted.title,
-            subTitle: extracted.description
+            subTitle: extracted.description,
         )
     }
 
     static func isYouTubeURL(_ url: URL) -> Bool {
-        guard let host = url.host?.lowercased() else { return false }
+        guard let host = url.host?.lowercased() else {
+            return false
+        }
+
         return host.contains("youtube.com")
             || host.contains("youtu.be")
             || host.contains("youtube-nocookie.com")
@@ -109,8 +122,8 @@ extension AttachmentFactory {
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse,
-                  let contentType = http.value(forHTTPHeaderField: "Content-Type")
-            else {
+                  let contentType = http.value(forHTTPHeaderField: "Content-Type") else
+            {
                 return false
             }
 
@@ -124,22 +137,23 @@ extension AttachmentFactory {
 extension AttachmentFactory {
     static func makeVideoAttachment(from text: String) async -> Attachment? {
         guard let url = URL(string: text),
-              let thumbnail = try? await VideoFactory.generateVideoThumbnail(from: url)
-        else {
+              let thumbnail = try? await VideoFactory.generateVideoThumbnail(from: url) else
+        {
             return nil
         }
+
         return await Attachment(
             uid: IDGenerator.shared.make(),
             url: text,
             attachMentTypeRaw: AttachMentType.video.rawValue,
             aspectRatio: thumbnail.aspectRatio,
-            title: ""
+            title: "",
         )
     }
 
     static func getImage(from url: URL) async throws -> UIImage? {
         let (data, response) = try await URLSession.shared.data(from: url)
-        if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+        if let http = response as? HTTPURLResponse, !(200 ... 299).contains(http.statusCode) {
             return nil
         }
         if let mime = (response as? HTTPURLResponse)?.mimeType,

@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -9,9 +9,10 @@ import SwiftUI
 import XUI
 
 public struct ArchitecturalView: View {
-    private let coordinator: AppCoordinator
 
-    init(launcher: AppLauncher, currentUser: CurrentUserModel) {
+    private let coordinator: AppCoordinator
+	
+    init(launcher: AppLauncher, currentUser: CurrentUserModel, router: Router) {
         let currentUserRepository = CurrentUserRepository(currentUser)
         let contactsRepository = ContactsRepository.shared
 
@@ -19,12 +20,12 @@ public struct ArchitecturalView: View {
             currentUserRepository: currentUserRepository,
             contactsRepository: contactsRepository
         )
-        coordinator = AppCoordinator(appLauncher: launcher, container: container, router: Router.shared)
+		coordinator = AppCoordinator(appLauncher: launcher, container: container, router: router)
     }
 
     public var body: some View {
         RootTabView(coordinator: coordinator)
-            .task {
+            .onTask {
 				await coordinator.start()
             }
     }

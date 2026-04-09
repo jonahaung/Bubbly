@@ -1,9 +1,9 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import XUI
+
+// MARK: - ContactRepresentable
 
 public protocol ContactRepresentable: UIdentifiable, StringMergable {
     var uid: String { get }
@@ -16,7 +16,10 @@ public protocol ContactRepresentable: UIdentifiable, StringMergable {
 
 public extension ContactRepresentable {
     func merging(from source: some ContactRepresentable) -> Self {
-        guard source.uid == uid else { return self }
+        guard source.uid == uid else {
+            return self
+        }
+
         var copy = self
         copy.name = mergedString(copy.name, from: source.name)
         copy.photoURL = mergedString(copy.photoURL, from: source.photoURL)

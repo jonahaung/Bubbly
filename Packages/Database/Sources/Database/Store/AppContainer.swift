@@ -1,6 +1,10 @@
+// © 2026 Aung Ko Min
+
 import Core
 import Foundation
 import SwiftData
+
+// MARK: - AppSchemaV1
 
 public enum AppSchemaV1: VersionedSchema {
     public static let versionIdentifier: Schema.Version = .init(1, 0, 0)
@@ -9,15 +13,17 @@ public enum AppSchemaV1: VersionedSchema {
             PContact.self,
             PMsg.self,
             PGroup.self,
-            PConversationProperties.self
+            PConversationProperties.self,
         ]
     }
 }
 
+// MARK: - AppSchemaMigrationPlan
+
 public enum AppSchemaMigrationPlan: SchemaMigrationPlan {
     public static var schemas: [any VersionedSchema.Type] {
         [
-            AppSchemaV1.self
+            AppSchemaV1.self,
         ]
     }
 
@@ -25,6 +31,8 @@ public enum AppSchemaMigrationPlan: SchemaMigrationPlan {
         []
     }
 }
+
+// MARK: - AppContainer
 
 public final class AppContainer: Sendable {
     public let modelContainer: ModelContainer
@@ -36,43 +44,26 @@ public final class AppContainer: Sendable {
             schema: schema,
             isStoredInMemoryOnly: false,
             allowsSave: true,
-            groupContainer: .identifier(AppInformation.groupID)
+            groupContainer: .identifier(AppInformation.groupID),
+            cloudKitDatabase: .none,
         )
         do {
-            try Self.prepareStoreDirectory()
-            let modelContainer = try ModelContainer(
+            modelContainer = try ModelContainer(
                 for: schema,
-                migrationPlan: migrationPlan ?? AppSchemaMigrationPlan.self,
-                configurations: configuration
+                migrationPlan: nil,
+                configurations: configuration,
             )
-            self.modelContainer = modelContainer
         } catch {
             if migrationPlan == nil,
                let legacyModelContainer = try? ModelContainer(
                    for: schema,
-                   configurations: configuration
-               ) {
+                   configurations: configuration,
+               )
+            {
                 modelContainer = legacyModelContainer
                 return
             }
             fatalError(error.localizedDescription)
         }
-    }
-
-    private static func prepareStoreDirectory() throws {
-        guard let groupURL = FileManager.default.containerURL(
-            forSecurityApplicationGroupIdentifier: AppInformation.groupID
-        ) else {
-            throw CocoaError(.fileNoSuchFile)
-        }
-
-        let applicationSupportURL = groupURL
-            .appendingPathComponent("Library", isDirectory: true)
-            .appendingPathComponent("Application Support", isDirectory: true)
-
-        try FileManager.default.createDirectory(
-            at: applicationSupportURL,
-            withIntermediateDirectories: true
-        )
     }
 }

@@ -1,15 +1,17 @@
+// © 2026 Aung Ko Min
+
 #if os(iOS)
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+    // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-import Foundation
+    import Foundation
 
-struct EmojiCategory: Hashable, Identifiable {
-    let id = UUID()
-    let title: String
-    let iconName: String
-    let emojis: [Emoji]
-}
+    struct EmojiCategory: Hashable, Identifiable {
+        let id: UUID = .init()
+        let title: String
+        let iconName: String
+        let emojis: [Emoji]
+    }
 
 #endif

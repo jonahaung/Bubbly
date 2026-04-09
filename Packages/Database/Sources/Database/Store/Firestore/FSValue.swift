@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - FSValue
 
 //
 //  FSValue.swift
@@ -39,13 +39,13 @@ public enum FSValue: Codable, Sendable {
         case let .map(dict):
             var mapContainer = container.nestedContainer(
                 keyedBy: CodingKeys.self,
-                forKey: .mapValue
+                forKey: .mapValue,
             )
             try mapContainer.encode(FSMap(fields: dict), forKey: .fields)
         case let .array(arr):
             var arrContainer = container.nestedContainer(
                 keyedBy: CodingKeys.self,
-                forKey: .arrayValue
+                forKey: .arrayValue,
             )
             try arrContainer.encode(FSArray(values: arr), forKey: .values)
         case .null:
@@ -61,26 +61,28 @@ public enum FSValue: Codable, Sendable {
         if let stringValue = try? container.decode(String.self, forKey: .stringValue) {
             self = .string(stringValue)
         } else if let intString = try? container.decode(String.self, forKey: .integerValue),
-                  let intVal = Int(intString) {
+                  let intVal = Int(intString)
+        {
             self = .int(intVal)
         } else if let doubleValue = try? container.decode(Double.self, forKey: .doubleValue) {
             self = .double(doubleValue)
         } else if let boolValue = try? container.decode(Bool.self, forKey: .booleanValue) {
             self = .bool(boolValue)
         } else if let timestamp = try? container.decode(String.self, forKey: .timestampValue),
-                  let date = formatter.date(from: timestamp) {
+                  let date = formatter.date(from: timestamp)
+        {
             self = .timestamp(date)
         } else if container.contains(.mapValue) {
             let mapContainer = try container.nestedContainer(
                 keyedBy: CodingKeys.self,
-                forKey: .mapValue
+                forKey: .mapValue,
             )
             let fsMap = try mapContainer.decode(FSMap.self, forKey: .fields)
             self = .map(fsMap.fields)
         } else if container.contains(.arrayValue) {
             let arrContainer = try container.nestedContainer(
                 keyedBy: CodingKeys.self,
-                forKey: .arrayValue
+                forKey: .arrayValue,
             )
             let fsArray = try arrContainer.decode(FSArray.self, forKey: .values)
             self = .array(fsArray.values)
@@ -90,8 +92,8 @@ public enum FSValue: Codable, Sendable {
             throw DecodingError.dataCorrupted(
                 .init(
                     codingPath: decoder.codingPath,
-                    debugDescription: "Unknown Firestore value type"
-                )
+                    debugDescription: "Unknown Firestore value type",
+                ),
             )
         }
     }
@@ -117,6 +119,8 @@ public enum FSValue: Codable, Sendable {
         let values: [FSValue]
     }
 }
+
+// MARK: - FSDocument
 
 public struct FSDocument: Codable, Sendable {
     public let fields: [String: FSValue]

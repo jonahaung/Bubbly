@@ -1,13 +1,12 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Foundation
 import XUI
 
+// MARK: - Conversation
+
 public struct Conversation: Codable, Sendable, Hashable, Equatable, UIdentifiable {
-	
     public let kind: ConversationKind
     public let uid: String
     public let name: String
@@ -30,28 +29,30 @@ public struct Conversation: Codable, Sendable, Hashable, Equatable, UIdentifiabl
     }
 }
 
+// MARK: EmptyRepresentable
+
 extension Conversation: EmptyRepresentable {
     public static let empty: Conversation = .init(.contact(.empty))
 }
 
 public extension Conversation {
-
     init(_ kind: ConversationKind) {
         guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
             preconditionFailure("Missing currentUserID in GroupAppStorage")
         }
+
         switch kind {
         case let .contact(contact):
             let uid = ConversationIDGenerator.generate(currentUserID, contact.uid)
             self.init(
                 kind: kind,
-                uid: uid
+                uid: uid,
             )
         case let .group(group):
             let uid = group.uid
             self.init(
                 kind: kind,
-                uid: uid
+                uid: uid,
             )
         }
     }
@@ -76,6 +77,8 @@ public extension Conversation {
         }
     }
 }
+
+// MARK: - ConversationError
 
 enum ConversationError: Error {
     case invalidType

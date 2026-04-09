@@ -1,17 +1,29 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftUI
 import XUI
 
+// MARK: - BubbleColor
+
 public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Identifiable,
-    CaseNameReflectable {
+    CaseNameReflectable
+{
     case `default`
-    case skyBlue, babyPink
-    case mistyRose, paleTurquoise, mintCream, warmBeige
-    case lilac, blush, lemon, mint, periwinkle
-    case peach, coral, sand, teal
+    case skyBlue
+    case babyPink
+    case mistyRose
+    case paleTurquoise
+    case mintCream
+    case warmBeige
+    case lilac
+    case blush
+    case lemon
+    case mint
+    case periwinkle
+    case peach
+    case coral
+    case sand
+    case teal
 
     public var id: String {
         rawValue
@@ -39,67 +51,113 @@ public enum BubbleColor: String, Sendable, Hashable, CaseIterable, Codable, Iden
     }
 }
 
+extension Color {
+    static func dynamic(light: Color, dark: Color) -> Color {
+        Color(uiColor: UIColor { trait in
+            trait.userInterfaceStyle == .dark
+                ? UIColor(dark)
+                : UIColor(light)
+        })
+    }
+}
+
+// MARK: - Palette
+
 private enum Palette {
     // MARK: - Basics
 
-    static let defaultGreen =
-        Color(red: 0.85, green: 1.0, blue: 0.85)
+    static let defaultGreen: Color = .dynamic(
+        light: Color(red: 0.865, green: 1.0, blue: 0.865),
+        dark: Color(red: 0.15, green: 0.35, blue: 0.20),
+    )
 
     // MARK: - Blues
 
-    static let skyBlue =
-        Color(red: 0.81, green: 0.90, blue: 0.95)
+    static let skyBlue: Color = .dynamic(
+        light: Color(red: 0.829, green: 0.91, blue: 0.955),
+        dark: Color(red: 0.20, green: 0.30, blue: 0.40),
+    )
 
-    static let periwinkle =
-        Color(red: 0.85, green: 0.90, blue: 0.96)
+    static let periwinkle: Color = .dynamic(
+        light: Color(red: 0.865, green: 0.91, blue: 0.964),
+        dark: Color(red: 0.25, green: 0.30, blue: 0.45),
+    )
 
-    static let teal =
-        Color(red: 0.60, green: 0.85, blue: 0.85)
+    static let teal: Color = .dynamic(
+        light: Color(red: 0.64, green: 0.865, blue: 0.865),
+        dark: Color(red: 0.15, green: 0.35, blue: 0.35),
+    )
 
     // MARK: - Greens
 
-    static let mint =
-        Color(red: 0.80, green: 0.96, blue: 0.88)
+    static let mint: Color = .dynamic(
+        light: Color(red: 0.82, green: 0.964, blue: 0.892),
+        dark: Color(red: 0.15, green: 0.40, blue: 0.30),
+    )
 
-    static let mintCream =
-        Color(red: 0.88, green: 0.94, blue: 0.85)
+    static let mintCream: Color = .dynamic(
+        light: Color(red: 0.892, green: 0.946, blue: 0.865),
+        dark: Color(red: 0.20, green: 0.35, blue: 0.25),
+    )
 
-    static let paleTurquoise =
-        Color(red: 0.87, green: 0.99, blue: 1.0)
+    static let paleTurquoise: Color = .dynamic(
+        light: Color(red: 0.883, green: 0.991, blue: 1.0),
+        dark: Color(red: 0.20, green: 0.35, blue: 0.40),
+    )
 
     // MARK: - Purples / Lilacs
 
-    static let lilac =
-        Color(red: 0.90, green: 0.88, blue: 0.96)
+    static let lilac: Color = .dynamic(
+        light: Color(red: 0.91, green: 0.892, blue: 0.964),
+        dark: Color(red: 0.30, green: 0.25, blue: 0.40),
+    )
 
     // MARK: - Reds / Pinks
 
-    static let babyPink =
-        Color(red: 1.0, green: 0.86, blue: 0.90)
+    static let babyPink: Color = .dynamic(
+        light: Color(red: 1.0, green: 0.874, blue: 0.91),
+        dark: Color(red: 0.40, green: 0.20, blue: 0.30),
+    )
 
-    static let blush =
-        Color(red: 0.99, green: 0.88, blue: 0.89)
+    static let blush: Color = .dynamic(
+        light: Color(red: 0.991, green: 0.892, blue: 0.901),
+        dark: Color(red: 0.35, green: 0.25, blue: 0.30),
+    )
 
-    static let mistyRose =
-        Color(red: 1.0, green: 0.89, blue: 0.88)
+    static let mistyRose: Color = .dynamic(
+        light: Color(red: 1.0, green: 0.901, blue: 0.892),
+        dark: Color(red: 0.40, green: 0.25, blue: 0.25),
+    )
 
-    static let coral =
-        Color(red: 1.0, green: 0.78, blue: 0.75)
+    static let coral: Color = .dynamic(
+        light: Color(red: 1.0, green: 0.802, blue: 0.775),
+        dark: Color(red: 0.50, green: 0.30, blue: 0.25),
+    )
 
-    static let peach =
-        Color(red: 1.0, green: 0.90, blue: 0.80)
+    static let peach: Color = .dynamic(
+        light: Color(red: 1.0, green: 0.91, blue: 0.82),
+        dark: Color(red: 0.45, green: 0.30, blue: 0.20),
+    )
 
     // MARK: - Yellows / Beiges
 
-    static let lemon =
-        Color(red: 0.99, green: 0.96, blue: 0.87)
+    static let lemon: Color = .dynamic(
+        light: Color(red: 0.991, green: 0.964, blue: 0.883),
+        dark: Color(red: 0.40, green: 0.40, blue: 0.20),
+    )
 
-    static let warmBeige =
-        Color(red: 0.98, green: 0.88, blue: 0.79)
+    static let warmBeige: Color = .dynamic(
+        light: Color(red: 0.982, green: 0.892, blue: 0.811),
+        dark: Color(red: 0.40, green: 0.30, blue: 0.20),
+    )
 
-    static let sand =
-        Color(red: 0.96, green: 0.91, blue: 0.78)
+    static let sand: Color = .dynamic(
+        light: Color(red: 0.964, green: 0.919, blue: 0.802),
+        dark: Color(red: 0.35, green: 0.30, blue: 0.20),
+    )
 }
+
+// MARK: - BubbleColor + XPickable, EmptyRepresentable
 
 extension BubbleColor: XPickable, EmptyRepresentable {
     public var title: String {

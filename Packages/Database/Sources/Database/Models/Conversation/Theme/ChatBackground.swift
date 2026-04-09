@@ -1,13 +1,17 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftUI
 import XUI
 
+// MARK: - ChatBackground
+
 public enum ChatBackground: Int, Codable, CaseIterable, Sendable {
-    case `default`, system, group
+    case `default`
+    case system
+    case group
 }
+
+// MARK: Identifiable
 
 extension ChatBackground: Identifiable {
     public var id: Int {
@@ -17,14 +21,16 @@ extension ChatBackground: Identifiable {
     public var color: Color {
         switch self {
         case .default:
-            .secondarySystemBackground
+            .background
         case .group:
             .systemGroupedBackground
         case .system:
-            .systemBackground
+            .appPrimary
         }
     }
 }
+
+// MARK: XPickable, EmptyRepresentable
 
 extension ChatBackground: XPickable, EmptyRepresentable {
     public var title: String {

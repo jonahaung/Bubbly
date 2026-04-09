@@ -1,6 +1,6 @@
 import SwiftUI
 
-extension Font.Weight {
+public extension Font.Weight {
     private struct _Weight {
         var value: CGFloat
     }

@@ -1,9 +1,9 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import SwiftData
+
+// MARK: - PContact
 
 @Model
 public final class PContact: ContactRepresentable, SendableTransformable {
@@ -21,7 +21,7 @@ public final class PContact: ContactRepresentable, SendableTransformable {
         mobile: String,
         photoURL: String,
         pushToken: String,
-        publicKeyString: String
+        publicKeyString: String,
     ) {
         self.uid = uid
         self.name = name
@@ -58,7 +58,7 @@ public extension PContact {
             mobile: item.mobile,
             photoURL: item.photoURL,
             pushToken: item.pushToken,
-            publicKeyString: item.publicKeyString
+            publicKeyString: item.publicKeyString,
         )
     }
 
@@ -69,7 +69,7 @@ public extension PContact {
             mobile: mobile,
             photoURL: photoURL,
             pushToken: pushToken,
-            publicKeyString: publicKeyString
+            publicKeyString: publicKeyString,
         )
     }
 }

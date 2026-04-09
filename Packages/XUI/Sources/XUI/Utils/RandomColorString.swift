@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import SwiftUI
@@ -26,4 +26,10 @@ public extension String {
         var generator: RandomNumberGenerator = SeededRandomGenerator(seed: seed)
         return .random(using: &generator)
     }
+}
+
+public extension Color {
+	@MainActor func readableText(over background: Color) -> some View {
+		apcaForeground(self, over: background, fontSize: 17, weight: .regular)
+	}
 }

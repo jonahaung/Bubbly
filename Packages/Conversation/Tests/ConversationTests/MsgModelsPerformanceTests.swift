@@ -1,6 +1,10 @@
+// © 2026 Aung Ko Min
+
+@testable import ConversationTestingSupport
 import Foundation
 import Testing
-@testable import ConversationTestingSupport
+
+// MARK: - MsgModelsPerformanceTests
 
 struct MsgModelsPerformanceTests {
     @Test
@@ -13,7 +17,7 @@ struct MsgModelsPerformanceTests {
             count: 10000,
             conversationID: conversationID,
             startDate: startDate,
-            startIndex: 0
+            startIndex: 0,
         )
 
         let setStart = clock.now
@@ -24,12 +28,12 @@ struct MsgModelsPerformanceTests {
             count: 200,
             conversationID: conversationID,
             startDate: startDate.addingTimeInterval(-200),
-            startIndex: -200
+            startIndex: -200,
         )
         let prependStart = clock.now
         let preservedAnchor = models.prepend(
             msgs: prependBatch,
-            preserveAnchor: base[2000].uid
+            preserveAnchor: base[2000].uid,
         )
         let prependElapsed = prependStart.duration(to: clock.now)
 
@@ -37,7 +41,7 @@ struct MsgModelsPerformanceTests {
             count: 200,
             conversationID: conversationID,
             startDate: startDate.addingTimeInterval(10000),
-            startIndex: 10000
+            startIndex: 10000,
         )
         let appendStart = clock.now
         for message in appendBatch {
@@ -71,11 +75,11 @@ private extension MsgModelsPerformanceTests {
         count: Int,
         conversationID: String,
         startDate: Date,
-        startIndex: Int
+        startIndex: Int,
     ) -> [Message] {
-        var result: [Message] = []
+        var result = [Message]()
         result.reserveCapacity(count)
-        for offset in 0..<count {
+        for offset in 0 ..< count {
             let index = startIndex + offset
             let date = startDate.addingTimeInterval(TimeInterval(offset))
             result.append(
@@ -87,8 +91,8 @@ private extension MsgModelsPerformanceTests {
                     date: date,
                     deliveryStatus: .delivered,
                     attachments: [],
-                    reactions: []
-                )
+                    reactions: [],
+                ),
             )
         }
         return result

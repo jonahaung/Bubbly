@@ -1,9 +1,9 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import UIKit
 import XUI
+
+// MARK: - ImageViewItem
 
 public protocol ImageViewItem: Sendable, PhotoGalleryItem {
     var remoteURL: URL? { get }
@@ -80,12 +80,18 @@ public extension ImageViewItem {
     }
 
     func image() -> UIImage? {
-        guard let data = data() else { return nil }
+        guard let data = data() else {
+            return nil
+        }
+
         return UIImage(data: data)
     }
 
     func thumbnailImage() -> UIImage? {
-        guard let data = thumbnailData() else { return nil }
+        guard let data = thumbnailData() else {
+            return nil
+        }
+
         return UIImage(data: data)
     }
 

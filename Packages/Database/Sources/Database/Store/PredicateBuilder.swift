@@ -1,9 +1,12 @@
-//import SwiftData
-//import Foundation
+// © 2026 Aung Ko Min
+
+// import SwiftData
+// import Foundation
 //
-//public struct PredicateBuilder<Root> {
+// public struct PredicateBuilder<Root> {
 //
-//	private var builders: [(PredicateExpressions.Variable<Root>) -> any StandardPredicateExpression<Bool>] = []
+//	private var builders: [(PredicateExpressions.Variable<Root>) -> any
+//	StandardPredicateExpression<Bool>] = []
 //
 //	public init() {}
 //
@@ -70,4 +73,4 @@
 //			}
 //		}
 //	}
-//}
+// }

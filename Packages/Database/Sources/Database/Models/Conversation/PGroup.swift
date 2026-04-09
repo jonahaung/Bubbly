@@ -1,9 +1,9 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import SwiftData
+
+// MARK: - PGroup
 
 @Model
 public final class PGroup {
@@ -23,7 +23,7 @@ public final class PGroup {
         photoURL: String,
         members: [String],
         createdBy: String,
-        theme: ConversationTheme = ConversationTheme(),
+        theme _: ConversationTheme = ConversationTheme(),
     ) {
         self.uid = uid
         self.name = name
@@ -33,6 +33,8 @@ public final class PGroup {
         self.createdBy = createdBy
     }
 }
+
+// MARK: UIdentifiable
 
 extension PGroup: UIdentifiable {
     public func update(with conversation: Conversation) {
@@ -47,9 +49,7 @@ extension PGroup: UIdentifiable {
         }
     }
 
-    public func update(with properties: ConversationProperties) {
-		
-    }
+    public func update(with _: ConversationProperties) {}
 
     public func update(from item: Group) {
         if name != item.name {
@@ -58,11 +58,13 @@ extension PGroup: UIdentifiable {
         if photoURL != item.photoURL {
             photoURL = item.photoURL ?? photoURL
         }
-		if members.uniqued().sorted() != item.members.uniqued().sorted() {
-			members = item.members.uniqued().sorted()
+        if members.uniqued().sorted() != item.members.uniqued().sorted() {
+            members = item.members.uniqued().sorted()
         }
     }
 }
+
+// MARK: SendableTransformable
 
 extension PGroup: SendableTransformable {
     public typealias SendableType = Group
@@ -71,10 +73,10 @@ extension PGroup: SendableTransformable {
         self.init(
             uid: snapshot.uid,
             name: snapshot.name,
-			createdDate: snapshot.createdDate,
+            createdDate: snapshot.createdDate,
             photoURL: snapshot.photoURL ?? "",
             members: snapshot.members,
-            createdBy: snapshot.createdBy
+            createdBy: snapshot.createdBy,
         )
     }
 
@@ -85,7 +87,7 @@ extension PGroup: SendableTransformable {
             createdDate: .init(createdDate),
             photoURL: photoURL,
             members: members,
-            createdBy: createdBy
+            createdBy: createdBy,
         )
     }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Database
@@ -20,11 +20,11 @@ public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, 
         case .inbox:
             "message"
         case .contacts:
-            "at"
+            "book.pages.fill"
         case .test:
-            "app.badge"
+            "apple.logo"
         case .settings:
-            "shield"
+            "person.crop.circle.fill"
         }
     }
 

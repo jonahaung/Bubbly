@@ -1,3 +1,10 @@
+//
+//  ProfileBackgroundShape.swift
+//  XUI
+//
+//  Created by Aung Ko Min on 6/4/26.
+//
+
 import SwiftUI
 
 public struct ProfileBackgroundShape: Shape {

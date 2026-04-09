@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import SwiftUI
@@ -28,8 +28,9 @@ public struct TextAvatarView: View {
                         .system(size: geo.size.height * 0.5, weight: .medium)
                             .width(.condensed)
                     )
-                    .foregroundStyle(.windowBackground)
-            }.aspectRatio(1, contentMode: .fit)
+					.foregroundStyle(Color(.tertiarySystemBackground))
+            }
+			.aspectRatio(1, contentMode: .fit)
         }
         .equatable(by: text)
     }

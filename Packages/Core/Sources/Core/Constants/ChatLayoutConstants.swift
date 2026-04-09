@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 
@@ -14,7 +12,7 @@ public enum ChatLayoutConstants {
         public static let bubbleMinSpacerWidth: CGFloat = 20
     }
 
-    public static let topBarHeight: CGFloat = 50
+    public static let topBarHeight: CGFloat = 44
     public static let bottomBarHeight: CGFloat = 44
-	public static let paginationTrashold: CGFloat = 100
+    public static let paginationTrashold: CGFloat = -1
 }

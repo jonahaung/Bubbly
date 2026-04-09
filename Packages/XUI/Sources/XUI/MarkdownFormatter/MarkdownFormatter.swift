@@ -1,78 +1,50 @@
 import SwiftUI
+public struct GitHubMarkdownStyle {
 
-public struct MarkdownFormatter {
+	public init() {}
 
-	let attributes: AttributeContainer = {
+	// MARK: - Base
+
+	public let base = AttributeContainer.base
+
+	// MARK: - Inline
+
+	public func inline(_ intent: InlinePresentationIntent) -> AttributeContainer? {
 		var container = AttributeContainer()
-		container.font = .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize)
-		container.lineHeight = .multiple(factor: 1.2)
-		var paragraph = NSMutableParagraphStyle()
-		paragraph.lineBreakMode = .byWordWrapping
-		paragraph.lineSpacing = 0
-		paragraph.paragraphSpacing = 0
-		container.paragraphStyle = paragraph
-		return container
-	}()
 
-	let font: Font = .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize)
+		switch intent {
 
-	private let markdownParser: Markdown
-
-	public init() {
-		markdownParser = Markdown()
-	}
-
-	public func format(
-		_ string: String,
-		layoutDirection: LayoutDirection = .leftToRight
-	) -> AttributedString {
-		do {
-			return try markdownParser.style(
-				markdown: string,
-				options: Markdown.ParsingOptions(
-					layoutDirectionLeftToRight: layoutDirection == .leftToRight
-				),
-				attributes: attributes,
-				inlinePresentationIntentAttributes: inlinePresentationIntentAttributes(for:),
-				presentationIntentAttributes: presentationIntentAttributes(for:in:)
-			)
-		} catch {
-
-			return AttributedString(string, attributes: attributes)
-		}
-	}
-
-	private func inlinePresentationIntentAttributes(
-		for inlinePresentationIntent: InlinePresentationIntent
-	) -> AttributeContainer? {
-		nil
-	}
-
-	private func presentationIntentAttributes(
-		for presentationKind: PresentationIntent.Kind,
-		in presentationIntent: PresentationIntent
-	) -> AttributeContainer? {
-		switch presentationKind {
-		case .blockQuote:
-			var container = AttributeContainer()
+		case .code:
 			container.font =
-				.system(
-					size: UIFont.preferredFont(forTextStyle: .callout).pointSize,
-					weight: .regular, design: .serif
-				).italic()
-				.leading(.tight)
-			return container
-		case .codeBlock:
-			var container = AttributeContainer()
-			container.font =
-				.system(
-					size: UIFont.preferredFont(forTextStyle: .caption1).pointSize,
-					weight: .medium, design: .monospaced
-				)
+				.system(size: UIFont.labelFontSize-1, weight: .regular, design: .monospaced)
 				.width(.condensed)
-				.leading(.tight)
+			container.foregroundColor = Color(.secondaryLabel)
+		case .emphasized:
+			container.font = .system(size: UIFont.labelFontSize)
+		case .stronglyEmphasized:
+			container.font = .system(size: UIFont.labelFontSize, weight: .medium)
+		case .strikethrough:
+			container.strikethroughStyle = .single
+		case .inlineHTML:
+			container.font = .system(size: UIFont.labelFontSize, design: .serif)
+		default:
+			return nil
+		}
 
-			return container
+		return container
+	}
+
+	// MARK: - Block
+
+	public func block(
+		_ kind: PresentationIntent.Kind,
+		_ intent: PresentationIntent
+	) -> AttributeContainer? {
+
+		var container = base
+
+		switch kind {
+
 		case .header(let level):
 			let font: Font = {
 				switch level {
@@ -102,20 +74,69 @@ public struct MarkdownFormatter {
 						weight: .regular
 					)
 				default:
-					return .footnote
+					return .subheadline
 				}
 			}()
 			let foregroundColor: Color? = level >= 6 ? Color.secondary : nil
 			if let foregroundColor {
-				return attributes
+				return container
 					.font(font)
 					.foregroundColor(foregroundColor)
 			} else {
-				return attributes
-					.font(font)
+				container.lineHeight = .tight
+				return container.font(font)
 			}
+		case .codeBlock, .blockQuote, .orderedList, .unorderedList:
+			container.font =
+				.system(size: UIFont.labelFontSize - 1)
+			container.lineHeight = .loose
 		default:
-			return nil
+			return container
+		}
+		return container
+	}
+}
+public struct MarkdownFormatter {
+	private let markdownParser: Markdown
+
+	public init() {
+		markdownParser = Markdown()
+	}
+
+	public func format(
+		_ string: String,
+		layoutDirection: LayoutDirection = .leftToRight
+	) -> AttributedString {
+		let style = GitHubMarkdownStyle()
+		do {
+			return try markdownParser.style(
+				markdown: string,
+				options: Markdown.ParsingOptions(
+					layoutDirectionLeftToRight: layoutDirection == .leftToRight
+				),
+				attributes: style.base,
+				inline: style.inline(_:),
+				block: style.block(_:_:)
+			)
+		} catch {
+			return AttributedString(string, attributes: style.base)
 		}
 	}
+}
+
+extension AttributeContainer {
+	public static let base: AttributeContainer = {
+		var container = AttributeContainer()
+		container.font = .system(size: UIFont.labelFontSize).leading(.tight)
+		container.lineHeight = .multiple(factor: 1.3)
+		container.foregroundColor = Color.label
+		let paragraphStyle = NSMutableParagraphStyle()
+		paragraphStyle.lineBreakMode = .byWordWrapping
+		paragraphStyle.lineSpacing = 0
+		paragraphStyle.lineBreakStrategy = .hangulWordPriority
+		paragraphStyle.allowsDefaultTighteningForTruncation = true
+		paragraphStyle.lineHeightMultiple = 1.3
+		container.paragraphStyle = paragraphStyle
+		return container
+	}()
 }

@@ -22,7 +22,7 @@ final class ExampleViewModel {
         self.loadUseCase = LoadExampleUseCaseImpl(repository: repository)
         self.refreshUseCase = RefreshExampleUseCaseImpl(repository: repository)
         self.submitUseCase = SubmitExampleUseCaseImpl(repository: repository)
-        self.state = .init(isLoading: false, error: nil)
+		self.state = .init(isLoading: false, error: nil, items: nil)
     }
 
     func send(_ intent: ExampleIntent) async {
@@ -73,7 +73,7 @@ final class ExampleViewModel {
         dispatch(.setLoading(true))
         dispatch(.setError(nil))
         do {
-            let snapshot = try await submitUseCase.execute()
+            let snapshot = try await loadUseCase.execute()
             dispatch(.applySnapshot(snapshot))
         } catch {
             dispatch(.setLoading(false))

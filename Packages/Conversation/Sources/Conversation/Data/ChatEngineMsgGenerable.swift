@@ -1,5 +1,8 @@
+// © 2026 Aung Ko Min
 
 import FoundationModels
+
+// MARK: - ChatEngineMsgGenerable
 
 @Generable
 struct ChatEngineMsgGenerable {
@@ -8,6 +11,8 @@ struct ChatEngineMsgGenerable {
     @Guide(description: "The content of the message")
     let content: String
 }
+
+// MARK: - TopicGenerable
 
 @Generable
 struct TopicGenerable {

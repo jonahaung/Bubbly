@@ -3,28 +3,53 @@
 //
 
 import SwiftUI
+import XUI
+import Core
 
 struct ExampleView: View {
     @State private var viewModel = ExampleViewModel()
 
     var body: some View {
-        VStack(spacing: 16) {
-            if viewModel.state.isLoading {
-                ProgressView()
-            }
+		ScrollView {
+			LazyVStack(alignment: .leading, spacing: Spacing.md) {
+				if viewModel.state.isLoading {
+					ProgressView()
+				}
 
-            if let error = viewModel.state.error {
-                Text(error)
-                    .foregroundStyle(.red)
-            }
+				if let error = viewModel.state.error {
+					Text(error)
+						.foregroundStyle(.red)
+				}
 
-            Button("Submit") {
-                Task {
-                    await viewModel.send(.submit)
-                }
-            }
-        }
-        .padding()
+				if let items = viewModel.state.items {
+					Section {
+						ForEach(items, id: \.self) { item in
+							VStack {
+								HStack(spacing: Spacing.md) {
+									Text(item)
+
+									Spacer()
+								}
+							}
+							.padding(Padding.md)
+							.flexible(.horizontal)
+							.background(Color.appPrimary)
+						}
+					} header: {
+						Button("LoadItems") {
+							Task {
+								await viewModel.send(.submit)
+							}
+						}
+						.buttonSizing(.flexible)
+						.padding(.vertical)
+						.buttonStyle(.borderedProminent)
+					}
+				}
+			}
+			.padding(Padding.md)
+		}
+		.applyBackground()
         .navigationTitle("Example")
         .task {
             await viewModel.send(.appear)

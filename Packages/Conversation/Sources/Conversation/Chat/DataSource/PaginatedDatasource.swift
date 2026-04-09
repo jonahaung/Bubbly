@@ -1,3 +1,5 @@
+// © 2026 Aung Ko Min
+
 import Core
 import Database
 import Foundation
@@ -6,58 +8,62 @@ import SwiftData
 import XUI
 
 actor PaginatedDatasource {
+    // MARK: Lifecycle
 
-	private let pageSize: Int
+    init(pageSize: Int) {
+        self.pageSize = pageSize
+    }
 
-	init(pageSize: Int) {
-		self.pageSize = pageSize
-	}
-	
-	func reset(conID: String) async throws -> [Message] {
-		let messages = try await MsgRepo.msgs(
-			conID: conID,
-			limit: pageSize
-		)
-		return messages
-	}
+    // MARK: Internal
 
-	func previous(
-		before date: String,
-		conID: String
-	) async throws -> [Message] {
-		var descriptor = FetchDescriptor<PMsg>(
-			predicate: .msgs(conID: conID, date: date, comparison: .lessThan),
-			sortBy: [.init(\.date, order: .reverse)]
-		)
-		descriptor.fetchLimit = pageSize
-		let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
+    func reset(conID: String) async throws -> [Message] {
+        try await MsgRepo.msgs(
+            conID: conID,
+            limit: pageSize,
+        )
+    }
 
-		return Array(snapshots.reversed())
-	}
+    func previous(
+        before date: String,
+        conID: String,
+    ) async throws -> [Message] {
+        var descriptor = FetchDescriptor<PMsg>(
+            predicate: .msgs(conID: conID, date: date, comparison: .lessThan),
+            sortBy: [.init(\.date, order: .reverse)],
+        )
+        descriptor.fetchLimit = pageSize
+        let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
 
-	func msg(
-		from date: String,
-		conID: String
-	) async throws -> [Message] {
-		var descriptor = FetchDescriptor<PMsg>(
-			predicate: .msgs(conID: conID, date: date, comparison: .lessThanOrEqual),
-			sortBy: [.init(\.date, order: .reverse)]
-		)
-		descriptor.fetchLimit = pageSize
-		let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
+        return Array(snapshots.reversed())
+    }
 
-		return Array(snapshots.reversed())
-	}
-	func more(
-		after date: String,
-		conID: String,
-	) async throws -> [Message] {
-		var descriptor = FetchDescriptor<PMsg>(
-			predicate: .msgs(conID: conID, date: date, comparison: .greaterThan),
-			sortBy: [.init(\.date, order: .forward)]
-		)
-		descriptor.fetchLimit = pageSize
-		return try await Store.shared.msgStore?.fetch(descriptor) ?? []
-	}
+    func msg(
+        from date: String,
+        conID: String,
+    ) async throws -> [Message] {
+        var descriptor = FetchDescriptor<PMsg>(
+            predicate: .msgs(conID: conID, date: date, comparison: .lessThanOrEqual),
+            sortBy: [.init(\.date, order: .reverse)],
+        )
+        descriptor.fetchLimit = pageSize
+        let snapshots = try await Store.shared.msgStore?.fetch(descriptor) ?? []
+
+        return Array(snapshots.reversed())
+    }
+
+    func more(
+        after date: String,
+        conID: String,
+    ) async throws -> [Message] {
+        var descriptor = FetchDescriptor<PMsg>(
+            predicate: .msgs(conID: conID, date: date, comparison: .greaterThan),
+            sortBy: [.init(\.date, order: .forward)],
+        )
+        descriptor.fetchLimit = pageSize
+        return try await Store.shared.msgStore?.fetch(descriptor) ?? []
+    }
+
+    // MARK: Private
+
+    private let pageSize: Int
 }
-

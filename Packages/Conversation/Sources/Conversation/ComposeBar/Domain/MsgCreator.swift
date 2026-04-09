@@ -1,46 +1,48 @@
+// © 2026 Aung Ko Min
+
 #if os(iOS)
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+    // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-import Database
-import Foundation
-import MediaPicker
-import Services
-import UIKit
-import XUI
+    import Database
+    import Foundation
+    import MediaPicker
+    import Services
+    import UIKit
+    import XUI
 
-public actor MsgCreator {
-    public enum Error: Swift.Error {
-        case noCurrentUserId
-        case imageProcessingFailed(Swift.Error? = nil)
-        case dataConversionFailed
+    public actor MsgCreator {
+        public enum Error: Swift.Error {
+            case noCurrentUserId
+            case imageProcessingFailed(Swift.Error? = nil)
+            case dataConversionFailed
+        }
+
+        private let mediaManager: MediaManager
+        private let currentUserId: String
+
+        public init(currentUserId: String, mediaManager: MediaManager = .shared) {
+            self.mediaManager = mediaManager
+            self.currentUserId = currentUserId
+        }
+
+        public func message(
+            text: String,
+            attachments: [Attachment],
+            in conversation: Conversation,
+        ) async -> Message {
+            await Message(
+                uid: IDGenerator.shared.make(),
+                senderID: currentUserId,
+                conID: conversation.uid,
+                text: text,
+                date: .now,
+                deliveryStatus: .sending,
+                attachments: attachments,
+                reactions: [],
+            )
+        }
     }
-
-    private let mediaManager: MediaManager
-    private let currentUserId: String
-
-    public init(currentUserId: String, mediaManager: MediaManager = .shared) {
-        self.mediaManager = mediaManager
-        self.currentUserId = currentUserId
-    }
-
-    public func message(
-        text: String,
-        attachments: [Attachment],
-        in conversation: Conversation
-    ) async throws -> Message {
-        await Message(
-            uid: IDGenerator.shared.make(),
-            senderID: currentUserId,
-            conID: conversation.uid,
-            text: text,
-            date: .now,
-			deliveryStatus: .sending,
-            attachments: attachments,
-            reactions: []
-        )
-    }
-}
 
 #endif

@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -16,28 +16,27 @@ public struct Route: Sendable, Hashable, Identifiable {
 @Observable
 public final class Router {
 
-	public var routes: [Route]
+	public var routes = [TabPath: [NavPath]]()
 	@ObservationIgnored
 	public var selectedTab: TabPath
 	public var sheet: NavPath?
-	public var toolbarVisibility: Visibility = .visible
 
 	public init(_ selected: TabPath) {
 		selectedTab = selected
-		routes = TabPath.allCases.map { .init(tabPath: $0, navPaths: []) }
+		TabPath.allCases.forEach { each in
+			routes[each] = []
+		}
 	}
 
 	public func navPaths(for tab: TabPath) -> [NavPath] {
-		routes.first(where: { $0.tabPath == tab })?.navPaths ?? []
+		routes[tab] ?? []
 	}
 
 	public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
 		Binding(
 			get: { self.navPaths(for: tab) },
 			set: { newValue in
-				if let index = self.routes.firstIndex(where: { $0.tabPath == tab }) {
-					self.routes[index].navPaths = newValue
-				}
+				self.routes[tab] = newValue
 			}
 		)
 	}
@@ -48,19 +47,23 @@ public final class Router {
 			set: { self.selectedTab = $0 }
 		)
 	}
+
+	public func reset() {
+		routes.forEach { key, value in
+			routes[key] = []
+		}
+		selectedTab = .inbox
+	}
 }
 
 extension Router {
 	@ObservationIgnored
 	fileprivate var currentNavPaths: [NavPath] {
-		routes.first(where: { $0.tabPath == selectedTab })?.navPaths ?? []
+		navPaths(for: selectedTab)
 	}
 }
 
 extension Router {
-	public func setTabBar(visibility: Visibility) {
-		toolbarVisibility = visibility
-	}
 	public func selectTab(_ newValue: TabPath) {
 		guard selectedTab != newValue else { return }
 		selectedTab = newValue
@@ -74,10 +77,11 @@ extension Router {
 		var paths = navPaths(for: selectedTab)
 		if let index = paths.firstIndex(where: { $0.id == path.id }) {
 			paths = Array(paths[...index])
-			navPathsBinding(for: selectedTab).wrappedValue = paths
+			routes[selectedTab] = paths
 			return
 		}
-		navPathsBinding(for: selectedTab).wrappedValue.append(path)
+		paths.append(path)
+		routes[selectedTab] = paths
 	}
 
 	public func pop() {

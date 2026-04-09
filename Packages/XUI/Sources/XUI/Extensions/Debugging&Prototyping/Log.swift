@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
@@ -14,6 +14,6 @@ public func log(
     #if DEBUG
     guard let object else { return }
     let file = (filename as NSString).lastPathComponent
-    print("\("♻️") \(file)|\(line)\n\(object)")
+    print("\("✅") \(file)|\(line)\n\(object)")
     #endif
 }

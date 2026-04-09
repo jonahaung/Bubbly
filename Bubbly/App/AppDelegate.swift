@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -12,10 +12,14 @@ import SwiftUI
 import XUI
 
 @MainActor
-class AppDelegate: NSObject, UIApplicationDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate {
+
+	var pushNotificationServie: PushNotificationService?
+	let backgroundTaskHandler: BackgroundTaskHandler = .init()
+
 	func application(
 		_: UIApplication,
-		didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
+		didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil,
 	)
 		-> Bool
 	{
@@ -23,19 +27,20 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 		FirebaseKeychainSanitizer.sanitize()
 		FirebaseConfiguration.shared.setLoggerLevel(.error)
 		Auth.auth().shareAuthStateAcrossDevices = true
+		pushNotificationServie = .init()
 		return true
 	}
 
 	func application(
 		_: UIApplication,
-		didFailToRegisterForRemoteNotificationsWithError error: any Error
+		didFailToRegisterForRemoteNotificationsWithError error: any Error,
 	) {
-		debugPrint(error)
+		log(error)
 	}
 
 	func application(
 		_: UIApplication,
-		didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+		didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data,
 	) {
 		Auth.auth().setAPNSToken(deviceToken, type: .sandbox)
 		Messaging.messaging().apnsToken = deviceToken
@@ -43,10 +48,25 @@ class AppDelegate: NSObject, UIApplicationDelegate {
 
 	func application(
 		_: UIApplication,
-		didReceiveRemoteNotification _: [AnyHashable: Any]
+		didReceiveRemoteNotification userInfo: [AnyHashable: Any],
 	) async
 		-> UIBackgroundFetchResult
 	{
-		.noData
+		if Auth.auth().canHandleNotification(userInfo) {
+			return .noData
+		}
+		return .noData
+	}
+}
+
+private extension AppDelegate {
+	func registerForRemoteNotifications() {
+		Task {
+			do {
+				try await pushNotificationServie?.registerForPushNotifications()
+			} catch {
+				log(error)
+			}
+		}
 	}
 }

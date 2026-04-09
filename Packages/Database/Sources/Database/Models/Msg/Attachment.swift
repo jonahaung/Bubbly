@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - Attachment
 
 public struct Attachment: Codable, Sendable, Hashable, Identifiable {
     public var id: String {
@@ -24,11 +24,11 @@ public struct Attachment: Codable, Sendable, Hashable, Identifiable {
         attachMentTypeRaw: Int,
         aspectRatio: Double,
         title: String? = nil,
-        subTitle: String? = nil
+        subTitle: String? = nil,
     ) {
         self.uid = uid
         self.url = url
-        self.thumbnailURL = thumbnailUrl
+        thumbnailURL = thumbnailUrl
         self.attachMentTypeRaw = attachMentTypeRaw
         self.aspectRatio = aspectRatio
         self.title = title

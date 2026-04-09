@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import SwiftUI
@@ -94,7 +94,7 @@ private struct HeadingView: View {
                         weight: .medium
                     )
                 )
-                .lineHeight(.loose)
+				.lineHeight(.tight)
         case 2:
             Text(text)
                 .font(
@@ -103,7 +103,7 @@ private struct HeadingView: View {
                         weight: .medium
                     )
                 )
-                .lineHeight(.loose)
+                .lineHeight(.tight)
         case 3:
             Text(text)
                 .font(
@@ -112,7 +112,7 @@ private struct HeadingView: View {
                         weight: .medium
                     )
                 )
-                .lineHeight(.loose)
+                .lineHeight(.tight)
         case 4:
             Text(text)
                 .font(
@@ -121,7 +121,7 @@ private struct HeadingView: View {
                         weight: .medium
                     )
                 )
-                .lineHeight(.loose)
+                .lineHeight(.tight)
         default:
             Text(text)
                 .font(
@@ -130,7 +130,7 @@ private struct HeadingView: View {
                         weight: .semibold
                     )
                 )
-                .lineHeight(.loose)
+                .lineHeight(.tight)
         }
     }
 }

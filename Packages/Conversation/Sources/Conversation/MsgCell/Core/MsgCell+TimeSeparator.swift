@@ -1,7 +1,4 @@
-#if os(iOS)
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -11,26 +8,34 @@ import XUI
 
 extension MsgCell {
     struct TimeSeparator: View {
-        @Environment(MsgCellViewModel.self) private var viewModel
+        // MARK: Internal
 
         var body: some View {
-			let date = viewModel.state.date
-			Text(
-				date, format: date.isInToday ? .dateTime
-					.hour()
-					.minute() : .dateTime
-					.day()
-					.weekday(.abbreviated)
-					.hour()
-					.minute()
-			)
+            ZStack {
+                if viewModel.state.isVisible {
+                    let date = viewModel.state.date
+                    Text(
+                        date, format: date.isInToday ? .dateTime
+                            .hour()
+                            .minute() : .dateTime
+                            .day()
+                            .weekday(.abbreviated)
+                            .hour()
+                            .minute(),
+                    )
+                    .font(.system(size: UIFont.systemFontSize - 1, weight: .medium))
+                    .foregroundStyle(Color.secondaryText)
+                    .equatable(by: date)
+                }
+            }
             .flexible(.horizontal)
-			.frame(height: ChatLayoutConstants.Cell.timeSeparatorHeight, alignment: .center)
-			.font(.footnote)
-			.allowsHitTesting(false)
-			.equatable(by: viewModel.state.id)
+            .frame(height: ChatLayoutConstants.Cell.timeSeparatorHeight)
+            .allowsHitTesting(false)
+            .equatable(by: viewModel.state)
         }
+
+        // MARK: Private
+
+        @Environment(MsgCellViewModel.self) private var viewModel
     }
 }
-
-#endif

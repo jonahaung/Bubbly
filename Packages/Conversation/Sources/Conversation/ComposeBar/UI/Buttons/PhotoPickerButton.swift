@@ -1,40 +1,36 @@
-#if os(iOS)
-//
-//  PhotoPickerButton.swift
-//  Conversation
-//
-//  Created by Aung Ko Min on 3/4/26.
-//
+// © 2026 Aung Ko Min
 
+import Core
+import Services
 import SwiftUI
 import XUI
-import Services
 
 struct PhotoPickerButton: View {
-
-	@Environment(ChatComposer.self) private var composer
-	@Environment(ChatManager.self) private var manager
+    // MARK: Internal
 
     var body: some View {
-		CustomButton {
-			composer.updateSource(.liary)
-		} label: {
-			Image(systemName: ChatComposer.Source.liary.systemImageName)
-				.resizable()
-				.frame(square: 20)
-				.padding()
-				.frame(square: 38)
-				.background(.windowBackground, in: .circle)
-		} onFinished: {
-			Router.shared
-				.presentModel(
-					NavPath
-						.view(
-							node: PhotoPickerView().environment(composer.photoPicker).opaqueView()
-						)
-				)
-		}
+        CustomButton {
+            composer.updateSource(.liary)
+        } label: {
+            Image(systemName: ChatComposer.Source.liary.systemImageName)
+                .resizable()
+                .frame(square: 20)
+                .padding()
+                .frame(square: 38)
+                .background(Color.appPrimary, in: .circle)
+        } onFinished: {
+            manager.router?
+                .presentModel(
+                    NavPath
+                        .view(
+                            node: PhotoPickerView().environment(composer.photoPicker).opaqueView(),
+                        ),
+                )
+        }
     }
-}
 
-#endif
+    // MARK: Private
+
+    @Environment(ChatComposer.self) private var composer
+    @Environment(ChatManager.self) private var manager
+}

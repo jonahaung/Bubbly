@@ -1,3 +1,5 @@
+// © 2026 Aung Ko Min
+
 import Database
 import Services
 import SwiftUI

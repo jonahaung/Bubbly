@@ -1,22 +1,22 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import SwiftData
 import UIKit
 
+// MARK: - PMsg
+
 @Model
 public final class PMsg {
     @Attribute(.unique)
-    public var uid = String()
-    public var senderID = String()
-    public var conID = String()
-    public var text: String?
-    public var date = String()
-	public var deliveryStatus: Int
-    public var attachments = [Attachment]()
-    public var reactions = [Reaction]()
+    public var uid: String
+    public var senderID: String
+    public var conID: String
+    public var text: String? = nil
+    public var date: String
+    public var deliveryStatus: Int
+    public var attachments: [Attachment] = []
+    public var reactions: [Reaction] = []
 
     public init(
         uid: String,
@@ -26,7 +26,7 @@ public final class PMsg {
         date: String,
         deliveryStatus: DeliveryStatus,
         attachments: [Attachment],
-        reactions: [Reaction]
+        reactions: [Reaction],
     ) {
         self.uid = uid
         self.senderID = senderID
@@ -47,11 +47,19 @@ public extension PMsg {
     }
 
     func update(from item: Message) {
-        deliveryStatus = item.deliveryStatus.rawValue
-        attachments = item.attachments
-        reactions = item.reactions
+        if deliveryStatus != item.deliveryStatus.rawValue {
+            deliveryStatus = item.deliveryStatus.rawValue
+        }
+        if attachments != item.attachments {
+            attachments = item.attachments
+        }
+        if reactions != item.reactions {
+            reactions = item.reactions
+        }
     }
 }
+
+// MARK: SendableTransformable
 
 extension PMsg: SendableTransformable {
     public typealias SendableType = Message
@@ -65,7 +73,7 @@ extension PMsg: SendableTransformable {
             date: ServerTime(snapshot.date).value,
             deliveryStatus: snapshot.deliveryStatus,
             attachments: snapshot.attachments,
-            reactions: snapshot.reactions
+            reactions: snapshot.reactions,
         )
     }
 
@@ -76,9 +84,9 @@ extension PMsg: SendableTransformable {
             conID: conID,
             text: text,
             date: ServerTime(date).date,
-			deliveryStatus: .init(rawValue: deliveryStatus) ?? .received,
+            deliveryStatus: .init(rawValue: deliveryStatus) ?? .received,
             attachments: attachments,
-            reactions: reactions
+            reactions: reactions,
         )
     }
 }

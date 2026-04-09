@@ -1,10 +1,14 @@
+// © 2026 Aung Ko Min
+
 import Foundation
+
+// MARK: - Message
 
 public struct Message: Hashable, Sendable {
     public let uid: String
     public let senderID: String
     public let conID: String
-    public var text: String?
+    public var text: String? = nil
     public let date: Date
     public var deliveryStatus: DeliveryStatus
     public var attachments: [Attachment]
@@ -18,7 +22,7 @@ public struct Message: Hashable, Sendable {
         date: Date,
         deliveryStatus: DeliveryStatus,
         attachments: [Attachment],
-        reactions: [Reaction]
+        reactions: [Reaction],
     ) {
         self.uid = uid
         self.senderID = senderID
@@ -31,6 +35,8 @@ public struct Message: Hashable, Sendable {
     }
 }
 
+// MARK: - DeliveryStatus
+
 public enum DeliveryStatus: Int, Hashable, Sendable {
     case received
     case read
@@ -39,9 +45,13 @@ public enum DeliveryStatus: Int, Hashable, Sendable {
     case sendingFailed
 }
 
+// MARK: - Attachment
+
 public struct Attachment: Hashable, Sendable {
     public init() {}
 }
+
+// MARK: - Reaction
 
 public struct Reaction: Hashable, Sendable {
     public init() {}

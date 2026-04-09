@@ -1,10 +1,10 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import FirebaseAuth
 import Foundation
 import XUI
+
+// MARK: - AnyMsgData
 
 public enum AnyMsgData: Codable, Sendable, Hashable {
     case newMsg(rMsg: RMsg)
@@ -53,13 +53,13 @@ public extension AnyMsgData {
         public let msgID: String
         public let userID: String
         public let conID: String
-		public let date: String
+        public let date: String
 
-		public init(msgID: String, userID: String, conID: String, date: String) {
+        public init(msgID: String, userID: String, conID: String, date: String) {
             self.msgID = msgID
             self.userID = userID
             self.conID = conID
-			self.date = date
+            self.date = date
         }
     }
 }
@@ -67,9 +67,9 @@ public extension AnyMsgData {
 public extension AnyMsgData {
     var conID: String {
         switch self {
-        case let .newMsg(rMsg),
-             let .updatedMsg(rMsg),
-             let .deleteMsg(rMsg):
+        case let .deleteMsg(rMsg),
+             let .newMsg(rMsg),
+             let .updatedMsg(rMsg):
             rMsg.conID
         case let .typingStatus(typingStatus):
             typingStatus.conID

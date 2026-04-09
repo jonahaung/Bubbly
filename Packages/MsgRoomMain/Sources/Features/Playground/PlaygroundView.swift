@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Services
@@ -13,6 +13,7 @@ struct PlaygroundView: View {
     @State private var fontName = ""
     @State private var searchText = ""
     @State private var text = ""
+	
     var body: some View {
         List {
 			if viewModel.state.isLoading {
@@ -24,6 +25,9 @@ struct PlaygroundView: View {
 					.foregroundStyle(.red)
 			}
 
+			NavigationLink("Exampl View") {
+				ExampleView()
+			}
 			Button("Show modal") {
 				text = Lorem.random()
 				showModal = true

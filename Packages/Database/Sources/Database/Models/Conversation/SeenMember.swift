@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - SeenMember
 
 public struct SeenMember: Codable, Sendable, Hashable {
     public let uid: String
@@ -16,11 +16,15 @@ public struct SeenMember: Codable, Sendable, Hashable {
     }
 }
 
+// MARK: Identifiable
+
 extension SeenMember: Identifiable {
     public var id: String {
         uid
     }
 }
+
+// MARK: Comparable
 
 extension SeenMember: Comparable {
     public static func < (lhs: SeenMember, rhs: SeenMember) -> Bool {

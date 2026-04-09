@@ -1,30 +1,26 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Services
 import SwiftUI
 import XUI
 
 extension MsgCell {
+    struct TextContent: View {
+        // MARK: Internal
 
-	struct TextContent: View {
+        var body: some View {
+            if let text = state.attributedText {
+                Text(text)
+                    .allowsHitTesting(false)
+            }
+        }
 
-		// MARK: Internal
+        // MARK: Private
 
-		var body: some View {
-			if let text = state.text {
-				Text(text)
-					.fixedSize(horizontal: false, vertical: true)
-			}
-		}
+        @Environment(MsgCellViewModel.self) private var viewModel
 
-		// MARK: Private
-
-		@Environment(MsgCellViewModel.self) private var viewModel
-
-		private var state: MsgCellViewModel.State {
-			viewModel.state
-		}
-	}
+        private var state: MsgCellViewModel.State {
+            viewModel.state
+        }
+    }
 }

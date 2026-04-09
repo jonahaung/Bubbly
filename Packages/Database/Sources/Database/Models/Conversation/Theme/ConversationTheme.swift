@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import SwiftUI
@@ -14,16 +12,16 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
     public init(
         bubbleColor: BubbleColor = .default,
         background: ChatBackground = .default,
-        bubbleCornorRadius: CGFloat = 17
+        bubbleCornorRadius: CGFloat = 17,
     ) {
         self.bubbleColor = bubbleColor
         self.background = background
         self.bubbleCornorRadius = bubbleCornorRadius
     }
 
-    public static let `default` = ConversationTheme(
+    public static let `default`: ConversationTheme = .init(
         bubbleColor: .default,
         background: .default,
-        bubbleCornorRadius: 17
+        bubbleCornorRadius: 17,
     )
 }

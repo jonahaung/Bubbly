@@ -1,18 +1,21 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import SwiftUI
 import XUI
 
-@MainActor
-public protocol Coordinator {
+public protocol Coordinator: Sendable {
     var appLauncher: AppLauncher { get }
     var router: Router { get }
     var container: DependencyContainer { get }
+	func start() async
+	func handleDeeplink(_ url: URL) async
 }
 
-public final class AppCoordinator: @MainActor Coordinator {
+@MainActor
+public struct AppCoordinator: Coordinator {
+
     public let appLauncher: AppLauncher
     public let router: Router
     public let container: DependencyContainer
@@ -22,7 +25,7 @@ public final class AppCoordinator: @MainActor Coordinator {
         self.appLauncher = appLauncher
         self.container = container
         self.router = .shared
-		deeplinkCoordinator = .init()
+		deeplinkCoordinator = .init(router: router)
     }
 
     public func handleDeeplink(_ url: URL) async {

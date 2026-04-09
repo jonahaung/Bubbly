@@ -1,3 +1,8 @@
-protocol Feature {
-    func build() -> AnyView
+// © 2026 Aung Ko Min
+
+import SwiftUI
+
+public protocol Feature {
+    associatedtype Content: View
+    func build() -> Content
 }

@@ -28,8 +28,9 @@ let package = Package(
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
 				.product(name: "Pow", package: "Pow")
             ],
-            resources: [
-            ]
+			resources: [
+				.process("Resources")
+			],
         ),
         .testTarget(
             name: "XUITests",

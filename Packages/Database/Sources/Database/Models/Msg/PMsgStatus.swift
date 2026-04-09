@@ -1,15 +1,10 @@
-//
-//  PMsgStatus.swift
-//  Database
-//
-//  Created by Aung Ko Min on 30/3/26.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import SwiftData
 //
-//@Model
-//public final class PMsgStatus {
+// @Model
+// public final class PMsgStatus {
 //    public var messageID: String
 //    public var userID: String
 //    public var status: Int
@@ -23,4 +18,4 @@ import SwiftData
 //        self.userID = userID
 //        self.status = status.rawValue
 //    }
-//}
+// }

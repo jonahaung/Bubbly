@@ -1,42 +1,37 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
+import Core
 import Foundation
 import SwiftData
 import XUI
-import Core
 
 public final actor Store: Sendable {
+    public static let shared: Store = .init()
 
-    public static let shared = Store()
-
-    public var appContainer: AppContainer?
+    public var appContainer: AppContainer? = nil
     public var modelContainer: ModelContainer? {
         appContainer?.modelContainer
     }
 
-    public var msgStore: StoreModelActor<PMsg>?
-    public var contactStore: StoreModelActor<PContact>?
-    public var groupStore: StoreModelActor<PGroup>?
-    public var conversationPropertiesStore: StoreModelActor<PConversationProperties>?
+    public var msgStore: StoreModelActor<PMsg>? = nil
+    public var contactStore: StoreModelActor<PContact>? = nil
+    public var groupStore: StoreModelActor<PGroup>? = nil
+    public var conversationPropertiesStore: StoreModelActor<PConversationProperties>? = nil
 
     public init() {}
 
     public func hasSetUp(for id: String) -> Bool {
-        guard let appContainer else {
-            return false
-        }
-        return appContainer.modelContainer.configurations.contains(
-            where: { $0.name == id }
-        )
+        modelContainer?.configurations.contains(
+            where: { $0.name == id },
+        ) == true
     }
 
     public func start(with id: String) {
         if let configurations = appContainer?.modelContainer.configurations,
            configurations.contains(
-               where: { $0.name == id }
-           ) {
+               where: { $0.name == id },
+           )
+        {
             return
         }
         log("Store started with id: \(id)")
@@ -47,24 +42,25 @@ public final actor Store: Sendable {
         let modelExecutor = DefaultSerialModelExecutor(modelContext: context)
         msgStore = .init(
             modelContainer: modelContainer,
-            modelExecutor: modelExecutor
+            modelExecutor: modelExecutor,
         )
         contactStore = .init(
             modelContainer: modelContainer,
-            modelExecutor: modelExecutor
+            modelExecutor: modelExecutor,
         )
         groupStore = .init(
             modelContainer: modelContainer,
-            modelExecutor: modelExecutor
+            modelExecutor: modelExecutor,
         )
         conversationPropertiesStore = .init(
             modelContainer: modelContainer,
-            modelExecutor: modelExecutor
+            modelExecutor: modelExecutor,
         )
         self.appContainer = appContainer
     }
 
     public func destory() {
+        try? modelContainer?.erase()
         appContainer = nil
         msgStore = nil
         contactStore = nil

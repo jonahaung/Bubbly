@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 //
 //  MsgSnapshot.swift
@@ -12,6 +10,8 @@ import Core
 import CoreImage
 import Foundation
 import SwiftData
+
+// MARK: - Message
 
 public struct Message: Codable, Sendable, Hashable, UIdentifiable {
     public let uid: String
@@ -31,7 +31,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         date: Date,
         deliveryStatus: DeliveryStatus,
         attachments: [Attachment],
-        reactions: [Reaction]
+        reactions: [Reaction],
     ) {
         self.uid = uid
         self.senderID = senderID
@@ -52,7 +52,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
             date: ServerTime(rMsg.date).date,
             deliveryStatus: rMsg.deliveryStatus,
             attachments: rMsg.attachments,
-            reactions: rMsg.reactions
+            reactions: rMsg.reactions,
         )
     }
 }
@@ -74,6 +74,7 @@ public extension Message {
         guard let text, !text.isWhitespace else {
             return attachments.first?.displayText ?? ""
         }
+
         return text
     }
 }

@@ -1,5 +1,9 @@
+// © 2026 Aung Ko Min
+
 import Foundation
 import SwiftUI
+
+// MARK: - ScrollPhase
 
 public enum ScrollPhase: Hashable, Sendable {
     case idle
@@ -7,9 +11,13 @@ public enum ScrollPhase: Hashable, Sendable {
     case decelerating
 }
 
+// MARK: - ScrollPhaseChangeContext
+
 public struct ScrollPhaseChangeContext: Hashable, Sendable {
     public init() {}
 }
+
+// MARK: - ScrollPositionItem
 
 public struct ScrollPositionItem: Hashable, Sendable {
     public enum Properties: Hashable, Sendable {
@@ -34,11 +42,15 @@ public struct ScrollPositionItem: Hashable, Sendable {
     }
 }
 
+// MARK: - ScrolledPosition
+
 public enum ScrolledPosition: Sendable, Hashable {
     case atTop
     case atBottom
     case none
 }
+
+// MARK: - VScrollGeometry
 
 @frozen
 public struct VScrollGeometry: Hashable, Sendable {
@@ -53,7 +65,7 @@ public struct VScrollGeometry: Hashable, Sendable {
         boundsHeight: CGFloat,
         offsetY: CGFloat,
         topInset: CGFloat,
-        bottomInset: CGFloat
+        bottomInset: CGFloat,
     ) {
         self.contentHeight = contentHeight
         self.boundsHeight = boundsHeight
@@ -62,12 +74,12 @@ public struct VScrollGeometry: Hashable, Sendable {
         self.bottomInset = bottomInset
     }
 
-    public static let empty = VScrollGeometry(
+    public static let empty: VScrollGeometry = .init(
         contentHeight: .zero,
         boundsHeight: .zero,
         offsetY: .zero,
         topInset: .zero,
-        bottomInset: .zero
+        bottomInset: .zero,
     )
 
     public var bottomMostOffset: CGFloat {
@@ -94,6 +106,8 @@ public struct VScrollGeometry: Hashable, Sendable {
     }
 }
 
+// MARK: - ScrollCoordinator
+
 public enum ScrollCoordinator {
     public enum ScrollDirection: Sendable, Hashable {
         case up
@@ -113,7 +127,7 @@ public enum ScrollCoordinator {
             geometry: VScrollGeometry,
             phase: ScrollPhase,
             isFirstResponder: Bool,
-            scrolledPosition: ScrolledPosition
+            scrolledPosition: ScrolledPosition,
         ) {
             self.updateState = updateState
             self.geometry = geometry
@@ -160,6 +174,7 @@ public enum ScrollCoordinator {
             guard self != newValue else {
                 return
             }
+
             self = newValue
         }
 
@@ -167,6 +182,7 @@ public enum ScrollCoordinator {
             guard self == .initial else {
                 return
             }
+
             self = .didEndUpdates
         }
     }

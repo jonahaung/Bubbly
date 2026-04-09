@@ -1,7 +1,8 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
+import BubblyContacts
 import Conversation
 import Database
 import Services
@@ -16,7 +17,7 @@ struct MainNavView<Content: View>: View {
 
 	var body: some View {
 		NavigationStack(
-			path: coordinator.router.navPathsBinding(for: tabPath)
+			path: coordinator.router.navPathsBinding(for: tabPath),
 		) {
 			content()
 		}
@@ -24,7 +25,7 @@ struct MainNavView<Content: View>: View {
 }
 
 extension AppCoordinator {
-	@ViewBuilder public func view(for navPath: NavPath) -> some View {
+	@MainActor @ViewBuilder public func view(for navPath: NavPath) -> some View {
 		switch navPath {
 		case .conversationDetails(let conversation):
 			switch conversation.kind {
@@ -34,7 +35,7 @@ extension AppCoordinator {
 				GroupConversationSettingsScene(group, coordinator: self)
 			}
 		case .conversation(let prefetchedData):
-			ConversationScene(prefetchedData, coordinator: self)
+			ConversationScene(coordinator: self, prefretchData: prefetchedData)
 				.toolbarVisibility(.hidden, for: .navigationBar, .tabBar)
 		case .contactDetails(let contact):
 			ContactDetailsScene(contact: contact, coordinator: self)

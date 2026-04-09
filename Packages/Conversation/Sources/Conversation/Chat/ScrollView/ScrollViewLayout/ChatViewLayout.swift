@@ -1,20 +1,15 @@
-//
-//  ChatViewLayout.swift
-//  Conversation
-//
-//  Created by Aung Ko Min on 13/3/26.
-//
+// © 2026 Aung Ko Min
 
+import Database
 import SwiftUI
 import XUI
-import Database
 
 @Observable
 final class ChatViewLayout {
-	private(set) var bottomBarFrame: CGRect?
-	var selectedMsg: SelectedMsg?
+    private(set) var bottomBarFrame: CGRect? = nil
+    var selectedMsg: SelectedMsg? = nil
 
-	func update(bottomBarFrame: CGRect) {
-		self.bottomBarFrame = bottomBarFrame
-	}
+    func update(bottomBarFrame: CGRect) {
+        self.bottomBarFrame = bottomBarFrame
+    }
 }

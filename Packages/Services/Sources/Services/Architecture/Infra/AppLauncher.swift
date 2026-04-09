@@ -1,11 +1,12 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Database
 import FirebaseAuth
 import Foundation
 import Observation
+import XUI
 
 @MainActor
 @Observable
@@ -21,21 +22,31 @@ public final class AppLauncher {
     }
 
     public private(set) var route: MainRoute = .loading
+	public let router: Router = .shared
 
     public init() {}
 }
 
 public extension AppLauncher {
     func startEvaluate() async {
-        route = await evaluateRoute()
+        let route = await evaluateRoute()
+		switch route {
+		case .getStarted:
+			await Store.shared.destory()
+		case .loading:
+			break
+		case let .main(currentUser):
+			router.reset()
+			if await !Store.shared.hasSetUp(for: currentUser.uid) {
+				await Store.shared.start(with: currentUser.uid)
+			}
+		}
+		self.route = route
     }
     private func evaluateRoute() async -> MainRoute {
         let hasCompleted = UserDefaults.standard.bool(forKey: DefaultKeys.getStarted)
         if hasCompleted {
             if let user = Auth.auth().currentUser {
-                if await !Store.shared.hasSetUp(for: user.uid) {
-                    await Store.shared.start(with: user.uid)
-                }
                 return .main(.init(user))
             }
         }

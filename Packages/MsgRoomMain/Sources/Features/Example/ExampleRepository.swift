@@ -5,6 +5,7 @@
 struct ExampleSnapshot {
     let isLoading: Bool
     let error: String?
+	let items: [String]
 }
 
 @MainActor

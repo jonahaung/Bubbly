@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Foundation
@@ -8,20 +6,22 @@ import Foundation
 public extension AnyMsgData {
     static func parse(from userInfo: [AnyHashable: Any]) throws -> AnyMsgData? {
         guard let string = userInfo["message"] as? String,
-              let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID))
-        else {
+              let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else
+        {
             return nil
         }
+
         let decrypted = try CryptoService.shared.decrypt(
             payloadString: string,
-            currentUserID: currentUserID
+            currentUserID: currentUserID,
         )
         guard let data = decrypted.data(using: .utf8) else {
             return nil
         }
+
         return try JSONDecoder().decode(
             AnyMsgData.self,
-            from: data
+            from: data,
         )
     }
 }

@@ -1,70 +1,61 @@
-//
-//  ReactionStackLayout.swift
-//  Conversation
-//
-//  Created by Aung Ko Min on 6/4/26.
-//
+// © 2026 Aung Ko Min
 
 import SwiftUI
 
 public struct ReactionStackLayout: Layout {
+    // MARK: Lifecycle
 
-	// MARK: Lifecycle
+    public init(overlap: CGFloat = 12) {
+        self.overlap = overlap
+    }
 
-	public init(overlap: CGFloat = 12) {
-		self.overlap = overlap
-	}
+    // MARK: Public
 
-	// MARK: Public
+    public var overlap: CGFloat
 
-	public var overlap: CGFloat
+    public func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache _: inout (),
+    ) -> CGSize {
+        var width: CGFloat = 0
+        var height: CGFloat = 0
 
-	public func sizeThatFits(
-		proposal: ProposedViewSize,
-		subviews: Subviews,
-		cache: inout (),
-	) -> CGSize {
+        for (index, subview) in subviews.enumerated() {
+            let size = subview.sizeThatFits(proposal)
 
-		var width: CGFloat = 0
-		var height: CGFloat = 0
+            if index == 0 {
+                width += size.width
+            } else {
+                width += size.width - overlap
+            }
 
-		for (index, subview) in subviews.enumerated() {
-			let size = subview.sizeThatFits(proposal)
+            height = max(height, size.height)
+        }
 
-			if index == 0 {
-				width += size.width
-			} else {
-				width += size.width - overlap
-			}
+        return CGSize(width: width, height: height)
+    }
 
-			height = max(height, size.height)
-		}
+    public func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache _: inout (),
+    ) {
+        var x = bounds.maxX
 
-		return CGSize(width: width, height: height)
-	}
+        for subview in subviews {
+            let size = subview.sizeThatFits(proposal)
 
-	public func placeSubviews(
-		in bounds: CGRect,
-		proposal: ProposedViewSize,
-		subviews: Subviews,
-		cache: inout (),
-	) {
+            x -= size.width
 
-		var x = bounds.maxX
+            subview.place(
+                at: CGPoint(x: x, y: bounds.midY - size.height / 2),
+                anchor: .topLeading,
+                proposal: ProposedViewSize(size),
+            )
 
-		for subview in subviews {
-
-			let size = subview.sizeThatFits(proposal)
-
-			x -= size.width
-
-			subview.place(
-				at: CGPoint(x: x, y: bounds.midY - size.height / 2),
-				anchor: .topLeading,
-				proposal: ProposedViewSize(size),
-			)
-
-			x += overlap
-		}
-	}
+            x += overlap
+        }
+    }
 }

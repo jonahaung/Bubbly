@@ -1,3 +1,5 @@
+// © 2026 Aung Ko Min
+
 import Foundation
 
 public enum AccessoryBarItem: Sendable, Hashable {

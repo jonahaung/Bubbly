@@ -1,4 +1,8 @@
+// © 2026 Aung Ko Min
+
 import Foundation
+
+// MARK: - MsgModels
 
 @MainActor
 public final class MsgModels {
@@ -11,7 +15,7 @@ public final class MsgModels {
 
     public init(_ msgs: [Message] = []) {
         storage = msgs.sorted(by: Self.precedes)
-        renderedRange = 0..<0
+        renderedRange = 0 ..< 0
         recenterWindow(around: storage.indices.last)
     }
 
@@ -56,6 +60,7 @@ public final class MsgModels {
         guard let index = index(of: id) else {
             return false
         }
+
         recenterWindow(around: index)
         return true
     }
@@ -82,13 +87,13 @@ public final class MsgModels {
 
     private func recenterWindow(around index: Int?) {
         guard !storage.isEmpty else {
-            renderedRange = 0..<0
+            renderedRange = 0 ..< 0
             return
         }
 
         let count = min(Constants.maxRenderedCount, storage.count)
         guard count < storage.count else {
-            renderedRange = 0..<storage.count
+            renderedRange = 0 ..< storage.count
             return
         }
 
@@ -101,7 +106,7 @@ public final class MsgModels {
             lowerBound = upperBound - count
         }
 
-        renderedRange = lowerBound..<upperBound
+        renderedRange = lowerBound ..< upperBound
     }
 
     private static func precedes(_ lhs: Message, _ rhs: Message) -> Bool {
@@ -111,6 +116,8 @@ public final class MsgModels {
         return lhs.uid < rhs.uid
     }
 }
+
+// MARK: - RenderedMessage
 
 public struct RenderedMessage: Identifiable, Hashable, Sendable {
     public let msg: Message

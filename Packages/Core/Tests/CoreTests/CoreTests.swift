@@ -1,12 +1,11 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 @testable import Core
-import XCTest
+import Foundation
+import Testing
 
-final class CoreTests: XCTestCase {
-    func testExample() {
+final class CoreTests {
+    @Test func example() {
         // XCTest Documentation
         // https://developer.apple.com/documentation/xctest
 

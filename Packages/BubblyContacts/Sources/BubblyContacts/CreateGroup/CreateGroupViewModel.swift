@@ -1,10 +1,4 @@
-//
-//  CreateGroupViewModel.swift
-//  BubblyContacts
-//
-//  Created by Aung Ko Min on 6/4/26.
-//
-
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -17,9 +11,9 @@ import XUI
 @Observable
 final class CreateGroupViewModel {
     var groupName: String = ""
-    var selection = [Contact]()
-    var pickedPhoto: PickedPhoto?
-    var uploadedURL: URL?
+    var selection: [Contact] = []
+    var pickedPhoto: PickedPhoto? = nil
+    var uploadedURL: URL? = nil
     var isLoading: Bool = false
 
     var canCreateGroup: Bool {
@@ -38,13 +32,14 @@ final class CreateGroupViewModel {
         guard let currentUserID, let image = pickedPhoto?.uiImage else {
             fatalError("explanation")
         }
+
         setLoading(true)
         let groupID = UUID().uuidString
         let imageUploader = ImageUploadingService()
         let url = try await imageUploader.uploadImage(
             image,
             size: .init(width: 100, height: 100),
-            to: .group(groupID: groupID)
+            to: .group(groupID: groupID),
         )
         let memberIDs = [currentUserID] + selection.map(\.uid)
         let group = Group(

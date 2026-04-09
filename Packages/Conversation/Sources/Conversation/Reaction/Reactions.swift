@@ -1,7 +1,4 @@
-
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -16,13 +13,13 @@ extension MsgCell {
             ReactionStackLayout {
                 ForEach(
                     Array(reactions.reversed().enumerated()),
-                    id: \.element
-                ) { (index, reaction) in
+                    id: \.element,
+                ) { index, reaction in
                     Text(reaction.rawValue)
                         .font(.footnote)
                         .offset(x: index.cgFloat * -12)
-						.transition(.movingParts.pop(.yellow))
-                 }
+                        .transition(.movingParts.pop(.yellow))
+                }
             }
             .offset(y: -10)
             .padding(.horizontal, 8)

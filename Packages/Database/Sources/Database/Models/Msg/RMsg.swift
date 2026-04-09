@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import XUI
@@ -23,14 +21,14 @@ public struct RMsg: Codable, Sendable, Hashable {
         text: String?,
         incomingStatus: DeliveryStatus,
         attachments: [Attachment],
-        reactions: [Reaction]
+        reactions: [Reaction],
     ) {
         self.uid = uid
         self.conID = conID
         self.senderID = senderID
         self.date = date
         self.text = text
-        self.deliveryStatus = incomingStatus
+        deliveryStatus = incomingStatus
         self.attachments = attachments
         self.reactions = reactions
     }
@@ -44,7 +42,7 @@ public struct RMsg: Codable, Sendable, Hashable {
             text: msg.text,
             incomingStatus: msg.deliveryStatus,
             attachments: msg.attachments,
-            reactions: msg.reactions
+            reactions: msg.reactions,
         )
     }
 }

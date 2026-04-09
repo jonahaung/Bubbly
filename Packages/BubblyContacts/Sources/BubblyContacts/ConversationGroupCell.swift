@@ -1,10 +1,4 @@
-//
-//  ConversationGroupCell.swift
-//  Contacts
-//
-//  Created by Aung Ko Min on 6/4/26.
-//
-
+// © 2026 Aung Ko Min
 
 import Database
 import Services
@@ -17,12 +11,12 @@ struct ConversationGroupCell: View {
     var body: some View {
         AsyncButton {
             try await ConversationInitializer.start(conversation: Conversation(
-                .group(group)
+                .group(group),
             ))
         } label: {
             HStack(spacing: 20) {
                 ProfilePhoto(
-                    group
+                    group,
                 )
                 .padding(.vertical, 2)
                 Text(group.name)

@@ -1,10 +1,11 @@
+// © 2026 Aung Ko Min
+
 import Database
 import Services
 import SwiftUI
 import XUI
 
 public struct ContactPickerScene: View {
-
     @Environment(\.dismiss) private var dismiss
     @Binding var selection: [Contact]
     @State private var searchText = ""
@@ -23,7 +24,7 @@ public struct ContactPickerScene: View {
                         let isSelected = selection.contains { $0.uid == contact.uid }
                         SelectableContactCell(
                             contact: contact,
-                            isSelected: isSelected
+                            isSelected: isSelected,
                         ) { _ in
                             toggleSelection(for: contact)
                         }
@@ -48,7 +49,7 @@ public struct ContactPickerScene: View {
             .searchable(
                 text: $searchText,
                 placement: .automatic,
-                prompt: "Search contacts"
+                prompt: "Search contacts",
             )
         }
         .interactiveDismissDisabled(!selection.isEmpty)
@@ -56,8 +57,9 @@ public struct ContactPickerScene: View {
 
     private var contacts: [Contact] {
         guard !searchText.isWhitespace else {
-			return ContactsRepository.shared.contacts
+            return ContactsRepository.shared.contacts
         }
+
         return ContactsRepository.shared.contacts.filter {
             $0.name.lowercased().contains(searchText.lowercased())
         }

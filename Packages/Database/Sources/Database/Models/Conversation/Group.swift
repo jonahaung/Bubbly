@@ -1,13 +1,11 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 
 public struct Group: Codable, Sendable, Hashable, UIdentifiable {
     public var uid: String
     public var name: String
-	public var createdDate: String
+    public var createdDate: String
     public var photoURL: String?
     public var members: [String]
     public var createdBy: String
@@ -18,11 +16,11 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         createdDate: ServerTime,
         photoURL: String?,
         members: [String],
-        createdBy: String
+        createdBy: String,
     ) {
         self.uid = uid
         self.name = name
-		self.createdDate = createdDate.value
+        self.createdDate = createdDate.value
         self.photoURL = photoURL
         self.members = members
         self.createdBy = createdBy
@@ -37,7 +35,7 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         case createdBy
     }
 
-	public func conversationProperties() async -> ConversationProperties {
-		await ConversationPropertiesRepo.getOrCreateMain(for: uid)
+    public func conversationProperties() async -> ConversationProperties {
+        await ConversationPropertiesRepo.getOrCreateMain(for: uid)
     }
 }

@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - ServerTime
 
 public struct ServerTime: Codable, Hashable, Sendable, Comparable {
     public let value: String
@@ -30,7 +30,10 @@ public extension ServerTime {
     }
 
     static func localizedString(from value: String) -> String {
-        guard let date = utcFormatter.date(from: value) else { return value }
+        guard let date = utcFormatter.date(from: value) else {
+            return value
+        }
+
         return localFormatter.string(from: date)
     }
 }
@@ -45,6 +48,8 @@ private extension ServerTime {
     }
 }
 
+// MARK: - ThreadLocal
+
 private enum ThreadLocal {
     private static let utcKey = "ServerTime.utcFormatter"
     private static let localKey = "ServerTime.localFormatter"
@@ -57,6 +62,8 @@ private enum ThreadLocal {
         .init(key: localKey, timeZone: .current)
     }
 }
+
+// MARK: - ThreadLocalFormatter
 
 private struct ThreadLocalFormatter {
     let key: String

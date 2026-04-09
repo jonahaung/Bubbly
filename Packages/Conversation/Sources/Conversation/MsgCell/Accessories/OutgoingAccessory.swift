@@ -1,7 +1,4 @@
-#if os(iOS)
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -10,42 +7,55 @@ import SwiftUI
 
 extension MsgCell {
     struct OutgoingAccessory: View {
-        @Environment(MsgCellViewModel.self) private var viewModel
-//        @Environment(\.seenMembers) private var seenMembers
-        @Environment(\.sharedNamespace) private var namespace
+        // MARK: Internal
 
         var body: some View {
-			if let namespace {
-				ZStack(alignment: .bottom) {
-//					ForEach(Array(members().enumerated), id: \.element) { index, seenMember in
-//						if let contact = ContactsRepository.shared.contact(
-//							for: seenMember.uid
-//						) {
-//							ProfilePhoto(
-//								contact,
-//								size: .custom(12)
-//							)
-//							.offset(y: index.cgFloat * -9)
-//							.matchedGeometryEffect(id: seenMember.uid, in: namespace.value)
-//						}
-//					}
-				}
-				.frame(width: 12)
-				.padding(.trailing, 8)
-				.allowsHitTesting(false)
-				.matchedGeometryEffect(
-					id: viewModel.id,
-					in: namespace.value,
-					anchor: .leading,
-					isSource: true
-				)
-			}
+            if viewModel.state.isSender, let namespace {
+                ZStack(alignment: .bottom) {
+                    Group {
+                        switch viewModel.state.deliveryStatus {
+                        case .delivered:
+                            Image(systemName: "checkmark.circle", variableValue: 0.0)
+                                .resizable()
+                                .scaledToFit()
+                                .symbolVariableValueMode(.draw)
+                        case .sending:
+                            Image(systemName: "progress.indicator")
+                                .resizable()
+                                .scaledToFit()
+                                .symbolEffect(
+                                    .rotate,
+                                    options: .repeat(.periodic), value: viewModel.state.isVisible,
+                                )
+                        case .sendingFailed:
+                            Image(systemName: "exclamationmark.circle")
+                                .resizable()
+                                .scaledToFit()
+                        default:
+                            EmptyView()
+                        }
+                    }
+                    .frame(square: 12)
+                    .padding(.bottom, 2)
+                    .fontWeight(.bold)
+                    .imageScale(.small)
+                    .symbolRenderingMode(.palette)
+                }
+                .frame(width: 12)
+                .padding(.trailing, 8)
+                .allowsHitTesting(false)
+                .matchedGeometryEffect(
+                    id: viewModel.id,
+                    in: namespace.value,
+                    anchor: .leading,
+                    isSource: true,
+                )
+            }
         }
 
-//        private func members() -> [SeenMember] {
-//			seenMembers.filter{ $0.msgId == viewModel.id }
-//        }
+        // MARK: Private
+
+        @Environment(MsgCellViewModel.self) private var viewModel
+        @Environment(\.sharedNamespace) private var namespace
     }
 }
-
-#endif

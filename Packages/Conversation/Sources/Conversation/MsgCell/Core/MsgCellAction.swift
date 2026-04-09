@@ -1,5 +1,9 @@
+// © 2026 Aung Ko Min
+
 import Database
 import SwiftUI
+
+// MARK: - MsgCellAction
 
 struct MsgCellAction {
     enum ActionType {

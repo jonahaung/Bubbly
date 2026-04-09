@@ -34,11 +34,12 @@ public struct CustomButton<Content: View>: View {
 				Task.detached {
 					try? await Task.sleep(seconds: 0.5)
 					Task { @MainActor in
-						buttonIsPressing = false
 						onFinished?()
+						buttonIsPressing = false
 					}
 				}
 			}
+			.allowsHitTesting(!buttonIsPressing)
 	}
 }
 

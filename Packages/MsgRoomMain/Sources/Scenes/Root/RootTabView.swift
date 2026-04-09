@@ -5,14 +5,14 @@ import Services
 import Settings
 import SwiftUI
 import XUI
+import BubblyContacts
 
 struct RootTabView: View {
 	let coordinator: AppCoordinator
 	private var router: Router { coordinator.router }
 	var body: some View {
 		TabView(selection: router.tabPathBinding()) {
-			ForEach(router.routes) { route in
-				let tabPath = route.tabPath
+			ForEach(TabPath.allCases) { tabPath in
 				Tab(value: tabPath, role: role(for: tabPath)) {
 					MainNavView(tabPath: tabPath, coordinator: coordinator) {
 						coordinator.view(for: tabPath)

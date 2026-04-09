@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -10,28 +10,28 @@ import UIKit
 import UserNotifications
 import XUI
 
-public final class PushNotificationService: NSObject {
+public final class PushNotificationService: NSObject, Sendable {
     override public init() {
         super.init()
     }
 
-    @MainActor
+	@concurrent
     public func registerForPushNotifications() async throws {
         try await UNUserNotificationCenter
             .current()
             .requestAuthorization(
                 options: [.alert, .badge, .sound]
             )
-        UIApplication.shared.registerForRemoteNotifications()
+		await UIApplication.shared.registerForRemoteNotifications()
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
     }
 
-    @MainActor
+	@concurrent
     public func applicationDidBecomeActive() async throws {
         let datas = await PushNotificationStore.shared.consumePendingAnyMsgData()
         if !datas.isEmpty {
-            let currentNavPath = Router.shared.visiblePath()
+			let currentNavPath = await Router.shared.visiblePath()
             try await AsyncOrderedStream.mapOrdered(inputs: datas) { data in
                 switch currentNavPath {
                 case let .conversation(prefetchData):
@@ -85,7 +85,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
             return
         }
         MainActor.assumeIsolated {
-            if let url = data.deeplinkURL {
+			if let url = data.deeplinkURL(coordinator: .init(router: Router.shared)) {
                 UIApplication.shared.open(url)
             }
         }

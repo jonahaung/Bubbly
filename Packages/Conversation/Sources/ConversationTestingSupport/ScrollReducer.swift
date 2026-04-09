@@ -1,5 +1,9 @@
+// © 2026 Aung Ko Min
+
 import Foundation
 import SwiftUI
+
+// MARK: - ScrollReducer
 
 public struct ScrollReducer {
     public typealias State = ScrollCoordinator.State
@@ -21,17 +25,17 @@ public extension ScrollReducer {
         intent: Intent,
         canLoadOlder: Bool,
         canLoadNewer: Bool,
-        shouldAdjustWindow: Bool
+        shouldAdjustWindow: Bool,
     ) -> Effect {
         switch intent {
-        case .onScrollGeometryChange(let old, let new):
+        case let .onScrollGeometryChange(old, new):
             reduceGeometry(
                 state: state,
                 oldValue: old,
                 newValue: new,
                 canLoadOlder: canLoadOlder,
                 canLoadNewer: canLoadNewer,
-                shouldAdjustWindow: shouldAdjustWindow
+                shouldAdjustWindow: shouldAdjustWindow,
             )
         default:
             .noAction
@@ -50,14 +54,15 @@ private extension ScrollReducer {
         newValue: VScrollGeometry,
         canLoadOlder: Bool,
         canLoadNewer: Bool,
-        shouldAdjustWindow: Bool
+        shouldAdjustWindow: Bool,
     ) -> Effect {
         if state.updateState.isUpdating {
             return handleUpdating(state: state, oldValue: oldValue, newValue: newValue)
         }
 
         if newValue.offsetY != oldValue.offsetY,
-           state.phase == .interacting || state.phase == .decelerating {
+           state.phase == .interacting || state.phase == .decelerating
+        {
             let direction: ScrollCoordinator.ScrollDirection =
                 newValue.offsetY > oldValue.offsetY ? .up : .down
 
@@ -67,7 +72,7 @@ private extension ScrollReducer {
                 newValue,
                 canLoadOlder,
                 canLoadNewer,
-                shouldAdjustWindow: shouldAdjustWindow
+                shouldAdjustWindow: shouldAdjustWindow,
             )
         }
 
@@ -76,11 +81,11 @@ private extension ScrollReducer {
 
     func paginateIfNeeded(
         direction: ScrollCoordinator.ScrollDirection,
-        _ state: State,
+        _: State,
         _ newValue: VScrollGeometry,
         _ canLoadOlder: Bool,
         _ canLoadNewer: Bool,
-        shouldAdjustWindow: Bool
+        shouldAdjustWindow: Bool,
     ) -> Effect {
         switch direction {
         case .down:
@@ -90,7 +95,7 @@ private extension ScrollReducer {
 
             if canLoadOlder {
                 return .begingUpdate(
-                    shouldAdjustWindow ? .remove(edge: .bottom) : .insert(edge: .top)
+                    shouldAdjustWindow ? .remove(edge: .bottom) : .insert(edge: .top),
                 )
             }
 
@@ -107,7 +112,7 @@ private extension ScrollReducer {
 
             if canLoadNewer {
                 return .begingUpdate(
-                    shouldAdjustWindow ? .remove(edge: .top) : .insert(edge: .bottom)
+                    shouldAdjustWindow ? .remove(edge: .top) : .insert(edge: .bottom),
                 )
             }
 
@@ -121,7 +126,7 @@ private extension ScrollReducer {
     func handleUpdating(
         state: State,
         oldValue: VScrollGeometry,
-        newValue: VScrollGeometry
+        newValue: VScrollGeometry,
     ) -> Effect {
         let diff = newValue.contentHeight - oldValue.contentHeight
         guard diff != 0 else {
@@ -129,25 +134,25 @@ private extension ScrollReducer {
         }
 
         switch state.updateState {
-        case .insertingItems(let edge):
+        case let .insertingItems(edge):
             if edge == .top {
                 let y = diff + (newValue.offsetY - oldValue.offsetY)
                 return .endUpdate(.insert(edge: edge), scrollItem: .y(y, properties: .scroll))
             }
             return .endUpdate(.insert(edge: edge), scrollItem: nil)
 
-        case .removingItems(let edge):
+        case let .removingItems(edge):
             if edge == .top {
                 let y = newValue.offsetY + diff + (newValue.offsetY - oldValue.offsetY)
                 return .endUpdate(.remove(edge: edge), scrollItem: .y(y, properties: .scroll))
             }
             return .endUpdate(.remove(edge: .bottom), scrollItem: nil)
 
-        case .appendingItem(let id):
+        case let .appendingItem(id):
             let y = newValue.offsetY + diff + (newValue.offsetY - oldValue.offsetY)
             return .endUpdate(
                 .append(id: id),
-                scrollItem: .y(y, properties: .animated(.easeOut(duration: 0.22)))
+                scrollItem: .y(y, properties: .animated(.easeOut(duration: 0.22))),
             )
 
         default:

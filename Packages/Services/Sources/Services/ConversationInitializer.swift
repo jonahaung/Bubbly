@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -83,7 +83,7 @@ extension ConversationInitializer {
 
 extension ConversationInitializer {
 	@concurrent
-	public static func start(conID: String, refetch: Bool, delay: Double = 0.2) async throws {
+	public static func start(conID: String, refetch: Bool, delay: Double = 0.0) async throws {
 		let conversation = try await ConversationRepo.getOrCreate(
 			for: conID,
 			refetch: refetch
@@ -98,7 +98,6 @@ extension ConversationInitializer {
 	}
 	@concurrent
 	public static func start(conversation: Conversation) async throws {
-		await Router.shared.setTabBar(visibility: .hidden)
 		let prefetchedData = try await createPrefetchedObject(
 			conversation: conversation
 		)

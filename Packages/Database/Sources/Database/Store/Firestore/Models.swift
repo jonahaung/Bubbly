@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - FirestoreFilter
 
 public struct FirestoreFilter {
     public enum Operator: String, Sendable {
@@ -32,16 +32,23 @@ public struct FirestoreFilter {
             "fieldFilter": [
                 "field": ["fieldPath": field],
                 "op": `operator`.rawValue,
-                "value": value.dictionary
-            ]
+                "value": value.dictionary,
+            ],
         ]
     }
 }
 
+// MARK: - FirestoreCollectionPath
+
 public enum FirestoreCollectionPath: String, Sendable {
-    case users, groups
+    case users
+    case groups
 }
 
+// MARK: - FirestoreDocumentPath
+
 public enum FirestoreDocumentPath: String, Sendable {
-    case uid, members, mobile
+    case uid
+    case members
+    case mobile
 }

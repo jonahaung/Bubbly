@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Foundation
@@ -23,7 +21,7 @@ public enum ContactRepo {
         let serverValue: Contact? = try? await FirestoreRepo.getModel(
             for: uid,
             collection: .users,
-            field: .uid
+            field: .uid,
         )
         guard let serverValue else {
             if let localValue {
@@ -32,6 +30,7 @@ public enum ContactRepo {
                 throw XError.noContactFound
             }
         }
+
         if localValue != nil {
             try await Store.shared.contactStore?.updateAndSave(uid: uid) { model in
                 model.merge(from: serverValue)
@@ -44,13 +43,12 @@ public enum ContactRepo {
 
     @discardableResult
     public static func getOrCreate(for uids: [String], refatch: Bool) async throws -> [Contact] {
-		let contacts = try await AsyncOrderedStream.mapOrdered(inputs: uids) { uid in
-			return try await ContactRepo.getOrCreate(
-				uid: uid,
-				refetch: refatch
-			)
-		}
-		return contacts
+        try await AsyncOrderedStream.mapOrdered(inputs: uids) { uid in
+            try await ContactRepo.getOrCreate(
+                uid: uid,
+                refetch: refatch,
+            )
+        }
     }
 
     public static func search(named name: String) async throws -> Contact? {
@@ -58,7 +56,7 @@ public enum ContactRepo {
         var descriptor = FetchDescriptor<PContact>(
             predicate: #Predicate {
                 $0.name == targetName
-            }
+            },
         )
         descriptor.fetchLimit = 1
         return try await Store.shared.contactStore?.fetch(descriptor).first
@@ -69,7 +67,7 @@ public enum ContactRepo {
         var descriptor = FetchDescriptor<PGroup>(
             predicate: #Predicate {
                 $0.name == targetName
-            }
+            },
         )
         descriptor.fetchLimit = 1
         return try await Store.shared.groupStore?.fetch(descriptor).first

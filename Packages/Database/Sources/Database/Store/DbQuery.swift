@@ -1,11 +1,9 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftData
 import SwiftUI
 
-public struct DbQuery<T>: View where T: PersistentModel & SendableTransformable {
+public struct DbQuery<T: PersistentModel & SendableTransformable>: View {
     @Query private var items: [T]
     private let content: (_ items: [T]) -> AnyView
 
@@ -13,7 +11,7 @@ public struct DbQuery<T>: View where T: PersistentModel & SendableTransformable 
         predicate: Predicate<T>? = nil,
         sortBy: [SortDescriptor<T>] = [],
         fetchLimit: Int? = nil,
-        @ViewBuilder content: @escaping (_ items: [T]) -> some View
+        @ViewBuilder content: @escaping (_ items: [T]) -> some View,
     ) {
         var descriptor = FetchDescriptor<T>(predicate: predicate, sortBy: sortBy)
         if let fetchLimit {
@@ -29,7 +27,7 @@ public struct DbQuery<T>: View where T: PersistentModel & SendableTransformable 
         predicate: Predicate<T>? = nil,
         sortBy: [SortDescriptor<T>] = [],
         fetchLimit: Int? = nil,
-        @ViewBuilder row: @escaping (_ item: T) -> some View
+        @ViewBuilder row: @escaping (_ item: T) -> some View,
     ) where T: Identifiable {
         var descriptor = FetchDescriptor<T>(predicate: predicate, sortBy: sortBy)
         if let fetchLimit {
@@ -41,7 +39,7 @@ public struct DbQuery<T>: View where T: PersistentModel & SendableTransformable 
             AnyView(
                 ForEach(items) { item in
                     row(item)
-                }
+                },
             )
         }
     }

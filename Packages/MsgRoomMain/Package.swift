@@ -16,6 +16,7 @@ let package = Package(
         .package(name: "Services", path: "../Services"),
         .package(name: "Database", path: "../Database"),
         .package(name: "Conversation", path: "../Conversation"),
+		.package(name: "BubblyContacts", path: "../BubblyContacts"),
         .package(name: "Inbox", path: "../Inbox"),
         .package(name: "Settings", path: "../Settings")
     ],
@@ -26,6 +27,7 @@ let package = Package(
                 .product(name: "Services", package: "Services"),
                 .product(name: "Database", package: "Database"),
                 .product(name: "Conversation", package: "Conversation"),
+				.product(name: "BubblyContacts", package: "BubblyContacts"),
                 .product(name: "Inbox", package: "Inbox"),
                 .product(name: "Settings", package: "Settings")
             ]
@@ -37,6 +39,7 @@ let package = Package(
                 .product(name: "Services", package: "Services"),
                 .product(name: "Database", package: "Database"),
                 .product(name: "Conversation", package: "Conversation"),
+				.product(name: "BubblyContacts", package: "BubblyContacts"),
                 .product(name: "Inbox", package: "Inbox"),
                 .product(name: "Settings", package: "Settings")
             ]

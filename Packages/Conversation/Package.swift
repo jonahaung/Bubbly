@@ -5,17 +5,17 @@ import PackageDescription
 let package = Package(
     name: "Conversation",
     platforms: [
-        .iOS(.v26)
+        .iOS(.v26),
     ],
     products: [
         .library(
             name: "Conversation",
-            targets: ["Conversation"]
+            targets: ["Conversation"],
         ),
         .library(
             name: "ConversationTestingSupport",
-            targets: ["ConversationTestingSupport"]
-        )
+            targets: ["ConversationTestingSupport"],
+        ),
     ],
     dependencies: [
         .package(name: "Core", path: "../Core"),
@@ -31,25 +31,45 @@ let package = Package(
             name: "Conversation",
             dependencies: [
                 .product(name: "Core", package: "Core", condition: .when(platforms: [.iOS])),
-                .product(name: "Database", package: "Database", condition: .when(platforms: [.iOS])),
-                .product(name: "Services", package: "Services", condition: .when(platforms: [.iOS])),
+                .product(
+                    name: "Database",
+                    package: "Database",
+                    condition: .when(platforms: [.iOS]),
+                ),
+                .product(
+                    name: "Services",
+                    package: "Services",
+                    condition: .when(platforms: [.iOS]),
+                ),
                 .product(name: "XUI", package: "XUI", condition: .when(platforms: [.iOS])),
-                .product(name: "ImageLoader", package: "ImageLoader", condition: .when(platforms: [.iOS])),
-                .product(name: "VideoLoader", package: "ImageLoader", condition: .when(platforms: [.iOS])),
-                .product(name: "MediaPicker", package: "MediaPicker", condition: .when(platforms: [.iOS]))
+                .product(
+                    name: "ImageLoader",
+                    package: "ImageLoader",
+                    condition: .when(platforms: [.iOS]),
+                ),
+                .product(
+                    name: "VideoLoader",
+                    package: "ImageLoader",
+                    condition: .when(platforms: [.iOS]),
+                ),
+                .product(
+                    name: "MediaPicker",
+                    package: "MediaPicker",
+                    condition: .when(platforms: [.iOS]),
+                ),
             ],
             resources: [
-                .process("Resources")
-            ]
+                .process("Resources"),
+            ],
         ),
         .target(
-            name: "ConversationTestingSupport"
+            name: "ConversationTestingSupport",
         ),
         .testTarget(
             name: "ConversationTests",
             dependencies: [
-                "ConversationTestingSupport"
-            ]
-        )
-    ]
+                "ConversationTestingSupport",
+            ],
+        ),
+    ],
 )

@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -11,16 +11,18 @@ public struct DeepLinkCoordinator: Sendable {
     private let codec: DeeplinkCodec
     private let planner: DeeplinkActionPlanner
     private let sideEffects: SideEffectHandler
+	internal let router: Router
 
-	@MainActor
     public init(
 		codec: DeeplinkCodec = .standard,
 		planner: DeeplinkActionPlanner = .default(),
-		sideEffects: SideEffectHandler = .default
+		sideEffects: SideEffectHandler = .default,
+		router: Router
     ) {
         self.codec = codec
         self.planner = planner
         self.sideEffects = sideEffects
+		self.router = router
     }
 
     public func onOpenURL(url: URL) async {
@@ -55,7 +57,6 @@ public struct DeepLinkCoordinator: Sendable {
 private extension DeepLinkCoordinator {
     @concurrent
     func handleDeepLinkAction(_ action: DeeplinkAction) async throws {
-		let router = await Router.shared
         switch action {
         case let .selectTab(tab):
             await router.selectTab(tab)

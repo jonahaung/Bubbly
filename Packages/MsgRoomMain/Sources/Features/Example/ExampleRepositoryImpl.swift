@@ -2,6 +2,8 @@
 //  Created by Aung Ko Min on 9/4/26.
 //
 
+import XUI
+
 @MainActor
 struct ExampleRepositoryImpl: ExampleRepository {
     private let manager: ExampleManager
@@ -33,6 +35,17 @@ struct ExampleRepositoryImpl: ExampleRepository {
     }
 
     private func snapshot() -> ExampleSnapshot {
-        .init(isLoading: manager.isLoading, error: manager.error)
+		let items: [String] = {
+			var items: [String] = []
+			for _ in 0..<1000 {
+				items.append(Lorem.random())
+			}
+			return items
+		}()
+		return .init(
+			isLoading: manager.isLoading,
+			error: manager.error,
+			items: items.uniqued()
+		)
     }
 }

@@ -1,12 +1,11 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import SwiftData
 
-public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UID == String, T.SendableType.UID == String {
-
+public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID == String,
+    T.SendableType.UID == String
+{
     public let modelExecutor: any ModelExecutor
     public let modelContainer: ModelContainer
 
@@ -14,24 +13,24 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
         modelExecutor.modelContext
     }
 
-    private var saveTask: Task<Void, Never>?
+    private var saveTask: Task<Void, Never>? = nil
 
     public init(
         modelContainer: ModelContainer,
-        modelExecutor: ModelExecutor
+        modelExecutor: ModelExecutor,
     ) {
         self.modelContainer = modelContainer
         self.modelExecutor = modelExecutor
     }
 
     public func insert(_ data: T.SendableType) throws {
-		if try exists(uid: data.uid) {
-			try updateAndSave(uid: data.uid) { model in
-				model.update(from: data)
-			}
-			return
-		}
-		context.insert(T(from: data))
+        if try exists(uid: data.uid) {
+            try updateAndSave(uid: data.uid) { model in
+                model.update(from: data)
+            }
+            return
+        }
+        context.insert(T(from: data))
         try save()
     }
 
@@ -58,8 +57,8 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
             .init(
                 predicate: #Predicate {
                     $0.uid == uid
-                }
-            )
+                },
+            ),
         )
     }
 
@@ -71,9 +70,10 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
 
     public func updateAndSave<Result: Sendable>(
         uid: String,
-        _ update: sending (inout T) -> Result
+        _ update: sending (inout T) -> Result,
     ) throws
-        -> Result? {
+        -> Result?
+    {
         guard var model = try getModel(for: uid) else {
             return nil
         }
@@ -86,7 +86,7 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
     public func updateAndSaveDebounced<Result: Sendable>(
         uid: String,
         _ update: @escaping (inout T)
-            -> Result
+            -> Result,
     ) throws -> Result? {
         guard var model = try getModel(for: uid) else {
             return nil
@@ -100,7 +100,7 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
     // MARK: - Delete
 
     public func delete(id: PersistentIdentifier) throws {
-		context.delete(context.model(for: id))
+        context.delete(context.model(for: id))
         try save()
     }
 
@@ -109,7 +109,7 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
             return
         }
 
-		try delete(id: model.persistentModelID)
+        try delete(id: model.persistentModelID)
     }
 
     public func delete(where predicate: Predicate<T>) throws {
@@ -120,12 +120,12 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
     // MARK: - Save
 
     public func save() throws {
-		if context.hasChanges {
-			try context.save()
-		}
+        if context.hasChanges {
+            try context.save()
+        }
     }
 
-	public func saveDebounced(after delay: TimeInterval = 0.5) {
+    public func saveDebounced(after delay: TimeInterval = 0.5) {
         saveTask?.cancel()
 
         saveTask = Task {
@@ -134,9 +134,10 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
             guard !Task.isCancelled else {
                 return
             }
-			if context.hasChanges {
-				try? context.save()
-			}
+
+            if context.hasChanges {
+                try? context.save()
+            }
 
             saveTask = nil
         }
@@ -148,9 +149,9 @@ public actor StoreModelActor<T>: ModelActor where T: SendableTransformable, T.UI
         var descriptor = FetchDescriptor<T>(
             predicate: #Predicate {
                 $0.uid == uid
-            }
+            },
         )
-		descriptor.fetchLimit = 1
+        descriptor.fetchLimit = 1
         return try context.fetch(descriptor).first
     }
 }

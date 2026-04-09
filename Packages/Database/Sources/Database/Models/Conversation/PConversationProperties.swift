@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftData
+
+// MARK: - PConversationProperties
 
 @Model
 public final class PConversationProperties {
@@ -14,13 +14,15 @@ public final class PConversationProperties {
     public init(
         uid: String,
         theme: ConversationTheme,
-        seenMembers: [SeenMember]
+        seenMembers: [SeenMember],
     ) {
         self.uid = uid
         self.theme = theme
         self.seenMembers = seenMembers
     }
 }
+
+// MARK: SendableTransformable
 
 extension PConversationProperties: SendableTransformable {
     public func update(from item: ConversationProperties) {
@@ -36,7 +38,7 @@ extension PConversationProperties: SendableTransformable {
         self.init(
             uid: sendable.uid,
             theme: sendable.theme,
-            seenMembers: sendable.seenMembers
+            seenMembers: sendable.seenMembers,
         )
     }
 
@@ -44,7 +46,7 @@ extension PConversationProperties: SendableTransformable {
         .init(
             uid: uid,
             theme: theme,
-            seenMembers: seenMembers
+            seenMembers: seenMembers,
         )
     }
 }

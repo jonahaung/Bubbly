@@ -1,9 +1,4 @@
-//
-//  CreateGroupScene.swift
-//  BubblyContacts
-//
-//  Created by Aung Ko Min on 6/4/26.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -14,7 +9,7 @@ import SwiftUI
 import XUI
 
 public struct CreateGroupScene: View {
-    @State private var viewModel = CreateGroupViewModel()
+    @State private var viewModel: CreateGroupViewModel = .init()
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isFocused: Bool
 
@@ -26,7 +21,7 @@ public struct CreateGroupScene: View {
                 HStack(spacing: 20) {
                     PhotoPickerButton(
                         pickedPhoto: $viewModel.pickedPhoto,
-                        clipShape: Circle()
+                        clipShape: Circle(),
                     ) {
                         ResizableImage(viewModel.uploadedURL?.absoluteString)
                     }
@@ -47,7 +42,7 @@ public struct CreateGroupScene: View {
                         LabeledContent(contact.name) {
                             Button {
                                 if let index = viewModel.selection.firstIndex(
-                                    where: { $0.uid == contact.uid }
+                                    where: { $0.uid == contact.uid },
                                 ) {
                                     viewModel.selection.remove(at: index)
                                 }
@@ -81,7 +76,7 @@ public struct CreateGroupScene: View {
                     if let currentUserID {
                         try await Task.sleep(seconds: 1)
                         try await viewModel.createGroup()
-						try await ContactsRepository.shared.syncGroups(currentUserId: currentUserID)
+                        try await ContactsRepository.shared.syncGroups(currentUserId: currentUserID)
                     }
                     dismiss()
                 } label: {
@@ -92,7 +87,7 @@ public struct CreateGroupScene: View {
                     }
                 }
                 .disabled(
-                    !viewModel.canCreateGroup
+                    !viewModel.canCreateGroup,
                 )
             }
             ToolbarItem(placement: .cancellationAction) {

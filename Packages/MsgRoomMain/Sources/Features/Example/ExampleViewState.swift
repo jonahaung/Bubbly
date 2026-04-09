@@ -5,4 +5,5 @@
 struct ExampleViewState {
     let isLoading: Bool
     let error: String?
+	let items: [String]?
 }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Database
@@ -8,7 +8,6 @@ import XUI
 
 @Observable
 public final class MsgCellViewModel: Identifiable {
-
 	// MARK: Lifecycle
 
 	public init(_ msg: Message) {
@@ -16,7 +15,6 @@ public final class MsgCellViewModel: Identifiable {
 	}
 
 	// MARK: Public
-
 	public var state: State
 
 	public var msg: Message {
@@ -27,7 +25,10 @@ public final class MsgCellViewModel: Identifiable {
 		guard state.msg != msg else {
 			return
 		}
+		var state = self.state
 		state.msg = msg
+		state.deliveryStatus = msg.deliveryStatus
+		self.state = state
 	}
 
 	@MainActor
@@ -55,8 +56,10 @@ public final class MsgCellViewModel: Identifiable {
 		guard state.selectedMsg != selectedMsg else {
 			return
 		}
+		var state = self.state
 		state.selectedMsg = selectedMsg
 		state.bubbleCornor = state.computeBubbleCorner()
+		self.state = state
 	}
 }
 
@@ -67,25 +70,27 @@ public extension MsgCellViewModel {
 
 		public init(msg: Message) {
 			self.msg = msg
-			text = {
+			attributedText = {
 				guard let text = msg.text else {
 					return nil
 				}
-				return text.containsMarkdown ? MarkdownFormatter().format(text) : .init(text)
+				return .init(text, attributes: AttributeContainer.base)
 			}()
 			isSender = msg.isSender
+			deliveryStatus = msg.deliveryStatus
 		}
 
 		// MARK: Public
 
 		public var msg: Message
-		public let text: AttributedString?
+		public var attributedText: AttributedString?
 		public let isSender: Bool
 		public var sender: Contact? = nil
 		public var layout: MsgCellLayout = .init()
 		public var isVisible: Bool = false
 		public var selectedMsg: SelectedMsg? = nil
 		public var bubbleCornor: BubbleCorner = .none
+		public var deliveryStatus: DeliveryStatus? = nil
 
 		public var id: String {
 			msg.uid
@@ -114,11 +119,6 @@ public extension MsgCellViewModel {
 		public var horizontalAlignment: HorizontalAlignment {
 			isSender ? .trailing : .leading
 		}
-
-		public var foregroundStyle: Color {
-			isSender ? .black : .primary
-		}
-
 		public var isSelected: Bool {
 			selectedMsg?.id == id
 		}

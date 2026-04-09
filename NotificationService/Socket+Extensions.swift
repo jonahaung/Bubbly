@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -43,28 +43,19 @@ extension Socket {
         case .typingStatus:
             break
         case let .seenStatus(status: status):
-
-            let seenMember = SeenMember(
-                uid: status.userID,
-				msgId: status.msgID,
-				date: status.date
-            )
-
             if var properties = try await Store.shared.conversationPropertiesStore?.fetch(
                 uid: status.conID
             ) {
-				if let index = properties.seenMembers.firstIndex(where: { $0.uid == status.userID }) {
-					properties.seenMembers.remove(at: index)
-				}
-                properties.seenMembers.appendUnique(seenMember)
+				properties.seenMembers.removeAll(where: { $0.uid == status.seenMember.uid })
+				properties.seenMembers.append(status.seenMember)
                 try await Store.shared.conversationPropertiesStore?
                     .updateAndSave(uid: status.conID) { model in
                         model.update(from: properties)
                     }
             }
-            try await Store.shared.msgStore?.updateAndSave(uid: status.msgID) { msg in
-				msg.deliveryStatus = DeliveryStatus.read.rawValue
-            }
+			if let currentUserID {
+				try await MsgRepo.updateSentMsgs(statusPayload: status, currentUserID: currentUserID)
+			}
         }
 
         let appState = AppStateStore.read()
