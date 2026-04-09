@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "lol_reaction.pdf",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "lol_reaction.pdf",
       "idiom" : "universal",
       "scale" : "2x"
     },

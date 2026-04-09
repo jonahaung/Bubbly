@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "thumbsup_reaction.pdf",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "thumbsup_reaction.pdf",
       "idiom" : "universal",
       "scale" : "2x"
     },
