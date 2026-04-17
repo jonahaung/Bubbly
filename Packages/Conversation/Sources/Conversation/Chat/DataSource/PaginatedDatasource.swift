@@ -8,13 +8,10 @@ import SwiftData
 import XUI
 
 actor PaginatedDatasource {
-    // MARK: Lifecycle
 
     init(pageSize: Int) {
         self.pageSize = pageSize
     }
-
-    // MARK: Internal
 
     func reset(conID: String) async throws -> [Message] {
         try await MsgRepo.msgs(
@@ -42,7 +39,11 @@ actor PaginatedDatasource {
         conID: String,
     ) async throws -> [Message] {
         var descriptor = FetchDescriptor<PMsg>(
-            predicate: .msgs(conID: conID, date: date, comparison: .lessThanOrEqual),
+            predicate: .msgs(
+                conID: conID,
+                date: date,
+                comparison: .lessThanOrEqual
+            ),
             sortBy: [.init(\.date, order: .reverse)],
         )
         descriptor.fetchLimit = pageSize
@@ -56,14 +57,16 @@ actor PaginatedDatasource {
         conID: String,
     ) async throws -> [Message] {
         var descriptor = FetchDescriptor<PMsg>(
-            predicate: .msgs(conID: conID, date: date, comparison: .greaterThan),
+            predicate: .msgs(
+                conID: conID,
+                date: date,
+                comparison: .greaterThan
+            ),
             sortBy: [.init(\.date, order: .forward)],
         )
         descriptor.fetchLimit = pageSize
         return try await Store.shared.msgStore?.fetch(descriptor) ?? []
     }
-
-    // MARK: Private
 
     private let pageSize: Int
 }

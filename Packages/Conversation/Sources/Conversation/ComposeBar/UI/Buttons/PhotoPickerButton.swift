@@ -6,7 +6,7 @@ import SwiftUI
 import XUI
 
 struct PhotoPickerButton: View {
-    // MARK: Internal
+    
 
     var body: some View {
         CustomButton {
@@ -29,7 +29,7 @@ struct PhotoPickerButton: View {
         }
     }
 
-    // MARK: Private
+    
 
     @Environment(ChatComposer.self) private var composer
     @Environment(ChatManager.self) private var manager

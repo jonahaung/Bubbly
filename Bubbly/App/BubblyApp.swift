@@ -14,14 +14,14 @@ import FirebaseCore
 @main
 struct BubblyApp: App {
 
-	// MARK: Internal
+	
 
 	var body: some Scene {
 		WindowGroup {
 			ContentView()
-				.symbolColorRenderingMode(.gradient)
-				.tint(Color.accent)
+                .symbolColorRenderingMode(.gradient)
 				.allowsTightening(false)
+                .tint(Color.accent)
 				.onTask {
 					await Task.yield()
 					do {
@@ -49,12 +49,13 @@ struct BubblyApp: App {
 					}
 				}
 		}
+		.defaultAppStorage(.init(suiteName: AppInformation.groupID) ?? .standard)
 		.backgroundTask(.appRefresh(AppInformation.BackgroundTask.appRefresh)) { _ in
 			await appDelegate.backgroundTaskHandler.handleAppRefresh()
 		}
 	}
 
-	// MARK: Private
+	
 
 	@Environment(\.scenePhase) private var scenePhase
 	@UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate

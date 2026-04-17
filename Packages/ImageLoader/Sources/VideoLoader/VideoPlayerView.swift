@@ -81,7 +81,7 @@ public final class VideoPlayerView: PlatformBaseView {
     }
     #endif
 
-    // MARK: Private
+    
 
     private var player: AVPlayer? {
         didSet {

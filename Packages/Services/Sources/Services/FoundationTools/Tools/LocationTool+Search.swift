@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import CoreLocation
 import FoundationModels
@@ -20,7 +18,7 @@ extension LocationTool {
             request.region = MKCoordinateRegion(
                 center: location.coordinate,
                 latitudinalMeters: searchRadius * 2,
-                longitudinalMeters: searchRadius * 2
+                longitudinalMeters: searchRadius * 2,
             )
         }
 
@@ -36,7 +34,7 @@ extension LocationTool {
                 if let userLocation = locationManager.location {
                     let placeLocation = CLLocation(
                         latitude: item.location.coordinate.latitude,
-                        longitude: item.location.coordinate.longitude
+                        longitude: item.location.coordinate.longitude,
                     )
                     let meters = userLocation.distance(from: placeLocation)
                     distance = formatDistance(meters)
@@ -62,7 +60,7 @@ extension LocationTool {
                 "query": query,
                 "resultCount": response.mapItems.count,
                 "places": placesDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-                "message": "Found \(response.mapItems.count) place(s)"
+                "message": "Found \(response.mapItems.count) place(s)",
             ])
         } catch {
             return createErrorOutput(error: error)

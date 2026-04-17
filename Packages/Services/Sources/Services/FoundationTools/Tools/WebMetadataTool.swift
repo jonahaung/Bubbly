@@ -1,10 +1,10 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import FoundationModels
 import XUI
+
+// MARK: - WebMetadataTool
 
 /// A tool for extracting metadata from web pages using LinkPresentation.
 ///
@@ -28,7 +28,7 @@ public struct WebMetadataTool: Tool {
     public let description =
         "Extract metadata from web pages including title, description, and images"
 
-    private let swiftLinkPreview = SwiftLinkPreview()
+    private let swiftLinkPreview: SwiftLinkPreview = .init()
     /// Arguments for web metadata extraction.
     @Generable
     public struct Arguments {
@@ -86,7 +86,7 @@ public struct WebMetadataTool: Tool {
 
     private func extractBasicMetadata(
         from metadata: SwiftLinkPreviewResponse,
-        url: URL
+        url: URL,
     ) -> WebMetadata {
         let title = metadata.title ?? "Untitled"
         // Note: LPLinkMetadata does not expose a public API for page description/summary.
@@ -99,7 +99,7 @@ public struct WebMetadataTool: Tool {
             url: url.absoluteString,
             title: title,
             description: description,
-            imageURL: imageURL?.absoluteString
+            imageURL: imageURL?.absoluteString,
         )
     }
 
@@ -110,7 +110,7 @@ public struct WebMetadataTool: Tool {
             "title": metadata.title,
             "description": metadata.description,
             "imageURL": metadata.imageURL ?? "",
-            "message": "Successfully extracted web metadata"
+            "message": "Successfully extracted web metadata",
         ])
     }
 
@@ -119,10 +119,12 @@ public struct WebMetadataTool: Tool {
             "status": "error",
             "url": url,
             "error": error.localizedDescription,
-            "message": "Failed to fetch web metadata"
+            "message": "Failed to fetch web metadata",
         ])
     }
 }
+
+// MARK: - WebMetadataError
 
 enum WebMetadataError: Error, LocalizedError {
     case emptyURL

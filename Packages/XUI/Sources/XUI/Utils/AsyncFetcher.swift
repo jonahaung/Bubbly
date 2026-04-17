@@ -33,8 +33,6 @@ public actor AsyncFetcher<T: Sendable> {
         inFlightCount < maxConcurrent
     }
 
-    // MARK: - Initialization
-
     public init(maxConcurrent: Int = 10, fetch: @escaping Fetch) {
         precondition(maxConcurrent > 0, "maxConcurrent must be > 0")
         self.maxConcurrent = maxConcurrent
@@ -72,7 +70,8 @@ public actor AsyncFetcher<T: Sendable> {
         if hasCapacity {
             startTask(for: id)
             return true
-        } else {
+        }
+        else {
             // Enqueue (FIFO)
             pendingQueue.append(id)
             return false
@@ -100,7 +99,8 @@ public actor AsyncFetcher<T: Sendable> {
                 throw CancellationError()
             }
             return try await task.value
-        } else {
+        }
+        else {
             // Avoid duplicate pending entries for the same id
             if !pendingQueue.contains(id) {
                 pendingQueue.append(id)
@@ -176,7 +176,9 @@ public actor AsyncFetcher<T: Sendable> {
 
     private func startTask(for id: ID) {
         // If already started by racing caller, do nothing
-        if tasks[id] != nil { return }
+        if tasks[id] != nil {
+            return
+        }
 
         // Create task and register it
         let task = createTask(for: id)
@@ -207,7 +209,8 @@ public actor AsyncFetcher<T: Sendable> {
                 // Notify completions (nonisolated helper will forward to actor)
                 handleCompletion(id: id, result: .success(value))
                 return value
-            } catch {
+            }
+            catch {
                 handleCompletion(id: id, result: .failure(error))
                 throw error
             }
@@ -233,7 +236,7 @@ public actor AsyncFetcher<T: Sendable> {
 
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<
             T,
-            Error
+            Error,
         >) in
             waiters[id, default: []].append(continuation)
             // If the id was removed from pending before it starts (e.g. cancelled),
@@ -292,12 +295,18 @@ public extension AsyncFetcher {
 
     /// Get current state for an ID
     enum FetchState: Sendable {
-        case fetching, pending, idle
+        case fetching
+        case pending
+        case idle
     }
 
     func state(for id: ID) -> FetchState {
-        if isFetching(id) { return .fetching }
-        if isPending(id) { return .pending }
+        if isFetching(id) {
+            return .fetching
+        }
+        if isPending(id) {
+            return .pending
+        }
         return .idle
     }
 }

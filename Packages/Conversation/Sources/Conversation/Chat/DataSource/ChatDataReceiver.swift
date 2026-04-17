@@ -10,12 +10,14 @@ import XUI
 
 @MainActor
 protocol ChatDataReceiverDelegate: AnyObject {
-    func chatDataReceiver(didInsert msg: Message)
-    func chatDataReceiver(didReceiveMsg msg: Message)
-    func chatDataReceiver(didRemove msg: Message, animated: Bool)
-    func chatDataReceiver(didUpdate msg: Message, animated: Bool)
-    func chatDataReceiver(didReceive status: AnyMsgData.SeenStatusPayload)
-    func chatDataReceiver(didReceive typingStatus: AnyMsgData.TypingStatusPayload)
+    func chatDataReceiver(didInsert msg: Message) async
+    func chatDataReceiver(didReceiveMsg msg: Message) async
+    func chatDataReceiver(didRemove msg: Message, animated: Bool) async
+    func chatDataReceiver(didUpdate msg: Message, animated: Bool) async
+    func chatDataReceiver(didReceive status: AnyMsgData.SeenStatusPayload) async
+    func chatDataReceiver(
+        didReceive typingStatus: AnyMsgData.TypingStatusPayload
+    ) async
     func chatDataReceiver(didRecieveError error: Error)
 }
 
@@ -23,9 +25,8 @@ protocol ChatDataReceiverDelegate: AnyObject {
 
 @MainActor
 final class ChatDataReceiver {
-    // MARK: Lifecycle
 
-    init(conID: String) {
+    init(_ conID: String) {
         NotificationCenter.default
             .publisher(for: .msgNoti(for: conID))
             .compactMap(\.anyMsgData)
@@ -34,7 +35,6 @@ final class ChatDataReceiver {
                 guard let self else {
                     return
                 }
-
                 queue.addOperation { [weak self] in
                     guard let self else {
                         return
@@ -47,43 +47,50 @@ final class ChatDataReceiver {
     }
 
     deinit {
+        queue.cancelAllPendingTasks()
         cancelBag.cancel()
     }
 
-    // MARK: Internal
-
-    weak var delegate: ChatDataReceiverDelegate? = nil
-
     func performUpdate(_ data: AnyMsgData) async {
         switch data {
-        case let .newMsg(rMsg):
+        case .newMsg(let rMsg):
             let msg = Message(rMsg)
-            delegate?.chatDataReceiver(didInsert: msg)
+            await delegate?.chatDataReceiver(didInsert: msg)
             if !msg.isSender {
-                delegate?.chatDataReceiver(didReceiveMsg: msg)
+                await delegate?.chatDataReceiver(didReceiveMsg: msg)
             }
-        case let .updatedMsg(rMsg):
-            delegate?.chatDataReceiver(didUpdate: Message(rMsg), animated: false)
-        case let .reaction(reaction):
-            if let msg = try? await Store.shared.msgStore?.fetch(uid: reaction.msgID) {
-                delegate?.chatDataReceiver(didUpdate: msg, animated: false)
+        case .updatedMsg(let rMsg):
+            await delegate?.chatDataReceiver(
+                didUpdate: Message(rMsg),
+                animated: false
+            )
+        case .reaction(let reaction):
+            if let msg = try? await Store.shared.msgStore?.fetch(
+                uid: reaction.msgID
+            ) {
+                await delegate?.chatDataReceiver(
+                    didUpdate: msg,
+                    animated: false
+                )
             }
-        case let .typingStatus(status):
-            delegate?.chatDataReceiver(didReceive: status)
-        case let .deleteMsg(rMsg):
+        case .typingStatus(let status):
+            await delegate?.chatDataReceiver(didReceive: status)
+        case .deleteMsg(let rMsg):
             do {
                 try await Store.shared.msgStore?.delete(uid: rMsg.uid)
-                delegate?.chatDataReceiver(didRemove: Message(rMsg), animated: true)
+                await delegate?.chatDataReceiver(
+                    didRemove: Message(rMsg),
+                    animated: true
+                )
             } catch {
                 delegate?.chatDataReceiver(didRecieveError: error)
             }
-        case let .seenStatus(status):
-            delegate?.chatDataReceiver(didReceive: status)
+        case .seenStatus(let status):
+            await delegate?.chatDataReceiver(didReceive: status)
         }
     }
 
-    // MARK: Private
-
+    weak var delegate: ChatDataReceiverDelegate? = nil
     private let queue: AsyncQueue = .init()
     private let cancelBag: CancelBag = .init()
 }

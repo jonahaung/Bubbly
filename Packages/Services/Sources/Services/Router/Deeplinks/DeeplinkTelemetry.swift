@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - DeeplinkTelemetry
 
 public struct DeeplinkTelemetry: Sendable {
     public var onParsed: @Sendable (_ url: URL, _ link: Deeplink, _ metadata: Metadata) -> Void
@@ -12,7 +12,7 @@ public struct DeeplinkTelemetry: Sendable {
     public init(
         onParsed: @escaping @Sendable (URL, Deeplink, Metadata) -> Void = { _, _, _ in },
         onFailed: @escaping @Sendable (URL, DeeplinkParseError, Metadata)
-            -> Void = { _, _, _ in }
+            -> Void = { _, _, _ in },
     ) {
         self.onParsed = onParsed
         self.onFailed = onFailed
@@ -39,8 +39,8 @@ public struct DeeplinkTelemetry: Sendable {
 }
 
 public extension DeeplinkTelemetry {
-    static let `default` = DeeplinkTelemetry(
+    static let `default`: DeeplinkTelemetry = .init(
         onParsed: { url, link, _ in print("✅ \(url.absoluteString) -> \(link)") },
-        onFailed: { url, err, _ in print("❌ \(url.absoluteString) \(err)") }
+        onFailed: { url, err, _ in print("❌ \(url.absoluteString) \(err)") },
     )
 }

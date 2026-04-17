@@ -5,7 +5,7 @@ public extension View {
         modifier(DimensionVisualizationModifier(content: content, dimensions: [dimension]))
     }
 
-    func visualizeSize(color content: some ShapeStyle = Color.red) -> some View {
+    func visualizeSize(color content: some ShapeStyle = Color.random) -> some View {
         modifier(DimensionVisualizationModifier(content: content, dimensions: [.width, .height]))
     }
 }

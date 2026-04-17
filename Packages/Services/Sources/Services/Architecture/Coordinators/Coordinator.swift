@@ -1,21 +1,22 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftUI
 import XUI
+
+// MARK: - Coordinator
 
 public protocol Coordinator: Sendable {
     var appLauncher: AppLauncher { get }
     var router: Router { get }
     var container: DependencyContainer { get }
-	func start() async
-	func handleDeeplink(_ url: URL) async
+    func start() async
+    func handleDeeplink(_ url: URL) async
 }
+
+// MARK: - AppCoordinator
 
 @MainActor
 public struct AppCoordinator: Coordinator {
-
     public let appLauncher: AppLauncher
     public let router: Router
     public let container: DependencyContainer
@@ -25,14 +26,14 @@ public struct AppCoordinator: Coordinator {
         self.appLauncher = appLauncher
         self.container = container
         self.router = .shared
-		deeplinkCoordinator = .init(router: router)
+        deeplinkCoordinator = .init(router: router)
     }
 
     public func handleDeeplink(_ url: URL) async {
         await deeplinkCoordinator.onOpenURL(url: url)
     }
 
-	public func start() async {
-		try? await container.contactsRepository.fetchData()
+    public func start() async {
+        try? await container.contactsRepository.fetchData()
     }
 }

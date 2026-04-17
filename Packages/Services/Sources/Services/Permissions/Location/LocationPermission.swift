@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import EventKit
 import Foundation
@@ -11,13 +9,15 @@ public extension Permission {
     }
 }
 
-public class LocationPermission: Permission {
+// MARK: - LocationPermission
+
+public final class LocationPermission: Permission {
     private var access: PermissionKind.LocationAccess
     public var kind: PermissionKind {
         .location(access: access)
     }
 
-    // MARK: - Init
+    
 
     init(access: PermissionKind.LocationAccess) {
         self.access = access

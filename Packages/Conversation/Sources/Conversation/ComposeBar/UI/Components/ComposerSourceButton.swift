@@ -8,7 +8,7 @@ import XUI
 // MARK: - ComposerSourceButton
 
 struct ComposerSourceButton: View {
-    // MARK: Internal
+    
 
     let source: ChatComposer.Source
 
@@ -29,7 +29,7 @@ struct ComposerSourceButton: View {
         }
     }
 
-    // MARK: Private
+    
 
     @Environment(ChatComposer.self) private var composer
     @Environment(ChatManager.self) private var manager

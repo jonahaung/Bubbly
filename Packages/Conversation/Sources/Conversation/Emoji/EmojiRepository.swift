@@ -8,14 +8,12 @@
     import Foundation
 
     struct EmojiRepository {
-        // MARK: - Properties
+        
 
         @MainActor
         static let shared: EmojiRepository = .init()
         private(set) var categories: [EmojiCategory] = []
         private(set) var emojis: [Emoji] = []
-
-        // MARK: - Initializers
 
         init() {
             do {

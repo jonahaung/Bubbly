@@ -40,7 +40,7 @@ struct SeenStatusOverlay: View {
         .equatable(by: manager.state.properties.seenMembers)
     }
 
-    // MARK: Private
+    
 
     @Environment(\.sharedNamespace) private var namespace
     @Environment(ChatManager.self) private var manager

@@ -154,8 +154,6 @@ public extension ImagePipeline {
         /// Image decompressing queue. Default maximum concurrent task count is 2.
         public var imageDecompressingQueue = OperationQueue(maxConcurrentCount: 2)
 
-        // MARK: - Initializer
-
         /// Instantiates a pipeline configuration.
         ///
         /// - parameter dataLoader: `DataLoader()` by default.

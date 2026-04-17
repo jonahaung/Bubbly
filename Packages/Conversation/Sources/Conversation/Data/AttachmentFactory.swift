@@ -23,7 +23,7 @@ extension AttachmentFactory {
     static func createImageAttachment(from item: SelectedImage) async throws -> Attachment {
         let image = item.image
         let imageData = try MediaManager.shared.createData(from: image)
-        let thumbnailData = try await MediaManager.shared.createThumbnail(from: image)
+        let thumbnailData = try MediaManager.shared.createThumbnail(from: image)
 
         var attachment = Attachment(
             uid: item.id,
@@ -49,7 +49,7 @@ extension AttachmentFactory {
 
     static func createImageAttachment(from uiImage: UIImage) async throws -> Attachment {
         let imageData = try MediaManager.shared.createData(from: uiImage)
-        let thumbnailData = try await MediaManager.shared.createThumbnail(from: uiImage)
+        let thumbnailData = try MediaManager.shared.createThumbnail(from: uiImage)
 
         var attachment = await Attachment(
             uid: IDGenerator.shared.make(),
@@ -71,7 +71,7 @@ extension AttachmentFactory {
 extension AttachmentFactory {
     static func createLinkAttachments(from items: [ExtractedLink]) async throws -> [Attachment] {
         try await AsyncOrderedStream.mapOrdered(inputs: items) { item in
-            try await createLinkAttachment(from: item.url)
+			await createLinkAttachment(from: item.url)
         }.compactMap(\.self)
     }
 

@@ -7,8 +7,9 @@ import SwiftUI
 import XUI
 
 struct TopBar: View {
-    // MARK: Internal
+    
 
+    @Environment(\.conversationTheme) private var theme
     var body: some View {
         ZStack(alignment: .top) {
             CustomButton {
@@ -108,7 +109,7 @@ struct TopBar: View {
         .background(
             LinearGradient(
                 colors: [
-                    manager.state.properties.theme.background.color,
+                    theme.backgroundColor,
                     .clear,
                 ],
                 startPoint: .top,
@@ -119,7 +120,7 @@ struct TopBar: View {
         .equatable(by: manager.state)
     }
 
-    // MARK: Private
+    
 
     @Environment(ChatManager.self) private var manager
     @Environment(\.dismiss) private var dismiss

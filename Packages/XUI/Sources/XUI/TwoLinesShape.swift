@@ -21,7 +21,7 @@ public struct TwoLinesShape: Shape {
             x: rect.midX - side / 2,
             y: rect.midY - side / 2,
             width: side,
-            height: side
+            height: side,
         )
 
         let lineHeight = square.height * lineThickness
@@ -34,24 +34,24 @@ public struct TwoLinesShape: Shape {
             x: square.minX,
             y: topY - lineHeight / 1.5,
             width: square.width,
-            height: lineHeight
+            height: lineHeight,
         )
 
         let bottomRect = CGRect(
             x: square.minX,
             y: bottomY - lineHeight / 1.5,
             width: square.width * bottomLineScale,
-            height: lineHeight
+            height: lineHeight,
         )
 
         path.addRoundedRect(
             in: topRect,
-            cornerSize: CGSize(width: lineHeight / 1.5, height: lineHeight / 1.5)
+            cornerSize: CGSize(width: lineHeight / 1.5, height: lineHeight / 1.5),
         )
 
         path.addRoundedRect(
             in: bottomRect,
-            cornerSize: CGSize(width: lineHeight / 1.5, height: lineHeight / 1.5)
+            cornerSize: CGSize(width: lineHeight / 1.5, height: lineHeight / 1.5),
         )
 
         return path

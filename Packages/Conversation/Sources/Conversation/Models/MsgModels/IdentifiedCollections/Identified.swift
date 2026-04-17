@@ -5,7 +5,7 @@
 /// A wrapper around a value and a hashable identifier that conforms to identifiable.
 @dynamicMemberLookup
 public struct Identified<ID: Hashable, Value>: Identifiable {
-    // MARK: Lifecycle
+    
 
     /// Initializes an identified value from a given value and a hashable identifier.
     ///

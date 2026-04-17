@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import FirePhoneOTP
@@ -8,7 +6,7 @@ import Services
 import SwiftUI
 
 public struct AuthFlow: View {
-    @State private var router = AuthRouter()
+    @State private var router: AuthRouter = .init()
     let appLauncher: AppLauncher
 
     public init(appLauncher: AppLauncher) {

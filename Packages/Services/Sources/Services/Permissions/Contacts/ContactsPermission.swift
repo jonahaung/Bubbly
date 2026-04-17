@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Contacts
 import Foundation
@@ -11,7 +9,9 @@ public extension Permission {
     }
 }
 
-public class ContactsPermission: Permission {
+// MARK: - ContactsPermission
+
+public final class ContactsPermission: Permission {
     public var kind: PermissionKind {
         .contacts
     }

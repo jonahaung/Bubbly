@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import MediaPlayer
@@ -11,7 +9,9 @@ public extension Permission {
     }
 }
 
-public class MediaLibraryPermission: Permission {
+// MARK: - MediaLibraryPermission
+
+public final class MediaLibraryPermission: Permission {
     public var kind: PermissionKind {
         .mediaLibrary
     }

@@ -6,4 +6,5 @@ import XUI
 public enum MsgRecipient: Int, Codable, Sendable, Hashable {
     case outgoing
     case incoming
+    case system
 }

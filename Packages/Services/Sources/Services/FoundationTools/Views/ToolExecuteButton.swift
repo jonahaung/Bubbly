@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftUI
+
+// MARK: - ToolExecuteButton
 
 /// Standard execute button for tool views
 public struct ToolExecuteButton: View {
@@ -15,7 +15,7 @@ public struct ToolExecuteButton: View {
         _ title: String,
         systemImage: String? = nil,
         isRunning: Bool = false,
-        action: @escaping () -> Void
+        action: @escaping () -> Void,
     ) {
         self.title = title
         self.systemImage = systemImage
@@ -42,6 +42,8 @@ public struct ToolExecuteButton: View {
         .disabled(isRunning)
     }
 }
+
+// MARK: - ToolInputField
 
 /// Standard input field for tool views
 public struct ToolInputField: View {

@@ -1,6 +1,6 @@
-//
-//  Created by Aung Ko Min on 9/4/26.
-//
+// © 2026 Aung Ko Min
+
+// MARK: - ExampleTaskKey
 
 enum ExampleTaskKey: Hashable {
     case appear
@@ -8,8 +8,10 @@ enum ExampleTaskKey: Hashable {
     case submit
 }
 
+// MARK: - ExampleTaskRegistry
+
 actor ExampleTaskRegistry {
-    private var tasks = [ExampleTaskKey: Task<Void, Never>]()
+    private var tasks: [ExampleTaskKey: Task<Void, Never>] = [:]
 
     func run(key: ExampleTaskKey, operation: @escaping @Sendable () async -> Void) {
         tasks[key]?.cancel()

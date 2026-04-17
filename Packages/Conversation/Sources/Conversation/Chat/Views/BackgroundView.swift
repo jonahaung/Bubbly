@@ -1,22 +1,21 @@
 // © 2026 Aung Ko Min
 
 import Core
-import Database
-import Services
 import SwiftUI
-import XUI
 
 struct BackgroundView: View {
-    @Environment(ChatManager.self) private var manager
+    let imageName: String
     var body: some View {
-        Image("bg_default")
-            .resizable(resizingMode: .tile)
-            .foregroundStyle(Color.secondaryText)
-            .background(manager.state.theme.backgroundColor)
-            .blendMode(.plusLighter)
+        Color.background
+            .overlay {
+                Image(imageName)
+                    .resizable()
+                    .aspectRatio(UIApplication.shared.screenScale(), contentMode: .fit)
+                    .foregroundStyle(Color.container)
+            }
+            .ignoresSafeArea(.keyboard)
             .backgroundExtensionEffect()
-            .geometryGroup()
             .allowsHitTesting(false)
-            .equatable(by: manager.state.theme)
+            .equatable(by: imageName)
     }
 }

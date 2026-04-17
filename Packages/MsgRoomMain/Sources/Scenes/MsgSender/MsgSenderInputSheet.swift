@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Services
@@ -10,7 +8,7 @@ import XUI
 struct MsgSenderInputSheet: View {
     let conversationName: String
     @State private var inputText = ""
-    @State private var executor = ToolExecutor()
+    @State private var executor: ToolExecutor = .init()
     @Environment(\.dismiss) private var dismiss
     @FocusState private var isFocused
     @State private var isCopied = false
@@ -22,7 +20,7 @@ struct MsgSenderInputSheet: View {
                     ToolInputField(
                         label: "Enter message to send",
                         text: $inputText,
-                        placeholder: "Text ..."
+                        placeholder: "Text ...",
                     )
                     .focused($isFocused)
 
@@ -37,7 +35,7 @@ struct MsgSenderInputSheet: View {
                     "Send Message",
                     systemImage: "bubbles.and.sparkles.fill",
                     isRunning: executor.isRunning,
-                    action: executeMsgSend
+                    action: executeMsgSend,
                 )
                 .padding()
                 .disabled(inputText.isEmpty)
@@ -68,7 +66,7 @@ struct MsgSenderInputSheet: View {
                 .execute(
                     tool: MsgSenderTool(),
                     prompt: "send message to conversation name: \(conversationName) and text: \(text)",
-                    type: MsgSenderToolOutput.self
+                    type: MsgSenderToolOutput.self,
                 ) { model in
                     model.text
                 } clearForm: {

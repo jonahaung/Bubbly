@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
@@ -26,17 +24,17 @@ public actor MsgCreator {
     public func message(
         text: String,
         attachments: [Attachment],
-        in conversation: Conversation
-    ) async throws -> Message {
+        in conversation: Conversation,
+    ) async -> Message {
         await Message(
             uid: IDGenerator.shared.make(),
             senderID: currentUserId,
             conID: conversation.uid,
             text: text,
             date: .now,
-			deliveryStatus: .sending,
+            deliveryStatus: .sending,
             attachments: attachments,
-            reactions: []
+            reactions: [],
         )
     }
 }

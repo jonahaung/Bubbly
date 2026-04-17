@@ -9,8 +9,8 @@ public final class ProducerConsumerQueue<T> {
     private var head = 0
     private var tail = 0
     private var count = 0
-    private let lock = NSLock()
-    private let semaphore = DispatchSemaphore(value: 0)
+    private let lock: NSLock = .init()
+    private let semaphore: DispatchSemaphore = .init(value: 0)
 
     public init(capacity: Int = 1024) {
         // Round up capacity to nearest power of 2 for efficient wrapping
@@ -47,7 +47,9 @@ public final class ProducerConsumerQueue<T> {
     public func tryDequeue() -> T? {
         lock.lock()
         defer { lock.unlock() }
-        guard !isEmpty else { return nil }
+        guard !isEmpty else {
+            return nil
+        }
         let item = buffer[head]!
         buffer[head] = nil
         head = (head + 1) & (buffer.count - 1)
@@ -85,7 +87,7 @@ public final class ProducerConsumerQueue<T> {
     private func grow() {
         let newCap = buffer.count * 2
         var newBuffer = [T?](repeating: nil, count: newCap)
-        for i in 0..<count {
+        for i in 0 ..< count {
             newBuffer[i] = buffer[(head + i) & (buffer.count - 1)]
         }
         buffer = newBuffer
@@ -120,7 +122,8 @@ public actor AsyncProducerConsumerQueue<T: Sendable> {
         if let waiter = waiting.first {
             waiting.removeFirst()
             waiter.resume(returning: item)
-        } else {
+        }
+        else {
             buffer.append(item)
         }
     }

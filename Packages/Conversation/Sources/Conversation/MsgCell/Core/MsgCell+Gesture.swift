@@ -13,7 +13,7 @@ extension MsgCell {
 
     @Observable
     final class GestureViewModel {
-        // MARK: Internal
+        
 
         var draggedOffset: CGFloat = 0
         var isLongPressActive = false
@@ -70,7 +70,7 @@ extension MsgCell {
             }
         }
 
-        // MARK: Private
+        
 
         @ObservationIgnored
         private var lastAppliedOffset: CGFloat = 0
@@ -99,7 +99,7 @@ extension MsgCell {
 
 extension MsgCell {
     struct GestureAware<Content: View>: View {
-        // MARK: Internal
+        
 
         let content: () -> Content
 
@@ -116,7 +116,7 @@ extension MsgCell {
                 }
         }
 
-        // MARK: Private
+        
 
         @Environment(MsgCellViewModel.self) private var viewModel
         @Environment(\.msgCellActions) private var sendInteraction

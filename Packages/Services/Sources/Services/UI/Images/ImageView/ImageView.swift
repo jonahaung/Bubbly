@@ -1,17 +1,16 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import ImageLoader
 import SwiftUI
 import XUI
 
+// MARK: - ImageView
+
 public struct ImageView: View {
     public typealias Item = any ImageViewItem
-    @State private var error: Error?
     @State private var manager: ImageViewManager
-    @State private var fetchImage = FetchImage()
+    @State private var fetchImage: FetchImage = .init()
 
     private let config: ImageViewConfig
 
@@ -43,7 +42,10 @@ public struct ImageView: View {
                         }
                     }
                     .onAppear {
-                        guard fetchImage.imageContainer?.image == nil else { return }
+                        guard fetchImage.imageContainer?.image == nil else {
+                            return
+                        }
+
                         if fetchImage.isLoading {
                             return
                         }
@@ -73,8 +75,8 @@ extension ImageView {
                 .resizable()
                 .aspectRatio(
                     contentMode: (
-                        config.size.value == nil
-                    ) ? .fit : .fill
+                        config.size.value == nil,
+                    ) ? .fit : .fill,
                 )
                 .sheetWithZoomTransition { imagerViewerScene }
                 .equatable(by: manager.item.imageID)
@@ -111,12 +113,12 @@ extension ImageView {
             items: [manager.item],
             title: manager.item.fileName(),
             selection: manager
-                .item.id
+                .item.id,
         )
     }
 
     var processors: [ImageProcessing] {
-        var array: [ImageProcessing] = []
+        var array = [ImageProcessing]()
         if let value = config.size.value {
             array.append(.resize(width: value))
         }

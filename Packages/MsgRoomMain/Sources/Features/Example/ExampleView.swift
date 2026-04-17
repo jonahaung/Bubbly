@@ -1,55 +1,54 @@
-//
-//  Created by Aung Ko Min on 9/4/26.
-//
+// © 2026 Aung Ko Min
 
+import Core
 import SwiftUI
 import XUI
-import Core
 
 struct ExampleView: View {
-    @State private var viewModel = ExampleViewModel()
+
+    @State private var viewModel: ExampleViewModel = .init()
 
     var body: some View {
-		ScrollView {
-			LazyVStack(alignment: .leading, spacing: Spacing.md) {
-				if viewModel.state.isLoading {
-					ProgressView()
-				}
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: Spacing.md) {
+                if viewModel.state.isLoading {
+                    ProgressView()
+                }
 
-				if let error = viewModel.state.error {
-					Text(error)
-						.foregroundStyle(.red)
-				}
+                if let error = viewModel.state.error {
+                    Text(error)
+                        .foregroundStyle(.red)
+                }
 
-				if let items = viewModel.state.items {
-					Section {
-						ForEach(items, id: \.self) { item in
-							VStack {
-								HStack(spacing: Spacing.md) {
-									Text(item)
+                if let items = viewModel.state.items {
+                    Section {
+                        ForEach(items, id: \.self) { item in
+                            VStack {
+                                HStack(spacing: Spacing.md) {
+                                    Text(item)
 
-									Spacer()
-								}
-							}
-							.padding(Padding.md)
-							.flexible(.horizontal)
-							.background(Color.appPrimary)
-						}
-					} header: {
-						Button("LoadItems") {
-							Task {
-								await viewModel.send(.submit)
-							}
-						}
-						.buttonSizing(.flexible)
-						.padding(.vertical)
-						.buttonStyle(.borderedProminent)
-					}
-				}
-			}
-			.padding(Padding.md)
-		}
-		.applyBackground()
+                                    Spacer()
+                                }
+                            }
+                            .padding(Padding.md)
+                            .flexible(.horizontal)
+                            .background(Color.appPrimary)
+                        }
+                    } header: {
+                        Button("LoadItems") {
+                            Task {
+                                await viewModel.send(.submit)
+                            }
+                        }
+                        .buttonSizing(.flexible)
+                        .padding(.vertical)
+                        .buttonStyle(.borderedProminent)
+                    }
+                }
+            }
+            .padding(Padding.md)
+        }
+        .applyBackground()
         .navigationTitle("Example")
         .task {
             await viewModel.send(.appear)

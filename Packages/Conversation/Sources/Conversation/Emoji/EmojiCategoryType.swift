@@ -20,7 +20,7 @@
         case symbols
         case flags
 
-        // MARK: - Properties
+        
 
         var title: String {
             switch self {

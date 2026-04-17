@@ -21,9 +21,9 @@ struct HeaderProfileView: View {
         .frame(maxWidth: .infinity, minHeight: UIApplication.shared.screenSize().height / 2)
         .fixedSize(horizontal: false, vertical: true)
         .padding(Padding.md)
-        .background(Color.appPrimary)
+        .background(Color.container)
         .containerShape(RoundedRectangle(cornerRadius: Radius.card))
-        .padding(.horizontal, Padding.lg)
+        .padding(.vertical, Padding.md)
         .id("header")
         .equatable(by: conversation.uid)
     }

@@ -3,7 +3,7 @@
 import Foundation
 
 public struct IdentifiedArray<ID: Hashable, Element>: Sequence {
-    // MARK: Lifecycle
+    
 
     public init(id: KeyPath<Element, ID>) {
         idKeyPath = id
@@ -119,7 +119,7 @@ public struct IdentifiedArray<ID: Hashable, Element>: Sequence {
         elements.makeIterator()
     }
 
-    // MARK: Private
+    
 
     private let idKeyPath: KeyPath<Element, ID>
     private var elements: [Element]

@@ -6,15 +6,17 @@ import Services
 import XUI
 
 struct ConversationDataUpdater {
-    func reloadConversation(currentState: ChatManager.State, refetch: Bool) async throws
+    func reloadConversation(currentState: ChatManager.State, refetch: Bool)
+        async throws
         -> ChatManager.State
     {
         let conID = currentState.conversation.uid
         var updatedState = currentState
-        updatedState.properties = try await ConversationPropertiesRepo.getOrCreate(
-            for: conID,
-            refetch: refetch,
-        )
+        updatedState.properties =
+            try await ConversationPropertiesRepo.getOrCreate(
+                for: conID,
+                refetch: refetch,
+            )
         updatedState.conversation = try await ConversationRepo.getOrCreate(
             for: conID,
             refetch: refetch,
@@ -43,7 +45,8 @@ struct ConversationDataUpdater {
             return []
         }
 
-        let results = try await AsyncOrderedStream.mapOrdered(inputs: msgs) { msg in
+        let results = try await AsyncOrderedStream.mapOrdered(inputs: msgs) {
+            msg in
             var mutable = msg
             mutable.deliveryStatus = toStatus
             return try await store.updateAndSave(uid: msg.uid) { model in
@@ -54,7 +57,11 @@ struct ConversationDataUpdater {
         return results.compactMap(\.self)
     }
 
-    func sendSeenStatus(lastReadMsg: Message, currentUserID: String, conversation: Conversation)
+    func sendSeenStatus(
+        lastReadMsg: Message,
+        currentUserID: String,
+        conversation: Conversation
+    )
         async throws
     {
         try await Socket.send(

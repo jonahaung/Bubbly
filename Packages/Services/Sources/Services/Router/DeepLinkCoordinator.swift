@@ -1,28 +1,27 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Foundation
 import XUI
 
-public struct DeepLinkCoordinator: Sendable {
+// MARK: - DeepLinkCoordinator
 
+public struct DeepLinkCoordinator: Sendable {
     private let codec: DeeplinkCodec
     private let planner: DeeplinkActionPlanner
     private let sideEffects: SideEffectHandler
-	internal let router: Router
+    let router: Router
 
     public init(
-		codec: DeeplinkCodec = .standard,
-		planner: DeeplinkActionPlanner = .default(),
-		sideEffects: SideEffectHandler = .default,
-		router: Router
+        codec: DeeplinkCodec = .standard,
+        planner: DeeplinkActionPlanner = .default(),
+        sideEffects: SideEffectHandler = .default,
+        router: Router,
     ) {
         self.codec = codec
         self.planner = planner
         self.sideEffects = sideEffects
-		self.router = router
+        self.router = router
     }
 
     public func onOpenURL(url: URL) async {
@@ -42,7 +41,10 @@ public struct DeepLinkCoordinator: Sendable {
         let actions = planner.plan(link)
 
         do {
-            try await AsyncOrderedStream.mapOrdered(inputs: actions, transform: handleDeepLinkAction)
+            try await AsyncOrderedStream.mapOrdered(
+                inputs: actions,
+                transform: handleDeepLinkAction,
+            )
         } catch {
             log(error)
         }
@@ -68,24 +70,8 @@ private extension DeepLinkCoordinator {
             // Run off the main actor but preserve ordering by awaiting
             try await Task.detached { [sideEffects] in
                 try await sideEffects.run(effect)
-            }.value
+            }
+            .value
         }
     }
-}
-
-public extension DeepLinkCoordinator {
-//    static let shared: DeepLinkCoordinator = .init(
-//        router: Router.shared,
-//        codec: DeeplinkCodec(
-//            config: .init(
-//                scheme: AppInformation.urlScheme,
-//                supportedVersions: Set(["v1"]),
-//                queryValidation: .strict
-//            ),
-//            aliases: .init(routeAliases: ["conv": "conversation"]),
-//            telemetry: .default
-//        ),
-//        planner: .default(tabMapping: .default, navMapping: .default),
-//        sideEffects: .default
-//    )
 }

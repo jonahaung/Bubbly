@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 @MainActor
 struct PlaygroundRepositoryImpl: PlaygroundRepository {
@@ -10,25 +8,25 @@ struct PlaygroundRepositoryImpl: PlaygroundRepository {
         self.manager = manager
     }
 
-    func loadInitial() async throws -> PlaygroundSnapshot {
+    func loadInitial() -> PlaygroundSnapshot {
         manager.setLoading(false)
         manager.setError(nil)
         return snapshot()
     }
 
-    func refresh() async throws -> PlaygroundSnapshot {
+    func refresh() -> PlaygroundSnapshot {
         manager.setLoading(false)
         manager.setError(nil)
         return snapshot()
     }
 
-    func submit() async throws -> PlaygroundSnapshot {
+    func submit() -> PlaygroundSnapshot {
         manager.setLoading(false)
         manager.setError(nil)
         return snapshot()
     }
 
-    func latestSnapshot() async -> PlaygroundSnapshot {
+    func latestSnapshot() -> PlaygroundSnapshot {
         snapshot()
     }
 

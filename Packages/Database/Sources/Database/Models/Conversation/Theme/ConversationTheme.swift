@@ -3,6 +3,7 @@
 import Foundation
 import SwiftUI
 import XUI
+import Core
 
 public struct ConversationTheme: Codable, Sendable, Hashable {
     public var bubbleColor: BubbleColor
@@ -10,8 +11,8 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
     public var bubbleCornorRadius: CGFloat
 
     public init(
-        bubbleColor: BubbleColor = .default,
-        background: ChatBackground = .default,
+		bubbleColor: BubbleColor = .empty,
+        background: ChatBackground = .bg_6,
         bubbleCornorRadius: CGFloat = 17,
     ) {
         self.bubbleColor = bubbleColor
@@ -20,8 +21,8 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
     }
 
     public static let `default`: ConversationTheme = .init(
-        bubbleColor: .default,
-        background: .default,
+		bubbleColor: .empty,
+        background: .bg_6,
         bubbleCornorRadius: 17,
     )
 }

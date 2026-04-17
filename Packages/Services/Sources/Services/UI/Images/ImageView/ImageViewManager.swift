@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import ImageLoader
@@ -11,8 +9,8 @@ import XUI
 @Observable
 final class ImageViewManager {
     let item: any ImageViewItem
-    var image: UIImage?
-    var progress: ImageTask.Progress?
+    var image: UIImage? = nil
+    var progress: ImageTask.Progress? = nil
 
     init(item: any ImageViewItem) {
         self.item = item
@@ -22,17 +20,20 @@ final class ImageViewManager {
         item.fileExist()
     }
 
-	func loadLocalImage(isThumbnil: Bool) async {
+    func loadLocalImage(isThumbnil: Bool) {
         guard image == nil else {
             return
         }
-        guard isLocallyCached() else { return }
-		if isThumbnil {
-			image = item.thumbnailImage()
-		} else {
-			image = item.image()
-		}
 
+        guard isLocallyCached() else {
+            return
+        }
+
+        if isThumbnil {
+            image = item.thumbnailImage()
+        } else {
+            image = item.image()
+        }
     }
 
     func onCompletion(_ result: Result<ImageResponse, Error>) {
@@ -41,7 +42,7 @@ final class ImageViewManager {
             Task {
                 do {
                     try await self.saveImage(success.image)
-					await loadLocalImage(isThumbnil: true)
+					loadLocalImage(isThumbnil: true)
                 } catch {
                     log(error)
                 }

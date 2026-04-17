@@ -31,13 +31,7 @@ public enum ContactRepo {
             }
         }
 
-        if localValue != nil {
-            try await Store.shared.contactStore?.updateAndSave(uid: uid) { model in
-                model.merge(from: serverValue)
-            }
-        } else {
-            try await Store.shared.contactStore?.insert(serverValue)
-        }
+        try await Store.shared.contactStore?.insert(serverValue)
         return serverValue
     }
 

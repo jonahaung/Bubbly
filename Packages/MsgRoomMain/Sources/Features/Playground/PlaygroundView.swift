@@ -1,81 +1,80 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Services
 import SwiftUI
 import XUI
 
+// MARK: - PlaygroundView
+
 struct PlaygroundView: View {
-    @State private var viewModel = PlaygroundViewModel()
+    @State private var viewModel: PlaygroundViewModel = .init()
 
     @State private var showModal = false
-    @State private var fontName = ""
     @State private var searchText = ""
     @State private var text = ""
-	
+
     var body: some View {
         List {
-			if viewModel.state.isLoading {
-				ProgressView()
-			}
+            if viewModel.state.isLoading {
+                ProgressView()
+            }
 
-			if let error = viewModel.state.error {
-				Text(error)
-					.foregroundStyle(.red)
-			}
+            if let error = viewModel.state.error {
+                Text(error)
+                    .foregroundStyle(.red)
+            }
 
-			NavigationLink("Exampl View") {
-				ExampleView()
-			}
-			Button("Show modal") {
-				text = Lorem.random()
-				showModal = true
-			}
-			Button("Font Picker") {
-//				Router.shared.presentModel(.view(FontPicker(selection: $fontName).opaqueView()))
-			}
-			Button("Markdown View") {
-//				Router.shared.presentModel(.view(MarkdownView.ExampleView().opaqueView()))
-			}
-			Button("System Sounds") {
-//				Router.shared.presentModel(.view(SystemSoundTesterView().opaqueView()))
-			}
-			Button("Show Toast") {
-				ToastPresenter.show(allowsBackgroundTap: true) {
-					Text(Lorem.random())
-				} action: {
-					print("tapped")
-				}
-			}
-			Text("Example View").tapToPush {
-				ExampleView1()
-			}
-			Button("Show Loading") {
-				Loading.show(true)
-			}
-			Label(text, systemImage: "bubble.right")
-			Spacer()
-			Button("Submit") {
-				Task {
-					await viewModel.send(.submit)
-				}
-			}
+            NavigationLink("Exampl View") {
+                ExampleView()
+            }
+            Button("Show modal") {
+                text = Lorem.random()
+                showModal = true
+            }
+            Button("Font Picker") {
+                //				Router.shared.presentModel(.view(FontPicker(selection: $fontName).opaqueView()))
+            }
+            Button("Markdown View") {
+                //				Router.shared.presentModel(.view(MarkdownView.ExampleView().opaqueView()))
+            }
+            Button("System Sounds") {
+                //				Router.shared.presentModel(.view(SystemSoundTesterView().opaqueView()))
+            }
+            Button("Show Toast") {
+                ToastPresenter.show(allowsBackgroundTap: true) {
+                    Text(Lorem.random())
+                } action: {
+                    print("tapped")
+                }
+            }
+            Text("Example View").tapToPush {
+                ExampleView1()
+            }
+            Button("Show Loading") {
+                Loading.show(true)
+            }
+            Label(text, systemImage: "bubble.right")
+            Spacer()
+            Button("Submit") {
+                Task {
+                    await viewModel.send(.submit)
+                }
+            }
         }
-		.navigationTitle(Self.defaultTitle)
+        .navigationTitle(Self.defaultTitle)
         .searchable(text: $searchText)
         .overlay {
             if showModal {
-				ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {
-					Text(text)
+                ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {
+                    Text(text)
                         .padding()
                         .background(.bar, in: .rect)
-						.foregroundStyle(Color.white)
+                        .foregroundStyle(Color.white)
                         .colorScheme(.dark)
 
                 } onClose: {
                     showModal = false
-				}
+                }
             }
         }
         .task {
@@ -87,8 +86,9 @@ struct PlaygroundView: View {
     }
 }
 
-struct ExpandingTextEditor: View {
+// MARK: - ExpandingTextEditor
 
+struct ExpandingTextEditor: View {
     @Binding var text: String
 
     let maxLines: Int
@@ -99,7 +99,7 @@ struct ExpandingTextEditor: View {
     init(
         text: Binding<String>,
         maxLines: Int = 5,
-        font: Font = .body
+        font: Font = .body,
     ) {
         _text = text
         self.maxLines = maxLines
@@ -107,9 +107,7 @@ struct ExpandingTextEditor: View {
     }
 
     var body: some View {
-
         ZStack(alignment: .topLeading) {
-
             TextEditor(text: $text)
                 .font(font)
                 .frame(height: clampedHeight)

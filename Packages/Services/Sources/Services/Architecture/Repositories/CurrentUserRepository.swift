@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -9,6 +7,8 @@ import FirebaseMessaging
 import Foundation
 import XUI
 
+// MARK: - CurrentUserRepository
+
 public actor CurrentUserRepository {
     public enum XError: Error {
         case notLoggedIn
@@ -16,12 +16,15 @@ public actor CurrentUserRepository {
     }
 
     public var model: CurrentUserModel
-    private let cancelBag = CancelBag()
+    private let cancelBag: CancelBag = .init()
 
     public init(_ model: CurrentUserModel) {
         self.model = model
         Task { [weak self] in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
+
             await observeReloadNotification()
         }
     }
@@ -30,6 +33,7 @@ public actor CurrentUserRepository {
         guard let firUser = Auth.auth().currentUser else {
             throw XError.notLoggedIn
         }
+
         let storage = GroupStorage.shared
 
         let newModel = CurrentUserModel(firUser)
@@ -38,14 +42,14 @@ public actor CurrentUserRepository {
         if let remoteModel: CurrentUserModel? = try? await FirestoreRepo.getModel(
             for: newModel.uid,
             collection: .users,
-            field: .uid
+            field: .uid,
         ) {
             if newModel != remoteModel {
                 try await FirestoreRepo
                     .update(
                         value: newModel.dictionary,
                         collectionPath: .users,
-                        to: newModel.uid
+                        to: newModel.uid,
                     )
                 await ToastPresenter.show("Profile Updated", allowsBackgroundTap: false)
             }
@@ -68,7 +72,10 @@ public actor CurrentUserRepository {
             .publisher(for: .reloadCurrentUser)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
+
                 Task {
                     try await self.updateIfNeeded()
                 }

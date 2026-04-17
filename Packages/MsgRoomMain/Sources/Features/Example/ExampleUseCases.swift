@@ -1,26 +1,34 @@
-//
-//  Created by Aung Ko Min on 9/4/26.
-//
+// © 2026 Aung Ko Min
+
+// MARK: - LoadExampleUseCase
 
 @MainActor
 protocol LoadExampleUseCase {
     func execute() async throws -> ExampleSnapshot
 }
 
+// MARK: - RefreshExampleUseCase
+
 @MainActor
 protocol RefreshExampleUseCase {
     func execute() async throws -> ExampleSnapshot
 }
+
+// MARK: - SubmitExampleUseCase
 
 @MainActor
 protocol SubmitExampleUseCase {
     func execute() async throws -> ExampleSnapshot
 }
 
+// MARK: - LatestExampleSnapshotUseCase
+
 @MainActor
 protocol LatestExampleSnapshotUseCase {
     func execute() async -> ExampleSnapshot
 }
+
+// MARK: - LoadExampleUseCaseImpl
 
 struct LoadExampleUseCaseImpl: LoadExampleUseCase {
     private let repository: ExampleRepository
@@ -34,6 +42,8 @@ struct LoadExampleUseCaseImpl: LoadExampleUseCase {
     }
 }
 
+// MARK: - RefreshExampleUseCaseImpl
+
 struct RefreshExampleUseCaseImpl: RefreshExampleUseCase {
     private let repository: ExampleRepository
 
@@ -46,6 +56,8 @@ struct RefreshExampleUseCaseImpl: RefreshExampleUseCase {
     }
 }
 
+// MARK: - SubmitExampleUseCaseImpl
+
 struct SubmitExampleUseCaseImpl: SubmitExampleUseCase {
     private let repository: ExampleRepository
 
@@ -57,6 +69,8 @@ struct SubmitExampleUseCaseImpl: SubmitExampleUseCase {
         try await repository.submit()
     }
 }
+
+// MARK: - LatestExampleSnapshotUseCaseImpl
 
 struct LatestExampleSnapshotUseCaseImpl: LatestExampleSnapshotUseCase {
     private let repository: ExampleRepository

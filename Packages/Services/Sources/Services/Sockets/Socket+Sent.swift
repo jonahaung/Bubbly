@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -34,7 +32,7 @@ extension Socket {
         case let .reaction(payload):
             try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in
                 model.reactions.removeAll(where: { $0.senderID == payload.reaction.senderID })
-				model.reactions.append(payload.reaction)
+                model.reactions.append(payload.reaction)
             }
             notifyMessage(data)
             addToQueue()
@@ -52,19 +50,31 @@ extension Socket {
     }
 
     private func dequeueIfNeeded() {
-        guard let data = sendingQueue.dequeue() else { return }
+        guard let data = sendingQueue.dequeue() else {
+            return
+        }
+
         Task { [weak self] in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
+
             try await queue.sync { [weak self] in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
+
                 defer {
                     Task { [weak self] in
-                        guard let self else { return }
+                        guard let self else {
+                            return
+                        }
+
                         try await Task.sleep(seconds: 1)
                         await self.dequeueIfNeeded()
                     }
                 }
-                try await self.performSend(data)
+                try await performSend(data)
             }
         }
     }
@@ -72,14 +82,14 @@ extension Socket {
     private func performSend(_ data: AnyMsgData) async throws {
         let conversation = try await ConversationRepo.getOrCreate(
             for: data.conID,
-            refetch: false
+            refetch: false,
         )
         switch data {
         case let .newMsg(rMsg):
             var msg = Message(rMsg)
-			msg.deliveryStatus = try await sendToRemote(
+            msg.deliveryStatus = try await sendToRemote(
                 .newMsg(rMsg: rMsg),
-                conversation: conversation
+                conversation: conversation,
             )
             try await Store.shared.msgStore?.updateAndSave(uid: rMsg.uid) { model in
                 model.update(from: msg)
@@ -100,45 +110,47 @@ extension Socket {
         case let .seenStatus(status: status):
             guard
                 let msg = try await Store.shared.msgStore?.fetch(
-                    uid: status.msgID
-                )
-            else {
+                    uid: status.msgID,
+                ) else
+            {
                 return
             }
+
             guard let contact = await ContactsRepository.shared.contact(for: msg.senderID) else {
                 return
             }
+
             let title = data.pushNotificationTitle(for: conversation)
             let body = data.pushNotificationSubtitle
             try await sendToRemote(
                 data,
                 alert: .init(title: title, body: body),
-                contacts: [contact]
+                contacts: [contact],
             )
         }
     }
 
     @discardableResult public func sendToRemote(
         _ data: AnyMsgData,
-        conversation: Conversation
+        conversation: Conversation,
     ) async throws -> DeliveryStatus {
         let contacts = try await getContacts(
-            from: conversation
+            from: conversation,
         ).filter {
             $0.uid != currentUserID
                 && isValidDeviceToken(
-                    $0.pushToken
+                    $0.pushToken,
                 )
         }
         let title = data.pushNotificationTitle(for: conversation)
         return try await sendToRemote(
             data,
-			alert: .init(
-				title: title,
-				subtitle: nil,
-				body: data.pushNotificationBody
-			),
-            contacts: contacts
+            alert: .init(
+                title: title,
+                subtitle: nil,
+                body: data.pushNotificationBody,
+            ),
+            contacts: contacts,
         )
     }
 
@@ -154,39 +166,41 @@ extension Socket {
     @discardableResult public func sendToRemote(
         _ data: AnyMsgData,
         alert: APNSAlert,
-        contacts: [Contact]
+        contacts: [Contact],
     ) async throws -> DeliveryStatus {
         let encoded = try JSONEncoder().encode(data)
         guard let encodedString = String(data: encoded, encoding: .utf8) else {
             throw SocketError.encodingFailed
         }
+
         let results: [(Contact, Bool)] = try await AsyncOrderedStream.mapOrdered(
-            inputs: contacts
+            inputs: contacts,
         ) { contact in
             let encrypted = try await self.encrypt(
                 encodedString,
-                publicKeyString: contact.publicKeyString
+                publicKeyString: contact.publicKeyString,
             )
 
             // Build APNs notification
             let notification = APNSNotification(
                 deviceToken: contact.pushToken,
                 messageContent: encrypted,
-                alert: alert
+                alert: alert,
             )
             let success = try? await self.pushNotificationSender.send(notification: notification)
             return (contact, success != nil)
         }
-		return results.contains(where: { $0.1 == true }) ? .delivered : .sendingFailed
+        return results.contains(where: { $0.1 == true }) ? .delivered : .sendingFailed
     }
 
-    private func encrypt(_ dataString: String, publicKeyString: String) async throws -> String {
+    private func encrypt(_ dataString: String, publicKeyString: String) throws -> String {
         guard let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
             throw SocketError.encryptionFailed
         }
+
         return try cryptoService.encrypt(
             dataString: dataString,
-            recipientPublicKeyString: publicKeyString, currentUserID: currentUserID
+            recipientPublicKeyString: publicKeyString, currentUserID: currentUserID,
         )
     }
 

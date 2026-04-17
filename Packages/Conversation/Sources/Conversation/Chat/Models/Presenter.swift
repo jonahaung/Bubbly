@@ -11,28 +11,19 @@ import XUI
 @MainActor
 @Observable
 final class Presenter {
-    // MARK: Lifecycle
+    
 
-    init(_ config: ConversationInitializer.Configuration) {
-        let initialState = State(
-            toast: nil,
-            dateText: nil,
-            overlayItem: nil,
-            bottomAccessory: nil,
-            typingStatus: nil,
-            showContactInfo: !config.canPaginate,
-        )
-        state = initialState
+    init(_ conID: String) {
+		state = .init()
     }
 
-    // MARK: Internal
+    
 
     enum Intent {
         case toast(_ newValue: ChatToastItem?)
         case date(_ newValue: Date)
         case overlayItem(_ newValue: OverlayMenuItem?)
         case bottomAccessory(_ newValue: AccessoryBarItem?)
-        case showContactInfo(_ newValue: Bool)
         case typing(_ newValue: AnyMsgData.TypingStatusPayload?)
     }
 
@@ -42,12 +33,11 @@ final class Presenter {
         var overlayItem: OverlayMenuItem? = nil
         var bottomAccessory: AccessoryBarItem? = nil
         var typingStatus: AnyMsgData.TypingStatusPayload? = nil
-        var showContactInfo: Bool
     }
 
     var state: State
 
-    // MARK: Private
+    
 
     @ObservationIgnored
     private let dateCache: ExpiringCache<Date, String> = .init()
@@ -86,8 +76,6 @@ extension Presenter {
             state.overlayItem = newValue
         case let .bottomAccessory(newValue):
             state.bottomAccessory = newValue
-        case let .showContactInfo(newValue):
-            state.showContactInfo = newValue
         case let .typing(newValue):
             state.typingStatus = newValue
         }

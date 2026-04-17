@@ -21,6 +21,10 @@ public extension CaseNameReflectable {
     var localizedName: String {
         caseName.camelCaseToWords
     }
+
+	var rawValue: String {
+		caseName
+	}
 }
 
 public extension String {

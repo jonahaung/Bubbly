@@ -21,7 +21,7 @@ struct ExtractedLink: Hashable, Identifiable {
 // MARK: - LinkExtractor
 
 enum LinkExtractor {
-    // MARK: Internal
+    
 
     static func extractLinks(from text: String) -> [ExtractedLink] {
         guard let regularExpression = try? NSRegularExpression(pattern: pattern, options: []) else {
@@ -77,7 +77,7 @@ enum LinkExtractor {
         extractLinks(from: text).map(\.url)
     }
 
-    // MARK: Private
+    
 
     /// Matches:
     /// 1) http(s)://...

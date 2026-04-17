@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import CoreLocation
 import FoundationModels
@@ -11,6 +9,7 @@ extension LocationTool {
         guard let request = MKReverseGeocodingRequest(location: location) else {
             return nil
         }
+
         return try? await request.mapItems.first
     }
 
@@ -38,7 +37,7 @@ extension LocationTool {
                 "latitude": location.coordinate.latitude,
                 "longitude": location.coordinate.longitude,
                 "formattedAddress": formattedAddress,
-                "message": "Location found: \(formattedAddress)"
+                "message": "Location found: \(formattedAddress)",
             ])
         } catch {
             return createErrorOutput(error: error)
@@ -47,8 +46,8 @@ extension LocationTool {
 
     func reverseGeocode(latitude: Double?, longitude: Double?) async -> GeneratedContent {
         guard let latitude,
-              let longitude
-        else {
+              let longitude else
+        {
             return createErrorOutput(error: LocationError.missingCoordinates)
         }
 
@@ -58,6 +57,7 @@ extension LocationTool {
             guard let request = MKReverseGeocodingRequest(location: location) else {
                 return createErrorOutput(error: LocationError.reverseGeocodingFailed)
             }
+
             let mapItems = try await request.mapItems
 
             guard let mapItem = mapItems.first else {
@@ -71,7 +71,7 @@ extension LocationTool {
                 "latitude": latitude,
                 "longitude": longitude,
                 "address": address,
-                "message": "Address: \(address)"
+                "message": "Address: \(address)",
             ])
         } catch {
             return createErrorOutput(error: error)
@@ -83,11 +83,12 @@ extension LocationTool {
 
 func formatAddress(
     from mapItem: MKMapItem?,
-    fallbackLocation: CLLocation?
+    fallbackLocation: CLLocation?,
 ) -> String {
     guard let mapItem else {
         return fallbackLocation.map(coordinateDescription) ?? "Unknown location"
     }
+
     return mapItem.address?.fullAddress ?? mapItem.name ?? "Unknown location"
 }
 
@@ -95,6 +96,6 @@ func coordinateDescription(for location: CLLocation) -> String {
     String(
         format: "%.4f, %.4f",
         location.coordinate.latitude,
-        location.coordinate.longitude
+        location.coordinate.longitude,
     )
 }

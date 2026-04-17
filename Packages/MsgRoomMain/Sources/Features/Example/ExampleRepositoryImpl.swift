@@ -1,6 +1,4 @@
-//
-//  Created by Aung Ko Min on 9/4/26.
-//
+// © 2026 Aung Ko Min
 
 import XUI
 
@@ -12,40 +10,40 @@ struct ExampleRepositoryImpl: ExampleRepository {
         self.manager = manager
     }
 
-    func loadInitial() async throws -> ExampleSnapshot {
+    func loadInitial() -> ExampleSnapshot {
         manager.setLoading(false)
         manager.setError(nil)
         return snapshot()
     }
 
-    func refresh() async throws -> ExampleSnapshot {
+    func refresh() -> ExampleSnapshot {
         manager.setLoading(false)
         manager.setError(nil)
         return snapshot()
     }
 
-    func submit() async throws -> ExampleSnapshot {
+    func submit() -> ExampleSnapshot {
         manager.setLoading(false)
         manager.setError(nil)
         return snapshot()
     }
 
-    func latestSnapshot() async -> ExampleSnapshot {
+    func latestSnapshot() -> ExampleSnapshot {
         snapshot()
     }
 
     private func snapshot() -> ExampleSnapshot {
-		let items: [String] = {
-			var items: [String] = []
-			for _ in 0..<1000 {
-				items.append(Lorem.random())
-			}
-			return items
-		}()
-		return .init(
-			isLoading: manager.isLoading,
-			error: manager.error,
-			items: items.uniqued()
-		)
+        let items: [String] = {
+            var items = [String]()
+            for _ in 0 ..< 1000 {
+                items.append(Lorem.random())
+            }
+            return items
+        }()
+        return .init(
+            isLoading: manager.isLoading,
+            error: manager.error,
+            items: items.uniqued(),
+        )
     }
 }

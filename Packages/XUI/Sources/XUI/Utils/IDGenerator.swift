@@ -5,13 +5,13 @@
 import Foundation
 
 public actor IDGenerator {
-    public static let shared = IDGenerator()
+    public static let shared: IDGenerator = .init()
 
-    private static let ascendingChars = Array(
-        "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz"
+    private static let ascendingChars: Array = .init(
+        "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz",
     )
 
-    private static let descendingChars = Array(ascendingChars.reversed())
+    private static let descendingChars: Array = .init(ascendingChars.reversed())
 
     private var lastTimestamp: UInt64 = 0
     private var lastRandomValues: [Int] = Array(repeating: 0, count: 12)
@@ -44,7 +44,8 @@ public actor IDGenerator {
 
         if isDuplicateTimestamp {
             incrementRandomValues()
-        } else {
+        }
+        else {
             generateRandomValues()
         }
 
@@ -57,9 +58,9 @@ public actor IDGenerator {
     }
 
     private func generateRandomValues() {
-        for index in 0..<lastRandomValues.count {
+        for index in 0 ..< lastRandomValues.count {
             lastRandomValues[index] = Int(
-                64 * Double(arc4random()) / Double(UInt32.max)
+                64 * Double(arc4random()) / Double(UInt32.max),
             )
         }
     }

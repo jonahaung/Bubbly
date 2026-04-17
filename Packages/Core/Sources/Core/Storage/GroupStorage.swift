@@ -2,178 +2,189 @@
 
 import Foundation
 
-public struct GroupStorage {
-    public nonisolated(unsafe) static let shared: GroupStorage = {
+public struct StorageKey<Value>: Sendable {
+    public let name: String
+
+    public init(_ name: String) {
+        self.name = name
+    }
+}
+
+private protocol _UserDefaultsPrimitive {}
+
+extension String: _UserDefaultsPrimitive {}
+extension Int: _UserDefaultsPrimitive {}
+extension Bool: _UserDefaultsPrimitive {}
+extension Double: _UserDefaultsPrimitive {}
+extension Float: _UserDefaultsPrimitive {}
+extension Data: _UserDefaultsPrimitive {}
+extension Date: _UserDefaultsPrimitive {}
+
+public struct GroupStorage: @unchecked Sendable {
+    public static let shared: GroupStorage = {
         if let defaults = UserDefaults(suiteName: AppInformation.groupID) {
             return GroupStorage(store: defaults)
-        } else {
-            assertionFailure(
-                "UserDefaults suiteName \(AppInformation.groupID) is nil. Falling back to .standard. Check App Group entitlements for this target/scheme.",
-            )
-            return GroupStorage(store: .standard)
         }
+        return GroupStorage(store: .standard)
     }()
 
     public let store: UserDefaults
+    private let encoder: JSONEncoder
+    private let decoder: JSONDecoder
 
-    /// Injectable for tests or custom setups
-    public init(store: UserDefaults) {
+    public init(
+        store: UserDefaults,
+        encoder: JSONEncoder = .init(),
+        decoder: JSONDecoder = .init()
+    ) {
         self.store = store
+        self.encoder = encoder
+        self.decoder = decoder
     }
+}
 
-    @usableFromInline
-    static let defaultEncoder: JSONEncoder = .init()
-    @usableFromInline
-    static let defaultDecoder: JSONDecoder = .init()
-
-    // MARK: - Delete
-
-    @inlinable
-    public func delete(for key: GroupStorageKey) {
-        store.removeObject(forKey: key.value)
-    }
-
-    @usableFromInline
-    func setOrDelete(_ value: Any?, for key: GroupStorageKey) {
-        if let value {
-            store.set(value, forKey: key.value)
-        } else {
-            delete(for: key)
-        }
-    }
-
-    // MARK: - Save
-
-    @inlinable
-    public func save(_ value: String?, for key: GroupStorageKey) {
-        setOrDelete(value, for: key)
-    }
-
-    @inlinable
-    public func save(_ value: Int?, for key: GroupStorageKey) {
-        setOrDelete(value, for: key)
-    }
-
-    @inlinable
-    public func save(_ value: Float?, for key: GroupStorageKey) {
-        setOrDelete(value, for: key)
-    }
-
-    @inlinable
-    public func save(_ value: Double?, for key: GroupStorageKey) {
-        setOrDelete(value, for: key)
-    }
-
-    @inlinable
-    public func save(_ value: Bool?, for key: GroupStorageKey) {
-        setOrDelete(value, for: key)
-    }
-
-    @inlinable
-    public func save(_ value: Any?, for key: GroupStorageKey) {
-        setOrDelete(value, for: key)
-    }
-
-    @inlinable
-    public func save(
-        _ value: (some Encodable)?,
-        for key: GroupStorageKey,
-        encoder: JSONEncoder = GroupStorage.defaultEncoder,
+public extension GroupStorage {
+    func set<Value: Encodable>(
+        _ value: Value?,
+        for key: StorageKey<Value>
     ) {
         guard let value else {
-            delete(for: key)
+            store.removeObject(forKey: key.name)
+            return
+        }
+
+        if let primitive = value as? any _UserDefaultsPrimitive {
+            store.set(primitive, forKey: key.name)
             return
         }
 
         do {
             let data = try encoder.encode(value)
-            store.set(data, forKey: key.value)
+            store.set(data, forKey: key.name)
         } catch {
-            assertionFailure("Failed to encode value for key \(key.value): \(error)")
+            store.removeObject(forKey: key.name)
         }
     }
 
-    // MARK: - Get
+    func get<Value: Decodable>(
+        _ key: StorageKey<Value>
+    ) -> Value? {
+        if Value.self is any _UserDefaultsPrimitive.Type {
+            return store.object(forKey: key.name) as? Value
+        }
 
-    public func string(for key: GroupStorageKey) -> String? {
-        store.string(forKey: key.value)
-    }
-
-    /// Use object(forKey:) to preserve “missing” vs default(0/false)
-    public func integer(for key: GroupStorageKey) -> Int? {
-        store.object(forKey: key.value) as? Int
-    }
-
-    public func float(for key: GroupStorageKey) -> Float? {
-        store.object(forKey: key.value) as? Float
-    }
-
-    public func double(for key: GroupStorageKey) -> Double? {
-        store.object(forKey: key.value) as? Double
-    }
-
-    public func bool(for key: GroupStorageKey) -> Bool? {
-        store.object(forKey: key.value) as? Bool
-    }
-
-    @inlinable
-    public func data(for key: GroupStorageKey) -> Data? {
-        store.data(forKey: key.value)
-    }
-
-    public func object<T>(for key: GroupStorageKey) -> T? {
-        store.object(forKey: key.value) as? T
-    }
-
-    @inlinable
-    public func codable<T: Decodable>(
-        _ type: T.Type,
-        for key: GroupStorageKey,
-        decoder: JSONDecoder = GroupStorage.defaultDecoder,
-    ) -> T? {
-        guard let data = data(for: key) else {
+        guard let data = store.data(forKey: key.name) else {
             return nil
         }
 
         do {
-            return try decoder.decode(type, from: data)
+            return try decoder.decode(Value.self, from: data)
         } catch {
-            assertionFailure("Failed to decode value for key \(key.value): \(error)")
             return nil
         }
     }
 
-    // MARK: - Requiring values
-
-    public func requireString(for key: GroupStorageKey) throws -> String {
-        if let value = string(for: key) {
+    func require<Value: Decodable>(
+        _ key: StorageKey<Value>
+    ) throws -> Value {
+        if let value = get(key) {
             return value
         }
-        throw MissingValueError(key: key)
+        throw MissingValueError(key: key.name)
     }
 
-    @inlinable
-    public func requireCodable<T: Decodable>(
-        _ type: T.Type,
-        for key: GroupStorageKey,
-        decoder: JSONDecoder = GroupStorage
-            .defaultDecoder,
-    ) throws -> T {
-        if let value = codable(type, for: key, decoder: decoder) {
-            return value
-        }
-        throw MissingValueError(key: key)
+    func delete<Value>(
+        _ key: StorageKey<Value>
+    ) {
+        store.removeObject(forKey: key.name)
+    }
+}
+
+public extension GroupStorage {
+    func save<Value: Encodable>(
+        _ value: Value?,
+        for key: GroupStorageKey
+    ) {
+        let storageKey = StorageKey<Value>(key.value)
+        set(value, for: storageKey)
     }
 
-    public struct MissingValueError: Error, CustomStringConvertible {
-        public let key: GroupStorageKey
+    func codable<Value: Decodable>(
+        _ type: Value.Type,
+        for key: GroupStorageKey
+    ) -> Value? {
+        let storageKey = StorageKey<Value>(key.value)
+        return get(storageKey)
+    }
 
-        public init(key: GroupStorageKey) {
-            self.key = key
+    func string(for key: GroupStorageKey) -> String? {
+        store.string(forKey: key.value)
+    }
+
+    func integer(for key: GroupStorageKey) -> Int? {
+        guard store.object(forKey: key.value) != nil else {
+            return nil
         }
+        return store.integer(forKey: key.value)
+    }
+
+    func bool(for key: GroupStorageKey) -> Bool? {
+        guard store.object(forKey: key.value) != nil else {
+            return nil
+        }
+        return store.bool(forKey: key.value)
+    }
+
+    func double(for key: GroupStorageKey) -> Double? {
+        guard store.object(forKey: key.value) != nil else {
+            return nil
+        }
+        return store.double(forKey: key.value)
+    }
+
+    func data(for key: GroupStorageKey) -> Data? {
+        store.data(forKey: key.value)
+    }
+
+    func delete(for key: GroupStorageKey) {
+        store.removeObject(forKey: key.value)
+    }
+}
+
+public extension GroupStorage {
+    struct MissingValueError: Error, CustomStringConvertible {
+        public let key: String
 
         public var description: String {
-            "Missing value for key: \(key.value)"
+            "Missing value for key: \(key)"
         }
+    }
+}
+
+public actor GroupStorageActor {
+    private let storage: GroupStorage
+
+    public init(storage: GroupStorage = .shared) {
+        self.storage = storage
+    }
+
+    public func get<Value: Decodable>(_ key: StorageKey<Value>) -> Value? {
+        storage.get(key)
+    }
+
+    public func set<Value: Encodable>(_ value: Value?, for key: StorageKey<Value>) {
+        storage.set(value, for: key)
+    }
+
+    public func save<Value: Encodable>(_ value: Value?, for key: GroupStorageKey) {
+        storage.save(value, for: key)
+    }
+
+    public func delete<Value>(_ key: StorageKey<Value>) {
+        storage.delete(key)
+    }
+
+    public func delete(for key: GroupStorageKey) {
+        storage.delete(for: key)
     }
 }

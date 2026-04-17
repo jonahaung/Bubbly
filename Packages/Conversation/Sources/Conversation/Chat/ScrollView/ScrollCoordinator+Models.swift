@@ -5,6 +5,21 @@ import SwiftUI
 import XUI
 
 extension ScrollCoordinator {
+    struct PaginationState: Hashable {
+        let canLoadOlder: Bool
+        let canLoadNewer: Bool
+        let canAdjustSize: Bool
+
+        init(
+            canLoadOlder: Bool = false,
+            canLoadNewer: Bool = false,
+            canAdjustSize: Bool = false
+        ) {
+            self.canLoadOlder = canLoadOlder
+            self.canLoadNewer = canLoadNewer
+            self.canAdjustSize = canAdjustSize
+        }
+    }
     enum ScrollDirection: Sendable, Hashable {
         case up
         case down
@@ -12,39 +27,42 @@ extension ScrollCoordinator {
     }
 
     struct State: Hashable {
-        var updateState: ScrollViewUpdate
-        var geometry: VScrollGeometry
-        var phase: ScrollPhase
-        var isFirstResponder: Bool
-        var scrolledPosition: ScrolledPosition
+        var isFirstResponder = false
+        var updateState: ScrollViewUpdate = .initial
+        var geometry: VScrollGeometry = .empty
+        var phase: ScrollPhase = .idle
+        var scrolledPosition: ScrolledPosition = .none
+        var paginationState: PaginationState? = nil
     }
 
     enum Intent {
-        case onScrollGeometryChange(_ oldValue: VScrollGeometry, _ newValue: VScrollGeometry)
+        case onScrollGeometryChange(
+            _ oldValue: VScrollGeometry,
+            _ newValue: VScrollGeometry
+        )
         case onScrollPhaseChange(
             _ oldValue: ScrollPhase,
             _ newPhase: ScrollPhase,
             context: ScrollPhaseChangeContext,
         )
-        case onBottomBarFrameChage(_ oldValue: CGRect, _ newValue: CGRect)
     }
 
     enum DataUpdate: Sendable, Hashable {
-        case insert(edge: VerticalEdge)
-        case remove(edge: VerticalEdge)
-        case append(id: String)
+        case insert(_ edge: VerticalEdge)
+        case remove(_ edge: VerticalEdge)
+        case append(_ msgID: String)
+        case resetting(_ msgID: String)
     }
 
     enum ScrollViewUpdate: Hashable {
         case initial
         case didEndUpdates
-        case resetting
+        case resetting(_ msgID: String)
+        case willEndUpdates
         case willBeginUpdates
         case insertingItems(_ edge: VerticalEdge)
         case removingItems(_ edge: VerticalEdge)
         case appendingItem(_ id: String)
-
-        // MARK: Internal
 
         var hasViewLoaded: Bool {
             self != .initial

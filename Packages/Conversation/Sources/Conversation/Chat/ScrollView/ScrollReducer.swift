@@ -6,152 +6,144 @@ import SwiftUI
 import XUI
 
 // MARK: - ScrollReducer
-
 struct ScrollReducer {
-    typealias State = ScrollCoordinator.State
-    typealias Intent = ScrollCoordinator.Intent
-    typealias DataUpdate = ScrollCoordinator.DataUpdate
-
     enum Effect: Equatable {
-        case begingUpdate(DataUpdate)
-        case endUpdate(DataUpdate, scrollItem: ScrollPositionItem?)
-        case noAction
+        case begingUpdate(ScrollCoordinator.DataUpdate)
+        case endUpdate(
+            ScrollCoordinator.DataUpdate,
+            scrollItem: ScrollPositionItem?
+        )
     }
 }
-
 extension ScrollReducer {
-    func reduce(
-        state: State,
-        intent: Intent,
-        canLoadOlder: Bool,
-        canLoadNewer: Bool,
-        shouldAdjustWindow: Bool,
-    ) -> Effect {
-        switch intent {
-        case let .onScrollGeometryChange(old, new):
-            reduceGeometry(
-                state: state,
-                oldValue: old,
-                newValue: new,
-                canLoadOlder: canLoadOlder,
-                canLoadNewer: canLoadNewer,
-                shouldAdjustWindow: shouldAdjustWindow,
-            )
-        default:
-            .noAction
-        }
-    }
-}
-
-extension ScrollReducer {
-    private func reduceGeometry(
-        state: State,
+    func reduceGeometry(
+        state: ScrollCoordinator.ScrollViewUpdate,
         oldValue: VScrollGeometry,
         newValue: VScrollGeometry,
-        canLoadOlder: Bool,
-        canLoadNewer: Bool,
-        shouldAdjustWindow: Bool,
-    ) -> Effect {
-        if state.updateState.isUpdating {
-            return handleUpdating(state: state, oldValue: oldValue, newValue: newValue)
-        }
-
-        if newValue.offsetY != oldValue.offsetY,
-           state.phase == .interacting || state.phase == .decelerating
-        {
-            let direction: ScrollCoordinator.ScrollDirection =
-                newValue.offsetY > oldValue.offsetY ? .up : .down
-
-            return paginateIfNeeded(
-                direction: direction,
-                state,
-                newValue,
-                canLoadOlder,
-                canLoadNewer,
-                shouldAdjustWindow: shouldAdjustWindow,
+        paginationState: ScrollCoordinator.PaginationState
+    ) -> Effect? {
+        if state.isUpdating {
+            return handleUpdating(
+                state: state,
+                oldValue: oldValue,
+                newValue: newValue
             )
         }
-
-        return .noAction
+        if newValue.offsetY <= ChatLayoutConstants.paginationTrashold
+            && oldValue.offsetY > ChatLayoutConstants.paginationTrashold
+        {
+            if paginationState.canLoadOlder {
+                return .begingUpdate(.insert(.top))
+            }
+        }
+        let direction: ScrollCoordinator.ScrollDirection =
+            newValue.offsetY > oldValue.offsetY ? .up : .down
+        return paginateIfNeeded(
+            direction: direction,
+            state,
+            oldValue,
+            newValue,
+            paginationState: paginationState
+        )
     }
 
     private func paginateIfNeeded(
         direction: ScrollCoordinator.ScrollDirection,
-        _: State,
+        _: ScrollCoordinator.ScrollViewUpdate,
+        _ old: VScrollGeometry,
         _ new: VScrollGeometry,
-        _ canLoadOlder: Bool,
-        _ canLoadNewer: Bool,
-        shouldAdjustWindow: Bool,
-    ) -> Effect {
+        paginationState: ScrollCoordinator.PaginationState
+    ) -> Effect? {
         switch direction {
         case .down:
-            guard new.offsetY <= ChatLayoutConstants.paginationTrashold else {
-                return .noAction
+            if new.offsetY <= 0 {
+                if paginationState.canLoadOlder {
+                    return .begingUpdate(.insert(.top))
+                }
+                return paginationState.canAdjustSize
+                    ? .begingUpdate(.remove(.bottom)) : nil
             }
-
-            if canLoadOlder {
-                return .begingUpdate(
-                    shouldAdjustWindow ? .remove(edge: .bottom) : .insert(edge: .top),
-                )
-            }
-            return shouldAdjustWindow ? .begingUpdate(.remove(edge: .bottom)) : .noAction
-
+            return nil
         case .up:
             let atBottom =
-                new.offsetY.rounded() > (new.contentHeight - new.boundsHeight).rounded()
+                new.offsetY.rounded()
+                > (new.contentHeight - new.boundsHeight).rounded()
 
             guard atBottom else {
-                return .noAction
+                return nil
             }
 
-            if canLoadNewer {
+            if paginationState.canLoadNewer {
                 return .begingUpdate(
-                    shouldAdjustWindow ? .remove(edge: .top) : .insert(edge: .bottom),
+                    paginationState.canAdjustSize
+                        ? .remove(.top) : .insert(.bottom),
                 )
             }
 
-            return shouldAdjustWindow ? .begingUpdate(.remove(edge: .top)) : .noAction
+            return paginationState.canAdjustSize
+                ? .begingUpdate(.remove(.top)) : nil
 
         case .none:
-            return .noAction
+            return nil
         }
     }
 
-    private func handleUpdating(
-        state: State,
+    func handleUpdating(
+        state: ScrollCoordinator.ScrollViewUpdate,
         oldValue: VScrollGeometry,
         newValue: VScrollGeometry,
-    ) -> Effect {
+    ) -> Effect? {
         let diff = newValue.contentHeight - oldValue.contentHeight
-        guard diff != 0 else {
-            return .noAction
+        guard diff != 0 || state != .willEndUpdates else {
+            return nil
         }
-
-        switch state.updateState {
-        case let .insertingItems(edge):
+        switch state {
+        case .insertingItems(let edge):
             if edge == .top {
-                let y = diff + (newValue.offsetY - oldValue.offsetY) + ChatLayoutConstants
-                    .paginationTrashold
-                return .endUpdate(.insert(edge: edge), scrollItem: .y(y, properties: .scroll))
+                let y =
+                    diff
+                    + min(
+                        ChatLayoutConstants.paginationTrashold,
+                        max(0, newValue.offsetY)
+                    )
+                return .endUpdate(
+                    .insert(edge),
+                    scrollItem: .y(y, .notAnimated)
+                )
             }
-            return .endUpdate(.insert(edge: edge), scrollItem: nil)
+            return .endUpdate(.insert(edge), scrollItem: nil)
 
-        case let .removingItems(edge):
+        case .removingItems(let edge):
             if edge == .top {
-                let y = newValue.offsetY + diff + (newValue.offsetY - oldValue.offsetY)
-                return .endUpdate(.remove(edge: edge), scrollItem: .y(y, properties: .scroll))
+                let y =
+                    newValue.offsetY + diff
+                    + (newValue.offsetY - oldValue.offsetY)
+                return .endUpdate(.remove(edge), scrollItem: .y(y, .scroll))
             }
-            return .endUpdate(.remove(edge: .bottom), scrollItem: nil)
+            return .endUpdate(.remove(.bottom), scrollItem: nil)
 
-        case let .appendingItem(id):
-            let y = newValue.offsetY + diff + (newValue.offsetY - oldValue.offsetY)
+        case .appendingItem(let id):
+            if newValue.offsetY > newValue.bottomMostOffset - newValue
+                .boundsHeight * 2
+            {
+                return .endUpdate(
+                    .append(id),
+                    scrollItem: .edge(.bottom, .animated(.snappy)),
+                )
+            }
             return .endUpdate(
-                .append(id: id),
-                scrollItem: .y(y, properties: .animated(.easeOut(duration: 0.22))),
+                .append(id),
+                scrollItem: .id(id, .animated()),
             )
-
+        case .resetting(let msgID):
+            return .endUpdate(
+                .resetting(msgID),
+                scrollItem: .y(
+                    newValue.bottomMostOffset - (newValue.boundsHeight * 0.5)
+                )
+            )
         default:
-            return .noAction
+            return nil
         }
     }
 }

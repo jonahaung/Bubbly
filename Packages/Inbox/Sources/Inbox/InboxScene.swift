@@ -20,19 +20,20 @@ public struct InboxScene: View {
     }
 
     public var body: some View {
-        List {
-            ForEach(viewModel.state.items, id: \.msg) { item in
-                InboxCell(item: item) { _ in
-                    if let url = coordinator.deeplinkCoordinator
-                        .url(for: .conversation(id: item.conversation.uid))
-                    {
-                        openURL(url)
+        ScrollView {
+            LazyVStack(alignment: .leading) {
+                ScrollSection(data: viewModel.state.items) { item in
+                    InboxCell(item: item) {
+                        if let url = coordinator.deeplinkCoordinator
+                            .url(for: .conversation(conID: $0.conversation.uid))
+                        {
+                            openURL(url)
+                        }
                     }
                 }
             }
-            .onDelete { _ in
-            }
         }
+        .groupScrollViewStyle()
         .task {
             await viewModel.send(.appear(currentUser))
         }

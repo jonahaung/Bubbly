@@ -20,6 +20,8 @@ extension MsgRecipient {
             .sender
         case .incoming:
             .user
+        case .system:
+            .assistant
         }
     }
 }

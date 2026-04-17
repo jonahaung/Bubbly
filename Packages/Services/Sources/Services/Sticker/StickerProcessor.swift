@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import CoreImage.CIFilterBuiltins
 import PhotosUI
@@ -30,20 +28,26 @@ public nonisolated struct StickerProcessor: Sendable {
     }
 
     public func extractSticker(from data: Data) throws -> UIImage {
-        guard let uiImage = UIImage(data: data)
-        else { fatalError("Failed to create UIImage from data") }
-        guard let image = CIImage(data: data) else { return uiImage }
+        guard let uiImage = UIImage(data: data) else {
+            fatalError("Failed to create UIImage from data")
+        }
+
+        guard let image = CIImage(data: data) else {
+            return uiImage
+        }
 
         let handler = VNImageRequestHandler(ciImage: image)
         let request = VNGenerateForegroundInstanceMaskRequest()
 
         try handler.perform([request])
 
-        guard let result = request.results?.first else { return uiImage }
+        guard let result = request.results?.first else {
+            return uiImage
+        }
 
         let maskPixelBuffer = try result.generateScaledMaskForImage(
             forInstances: IndexSet(result.allInstances.filter { $0 != 0 }),
-            from: handler
+            from: handler,
         )
         let mask = CIImage(cvPixelBuffer: maskPixelBuffer)
         let extent = mask.extent
@@ -53,26 +57,27 @@ public nonisolated struct StickerProcessor: Sendable {
 
         let dilatedMask = mask
             .applyingFilter("CIMorphologyMaximum", parameters: [
-                "inputRadius": scaledRadius
+                "inputRadius": scaledRadius,
             ])
 
         let whiteBackground = CIImage(color: .white)
             .cropped(to: extent)
             .applyingFilter("CIBlendWithMask", parameters: [
-                "inputMaskImage": dilatedMask
+                "inputMaskImage": dilatedMask,
             ])
 
         let subject = image
             .applyingFilter("CIBlendWithMask", parameters: [
-                "inputMaskImage": mask
+                "inputMaskImage": mask,
             ])
 
         let sticker = subject.composited(over: whiteBackground)
         guard let cgImage = CIContext()
-            .createCGImage(sticker, from: sticker.extent)
-        else {
+            .createCGImage(sticker, from: sticker.extent) else
+        {
             return uiImage
         }
+
         return UIImage(cgImage: cgImage, scale: 0.5, orientation: uiImage.imageOrientation)
     }
 }

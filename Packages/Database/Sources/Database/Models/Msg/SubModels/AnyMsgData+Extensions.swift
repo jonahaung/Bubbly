@@ -4,19 +4,33 @@ import Core
 import Foundation
 
 public extension AnyMsgData {
-    static func parse(from userInfo: [AnyHashable: Any]) throws -> AnyMsgData? {
-        guard let string = userInfo["message"] as? String,
-              let currentUserID = GroupStorage.shared.string(for: .auth(.currentUserID)) else
-        {
-            return nil
+    enum ParseError: Error {
+        case missingEncryptedMessage
+        case currentUserIDUnavailable
+        case invalidDecryptedPayload
+    }
+
+    static func parse(from userInfo: [AnyHashable: Any]) throws -> AnyMsgData {
+        let encryptedMessage: String
+        if let string = userInfo["message"] as? String {
+            encryptedMessage = string
+        } else if let string = userInfo["message"] as? NSString {
+            encryptedMessage = string as String
+        } else {
+            throw ParseError.missingEncryptedMessage
+        }
+
+        guard let currentUserID else {
+            throw ParseError.currentUserIDUnavailable
         }
 
         let decrypted = try CryptoService.shared.decrypt(
-            payloadString: string,
+            payloadString: encryptedMessage,
             currentUserID: currentUserID,
         )
+
         guard let data = decrypted.data(using: .utf8) else {
-            return nil
+            throw ParseError.invalidDecryptedPayload
         }
 
         return try JSONDecoder().decode(

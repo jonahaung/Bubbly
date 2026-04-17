@@ -9,25 +9,21 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
 
     // MARK: - Storage
 
-    @usableFromInline
-    var buffer: [Element?]
-
-    @usableFromInline
-    var head: Int = 0
-
+    @usableFromInline var buffer: [Element?]
+    @usableFromInline var head: Int = 0
     public private(set) var count: Int = 0
 
-    // MARK: - Init
+    
 
     public init(_ capacity: Int = 16) {
         buffer = Array(repeating: nil, count: Swift.max(1, capacity))
     }
 
-    public init<S: Sequence>(_ sequence: S) where S.Element == Element {
+    public init(_ sequence: some Sequence<Element>) {
         let elements = Array(sequence)
         buffer = Array(repeating: nil, count: Swift.max(1, elements.count))
-        for element in elements {
-            enqueue(element)
+        for e in elements {
+            enqueue(e)
         }
     }
 
@@ -60,7 +56,7 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
         }
     }
 
-    // MARK: - Properties
+    
 
     public var isEmpty: Bool {
         count == 0
@@ -79,28 +75,43 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
     }
 
     public var back: Element? {
-        guard !isEmpty else { return nil }
+        guard !isEmpty else {
+            return nil
+        }
         return buffer[physicalIndex(count - 1)]
     }
 
     // MARK: - Core Operations
 
-    public mutating func enqueue(_ element: Element) {
+    @inline(__always)
+    public mutating func enqueue(_ element: Element, atFront: Bool = false) {
         ensureCapacityForInsert()
-        buffer[physicalIndex(count)] = element
+        if atFront {
+            head = previousIndex(head)
+            buffer[head] = element
+        }
+        else {
+            buffer[physicalIndex(count)] = element
+        }
         count += 1
     }
 
+    @inline(__always)
     public mutating func enqueueFront(_ element: Element) {
-        ensureCapacityForInsert()
-        head = previousIndex(head)
-        buffer[head] = element
-        count += 1
+        enqueue(element, atFront: true)
+    }
+
+    @inline(__always)
+    public mutating func enqueueBack(_ element: Element) {
+        enqueue(element, atFront: false)
     }
 
     @discardableResult
+    @inline(__always)
     public mutating func dequeue() -> Element? {
-        guard !isEmpty else { return nil }
+        guard !isEmpty else {
+            return nil
+        }
         let element = buffer[head]
         buffer[head] = nil
         head = nextIndex(head)
@@ -109,8 +120,11 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
     }
 
     @discardableResult
+    @inline(__always)
     public mutating func dequeueBack() -> Element? {
-        guard !isEmpty else { return nil }
+        guard !isEmpty else {
+            return nil
+        }
         let index = physicalIndex(count - 1)
         let element = buffer[index]
         buffer[index] = nil
@@ -126,10 +140,11 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
 
     public mutating func removeAll(keepingCapacity: Bool = false) {
         if keepingCapacity {
-            for i in 0..<buffer.count {
+            for i in 0 ..< buffer.count {
                 buffer[i] = nil
             }
-        } else {
+        }
+        else {
             buffer = Array(repeating: nil, count: 16)
         }
         head = 0
@@ -160,6 +175,7 @@ private extension Deque {
         (head + logicalIndex) % buffer.count
     }
 
+    @inline(__always)
     mutating func ensureCapacityForInsert() {
         if count == buffer.count {
             resize()
@@ -170,7 +186,7 @@ private extension Deque {
         let newCapacity = buffer.count << 1
         var newBuffer = [Element?](repeating: nil, count: newCapacity)
 
-        for i in 0..<count {
+        for i in 0 ..< count {
             newBuffer[i] = buffer[physicalIndex(i)]
         }
 

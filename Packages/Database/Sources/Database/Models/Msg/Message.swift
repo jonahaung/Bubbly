@@ -22,6 +22,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
     public var deliveryStatus: DeliveryStatus
     public var attachments: [Attachment]
     public var reactions: [Reaction]
+    public let isSender: Bool
 
     public init(
         uid: String,
@@ -41,6 +42,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         self.deliveryStatus = deliveryStatus
         self.attachments = attachments
         self.reactions = reactions
+        self.isSender = senderID == currentUserID
     }
 
     public init(_ rMsg: RMsg) {
@@ -62,10 +64,6 @@ public extension Message {
         senderID == currentUserID
             ? .outgoing
             : .incoming
-    }
-
-    var isSender: Bool {
-        senderID == currentUserID
     }
 }
 

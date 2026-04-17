@@ -1,6 +1,6 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
+
+// MARK: - PlaygroundTaskKey
 
 enum PlaygroundTaskKey: Hashable {
     case appear
@@ -8,8 +8,10 @@ enum PlaygroundTaskKey: Hashable {
     case submit
 }
 
+// MARK: - PlaygroundTaskRegistry
+
 actor PlaygroundTaskRegistry {
-    private var tasks = [PlaygroundTaskKey: Task<Void, Never>]()
+    private var tasks: [PlaygroundTaskKey: Task<Void, Never>] = [:]
 
     func run(key: PlaygroundTaskKey, operation: @escaping @Sendable () async -> Void) {
         tasks[key]?.cancel()

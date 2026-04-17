@@ -13,7 +13,7 @@ public struct AnimatedButton<Label: View>: View {
     public init(
         _ alignment: HorizontalAlignment,
         action: @escaping () -> Void,
-        @ViewBuilder label: @escaping () -> Label
+        @ViewBuilder label: @escaping () -> Label,
     ) {
         self.label = label
         self.action = action
@@ -25,8 +25,8 @@ public struct AnimatedButton<Label: View>: View {
             withAnimation(
                 .interpolatingSpring(
                     stiffness: 170,
-                    damping: 10
-                )
+                    damping: 10,
+                ),
             ) {
                 animate.toggle()
             } completion: {

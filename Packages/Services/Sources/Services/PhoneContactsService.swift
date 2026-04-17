@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Contacts
 import Database
@@ -8,45 +6,61 @@ import Foundation
 @preconcurrency import PhoneNumberKit
 import XUI
 
-public final class PhoneContactsService {
-    public nonisolated(unsafe) static let shared = PhoneContactsService()
+public enum ContactError: Error {
+    case permissionDenied
+}
 
-    private var isSyncing = false
+public actor PhoneContactsService {
+    public static let shared: PhoneContactsService = .init()
 
-    public func fetchContacts() async throws -> [Contact] {
-        let contactStore = CNContactStore()
-        let keysToFetch: [CNKeyDescriptor] = [
-            CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
-            CNContactPhoneNumbersKey as CNKeyDescriptor,
-            CNContactThumbnailImageDataKey as CNKeyDescriptor
-        ]
+	private let store = CNContactStore()
 
-        let allContainers = try contactStore.containers(matching: nil)
-        var results: [CNContact] = []
+	public init() {}
 
-        for container in allContainers {
-            let fetchPredicate = CNContact.predicateForContactsInContainer(
-                withIdentifier: container.identifier
-            )
-            let containerResults = try contactStore.unifiedContacts(
-                matching: fetchPredicate,
-                keysToFetch: keysToFetch
-            )
-            results.append(contentsOf: containerResults)
-        }
+	public func fetchContacts() async throws -> [Contact] {
+		try await requestAccess()
 
-        var seenMobiles = Set<String>()
-        let mapped = results.compactMap { Contact(cnContact: $0) }
-        return mapped.filter { contact in
-            guard !contact.mobile.isEmpty else { return false }
-            return seenMobiles.insert(contact.mobile).inserted
-        }
-    }
+		let keys: [CNKeyDescriptor] = [
+			CNContactFormatter.descriptorForRequiredKeys(for: .fullName),
+			CNContactPhoneNumbersKey as CNKeyDescriptor,
+			CNContactThumbnailImageDataKey as CNKeyDescriptor
+		]
 
+		var seen = Set<String>()
+		var results: [Contact] = []
+
+		let request = CNContactFetchRequest(keysToFetch: keys)
+
+		try store.enumerateContacts(with: request) { cn, _ in
+			guard let c = Contact(cnContact: cn),
+				  seen.insert(c.mobile).inserted
+			else { return }
+
+			results.append(c)
+		}
+
+		return results
+	}
+
+	private func requestAccess() async throws {
+		try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
+			store.requestAccess(for: .contacts) { granted, error in
+				if let error {
+					cont.resume(throwing: error)
+					return
+				}
+				guard granted else {
+					cont.resume(throwing: ContactError.permissionDenied)
+					return
+				}
+				cont.resume(returning: ())
+			}
+		}
+	}
     @discardableResult
     @concurrent
     public func syncContacts() async throws -> [Contact] {
-        let phoneContacts = try await fetchContacts()
+		let phoneContacts = try await fetchContacts()
         let phoneNumberKit = PhoneNumberKit()
         let dbContact = await Store.shared.contactStore
         let contacts: [Contact?] = try await AsyncOrderedStream
@@ -56,7 +70,7 @@ public final class PhoneContactsService {
                 let remoteContact: Contact? = try await FirestoreRepo.getModel(
                     for: formattedNumber,
                     collection: .users,
-                    field: .mobile
+                    field: .mobile,
                 )
                 if var remoteContact {
                     remoteContact.name = phoneContact.name

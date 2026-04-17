@@ -14,7 +14,10 @@ public extension Color {
 	static let primaryText = Color(.primaryText)
 	static let secondaryText = Color(.secondaryText)
 	static let tertiaryText = Color(.tertiaryText)
+    static let quaternaryText = Color(.quaternaryText)
+    static let quinaryText = Color(.quinaryText)
 	static let border = Color(.border)
 	static let shadow = Color(.shadow)
-	static let container = Color(.tertiarySystemBackground)
+    static let container = Color(.primary)
+    
 }

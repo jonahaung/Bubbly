@@ -13,7 +13,7 @@ public protocol ScrollViewPrefetcherDelegate: AnyObject {
 
 @MainActor
 public final class ScrollViewPrefetcher {
-    // MARK: - Properties
+    
 
     private let windowSize: Int
     public weak var delegate: ScrollViewPrefetcherDelegate?
@@ -24,7 +24,7 @@ public final class ScrollViewPrefetcher {
     private var prefetchWindow: Range<Int> = 0..<0
     private var isRefreshScheduled = false
 
-    // MARK: - Init
+    
 
     public init(windowSize: Int = 12) {
         self.windowSize = windowSize

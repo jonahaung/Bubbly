@@ -1,0 +1,119 @@
+import Database
+import Observation
+import Services
+
+@MainActor
+@Observable
+final class ContactListViewModel {
+    private(set) var state: ContactListViewState
+
+    private let reducer: ContactListReducer
+    private let taskRegistry = ContactListTaskRegistry()
+    private let loadUseCase: LoadContactListUseCase
+    private let refreshUseCase: RefreshContactListUseCase
+    private let syncContactsUseCase: SyncContactListContactsUseCase
+    private let syncGroupsUseCase: SyncContactListGroupsUseCase
+
+    init(
+        currentUserRepository: CurrentUserRepository,
+        reducer: ContactListReducer = ContactListReducerImpl()
+    ) {
+        self.reducer = reducer
+        let manager = ContactListManager()
+        let repository = ContactListRepositoryImpl(
+            manager: manager,
+            currentUserRepository: currentUserRepository
+        )
+        self.loadUseCase = LoadContactListUseCaseImpl(repository: repository)
+        self.refreshUseCase = RefreshContactListUseCaseImpl(repository: repository)
+        self.syncContactsUseCase = SyncContactListContactsUseCaseImpl(repository: repository)
+        self.syncGroupsUseCase = SyncContactListGroupsUseCaseImpl(repository: repository)
+        self.state = .init(
+            searchText: "",
+            contacts: [],
+            groups: [],
+            sections: [],
+            isLoading: false,
+            error: nil
+        )
+    }
+
+    func send(_ intent: ContactListIntent) async {
+        switch intent {
+        case .appear:
+            await taskRegistry.run(key: .appear) { [weak self] in
+                guard let self else { return }
+                await self.load()
+            }
+        case .refresh:
+            await taskRegistry.run(key: .refresh) { [weak self] in
+                guard let self else { return }
+                await self.refresh()
+            }
+        case .setSearchText(let value):
+            dispatch(.setSearchText(value))
+        case .syncContacts:
+            await taskRegistry.run(key: .syncContacts) { [weak self] in
+                guard let self else { return }
+                await self.syncContacts()
+            }
+        case .syncGroups:
+            await taskRegistry.run(key: .syncGroups) { [weak self] in
+                guard let self else { return }
+                await self.syncGroups()
+            }
+        }
+    }
+
+    private func load() async {
+        dispatch(.setLoading(true))
+        dispatch(.setError(nil))
+        do {
+            let snapshot = try await loadUseCase.execute()
+            dispatch(.applySnapshot(snapshot))
+        } catch {
+            dispatch(.setLoading(false))
+            dispatch(.setError(error.localizedDescription))
+        }
+    }
+
+    private func refresh() async {
+        dispatch(.setLoading(true))
+        dispatch(.setError(nil))
+        do {
+            let snapshot = try await refreshUseCase.execute()
+            dispatch(.applySnapshot(snapshot))
+        } catch {
+            dispatch(.setLoading(false))
+            dispatch(.setError(error.localizedDescription))
+        }
+    }
+
+    private func syncContacts() async {
+        dispatch(.setLoading(true))
+        dispatch(.setError(nil))
+        do {
+            let snapshot = try await syncContactsUseCase.execute()
+            dispatch(.applySnapshot(snapshot))
+        } catch {
+            dispatch(.setLoading(false))
+            dispatch(.setError(error.localizedDescription))
+        }
+    }
+
+    private func syncGroups() async {
+        dispatch(.setLoading(true))
+        dispatch(.setError(nil))
+        do {
+            let snapshot = try await syncGroupsUseCase.execute()
+            dispatch(.applySnapshot(snapshot))
+        } catch {
+            dispatch(.setLoading(false))
+            dispatch(.setError(error.localizedDescription))
+        }
+    }
+
+    private func dispatch(_ action: ContactListAction) {
+        reducer.reduce(state: &state, action: action)
+    }
+}

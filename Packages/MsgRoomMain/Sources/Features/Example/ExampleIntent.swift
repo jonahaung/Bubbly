@@ -1,6 +1,4 @@
-//
-//  Created by Aung Ko Min on 9/4/26.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 

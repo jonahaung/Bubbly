@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Photos
 
@@ -10,16 +8,18 @@ public extension Permission {
     }
 }
 
-public class PhotoLibraryPermission: Permission {
-    open var kind: PermissionKind {
+// MARK: - PhotoLibraryPermission
+
+public final class PhotoLibraryPermission: Permission {
+    public var kind: PermissionKind {
         .photoLibrary
     }
 
-    open var fullAccessUsageDescriptionKey: String? {
+    public var fullAccessUsageDescriptionKey: String? {
         "NSPhotoLibraryUsageDescription"
     }
 
-    open var addingOnlyUsageDescriptionKey: String? {
+    public var addingOnlyUsageDescriptionKey: String? {
         "NSPhotoLibraryAddUsageDescription"
     }
 

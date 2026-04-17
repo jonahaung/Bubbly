@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - MockDependencyContainer
 
 public final class MockDependencyContainer: DependencyContainer {
     public let currentUserRepository: CurrentUserRepository
@@ -10,12 +10,14 @@ public final class MockDependencyContainer: DependencyContainer {
 
     public init(
         currentUserRepository: CurrentUserRepository,
-        contactsRepository: any ContactsRepositoryProtocol
+        contactsRepository: any ContactsRepositoryProtocol,
     ) {
         self.currentUserRepository = currentUserRepository
         self.contactsRepository = contactsRepository
     }
 }
+
+// MARK: - XEnvironment
 
 public enum XEnvironment: Sendable {
     case development
@@ -46,9 +48,9 @@ public enum XEnvironment: Sendable {
 
     public static var current: XEnvironment {
         #if DEBUG
-        .development
+            .development
         #else
-        .production
+            .production
         #endif
     }
 }

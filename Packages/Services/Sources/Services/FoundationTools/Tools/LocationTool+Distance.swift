@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import CoreLocation
 import FoundationModels
@@ -10,8 +8,8 @@ extension LocationTool {
         guard let lat1 = arguments.latitude,
               let lon1 = arguments.longitude,
               let lat2 = arguments.latitude2,
-              let lon2 = arguments.longitude2
-        else {
+              let lon2 = arguments.longitude2 else
+        {
             return createErrorOutput(error: LocationError.missingCoordinates)
         }
 
@@ -35,7 +33,7 @@ extension LocationTool {
             "formattedDistance": formatDistance(distance),
             "bearing": bearing,
             "direction": direction,
-            "message": "Distance: \(formatDistance(distance)) \(direction)"
+            "message": "Distance: \(formatDistance(distance)) \(direction)",
         ])
     }
 
@@ -69,7 +67,7 @@ extension LocationTool {
     func compassDirection(from bearing: Double) -> String {
         let directions = [
             "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-            "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"
+            "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW",
         ]
         let index = Int((bearing + 11.25) / 22.5) % 16
         return directions[index]

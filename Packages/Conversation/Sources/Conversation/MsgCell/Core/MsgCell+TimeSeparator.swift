@@ -8,34 +8,116 @@ import XUI
 
 extension MsgCell {
     struct TimeSeparator: View {
-        // MARK: Internal
+        
 
         var body: some View {
-            ZStack {
-                if viewModel.state.isVisible {
-                    let date = viewModel.state.date
-                    Text(
-                        date, format: date.isInToday ? .dateTime
-                            .hour()
-                            .minute() : .dateTime
-                            .day()
-                            .weekday(.abbreviated)
-                            .hour()
-                            .minute(),
-                    )
-                    .font(.system(size: UIFont.systemFontSize - 1, weight: .medium))
-                    .foregroundStyle(Color.secondaryText)
-                    .equatable(by: date)
+            let date = viewModel.state.date
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+                if date.isInToday {
+                    Text(date, style: .time)
+                        .font(boldFont)
+                } else {
+                    if date.isInThisWeek {
+                        if viewModel.state.isSender {
+                            Text(
+                                date,
+                                format: .dateTime.weekday(.wide),
+                            )
+                            .font(normalFont)
+
+                            Text(date, style: .time)
+                                .font(boldFont)
+                        } else {
+                            Text(date, style: .time)
+                                .font(boldFont)
+                            Text(
+                                date,
+                                format: .dateTime.weekday(.wide),
+                            )
+                            .font(normalFont)
+                        }
+                    } else {
+                        if date.isInThisMonth {
+                            if viewModel.state.isSender {
+                                Text(date, style: .time)
+                                    .font(boldFont)
+                                Text(
+                                    date,
+                                    format: .dateTime.day(.defaultDigits)
+                                        .month(),
+                                ).font(normalFont)
+
+                            } else {
+                                Text(
+                                    date,
+                                    format: .dateTime.day(.defaultDigits)
+                                        .month(),
+                                ).font(normalFont)
+                                Text(date, style: .time)
+                                    .font(boldFont)
+                            }
+
+                        } else {
+                            if viewModel.state.isSender {
+                                Text(date, style: .time)
+                                    .font(boldFont)
+
+                                Text(
+                                    date,
+                                    format: .dateTime.day(.defaultDigits)
+                                        .month()
+                                        .year(),
+                                ).font(normalFont)
+                            } else {
+                                Text(
+                                    date,
+                                    format: .dateTime.day(.defaultDigits)
+                                        .month()
+                                        .year(),
+                                ).font(normalFont)
+                                Text(date, style: .time)
+                                    .font(boldFont)
+                            }
+                        }
+                    }
                 }
             }
-            .flexible(.horizontal)
-            .frame(height: ChatLayoutConstants.Cell.timeSeparatorHeight)
+            .foregroundStyle(Color.quinaryText)
+            .padding(
+                viewModel.state.isSender ? .trailing : .leading,
+                Padding.sm,
+            )
+            .padding(.horizontal, Padding.xl)
+            .lineHeight(.multiple(factor: 1.2))
+            .frame(
+                height: ChatLayoutConstants.Cell.timeSeparatorHeight,
+                alignment: .bottom,
+            )
             .allowsHitTesting(false)
-            .equatable(by: viewModel.state)
+            .equatable(by: viewModel.id)
         }
 
-        // MARK: Private
+        
 
         @Environment(MsgCellViewModel.self) private var viewModel
+
+        private var boldFont: Font {
+            Font.system(
+                size: UIFont.preferredFont(forTextStyle: .title1).pointSize,
+                weight: .semibold,
+                design: .serif,
+            )
+            .width(.compressed)
+            .smallCaps()
+        }
+
+        private var normalFont: Font {
+            Font.system(
+                size: UIFont.systemFontSize,
+                weight: .regular,
+                design: .default,
+            )
+            .width(.condensed)
+        }
     }
 }

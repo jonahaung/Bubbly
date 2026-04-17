@@ -4,7 +4,7 @@ import Core
 import SwiftUI
 
 struct ReactionBar: View {
-    // MARK: Internal
+    
 
     var body: some View {
         HStack(spacing: Spacing.sm) {
@@ -46,7 +46,7 @@ struct ReactionBar: View {
         .tint(Color.darkGray)
     }
 
-    // MARK: Private
+    
 
     @State private var heartReactionCount = 0
     @State private var upReactionCount = 0

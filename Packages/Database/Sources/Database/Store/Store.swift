@@ -60,11 +60,11 @@ public final actor Store: Sendable {
     }
 
     public func destory() {
-        try? modelContainer?.erase()
-        appContainer = nil
-        msgStore = nil
-        contactStore = nil
-        groupStore = nil
-        conversationPropertiesStore = nil
+//        try? modelContainer?.erase()
+//        appContainer = nil
+//        msgStore = nil
+//        contactStore = nil
+//        groupStore = nil
+//        conversationPropertiesStore = nil
     }
 }

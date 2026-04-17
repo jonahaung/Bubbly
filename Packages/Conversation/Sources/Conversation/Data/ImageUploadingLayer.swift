@@ -9,7 +9,7 @@ import VideoLoader
 import XUI
 
 struct ImageUploadingLayer: View {
-    // MARK: Internal
+    
 
     let attachment: Attachment
     let url: URL
@@ -35,7 +35,7 @@ struct ImageUploadingLayer: View {
         }
     }
 
-    // MARK: Private
+    
 
     @Environment(\.isVisible) private var viewIsVisible
     @State private var progress: ImageTask.Progress?

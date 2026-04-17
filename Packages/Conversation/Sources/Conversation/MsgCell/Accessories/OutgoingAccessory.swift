@@ -7,7 +7,7 @@ import SwiftUI
 
 extension MsgCell {
     struct OutgoingAccessory: View {
-        // MARK: Internal
+        
 
         var body: some View {
             if viewModel.state.isSender, let namespace {
@@ -25,7 +25,7 @@ extension MsgCell {
                                 .scaledToFit()
                                 .symbolEffect(
                                     .rotate,
-                                    options: .repeat(.periodic), value: viewModel.state.isVisible,
+                                    options: .repeat(.periodic), value: viewModel.isVisible,
                                 )
                         case .sendingFailed:
                             Image(systemName: "exclamationmark.circle")
@@ -42,7 +42,7 @@ extension MsgCell {
                     .symbolRenderingMode(.palette)
                 }
                 .frame(width: 12)
-                .padding(.trailing, 8)
+//                .padding(.trailing, Padding.md)
                 .allowsHitTesting(false)
                 .matchedGeometryEffect(
                     id: viewModel.id,
@@ -50,10 +50,11 @@ extension MsgCell {
                     anchor: .leading,
                     isSource: true,
                 )
+                .geometryGroup()
             }
         }
 
-        // MARK: Private
+        
 
         @Environment(MsgCellViewModel.self) private var viewModel
         @Environment(\.sharedNamespace) private var namespace

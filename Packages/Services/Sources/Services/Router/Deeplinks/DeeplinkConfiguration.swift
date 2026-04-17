@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 
@@ -14,7 +12,7 @@ public struct DeeplinkConfiguration: Sendable, Equatable {
         scheme: String,
         supportedVersions: Set<String> = ["v1"],
         universalLinkHosts: Set<String> = [],
-        queryValidation: QueryValidationMode = .permissive
+        queryValidation: QueryValidationMode = .permissive,
     ) {
         self.scheme = scheme
         self.supportedVersions = supportedVersions

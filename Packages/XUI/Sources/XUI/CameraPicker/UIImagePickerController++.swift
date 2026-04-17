@@ -20,7 +20,7 @@ extension UIImagePickerController {
 
 		fixCannotMoveEditingBox()
 	}
-
+ 
 	private func fixCannotMoveEditingBox() {
 		if let cropView, let scrollView, scrollView.contentOffset.y == 0 {
 			let top = cropView.frame.minY + view.frame.minY

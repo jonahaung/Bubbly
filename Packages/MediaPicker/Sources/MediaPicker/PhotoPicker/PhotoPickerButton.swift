@@ -14,7 +14,7 @@ public struct PhotoPickerButton<Content: View>: View {
     @ViewBuilder private var content: () -> Content
     @Binding private var pickedPhoto: PickedPhoto?
 
-    // MARK: - Init
+    
 
     public init(
         pickedPhoto: Binding<PickedPhoto?>,

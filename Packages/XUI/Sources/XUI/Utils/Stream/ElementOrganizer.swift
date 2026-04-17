@@ -50,15 +50,18 @@ public final class ElementOrganizer<Element> {
             buffer[current] = elements
 
             return .next(element)
-        } else if finished.contains(current) {
+        }
+        else if finished.contains(current) {
             buffer.removeValue(forKey: current)
             finished.remove(current)
             current += 1
 
             return .none
-        } else if !buffer.isEmpty || !finished.isEmpty {
+        }
+        else if !buffer.isEmpty || !finished.isEmpty {
             return .none
-        } else {
+        }
+        else {
             return .ended
         }
     }

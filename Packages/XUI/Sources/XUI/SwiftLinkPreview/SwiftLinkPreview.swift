@@ -20,7 +20,7 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
     /// We keep a session with a delegate to force GET on redirects.
     public private(set) var session: URLSession
 
-    // MARK: - Init
+    
 
     public init(
         session: URLSession? = nil,

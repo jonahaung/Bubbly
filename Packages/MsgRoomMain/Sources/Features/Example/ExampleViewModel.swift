@@ -1,6 +1,4 @@
-//
-//  Created by Aung Ko Min on 9/4/26.
-//
+// © 2026 Aung Ko Min
 
 import Observation
 
@@ -10,7 +8,7 @@ final class ExampleViewModel {
     private(set) var state: ExampleViewState
 
     private let reducer: ExampleReducer
-    private let taskRegistry = ExampleTaskRegistry()
+    private let taskRegistry: ExampleTaskRegistry = .init()
     private let loadUseCase: LoadExampleUseCase
     private let refreshUseCase: RefreshExampleUseCase
     private let submitUseCase: SubmitExampleUseCase
@@ -19,28 +17,37 @@ final class ExampleViewModel {
         self.reducer = reducer
         let manager = ExampleManager()
         let repository = ExampleRepositoryImpl(manager: manager)
-        self.loadUseCase = LoadExampleUseCaseImpl(repository: repository)
-        self.refreshUseCase = RefreshExampleUseCaseImpl(repository: repository)
-        self.submitUseCase = SubmitExampleUseCaseImpl(repository: repository)
-		self.state = .init(isLoading: false, error: nil, items: nil)
+        loadUseCase = LoadExampleUseCaseImpl(repository: repository)
+        refreshUseCase = RefreshExampleUseCaseImpl(repository: repository)
+        submitUseCase = SubmitExampleUseCaseImpl(repository: repository)
+        state = .init(isLoading: false, error: nil, items: nil)
     }
 
     func send(_ intent: ExampleIntent) async {
         switch intent {
         case .appear:
             await taskRegistry.run(key: .appear) { [weak self] in
-                guard let self else { return }
-                await self.load()
+                guard let self else {
+                    return
+                }
+
+                await load()
             }
         case .refresh:
             await taskRegistry.run(key: .refresh) { [weak self] in
-                guard let self else { return }
-                await self.refresh()
+                guard let self else {
+                    return
+                }
+
+                await refresh()
             }
         case .submit:
             await taskRegistry.run(key: .submit) { [weak self] in
-                guard let self else { return }
-                await self.submit()
+                guard let self else {
+                    return
+                }
+
+                await submit()
             }
         }
     }

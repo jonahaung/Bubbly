@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import XUI
@@ -13,7 +11,7 @@ public struct MsgCellLayout: Conformable {
     public init(
         showTimeSeparator: Bool,
         showTopPadding: Bool,
-        bubbleCorner: BubbleCorner
+        bubbleCorner: BubbleCorner,
     ) {
         self.showTimeSeparator = showTimeSeparator
         self.showTopPadding = showTopPadding
@@ -24,7 +22,7 @@ public struct MsgCellLayout: Conformable {
         self.init(
             showTimeSeparator: false,
             showTopPadding: false,
-            bubbleCorner: .none
+            bubbleCorner: .none,
         )
     }
 

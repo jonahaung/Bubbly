@@ -33,7 +33,7 @@ public enum SystemSoundCatalog {
         .init(id: 1057, name: "Call Waiting"),
         .init(id: 1058, name: "Call Waiting 2"),
         .init(id: 1104, name: "Tock"),
-        .init(id: 1157, name: "Tink")
+        .init(id: 1157, name: "Tink"),
     ]
 }
 
@@ -61,7 +61,9 @@ public final class SystemSoundRegistry: ObservableObject {
     }
 
     public func rename(id: UInt32, name: String) {
-        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
+        guard let index = items.firstIndex(where: { $0.id == id }) else {
+            return
+        }
         items[index].name = name
         storeNames()
     }

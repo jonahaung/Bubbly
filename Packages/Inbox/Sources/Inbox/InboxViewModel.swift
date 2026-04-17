@@ -53,9 +53,11 @@ public final class InboxViewModel: ErrorPresenter {
     }
 
     private func handleRefresh() async {
+        print("refreshing")
         state = updatedState(isLoading: true, error: nil)
         do {
             let snapshot = try await refreshInbox.execute()
+            print(snapshot)
             state = makeState(snapshot: snapshot, isLoading: false, error: nil)
         } catch {
             state = updatedState(isLoading: false, error: error.localizedDescription)
@@ -68,7 +70,6 @@ public final class InboxViewModel: ErrorPresenter {
     }
 
     private func observeInboxChanges() {
-        cancelBag.cancel()
         NotificationCenter.default
             .publisher(for: .inboxChanges)
             .receive(on: RunLoop.main)

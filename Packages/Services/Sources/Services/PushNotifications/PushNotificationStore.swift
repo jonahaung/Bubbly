@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -28,14 +26,14 @@ public actor PushNotificationStore {
                     try await FirestoreRepo.update(
                         value: ["pushToken": token],
                         collectionPath: .users,
-                        to: userID
+                        to: userID,
                     )
-                }
+                },
             )
         }
     }
 
-    public static let shared = PushNotificationStore()
+    public static let shared: PushNotificationStore = .init()
     private let deps: Dependencies
 
     init(dependencies: Dependencies = .live) {
@@ -48,6 +46,14 @@ public actor PushNotificationStore {
             return datas
         }
         return []
+    }
+
+    public func savePendingAnyMsgData(_ datas: [AnyMsgData]) {
+        guard !datas.isEmpty else {
+            deps.storage.delete(for: .device(.anyMsgData))
+            return
+        }
+        deps.storage.save(datas, for: .device(.anyMsgData))
     }
 
     public func postReceiveDeviceToken(_ fcmToken: String?) async {
@@ -75,15 +81,16 @@ public actor PushNotificationStore {
             let fcmToken,
             !fcmToken.isEmpty,
             storedToken != fcmToken,
-            let user = deps.authProvider()
-        else {
+            let user = deps.authProvider() else
+        {
             return
         }
+
         do {
             deps.storage.save(fcmToken, for: .device(.deviceToken))
             try await deps.updatePushToken(fcmToken, user.uid)
             log(
-                "Updated fcmToken (\(fcmToken)) to Firestore for user: \(user.displayName ?? user.uid)"
+                "Updated fcmToken (\(fcmToken)) to Firestore for user: \(user.displayName ?? user.uid)",
             )
         } catch {
             log(error)

@@ -1,12 +1,12 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import FirebaseAuth
 import FirePhoneOTP
 import Foundation
 import XUI
+
+// MARK: - AuthRouter
 
 @MainActor
 @Observable
@@ -18,7 +18,7 @@ public final class AuthRouter {
     }
 
     public var paths = [AuthRouter.Route]()
-    private let cancelBag = CancelBag()
+    private let cancelBag: CancelBag = .init()
 
     public func route(to route: AuthRouter.Route) {
         paths.append(route)
@@ -28,10 +28,14 @@ public final class AuthRouter {
 extension AuthRouter {
     public func startObservingAuthStateChanges() {
         cancelBag.cancel()
-        NotificationCenter.default.publisher(for: .firePhoneOTPDidLogIn)
+        NotificationCenter.default
+            .publisher(for: .firePhoneOTPDidLogIn)
             .debounce(for: 0.5, scheduler: RunLoop.main)
             .sink { [weak self] value in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
+
                 if let user = value.object as? User {
                     completeLogin(with: user)
                 }
@@ -44,5 +48,7 @@ extension AuthRouter {
         route(to: .userInfo(user))
     }
 }
+
+// MARK: - User + @unchecked @retroactive Sendable
 
 extension User: @unchecked @retroactive Sendable {}

@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import FoundationModels
@@ -42,7 +40,10 @@ private extension Sequence<Transcript.Segment> {
 private extension Transcript.Entry {
     /// Returns true if this entry is an instructions entry
     var isInstruction: Bool {
-        guard case .instructions = self else { return false }
+        guard case .instructions = self else {
+            return false
+        }
+
         return true
     }
 }
@@ -182,7 +183,7 @@ public extension Transcript {
     /// ```
     func entriesWithinTokenBudget(_ budget: Int) -> [Transcript.Entry] {
         var tokenCount = 0
-        var recentEntriesToKeep: [Transcript.Entry] = []
+        var recentEntriesToKeep = [Transcript.Entry]()
 
         // 1. Find the first instruction
         let firstInstruction = first(where: \.isInstruction)
@@ -198,7 +199,9 @@ public extension Transcript {
         // 2. Iterate backwards through non-instructions and collect what fits in the remaining
         // budget
         for entry in reversed() {
-            if entry.isInstruction { continue }
+            if entry.isInstruction {
+                continue
+            }
 
             let entryTokens = entry.estimatedTokenCount
             if tokenCount + entryTokens <= budget {
@@ -208,7 +211,7 @@ public extension Transcript {
         }
 
         // 3. Assemble the final list in chronological order
-        var result: [Transcript.Entry] = []
+        var result = [Transcript.Entry]()
         if let instruction = firstInstruction, instruction.estimatedTokenCount <= budget {
             result.append(instruction)
         }
@@ -236,7 +239,9 @@ public extension Transcript {
 /// print("Token count: \(tokens)")  // Prints approximately 3
 /// ```
 public func estimateTokens(from text: String) -> Int {
-    guard !text.isEmpty else { return 0 }
+    guard !text.isEmpty else {
+        return 0
+    }
 
     let characterCount = text.count
     let tokensPerChar = 1.0 / charactersPerToken
@@ -260,7 +265,9 @@ public func estimateTokens(from text: String) -> Int {
 /// }
 /// ```
 public func estimateTokensConservative(from text: String) -> Int {
-    guard !text.isEmpty else { return 0 }
+    guard !text.isEmpty else {
+        return 0
+    }
 
     let characterCount = text.count
     let tokensPerChar = 1.0 / conservativeCharactersPerToken

@@ -30,7 +30,7 @@
     }
 
     public actor AttachmentFetcher {
-        // MARK: Lifecycle
+        
 
         public init(maxConcurrent: Int = 10) {
             precondition(maxConcurrent > 0, "maxConcurrent must be > 0")
@@ -171,7 +171,7 @@
             promote(key)
         }
 
-        // MARK: Private
+        
 
         private struct QueueKey: Hashable {
             let uid: String

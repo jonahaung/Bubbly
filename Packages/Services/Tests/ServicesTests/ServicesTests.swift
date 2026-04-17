@@ -1,16 +1,15 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
+import Foundation
 @testable import Services
-import XCTest
+import Testing
 
-final class ServicesTests: XCTestCase {
-    func testConsumePendingAnyMsgDataClearsStorage() async throws {
+final class ServicesTests {
+    @Test func consumePendingAnyMsgDataClearsStorage() async throws {
         let suiteName = "test.PushNotificationStore.\(UUID().uuidString)"
-        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        let defaults = try #require(UserDefaults(suiteName: suiteName))
         defaults.removePersistentDomain(forName: suiteName)
         defer { defaults.removePersistentDomain(forName: suiteName) }
 
@@ -22,18 +21,18 @@ final class ServicesTests: XCTestCase {
                 storage: storage,
                 notificationCenter: notificationCenter,
                 authProvider: { nil },
-                updatePushToken: { _, _ in }
-            )
+                updatePushToken: { _, _ in },
+            ),
         )
 
         let payload = AnyMsgData.typingStatus(
-            status: .init(isTyping: true, conID: "con-1", senderID: "user-1")
+            status: .init(isTyping: true, conID: "con-1", senderID: "user-1"),
         )
         storage.save([payload], for: .device(.anyMsgData))
 
         let result = await store.consumePendingAnyMsgData()
 
-        XCTAssertEqual(result, [payload])
-        XCTAssertNil(storage.codable([AnyMsgData].self, for: .device(.anyMsgData)))
+        #expect(result == [payload])
+        #expect(storage.codable([AnyMsgData].self, for: .device(.anyMsgData)) == nil)
     }
 }

@@ -9,63 +9,71 @@ import SwiftUI
 
 public struct HamburgerButton: View {
 
-	@Binding private var isOpen: Bool
-	private let action: (Bool) -> Void
-	private let size: CGFloat
-	private let color: Color
-	private let padding: CGFloat
+    @Binding private var isOpen: Bool
+    private let action: (Bool) -> Void
+    private let size: CGFloat
+    private let color: Color
+    private let padding: CGFloat
 
-	private var thickness: CGFloat { (size - padding) * 0.12 }
-	private var spacing: CGFloat { (size - padding) * 0.25 }
-	private var width: CGFloat { size - padding }
-	private var height: CGFloat { thickness * 2 + spacing }
+    private var thickness: CGFloat {
+        (size - padding) * 0.12
+    }
+    private var spacing: CGFloat {
+        (size - padding) * 0.25
+    }
+    private var width: CGFloat {
+        size - padding
+    }
+    private var height: CGFloat {
+        thickness * 2 + spacing
+    }
 
-	public init(
-		isOpen: Binding<Bool>,
-		size: CGFloat = 48,
-		color: Color = .accentColor,
-		padding: CGFloat = 14,
-		action: @escaping (Bool) -> Void
-	) {
-		self.action = action
-		self._isOpen = isOpen
-		self.size = size
-		self.color = color
-		self.padding = padding
-	}
+    public init(
+        isOpen: Binding<Bool>,
+        size: CGFloat = 48,
+        color: Color = .accentColor,
+        padding: CGFloat = 14,
+        action: @escaping (Bool) -> Void,
+    ) {
+        self.action = action
+        self._isOpen = isOpen
+        self.size = size
+        self.color = color
+        self.padding = padding
+    }
 
-	public var body: some View {
+    public var body: some View {
 
-		let offset = (thickness + spacing) / 2
+        let offset = (thickness + spacing) / 2
 
-		ZStack(alignment: .center) {
-			RoundedRectangle(cornerRadius: thickness / 2)
-				.fill(color.gradient)
-				.frame(width: width, height: thickness)
-				.rotationEffect(.degrees(isOpen ? 45 : 0))
-				.offset(y: isOpen ? 0 : -offset)
-			RoundedRectangle(cornerRadius: thickness / 2)
-				.fill(color.gradient)
-				.frame(width: isOpen ? width : width*0.3, height: thickness)
-				.rotationEffect(.degrees(isOpen ? -45 : 0))
-				.offset(y: isOpen ? 0 : offset)
-		}
-		.frame(width: width, height: height)
-		.padding(.vertical, padding)
-		.padding(.horizontal, padding/2)
-		.background(.fill.opacity(0.0001))
-		.animation(.anticipateOvershoot, value: isOpen)
-		.geometryGroup()
-		._onButtonGesture { pressing in
-			if pressing {
-			} else {
-				UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
-			}
-		} perform: {
-			isOpen.toggle()
-		}
-		.onChange(of: isOpen) { oldValue, newValue in
-			action(newValue)
-		}
-	}
+        ZStack(alignment: .center) {
+            RoundedRectangle(cornerRadius: thickness / 2)
+                .fill(color.gradient)
+                .frame(width: width, height: thickness)
+                .rotationEffect(.degrees(isOpen ? 45 : 0))
+                .offset(y: isOpen ? 0 : -offset)
+            RoundedRectangle(cornerRadius: thickness / 2)
+                .fill(color.gradient)
+                .frame(width: isOpen ? width : width * 0.3, height: thickness)
+                .rotationEffect(.degrees(isOpen ? -45 : 0))
+                .offset(y: isOpen ? 0 : offset)
+        }
+        .frame(width: width, height: height)
+        .padding(.vertical, padding)
+        .padding(.horizontal, padding / 2)
+        .background(.fill.opacity(0.0001))
+        .animation(.anticipateOvershoot, value: isOpen)
+        .geometryGroup()
+        ._onButtonGesture { pressing in
+            if pressing {
+            } else {
+                UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
+            }
+        } perform: {
+            isOpen.toggle()
+        }
+        .onChange(of: isOpen) { _, newValue in
+            action(newValue)
+        }
+    }
 }

@@ -1,9 +1,9 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import FoundationModels
+
+// MARK: - FoundationModelsError
 
 /// Custom error types for Foundation Models operations
 public nonisolated enum FoundationModelsError: LocalizedError, Sendable {
@@ -29,10 +29,13 @@ public nonisolated enum FoundationModelsError: LocalizedError, Sendable {
     }
 }
 
+// MARK: - FoundationModelsErrorHandler
+
 /// Helper for handling LanguageModelSession errors
 public struct FoundationModelsErrorHandler: Sendable {
     public static func handleGenerationError(_ error: LanguageModelSession
-        .GenerationError) -> String {
+        .GenerationError) -> String
+    {
         switch error {
         case let .exceededContextWindowSize(context):
             return "Context window exceeded: \(context.debugDescription)"

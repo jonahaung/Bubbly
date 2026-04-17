@@ -10,16 +10,16 @@ extension ChatManager {
     func reloadConversation(refetch: Bool) async throws {
         state =
             try await conversationDataUpdater
-                .reloadConversation(currentState: state, refetch: refetch)
+            .reloadConversation(currentState: state, refetch: refetch)
     }
 
-    func setIncomingMsgsAsRead() async throws {
+    func setIncomingMsgsAsRead(before date: Date = .now) async throws {
         guard let currentUserID = await currentUserRepository?.model.uid else {
             return
         }
 
         let updatedMsgs = try await conversationDataUpdater.updateMsgs(
-            before: .now,
+            before: date,
             of: .incoming,
             from: .received,
             to: .read,
@@ -40,8 +40,12 @@ extension ChatManager {
         }
     }
 
-    func setOutgoingMsgsAsRead(status: AnyMsgData.SeenStatusPayload) async throws {
-        guard let msg = try await Store.shared.msgStore?.fetch(uid: status.msgID) else {
+    func setOutgoingMsgsAsRead(status: AnyMsgData.SeenStatusPayload)
+        async throws
+    {
+        guard
+            let msg = try await Store.shared.msgStore?.fetch(uid: status.msgID)
+        else {
             return
         }
 
@@ -50,9 +54,10 @@ extension ChatManager {
                 $0.msg.receiptType == .outgoing && $0.state.date <= msg.date
                     && $0.state.deliveryStatus == .delivered
             }
-            .map(\.value.id)
+            .map(\.id)
 
-        let msgs = try await AsyncOrderedStream.mapOrdered(inputs: msgIDs) { msgID in
+        let msgs = try await AsyncOrderedStream.mapOrdered(inputs: msgIDs) {
+            msgID in
             try await Store.shared.msgStore?.fetch(uid: msgID)
         }.compactMap(\.self)
 

@@ -8,16 +8,16 @@ import XUI
 // MARK: - ChatTheme
 
 public struct ChatTheme: Equatable, EmptyRepresentable {
-    // MARK: Lifecycle
+    
 
     public init(_ theme: Database.ConversationTheme) {
-        backgroundColor = theme.background.color
-        secondaryColor = Color.link
+        backgroundColor = Color.background
+        secondaryColor = Color.tint
         outgoing = .init(
-            bubbleCoor: theme.bubbleColor.value,
+			bubbleCoor: theme.bubbleColor.value,
         )
         incoming = .init(
-            bubbleCoor: theme.background == .system ? Color(.systemGray6) : Color.container,
+            bubbleCoor: Color.container
         )
         let uiFont = UIFont.systemFont(ofSize: UIFont.labelFontSize, weight: .regular)
         font =
@@ -54,7 +54,7 @@ public struct ChatTheme: Equatable, EmptyRepresentable {
         )
     }
 
-    // MARK: Internal
+    
 
     struct Theme: Equatable {
         let bubbleCoor: Color

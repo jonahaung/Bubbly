@@ -3,7 +3,7 @@
 import SwiftUI
 
 public struct ReactionStackLayout: Layout {
-    // MARK: Lifecycle
+    
 
     public init(overlap: CGFloat = 12) {
         self.overlap = overlap

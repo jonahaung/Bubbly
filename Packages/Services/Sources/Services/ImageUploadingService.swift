@@ -1,11 +1,11 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import FirebaseStorage
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
+
+// MARK: - ImageUploadingService
 
 public struct ImageUploadingService: Sendable {
     public enum Path {
@@ -42,9 +42,10 @@ public struct ImageUploadingService: Sendable {
         _ image: UIImage,
         size: CGSize?,
         to path: Path,
-        onProgress: (@Sendable (Progress?) -> Void)? = nil
+        onProgress: (@Sendable (Progress?) -> Void)? = nil,
     ) async throws
-        -> URL {
+        -> URL
+    {
         let mediaManager = MediaManager.shared
 
         let uploadingImage: UIImage =
@@ -64,7 +65,7 @@ public struct ImageUploadingService: Sendable {
         _ = try await reference.putDataAsync(
             data,
             metadata: metadata,
-            onProgress: onProgress
+            onProgress: onProgress,
         )
         return try await reference.downloadURL()
     }
@@ -72,7 +73,7 @@ public struct ImageUploadingService: Sendable {
     public func uploadFile(
         _ url: URL,
         to path: Path,
-        onProgress: (@Sendable (Progress?) -> Void)? = nil
+        onProgress: (@Sendable (Progress?) -> Void)? = nil,
     ) async throws -> URL {
         let reference = Storage.storage()
             .reference(withPath: path.path)
@@ -94,7 +95,10 @@ public struct ImageUploadingService: Sendable {
 
 private extension String {
     var storagePathComponent: String {
-        let allowed = CharacterSet(charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.")
+        let allowed =
+            CharacterSet(
+                charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.",
+            )
         let scalars = unicodeScalars.map { allowed.contains($0) ? Character($0) : "_" }
         return String(scalars)
     }
@@ -104,12 +108,12 @@ public extension UIImage {
     func resizedToFit(in targetSize: CGSize) -> UIImage? {
         let aspectRatio = min(
             targetSize.width / size.width,
-            targetSize.height / size.height
+            targetSize.height / size.height,
         )
 
         let newSize = CGSize(
             width: size.width * aspectRatio,
-            height: size.height * aspectRatio
+            height: size.height * aspectRatio,
         )
 
         return renderResizedImage(to: newSize)
@@ -118,19 +122,19 @@ public extension UIImage {
     func resizedToFill(_ targetSize: CGSize) -> UIImage? {
         let aspectRatio = max(
             targetSize.width / size.width,
-            targetSize.height / size.height
+            targetSize.height / size.height,
         )
 
         let scaledSize = CGSize(
             width: size.width * aspectRatio,
-            height: size.height * aspectRatio
+            height: size.height * aspectRatio,
         )
 
         let renderer = UIGraphicsImageRenderer(size: targetSize)
         return renderer.image { _ in
             let origin = CGPoint(
                 x: (targetSize.width - scaledSize.width) * 0.5,
-                y: (targetSize.height - scaledSize.height) * 0.5
+                y: (targetSize.height - scaledSize.height) * 0.5,
             )
             draw(in: CGRect(origin: origin, size: scaledSize))
         }

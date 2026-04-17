@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import FirebaseCore
@@ -61,13 +59,13 @@ struct ConversationViewModelIntentTests {
     private func makeFixture() -> (
         conversation: Conversation,
         messages: [Message],
-        prefetchedData: ConversationInitializer.PrefetchedData
+        prefetchedData: ConversationInitializer.PrefetchedData,
     ) {
         let conID = "con-1"
         let conversation = Conversation(
             kind: .contact(.empty),
             uid: conID,
-            properties: .init(uid: conID)
+            properties: .init(uid: conID),
         )
         let messages = [
             Message(
@@ -79,7 +77,7 @@ struct ConversationViewModelIntentTests {
                 incomingStatus: .none,
                 outgoingStatus: [:],
                 attachments: [],
-                reactions: []
+                reactions: [],
             ),
             Message(
                 uid: "m2",
@@ -90,8 +88,8 @@ struct ConversationViewModelIntentTests {
                 incomingStatus: .none,
                 outgoingStatus: [:],
                 attachments: [],
-                reactions: []
-            )
+                reactions: [],
+            ),
         ]
         let configuration = ConversationInitializer.Configuration(
             conID: conID,
@@ -100,18 +98,18 @@ struct ConversationViewModelIntentTests {
             lastMsgID: messages.last?.uid,
             firstMsgID: messages.first?.uid,
             totalMsgsCount: messages.count,
-            canPaginate: false
+            canPaginate: false,
         )
         let prefetchedData = ConversationInitializer.PrefetchedData(
             conversation: conversation,
             msgs: messages,
-            configuration: configuration
+            configuration: configuration,
         )
         return (conversation, messages, prefetchedData)
     }
 
     private func waitForTasks(iterations: Int = 40) async {
-        for _ in 0..<iterations {
+        for _ in 0 ..< iterations {
             await Task.yield()
             try? await Task.sleep(nanoseconds: 5_000_000)
         }
@@ -121,9 +119,10 @@ struct ConversationViewModelIntentTests {
         guard FirebaseApp.app() == nil else {
             return
         }
+
         let options = FirebaseOptions(
             googleAppID: "1:1234567890:ios:test",
-            gcmSenderID: "1234567890"
+            gcmSenderID: "1234567890",
         )
         options.apiKey = "test-api-key"
         options.projectID = "test-project-id"

@@ -1,9 +1,9 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import UIKit
+
+// MARK: - Permission
 
 public protocol Permission {
     var kind: PermissionKind { get }
@@ -44,7 +44,11 @@ public extension Permission {
     func openSettingPage() {
         DispatchQueue.main.async {
             guard let settingsUrl = URL(string: UIApplication.openSettingsURLString),
-                  UIApplication.shared.canOpenURL(settingsUrl) else { return }
+                  UIApplication.shared.canOpenURL(settingsUrl) else
+            {
+                return
+            }
+
             UIApplication.shared.open(settingsUrl)
         }
     }

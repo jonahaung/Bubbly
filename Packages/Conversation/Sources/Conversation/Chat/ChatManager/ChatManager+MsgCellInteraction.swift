@@ -2,37 +2,36 @@
 
 import Database
 import Services
+import SwiftUI
 
 extension ChatManager {
     func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
         switch action {
-        case let .onTapMsg(string):
+        case .onTapMsg(let string):
             setSelectedMsg(string)
         case .onMarkMsg:
             break
-        case let .onTapAvatar(string):
+        case .onTapAvatar(let string):
             guard let vieModel = models.element(withID: string) else {
                 return
             }
-
-            let msg = vieModel.msg
-            let senderID = msg.senderID
-            if let contact = contactsRepository?.contact(for: senderID) {
+            if let contact = vieModel.state.sender {
                 router?.pushToNav(.contactDetails(contact))
             }
-        case let .onFocusMsgBubble(frame):
+        case .onFocusMsgBubble(let frame):
             presentation.send(.overlayItem(frame))
             layoutIfNeeded()
         case .onUploadedAttachments:
             break
-        case let .onReact(message, reactionType):
+        case .onReact(let message, let reactionType):
             let conversation = state.conversation
             serialQueue.addOperation { [weak self] in
                 guard let self else {
                     return
                 }
 
-                guard let currentUserID = await currentUserRepository?.model.uid else {
+                guard let currentUserID = await currentUserRepository?.model.uid
+                else {
                     return
                 }
 
@@ -51,6 +50,48 @@ extension ChatManager {
                         ),
                         conversation: conversation,
                     )
+            }
+        }
+    }
+}
+
+extension ChatManager {
+    fileprivate func setSelectedMsg(_ uid: String) {
+        guard let index = models.index(of: uid) else {
+            return
+        }
+
+        let oldValue = layoutManager.selectedMsg
+        let nextMsg = models[safe: index + 1]?.msg
+        let previousMsg = models[safe: index - 1]?.msg
+        let newValue: SelectedMsg? =
+            oldValue?.id == uid
+            ? nil
+            : SelectedMsg(
+                id: uid,
+                previous: previousMsg?.uid,
+                next: nextMsg?.uid,
+            )
+        let transaction = Transaction.withAnimation(.interactiveSpring)
+        withTransaction(transaction) {
+            layoutManager.updateSelectedMsg(newValue)
+            if let oldValue {
+                models.didChangeSelection(newValue, for: oldValue.id)
+                if let id = oldValue.next {
+                    models.didChangeSelection(newValue, for: id)
+                }
+                if let id = oldValue.previous {
+                    models.didChangeSelection(newValue, for: id)
+                }
+            }
+            if let newValue {
+                models.didChangeSelection(newValue, for: newValue.id)
+                if let id = newValue.next {
+                    models.didChangeSelection(newValue, for: id)
+                }
+                if let id = newValue.previous {
+                    models.didChangeSelection(newValue, for: id)
+                }
             }
         }
     }

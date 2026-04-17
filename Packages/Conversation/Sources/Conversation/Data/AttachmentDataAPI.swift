@@ -7,7 +7,7 @@ import UIKit
 import XUI
 
 actor AttachmentDataAPI {
-    // MARK: Lifecycle
+    
 
     init(
         mediaManager: MediaManager = .shared,
@@ -19,7 +19,7 @@ actor AttachmentDataAPI {
         self.swiftLinkPreview = swiftLinkPreview
     }
 
-    // MARK: Internal
+    
 
     enum AttachmentError: LocalizedError {
         case missingFileURL
@@ -28,7 +28,7 @@ actor AttachmentDataAPI {
         case imageDecodingFailed
         case badResponse(Int)
 
-        // MARK: Internal
+        
 
         var errorDescription: String? {
             switch self {
@@ -73,7 +73,7 @@ actor AttachmentDataAPI {
         }
     }
 
-    // MARK: Private
+    
 
     private let mediaManager: MediaManager
     private let urlSession: URLSession
@@ -154,7 +154,7 @@ actor AttachmentDataAPI {
                 image = UIImage(systemSymbol: .photoOnRectangleAngled)
             }
         }
-        try await persistImageOnly(image, for: attachment)
+        try persistImageOnly(image, for: attachment)
         return .link(thumbnail: image)
     }
 
@@ -192,7 +192,7 @@ actor AttachmentDataAPI {
         for attachment: Attachment,
     ) async throws -> UIImage {
         let originalData = try mediaManager.createData(from: image)
-        let thumbnailData = try await mediaManager.createThumbnail(from: image)
+        let thumbnailData = try mediaManager.createThumbnail(from: image)
         guard let thumbnail = UIImage(data: thumbnailData) else {
             throw AttachmentError.imageDecodingFailed
         }
@@ -212,7 +212,7 @@ actor AttachmentDataAPI {
         _ image: UIImage,
         for attachment: Attachment,
     ) async throws -> UIImage {
-        let thumbnailData = try await mediaManager.createThumbnail(from: image)
+        let thumbnailData = try mediaManager.createThumbnail(from: image)
         guard let thumbnail = UIImage(data: thumbnailData) else {
             throw AttachmentError.imageDecodingFailed
         }

@@ -1,9 +1,9 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
+
+// MARK: - TabMapping
 
 public struct TabMapping: Sendable {
     public var tabForLink: @Sendable (Deeplink) -> TabPath?
@@ -24,6 +24,8 @@ public extension TabMapping {
     }
 }
 
+// MARK: - NavMapping
+
 public struct NavMapping: Sendable {
     public var navForLink: @Sendable (Deeplink) -> NavPath?
     public init(navForLink: @escaping @Sendable (Deeplink) -> NavPath?) {
@@ -34,7 +36,7 @@ public struct NavMapping: Sendable {
 public extension NavMapping {
     static let `default` = NavMapping { link in
         switch link {
-        case let .conversation(id):
+        case .conversation:
             nil
         default:
             nil

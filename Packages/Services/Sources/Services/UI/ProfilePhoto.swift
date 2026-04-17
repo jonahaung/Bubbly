@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import SwiftUI
@@ -13,22 +11,22 @@ public struct ProfilePhoto: View {
     public init(
         _ item: any ImageViewItem,
         size: ImageSize = .small,
-        tapAction: ImageViewTapAction = .none
+        tapAction: ImageViewTapAction = .none,
     ) {
         self.item = item
         config = .init(
             size: size,
-            processors: [], tapAction: tapAction
+            processors: [], tapAction: tapAction,
         )
     }
 
-	public init(
-		_ item: any ImageViewItem,
-		config: ImageViewConfig
-	) {
-		self.item = item
-		self.config = config
-	}
+    public init(
+        _ item: any ImageViewItem,
+        config: ImageViewConfig,
+    ) {
+        self.item = item
+        self.config = config
+    }
 
     public var body: some View {
         ImageView(item, config: config)

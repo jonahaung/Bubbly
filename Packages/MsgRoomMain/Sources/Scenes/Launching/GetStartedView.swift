@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import FirebaseAuth
 import Services
@@ -26,7 +24,7 @@ struct GetStartedView: View {
                     .font(.largeTitle.weight(.bold))
                     .multilineTextAlignment(.center)
                 Text(
-                    "Chat with friends, share moments, and stay connected. Let’s get you set up in a few seconds."
+                    "Chat with friends, share moments, and stay connected. Let’s get you set up in a few seconds.",
                 )
                 .font(.body)
                 .foregroundStyle(.secondary)

@@ -1,12 +1,13 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
+import Core
 import Database
 import FirebaseAuth
 import Foundation
 import Observation
 import XUI
+
+// MARK: - AppLauncher
 
 @MainActor
 @Observable
@@ -22,28 +23,31 @@ public final class AppLauncher {
     }
 
     public private(set) var route: MainRoute = .loading
-	public let router: Router = .shared
+    public let router: Router = .shared
 
     public init() {}
 }
 
 public extension AppLauncher {
     func startEvaluate() async {
-        let route = await evaluateRoute()
-		switch route {
-		case .getStarted:
-			await Store.shared.destory()
-		case .loading:
-			break
-		case let .main(currentUser):
-			router.reset()
-			if await !Store.shared.hasSetUp(for: currentUser.uid) {
-				await Store.shared.start(with: currentUser.uid)
-			}
-		}
-		self.route = route
+        let route = evaluateRoute()
+        switch route {
+        case .getStarted:
+            await Store.shared.destory()
+            GroupStorage.shared.delete(for: .auth(.currentUserID))
+            GroupStorage.shared.delete(for: .auth(.authToken))
+        case .loading:
+            break
+        case let .main(currentUser):
+            router.reset()
+            if await !Store.shared.hasSetUp(for: currentUser.uid) {
+                await Store.shared.start(with: currentUser.uid)
+            }
+        }
+        self.route = route
     }
-    private func evaluateRoute() async -> MainRoute {
+
+    private func evaluateRoute() -> MainRoute {
         let hasCompleted = UserDefaults.standard.bool(forKey: DefaultKeys.getStarted)
         if hasCompleted {
             if let user = Auth.auth().currentUser {

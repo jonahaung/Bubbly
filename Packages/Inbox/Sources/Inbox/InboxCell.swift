@@ -4,6 +4,7 @@ import Database
 import Services
 import SwiftUI
 import XUI
+import Core
 
 struct InboxCell: View {
     let item: InboxItem
@@ -12,29 +13,31 @@ struct InboxCell: View {
     @Environment(\.typography) private var typography
 
     var body: some View {
-        CustomButton {
+        Button {
             onSelect(item)
         } label: {
-            Label {
-                Text(item.title)
-                    .font(typography.headLine)
-                    .redactable()
-                Text(item.msg.displayText)
-                    .font(typography.subHeadline)
-                    .lineLimit(3)
-                    .foregroundStyle(
-                        item.unreadMsgsCount == 0 ? .secondary : .primary,
-                    )
-                    .multilineTextAlignment(.leading)
-                    .redactable()
-            } icon: {
+            HStack(spacing: Spacing.md) {
                 ProfilePhoto(item, size: .custom(50))
-                    .redactable()
+                LabeledContent {
+                    if item.unreadMsgsCount > 0 {
+                        Image(systemName: "\(item.unreadMsgsCount).circle.fill")
+                            .foregroundStyle(Color.blue)
+                            .imageScale(.small)
+                    }
+                } label: {
+                    Text(item.title)
+                        .font(.headline)
+                    Text(.init(item.msg.displayText))
+                        .font(.system(size: UIFont.labelFontSize))
+                        .lineHeight(.multiple(factor: 1.1))
+                        .lineLimit(5)
+                        .foregroundStyle(
+                            item.unreadMsgsCount == 0 ? Color.quaternaryText : .primaryText,
+                        )
+                        .multilineTextAlignment(.leading)
+                }
             }
-            .badge(item.unreadMsgsCount)
-            .badgeProminence(.increased)
-            .labelReservedIconWidth(45)
-        } onFinished: {}
-            .equatable(by: item.msg)
+        }
+        .equatable(by: item.msg)
     }
 }

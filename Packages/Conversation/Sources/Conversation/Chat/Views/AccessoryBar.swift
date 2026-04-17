@@ -12,7 +12,7 @@ struct AccessoryBar: View {
             if let accessory = manager.presentation.state.bottomAccessory {
                 if accessory == .scrollDownButton {
                     CustomButton {
-                        manager.handleScrollDownButtonTap()
+						manager.send(.scrollDownButtonTapped)
                     } label: {
                         Image(systemName: "chevron.down")
                             .resizable()

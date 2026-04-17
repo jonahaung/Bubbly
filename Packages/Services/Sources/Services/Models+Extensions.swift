@@ -1,12 +1,12 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
 import ImageLoader
 import SwiftUI
 import XUI
+
+// MARK: - Contact + @retroactive ImageViewItem
 
 extension Contact: @retroactive ImageViewItem {
     public var imageName: String? {
@@ -30,6 +30,8 @@ extension Contact: @retroactive ImageViewItem {
     }
 }
 
+// MARK: - Database.Group + @retroactive ImageViewItem
+
 extension Database.Group: @retroactive ImageViewItem {
     public var imageName: String? {
         name
@@ -51,6 +53,8 @@ extension Database.Group: @retroactive ImageViewItem {
         uid
     }
 }
+
+// MARK: - Attachment + @retroactive ImageViewItem
 
 extension Attachment: @retroactive ImageViewItem {
     public var imageName: String? {

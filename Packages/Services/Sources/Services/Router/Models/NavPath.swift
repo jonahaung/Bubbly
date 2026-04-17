@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
@@ -8,7 +6,6 @@ import SwiftUI
 import XUI
 
 public enum NavPath: Sendable, Hashable, Identifiable, CaseNameReflectable {
-
     case conversationDetails(_ conversation: Conversation)
     case conversation(_ prefatchData: ConversationInitializer.PrefetchedData)
     case contactDetails(_ contact: Contact)
@@ -32,8 +29,8 @@ public enum NavPath: Sendable, Hashable, Identifiable, CaseNameReflectable {
             hasher.combine(snapshot.uid)
         case .currentUserDetails:
             hasher.combine(3)
-		case .view:
-			hasher.combine("view")
+        case .view:
+            hasher.combine("view")
         }
     }
 

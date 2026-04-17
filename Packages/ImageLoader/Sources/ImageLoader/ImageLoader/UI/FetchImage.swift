@@ -8,7 +8,7 @@ import SwiftUI
 @Observable
 public final class FetchImage: Identifiable {
 
-	// MARK: Lifecycle
+	
 
 	deinit {
 		MainActor.assumeIsolated {
@@ -155,7 +155,7 @@ public final class FetchImage: Identifiable {
 		lastResponse = nil
 	}
 
-	// MARK: Private
+	
 
 	private var _progress: Progress?
 

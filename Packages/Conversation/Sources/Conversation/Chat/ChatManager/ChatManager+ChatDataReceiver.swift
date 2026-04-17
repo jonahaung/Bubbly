@@ -15,140 +15,92 @@ extension ChatManager: ChatDataReceiverDelegate {
         }
     }
 
-    func chatDataReceiver(didReceive typingStatus: AnyMsgData.TypingStatusPayload) {
-        serialQueue.addOperation { [weak self] in
-            guard let self else {
-                return
-            }
-
-            presentation.send(.typing(typingStatus))
-        }
+    func chatDataReceiver(
+        didReceive typingStatus: AnyMsgData.TypingStatusPayload
+    ) async {
+        presentation.send(.typing(typingStatus))
     }
 
-    func chatDataReceiver(didInsert msg: Message) {
+    func chatDataReceiver(didInsert msg: Message) async {
         if models.contains(withID: msg.uid) {
-            serialQueue.addOperation { [weak self] in
-                guard let self else {
-                    return
-                }
-
-                models.update(msg: msg)
-            }
+            models.update(msg: msg)
             return
         }
         if scrollController.isNear(.bottom) {
-            serialQueue.addOperation { [weak self] in
-                guard let self else {
-                    return
-                }
-
-                scrollController.updateStateUpdate(to: .appendingItem(msg.uid))
-                models.insert(msg: msg)
-                layoutIfNeeded()
-            }
+            scrollController.updateStateUpdate(to: .appendingItem(msg.uid))
+            models.insert(msg: msg)
+            layoutIfNeeded()
         } else {
             if scrollCoordinator(scrollController, shouldPaginateAt: .bottom) {
-                serialQueue.addOperation { [weak self] in
+                ToastPresenter.shared.dismiss()
+                let toast = Toast(
+                    node: Text(msg.displayText).opaqueView(),
+                    allowsBackgroundTap: true,
+                ) { [weak self] in
                     guard let self else {
                         return
                     }
-
-                    let toast = Toast(
-                        node: Text(msg.displayText).opaqueView(),
-                        allowsBackgroundTap: false,
-                    ) { [weak self] in
+                    ToastPresenter.shared.dismiss()
+                    serialQueue.addOperation { [weak self] in
                         guard let self else {
                             return
                         }
-
-                        ToastPresenter.shared.dismiss()
-                        scrollTo(msgID: msg.uid)
+                        await scrollTo(msg: msg)
                     }
-                    ToastPresenter.show(toast)
                 }
+                ToastPresenter.show(toast)
             } else {
-                serialQueue.addBarrierOperation { [weak self] in
+                models.insert(msg: msg)
+                layoutIfNeeded()
+                ToastPresenter.shared.dismiss()
+                let toast = Toast(
+                    node: Text(msg.displayText).opaqueView(),
+                    allowsBackgroundTap: false,
+                ) { [weak self] in
                     guard let self else {
                         return
                     }
 
-                    let toast = Toast(
-                        node: Text(msg.displayText).opaqueView(),
-                        allowsBackgroundTap: false,
-                    ) { [weak self] in
+                    ToastPresenter.shared.dismiss()
+                    serialQueue.addBarrierOperation { [weak self] in
                         guard let self else {
                             return
                         }
-
-                        ToastPresenter.shared.dismiss()
-                        scrollTo(msgID: msg.uid)
+                        await scrollTo(msg: msg)
                     }
-                    ToastPresenter.show(toast)
                 }
-
-                serialQueue.addOperation { [weak self] in
-                    guard let self else {
-                        return
-                    }
-
-                    models.insert(msg: msg)
-                    layoutIfNeeded()
-                }
+                ToastPresenter.show(toast)
             }
         }
     }
 
-    func chatDataReceiver(didReceiveMsg _: Message) {
-        serialQueue.addOperation { [weak self] in
-            guard let self else {
-                return
-            }
-
-            try await setIncomingMsgsAsRead()
+    func chatDataReceiver(didReceiveMsg msg: Message) async {
+        do {
+            try await setIncomingMsgsAsRead(before: msg.date)
+        } catch {
+            await showError(error)
         }
     }
 
-    func chatDataReceiver(didUpdate msg: Message, animated _: Bool) {
-        serialQueue.addOperation { [weak self] in
-            guard let self else {
-                return
-            }
-
-            models.update(msg: msg)
-        }
+    func chatDataReceiver(didUpdate msg: Message, animated _: Bool) async {
+        models.update(msg: msg)
     }
 
-    func chatDataReceiver(didRemove msg: Message, animated _: Bool) {
-        serialQueue.addOperation { [weak self] in
-            guard let self else {
-                return
-            }
-
-            models.remove(msg: msg)
-        }
-        serialQueue.addBarrierOperation { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-
+    func chatDataReceiver(didRemove msg: Message, animated _: Bool) async {
+        models.remove(msg: msg)
+        let transition = Transaction.withAnimation(.snappy)
+        withTransaction(transition) {
             layoutIfNeeded()
         }
     }
 
-    func chatDataReceiver(didReceive status: AnyMsgData.SeenStatusPayload) {
-        serialQueue.addOperation { [weak self] in
-            guard let self else {
-                return
-            }
-
+    func chatDataReceiver(didReceive status: AnyMsgData.SeenStatusPayload) async
+    {
+        do {
             try await reloadConversation(refetch: false)
-        }
-        serialQueue.addBarrierOperation { [weak self] in
-            guard let self else {
-                return
-            }
-
             try await setOutgoingMsgsAsRead(status: status)
+        } catch {
+            await showError(error)
         }
     }
 }

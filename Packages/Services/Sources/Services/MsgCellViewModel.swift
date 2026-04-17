@@ -1,156 +1,166 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import SwiftUI
 import XUI
 
+// MARK: - MsgCellViewModel
+
 @Observable
-public final class MsgCellViewModel: Identifiable {
-	// MARK: Lifecycle
+public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
+    public var reloadID: Int = 0
+    
+    public func layoutIfNeeded() {
+        if isVisible {
+            reloadID = reloadID == 0 ? 1 : 0
+        }
+    }
 
-	public init(_ msg: Message) {
-		state = .init(msg: msg)
+	public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
+		lhs.id == rhs.id
 	}
+    
 
-	// MARK: Public
-	public var state: State
-
-	public var msg: Message {
-		state.msg
-	}
-
-	public func update(with msg: Message) {
-		guard state.msg != msg else {
-			return
-		}
-		var state = self.state
-		state.msg = msg
-		state.deliveryStatus = msg.deliveryStatus
+	public init(_ state: State) {
 		self.state = state
-	}
+    }
+    // MARK: Public
+    
+    public var state: State
+	public var isVisible: Bool = false
+    public var msg: Message {
+        state.msg
+    }
 
-	@MainActor
-	public func update(layout: MsgCellLayout) {
-		guard state.layout != layout else {
-			return
-		}
-		var state = state
-		if layout.showAvatar, state.sender == nil {
-			state.sender = ContactsRepository.shared.contact(for: state.senderID)
-		}
-		state.layout = layout
-		state.bubbleCornor = state.computeBubbleCorner()
-		self.state = state
-	}
+    public func update(with msg: Message) {
+        guard state.msg != msg else {
+            return
+        }
+        var state = state
+        state.msg = msg
+        self.state = state
+        layoutIfNeeded()
+    }
 
-	public func setVisibility(_ isVisible: Bool) {
-		guard state.isVisible != isVisible else {
-			return
-		}
-		state.isVisible = isVisible
-	}
+    @MainActor
+    public func update(layout: MsgCellLayout) {
+        guard state.layout != layout else {
+            return
+        }
+        var state = state
+        if layout.showAvatar, state.sender == nil {
+            state.sender = ContactsRepository.shared.contact(for: state.senderID)
+        }
+        state.layout = layout
+        state.bubbleCornor = state.computeBubbleCorner()
+        self.state = state
+    }
 
-	public func update(selectedMsg: SelectedMsg?) {
-		guard state.selectedMsg != selectedMsg else {
-			return
-		}
-		var state = self.state
-		state.selectedMsg = selectedMsg
-		state.bubbleCornor = state.computeBubbleCorner()
-		self.state = state
-	}
+    public func setVisibility(_ isVisible: Bool) {
+		guard self.isVisible != isVisible else {
+            return
+        }
+		self.isVisible = isVisible
+    }
+
+    public func update(selectedMsg: SelectedMsg?) {
+        guard state.selectedMsg != selectedMsg else {
+            return
+        }
+        var state = state
+        state.selectedMsg = selectedMsg
+        state.bubbleCornor = state.computeBubbleCorner()
+        self.state = state
+        layoutIfNeeded()
+    }
 }
 
 public extension MsgCellViewModel {
-	struct State: Equatable, Identifiable {
+    struct State: Sendable, Equatable, Identifiable {
+        
 
-		// MARK: Lifecycle
+		public init(msg: Message, attributedText: AttributedString?) {
+            self.msg = msg
+			self.attributedText = attributedText
+        }
 
-		public init(msg: Message) {
-			self.msg = msg
-			attributedText = {
-				guard let text = msg.text else {
-					return nil
-				}
-				return .init(text, attributes: AttributeContainer.base)
-			}()
-			isSender = msg.isSender
-			deliveryStatus = msg.deliveryStatus
-		}
+        // MARK: Public
 
-		// MARK: Public
+        public var msg: Message
+        public let attributedText: AttributedString?
+       
+        public var sender: Contact? = nil
+        public var layout: MsgCellLayout = .init()
+        public var selectedMsg: SelectedMsg? = nil
+        public var bubbleCornor: BubbleCorner = .none
+        
+        public var deliveryStatus: DeliveryStatus? {
+            msg.deliveryStatus
+        }
 
-		public var msg: Message
-		public var attributedText: AttributedString?
-		public let isSender: Bool
-		public var sender: Contact? = nil
-		public var layout: MsgCellLayout = .init()
-		public var isVisible: Bool = false
-		public var selectedMsg: SelectedMsg? = nil
-		public var bubbleCornor: BubbleCorner = .none
-		public var deliveryStatus: DeliveryStatus? = nil
+        public var isSender: Bool { msg.isSender }
+        
+        public var id: String {
+            msg.uid
+        }
 
-		public var id: String {
-			msg.uid
-		}
+        public var senderID: String {
+            msg.senderID
+        }
 
-		public var senderID: String {
-			msg.senderID
-		}
+        public var attachments: [Attachment] {
+            msg.attachments
+        }
 
-		public var attachments: [Attachment] {
-			msg.attachments
-		}
+        public var reactions: [Reaction] {
+            msg.reactions
+        }
 
-		public var reactions: [Reaction] {
-			msg.reactions
-		}
+        public var date: Date {
+            msg.date
+        }
 
-		public var date: Date {
-			msg.date
-		}
+        public var verticalAlignment: VerticalItemAlignment {
+            isSender ? .trailing : .leading
+        }
 
-		public var verticalAlignment: VerticalItemAlignment {
-			isSender ? .trailing : .leading
-		}
+        public var horizontalAlignment: HorizontalAlignment {
+            isSender ? .trailing : .leading
+        }
 
-		public var horizontalAlignment: HorizontalAlignment {
-			isSender ? .trailing : .leading
-		}
-		public var isSelected: Bool {
-			selectedMsg?.id == id
-		}
+        public var isSelected: Bool {
+            selectedMsg?.id == id
+        }
 
-		internal func computeBubbleCorner() -> BubbleCorner {
-			if selectedMsg?.id == id {
-				return .all
-			}
-			var corner = layout.bubbleCorner
-			if selectedMsg?.previous == id {
-				corner.append(.bottom)
-			}
-			if selectedMsg?.next == id {
-				corner.append(.top)
-			}
-			return corner
-		}
+        func computeBubbleCorner() -> BubbleCorner {
+            if selectedMsg?.id == id {
+                return .all
+            }
+            var corner = layout.bubbleCorner
+            if selectedMsg?.previous == id {
+                corner.append(.bottom)
+            }
+            if selectedMsg?.next == id {
+                corner.append(.top)
+            }
+            return corner
+        }
+    }
 
-	}
-
-	var id: String {
-		state.id
-	}
+    var id: String {
+        state.id
+    }
 }
 
 public extension HorizontalAlignment {
-	var inverted: HorizontalAlignment {
-		self == .leading ? .trailing : .leading
-	}
+    var inverted: HorizontalAlignment {
+        self == .leading ? .trailing : .leading
+    }
 }
 
+// MARK: - VerticalItemAlignment
+
 public enum VerticalItemAlignment: Sendable, Hashable {
-	case leading
-	case trailing
+    case leading
+    case trailing
 }

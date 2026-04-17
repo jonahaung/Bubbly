@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -17,20 +15,20 @@ public struct BubbleFactory: Sendable {
         msg: Message,
         isSent: Bool,
         previousMsg: Message?,
-        nextMsg: Message?
+        nextMsg: Message?,
     ) -> BubbleCorner {
         let canPreviousGroup =
             previousMsg.map {
                 shouldGroupWithPrevious(
                     msg: msg,
-                    previousMsg: $0
+                    previousMsg: $0,
                 )
             } ?? true
         let canNextGroup =
             nextMsg.map {
                 shouldGroupWithNext(
                     msg: msg,
-                    nextMsg: $0
+                    nextMsg: $0,
                 )
             } ?? false
         return resolveCorner(
@@ -38,7 +36,7 @@ public struct BubbleFactory: Sendable {
             hasPrevious: previousMsg != nil,
             hasNext: nextMsg != nil,
             canGroupWithPrevious: canPreviousGroup,
-            canGroupWithNext: canNextGroup
+            canGroupWithNext: canNextGroup,
         )
     }
 
@@ -47,7 +45,7 @@ public struct BubbleFactory: Sendable {
         hasPrevious: Bool,
         hasNext: Bool,
         canGroupWithPrevious: Bool,
-        canGroupWithNext: Bool
+        canGroupWithNext: Bool,
     ) -> BubbleCorner {
         switch (hasPrevious, hasNext) {
         case (true, true):
@@ -79,7 +77,7 @@ public struct BubbleFactory: Sendable {
     public func style(
         for msg: Message,
         previous: Message?,
-        next: Message?
+        next: Message?,
     ) -> MsgCellLayout {
         guard let previous else {
             return .init(
@@ -89,8 +87,8 @@ public struct BubbleFactory: Sendable {
                     msg: msg,
                     isSent: msg.receiptType == .outgoing,
                     previousMsg: nil,
-                    nextMsg: next
-                )
+                    nextMsg: next,
+                ),
             )
         }
 
@@ -101,12 +99,12 @@ public struct BubbleFactory: Sendable {
             msg: msg,
             isSent: msg.receiptType == .outgoing,
             previousMsg: previous,
-            nextMsg: next
+            nextMsg: next,
         )
         return .init(
             showTimeSeparator: showTimeSeparator,
             showTopPadding: showTopPadding,
-            bubbleCorner: bubbleCorner
+            bubbleCorner: bubbleCorner,
         )
     }
 
@@ -115,14 +113,14 @@ public struct BubbleFactory: Sendable {
     private func shouldGroupWithPrevious(msg: Message, previousMsg: Message) -> Bool {
         isEqual(of: msg, to: previousMsg) && isSimilarDateTime(
             of: msg.date,
-            from: previousMsg
+            from: previousMsg,
         ) && msg.attachments.isEmpty && previousMsg.attachments.isEmpty
     }
 
     private func shouldGroupWithNext(msg: Message, nextMsg: Message) -> Bool {
         isEqual(of: msg, to: nextMsg) && isSimilarDateTime(
             of: msg.date,
-            from: nextMsg
+            from: nextMsg,
         ) && msg.attachments.isEmpty && nextMsg.attachments.isEmpty
     }
 

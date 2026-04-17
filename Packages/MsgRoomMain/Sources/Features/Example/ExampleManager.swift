@@ -1,6 +1,4 @@
-//
-//  Created by Aung Ko Min on 9/4/26.
-//
+// © 2026 Aung Ko Min
 
 import Observation
 
@@ -8,7 +6,7 @@ import Observation
 @Observable
 final class ExampleManager {
     private(set) var isLoading = false
-    private(set) var error: String?
+    private(set) var error: String? = nil
 
     func setLoading(_ value: Bool) {
         isLoading = value

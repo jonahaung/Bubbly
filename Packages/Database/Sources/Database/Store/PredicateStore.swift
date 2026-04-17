@@ -73,6 +73,8 @@ public extension Predicate<PMsg> {
                     ),
                 )
             }
+        case .system:
+            fatalError()
         }
     }
 
@@ -140,6 +142,8 @@ public extension Predicate<PMsg> {
                     ),
                 )
             }
+        case .system:
+            fatalError()
         }
     }
 }

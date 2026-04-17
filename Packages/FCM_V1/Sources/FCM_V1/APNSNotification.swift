@@ -31,6 +31,7 @@ public struct APNSNotification: Codable {
     ) {
         self.validateOnly = validateOnly
         var data = customData
+        data.removeValue(forKey: "message")
         data["message"] = messageContent
         message = .init(
             token: deviceToken,
@@ -46,12 +47,12 @@ public struct APNSNotification: Codable {
         alert: APNSAlert,
         badge: Int? = 1,
         sound: APNSSoundType? = .normal("paper.wav"),
-		hasContentAvailable: Bool? = true,
+        hasContentAvailable: Bool? = true,
         hasMutableContent: Bool? = true,
         category: String? = nil,
         threadID: String? = nil,
         targetContentId: String? = nil,
-		interruptionLevel: APNSPayload.InterruptionLevel? = .critical,
+        interruptionLevel: APNSPayload.InterruptionLevel? = nil,
         relevanceScore: Float? = nil,
         filterCriteria: String? = nil,
         customData: [String: String] = [:]

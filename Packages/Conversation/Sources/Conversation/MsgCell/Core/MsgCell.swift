@@ -7,12 +7,15 @@ import SwiftUI
 import XUI
 
 struct MsgCell: View {
-    // MARK: Internal
+    
 
     let viewModel: MsgCellViewModel
 
     var body: some View {
-        VStack(alignment: viewModel.state.horizontalAlignment, spacing: 0) {
+        VStack(
+            alignment: viewModel.state.horizontalAlignment,
+            spacing: Spacing.xs
+        ) {
             if layout.showTimeSeparator {
                 TimeSeparator()
             }
@@ -22,10 +25,8 @@ struct MsgCell: View {
             if isSelected {
                 Header()
             }
-            HStack(alignment: .bottom, spacing: 0) {
-                if viewModel.state.isSender {
-                    Spacer(minLength: viewModel.state.attachments.isEmpty ? 50 : 120)
-                } else {
+            HStack(alignment: .bottom, spacing: Spacing.xs) {
+                if !viewModel.state.isSender {
                     IncomingAccessory()
                 }
                 GestureAware {
@@ -33,8 +34,6 @@ struct MsgCell: View {
                 }
                 if viewModel.state.isSender {
                     OutgoingAccessory()
-                } else {
-                    Spacer(minLength: viewModel.state.attachments.isEmpty ? 50 : 120)
                 }
             }
 
@@ -42,12 +41,13 @@ struct MsgCell: View {
                 Footer()
             }
         }
-        .environment(\.isVisible, viewModel.state.isVisible)
+        .equatable(by: viewModel.reloadID)
+        .geometryGroup()
+        .environment(\.isVisible, viewModel.isVisible)
         .environment(viewModel)
-        .equatable(by: viewModel.state)
     }
 
-    // MARK: Private
+    
 
     private var isSelected: Bool {
         viewModel.state.isSelected

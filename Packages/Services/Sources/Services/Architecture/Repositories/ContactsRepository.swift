@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -9,6 +7,8 @@ import Foundation
 import SwiftData
 import XUI
 
+// MARK: - ContactsRepository
+
 public final class ContactsRepository: ContactsRepositoryProtocol, Sendable, ErrorPresenter {
     @MainActor
     public static var shared: ContactsRepository {
@@ -16,15 +16,16 @@ public final class ContactsRepository: ContactsRepositoryProtocol, Sendable, Err
         set { sharedLock.value = newValue }
     }
 
-    private static let sharedLock = Mutex(ContactsRepository())
+    private static let sharedLock: Mutex = .init(ContactsRepository())
     private init() {}
 
-    public var contacts = [Contact]()
-    public var groups = [Group]()
+    public var contacts: [Contact] = []
+    public var groups: [Group] = []
 
     public func delete(uid: String) async throws {
         if let indext = await contacts.firstIndex(where: { $0.uid == uid }) {
-            try await Store.shared.contactStore?
+            try await Store.shared
+                .contactStore?
                 .delete(uid: uid)
 
             Task { @MainActor in
@@ -56,9 +57,9 @@ public extension ContactsRepository {
         let groups: [Group] = try await FirestoreRepo.getModels(
             for: currentUserId,
             collection: .groups,
-            field: .members
+            field: .members,
         )
-		let store = await Store.shared.groupStore
+        let store = await Store.shared.groupStore
 
         try await withThrowingTaskGroup(of: Void.self) { taskGroup in
             for group in groups {

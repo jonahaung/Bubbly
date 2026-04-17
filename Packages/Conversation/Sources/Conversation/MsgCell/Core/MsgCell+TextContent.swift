@@ -5,22 +5,21 @@ import SwiftUI
 import XUI
 
 extension MsgCell {
-    struct TextContent: View {
-        // MARK: Internal
+	struct TextContent: View {
+		
 
-        var body: some View {
-            if let text = state.attributedText {
-                Text(text)
-                    .allowsHitTesting(false)
-            }
-        }
+		var body: some View {
+			if let text = state.attributedText {
+				Text(text)
+			}
+		}
 
-        // MARK: Private
+		
 
-        @Environment(MsgCellViewModel.self) private var viewModel
+		@Environment(MsgCellViewModel.self) private var viewModel
 
-        private var state: MsgCellViewModel.State {
-            viewModel.state
-        }
-    }
+		private var state: MsgCellViewModel.State {
+			viewModel.state
+		}
+	}
 }

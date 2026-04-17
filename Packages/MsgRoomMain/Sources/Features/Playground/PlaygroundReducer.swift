@@ -1,10 +1,12 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
+
+// MARK: - PlaygroundReducer
 
 protocol PlaygroundReducer {
     func reduce(state: inout PlaygroundViewState, action: PlaygroundAction)
 }
+
+// MARK: - PlaygroundReducerImpl
 
 struct PlaygroundReducerImpl: PlaygroundReducer {
     func reduce(state: inout PlaygroundViewState, action: PlaygroundAction) {

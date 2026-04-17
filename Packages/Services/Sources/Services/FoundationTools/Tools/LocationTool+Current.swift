@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 @preconcurrency import CoreLocation
 import FoundationModels
@@ -40,7 +38,7 @@ extension LocationTool {
 
     func buildCurrentLocationContent(
         from location: CLLocation,
-        source: LocationResultSource
+        source: LocationResultSource,
     ) async -> GeneratedContent {
         let mapItem = await reverseGeocode(location: location)
         let address = formatAddress(from: mapItem, fallbackLocation: location)
@@ -55,7 +53,7 @@ extension LocationTool {
             "timestamp": formatDate(location.timestamp),
             "address": address,
             "message": source.message(for: address),
-            "note": source.note ?? ""
+            "note": source.note ?? "",
         ])
     }
 
@@ -75,10 +73,10 @@ extension LocationTool {
         locationManager.delegate = permissionRequester
 
         #if os(macOS)
-        locationManager.startUpdatingLocation()
-        locationManager.stopUpdatingLocation()
+            locationManager.startUpdatingLocation()
+            locationManager.stopUpdatingLocation()
         #else
-        locationManager.requestWhenInUseAuthorization()
+            locationManager.requestWhenInUseAuthorization()
         #endif
 
         await permissionRequester.waitForAuthorizationResponse()
@@ -95,7 +93,7 @@ extension LocationTool {
         GeneratedContent(properties: [
             "status": "error",
             "error": error.localizedDescription,
-            "message": "Failed to perform location operation"
+            "message": "Failed to perform location operation",
         ])
     }
 
@@ -107,22 +105,22 @@ extension LocationTool {
             return AuthorizationResult(
                 status: status,
                 isAuthorized: false,
-                result: createErrorOutput(error: LocationError.locationServicesDisabled)
+                result: createErrorOutput(error: LocationError.locationServicesDisabled),
             )
         }
 
         #if os(iOS) || os(visionOS)
-        if status == .authorizedAlways || status == .authorizedWhenInUse {
-            return AuthorizationResult(status: status, isAuthorized: true, result: nil)
-        }
+            if status == .authorizedAlways || status == .authorizedWhenInUse {
+                return AuthorizationResult(status: status, isAuthorized: true, result: nil)
+            }
         #elseif os(macOS)
-        if status == .authorizedAlways {
-            return AuthorizationResult(status: status, isAuthorized: true, result: nil)
-        }
+            if status == .authorizedAlways {
+                return AuthorizationResult(status: status, isAuthorized: true, result: nil)
+            }
         #else
-        if status == .authorizedAlways || status == .authorizedWhenInUse {
-            return AuthorizationResult(status: status, isAuthorized: true, result: nil)
-        }
+            if status == .authorizedAlways || status == .authorizedWhenInUse {
+                return AuthorizationResult(status: status, isAuthorized: true, result: nil)
+            }
         #endif
 
         if status == .notDetermined {
@@ -132,22 +130,22 @@ extension LocationTool {
         return AuthorizationResult(
             status: status,
             isAuthorized: false,
-            result: createErrorOutput(error: LocationError.authorizationDenied)
+            result: createErrorOutput(error: LocationError.authorizationDenied),
         )
     }
 }
 
-// MARK: - Helpers and Delegates
+// MARK: - CurrentLocationFetcher
 
 @MainActor
 final class CurrentLocationFetcher: NSObject, @MainActor CLLocationManagerDelegate {
-    private var continuation: CheckedContinuation<CLLocation, Error>?
-    private var timeoutTask: Task<Void, Never>?
+    private var continuation: CheckedContinuation<CLLocation, Error>? = nil
+    private var timeoutTask: Task<Void, Never>? = nil
 
     @MainActor
     func requestLocation(
         using manager: CLLocationManager,
-        timeout: TimeInterval = 8
+        timeout: TimeInterval = 8,
     ) async throws -> CLLocation {
         if continuation != nil {
             throw LocationError.operationInProgress
@@ -158,15 +156,18 @@ final class CurrentLocationFetcher: NSObject, @MainActor CLLocationManagerDelega
             manager.delegate = self
 
             #if os(macOS)
-            manager.startUpdatingLocation()
+                manager.startUpdatingLocation()
             #else
-            manager.requestLocation()
+                manager.requestLocation()
             #endif
 
             timeoutTask = Task { [weak self, weak manager] in
                 do {
                     try await Task.sleep(nanoseconds: UInt64(timeout * 1_000_000_000))
-                    guard let self, let manager else { return }
+                    guard let self, let manager else {
+                        return
+                    }
+
                     handleTimeout(manager: manager)
                 } catch {
                     // cancelled
@@ -177,7 +178,10 @@ final class CurrentLocationFetcher: NSObject, @MainActor CLLocationManagerDelega
 
     @MainActor
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
+        guard let location = locations.last else {
+            return
+        }
+
         if let continuation = cleanup(manager: manager) {
             continuation.resume(returning: location)
         }
@@ -192,17 +196,21 @@ final class CurrentLocationFetcher: NSObject, @MainActor CLLocationManagerDelega
 
     @MainActor
     private func handleTimeout(manager: CLLocationManager) {
-        guard let continuation = cleanup(manager: manager) else { return }
+        guard let continuation = cleanup(manager: manager) else {
+            return
+        }
+
         continuation.resume(throwing: LocationError.locationTimeout)
     }
 
     @MainActor
     private func cleanup(manager: CLLocationManager)
-        -> CheckedContinuation<CLLocation, Error>? {
+        -> CheckedContinuation<CLLocation, Error>?
+    {
         timeoutTask?.cancel()
         timeoutTask = nil
         #if os(macOS)
-        manager.stopUpdatingLocation()
+            manager.stopUpdatingLocation()
         #endif
         manager.delegate = nil
         let continuation = continuation
@@ -210,6 +218,8 @@ final class CurrentLocationFetcher: NSObject, @MainActor CLLocationManagerDelega
         return continuation
     }
 }
+
+// MARK: - PermissionRequester
 
 final class PermissionRequester: NSObject, CLLocationManagerDelegate {
     private let authorizationUpdated = AsyncStream<Void>.makeStream()

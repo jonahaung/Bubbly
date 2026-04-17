@@ -26,12 +26,13 @@ extension MsgCell {
 
         var body: some View {
             Text(headerText)
-                .font(typography.caption1)
+                .font(.system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded))
                 .foregroundStyle(Color.secondaryText)
                 .padding(.horizontal, 35)
-                .fixedSize(horizontal: false, vertical: true)
                 .allowsHitTesting(false)
+                .transition(.opacity)
                 .equatable(by: state.id)
+                .geometryGroup()
         }
     }
 }

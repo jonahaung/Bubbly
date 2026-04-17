@@ -7,74 +7,88 @@ import SwiftUI
 import XUI
 
 struct ConversationScrollView: View {
-    // MARK: Internal
 
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
-            ForEach(manager.models.headerModels) { model in
-                switch model.kind {
-                case let .conversation(conversation):
-                    HeaderProfileView(conversation: conversation)
-                        .id(conversation.uid)
-                }
-            }
-            if lazyScrollView {
-                LazyVStack(spacing: manager.conversationConfig.lineSpacing) {
-                    ForEach(manager.models.renderedModels, id: \.id) { identified in
-                        let model = identified.value
-                        MsgCell(viewModel: model)
-                            .onScrollVisibilityChange { isVisible in
-                                model.setVisibility(isVisible)
-                                if isVisible, model.state.layout.showTopPadding {
-                                    manager.presentation.send(.date(model.msg.date))
-                                }
-                            }
-                            .id(identified.id)
+            MsgsScrollViewLayout(
+                manager: manager.layoutManager,
+                config: .init(
+                    spacing: manager.conversationConfig.lineSpacing,
+                    contentInsets: .init(
+                        top: ChatLayoutConstants.topBarHeight,
+                        leading: Padding.sm,
+                        bottom: 0,
+                        trailing: Padding.sm
+                    ),
+                    boundsWidth: UIApplication.shared.screenSize().width
+                )
+            ) {
+                ForEach(manager.models.headerModels) { model in
+                    switch model.kind {
+                    case .conversation(let conversation):
+                        HeaderProfileView(conversation: conversation)
+                            .id(conversation.uid)
+                            .layoutValue(
+                                key: MsgLayoutValueKey.self,
+                                value: .init(
+                                    uid: conversation.uid,
+                                    recipient: .system,
+                                    attachmentsCount: 0,
+                                    headerStatus: 0
+                                )
+                            )
                     }
                 }
-                .equatable(by: manager.state.reloadID)
-                .geometryGroup()
-            } else {
-                VStack(spacing: manager.conversationConfig.lineSpacing) {
-                    ForEach(manager.models.renderedModels) { identified in
-                        let model = identified.value
-                        MsgCell(viewModel: model)
-                            .onScrollVisibilityChange { isVisible in
-                                model.setVisibility(isVisible)
-                                if isVisible, model.state.layout.showTimeSeparator {
-                                    manager.presentation.send(.date(model.msg.date))
-                                }
-                            }
-                            .id(identified.id)
-                    }
+
+                ForEach(manager.models.renderedModels) { model in
+                    MsgCell(viewModel: model)
+                        .id(model.id)
+                        .layoutValue(
+                            key: MsgLayoutValueKey.self,
+                            value: model.msg.layoutValue(
+                                layout: model.state.layout
+                            )
+                        )
                 }
-                .equatable(by: manager.state.reloadID)
-                .geometryGroup()
             }
+            .geometryGroup()
+            .scrollTargetLayout()
         }
-        .scrollEdgeEffectStyle(.soft, for: .vertical)
-        .tint(Color.tintColor)
+        .tint(Color.tint)
         .foregroundStyle(Color.primaryText)
-        .contentMargins(.top, ChatLayoutConstants.topBarHeight, for: .scrollContent)
-        .contentMargins(.bottom, manager.layout.bottomBarFrame?.height, for: .scrollContent)
         .scrollDismissesKeyboard(.never)
-        .scrollBounceBehavior(.always, axes: .vertical)
-        .defaultScrollAnchor(.bottom, for: .sizeChanges)
+        .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
         .onScrollPhaseChange { oldPhase, newPhase, context in
-            manager.send(.onScrollPhaseChange(oldPhase, newPhase, context: context))
+            manager.send(
+                .scrollViewIntent(
+                    .onScrollPhaseChange(oldPhase, newPhase, context: context)
+                )
+            )
         }
         .onScrollGeometryChange(
             for: VScrollGeometry.self,
             of: { .init($0) },
         ) { oldValue, newValue in
-            manager.send(.onScrollGeometryChange(oldValue, newValue))
+            manager.send(
+                .scrollViewIntent(.onScrollGeometryChange(oldValue, newValue))
+            )
         }
+        .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) {
+            ids in
+            manager.models.didBecomeVisible(ids: ids)
+        }
+        .defaultScrollAnchor(.top, for: .initialOffset)
         .equatable(by: manager.state.reloadID)
-        .scrollPosition(manager.scrollController.scrollPositionBindable, anchor: .none)
+        .defaultScrollAnchor(
+            manager.presentation.state.bottomAccessory == .scrollDownButton
+                ? nil : .bottom,
+            for: .sizeChanges
+        )
+        .scrollPosition(
+            manager.scrollController.scrollPositionBindable,
+            anchor: nil
+        )
     }
 
-    // MARK: Private
-
     @Environment(ChatManager.self) private var manager
-    @AppStorage("Lazy Scroll View") private var lazyScrollView: Bool = true
 }

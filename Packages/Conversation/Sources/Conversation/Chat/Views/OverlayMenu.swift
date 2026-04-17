@@ -11,14 +11,14 @@ import XUI
 // MARK: - OverlayMenu
 
 struct OverlayMenu: View {
-    // MARK: Internal
+    
 
     enum TransitState: Hashable {
         case appeared
         case didAppear
         case hidden
 
-        // MARK: Internal
+        
 
         var isDidAppear: Bool {
             self == .didAppear
@@ -30,16 +30,12 @@ struct OverlayMenu: View {
     }
 
     let item: OverlayMenuItem
-
+    @Environment(\.conversationTheme) private var theme
     var body: some View {
         ZStack {
             Rectangle()
                 .fill(
-                    manager.state
-                        .properties
-                        .theme
-                        .background
-                        .color
+                    theme.backgroundColor
                         .opacity(transitionState.isDidAppear ? 0.8 : 0),
                 )
                 .gesture(
@@ -95,7 +91,7 @@ struct OverlayMenu: View {
         }
     }
 
-    // MARK: Private
+    
 
     @Environment(MsgCellViewModel.self) private var viewModel
     @Environment(\.msgCellActions) private var msgCellActions
@@ -113,7 +109,7 @@ struct OverlayMenu: View {
 // MARK: - RoomFocesedOverlayBar
 
 struct RoomFocesedOverlayBar: View {
-    // MARK: Internal
+    
 
     var body: some View {
         HStack(spacing: 0) {
@@ -169,7 +165,7 @@ struct RoomFocesedOverlayBar: View {
         }
     }
 
-    // MARK: Private
+    
 
     @Environment(\.conversation) private var conversation
     @Environment(\.msgCellActions) private var msgCellActions

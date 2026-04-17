@@ -1,128 +1,61 @@
---acronyms 
---allman false
---allow-partial-wrapping true
---anonymous-for-each convert
---asset-literals visual-width
---async-capturing 
---before-marks 
---binary-grouping 4,8
---blank-line-after-switch-case multiline-only
---call-site-paren default
---category-mark "MARK: %c"
---class-threshold 0
---closing-paren balanced
---closure-void remove
---complex-attributes preserve
---computed-var-attributes preserve
---conditional-assignment after-property
---conflict-markers reject
---date-format "RFC 1123"
---decimal-grouping 3,6
---default-test-suite-attributes 
---doc-comments before-declarations
---else-position same-line
---empty-braces no-space
---enum-namespaces always
---enum-threshold 0
---equatable-macro none
---exponent-case lowercase
---exponent-grouping disabled
---extension-acl on-extension
---extension-mark "MARK: - %t + %c"
---extension-threshold 0
---file-macro "#fileID"
---fraction-grouping disabled
---fragment false
---func-attributes preserve
---generic-types 
---group-blank-lines true
---grouped-extension "MARK: %c"
---guard-else same-line
---header "// © 2026 Aung Ko Min"
---hex-grouping 4,8
---hex-literal-case uppercase
---ifdef indent
---import-grouping alpha
---indent 4
---indent-case false
---indent-strings false
---inferred-types always
---init-coder-nil false
---language-mode 0
---lifecycle 
---line-after-marks true
---line-between-guards true
---linebreaks lf
---mark-categories true
---mark-class-threshold 0
---mark-enum-threshold 0
---mark-extension-threshold 0
---mark-extensions always
---mark-struct-threshold 0
---mark-types always
---markdown-files ignore
---max-width 100
---modifier-order 
---never-trailing 
---nil-init insert
---no-space-operators 
---no-wrap-operators 
---non-complex-attributes 
---octal-grouping 4,8
---operator-func spaced
---organization-mode visibility
---organize-types actor,class,enum,struct
---pattern-let hoist
---prefer-synthesized-init-for-internal-structs never
---preserve-acronyms 
---preserve-decls 
---preserved-property-types Package
---property-types infer-locals-only
---ranges spaced
---redundant-async always
---redundant-throws always
---self remove
---self-required 
---semicolons never
---short-optionals except-properties
---single-line-for-each ignore
---smart-tabs enabled
---some-any true
---sort-swiftui-properties alphabetize
---sorted-patterns 
---stored-var-attributes preserve
---strip-unused-args always
---struct-threshold 0
---swift-version 6.4
---tab-width unspecified
---throw-capturing 
---timezone UTC
---trailing-closures 
---trailing-commas always
---trim-whitespace always
---type-attributes preserve
---type-blank-lines remove
---type-body-marks preserve
---type-delimiter space-after
---type-mark "MARK: - %t"
---type-marks 
---type-order 
---url-macro none
---visibility-marks 
---visibility-order 
---void-type Void
---wrap-arguments preserve
---wrap-collections preserve
---wrap-conditions preserve
---wrap-effects preserve
---wrap-enum-cases always
---wrap-parameters default
---wrap-return-type preserve
---wrap-string-interpolation default
---wrap-ternary default
---wrap-type-aliases preserve
---xcode-indentation disabled
---xctest-symbols 
---yoda-swap always
---disable blankLineAfterImports,braces,docComments,docCommentsBeforeModifiers
---enable acronyms,blankLinesAfterGuardStatements,blockComments,isEmpty,markTypes,noExplicitOwnership,noGuardInTests,preferFinalClasses,preferSwiftTesting,privateStateVariables,propertyTypes,singlePropertyPerLine,sortSwitchCases,unusedPrivateDeclarations,validateTestCases,wrapConditionalBodies,wrapEnumCases,wrapMultilineConditionalAssignment,wrapMultilineFunctionChains,wrapSwitchCases
+rules:
+  # MARK: - Structure
+  - blankLinesBetweenScopes
+  - blankLinesAroundMark
+  - blankLinesAtStartOfScope
+  - blankLinesAtEndOfScope
+
+  # MARK: - Formatting
+  - indent
+  - linebreaks
+  - linebreakAtEndOfFile
+  - braces
+  - elseOnSameLine
+
+  # MARK: - Spacing
+  - consecutiveBlankLines
+  - consecutiveSpaces
+  - trailingSpace
+  - spaceAroundOperators
+  - spaceAroundBraces
+  - spaceAroundParens
+  - spaceAroundGenerics
+  - spaceAroundBrackets
+  - spaceAroundComments
+  - spaceInsideBraces
+  - spaceInsideParens
+  - spaceInsideGenerics
+  - spaceInsideBrackets
+  - spaceInsideComments
+
+  # MARK: - Code Simplification
+  - redundantSelf
+  - redundantReturn
+  - redundantInit
+  - redundantLet
+  - redundantNilInit
+  - redundantParens
+  - redundantPattern
+  - redundantGet
+  - redundantBackticks
+  - redundantRawValues
+  - redundantVoidReturnType
+
+  # MARK: - Safety / Correctness
+  - strongOutlets
+  - unusedArguments
+  - hoistPatternLet
+
+  # MARK: - Style
+  - semicolons
+  - numberFormatting
+  - ranges
+  - specifiers
+  - void
+
+  # MARK: - Imports
+  - duplicateImports
+  - sortedImports
+
+  # MARK: - Misc
+  - todos

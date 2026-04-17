@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Observation
 
@@ -8,7 +6,7 @@ import Observation
 @Observable
 final class PlaygroundManager {
     private(set) var isLoading = false
-    private(set) var error: String?
+    private(set) var error: String? = nil
 
     func setLoading(_ value: Bool) {
         isLoading = value

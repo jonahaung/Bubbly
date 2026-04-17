@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Crypto
@@ -30,7 +28,7 @@ public struct AuthUserProfileView: View {
                     PhotoPickerButton(
                         pickedPhoto: $viewModel.pickedPhoto,
                         size: 200,
-                        clipShape: Circle()
+                        clipShape: Circle(),
                     ) {
                         ResizableImage(viewModel.editingUser.photoURL)
                     }

@@ -29,7 +29,7 @@ public final class PhotoPickerViewModel {
         }
     }
 
-    // MARK: - Init
+    
 
     public init(_ pickedPhoto: PickedPhoto?) {
         _pickedPhoto = pickedPhoto

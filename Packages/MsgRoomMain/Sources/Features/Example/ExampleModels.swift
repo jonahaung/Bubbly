@@ -1,33 +1,27 @@
-//
-//  Created by Aung Ko Min on 9/4/26.
-//
+// © 2026 Aung Ko Min
 
 import UIKit
 
 enum ExampleModels {
-
     enum FetchFromLocalDataStore {
-        struct Request {
-        }
+        struct Request {}
 
-        struct Response {
-        }
+        struct Response {}
 
         struct ViewModel {
-            var exampleTranslation: String?
+            var exampleTranslation: String? = nil
         }
     }
 
     enum FetchFromRemoteDataStore {
-        struct Request {
-        }
+        struct Request {}
 
         struct Response {
-            var exampleVariable: String?
+            var exampleVariable: String? = nil
         }
 
         struct ViewModel {
-            var exampleVariable: String?
+            var exampleVariable: String? = nil
         }
     }
 
@@ -36,24 +30,22 @@ enum ExampleModels {
             var event: AnalyticsEvents
         }
 
-        struct Response {
-        }
+        struct Response {}
 
-        struct ViewModel {
-        }
+        struct ViewModel {}
     }
 
     enum PerformExample {
         struct Request {
-            var exampleVariable: String?
+            var exampleVariable: String? = nil
         }
 
         struct Response {
-            var error: ExampleError?
+            var error: ExampleError? = nil
         }
 
         struct ViewModel {
-            var error: ExampleError?
+            var error: ExampleError? = nil
         }
     }
 
@@ -71,7 +63,7 @@ enum ExampleModels {
 
     struct Error<T> {
         var type: T
-        var message: String?
+        var message: String? = nil
 
         init(type: T) {
             self.type = type

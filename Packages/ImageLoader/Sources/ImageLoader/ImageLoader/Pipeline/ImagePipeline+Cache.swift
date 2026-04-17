@@ -226,7 +226,7 @@ public extension ImagePipeline.Cache {
         }
     }
 
-    // MARK: Private
+    
 
     private func decodeImageData(_ data: Data, for request: ImageRequest) -> ImageContainer? {
         let context = ImageDecodingContext(request: request, data: data, cacheType: .disk)

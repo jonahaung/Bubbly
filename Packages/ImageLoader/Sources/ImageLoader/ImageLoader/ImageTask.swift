@@ -204,8 +204,6 @@ public final class ImageTask: Hashable {
         }
     }
 
-    // MARK: Internals
-
     /// Gets called when the task is cancelled either by the user or by an
     /// external event such as session invalidation.
     func cancelInternal() {

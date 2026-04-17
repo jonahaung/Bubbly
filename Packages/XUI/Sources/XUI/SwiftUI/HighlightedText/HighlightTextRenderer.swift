@@ -7,11 +7,9 @@ import SwiftUI
 /// A custom TextRenderer that draws a background highlight
 /// behind text runs marked with `HighlightAttribute`
 public struct HighlightTextRenderer: TextRenderer {
-    // MARK: - Properties
+    
 
     private let style: any ShapeStyle
-
-    // MARK: - Initializer
 
     public init(style: any ShapeStyle = .yellow) {
         self.style = style

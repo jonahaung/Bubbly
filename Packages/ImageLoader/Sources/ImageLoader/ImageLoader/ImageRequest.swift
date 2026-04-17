@@ -419,7 +419,7 @@ public struct ImageRequest: CustomStringConvertible, @unchecked Sendable,
         }
     }
 
-    // MARK: Internal
+    
 
     private var ref: Container
 

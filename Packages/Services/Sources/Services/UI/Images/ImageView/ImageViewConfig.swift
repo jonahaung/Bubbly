@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import ImageLoader
 import SwiftUI
@@ -15,7 +13,7 @@ public struct ImageViewConfig {
         size: ImageSize,
         processors: [ImageProcessing] = [],
         backgroundColor: Color? = nil,
-        tapAction: ImageViewTapAction = .openPhotoViewer
+        tapAction: ImageViewTapAction = .openPhotoViewer,
     ) {
         self.size = size
         self.processors = processors

@@ -1,17 +1,35 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftUI
 import UIKit
 
+// MARK: - BubbleCorner
+
 public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
+    case all
+    case receivingTop
+    case receivingCenter
+    case receivingBottom
+    case sendingTop
+    case sendingCenter
+    case sendingBottom
+    case none
+
+    // MARK: Public
+
     public var id: Int {
         rawValue
     }
 
-    case all, receivingTop, receivingCenter, receivingBottom, sendingTop, sendingCenter,
-         sendingBottom, none
+    public var isCenter: Bool {
+        switch self {
+        case .receivingCenter,
+             .sendingCenter:
+            true
+        default:
+            false
+        }
+    }
 
     public mutating func append(_ edge: VerticalEdge) {
         switch self {
@@ -64,18 +82,26 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
         }
     }
 
-    public var isCenter: Bool {
-        switch self {
-        case .receivingCenter, .sendingCenter:
-            true
-        default:
-            false
-        }
+    @MainActor
+    public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle {
+        UnevenRoundedRectangle(
+            topLeadingRadius: topLeadingRadius ? cornerRadius : 2,
+            bottomLeadingRadius: bottomLeadingRadius ? cornerRadius : 2,
+            bottomTrailingRadius: bottomTrailingRadius ? cornerRadius : 2,
+            topTrailingRadius: topTrailingRadius ? cornerRadius : 2,
+            style: .continuous,
+        )
     }
+
+    
 
     var topLeadingRadius: Bool {
         switch self {
-        case .all, .receivingTop, .sendingTop, .sendingBottom, .sendingCenter:
+        case .all,
+             .receivingTop,
+             .sendingBottom,
+             .sendingCenter,
+             .sendingTop:
             true
         default:
             false
@@ -84,7 +110,11 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
 
     var topTrailingRadius: Bool {
         switch self {
-        case .all, .sendingTop, .receivingTop, .receivingBottom, .receivingCenter:
+        case .all,
+             .receivingBottom,
+             .receivingCenter,
+             .receivingTop,
+             .sendingTop:
             true
         default:
             false
@@ -93,7 +123,11 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
 
     var bottomLeadingRadius: Bool {
         switch self {
-        case .all, .receivingBottom, .sendingTop, .sendingBottom, .sendingCenter:
+        case .all,
+             .receivingBottom,
+             .sendingBottom,
+             .sendingCenter,
+             .sendingTop:
             true
         default:
             false
@@ -102,22 +136,15 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
 
     var bottomTrailingRadius: Bool {
         switch self {
-        case .all, .sendingBottom, .receivingTop, .receivingBottom, .receivingCenter:
+        case .all,
+             .receivingBottom,
+             .receivingCenter,
+             .receivingTop,
+             .sendingBottom:
             true
         default:
             false
         }
-    }
-
-    @MainActor
-    public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle {
-        UnevenRoundedRectangle(
-            topLeadingRadius: topLeadingRadius ? cornerRadius : 0,
-            bottomLeadingRadius: bottomLeadingRadius ? cornerRadius : 0,
-            bottomTrailingRadius: bottomTrailingRadius ? cornerRadius : 0,
-            topTrailingRadius: topTrailingRadius ? cornerRadius : 0,
-            style: .continuous
-        )
     }
 }
 

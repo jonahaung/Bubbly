@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import UserNotifications
@@ -9,19 +7,23 @@ public extension Permission {
     static func notification(_ access: Set<PermissionKind.NotificationAccess> = [
         .alert,
         .badge,
-        .sound
+        .sound,
     ]) -> NotificationPermission {
         NotificationPermission(access: access)
     }
 }
 
+// MARK: - _SendableBox
+
 /// Simple sendable box to move a value out of a @Sendable closure safely.
 private final class _SendableBox<T>: @unchecked Sendable {
-    var value: T?
+    var value: T? = nil
     init(_ value: T? = nil) {
         self.value = value
     }
 }
+
+// MARK: - NotificationPermission
 
 public final class NotificationPermission: Permission {
     public let access: Set<PermissionKind.NotificationAccess>
@@ -41,6 +43,7 @@ public final class NotificationPermission: Permission {
         guard let authorizationStatus = fetchAuthorizationStatusLegacy() else {
             return .notDetermined
         }
+
         return status(from: authorizationStatus)
     }
 
@@ -83,8 +86,8 @@ public final class NotificationPermission: Permission {
         center
             .requestAuthorization(
                 options: UNAuthorizationOptions(
-                    access.map(\.userNotifcationAuthorizationOptions)
-                )
+                    access.map(\.userNotifcationAuthorizationOptions),
+                ),
             ) { _, _ in
                 DispatchQueue.main.async {
                     completion()

@@ -30,7 +30,7 @@ extension AppCoordinator {
 		case .conversationDetails(let conversation):
 			switch conversation.kind {
 			case .contact(let contact):
-				ContactSettingsScene(contact, coordinator: self)
+				ContactProfile(contact, coordinator: self)
 			case .group(let group):
 				GroupConversationSettingsScene(group, coordinator: self)
 			}

@@ -5,7 +5,7 @@
 import SwiftUI
 
 public struct SystemSoundTesterView: View {
-    @StateObject private var registry = SystemSoundRegistry()
+    @StateObject private var registry: SystemSoundRegistry = .init()
     @State private var query = ""
 
     public init() {}
@@ -53,7 +53,7 @@ public struct SystemSoundTesterView: View {
     private func nameBinding(for id: UInt32) -> Binding<String> {
         .init(
             get: { registry.name(for: id) },
-            set: { registry.rename(id: id, name: $0) }
+            set: { registry.rename(id: id, name: $0) },
         )
     }
 }

@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
@@ -11,6 +9,6 @@ public protocol DependencyContainer: Sendable {
     var contactsRepository: ContactsRepositoryProtocol { get }
     init(
         currentUserRepository: CurrentUserRepository,
-        contactsRepository: any ContactsRepositoryProtocol
+        contactsRepository: any ContactsRepositoryProtocol,
     )
 }

@@ -1,6 +1,6 @@
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+// © 2026 Aung Ko Min
+
+// MARK: - PermissionKind
 
 public enum PermissionKind {
     case camera
@@ -95,6 +95,8 @@ public extension PermissionKind {
         }
     }
 }
+
+// MARK: Hashable
 
 extension PermissionKind: Hashable {
     public static func == (lhs: PermissionKind, rhs: PermissionKind) -> Bool {

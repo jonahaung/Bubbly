@@ -6,7 +6,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 public struct SoundEffect: Hashable, Sendable {
-    nonisolated(unsafe) static var audioSession: AVAudioSession? = nil
+    nonisolated(unsafe) static var audioSession: AVAudioSession?
 
     var urls: [URL]
 

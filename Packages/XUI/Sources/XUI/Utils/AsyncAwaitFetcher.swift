@@ -50,7 +50,7 @@ public actor AsyncAwaitFetcher<Item: AsyncFetchingItem> {
 
 public actor FetcherPool {
     private var storage: [ObjectIdentifier: Any] = [:]
-    public static let shared = FetcherPool()
+    public static let shared: FetcherPool = .init()
 
     public func fetcher<Item: AsyncFetchingItem>(of type: Item.Type) -> AsyncAwaitFetcher<Item> {
         let key = ObjectIdentifier(type)

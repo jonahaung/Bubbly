@@ -8,19 +8,19 @@ import XUI
 
 extension MsgCell {
     struct Footer: View {
-        // MARK: Internal
+        
 
         var body: some View {
             Text(footerText)
-                .font(.caption)
+                .font(.system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded))
                 .foregroundStyle(Color.secondaryText)
                 .padding(.horizontal, 35)
-                .fixedSize(horizontal: false, vertical: true)
                 .allowsHitTesting(false)
+                .transition(.opacity)
                 .equatable(by: state.id)
         }
 
-        // MARK: Private
+        
 
         @Environment(MsgCellViewModel.self) private var viewModel
 
