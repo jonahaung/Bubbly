@@ -14,13 +14,15 @@ struct ContactListReducerImpl: ContactListReducer {
             state.error = value
         case .setSearchText(let value):
             state.searchText = value
-            state.sections = buildSections(from: filteredContacts(for: state.contacts, searchText: value))
+            state.chatContactSections = buildSections(from: filteredContacts(for: state.chatContacts, searchText: value))
         case .applySnapshot(let snapshot):
             state = .init(
                 searchText: state.searchText,
-                contacts: snapshot.contacts,
+                chatContacts: snapshot.contacts,
+                phoneContacts: snapshot.phoneContacts,
                 groups: snapshot.groups,
-                sections: buildSections(from: filteredContacts(for: snapshot.contacts, searchText: state.searchText)),
+                chatContactSections: buildSections(from: filteredContacts(for: snapshot.contacts, searchText: state.searchText)),
+                phoneContactSections: buildSections(from: filteredContacts(for: snapshot.phoneContacts, searchText: state.searchText)),
                 isLoading: snapshot.isLoading,
                 error: snapshot.error
             )

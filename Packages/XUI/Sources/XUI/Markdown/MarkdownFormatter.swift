@@ -8,10 +8,8 @@
 import Contacts
 import SwiftUI
 
-// MARK: - MarkdownFormatter
-
 public struct MarkdownFormatter {
-   
+
     private let style: GitHubMarkdownStyle = .init()
     public init() {}
 
@@ -20,7 +18,14 @@ public struct MarkdownFormatter {
         guard string.containsMarkdown else {
             return .init(string, attributes: style.base)
         }
-        if let markdown = try? AttributedString(markdown: string) {
+        if let markdown = try? AttributedString(
+            markdown: string,
+            options: .init(
+                allowsExtendedAttributes: true,
+                interpretedSyntax: .full,
+                failurePolicy: .returnPartiallyParsedIfPossible
+            )
+        ) {
             return markdown.mergingAttributes(.paragraph)
         }
         return AttributedString(string, attributes: .paragraph)
@@ -40,34 +45,47 @@ public struct MarkdownFormatter {
             appendSpacingIfNeeded(&result)
 
             switch block {
-            case let .heading(level, text):
+            case .heading(let level, let text):
                 result += renderHeading(level: level, text: text, style: style)
-            case let .paragraph(text):
+            case .paragraph(let text):
                 result += parseInline(text, base: style.base)
-            case let .codeBlock(lang, content):
-                result += renderCodeBlock(lang: lang, content: content, style: style)
-            case let .listItem(level, text):
-                result += renderUnorderedListItem(level: level, text: text, style: style)
-            case let .orderedListItem(level, index, text):
+            case .codeBlock(let lang, let content):
+                result += renderCodeBlock(
+                    lang: lang,
+                    content: content,
+                    style: style
+                )
+            case .listItem(let level, let text):
+                result += renderUnorderedListItem(
+                    level: level,
+                    text: text,
+                    style: style
+                )
+            case .orderedListItem(let level, let index, let text):
                 result += renderOrderedListItem(
                     level: level,
                     index: index,
                     text: text,
                     style: style,
                 )
-            case let .blockquote(text):
+            case .blockquote(let text):
                 result += renderBlockquote(text: text, style: style)
             case .horizontalRule:
                 result += renderDivider(style: style)
-            case let .mention(username):
+            case .mention(let username):
                 var attr = style.base
+                attr.font = .system(
+                    size: UIFont.labelFontSize,
+                    weight: .medium,
+                    design: .serif
+                )
                 attr.foregroundColor = .red
                 result += AttributedString("@\(username)", attributes: attr)
-            case let .hashtag(topic):
+            case .hashtag(let topic):
                 var attr = style.base
                 attr.foregroundColor = .blue
                 result += AttributedString("#\(topic)", attributes: attr)
-            case let .unknown(text):
+            case .unknown(let text):
                 result += parseInline(text, base: style.base)
             }
         }
@@ -80,9 +98,18 @@ public struct MarkdownFormatter {
 extension MarkdownFormatter {
     // MARK: Inline Parsing
 
-    func parseInline(_ text: String, base: AttributeContainer) -> AttributedString {
+    func parseInline(_ text: String, base: AttributeContainer)
+        -> AttributedString
+    {
         if text.containsMarkdown {
-            if let result = try? AttributedString(markdown: text, options: .init(allowsExtendedAttributes: false, interpretedSyntax: .inlineOnly, failurePolicy: .returnPartiallyParsedIfPossible)) {
+            if let result = try? AttributedString(
+                markdown: text,
+                options: .init(
+                    allowsExtendedAttributes: true,
+                    interpretedSyntax: .full,
+                    failurePolicy: .returnPartiallyParsedIfPossible
+                )
+            ) {
                 return result.mergingAttributes(base)
             }
         }
@@ -91,7 +118,10 @@ extension MarkdownFormatter {
 
     // MARK: Block Spacing
 
-    func appendSpacingIfNeeded(_ attr: inout AttributedString, tight _: Bool = true) {
+    func appendSpacingIfNeeded(
+        _ attr: inout AttributedString,
+        tight _: Bool = true
+    ) {
         guard !attr.characters.isEmpty, attr.characters.last != "\n" else {
             return
         }
@@ -101,7 +131,9 @@ extension MarkdownFormatter {
 
     // MARK: Headings
 
-    func renderHeading(level: Int, text: String, style: GitHubMarkdownStyle) -> AttributedString {
+    func renderHeading(level: Int, text: String, style: GitHubMarkdownStyle)
+        -> AttributedString
+    {
         .init(text, attributes: style.block(.header(level: level)))
     }
 
@@ -113,14 +145,19 @@ extension MarkdownFormatter {
         style: GitHubMarkdownStyle,
     ) -> AttributedString {
         let attributes = style.block(.codeBlock(languageHint: lang))
-        return  .init(content, attributes: attributes)
+        return .init(content, attributes: attributes)
     }
 
     // MARK: Blockquote
 
-    func renderBlockquote(text: String, style: GitHubMarkdownStyle) -> AttributedString {
+    func renderBlockquote(text: String, style: GitHubMarkdownStyle)
+        -> AttributedString
+    {
         let attributes = style.block(.blockQuote)
-        let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+        let lines = text.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
+        )
         var result = AttributedString()
         for line in lines {
             result += AttributedString("│ ", attributes: attributes)
@@ -134,7 +171,7 @@ extension MarkdownFormatter {
     func renderDivider(style: GitHubMarkdownStyle) -> AttributedString {
         var attributes = style.block(.paragraph)
         attributes.foregroundColor = .secondary
-        return AttributedString("──────────", attributes: attributes)
+        return AttributedString("–––––––", attributes: attributes)
     }
 
     // MARK: Unordered List Items
@@ -145,7 +182,7 @@ extension MarkdownFormatter {
         style: GitHubMarkdownStyle,
     ) -> AttributedString {
         let attributes = style.block(.unorderedList)
-        let bullets = ["•", "◦", "‣"]
+        let bullets = ["-", "•", "‣", "◦"]
         let bullet = bullets[level % bullets.count]
         let indent = String(repeating: " ", count: level)
         return AttributedString("\(indent)\(bullet) ", attributes: attributes)

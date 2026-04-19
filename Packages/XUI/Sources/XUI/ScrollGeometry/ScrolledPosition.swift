@@ -4,17 +4,19 @@ import SwiftUI
 @frozen
 public struct VScrollGeometry: Hashable {
 	public let contentHeight: CGFloat
-	public let boundsHeight: CGFloat
+	public let boundsSize: CGSize
 	public var offsetY: CGFloat
 	public let topInset: CGFloat
 	public let bottomInset: CGFloat
+    
+    public var boundsHeight: CGFloat { boundsSize.height }
 }
 
 public extension VScrollGeometry {
 	init(_ geometry: ScrollGeometry) {
 		self.init(
 			contentHeight: geometry.contentSize.height,
-			boundsHeight: geometry.bounds.height,
+            boundsSize: geometry.bounds.size,
 			offsetY: geometry.contentOffset.y + geometry.contentInsets.top,
 			topInset: geometry.contentInsets.top,
 			bottomInset: geometry.contentInsets.bottom,
@@ -24,7 +26,7 @@ public extension VScrollGeometry {
 	nonisolated
 	static let empty: VScrollGeometry = .init(
 		contentHeight: .zero,
-		boundsHeight: .zero,
+		boundsSize: .zero,
 		offsetY: .zero,
 		topInset: .zero,
 		bottomInset: .zero,
@@ -36,14 +38,14 @@ public extension VScrollGeometry {
 		if contentHeight == 0 {
 			return 0
 		}
-		return contentHeight - boundsHeight + topInset
+        return contentHeight - boundsSize.height + topInset
 	}
 
 	var scrolledPosition: ScrolledPosition {
 		if offsetY == 0 {
 			return .atTop
 		}
-		let diff = contentHeight - (offsetY+boundsHeight)
+		let diff = contentHeight - (offsetY+boundsSize.height)
 		if diff > 10 {
 			return .none
 		}
@@ -53,9 +55,9 @@ public extension VScrollGeometry {
 	func isNear(_ edge: VerticalEdge) -> Bool {
 		switch edge {
 		case .top:
-			offsetY < boundsHeight / 2
+			offsetY < boundsSize.height / 2
 		case .bottom:
-			offsetY > (bottomMostOffset - (boundsHeight / 2))
+			offsetY > (bottomMostOffset - (boundsSize.height / 2))
 		}
 	}
 }

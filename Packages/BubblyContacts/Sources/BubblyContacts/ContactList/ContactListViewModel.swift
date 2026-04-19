@@ -8,7 +8,7 @@ final class ContactListViewModel {
     private(set) var state: ContactListViewState
 
     private let reducer: ContactListReducer
-    private let taskRegistry = ContactListTaskRegistry()
+    private let taskRegistry: ContactListTaskRegistry = .init()
     private let loadUseCase: LoadContactListUseCase
     private let refreshUseCase: RefreshContactListUseCase
     private let syncContactsUseCase: SyncContactListContactsUseCase
@@ -16,25 +16,27 @@ final class ContactListViewModel {
 
     init(
         currentUserRepository: CurrentUserRepository,
-        reducer: ContactListReducer = ContactListReducerImpl()
+        reducer: ContactListReducer = ContactListReducerImpl(),
     ) {
         self.reducer = reducer
         let manager = ContactListManager()
         let repository = ContactListRepositoryImpl(
             manager: manager,
-            currentUserRepository: currentUserRepository
+            currentUserRepository: currentUserRepository,
         )
-        self.loadUseCase = LoadContactListUseCaseImpl(repository: repository)
-        self.refreshUseCase = RefreshContactListUseCaseImpl(repository: repository)
-        self.syncContactsUseCase = SyncContactListContactsUseCaseImpl(repository: repository)
-        self.syncGroupsUseCase = SyncContactListGroupsUseCaseImpl(repository: repository)
-        self.state = .init(
+        loadUseCase = LoadContactListUseCaseImpl(repository: repository)
+        refreshUseCase = RefreshContactListUseCaseImpl(repository: repository)
+        syncContactsUseCase = SyncContactListContactsUseCaseImpl(repository: repository)
+        syncGroupsUseCase = SyncContactListGroupsUseCaseImpl(repository: repository)
+        state = .init(
             searchText: "",
-            contacts: [],
+            chatContacts: [],
+            phoneContacts: [],
             groups: [],
-            sections: [],
+            chatContactSections: [],
+            phoneContactSections: [],
             isLoading: false,
-            error: nil
+            error: nil,
         )
     }
 
@@ -42,25 +44,33 @@ final class ContactListViewModel {
         switch intent {
         case .appear:
             await taskRegistry.run(key: .appear) { [weak self] in
-                guard let self else { return }
-                await self.load()
+                guard let self else {
+                    return
+                }
+                await load()
             }
         case .refresh:
             await taskRegistry.run(key: .refresh) { [weak self] in
-                guard let self else { return }
-                await self.refresh()
+                guard let self else {
+                    return
+                }
+                await refresh()
             }
-        case .setSearchText(let value):
+        case let .setSearchText(value):
             dispatch(.setSearchText(value))
         case .syncContacts:
             await taskRegistry.run(key: .syncContacts) { [weak self] in
-                guard let self else { return }
-                await self.syncContacts()
+                guard let self else {
+                    return
+                }
+                await syncContacts()
             }
         case .syncGroups:
             await taskRegistry.run(key: .syncGroups) { [weak self] in
-                guard let self else { return }
-                await self.syncGroups()
+                guard let self else {
+                    return
+                }
+                await syncGroups()
             }
         }
     }
@@ -71,7 +81,8 @@ final class ContactListViewModel {
         do {
             let snapshot = try await loadUseCase.execute()
             dispatch(.applySnapshot(snapshot))
-        } catch {
+        }
+        catch {
             dispatch(.setLoading(false))
             dispatch(.setError(error.localizedDescription))
         }
@@ -83,7 +94,8 @@ final class ContactListViewModel {
         do {
             let snapshot = try await refreshUseCase.execute()
             dispatch(.applySnapshot(snapshot))
-        } catch {
+        }
+        catch {
             dispatch(.setLoading(false))
             dispatch(.setError(error.localizedDescription))
         }
@@ -95,7 +107,8 @@ final class ContactListViewModel {
         do {
             let snapshot = try await syncContactsUseCase.execute()
             dispatch(.applySnapshot(snapshot))
-        } catch {
+        }
+        catch {
             dispatch(.setLoading(false))
             dispatch(.setError(error.localizedDescription))
         }
@@ -107,7 +120,8 @@ final class ContactListViewModel {
         do {
             let snapshot = try await syncGroupsUseCase.execute()
             dispatch(.applySnapshot(snapshot))
-        } catch {
+        }
+        catch {
             dispatch(.setLoading(false))
             dispatch(.setError(error.localizedDescription))
         }

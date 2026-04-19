@@ -5,19 +5,17 @@ import Services
 import SwiftUI
 import XUI
 
-
-
 struct MsgsScrollViewLayoutConfiguration {
 
     init(
         spacing: CGFloat,
         contentInsets: EdgeInsets,
-        boundsWidth: CGFloat,
-        selectedMsg: SelectedMsg? = nil
+        screenSize: CGSize,
+        selectedMsg: SelectedMsg? = nil,
     ) {
         self.spacing = spacing
         self.contentInsets = contentInsets
-        self.boundsWidth = boundsWidth
+        self.screenSize = screenSize
         self.selectedMsg = selectedMsg
     }
 
@@ -28,7 +26,8 @@ struct MsgsScrollViewLayoutConfiguration {
 
     let spacing: CGFloat
     let contentInsets: EdgeInsets
-    let boundsWidth: CGFloat
+    let screenSize: CGSize
+    var boundsWidth: CGFloat { screenSize.width }
     let selectedMsg: SelectedMsg?
 }
 
@@ -38,7 +37,7 @@ struct MsgsScrollViewLayout: Layout, @unchecked Sendable {
 
     init(
         manager: MsgsScrollViewLayoutManager,
-        config: MsgsScrollViewLayoutConfiguration
+        config: MsgsScrollViewLayoutConfiguration,
     ) {
         self.manager = manager
         self.config = config
@@ -47,7 +46,9 @@ struct MsgsScrollViewLayout: Layout, @unchecked Sendable {
     @preconcurrency private let manager: MsgsScrollViewLayoutManager
     private let config: MsgsScrollViewLayoutConfiguration
 
-    private var cacheStore: MsgsScrollViewLayoutCache { manager.cache }
+    private var cacheStore: MsgsScrollViewLayoutCache {
+        manager.cache
+    }
 }
 
 // MARK: - Layout Core
@@ -65,14 +66,16 @@ extension MsgsScrollViewLayout {
     func sizeThatFits(
         proposal: ProposedViewSize,
         subviews: Subviews,
-        cache: inout Cache
+        cache: inout Cache,
     ) -> CGSize {
         let size = proposal.replacingUnspecifiedDimensions()
-        guard !subviews.isEmpty else { return size }
+        guard !subviews.isEmpty else {
+            return size
+        }
 
         return .init(
             width: size.width,
-            height: max(size.height, cache.totalHeight)
+            height: max(size.height, cache.totalHeight),
         )
     }
 
@@ -80,9 +83,11 @@ extension MsgsScrollViewLayout {
         in _: CGRect,
         proposal _: ProposedViewSize,
         subviews: Subviews,
-        cache: inout Cache
+        cache: inout Cache,
     ) {
-        guard cache.layouts.count == subviews.count else { return }
+        guard cache.layouts.count == subviews.count else {
+            return
+        }
 
         for (i, subview) in subviews.enumerated() {
             let layout = cache.layouts[i]
@@ -91,7 +96,7 @@ extension MsgsScrollViewLayout {
             subview.place(
                 at: layout.position,
                 anchor: value.anchor,
-                proposal: ProposedViewSize(layout.size)
+                proposal: ProposedViewSize(layout.size),
             )
         }
     }
@@ -101,9 +106,11 @@ extension MsgsScrollViewLayout {
         in _: CGRect,
         proposal _: ProposedViewSize,
         subviews _: Subviews,
-        cache: inout Cache
+        cache: inout Cache,
     ) -> CGFloat? {
-        guard !cache.layouts.isEmpty else { return nil }
+        guard !cache.layouts.isEmpty else {
+            return nil
+        }
 
         switch guide {
         case .leading: return config.contentInsets.leading
@@ -131,7 +138,7 @@ extension MsgsScrollViewLayout {
         let cache = Cache(
             totalHeight: totalHeight,
             layouts: layouts,
-            signatureHash: signature
+            signatureHash: signature,
         )
 
         cacheStore.setCache(cache, signature: signature)
@@ -144,10 +151,10 @@ extension MsgsScrollViewLayout {
 extension MsgsScrollViewLayout {
 
     private func computeLayouts(
-        subviews: Subviews
+        subviews: Subviews,
     ) -> ([Cache.CellLayout], CGFloat) {
 
-        var layouts: [Cache.CellLayout] = []
+        var layouts = [Cache.CellLayout]()
         layouts.reserveCapacity(subviews.count)
 
         var y = config.contentInsets.top
@@ -159,7 +166,7 @@ extension MsgsScrollViewLayout {
             let x = xPosition(for: value.recipient)
 
             layouts.append(
-                .init(id: value.uid, size: size, position: .init(x: x, y: y))
+                .init(id: value.uid, size: size, position: .init(x: x, y: y)),
             )
             y += size.height + config.spacing
         }
@@ -174,7 +181,7 @@ extension MsgsScrollViewLayout {
 
     private func size(
         for subview: LayoutSubview,
-        value: MsgLayoutValue
+        value: MsgLayoutValue,
     ) -> CGSize {
 
         let key = sizeKey(for: value)
@@ -191,29 +198,28 @@ extension MsgsScrollViewLayout {
 
     private func measure(
         subview: LayoutSubview,
-        value: MsgLayoutValue
+        value: MsgLayoutValue,
     ) -> CGSize {
 
-        let ratio: CGFloat = {
+        let ratio: CGFloat =
             switch value.attachmentsCount {
-            case 0: return 1
-            case 1: return 0.7
-            default: return 0.8
+            case 0: 1
+            case 1: 0.7
+            default: 0.8
             }
-        }()
 
         let containerWidth =
             (config.boundsWidth - config.contentInsets.horizontal) * ratio
         let width =
             containerWidth
-            * MsgsScrollViewLayoutConfiguration.Constants.bubbleWidthRatio
+                * MsgsScrollViewLayoutConfiguration.Constants.bubbleWidthRatio
 
         let proposed = ProposedViewSize(width: width, height: .infinity)
         let measured = subview.sizeThatFits(proposed)
 
         return .init(
             width: measured.width,
-            height: measured.height
+            height: measured.height,
         )
     }
 
@@ -230,16 +236,18 @@ extension MsgsScrollViewLayout {
 
     private func xPosition(for recipient: MsgRecipient) -> CGFloat {
         switch recipient {
-        case .incoming: return config.contentInsets.leading
+        case .incoming: config.contentInsets.leading
         case .outgoing:
-            return config.boundsWidth - config.contentInsets.trailing
+            config.boundsWidth - config.contentInsets.trailing
         case .system:
-            return (config.boundsWidth) * 0.5
+            (config.boundsWidth) * 0.5
         }
     }
 
     private func totalHeight(for layouts: [Cache.CellLayout]) -> CGFloat {
-        guard !layouts.isEmpty else { return 0 }
+        guard !layouts.isEmpty else {
+            return 0
+        }
 
         let content = layouts.reduce(0) { $0 + $1.size.height }
         let spacing = config.spacing * CGFloat(layouts.count - 1)
@@ -283,7 +291,9 @@ extension MsgsScrollViewLayout {
             let size: CGSize
             let position: CGPoint
 
-            var frame: CGRect { .init(origin: position, size: size) }
+            var frame: CGRect {
+                .init(origin: position, size: size)
+            }
         }
 
         let totalHeight: CGFloat

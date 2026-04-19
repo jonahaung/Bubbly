@@ -12,12 +12,9 @@ extension MsgCell {
         private var state: MsgCellViewModel.State {
             viewModel.state
         }
-
-        @Environment(\.typography) private var typography
-
         private var headerText: String {
             if state.isSender {
-                return state.date.formatted(date: .abbreviated, time: .shortened)
+                return  MsgTimeStringFormatter.string(for: state.date, isSender: state.isSender)
             } else {
                 let name: String? = ContactsRepository.shared.contact(for: state.senderID)?.name
                 return name ?? "Unknown"
@@ -27,10 +24,10 @@ extension MsgCell {
         var body: some View {
             Text(headerText)
                 .font(.system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded))
-                .foregroundStyle(Color.secondaryText)
+                .foregroundStyle(Color.tertiaryText)
                 .padding(.horizontal, 35)
                 .allowsHitTesting(false)
-                .transition(.opacity)
+                .transition(.push(from: .bottom))
                 .equatable(by: state.id)
                 .geometryGroup()
         }

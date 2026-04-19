@@ -13,7 +13,6 @@ extension MsgCell {
 
     @Observable
     final class GestureViewModel {
-        
 
         var draggedOffset: CGFloat = 0
         var isLongPressActive = false
@@ -34,7 +33,7 @@ extension MsgCell {
             let magnitude = abs(translation)
 
             if !draggedLimitReached,
-               magnitude > MsgCellGestureThresholds.markTrigger
+                magnitude > MsgCellGestureThresholds.markTrigger
             {
                 draggedLimitReached = true
                 onMark()
@@ -70,8 +69,6 @@ extension MsgCell {
             }
         }
 
-        
-
         @ObservationIgnored
         private var lastAppliedOffset: CGFloat = 0
 
@@ -99,7 +96,6 @@ extension MsgCell {
 
 extension MsgCell {
     struct GestureAware<Content: View>: View {
-        
 
         let content: () -> Content
 
@@ -116,11 +112,8 @@ extension MsgCell {
                 }
         }
 
-        
-
         @Environment(MsgCellViewModel.self) private var viewModel
         @Environment(\.msgCellActions) private var sendInteraction
-
         @State private var model: GestureViewModel = .init()
     }
 }
@@ -151,26 +144,25 @@ extension MsgCell.GestureAware {
         }
     }
 
+    @ViewBuilder
     private var longPressOverlay: some View {
-        Group {
-            if model.isLongPressActive {
-                Color.clear
-                    .allowsHitTesting(false)
-                    .accessibilityHidden(true)
-                    .onGeometryChange(for: CGRect.self) { proxy in
-                        proxy.frame(in: .global)
-                    } action: { frame in
-                        model.isLongPressActive = false
+        if model.isLongPressActive {
+            Color.clear
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .global)
+                } action: { frame in
+                    model.isLongPressActive = false
 
-                        withTransaction(.withoutAnimation()) {
-                            sendInteraction?(
-                                .onFocusMsgBubble(
-                                    .init(id: viewModel.id, frame: frame),
-                                ),
-                            )
-                        }
+                    withTransaction(.withoutAnimation()) {
+                        sendInteraction?(
+                            .onFocusMsgBubble(
+                                .init(id: viewModel.id, frame: frame),
+                            ),
+                        )
                     }
-            }
+                }
         }
     }
 

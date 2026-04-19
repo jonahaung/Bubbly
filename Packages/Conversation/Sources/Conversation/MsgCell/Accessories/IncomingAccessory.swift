@@ -18,7 +18,7 @@ extension MsgCell {
                 if layout.showAvatar, let sender = viewModel.state.sender {
 					ProfilePhoto(
 						sender,
-						size: .custom(ChatLayoutConstants.Cell.defaultSpacing),
+                        size: .custom(Spacing.md),
 						tapAction: .custom {
 							msgCellActions?(.onTapAvatar(viewModel.id))
 						},
@@ -26,8 +26,7 @@ extension MsgCell {
 					.equatable(by: sender.uid)
 				}
 			}
-			.frame(width: ChatLayoutConstants.Cell.defaultSpacing + 4)
-//            .padding(.leading, Padding.md)
+            .frame(width: Spacing.md + 4)
             .equatable(by: layout.showAvatar)
 		}
 	}

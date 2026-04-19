@@ -35,16 +35,13 @@ public struct ScrollSection<
 
     
     public var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.sm) {
-            if let header {
-                header
-                    .padding(.horizontal, Padding.md)
-            }
-
-            VStack(alignment: .leading, spacing: spacing) {
-                if data.isEmpty {
-                    ContentUnavailableView("Data is empty", systemImage: "list.bullet")
-                } else {
+        if !data.isEmpty {
+            VStack(alignment: .leading, spacing: Spacing.sm) {
+                if let header {
+                    header
+                        .padding(.horizontal, Padding.md)
+                }
+                VStack(alignment: .leading, spacing: spacing) {
                     ForEach(data) { item in
                         cell(item)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -61,17 +58,17 @@ public struct ScrollSection<
                         },
                     )
                 }
-            }
-            .padding(Padding.md)
-            .background(Color.container, in: RoundedRectangle(cornerRadius: Radius.md))
+                .padding(Padding.md)
+                .background(Color.container, in: RoundedRectangle(cornerRadius: Radius.card))
 
-            if let footer {
-                footer
-                    .padding(.horizontal, Padding.md)
+                if let footer {
+                    footer
+                        .padding(.horizontal, Padding.md)
+                }
             }
+            .animation(.anticipateOvershoot, value: data.map(\.id))
+            .geometryGroup()
         }
-        .animation(.anticipateOvershoot, value: data.map(\.id))
-        .geometryGroup()
     }
 
     

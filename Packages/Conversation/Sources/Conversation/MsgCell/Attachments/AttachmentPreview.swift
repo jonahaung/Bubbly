@@ -61,7 +61,7 @@ struct AttachmentPreview: View {
 
     private var content: some View {
         ZStack {
-            Rectangle().fill(Color.shadow)
+            Color.appSecondary
             if let data = model.attachmentData {
                 attachmentView(for: data)
             } else if let error = model.error {

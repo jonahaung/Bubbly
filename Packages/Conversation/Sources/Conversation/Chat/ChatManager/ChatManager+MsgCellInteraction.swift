@@ -62,8 +62,8 @@ extension ChatManager {
         }
 
         let oldValue = layoutManager.selectedMsg
-        let nextMsg = models[safe: index + 1]?.msg
-        let previousMsg = models[safe: index - 1]?.msg
+        let nextMsg = models[index + 1]?.msg
+        let previousMsg = models[index - 1]?.msg
         let newValue: SelectedMsg? =
             oldValue?.id == uid
             ? nil

@@ -46,7 +46,7 @@ public struct APNSNotification: Codable {
         messageContent: String,
         alert: APNSAlert,
         badge: Int? = 1,
-        sound: APNSSoundType? = .normal("paper.wav"),
+        sound: APNSSoundType? = .normal("drip.flat.m4a"),
         hasContentAvailable: Bool? = true,
         hasMutableContent: Bool? = true,
         category: String? = nil,

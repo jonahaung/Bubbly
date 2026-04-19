@@ -7,6 +7,8 @@
 
 import Database
 import SwiftUI
+import XUI
+import UIKit
 
 final class MsgsScrollViewLayoutManager {
     let cache: MsgsScrollViewLayoutCache

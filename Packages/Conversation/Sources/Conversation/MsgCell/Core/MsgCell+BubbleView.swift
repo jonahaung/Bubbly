@@ -40,8 +40,6 @@ extension MsgCell {
             }
         }
 
-        
-
         @Environment(MsgCellViewModel.self) private var viewModel
         @Environment(\.conversationTheme) private var theme
 

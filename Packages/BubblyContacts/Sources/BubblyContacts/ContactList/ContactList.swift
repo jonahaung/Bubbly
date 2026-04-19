@@ -30,6 +30,7 @@ public struct ContactList: View {
                 .pickerStyle(.segmented)
 
                 if let error = viewModel.state.error {
+                
                     Text(error)
                         .foregroundStyle(.red)
                         .padding(.horizontal, Padding.sm)
@@ -41,10 +42,35 @@ public struct ContactList: View {
                         ConversationGroupCell(group: group)
                     }
                 case .chat:
-                    ForEach(viewModel.state.sections) { section in
+                    ScrollSection(data: viewModel.state.chatContacts) { contact in
+                        ContactCell(contact) {
+                            await openConversation(for: contact)
+                        }
+                        .id(contact.uid)
+                        
+                    }
+//                    ForEach(viewModel.state.chatContactSections) { section in
+//                        ScrollSection(data: section.items) { contact in
+//                            ContactCell(contact) {
+//                                await openConversation(for: contact)
+//                            }
+//                            .id(contact.uid)
+//                        } header: {
+//                            HStack(alignment: .bottom) {
+//                                Text(section.title)
+//                                    .foregroundStyle(Color.secondaryText)
+//                                    .font(.footnote)
+//
+//                                Spacer()
+//                            }
+//                        }
+//                        .id(section.id)
+//                    }
+                case .phone:
+                    ForEach(viewModel.state.phoneContactSections) { section in
                         ScrollSection(data: section.items) { contact in
                             ContactCell(contact) {
-                                await openConversation(for: contact)
+//                                await openConversation(for: contact)
                             }
                             .id(contact.uid)
                         } header: {
@@ -72,7 +98,7 @@ public struct ContactList: View {
         .toolbar {
             ToolbarItemGroup {
                 switch defaultContactDisplay {
-                case .chat:
+                case .chat, .phone:
                     AsyncButton {
                         await viewModel.send(.syncContacts)
                     } label: {
@@ -112,7 +138,7 @@ public struct ContactList: View {
                 }
             }
         }
-        .task {
+        .onTask {
             await viewModel.send(.appear)
         }
         .refreshable {
@@ -142,6 +168,7 @@ public struct ContactList: View {
 
     enum DefaultContactDisplayType: String, CaseIterable {
         case chat = "Chat Contacts"
+        case phone = "Phone Contacts"
         case group = "Groups"
     }
 

@@ -12,10 +12,6 @@ let package = Package(
             name: "Conversation",
             targets: ["Conversation"],
         ),
-        .library(
-            name: "ConversationTestingSupport",
-            targets: ["ConversationTestingSupport"],
-        ),
     ],
     dependencies: [
         .package(name: "Core", path: "../Core"),
@@ -62,13 +58,10 @@ let package = Package(
                 .process("Resources"),
             ],
         ),
-        .target(
-            name: "ConversationTestingSupport",
-        ),
         .testTarget(
             name: "ConversationTests",
             dependencies: [
-                "ConversationTestingSupport",
+                "Conversation",
             ],
         ),
     ],

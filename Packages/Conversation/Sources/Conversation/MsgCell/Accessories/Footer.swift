@@ -8,19 +8,16 @@ import XUI
 
 extension MsgCell {
     struct Footer: View {
-        
 
         var body: some View {
             Text(footerText)
                 .font(.system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded))
-                .foregroundStyle(Color.secondaryText)
+                .foregroundStyle(Color.tertiaryText)
                 .padding(.horizontal, 35)
                 .allowsHitTesting(false)
-                .transition(.opacity)
+                .transition(.asymmetric(insertion: .push(from: .top), removal: .opacity))
                 .equatable(by: state.id)
         }
-
-        
 
         @Environment(MsgCellViewModel.self) private var viewModel
 
@@ -31,8 +28,9 @@ extension MsgCell {
         private var footerText: String {
             if state.isSender {
                 state.msg.deliveryStatus.localizedName
-            } else {
-                state.date.formatted(date: .abbreviated, time: .shortened)
+            }
+            else {
+                MsgTimeStringFormatter.string(for: state.date, isSender: state.isSender)
             }
         }
     }

@@ -18,14 +18,15 @@ final class ChatManager: ErrorPresenter {
         currentUserRepository: CurrentUserRepository,
         router: Router,
     ) {
+        let conID = data.configuration.conID
         self.contactsRepository = contactsRepository
         self.currentUserRepository = currentUserRepository
         self.router = router
         conversationConfig = data.configuration
         datasource = .init(pageSize: data.configuration.pageSize)
         scrollController = .init()
-        presentation = .init(data.configuration.conID)
-        dataObserver = .init(data.configuration.conID)
+        presentation = .init(conID)
+        dataObserver = .init(conID)
         attachmentFetcher = .init()
         state = .init(
             reloadID: 0,
@@ -33,11 +34,8 @@ final class ChatManager: ErrorPresenter {
             theme: .init(data.properties.theme),
             properties: data.properties,
         )
-        models = .init(
-            data.msgs,
-            data.configuration.canPaginate
-                ? [] : [.init(kind: .conversation(data.conversation))],
-        )
+        let headers: [HeaderModel] = data.configuration.canPaginate ? [] : [.init(kind: .conversation(data.conversation))]
+        models = .init(data.msgs, headers)
     }
 
     deinit {
@@ -45,35 +43,19 @@ final class ChatManager: ErrorPresenter {
         log("Deinit")
     }
 
-    struct State: Equatable {
-        var reloadID: Int
-        var conversation: Conversation
-        var theme: ChatTheme
-        var properties: ConversationProperties
-    }
-
-    enum Intent {
-        case scrollViewIntent(_ newValue: ScrollCoordinator.Intent)
-        case scrollDownButtonTapped
-        case cellAction(_ newValue: MsgCellAction.ActionType)
-    }
-
     @ObservationIgnored internal let datasource: PaginatedDatasource
     @ObservationIgnored let scrollController: ScrollCoordinator
     @ObservationIgnored var presentation: Presenter
-    @ObservationIgnored let conversationConfig:
-        ConversationInitializer.Configuration
+    @ObservationIgnored let conversationConfig: ConversationInitializer.Configuration
     @ObservationIgnored let attachmentFetcher: AttachmentFetcher
-    @ObservationIgnored let models: MsgModels
+    @ObservationIgnored let models: Messages
     @ObservationIgnored private let dataObserver: ChatDataReceiver
     @ObservationIgnored weak var contactsRepository: ContactsRepositoryProtocol?
     @ObservationIgnored weak var currentUserRepository: CurrentUserRepository?
     @ObservationIgnored weak var router: Router?
-    @ObservationIgnored internal let conversationDataUpdater:
-        ConversationDataUpdater = .init()
-    @ObservationIgnored internal let serialQueue: AsyncQueue = .init(
-        attributes: [])
-    let layoutManager = MsgsScrollViewLayoutManager(cache: .init())
+    @ObservationIgnored internal let conversationDataUpdater: ConversationDataUpdater = .init()
+    @ObservationIgnored internal let serialQueue: AsyncQueue = .init(attributes: [])
+    @ObservationIgnored let layoutManager = MsgsScrollViewLayoutManager(cache: .init())
     internal var state: State
 }
 
@@ -133,7 +115,7 @@ extension ChatManager {
 
 extension ChatManager {
     fileprivate func handleScrollDownButtonTap() async throws {
-        layoutIfNeeded()
+        UIApplication.shared.endEditing()
         guard
             let lasMsg = try await MsgRepo.lastMsg(
                 conID: conversationConfig.conID

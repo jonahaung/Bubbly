@@ -29,8 +29,16 @@ public struct ProfilePhoto: View {
     }
 
     public var body: some View {
-        ImageView(item, config: config)
-            .clipShape(.circle)
-            .equatable(by: item.remoteURL)
+        if item.remoteURL == nil {
+            if let text = item.imageName {
+               TextAvatarView(text: text)
+                    .frame(square: config.size.height)
+            }
+        } else {
+            ImageView(item, config: config)
+                .clipShape(.circle)
+                .equatable(by: item.remoteURL)
+        }
+        
     }
 }

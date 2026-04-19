@@ -2,9 +2,11 @@ import Database
 
 struct ContactListViewState {
     var searchText: String
-    var contacts: [Contact]
+    var chatContacts: [Contact]
+    var phoneContacts: [Contact]
     var groups: [Group]
-    var sections: [ContactListSection]
+    var chatContactSections: [ContactListSection]
+    var phoneContactSections: [ContactListSection]
     var isLoading: Bool
     var error: String?
 }

@@ -6,19 +6,20 @@ import Foundation
 
 @propertyWrapper
 public struct AtomicQueue<Value> {
-    private let queue = DispatchQueue(label: "com.jonahaung.AtomicQueue")
-    private var value: Value
+    private let queue: DispatchQueue
+    private var item: Value
 
-    public init(wrappedValue: Value) {
-        value = wrappedValue
+    public init(_ wrappedValue: Value) {
+        item = wrappedValue
+        queue = .init(label: "com.jonahaung.xui.\(Value.self)")
     }
 
     public var wrappedValue: Value {
         get {
-            queue.sync { value }
+            queue.sync { item }
         }
         set {
-            queue.sync { value = newValue }
+            queue.sync { item = newValue }
         }
     }
 }

@@ -64,6 +64,7 @@ struct ContactListRepositoryImpl: ContactListRepository {
     private func snapshot() -> ContactListSnapshot {
         .init(
             contacts: manager.contacts,
+            phoneContacts: manager.phoneContacts,
             groups: manager.groups,
             isLoading: manager.isLoading,
             error: manager.error
@@ -73,5 +74,6 @@ struct ContactListRepositoryImpl: ContactListRepository {
     private func reloadLocalData() async throws {
         manager.setContacts(try await Store.shared.contactStore?.fetchAll() ?? [])
         manager.setGroups(try await Store.shared.groupStore?.fetchAll() ?? [])
+        manager.setPhoneContacts([])
     }
 }

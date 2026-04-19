@@ -7,48 +7,60 @@
 
 import Foundation
 import SwiftUI
+import UIKit
 
 public struct GitHubMarkdownStyle {
-    
+
     public init() {}
 
-    // MARK: Public
     public var base: AttributeContainer = .paragraph
 
     public func block(
         _ kind: PresentationIntent.Kind,
     ) -> AttributeContainer {
         switch kind {
-        case let .header(level):
-            let size = UIFont.preferredFont(forTextStyle: .title2).pointSize - CGFloat(level * 2)
+        case .header(let level):
+            let size =
+                UIFont.preferredFont(forTextStyle: .title1).pointSize
+                - CGFloat(level * 2)
             let font = Font.system(
                 size: size,
                 weight: .semibold,
-                design: .rounded,
-            )
+                design: .default,
+            ).width(.condensed)
             return .init()
                 .font(font)
                 .foregroundColor(Color.primaryText)
                 .lineHeight(.multiple(factor: 1.3))
                 .paragraphStyle(.default)
         case .listItem,
-             .orderedList,
-             .unorderedList:
+            .orderedList,
+            .unorderedList:
             return .init()
-                .font(.system(size: labelFontSize))
-                .foregroundColor(Color.secondaryText)
+                .font(.system(size: labelFontSize, design: .rounded))
+                .foregroundColor(Color.primaryText)
                 .lineHeight(.multiple(factor: 1.4))
                 .paragraphStyle(.default)
         case .codeBlock:
             return .init()
                 .font(
-                    .system(size: systemFontSize, weight: .medium, design: .monospaced)
-                        .width(.compressed),
+                    .system(
+                        size: systemFontSize,
+                        weight: .medium,
+                        design: .monospaced
+                    )
+                    .width(.compressed),
                 )
                 .foregroundColor(.secondaryText)
         case .blockQuote:
             return .init()
-                .font(.system(size: systemFontSize + 2, weight: .thin, design: .serif))
+                .font(
+                    .system(
+                        size: systemFontSize + 2,
+                        weight: .thin,
+                        design: .serif
+                    )
+                )
                 .foregroundColor(.secondaryText)
                 .paragraphStyle(.default)
         case .paragraph:
@@ -63,7 +75,6 @@ public struct GitHubMarkdownStyle {
         }
     }
 
-    
     private var labelFontSize: CGFloat {
         UIFont.labelFontSize
     }
@@ -73,25 +84,22 @@ public struct GitHubMarkdownStyle {
     }
 }
 
-import UIKit
-
 extension NSParagraphStyle: @unchecked @retroactive Sendable {
-    static let `default`: NSParagraphStyle = {
-        let paragraphStyle = NSMutableParagraphStyle()
+    public static let `default`: NSParagraphStyle = { paragraphStyle in
         paragraphStyle.lineBreakMode = .byWordWrapping
-        paragraphStyle.lineBreakStrategy = .standard
+        paragraphStyle.lineBreakStrategy = .hangulWordPriority
         paragraphStyle.alignment = .natural
         paragraphStyle.lineSpacing = 0
-        paragraphStyle.lineHeightMultiple = 1.3
+        paragraphStyle.lineHeightMultiple = 1.2
         return paragraphStyle
-    }()
+    }(NSMutableParagraphStyle())
 }
 
-public extension AttributeContainer {
+extension AttributeContainer {
     static let paragraph: AttributeContainer = {
         var container = AttributeContainer()
         container.font = .system(size: UIFont.labelFontSize)
-        container.lineHeight = .multiple(factor: 1.3)
+        container.lineHeight = .multiple(factor: 1.2)
         container.paragraphStyle = .default
         return container
     }()

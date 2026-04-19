@@ -4,7 +4,9 @@ import Observation
 @MainActor
 @Observable
 final class ContactListManager {
+    
     private(set) var contacts: [Contact] = []
+    private(set) var phoneContacts: [Contact] = []
     private(set) var groups: [Group] = []
     private(set) var isLoading = false
     private(set) var error: String?
@@ -12,7 +14,9 @@ final class ContactListManager {
     func setContacts(_ value: [Contact]) {
         contacts = value
     }
-
+    func setPhoneContacts(_ value: [Contact]) {
+        phoneContacts = value
+    }
     func setGroups(_ value: [Group]) {
         groups = value
     }

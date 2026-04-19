@@ -10,7 +10,10 @@ public enum MarkdownParser {
     // MARK: Public
     public static func parse(_ markdown: String) -> [MarkdownItem] {
         var elements = [MarkdownItem]()
-        let lines = markdown.split(separator: "\n", omittingEmptySubsequences: false)
+        let lines = markdown.split(
+            separator: "\n",
+            omittingEmptySubsequences: false
+        )
 
         var inCodeBlock = false
         var codeBlockContent = ""
@@ -24,14 +27,17 @@ public enum MarkdownParser {
             if trimmed.hasPrefix("```") {
                 if inCodeBlock {
                     // End code block
-                    elements.append(.codeBlock(
-                        language: codeBlockLanguage,
-                        content: codeBlockContent.trimmingCharacters(in: .whitespacesAndNewlines),
-                    ))
+                    elements.append(
+                        .codeBlock(
+                            language: codeBlockLanguage,
+                            content: codeBlockContent.trimmingCharacters(
+                                in: .whitespacesAndNewlines
+                            ),
+                        )
+                    )
                     codeBlockContent = ""
                     codeBlockLanguage = nil
-                }
-                else {
+                } else {
                     // Start code block
                     codeBlockLanguage = String(trimmed.dropFirst(3))
                         .trimmingCharacters(in: .whitespaces)
@@ -46,10 +52,11 @@ public enum MarkdownParser {
             }
 
             if trimmed.hasPrefix(">") {
-                blockquoteBuffer.append(trimmed.dropFirst().trimmingCharacters(in: .whitespaces))
+                blockquoteBuffer.append(
+                    trimmed.dropFirst().trimmingCharacters(in: .whitespaces)
+                )
                 continue
-            }
-            else if !blockquoteBuffer.isEmpty {
+            } else if !blockquoteBuffer.isEmpty {
                 // Flush blockquote buffer
                 let combined = blockquoteBuffer.joined(separator: "\n")
                 elements.append(.blockquote(text: combined))
@@ -65,7 +72,9 @@ public enum MarkdownParser {
             // Heading detection
             if trimmed.hasPrefix("#") {
                 let level = trimmed.prefix { $0 == "#" }.count
-                let text = trimmed.dropFirst(level).trimmingCharacters(in: .whitespaces)
+                let text = trimmed.dropFirst(level).trimmingCharacters(
+                    in: .whitespaces
+                )
                 elements.append(.heading(level: level, text: text))
                 continue
             }
@@ -79,7 +88,13 @@ public enum MarkdownParser {
                 let indent = nsLine.substring(with: match.range(at: 1))
                 let index = Int(nsLine.substring(with: match.range(at: 2))) ?? 0
                 let text = nsLine.substring(with: match.range(at: 3))
-                elements.append(.orderedListItem(level: indent.count / 2, index: index, text: text))
+                elements.append(
+                    .orderedListItem(
+                        level: indent.count / 2,
+                        index: index,
+                        text: text
+                    )
+                )
                 continue
             }
 
@@ -108,16 +123,19 @@ public enum MarkdownParser {
 
         // Flush remaining code block
         if inCodeBlock, !codeBlockContent.isEmpty {
-            elements.append(.codeBlock(
-                language: codeBlockLanguage,
-                content: codeBlockContent.trimmingCharacters(in: .whitespacesAndNewlines),
-            ))
+            elements.append(
+                .codeBlock(
+                    language: codeBlockLanguage,
+                    content: codeBlockContent.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ),
+                )
+            )
         }
 
         return elements
     }
 
-    
     private static let orderedListItemRegex: NSRegularExpression =
         try! NSRegularExpression(pattern: "^(\\s*)(\\d+)\\.\\s+(.+)$")
 
@@ -139,10 +157,12 @@ public enum MarkdownParser {
         for match in matches {
             let range = match.range
             if range.location > lastIndex {
-                let substring = nsText.substring(with: NSRange(
-                    location: lastIndex,
-                    length: range.location - lastIndex,
-                ))
+                let substring = nsText.substring(
+                    with: NSRange(
+                        location: lastIndex,
+                        length: range.location - lastIndex,
+                    )
+                )
                 if !substring.trimmingCharacters(in: .whitespaces).isEmpty {
                     result.append(.paragraph(text: substring))
                 }
@@ -150,8 +170,7 @@ public enum MarkdownParser {
             let token = nsText.substring(with: range)
             if token.hasPrefix("@") {
                 result.append(.mention(username: String(token.dropFirst())))
-            }
-            else if token.hasPrefix("#") {
+            } else if token.hasPrefix("#") {
                 result.append(.hashtag(topic: String(token.dropFirst())))
             }
             lastIndex = range.location + range.length

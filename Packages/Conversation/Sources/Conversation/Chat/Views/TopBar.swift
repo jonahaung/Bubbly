@@ -7,7 +7,6 @@ import SwiftUI
 import XUI
 
 struct TopBar: View {
-    
 
     @Environment(\.conversationTheme) private var theme
     var body: some View {
@@ -15,39 +14,18 @@ struct TopBar: View {
             CustomButton {
                 UIApplication.shared.endEditing()
             } label: {
-                HStack {
-                    switch manager.state.conversation.kind {
-                    case let .contact(contact):
-                        ProfilePhoto(
-                            contact,
-                            config: .init(
-                                size: .custom(30),
-                                processors: [
-                                    .circle(border: .init(color: .green, width: 2)),
-                                    .sticker(),
-                                ],
-                            ),
+                Text(manager.state.conversation.name)
+                    .font(.system(size: UIFont.systemFontSize + 1, weight: .semibold))
+                    .badgeView(
+                        Text(
+                            manager.conversationConfig.totalMsgsCount,
+                            format: .number,
                         )
-                    case let .group(group):
-                        ProfilePhoto(
-                            group,
-                            config: .init(size: .custom(30), processors: [.circle(), .sticker()]),
-                        )
-                    }
-                    Text(manager.state.conversation.name)
-                        .font(.subheadline.weight(.semibold))
+                        .font(.system(size: UIFont.smallSystemFontSize, weight: .medium).width(.compressed))
                         .lineHeight(.multiple(factor: 1.2))
-                        .badgeView(
-                            Text(
-                                manager.conversationConfig.totalMsgsCount,
-                                format: .number,
-                            )
-                            .font(
-                                .caption.italic().width(.compressed).weight(.semibold),
-                            )
-                            .lineHeight(.multiple(factor: 1.2)),
-                        )
-                }
+                        .textScale(.secondary)
+                    )
+                    .background(theme.backgroundColor)
             } onFinished: {
                 manager.router?.pushToNav(.conversationDetails(manager.state.conversation))
             }
@@ -98,10 +76,25 @@ struct TopBar: View {
                         return Date(timeIntervalSince1970: randomTime)
                     }
                 } label: {
-                    Image(systemSymbol: .quoteClosing)
+                    switch manager.state.conversation.kind {
+                    case let .contact(contact):
+                        ProfilePhoto(
+                            contact,
+                            config: .init(
+                                size: .custom(38),
+                                processors: [
+                                    .circle(border: .init(color: .green, width: 2)),
+                                    .sticker(),
+                                ],
+                            ),
+                        )
+                    case let .group(group):
+                        ProfilePhoto(
+                            group,
+                            config: .init(size: .custom(38), processors: [.circle(), .sticker()]),
+                        )
+                    }
                 }
-                .frame(square: 44)
-                .background(Color.appPrimary, in: .circle)
             }
             .padding(.horizontal, Padding.sm)
             .padding(.bottom, Padding.sm)

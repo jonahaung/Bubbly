@@ -24,6 +24,9 @@ let package = Package(
             dependencies: [
                 .product(name: "Database", package: "Database"),
             ],
+            exclude: [
+                "Package.swift",
+            ],
         ),
         .testTarget(
             name: "ServicesTests",

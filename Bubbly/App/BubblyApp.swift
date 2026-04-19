@@ -13,14 +13,11 @@ import FirebaseCore
 
 @main
 struct BubblyApp: App {
-
-	
-
+    
 	var body: some Scene {
 		WindowGroup {
 			ContentView()
                 .symbolColorRenderingMode(.gradient)
-				.allowsTightening(false)
                 .tint(Color.accent)
 				.onTask {
 					await Task.yield()

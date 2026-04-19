@@ -4,7 +4,6 @@
 
 import Foundation
 
-@MainActor
 public final class LRUCache<Key: Hashable, Value> {
 
     private var storage = [Key: Value]()

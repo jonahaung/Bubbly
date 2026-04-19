@@ -20,7 +20,7 @@ struct ConversationScrollView: View {
                         bottom: 0,
                         trailing: Padding.sm
                     ),
-                    boundsWidth: UIApplication.shared.screenSize().width
+                    screenSize: UIApplication.shared.screenSize()
                 )
             ) {
                 ForEach(manager.models.headerModels) { model in
@@ -73,9 +73,8 @@ struct ConversationScrollView: View {
                 .scrollViewIntent(.onScrollGeometryChange(oldValue, newValue))
             )
         }
-        .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) {
-            ids in
-            manager.models.didBecomeVisible(ids: ids)
+        .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) { ids in
+            manager.onScrollTargetVisibilityChange(ids)
         }
         .defaultScrollAnchor(.top, for: .initialOffset)
         .equatable(by: manager.state.reloadID)
@@ -86,7 +85,7 @@ struct ConversationScrollView: View {
         )
         .scrollPosition(
             manager.scrollController.scrollPositionBindable,
-            anchor: nil
+            anchor: .none
         )
     }
 

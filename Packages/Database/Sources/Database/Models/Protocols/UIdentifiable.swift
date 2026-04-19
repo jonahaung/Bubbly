@@ -4,7 +4,7 @@ import Foundation
 
 // MARK: - UIdentifiable
 
-public protocol UIdentifiable: Identifiable {
+public protocol UIdentifiable: Identifiable, Hashable {
     associatedtype UID = String
     var uid: UID { get }
 }

@@ -20,7 +20,10 @@ public final class PushNotificationService: NSObject, Sendable {
         try await UNUserNotificationCenter
             .current()
             .requestAuthorization(
-                options: [.alert, .badge, .sound],
+                options: [
+                    .alert, .badge, .sound, .provisional, .criticalAlert,
+                    .providesAppNotificationSettings,
+                ]
             )
         await UIApplication.shared.registerForRemoteNotifications()
         Messaging.messaging().delegate = self
@@ -29,7 +32,8 @@ public final class PushNotificationService: NSObject, Sendable {
 
     @concurrent
     public func applicationDidBecomeActive() async throws {
-        let datas = await PushNotificationStore.shared.consumePendingAnyMsgData()
+        let datas = await PushNotificationStore.shared
+            .consumePendingAnyMsgData()
         if !datas.isEmpty {
             let currentNavPath = await Router.shared.visiblePath()
             var shouldRefreshInbox = false
@@ -48,8 +52,11 @@ public final class PushNotificationService: NSObject, Sendable {
                     await PushNotificationStore.shared.postInboxChanges()
                 }
             } catch {
-                let pending = nextPendingIndex.map { Array(datas[$0...]) } ?? datas
-                await PushNotificationStore.shared.savePendingAnyMsgData(pending)
+                let pending =
+                    nextPendingIndex.map { Array(datas[$0...]) } ?? datas
+                await PushNotificationStore.shared.savePendingAnyMsgData(
+                    pending
+                )
                 throw error
             }
         }
@@ -79,12 +86,15 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
         let currentNavPath = await MainActor.run { Router.shared.visiblePath() }
         do {
             switch currentNavPath {
-            case let .conversation(prefetchData)
-                where data.conID == prefetchData.configuration.conID:
+            case .conversation(let prefetchData)
+            where data.conID == prefetchData.configuration.conID:
                 try await Socket.shared.receive(data)
                 return []
             default:
-                let didAffectInbox = try await process(data, for: currentNavPath)
+                let didAffectInbox = try await process(
+                    data,
+                    for: currentNavPath
+                )
                 if didAffectInbox {
                     await PushNotificationStore.shared.postInboxChanges()
                 }
@@ -99,7 +109,8 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
     public func userNotificationCenter(
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping ()
+        withCompletionHandler completionHandler:
+            @escaping ()
             -> Void,
     ) {
         let userInfo = response.notification.request.content.userInfo
@@ -113,7 +124,9 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
         }
 
         Task { @MainActor in
-            if let url = data.deeplinkURL(coordinator: .init(router: Router.shared)) {
+            if let url = data.deeplinkURL(
+                coordinator: .init(router: Router.shared)
+            ) {
                 UIApplication.shared.open(url)
             }
         }
@@ -121,14 +134,14 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
     }
 }
 
-private extension PushNotificationService {
-    func process(
+extension PushNotificationService {
+    fileprivate func process(
         _ data: AnyMsgData,
         for currentNavPath: NavPath?
     ) async throws -> Bool {
         switch currentNavPath {
-        case let .conversation(prefetchData)
-            where data.conID == prefetchData.configuration.conID:
+        case .conversation(let prefetchData)
+        where data.conID == prefetchData.configuration.conID:
             try await Socket.shared.receive(data)
             return false
         default:
@@ -145,6 +158,8 @@ extension PushNotificationService: MessagingDelegate {
         _: Messaging,
         didReceiveRegistrationToken fcmToken: String?,
     ) {
-        Task { await PushNotificationStore.shared.handleRegistrationToken(fcmToken) }
+        Task {
+            await PushNotificationStore.shared.handleRegistrationToken(fcmToken)
+        }
     }
 }

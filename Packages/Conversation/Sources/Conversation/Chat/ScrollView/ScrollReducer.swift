@@ -29,15 +29,9 @@ extension ScrollReducer {
                 newValue: newValue
             )
         }
-        if newValue.offsetY <= ChatLayoutConstants.paginationTrashold
-            && oldValue.offsetY > ChatLayoutConstants.paginationTrashold
-        {
-            if paginationState.canLoadOlder {
-                return .begingUpdate(.insert(.top))
-            }
-        }
+    
         let direction: ScrollCoordinator.ScrollDirection =
-            newValue.offsetY > oldValue.offsetY ? .up : .down
+            newValue.offsetY >= oldValue.offsetY ? .up : .down
         return paginateIfNeeded(
             direction: direction,
             state,
@@ -50,24 +44,23 @@ extension ScrollReducer {
     private func paginateIfNeeded(
         direction: ScrollCoordinator.ScrollDirection,
         _: ScrollCoordinator.ScrollViewUpdate,
-        _ old: VScrollGeometry,
-        _ new: VScrollGeometry,
+        _ oldValue: VScrollGeometry,
+        _ newValue: VScrollGeometry,
         paginationState: ScrollCoordinator.PaginationState
     ) -> Effect? {
+        
         switch direction {
         case .down:
-            if new.offsetY <= 0 {
+            if newValue.offsetY < ChatLayoutConstants.paginationTrashold  && oldValue.offsetY > newValue.offsetY {
                 if paginationState.canLoadOlder {
                     return .begingUpdate(.insert(.top))
                 }
-                return paginationState.canAdjustSize
-                    ? .begingUpdate(.remove(.bottom)) : nil
             }
             return nil
         case .up:
             let atBottom =
-                new.offsetY.rounded()
-                > (new.contentHeight - new.boundsHeight).rounded()
+                newValue.offsetY.rounded()
+                > (newValue.contentHeight - newValue.boundsHeight).rounded()
 
             guard atBottom else {
                 return nil
@@ -100,15 +93,10 @@ extension ScrollReducer {
         switch state {
         case .insertingItems(let edge):
             if edge == .top {
-                let y =
-                    diff
-                    + min(
-                        ChatLayoutConstants.paginationTrashold,
-                        max(0, newValue.offsetY)
-                    )
+                let y = diff + min(max(0, newValue.offsetY), ChatLayoutConstants.paginationTrashold)
                 return .endUpdate(
                     .insert(edge),
-                    scrollItem: .y(y, .notAnimated)
+                    scrollItem: .y(y, .scroll)
                 )
             }
             return .endUpdate(.insert(edge), scrollItem: nil)
@@ -139,7 +127,7 @@ extension ScrollReducer {
             return .endUpdate(
                 .resetting(msgID),
                 scrollItem: .y(
-                    newValue.bottomMostOffset - (newValue.boundsHeight * 0.5)
+                    newValue.bottomMostOffset - (newValue.boundsHeight)
                 )
             )
         default:

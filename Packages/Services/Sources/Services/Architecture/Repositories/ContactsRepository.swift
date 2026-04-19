@@ -9,14 +9,9 @@ import XUI
 
 // MARK: - ContactsRepository
 
-public final class ContactsRepository: ContactsRepositoryProtocol, Sendable, ErrorPresenter {
-    @MainActor
-    public static var shared: ContactsRepository {
-        get { sharedLock.value }
-        set { sharedLock.value = newValue }
-    }
+public final class ContactsRepository: ContactsRepositoryProtocol, @unchecked Sendable, ErrorPresenter {
 
-    private static let sharedLock: Mutex = .init(ContactsRepository())
+    public static let shared: ContactsRepository = .init()
     private init() {}
 
     public var contacts: [Contact] = []

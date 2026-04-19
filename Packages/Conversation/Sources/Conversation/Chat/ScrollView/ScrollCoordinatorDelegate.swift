@@ -23,8 +23,7 @@ protocol ScrollCoordinatorDelegate: AnyObject {
 
     func scrollCoordinator(
         _ coordinator: ScrollCoordinator,
-        finalizeUpdate state: ScrollCoordinator.State,
-        newState: ScrollCoordinator.State,
+        state: ScrollCoordinator.State,
     )
     func layoutIfNeeded()
     func edgeMsg(at edge: VerticalEdge) -> Message?

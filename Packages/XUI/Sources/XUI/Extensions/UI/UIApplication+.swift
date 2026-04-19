@@ -9,12 +9,21 @@ public extension UIApplication {
         sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 
-    func screenSize() -> CGSize {
+    var windowScene: UIWindowScene {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
             fatalError("explanation")
         }
-        if let first = windowScene.windows.first, let viewController = first.rootViewController {
-            return viewController.view.bounds.inset(by: viewController.view.safeAreaInsets).integral.size
+        return windowScene
+    }
+    var keyWindow: UIWindow? {
+        windowScene.keyWindow
+    }
+    func screenSize() -> CGSize {
+        guard let keyWindow else {
+            fatalError()
+        }
+        if let viewController = keyWindow.rootViewController {
+            return viewController.view.bounds.inset(by: viewController.view.safeAreaInsets).size
         }
         return windowScene.screen.bounds.inset(by: UIApplication.safeAreInset).integral.size
     }
@@ -23,21 +32,12 @@ public extension UIApplication {
         let size = screenSize()
         return size.width/size.height
     }
+    
+    var statusBarHeight: CGFloat {
+        windowScene.statusBarManager?.statusBarFrame.height ?? .zero
+    }
 }
 public extension UIApplication {
-    var keyWindow: UIWindow? {
-        connectedScenes
-            .compactMap {
-                $0 as? UIWindowScene
-            }
-            .flatMap {
-                $0.windows
-            }
-            .first {
-                $0.isKeyWindow
-            }
-    }
-    
     static var safeAreInset: UIEdgeInsets {
         UIApplication.shared.keyWindow?.safeAreaInsets ?? .init()
     }

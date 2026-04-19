@@ -34,6 +34,7 @@ extension MsgCell {
         var body: some View {
             Reactions(reactions: viewModel.state.reactions)
                 .fixedSize()
+                .equatable(by: viewModel.reloadID)
         }
         @Environment(MsgCellViewModel.self) private var viewModel
     }

@@ -14,7 +14,6 @@ public enum ConversationInitializer {
         public let lineSpacing: CGFloat
         public let lastMsgID: String?
         public let firstMsgID: String?
-        public let firstUnreadMsgID: String?
         public var totalMsgsCount: Int
         public let canPaginate: Bool
     }
@@ -50,7 +49,7 @@ public extension ConversationInitializer {
         let pageSize = Settings.Pagination.pageSize
         let msgs = try await MsgRepo.msgs(
             conID: conID,
-            limit: pageSize+(pageSize.cgFloat/2).int,
+            limit: pageSize * 2,
         )
         let firstMsg = try await MsgRepo.firstMsg(conID: conID)
         let lastMsg = msgs.last
@@ -69,11 +68,6 @@ public extension ConversationInitializer {
                 lineSpacing: lineSpacing,
                 lastMsgID: lastMsg?.uid,
                 firstMsgID: firstMsg?.uid,
-                firstUnreadMsgID: msgs
-                    .first(
-                        where: { $0.receiptType == .incoming && $0.deliveryStatus != .read
-                        },
-                    )?.uid,
                 totalMsgsCount: msgsCount,
                 canPaginate: msgsCount > msgs.count,
             ),

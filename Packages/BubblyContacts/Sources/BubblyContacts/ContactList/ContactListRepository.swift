@@ -2,6 +2,7 @@ import Database
 
 struct ContactListSnapshot {
     let contacts: [Contact]
+    let phoneContacts: [Contact]
     let groups: [Group]
     let isLoading: Bool
     let error: String?

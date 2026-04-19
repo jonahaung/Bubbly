@@ -7,14 +7,13 @@ import SwiftUI
 import XUI
 
 struct MsgCell: View {
-    
 
     let viewModel: MsgCellViewModel
 
     var body: some View {
         VStack(
             alignment: viewModel.state.horizontalAlignment,
-            spacing: Spacing.xs
+            spacing: 0
         ) {
             if layout.showTimeSeparator {
                 TimeSeparator()
@@ -41,13 +40,10 @@ struct MsgCell: View {
                 Footer()
             }
         }
-        .equatable(by: viewModel.reloadID)
-        .geometryGroup()
         .environment(\.isVisible, viewModel.isVisible)
         .environment(viewModel)
+        .equatable(by: viewModel.reloadID)
     }
-
-    
 
     private var isSelected: Bool {
         viewModel.state.isSelected

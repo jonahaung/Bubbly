@@ -33,6 +33,7 @@ public struct ContactCell: View {
             }
             .labelIconToTitleSpacing(Spacing.lg)
         }
+        .padding(.horizontal, Padding.sm)
         .equatable(by: contact)
         .id(contact.id)
     }

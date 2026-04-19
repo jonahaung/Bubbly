@@ -7,6 +7,7 @@ import SwiftUI
 // MARK: - ChatManager + ScrollCoordinatorDelegate
 
 extension ChatManager: ScrollCoordinatorDelegate {
+    
     func edgeMsg(at edge: VerticalEdge) -> Database.Message? {
         switch edge {
         case .top:
@@ -49,18 +50,14 @@ extension ChatManager: ScrollCoordinatorDelegate {
         isPaginatonEnabled && models.count > conversationConfig.pageSize * 2
     }
 
-    func scrollCoordinator(
-        _ coordinator: ScrollCoordinator,
-        finalizeUpdate _: ScrollCoordinator.State,
-        newState: ScrollCoordinator.State,
-    ) {
+    func scrollCoordinator(_ coordinator: ScrollCoordinator, state: ScrollCoordinator.State) {
         presentation.send(
             .bottomAccessory(
-                newState.scrolledPosition == .atBottom
+                state.scrolledPosition == .atBottom
                     ? nil : .scrollDownButton,
             ),
         )
-        layoutIfNeeded()
+        models.displayVisibleMsgsIfNeeded()
     }
 
     func scrollCoordinator(
@@ -69,9 +66,6 @@ extension ChatManager: ScrollCoordinatorDelegate {
     ) {
         serialQueue.addOperation { [weak self] in
             guard let self else {
-                return
-            }
-            guard coordinator.updatedState(is: .willBeginUpdates) else {
                 return
             }
             let message = edge == .top ? oldestMessage : newestMessage
@@ -93,11 +87,6 @@ extension ChatManager: ScrollCoordinatorDelegate {
                         conID: message.conID
                     )
                 }
-            let firstMsg = try await MsgRepo.firstMsg(conID: message.conID)
-            let noMorePrevious = msgs.contains(
-                where: { $0.uid == firstMsg?.uid },
-            )
-            configureHeader(noMorePrevious: noMorePrevious)
             if edge == .top {
                 await models.prepend(msgs)
                 coordinator.updateStateUpdate(to: .insertingItems(edge))
@@ -135,10 +124,6 @@ extension ChatManager: ScrollCoordinatorDelegate {
             guard let self else {
                 return
             }
-            guard coordinator.updatedState(is: .willBeginUpdates) else {
-                return
-            }
-
             let limit = conversationConfig.pageSize * 2
             switch edge {
             case .top:
@@ -154,6 +139,12 @@ extension ChatManager: ScrollCoordinatorDelegate {
             }
         }
     }
+    
+    func onScrollTargetVisibilityChange(_ newValue: [String]) {
+        if let dateString = models.didBecomeVisible(ids: newValue) {
+            presentation.send(.date(dateString))
+        }
+    }
 }
 
 extension ChatManager {
@@ -164,11 +155,6 @@ extension ChatManager {
     var oldestMessage: Database.Message? {
         models.first?.msg
     }
-
-    func reloadData() {
-        layoutIfNeeded()
-    }
-
     func scrollTo(msg: Message) async {
         scrollController.updateStateUpdate(to: .willBeginUpdates)
 

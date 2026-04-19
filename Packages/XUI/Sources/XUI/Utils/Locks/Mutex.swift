@@ -4,7 +4,7 @@
 
 import Foundation
 
-public final class Mutex<T>: @unchecked Sendable {
+public final class Mutex<T> {
     private var _value: T
     private let lock: os_unfair_lock_t
 
