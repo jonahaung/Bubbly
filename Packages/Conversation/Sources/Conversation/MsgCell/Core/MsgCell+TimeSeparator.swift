@@ -7,37 +7,21 @@ import XUI
 
 extension MsgCell {
     struct TimeSeparator: View {
-
+        @Environment(\.typography) private var typography
         var body: some View {
-            HStack(alignment: .firstTextBaseline, spacing: Spacing.sm) {
+            VStack {
                 if let dateString = viewModel.state.dateStString {
                     Text(dateString)
-                        .font(boldFont)
-                        .multilineTextAlignment(.center)
                 }
             }
-            .foregroundStyle(Color.quinaryText)
-            .padding(
-                viewModel.state.isSender ? .trailing : .leading,
-                Padding.sm,
-            )
-            .padding(.horizontal, Padding.xl)
-            .lineHeight(.multiple(factor: 1.1))
+            .font(typography.footnote.weight(.semibold))
+            .foregroundStyle(Color.secondaryText)
             .frame(
-                height: ChatLayoutConstants.Cell.timeSeparatorHeight,
-                alignment: .bottom,
-            ).equatable(by: viewModel.reloadID)
+                height: ChatLayoutConstants.Cell.timeSeparatorHeight
+            )
+            .flexible(.horizontal)
+            .equatable(by: viewModel.reloadID)
         }
-
         @Environment(MsgCellViewModel.self) private var viewModel
-
-        private var boldFont: Font {
-            Font.system(
-                size: UIFont.buttonFontSize + 4,
-                weight: .bold,
-                design: .serif,
-            ).width(.compressed)
-                .smallCaps()
-        }
     }
 }

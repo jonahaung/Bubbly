@@ -5,7 +5,7 @@
     var startPosition: TextPosition {
       TextPosition(
         indexPath: .init(runSlice: 0, run: 0, line: 0, layout: 0),
-        affinity: layouts.count > 0 ? .downstream : .upstream
+        affinity: !layouts.isEmpty ? .downstream : .upstream
       )
     }
 

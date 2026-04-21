@@ -5,8 +5,8 @@ import Foundation
 import SwiftData
 import XUI
 
-public extension Predicate<PMsg> {
-    static func deliveryStatusComparison(
+public enum PMsgPredicates {
+    public static func deliveryStatusComparison(
         conID: String,
         currentUserID: String,
         recipient: MsgRecipient,
@@ -78,7 +78,7 @@ public extension Predicate<PMsg> {
         }
     }
 
-    static func deliveryStatusEqual(
+    public static func deliveryStatusEqual(
         conID: String,
         currentUserID: String,
         recipient: MsgRecipient,
@@ -146,29 +146,26 @@ public extension Predicate<PMsg> {
             fatalError()
         }
     }
-}
-
-extension Predicate<PMsg> {
-    static func conID(_ value: String) -> Predicate<PMsg> {
-        #Predicate { $0.conID == value }
+    public static func conID(_ value: String) -> Predicate<PMsg> {
+        #Predicate<PMsg> { $0.conID == value }
     }
 
-    static func notSender(_ value: String) -> Predicate<PMsg> {
-        #Predicate { $0.senderID != value }
+    public static func notSender(_ value: String) -> Predicate<PMsg> {
+        #Predicate<PMsg> { $0.senderID != value }
     }
 
-    static func delivery(
+    public static func delivery(
         _ op: PredicateExpressions.ComparisonOperator,
         _ status: DeliveryStatus,
     ) -> Predicate<PMsg> {
         let value = status.rawValue
         switch op {
-        case .lessThan: return #Predicate { $0.deliveryStatus < value }
-        case .lessThanOrEqual: return #Predicate { $0.deliveryStatus <= value }
-        case .greaterThan: return #Predicate { $0.deliveryStatus > value }
-        case .greaterThanOrEqual: return #Predicate { $0.deliveryStatus >= value }
+        case .lessThan: return #Predicate<PMsg> { $0.deliveryStatus < value }
+        case .lessThanOrEqual: return #Predicate<PMsg> { $0.deliveryStatus <= value }
+        case .greaterThan: return #Predicate<PMsg> { $0.deliveryStatus > value }
+        case .greaterThanOrEqual: return #Predicate<PMsg> { $0.deliveryStatus >= value }
         @unknown default:
-            return #Predicate { $0.deliveryStatus == value }
+            return #Predicate<PMsg> { $0.deliveryStatus == value }
         }
     }
 

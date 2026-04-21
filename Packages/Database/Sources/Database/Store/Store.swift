@@ -5,18 +5,18 @@ import Foundation
 import SwiftData
 import XUI
 
-public final actor Store: Sendable {
+public final actor Store {
     public static let shared: Store = .init()
 
-    public var appContainer: AppContainer? = nil
+    public var appContainer: AppContainer?
     public var modelContainer: ModelContainer? {
         appContainer?.modelContainer
     }
 
-    public var msgStore: StoreModelActor<PMsg>? = nil
-    public var contactStore: StoreModelActor<PContact>? = nil
-    public var groupStore: StoreModelActor<PGroup>? = nil
-    public var conversationPropertiesStore: StoreModelActor<PConversationProperties>? = nil
+    public var msgStore: StoreModelActor<PMsg>?
+    public var contactStore: StoreModelActor<PContact>?
+    public var groupStore: StoreModelActor<PGroup>?
+    public var conversationPropertiesStore: StoreModelActor<PConversationProperties>?
 
     public init() {}
 

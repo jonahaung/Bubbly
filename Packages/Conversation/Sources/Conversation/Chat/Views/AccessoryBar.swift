@@ -9,28 +9,35 @@ struct AccessoryBar: View {
     var body: some View {
         HStack(alignment: .bottom) {
             Spacer()
+            
             if let accessory = manager.presentation.state.bottomAccessory {
-                if accessory == .scrollDownButton {
-                    CustomButton {
-						manager.send(.scrollDownButtonTapped)
-                    } label: {
-                        Image(systemName: "chevron.down")
-                            .resizable()
-                            .scaledToFit()
-                            .padding(12)
-                            .frame(square: 40)
-                            .background(Color.appPrimary, in: .circle)
-                            .transition(
-                                .movingParts
-                                    .skid(direction: .trailing)
-                                    .animation(.easeOut),
-                            )
+                switch accessory {
+                case .scrollDownButton:
+                    CircleButton(.arrowshapeDownFill) {
+                        manager.send(.scrollDownButtonTapped)
                     }
+                    .transition(
+                        .movingParts
+                            .skid(direction: .trailing)
+                            .animation(.easeOut),
+                    )
+                case .keyboardButton:
+                    CircleButton(.keyboardChevronCompactDown) {
+                        UIApplication.shared.endEditing()
+                    }
+                    .transition(
+                        .movingParts
+                            .skid(direction: .trailing)
+                            .animation(.easeOut),
+                    )
+                case .contactAvator:
+                    ZeroSizeView()
                 }
             }
         }
         .frame(height: 40)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, Padding.sm)
+        .padding(.bottom, Padding.sm)
         .geometryGroup()
     }
 }

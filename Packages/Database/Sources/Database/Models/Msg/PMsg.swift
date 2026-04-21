@@ -12,7 +12,7 @@ public final class PMsg {
     public var uid: String
     public var senderID: String
     public var conID: String
-    public var text: String? = nil
+    public var text: String?
     public var date: String
     public var deliveryStatus: Int
     public var attachments: [Attachment] = []

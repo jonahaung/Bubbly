@@ -13,7 +13,7 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
         modelExecutor.modelContext
     }
 
-    private var saveTask: Task<Void, Never>? = nil
+    private var saveTask: Task<Void, Never>?
 
     public init(
         modelContainer: ModelContainer,

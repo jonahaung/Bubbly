@@ -8,8 +8,7 @@ import XUI
 
 @Observable
 public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
-    
-    @ObservationIgnored public var state: State
+    public var state: State
     @ObservationIgnored public var isVisible: Bool = false
     public var reloadID: Int = 0
     
@@ -43,6 +42,7 @@ public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
         state.bubbleCornor = state.computeBubbleCorner()
         state.computeDateString()
         self.state = state
+        layoutIfNeeded()
     }
 
     public func setVisibility(_ isVisible: Bool) {
@@ -50,8 +50,7 @@ public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
             return
         }
         self.isVisible = isVisible
-        if isVisible {
-           
+        if !state.attachments.isEmpty {
             layoutIfNeeded()
         }
     }
@@ -68,7 +67,9 @@ public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
     }
     
     public func layoutIfNeeded() {
-        reloadID += 1
+        if isVisible {
+            reloadID += 1
+        }
     }
 
     public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
@@ -150,15 +151,12 @@ extension MsgCellViewModel {
 
         public mutating func computeDateString() {
             guard layout.showTimeSeparator, dateStString == nil else { return }
-            dateStString = MsgTimeStringFormatter.string(
-                for: date,
-                isSender: isSender
-            )
+            dateStString = MsgTimeStringFormatter.string(for: date)
         }
     }
 
     public var id: String {
-        state.id
+        state.msg.uid
     }
 }
 

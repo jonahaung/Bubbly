@@ -28,9 +28,8 @@ extension MsgCell {
         private var footerText: String {
             if state.isSender {
                 state.msg.deliveryStatus.localizedName
-            }
-            else {
-                MsgTimeStringFormatter.string(for: state.date, isSender: state.isSender)
+            } else {
+                MsgTimeStringFormatter.string(for: state.date)
             }
         }
     }

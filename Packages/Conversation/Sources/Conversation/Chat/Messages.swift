@@ -6,31 +6,48 @@ import Foundation
 import Services
 import SwiftUI
 import XUI
+import Combine
 
 // MARK: - MsgModels
 
 @MainActor
 final class Messages {
 
-    // MARK: - Init
+    var headerModels = [HeaderModel]()
+    private var storage = [MsgCellViewModel]()
+    private var indexMap: [String: Int] = [:]
+
+    private let bubbleFactory = BubbleFactory()
+    private var modelCache = LRUCache<MsgCellViewModel.ID, MsgCellViewModel>()
+    private let markdownFormatter = MarkdownFormatter()
+    private let richTextEnabled: Bool
+    
+    private let visibleIDsPublisher = PassthroughSubject<[String], Never>()
+    private let cancelBag = CancelBag()
 
     init(_ msgs: [Message] = [], _ headerModels: [HeaderModel] = []) {
-        self.headerModels = headerModels
         richTextEnabled = UserDefaults.group.bool(
             forKey: GroupStorageKey.conversation(.richTextEnabled).value
         )
-
+        self.headerModels = headerModels
         storage = msgs.map(model(for:))
         rebuildIndexMap()
         layoutBatch(storage)
+        
+        visibleIDsPublisher
+            .debounce(for: 0.5, scheduler: RunLoop.main)
+            .sink { [weak self] value in
+                guard let self else { return }
+                displayVisibleMsgsIfNeeded(currentVisibleIDS: value)
+            }
+            .store(in: cancelBag)
     }
 
-    deinit { log("deinit") }
-
-    // MARK: - Public
-
-    var headerModels = [HeaderModel]()
-
+    deinit {
+        cancelBag.cancel()
+        log("deinit")
+    }
+    
     var count: Int { storage.count }
     var first: MsgCellViewModel? { storage.first }
     var last: MsgCellViewModel? { storage.last }
@@ -53,61 +70,36 @@ final class Messages {
         guard let index = indexMap[id] else { return nil }
         return storage[index]
     }
-
-    // MARK: - Storage
-
-    private var storage = [MsgCellViewModel]()
-    private var indexMap: [String: Int] = [:]
-
-    private let bubbleFactory = BubbleFactory()
-    private var modelCache = LRUCache<MsgCellViewModel.ID, MsgCellViewModel>()
-    private let markdownFormatter = MarkdownFormatter()
-    private let richTextEnabled: Bool
-    private var currentVisibleIDS = [String]()
 }
-
 extension Messages {
-
-    func didBecomeVisible(ids: [String]) -> String? {
-//        currentVisibleIDS = ids
-        var dateString: String?
-
-        for id in ids {
-            guard let index = indexMap[id] else { continue }
-            let model = storage[index]
-
-            if !model.isVisible {
-                model.setVisibility(true)
-
-                if dateString == nil,
-                    model.state.layout.showTimeSeparator
-                {
-                    dateString = model.state.dateStString
+    func onScrollTargetVisibilityChange(_ ids: [String]) {
+        visibleIDsPublisher.send(ids)
+    }
+    func getCurrentVisibleDateString() -> String? {
+        guard let model = storage.first(where: { $0.isVisible }) else {
+            return nil
+        }
+        return MsgTimeStringFormatter.string(for: model.msg.date)
+    }
+    
+    private func displayVisibleMsgsIfNeeded(currentVisibleIDS: [String]) {
+        let oldIDs =  storage.filter { $0.isVisible }.map(\.msg.uid)
+        let difference = currentVisibleIDS.difference(from: oldIDs)
+        difference.forEach { each in
+            switch each {
+            case let .insert(_, id, _):
+                if let model = element(withID: id) {
+                    model.setVisibility(true)
+                }
+            case let .remove(_, id, _):
+                if let model = element(withID: id) {
+                    model.setVisibility(false)
                 }
             }
         }
-
-        return dateString
     }
 }
 extension Messages {
-    func displayVisibleMsgsIfNeeded() {
-        let diff = storage.filter{ $0.isVisible }.map(\.id).difference(from: currentVisibleIDS)
-        diff.forEach { each in
-            switch each {
-            case .insert:
-                break
-            case let .remove(_, id, _):
-                element(withID: id)?.setVisibility(false)
-            }
-        }
-    }
-}
-extension Messages {
-
-    var msgs: [Message] {
-        storage.map(\.msg)
-    }
     func didChangeSelection(_ selectedMsg: SelectedMsg?, for id: String) {
         guard let index = indexMap[id] else { return }
         storage[index].update(selectedMsg: selectedMsg)
@@ -143,7 +135,7 @@ extension Messages {
         layoutAround(index)
     }
 
-    func prepend(_ msgs: [Message]) async {
+    func prepend(_ msgs: [Message]) {
         let models = msgs.map(model(for:))
         layoutBatch(models)
 
@@ -151,7 +143,7 @@ extension Messages {
         rebuildIndexMap()
     }
 
-    func append(_ msgs: [Message]) async {
+    func append(_ msgs: [Message]) {
         let models = msgs.map(model(for:))
         layoutBatch(models)
 
@@ -188,28 +180,6 @@ extension Messages {
 }
 
 extension Messages {
-    func applyDiff(old: [Message], new: [Message]) {
-
-        let changes = Diff.diff(old: old, new: new)
-
-        for change in changes {
-            switch change.kind {
-
-            case .remove(let index):
-                storage.remove(at: index)
-
-            case .insert(let index):
-                let model = model(for: change.message)
-                storage.insert(model, at: index)
-
-            case .update(let index):
-                storage[index].update(with: change.message)
-            }
-        }
-
-        rebuildIndexMap()
-        layoutBatch(storage)
-    }
     func model(for msg: Message) -> MsgCellViewModel {
 
         if let cached = modelCache.get(msg.uid) {

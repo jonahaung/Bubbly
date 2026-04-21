@@ -1,5 +1,5 @@
 //
-//  ChatLayoutCache.swift
+//  MsgsScrollViewLayoutCache.swift
 //  Conversation
 //
 //  Created by Aung Ko Min on 17/4/26.
@@ -10,105 +10,160 @@ import Foundation
 
 final class MsgsScrollViewLayoutCache: @unchecked Sendable {
 
+    // MARK: - Snapshot (Immutable for readers)
+
+    struct Snapshot {
+        var sizeStorage: [String: CGSize]
+        var sizeOrder: [String]
+
+        var layoutStorage: [Int: MsgsScrollViewLayout.Cache]
+        var layoutOrder: [Int]
+    }
+
+    // MARK: - Config
+
     private let maxSizeEntries: Int
     private let maxLayoutEntries: Int
 
     // MARK: - Storage
 
-    private var sizeStorage: [String: CGSize] = [:]
-    private var sizeOrder: [String] = []  // LRU tracking
+    private let writeLock = NSLock()
+    private var snapshot: Snapshot
 
-    private var layoutStorage: [Int: MsgsScrollViewLayout.Cache] = [:]
-
-    private let lock = NSLock()
+    // MARK: - Init
 
     init(
-        maxSizeEntries: Int = 2000,
+        maxSizeEntries: Int = 1200,
         maxLayoutEntries: Int = 8
     ) {
         self.maxSizeEntries = maxSizeEntries
         self.maxLayoutEntries = maxLayoutEntries
+
+        snapshot = .init(
+            sizeStorage: [:],
+            sizeOrder: [],
+            layoutStorage: [:],
+            layoutOrder: []
+        )
     }
 
-    // MARK: - Size Cache
+    // MARK: - Lock-free Reads
 
+    @inline(__always)
     func size(for key: String) -> CGSize? {
-        lock.lock()
-        defer { lock.unlock() }
-
-        guard let value = sizeStorage[key] else { return nil }
-
-        // LRU refresh
-        if let index = sizeOrder.firstIndex(of: key) {
-            sizeOrder.remove(at: index)
-        }
-        sizeOrder.append(key)
-
-        return value
+        snapshot.sizeStorage[key]
     }
+
+    @inline(__always)
+    func cache(signature: Int) -> MsgsScrollViewLayout.Cache? {
+        snapshot.layoutStorage[signature]
+    }
+
+    // MARK: - Writes (Copy-on-Write + Atomic Swap)
 
     func setSize(_ size: CGSize, for key: String) {
-        lock.lock()
-        defer { lock.unlock() }
+        writeLock.lock()
+        defer { writeLock.unlock() }
 
-        if sizeStorage[key] == nil {
-            sizeOrder.append(key)
+        var new = snapshot
+
+        if new.sizeStorage.updateValue(size, forKey: key) == nil {
+            new.sizeOrder.append(key)
+        } else {
+            refresh(&new.sizeOrder, key)
         }
 
-        sizeStorage[key] = size
-        enforceSizeLimit()
-    }
+        enforceSizeLimit(&new)
 
-    private func enforceSizeLimit() {
-        while sizeOrder.count > maxSizeEntries {
-            let oldest = sizeOrder.removeFirst()
-            sizeStorage.removeValue(forKey: oldest)
-        }
-    }
-
-    func removeAllSizes() {
-        lock.lock()
-        sizeStorage.removeAll()
-        sizeOrder.removeAll()
-        lock.unlock()
-    }
-
-    // MARK: - Layout Cache
-
-    func cache(signature: Int) -> MsgsScrollViewLayout.Cache? {
-        lock.lock()
-        let value = layoutStorage[signature]
-        lock.unlock()
-
-        return value
+        snapshot = new
     }
 
     func setCache(
         _ cache: MsgsScrollViewLayout.Cache,
         signature: Int
     ) {
-        lock.lock()
+        writeLock.lock()
+        defer { writeLock.unlock() }
 
-        if layoutStorage.count >= maxLayoutEntries {
-            layoutStorage.remove(at: layoutStorage.startIndex)
+        var new = snapshot
+
+        if new.layoutStorage.updateValue(cache, forKey: signature) == nil {
+            new.layoutOrder.append(signature)
+        } else {
+            refresh(&new.layoutOrder, signature)
         }
-        layoutStorage[signature] = cache
-        lock.unlock()
+
+        enforceLayoutLimit(&new)
+
+        snapshot = new
     }
 
-    func removeAllLayouts() {
-        lock.lock()
-        layoutStorage.removeAll()
-        lock.unlock()
+    // MARK: - Partial Invalidation (important for chat)
+
+    func invalidateSizes(for keys: [String]) {
+        writeLock.lock()
+        defer { writeLock.unlock() }
+
+        var new = snapshot
+
+        for key in keys {
+            new.sizeStorage.removeValue(forKey: key)
+        }
+
+        new.sizeOrder.removeAll { !new.sizeStorage.keys.contains($0) }
+
+        snapshot = new
     }
 
-    // MARK: - Global Invalidation
+    func invalidateLayouts(for signatures: [Int]) {
+        writeLock.lock()
+        defer { writeLock.unlock() }
+
+        var new = snapshot
+
+        for sig in signatures {
+            new.layoutStorage.removeValue(forKey: sig)
+        }
+
+        new.layoutOrder.removeAll { !new.layoutStorage.keys.contains($0) }
+
+        snapshot = new
+    }
+
+    // MARK: - Full Reset
 
     func invalidateAll() {
-        lock.lock()
-        sizeStorage.removeAll()
-        sizeOrder.removeAll()
-        layoutStorage.removeAll()
-        lock.unlock()
+        writeLock.lock()
+        snapshot = .init(
+            sizeStorage: [:],
+            sizeOrder: [],
+            layoutStorage: [:],
+            layoutOrder: []
+        )
+        writeLock.unlock()
+    }
+
+    // MARK: - LRU Helpers
+
+    @inline(__always)
+    private func refresh<T: Equatable>(_ order: inout [T], _ key: T) {
+        if let index = order.firstIndex(of: key) {
+            order.remove(at: index)
+        }
+        order.append(key)
+    }
+
+    private func enforceSizeLimit(_ snap: inout Snapshot) {
+        while snap.sizeOrder.count > maxSizeEntries {
+            let oldest = snap.sizeOrder.removeFirst()
+            snap.sizeStorage.removeValue(forKey: oldest)
+        }
+    }
+
+    private func enforceLayoutLimit(_ snap: inout Snapshot) {
+        while snap.layoutOrder.count > maxLayoutEntries {
+            let oldest = snap.layoutOrder.removeFirst()
+            snap.layoutStorage.removeValue(forKey: oldest)
+        }
     }
 }

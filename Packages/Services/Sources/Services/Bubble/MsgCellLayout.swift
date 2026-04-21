@@ -33,4 +33,8 @@ public struct MsgCellLayout: Conformable {
     public var showAvatar: Bool {
         bubbleCorner == .all || bubbleCorner == .receivingBottom
     }
+    
+    public mutating func invalidate() {
+        self = .init()
+    }
 }

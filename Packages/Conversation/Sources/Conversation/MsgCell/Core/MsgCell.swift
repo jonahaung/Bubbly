@@ -40,9 +40,9 @@ struct MsgCell: View {
                 Footer()
             }
         }
+        .equatable(by: viewModel.reloadID)
         .environment(\.isVisible, viewModel.isVisible)
         .environment(viewModel)
-        .equatable(by: viewModel.reloadID)
     }
 
     private var isSelected: Bool {

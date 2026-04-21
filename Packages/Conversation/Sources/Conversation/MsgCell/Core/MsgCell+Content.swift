@@ -8,8 +8,6 @@ import XUI
 
 extension MsgCell {
     struct Content: View {
-        
-
         var body: some View {
             ZStack(
                 alignment: .init(
@@ -27,10 +25,7 @@ extension MsgCell {
             viewModel.state
         }
     }
-
     struct OverlayBubbleView: View {
-        
-
         var body: some View {
             Reactions(reactions: viewModel.state.reactions)
                 .fixedSize()

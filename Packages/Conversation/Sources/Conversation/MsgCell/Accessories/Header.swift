@@ -14,7 +14,7 @@ extension MsgCell {
         }
         private var headerText: String {
             if state.isSender {
-                return  MsgTimeStringFormatter.string(for: state.date, isSender: state.isSender)
+                return  MsgTimeStringFormatter.string(for: state.date)
             } else {
                 let name: String? = ContactsRepository.shared.contact(for: state.senderID)?.name
                 return name ?? "Unknown"

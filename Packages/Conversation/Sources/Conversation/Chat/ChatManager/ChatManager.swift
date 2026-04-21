@@ -43,7 +43,7 @@ final class ChatManager: ErrorPresenter {
         log("Deinit")
     }
 
-    @ObservationIgnored internal let datasource: PaginatedDatasource
+    @ObservationIgnored let datasource: PaginatedDatasource
     @ObservationIgnored let scrollController: ScrollCoordinator
     @ObservationIgnored var presentation: Presenter
     @ObservationIgnored let conversationConfig: ConversationInitializer.Configuration
@@ -53,22 +53,19 @@ final class ChatManager: ErrorPresenter {
     @ObservationIgnored weak var contactsRepository: ContactsRepositoryProtocol?
     @ObservationIgnored weak var currentUserRepository: CurrentUserRepository?
     @ObservationIgnored weak var router: Router?
-    @ObservationIgnored internal let conversationDataUpdater: ConversationDataUpdater = .init()
-    @ObservationIgnored internal let serialQueue: AsyncQueue = .init(attributes: [])
-    @ObservationIgnored let layoutManager = MsgsScrollViewLayoutManager(cache: .init())
-    internal var state: State
+    @ObservationIgnored let conversationDataUpdater: ConversationDataUpdater = .init()
+    @ObservationIgnored let serialQueue: AsyncQueue = .init(attributes: [])
+    @ObservationIgnored let layoutManager: MsgsScrollViewLayoutManager = .init(cache: .init())
+    var state: State
 }
 
 extension ChatManager {
-    func layoutIfNeeded() {
-        state.reloadID += 1
-    }
     func send(_ intent: Intent) {
         guard scrollController.delegate != nil else {
             return
         }
         switch intent {
-        case .scrollViewIntent(let newValue):
+        case let .scrollViewIntent(newValue):
             scrollController.send(newValue)
         case .scrollDownButtonTapped:
             serialQueue.addOperation { [weak self] in
@@ -78,8 +75,30 @@ extension ChatManager {
 
                 try await handleScrollDownButtonTap()
             }
-        case .cellAction(let newValue):
+        case let .cellAction(newValue):
             handleMsgCellInteraction(action: newValue)
+        }
+    }
+
+    func layoutIfNeeded() {
+        state.reloadID += 1
+    }
+}
+
+extension ChatManager {
+    private func handleScrollDownButtonTap() async throws {
+        guard
+            let lasMsg = try await MsgRepo.lastMsg(
+                conID: conversationConfig.conID,
+            )
+        else {
+            return
+        }
+        if models.contains(withID: lasMsg.uid) {
+            scrollController.performScroll(to: .id(lasMsg.uid, .animated()))
+        }
+        else {
+            scrollController.begin(updates: .resetting(msg: lasMsg))
         }
     }
 
@@ -111,22 +130,4 @@ extension ChatManager {
     }
 
     func onViewDisappear() {}
-}
-
-extension ChatManager {
-    fileprivate func handleScrollDownButtonTap() async throws {
-        UIApplication.shared.endEditing()
-        guard
-            let lasMsg = try await MsgRepo.lastMsg(
-                conID: conversationConfig.conID
-            )
-        else {
-            return
-        }
-        if models.contains(withID: lasMsg.uid) {
-            scrollController.performScroll(to: .id(lasMsg.uid, .animated()))
-        } else {
-            await scrollTo(msg: lasMsg)
-        }
-    }
 }

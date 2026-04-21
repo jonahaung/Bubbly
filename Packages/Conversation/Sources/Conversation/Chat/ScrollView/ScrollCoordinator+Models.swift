@@ -13,13 +13,14 @@ extension ScrollCoordinator {
         init(
             canLoadOlder: Bool = false,
             canLoadNewer: Bool = false,
-            canAdjustSize: Bool = false
+            canAdjustSize: Bool = false,
         ) {
             self.canLoadOlder = canLoadOlder
             self.canLoadNewer = canLoadNewer
             self.canAdjustSize = canAdjustSize
         }
     }
+
     enum ScrollDirection: Sendable, Hashable {
         case up
         case down
@@ -32,13 +33,13 @@ extension ScrollCoordinator {
         var geometry: VScrollGeometry = .empty
         var phase: ScrollPhase = .idle
         var scrolledPosition: ScrolledPosition = .none
-        var paginationState: PaginationState? = nil
+        var paginationState: PaginationState?
     }
 
     enum Intent {
         case onScrollGeometryChange(
             _ oldValue: VScrollGeometry,
-            _ newValue: VScrollGeometry
+            _ newValue: VScrollGeometry,
         )
         case onScrollPhaseChange(
             _ oldValue: ScrollPhase,
@@ -48,21 +49,18 @@ extension ScrollCoordinator {
     }
 
     enum DataUpdate: Sendable, Hashable {
-        case insert(_ edge: VerticalEdge)
-        case remove(_ edge: VerticalEdge)
-        case append(_ msgID: String)
-        case resetting(_ msgID: String)
+        case insert(edge: VerticalEdge, geometry: VScrollGeometry)
+        case remove(edge: VerticalEdge, geometry: VScrollGeometry)
+        case append(msgID: String)
+        case resetting(msg: Message)
     }
 
     enum ScrollViewUpdate: Hashable {
         case initial
         case didEndUpdates
-        case resetting(_ msgID: String)
         case willEndUpdates
         case willBeginUpdates
-        case insertingItems(_ edge: VerticalEdge)
-        case removingItems(_ edge: VerticalEdge)
-        case appendingItem(_ id: String)
+        case dataUpdate(DataUpdate)
 
         var hasViewLoaded: Bool {
             self != .initial
@@ -70,6 +68,10 @@ extension ScrollCoordinator {
 
         var isUpdating: Bool {
             self != .didEndUpdates
+        }
+
+        var canReduceUpdates: Bool {
+            isUpdating && self != .didEndUpdates && self != .willEndUpdates
         }
 
         var isNotUpdating: Bool {

@@ -68,7 +68,7 @@ actor EmptySoundEffectPlayer: SoundEffectPlayer {
 // MARK: - HapticEngineSoundEffectPlayer
 
 actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
-    private var engine: CHHapticEngine? = nil
+    private var engine: CHHapticEngine?
 
     private struct SoundEffectReference {
         let resourceID: CHHapticAudioResourceID
@@ -152,7 +152,7 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
         for url in audio.urls {
             registeredSounds[url]?.count -= 1
 
-            if registeredSounds[url]?.count == 0 {
+            if registeredSounds[url]?.isEmpty {
                 if let resourceID = registeredSounds[url]?.resourceID {
                     try engine.unregisterAudioResource(resourceID)
                 }
@@ -272,7 +272,7 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
 
         registeredSound.count -= 1
 
-        if registeredSound.count == 0 {
+        if registeredSound.isEmpty {
             registeredSounds[audio] = nil
         } else {
             registeredSounds[audio] = registeredSound
@@ -308,7 +308,7 @@ private final class AVAudioPlayerWithCompletionHandler: NSObject, AVAudioPlayerD
 
     var completion: (Result<Void, Error>) -> Void
 
-    var player: AVAudioPlayer? = nil
+    var player: AVAudioPlayer?
 
     init(url: URL, volume: Double) {
         self.url = url

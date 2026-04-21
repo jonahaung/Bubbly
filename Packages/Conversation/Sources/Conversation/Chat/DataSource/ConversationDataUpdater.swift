@@ -60,7 +60,7 @@ struct ConversationDataUpdater {
     func sendSeenStatus(
         lastReadMsg: Message,
         currentUserID: String,
-        conversation: Conversation
+        conversation: Conversation,
     )
         async throws
     {

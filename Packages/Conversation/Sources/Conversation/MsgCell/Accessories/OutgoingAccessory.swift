@@ -7,7 +7,6 @@ import SwiftUI
 
 extension MsgCell {
     struct OutgoingAccessory: View {
-        
 
         var body: some View {
             if viewModel.state.isSender, let namespace {
@@ -15,17 +14,21 @@ extension MsgCell {
                     Group {
                         switch viewModel.state.deliveryStatus {
                         case .delivered:
-                            Image(systemName: "checkmark.circle", variableValue: 0.0)
-                                .resizable()
-                                .scaledToFit()
-                                .symbolVariableValueMode(.draw)
+                            Image(
+                                systemName: "checkmark.circle",
+                                variableValue: 0.0
+                            )
+                            .resizable()
+                            .scaledToFit()
+                            .symbolVariableValueMode(.draw)
                         case .sending:
                             Image(systemName: "progress.indicator")
                                 .resizable()
                                 .scaledToFit()
                                 .symbolEffect(
                                     .rotate,
-                                    options: .repeat(.periodic), value: viewModel.isVisible,
+                                    options: .repeat(.periodic),
+                                    value: viewModel.isVisible,
                                 )
                         case .sendingFailed:
                             Image(systemName: "exclamationmark.circle")
@@ -42,7 +45,6 @@ extension MsgCell {
                     .symbolRenderingMode(.palette)
                 }
                 .frame(width: 12)
-//                .padding(.trailing, Padding.md)
                 .allowsHitTesting(false)
                 .matchedGeometryEffect(
                     id: viewModel.id,
@@ -53,8 +55,6 @@ extension MsgCell {
                 .geometryGroup()
             }
         }
-
-        
 
         @Environment(MsgCellViewModel.self) private var viewModel
         @Environment(\.sharedNamespace) private var namespace

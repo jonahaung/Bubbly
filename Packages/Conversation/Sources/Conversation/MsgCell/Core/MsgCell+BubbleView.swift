@@ -6,7 +6,6 @@ import SwiftUI
 
 extension MsgCell {
     struct BubbleView: View {
-
         var body: some View {
             if !state.attachments.isEmpty {
                 VStack(alignment: state.horizontalAlignment, spacing: .zero) {
@@ -14,6 +13,7 @@ extension MsgCell {
                         attachments: state.attachments,
                         alignment: state.horizontalAlignment,
                     )
+                   
                     if state.attributedText != nil {
                         TextContent()
                             .padding(theme.bubblePading)
@@ -36,7 +36,6 @@ extension MsgCell {
                     )
                     .background(Color.shadow)
                     .containerShape(bubbleShape)
-                    .textSelection(.enabled)
             }
         }
 

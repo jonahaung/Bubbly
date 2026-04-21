@@ -37,8 +37,8 @@
       let end = range.end.indexPath
 
       var selectionRects: [TextSelectionRect] = []
-      var currentLayout: Int? = nil
-      var builder: TextSelectionRect.Builder? = nil
+      var currentLayout: Int?
+      var builder: TextSelectionRect.Builder?
 
       func flushRects() {
         selectionRects += builder?.rects() ?? []
@@ -151,7 +151,7 @@
 
   extension Array where Element == [TextSelectionRect] {
     fileprivate mutating func inflate() {
-      var previousMaxY: CGFloat? = nil
+      var previousMaxY: CGFloat?
 
       for line in self.indices {
         guard !self[line].isEmpty else {

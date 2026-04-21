@@ -26,7 +26,7 @@ public final class NetworkManager: NSObject {
     )
 
     private let session: URLSession
-    private var lastPathStatus: NWPath.Status? = nil
+    private var lastPathStatus: NWPath.Status?
     public private(set) var isConnected: Bool = false
 
     override init() {
@@ -250,7 +250,7 @@ public final class NetworkManager: NSObject {
 // MARK: URLSessionDelegate, URLSessionTaskDelegate
 
 extension NetworkManager: URLSessionDelegate, URLSessionTaskDelegate {
-    public nonisolated func urlSession(
+    nonisolated public func urlSession(
         _: URLSession,
         task _: URLSessionTask,
         didCompleteWithError error: Error?,
@@ -261,7 +261,7 @@ extension NetworkManager: URLSessionDelegate, URLSessionTaskDelegate {
         }
     }
 
-    public nonisolated func urlSession(
+    nonisolated public func urlSession(
         _: URLSession,
         task _: URLSessionTask,
         didFinishCollecting _: URLSessionTaskMetrics,

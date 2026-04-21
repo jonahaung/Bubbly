@@ -27,7 +27,7 @@ extension ChatManager: ChatDataReceiverDelegate {
             return
         }
         if scrollController.isNear(.bottom) {
-            scrollController.updateStateUpdate(to: .appendingItem(msg.uid))
+            scrollController.updateStateUpdate(to: .dataUpdate(.append(msgID: msg.uid)))
             models.insert(msg: msg)
             layoutIfNeeded()
         } else {
@@ -45,7 +45,7 @@ extension ChatManager: ChatDataReceiverDelegate {
                         guard let self else {
                             return
                         }
-                        await scrollTo(msg: msg)
+                        try await scrollTo(msg: msg)
                     }
                 }
                 ToastPresenter.show(toast)
@@ -66,7 +66,7 @@ extension ChatManager: ChatDataReceiverDelegate {
                         guard let self else {
                             return
                         }
-                        await scrollTo(msg: msg)
+                        try await scrollTo(msg: msg)
                     }
                 }
                 ToastPresenter.show(toast)

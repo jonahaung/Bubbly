@@ -27,7 +27,7 @@ extension MsgCell {
 				}
 			}
             .frame(width: Spacing.md + 4)
-            .equatable(by: layout.showAvatar)
+            .equatable(by: viewModel.reloadID)
 		}
 	}
 }

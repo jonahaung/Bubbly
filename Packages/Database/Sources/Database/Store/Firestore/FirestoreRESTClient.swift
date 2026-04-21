@@ -418,7 +418,8 @@ public final class FirestoreRESTClient {
         queryItems.append(contentsOf: fieldPaths.map { URLQueryItem(
             name: "updateMask.fieldPaths",
             value: $0,
-        ) })
+        ) 
+        })
         components.queryItems = queryItems
         guard let url = components.url else {
             throw FirestoreError.invalidURL

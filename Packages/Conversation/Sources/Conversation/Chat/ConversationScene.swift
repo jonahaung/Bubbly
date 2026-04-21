@@ -8,7 +8,6 @@ import XUI
 
 public struct ConversationScene: View {
     
-
     public init(
         coordinator: AppCoordinator,
         prefretchData: ConversationInitializer.PrefetchedData,
@@ -59,9 +58,6 @@ public struct ConversationScene: View {
         .onAppear(perform: viewModel.onViewAppear)
         .onDisappear(perform: viewModel.onViewDisappear)
     }
-
-    
-
     @FocusState private var focusState: String?
     @Namespace private var namespace
 

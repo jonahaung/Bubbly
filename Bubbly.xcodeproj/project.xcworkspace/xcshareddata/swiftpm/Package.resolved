@@ -1,5 +1,5 @@
 {
-  "originHash" : "15f3e24d6c1eca50ec1abccf39b5520d7ac310b452e549492ac02946823498d0",
+  "originHash" : "b674a8d42f875a0d207c7ab25c92944c193cedb6b48a5072851ae9849a2c6c8c",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -146,15 +146,6 @@
       }
     },
     {
-      "identity" : "mockery",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/tonyarnold/mockery.git",
-      "state" : {
-        "branch" : "main",
-        "revision" : "e7354a0471c2972da7d5689cbddca6c1a52a0f18"
-      }
-    },
-    {
       "identity" : "nanopb",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/firebase/nanopb.git",
@@ -170,15 +161,6 @@
       "state" : {
         "revision" : "c107075aa8d394be7aced273a46e944afe8b321b",
         "version" : "3.8.0"
-      }
-    },
-    {
-      "identity" : "pow",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/EmergeTools/Pow",
-      "state" : {
-        "revision" : "a504eb6d144bcf49f4f33029a2795345cb39e6b4",
-        "version" : "1.0.5"
       }
     },
     {

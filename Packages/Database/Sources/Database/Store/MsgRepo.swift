@@ -30,7 +30,7 @@ public enum MsgRepo {
         limit: Int? = nil,
         offset: Int? = nil,
     ) -> FetchDescriptor<PMsg> {
-        var descriptor = FetchDescriptor<PMsg>(predicate: .conID(conID))
+        var descriptor = FetchDescriptor<PMsg>(predicate: PMsgPredicates.conID(conID))
         descriptor.sortBy = [.init(\.date, order: order)]
         descriptor.fetchLimit = limit
         descriptor.fetchOffset = offset
@@ -52,7 +52,10 @@ public enum MsgRepo {
     }
 
     public static func deleteMessages(conID: String) async throws {
-        try await withMsgStore({ try await $0.delete(where: .conID(conID)) }, defaultValue: ())
+        try await withMsgStore(
+            { try await $0.delete(where: PMsgPredicates.conID(conID)) },
+            defaultValue: (),
+        )
     }
 
     public static func lastMsg(conID: String) async throws -> Message? {
@@ -71,7 +74,7 @@ public enum MsgRepo {
 
     public static func totalMsgsCount(conID: String) async throws -> Int {
         try await withMsgStore(
-            { try await $0.fetchCount(FetchDescriptor(predicate: .conID(conID))) },
+            { try await $0.fetchCount(FetchDescriptor(predicate: PMsgPredicates.conID(conID))) },
             defaultValue: 0,
         )
     }
@@ -85,7 +88,7 @@ public extension MsgRepo {
             {
                 try await $0.fetchCount(
                     FetchDescriptor(
-                        predicate: Predicate<PMsg>
+                        predicate: PMsgPredicates
                             .deliveryStatusComparison(
                                 conID: conID,
                                 currentUserID: currentUserID,
@@ -106,7 +109,7 @@ public extension MsgRepo {
         try await withMsgStore(
             { store in
                 var descriptor = FetchDescriptor<PMsg>(
-                    predicate: Predicate<PMsg>
+                    predicate: PMsgPredicates
                         .deliveryStatusComparison(
                             conID: conID,
                             currentUserID: currentUserID,
@@ -129,7 +132,7 @@ public extension MsgRepo {
         try await withMsgStore(
             { store in
                 var descriptor = FetchDescriptor<PMsg>(
-                    predicate: Predicate<PMsg>
+                    predicate: PMsgPredicates
                         .deliveryStatusComparison(
                             conID: conID,
                             currentUserID: currentUserID,
@@ -199,7 +202,7 @@ public extension MsgRepo {
         try await withMsgStore(
             { store in
                 var descriptor = FetchDescriptor<PMsg>(
-                    predicate: Predicate<PMsg>
+                    predicate: PMsgPredicates
                         .deliveryStatusEqual(
                             conID: conID,
                             currentUserID: currentUserID,

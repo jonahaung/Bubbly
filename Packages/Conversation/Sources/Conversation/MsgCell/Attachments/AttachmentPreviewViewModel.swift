@@ -1,83 +1,72 @@
-// © 2026 Aung Ko Min
+import Database
+import Foundation
+import Services
 
-#if os(iOS)
-//
-    //  AttachmentPreviewViewModel.swift
-    //  Conversation
-//
-    //  Created by Aung Ko Min on 21/3/26.
-//
+@MainActor
+@Observable
+public final class AttachmentPreviewViewModel {
+    public var attachment: Attachment
+    public var attachmentData: AttachmentData? = nil
+    public var error: Error? = nil
 
-    import Database
-    import Foundation
-    import Services
+    public init(attachment: Attachment) {
+        self.attachment = attachment
+    }
 
-    @MainActor
-    @Observable
-    public final class AttachmentPreviewViewModel {
-        public var attachment: Attachment
-        public var attachmentData: AttachmentData? = nil
-        public var error: Error? = nil
-
-        public init(attachment: Attachment) {
-            self.attachment = attachment
-        }
-
-        @concurrent
-        public func cachedAttachmentData() async -> AttachmentData? {
-            let attachment = await attachment
-            switch attachment.attachmentType {
-            case .image:
-                if attachment.fileExist(),
-                   let thumb = attachment.thumbnailImage()
-                {
-                    return .image(thumbnail: thumb)
-                }
-            case .imageUploading:
-                if attachment.fileExist(),
-                   let url = attachment.file()?.url,
-                   let thumb = attachment.thumbnailImage()
-                {
-                    return .imageUpload(localURL: url, thumbnail: thumb)
-                }
-            case .video:
-                if attachment.fileExist(),
-                   let url = attachment.localURL(),
-                   let thumb = attachment.thumbnailImage()
-                {
-                    return .video(videoURL: url, thumbnail: thumb)
-                }
-            case .link:
-                if attachment.fileExist(),
-                   let thumb = attachment.image()
-                {
-                    return .link(thumbnail: thumb)
-                }
-            case .videoUploading:
-                break
+    @concurrent
+    public func cachedAttachmentData() async -> AttachmentData? {
+        let attachment = await attachment
+        switch attachment.attachmentType {
+        case .image:
+            if attachment.fileExist(),
+                let thumb = attachment.thumbnailImage()
+            {
+                return .image(thumbnail: thumb)
             }
-            return nil
+        case .imageUploading:
+            if attachment.fileExist(),
+                let url = attachment.file()?.url,
+                let thumb = attachment.thumbnailImage()
+            {
+                return .imageUpload(localURL: url, thumbnail: thumb)
+            }
+        case .video:
+            if attachment.fileExist(),
+                let url = attachment.localURL(),
+                let thumb = attachment.thumbnailImage()
+            {
+                return .video(videoURL: url, thumbnail: thumb)
+            }
+        case .link:
+            if attachment.fileExist(),
+                let thumb = attachment.image()
+            {
+                return .link(thumbnail: thumb)
+            }
+        case .videoUploading:
+            break
         }
+        return nil
+    }
 
-        @concurrent
-        public func loadAttachment(attachmentFetcher: AttachmentFetcher) async {
-            do {
-                let data = try await attachmentFetcher.fetch(
-                    attachment, intent: .visible,
-                )
-                await MainActor.run {
-                    attachmentData = data
-                    error = nil
+    @concurrent
+    public func loadAttachment(attachmentFetcher: AttachmentFetcher) async {
+        do {
+            let data = try await attachmentFetcher.fetch(
+                attachment,
+                intent: .visible,
+            )
+            await MainActor.run {
+                attachmentData = data
+                error = nil
+            }
+        } catch {
+            await MainActor.run {
+                if error is CancellationError {
+                    return
                 }
-            } catch {
-                await MainActor.run {
-                    if error is CancellationError {
-                        return
-                    }
-                    self.error = error
-                }
+                self.error = error
             }
         }
     }
-
-#endif
+}

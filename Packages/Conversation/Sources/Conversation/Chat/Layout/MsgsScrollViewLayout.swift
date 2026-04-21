@@ -19,21 +19,20 @@ struct MsgsScrollViewLayoutConfiguration {
         self.selectedMsg = selectedMsg
     }
 
-    enum Constants {
-        static let bubbleWidthRatio: CGFloat = 0.9
-        static let maxBubbleHeight: CGFloat = 600
-    }
-
     let spacing: CGFloat
     let contentInsets: EdgeInsets
     let screenSize: CGSize
     var boundsWidth: CGFloat { screenSize.width }
     let selectedMsg: SelectedMsg?
+    
+    var bubbleWidthRatio: CGFloat {
+        screenSize.height > screenSize.width ? 0.95 : 0.7
+    }
 }
 
 // MARK: - Layout
 
-struct MsgsScrollViewLayout: Layout, @unchecked Sendable {
+struct MsgsScrollViewLayout: Layout {
 
     init(
         manager: MsgsScrollViewLayoutManager,
@@ -204,19 +203,13 @@ extension MsgsScrollViewLayout {
         let ratio: CGFloat =
             switch value.attachmentsCount {
             case 0: 1
-            case 1: 0.7
-            default: 0.8
+            case 1: 0.6
+            default: 0.7
             }
 
-        let containerWidth =
-            (config.boundsWidth - config.contentInsets.horizontal) * ratio
-        let width =
-            containerWidth
-                * MsgsScrollViewLayoutConfiguration.Constants.bubbleWidthRatio
-
-        let proposed = ProposedViewSize(width: width, height: .infinity)
-        let measured = subview.sizeThatFits(proposed)
-
+        let availableTotalWidth = (config.boundsWidth - config.contentInsets.horizontal) * ratio
+        let targetedMaxWidth = availableTotalWidth * config.bubbleWidthRatio
+        let measured = subview.sizeThatFits(ProposedViewSize(width: targetedMaxWidth, height: nil))
         return .init(
             width: measured.width,
             height: measured.height,

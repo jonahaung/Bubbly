@@ -73,7 +73,7 @@ struct ConversationScrollView: View {
                 .scrollViewIntent(.onScrollGeometryChange(oldValue, newValue))
             )
         }
-        .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) { ids in
+        .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.01) { ids in
             manager.onScrollTargetVisibilityChange(ids)
         }
         .defaultScrollAnchor(.top, for: .initialOffset)

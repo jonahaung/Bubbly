@@ -31,7 +31,7 @@ public struct APNSSoundType: Codable, Equatable {
 
     private var base: Base
 
-    public nonisolated(unsafe) static let none: APNSSoundType? = nil
+    nonisolated(unsafe) public static let none: APNSSoundType? = nil
 
     private init(_ base: Base) {
         self.base = base

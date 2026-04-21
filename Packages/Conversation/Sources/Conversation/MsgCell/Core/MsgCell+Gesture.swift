@@ -13,7 +13,6 @@ extension MsgCell {
 
     @Observable
     final class GestureViewModel {
-
         var draggedOffset: CGFloat = 0
         var isLongPressActive = false
 

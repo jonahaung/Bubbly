@@ -39,7 +39,6 @@ final class ChatDataReceiver {
                     guard let self else {
                         return
                     }
-
                     await performUpdate(data)
                 }
             }
@@ -90,7 +89,7 @@ final class ChatDataReceiver {
         }
     }
 
-    weak var delegate: ChatDataReceiverDelegate? = nil
+    weak var delegate: ChatDataReceiverDelegate?
     private let queue: AsyncQueue = .init()
     private let cancelBag: CancelBag = .init()
 }

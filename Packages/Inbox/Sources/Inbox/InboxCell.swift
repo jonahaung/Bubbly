@@ -26,9 +26,9 @@ struct InboxCell: View {
                     }
                 } label: {
                     Text(item.title)
-                        .font(.headline)
-                    Text(.init(item.msg.displayText))
-                        .font(.system(size: UIFont.labelFontSize))
+                        .font(typography.headLine)
+                    Text(item.msg.displayText)
+                        .font(typography.subHeadline)
                         .lineHeight(.multiple(factor: 1.1))
                         .lineLimit(5)
                         .foregroundStyle(

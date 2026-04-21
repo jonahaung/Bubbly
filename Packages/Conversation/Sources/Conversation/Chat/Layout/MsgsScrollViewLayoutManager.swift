@@ -10,7 +10,7 @@ import SwiftUI
 import XUI
 import UIKit
 
-final class MsgsScrollViewLayoutManager {
+final class MsgsScrollViewLayoutManager: @unchecked Sendable {
     let cache: MsgsScrollViewLayoutCache
     private(set) var selectedMsg: SelectedMsg?
 

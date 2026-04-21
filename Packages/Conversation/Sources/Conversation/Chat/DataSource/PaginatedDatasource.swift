@@ -25,7 +25,7 @@ actor PaginatedDatasource {
         conID: String,
     ) async throws -> [Message] {
         var descriptor = FetchDescriptor<PMsg>(
-            predicate: .msgs(conID: conID, date: date, comparison: .lessThan),
+            predicate: PMsgPredicates.msgs(conID: conID, date: date, comparison: .lessThan),
             sortBy: [.init(\.date, order: .reverse)],
         )
         descriptor.fetchLimit = pageSize
@@ -39,10 +39,10 @@ actor PaginatedDatasource {
         conID: String,
     ) async throws -> [Message] {
         var descriptor = FetchDescriptor<PMsg>(
-            predicate: .msgs(
+            predicate: PMsgPredicates.msgs(
                 conID: conID,
                 date: date,
-                comparison: .lessThanOrEqual
+                comparison: .lessThanOrEqual,
             ),
             sortBy: [.init(\.date, order: .reverse)],
         )
@@ -57,10 +57,10 @@ actor PaginatedDatasource {
         conID: String,
     ) async throws -> [Message] {
         var descriptor = FetchDescriptor<PMsg>(
-            predicate: .msgs(
+            predicate: PMsgPredicates.msgs(
                 conID: conID,
                 date: date,
-                comparison: .greaterThan
+                comparison: .greaterThan,
             ),
             sortBy: [.init(\.date, order: .forward)],
         )

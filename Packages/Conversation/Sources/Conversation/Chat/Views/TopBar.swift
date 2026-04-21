@@ -23,7 +23,7 @@ struct TopBar: View {
                         )
                         .font(.system(size: UIFont.smallSystemFontSize, weight: .medium).width(.compressed))
                         .lineHeight(.multiple(factor: 1.2))
-                        .textScale(.secondary)
+                        .textScale(.secondary),
                     )
                     .background(theme.backgroundColor)
             } onFinished: {
@@ -41,14 +41,14 @@ struct TopBar: View {
 
                 AsyncButton {
                     let id = manager.state.conversation.members.random()
-                    try await AsyncOrderedStream.mapOrdered(inputs: Array(0 ... 200)) { i in
+                    try await AsyncOrderedStream.mapOrdered(inputs: Array(2 ... 200)) { i in
                         let msg = await Message(
                             uid: IDGenerator.shared.make(),
                             senderID: [currentUserID!, id].random(),
                             conID: manager.conversationConfig.conID,
                             text: Lorem.random(),
                             date: Date.now
-                                .addingTimeInterval(-(i * [60, 10000, 5000, 20000].random())
+                                .addingTimeInterval(-(i * (6000 ... 200_000).randomElement()!)
                                     .double),
                             deliveryStatus: .delivered,
                             attachments: [],
@@ -60,16 +60,12 @@ struct TopBar: View {
                     @Sendable func randomDateInCurrentWeek() -> Date? {
                         let calendar = Calendar.current
                         let now = Date()
-
-                        // Get start of the week
                         guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: now) else {
                             return nil
                         }
 
                         let start = weekInterval.start
                         let end = weekInterval.end
-
-                        // Random time interval between start and end
                         let randomTime = TimeInterval
                             .random(in: start.timeIntervalSince1970 ... end.timeIntervalSince1970)
 
@@ -80,40 +76,36 @@ struct TopBar: View {
                     case let .contact(contact):
                         ProfilePhoto(
                             contact,
-                            config: .init(
-                                size: .custom(38),
-                                processors: [
-                                    .circle(border: .init(color: .green, width: 2)),
-                                    .sticker(),
-                                ],
-                            ),
+                            size: .custom(32), tapAction: .custom {
+                                Router.shared.pushToNav(NavPath.conversationDetails(manager.state.conversation))
+                            }
                         )
                     case let .group(group):
                         ProfilePhoto(
                             group,
-                            config: .init(size: .custom(38), processors: [.circle(), .sticker()]),
+                            size: .custom(32), tapAction: .custom {
+                                Router.shared.pushToNav(NavPath.conversationDetails(manager.state.conversation))
+                            }
                         )
                     }
                 }
             }
             .padding(.horizontal, Padding.sm)
-            .padding(.bottom, Padding.sm)
         }
         .background(
             LinearGradient(
                 colors: [
                     theme.backgroundColor,
-                    .clear,
+                    theme.backgroundColor,
+                    theme.backgroundColor.opacity(0.5)
                 ],
                 startPoint: .top,
                 endPoint: .bottom,
             ),
         )
         .geometryGroup()
-        .equatable(by: manager.state)
+        .equatable(by: manager.conversationConfig.conID)
     }
-
-    
 
     @Environment(ChatManager.self) private var manager
     @Environment(\.dismiss) private var dismiss

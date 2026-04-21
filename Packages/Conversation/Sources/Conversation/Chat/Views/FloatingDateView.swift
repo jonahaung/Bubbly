@@ -12,16 +12,18 @@ import XUI
 
 struct FloatingDateView: View {
     @Environment(ChatManager.self) private var manager
-
+    private var dateString: String? { manager.presentation.state.dateText }
     var body: some View {
-        if let dateText = manager.presentation.state.dateText {
-            Text(dateText)
-                .font(.footnote.bold())
-                .lineHeight(.normal)
-                .lineSpacing(0)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 4)
-                .background(Color.appPrimary, in: .capsule)
+        if let dateString {
+            VStack {
+                Text(dateString)
+                    .font(.system(size: UIFont.smallSystemFontSize, weight: .bold))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(Color.container.opacity(0.8), in: RoundedRectangle(cornerRadius: Radius.md))
+            .geometryGroup()
+            .equatable(by: dateString)
         }
     }
 }
