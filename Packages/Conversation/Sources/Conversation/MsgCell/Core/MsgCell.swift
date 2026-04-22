@@ -43,6 +43,7 @@ struct MsgCell: View {
         .equatable(by: viewModel.reloadID)
         .environment(\.isVisible, viewModel.isVisible)
         .environment(viewModel)
+        
     }
 
     private var isSelected: Bool {

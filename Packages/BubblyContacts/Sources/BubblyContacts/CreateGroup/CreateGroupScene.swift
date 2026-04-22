@@ -73,11 +73,10 @@ public struct CreateGroupScene: View {
             ToolbarItem(placement: .primaryAction) {
                 AsyncButton {
                     setFocus(false)
-                    if let currentUserID {
-                        try await Task.sleep(seconds: 1)
-                        try await viewModel.createGroup()
-                        try await ContactsRepository.shared.syncGroups(currentUserId: currentUserID)
-                    }
+                    let currentUserID = try CurrentUserID.get()
+                    try await Task.sleep(seconds: 1)
+                    try await viewModel.createGroup()
+                    try await ContactsRepository.shared.syncGroups(currentUserId: currentUserID)
                     dismiss()
                 } label: {
                     if viewModel.isLoading {

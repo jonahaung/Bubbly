@@ -13,11 +13,13 @@ import Services
 public struct UserProfileView: View {
     @LazyState private var viewModel: UserProfileViewModel
     @FocusState private var isFocused: Bool
+    private let appLauncher: AppLauncher
 
     public init(coordinator: AppCoordinator) {
-		_viewModel = .init(
-			wrappedValue: .init(currentUserRepository: coordinator.container.currentUserRepository)
-		)
+        _viewModel = .init(
+            wrappedValue: .init(currentUserRepository: coordinator.container.currentUserRepository)
+        )
+        appLauncher = coordinator.appLauncher
     }
 
     public var body: some View {
@@ -66,7 +68,13 @@ public struct UserProfileView: View {
 
             Section {
                 Button("Sign Out") {
-                    Task { await viewModel.send(.signOut) }
+                    Task {
+                        do {
+                            try await appLauncher.resetGetStarted()
+                        } catch {
+                            await viewModel.showError(error)
+                        }
+                    }
                 }
                 .buttonStyle(.roundedButtonStyle)
 

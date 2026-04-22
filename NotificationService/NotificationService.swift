@@ -130,7 +130,7 @@ final class NotificationService: UNNotificationServiceExtension {
     }
 
     private func resolvedCurrentUserID(for data: AnyMsgData) -> String? {
-        if let currentUserID {
+        if let currentUserID = try? CurrentUserID.get() {
             return currentUserID
         }
 

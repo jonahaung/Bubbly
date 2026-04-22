@@ -2,7 +2,6 @@
 
 import Foundation
 import XUI
-// MARK: - GroupStorageKey
 
 public enum GroupStorageKey: Hashable, Sendable, CaseNameReflectable {
     case device(Device)

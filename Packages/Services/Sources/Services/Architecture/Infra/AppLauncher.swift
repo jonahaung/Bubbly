@@ -33,16 +33,15 @@ public extension AppLauncher {
         let route = evaluateRoute()
         switch route {
         case .getStarted:
+            router.reset()
             await Store.shared.destory()
             GroupStorage.shared.delete(for: .auth(.currentUserID))
-            GroupStorage.shared.delete(for: .auth(.authToken))
         case .loading:
             break
         case let .main(currentUser):
             router.reset()
-            if await !Store.shared.hasSetUp(for: currentUser.uid) {
-                await Store.shared.start(with: currentUser.uid)
-            }
+            GroupStorage.shared.save(currentUser.uid, for: .auth(.currentUserID))
+            await Store.shared.start(with: currentUser.uid)
         }
         self.route = route
     }
@@ -57,15 +56,20 @@ public extension AppLauncher {
         return .getStarted
     }
 
-    func markGetStartedAsDone(user: CurrentUserModel) {
+    func markGetStartedAsDone(user: CurrentUserModel) async {
         let defaults = UserDefaults.standard
         defaults.set(true, forKey: DefaultKeys.getStarted)
+        router.reset()
+        GroupStorage.shared.save(user.uid, for: .auth(.currentUserID))
+        await Store.shared.start(with: user.uid)
         route = .main(user)
     }
 
-    func resetGetStarted() async {
-        try? Auth.auth().signOut()
+    func resetGetStarted() async throws {
+        try Auth.auth().signOut()
+        router.reset()
         await Store.shared.destory()
+        GroupStorage.shared.delete(for: .auth(.currentUserID))
         let defaults = UserDefaults.standard
         defaults.set(false, forKey: DefaultKeys.getStarted)
         await startEvaluate()

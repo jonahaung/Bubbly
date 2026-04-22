@@ -132,8 +132,7 @@ extension ChatManager: ScrollCoordinatorDelegate {
         }
     }
 
-    func scrollCoordinator(_: ScrollCoordinator, reset msg: Message)
-    {
+    func scrollCoordinator(_: ScrollCoordinator, reset msg: Message) {
         serialQueue.addOperation { [weak self] in
             guard let self else {
                 return

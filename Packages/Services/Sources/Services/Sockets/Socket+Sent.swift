@@ -24,6 +24,7 @@ extension Socket {
                 addToQueue()
             }
         case let .deleteMsg(rMsg: rMsg):
+            let currentUserID = try CurrentUserID.get()
             try await Store.shared.msgStore?.delete(uid: rMsg.uid)
             notifyMessage(data)
             if rMsg.senderID == currentUserID {
@@ -134,6 +135,7 @@ extension Socket {
         _ data: AnyMsgData,
         conversation: Conversation,
     ) async throws -> DeliveryStatus {
+        let currentUserID = try CurrentUserID.get()
         let contacts = try await getContacts(
             from: conversation,
         ).filter {

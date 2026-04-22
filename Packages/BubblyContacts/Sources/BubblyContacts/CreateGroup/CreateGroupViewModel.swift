@@ -29,12 +29,13 @@ final class CreateGroupViewModel {
     }
 
     func createGroup() async throws {
-        guard let currentUserID, let image = pickedPhoto?.uiImage else {
+        let currentUserID = try CurrentUserID.get()
+        guard let image = pickedPhoto?.uiImage else {
             fatalError("explanation")
         }
 
         setLoading(true)
-        let groupID = UUID().uuidString
+        let groupID = await IDGenerator.shared.make()
         let imageUploader = ImageUploadingService()
         let url = try await imageUploader.uploadImage(
             image,

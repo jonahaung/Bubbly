@@ -9,6 +9,7 @@ import XUI
 public struct ContactCell: View {
     let contact: Contact
     var onTap: (() async throws -> Void)?
+    @Environment(\.currentUser) private var currentUser
 
     public init(_ contact: Contact, onTap: (() async throws -> Void)? = nil) {
         self.contact = contact
@@ -21,7 +22,7 @@ public struct ContactCell: View {
         } label: {
             Label {
                 LabeledContent {
-                    Text(contact.uid == currentUserID ? "You" : "")
+                    Text(contact.uid == currentUser.uid ? "You" : "")
                         .font(.footnote)
                         .foregroundStyle(Color.tertiaryText)
                         .italic()

@@ -10,31 +10,23 @@ import Foundation
 
 final class MsgsScrollViewLayoutCache: @unchecked Sendable {
 
-    // MARK: - Snapshot (Immutable for readers)
-
     struct Snapshot {
-        var sizeStorage: [String: CGSize]
-        var sizeOrder: [String]
+        var sizeStorage: [MsgsScrollViewLayout.SizeKey: CGSize]
+        var sizeOrder: [MsgsScrollViewLayout.SizeKey]
 
         var layoutStorage: [Int: MsgsScrollViewLayout.Cache]
         var layoutOrder: [Int]
     }
 
-    // MARK: - Config
-
     private let maxSizeEntries: Int
     private let maxLayoutEntries: Int
 
-    // MARK: - Storage
-
-    private let writeLock = NSLock()
+    private let writeLock: NSLock = .init()
     private var snapshot: Snapshot
-
-    // MARK: - Init
 
     init(
         maxSizeEntries: Int = 1200,
-        maxLayoutEntries: Int = 8
+        maxLayoutEntries: Int = 8,
     ) {
         self.maxSizeEntries = maxSizeEntries
         self.maxLayoutEntries = maxLayoutEntries
@@ -43,14 +35,12 @@ final class MsgsScrollViewLayoutCache: @unchecked Sendable {
             sizeStorage: [:],
             sizeOrder: [],
             layoutStorage: [:],
-            layoutOrder: []
+            layoutOrder: [],
         )
     }
 
-    // MARK: - Lock-free Reads
-
     @inline(__always)
-    func size(for key: String) -> CGSize? {
+    func size(for key: MsgsScrollViewLayout.SizeKey) -> CGSize? {
         snapshot.sizeStorage[key]
     }
 
@@ -58,10 +48,8 @@ final class MsgsScrollViewLayoutCache: @unchecked Sendable {
     func cache(signature: Int) -> MsgsScrollViewLayout.Cache? {
         snapshot.layoutStorage[signature]
     }
-
-    // MARK: - Writes (Copy-on-Write + Atomic Swap)
-
-    func setSize(_ size: CGSize, for key: String) {
+    
+    func setSize(_ size: CGSize, for key: MsgsScrollViewLayout.SizeKey) {
         writeLock.lock()
         defer { writeLock.unlock() }
 
@@ -80,7 +68,7 @@ final class MsgsScrollViewLayoutCache: @unchecked Sendable {
 
     func setCache(
         _ cache: MsgsScrollViewLayout.Cache,
-        signature: Int
+        signature: Int,
     ) {
         writeLock.lock()
         defer { writeLock.unlock() }
@@ -98,9 +86,7 @@ final class MsgsScrollViewLayoutCache: @unchecked Sendable {
         snapshot = new
     }
 
-    // MARK: - Partial Invalidation (important for chat)
-
-    func invalidateSizes(for keys: [String]) {
+    func invalidateSizes(for keys: [MsgsScrollViewLayout.SizeKey]) {
         writeLock.lock()
         defer { writeLock.unlock() }
 
@@ -130,20 +116,16 @@ final class MsgsScrollViewLayoutCache: @unchecked Sendable {
         snapshot = new
     }
 
-    // MARK: - Full Reset
-
     func invalidateAll() {
         writeLock.lock()
         snapshot = .init(
             sizeStorage: [:],
             sizeOrder: [],
             layoutStorage: [:],
-            layoutOrder: []
+            layoutOrder: [],
         )
         writeLock.unlock()
     }
-
-    // MARK: - LRU Helpers
 
     @inline(__always)
     private func refresh<T: Equatable>(_ order: inout [T], _ key: T) {

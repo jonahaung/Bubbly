@@ -84,7 +84,7 @@ extension PGroup: SendableTransformable {
         SendableType(
             uid: uid,
             name: name,
-            createdDate: .init(createdDate),
+            createdDate: .init(stringLiteral: createdDate),
             photoURL: photoURL,
             members: members,
             createdBy: createdBy,

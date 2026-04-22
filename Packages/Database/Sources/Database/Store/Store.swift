@@ -30,8 +30,7 @@ public final actor Store {
         if let configurations = appContainer?.modelContainer.configurations,
            configurations.contains(
                where: { $0.name == id },
-           )
-        {
+           ) {
             return
         }
         log("Store started with id: \(id)")
@@ -60,11 +59,10 @@ public final actor Store {
     }
 
     public func destory() {
-//        try? modelContainer?.erase()
-//        appContainer = nil
-//        msgStore = nil
-//        contactStore = nil
-//        groupStore = nil
-//        conversationPropertiesStore = nil
+        appContainer = nil
+        msgStore = nil
+        contactStore = nil
+        groupStore = nil
+        conversationPropertiesStore = nil
     }
 }

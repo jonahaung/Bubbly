@@ -6,9 +6,9 @@ import XUI
 
 extension ScrollCoordinator {
     struct PaginationState: Hashable {
-        let canLoadOlder: Bool
-        let canLoadNewer: Bool
-        let canAdjustSize: Bool
+        var canLoadOlder: Bool
+        var canLoadNewer: Bool
+        var canAdjustSize: Bool
 
         init(
             canLoadOlder: Bool = false,
@@ -34,6 +34,7 @@ extension ScrollCoordinator {
         var phase: ScrollPhase = .idle
         var scrolledPosition: ScrolledPosition = .none
         var paginationState: PaginationState?
+        var scrollDirection: ScrollDirection = .none
     }
 
     enum Intent {

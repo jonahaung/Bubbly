@@ -24,9 +24,8 @@ struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
     }
 
     static func == (lhs: MsgLayoutValue, rhs: MsgLayoutValue) -> Bool {
-        lhs.uid == rhs.uid && lhs.recipient == rhs.recipient
+        lhs.uid == rhs.uid && lhs.recipient == rhs.recipient && lhs.headerStatus == rhs.headerStatus
     }
-
     static let empty = MsgLayoutValue(
         uid: String(),
         recipient: .outgoing,

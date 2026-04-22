@@ -5,52 +5,19 @@ import Services
 import SwiftUI
 import XUI
 
-struct MsgsScrollViewLayoutConfiguration {
-
-    init(
-        spacing: CGFloat,
-        contentInsets: EdgeInsets,
-        screenSize: CGSize,
-        selectedMsg: SelectedMsg? = nil,
-    ) {
-        self.spacing = spacing
-        self.contentInsets = contentInsets
-        self.screenSize = screenSize
-        self.selectedMsg = selectedMsg
-    }
-
-    let spacing: CGFloat
-    let contentInsets: EdgeInsets
-    let screenSize: CGSize
-    var boundsWidth: CGFloat { screenSize.width }
-    let selectedMsg: SelectedMsg?
-    
-    var bubbleWidthRatio: CGFloat {
-        screenSize.height > screenSize.width ? 0.95 : 0.7
-    }
-}
-
-// MARK: - Layout
-
 struct MsgsScrollViewLayout: Layout {
 
-    init(
-        manager: MsgsScrollViewLayoutManager,
-        config: MsgsScrollViewLayoutConfiguration,
-    ) {
+    init(manager: MsgsScrollViewLayoutManager, config: MsgsScrollViewLayoutConfiguration) {
         self.manager = manager
         self.config = config
     }
 
     @preconcurrency private let manager: MsgsScrollViewLayoutManager
     private let config: MsgsScrollViewLayoutConfiguration
-
     private var cacheStore: MsgsScrollViewLayoutCache {
         manager.cache
     }
 }
-
-// MARK: - Layout Core
 
 extension MsgsScrollViewLayout {
 
@@ -79,7 +46,7 @@ extension MsgsScrollViewLayout {
     }
 
     func placeSubviews(
-        in _: CGRect,
+        in rect: CGRect,
         proposal _: ProposedViewSize,
         subviews: Subviews,
         cache: inout Cache,
@@ -91,32 +58,15 @@ extension MsgsScrollViewLayout {
         for (i, subview) in subviews.enumerated() {
             let layout = cache.layouts[i]
             let value = subview[MsgLayoutValueKey.self]
-
+            let absolutePosition = CGPoint(
+                x: rect.minX + layout.position.x,
+                y: rect.minY + layout.position.y,
+            )
             subview.place(
-                at: layout.position,
+                at: absolutePosition,
                 anchor: value.anchor,
                 proposal: ProposedViewSize(layout.size),
             )
-        }
-    }
-
-    func explicitAlignment(
-        of guide: HorizontalAlignment,
-        in _: CGRect,
-        proposal _: ProposedViewSize,
-        subviews _: Subviews,
-        cache: inout Cache,
-    ) -> CGFloat? {
-        guard !cache.layouts.isEmpty else {
-            return nil
-        }
-
-        switch guide {
-        case .leading: return config.contentInsets.leading
-        case .trailing:
-            return config.boundsWidth - config.contentInsets.trailing
-        case .center: return config.boundsWidth * 0.5
-        default: return nil
         }
     }
 }
@@ -149,9 +99,7 @@ extension MsgsScrollViewLayout {
 
 extension MsgsScrollViewLayout {
 
-    private func computeLayouts(
-        subviews: Subviews,
-    ) -> ([Cache.CellLayout], CGFloat) {
+    private func computeLayouts(subviews: Subviews) -> ([Cache.CellLayout], CGFloat) {
 
         var layouts = [Cache.CellLayout]()
         layouts.reserveCapacity(subviews.count)
@@ -174,15 +122,8 @@ extension MsgsScrollViewLayout {
     }
 }
 
-// MARK: - Size
-
-extension MsgsScrollViewLayout {
-
-    private func size(
-        for subview: LayoutSubview,
-        value: MsgLayoutValue,
-    ) -> CGSize {
-
+private extension MsgsScrollViewLayout {
+    func size(for subview: LayoutSubview, value: MsgLayoutValue) -> CGSize {
         let key = sizeKey(for: value)
 
         if let cached = cacheStore.size(for: key) {
@@ -195,10 +136,7 @@ extension MsgsScrollViewLayout {
         return size
     }
 
-    private func measure(
-        subview: LayoutSubview,
-        value: MsgLayoutValue,
-    ) -> CGSize {
+    func measure(subview: LayoutSubview, value: MsgLayoutValue) -> CGSize {
 
         let ratio: CGFloat =
             switch value.attachmentsCount {
@@ -216,18 +154,11 @@ extension MsgsScrollViewLayout {
         )
     }
 
-    private func sizeKey(for value: MsgLayoutValue) -> String {
-        let width = Int(config.boundsWidth)
+    func sizeKey(for value: MsgLayoutValue) -> MsgsScrollViewLayout.SizeKey {
         let selected = value.uid == manager.selectedMsg?.id
-        return "\(value.uid)|\(width)|\(selected)"
+        return .init(uid: value.uid, width: config.boundsWidth, selected: selected)
     }
-}
-
-// MARK: - Positioning
-
-extension MsgsScrollViewLayout {
-
-    private func xPosition(for recipient: MsgRecipient) -> CGFloat {
+    func xPosition(for recipient: MsgRecipient) -> CGFloat {
         switch recipient {
         case .incoming: config.contentInsets.leading
         case .outgoing:
@@ -237,60 +168,28 @@ extension MsgsScrollViewLayout {
         }
     }
 
-    private func totalHeight(for layouts: [Cache.CellLayout]) -> CGFloat {
+    func totalHeight(for layouts: [Cache.CellLayout]) -> CGFloat {
         guard !layouts.isEmpty else {
-            return 0
+            return config.screenSize.height
         }
+        let totalContentHeight = layouts.reduce(into: 0.0) { $0 += $1.size.height }
+        let totalSpacing = config.spacing * CGFloat(max(0, layouts.count - 1))
 
-        let content = layouts.reduce(0) { $0 + $1.size.height }
-        let spacing = config.spacing * CGFloat(layouts.count - 1)
-
-        return config.contentInsets.vertical + content + spacing
+        return config.contentInsets.vertical + totalContentHeight + totalSpacing
     }
 }
-
-// MARK: - Signature
 
 extension MsgsScrollViewLayout {
 
     private func makeSignature(subviews: Subviews) -> Int {
         var hasher = Hasher()
-
         hasher.combine(Int(config.boundsWidth))
-        hasher.combine(config.spacing)
-        hasher.combine(config.contentInsets.top)
-        hasher.combine(config.contentInsets.leading)
-
         if let selected = manager.selectedMsg {
             hasher.combine(selected.id)
         }
-
         for subview in subviews {
-            hasher.combine(subview[MsgLayoutValueKey.self].hashValue)
+            hasher.combine(subview[MsgLayoutValueKey.self].id)
         }
-
         return hasher.finalize()
-    }
-}
-
-// MARK: - Cache
-
-extension MsgsScrollViewLayout {
-
-    struct Cache: Hashable {
-
-        struct CellLayout: Hashable {
-            let id: String
-            let size: CGSize
-            let position: CGPoint
-
-            var frame: CGRect {
-                .init(origin: position, size: size)
-            }
-        }
-
-        let totalHeight: CGFloat
-        let layouts: [CellLayout]
-        let signatureHash: Int
     }
 }

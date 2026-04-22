@@ -36,6 +36,7 @@ extension MsgCell {
                     )
                     .background(Color.shadow)
                     .containerShape(bubbleShape)
+                    .equatable(by: viewModel.reloadID)
             }
         }
 

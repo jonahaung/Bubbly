@@ -53,9 +53,10 @@ public final class Router {
     }
 
     public func reset() {
-		for (key, _) in routes {
+        for (key, _) in routes {
             routes[key] = []
         }
+        sheet = nil
         selectedTab = .inbox
     }
 }

@@ -19,11 +19,7 @@ public extension AnyMsgData {
         } else {
             throw ParseError.missingEncryptedMessage
         }
-
-        guard let currentUserID else {
-            throw ParseError.currentUserIDUnavailable
-        }
-
+        let currentUserID = try CurrentUserID.get()
         let decrypted = try CryptoService.shared.decrypt(
             payloadString: encryptedMessage,
             currentUserID: currentUserID,

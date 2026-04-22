@@ -21,6 +21,7 @@ public struct ConversationScene: View {
                 router: coordinator.router,
             )
         )
+        _composer = .init(wrappedValue: .init())
     }
 
     // MARK: Public
@@ -62,5 +63,5 @@ public struct ConversationScene: View {
     @Namespace private var namespace
 
     @LazyState private var viewModel: ChatManager
-    @LazyState private var composer: ChatComposer = .init()
+    @LazyState private var composer: ChatComposer
 }

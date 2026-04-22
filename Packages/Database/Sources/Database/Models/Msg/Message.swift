@@ -42,7 +42,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         self.deliveryStatus = deliveryStatus
         self.attachments = attachments
         self.reactions = reactions
-        self.isSender = senderID == currentUserID
+        self.isSender = senderID == (try? CurrentUserID.get())
     }
 
     public init(_ rMsg: RMsg) {
@@ -51,7 +51,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
             senderID: rMsg.senderID,
             conID: rMsg.conID,
             text: rMsg.text,
-            date: ServerTime(rMsg.date).date,
+            date: ServerTime(stringLiteral: rMsg.date).date,
             deliveryStatus: rMsg.deliveryStatus,
             attachments: rMsg.attachments,
             reactions: rMsg.reactions,
@@ -61,9 +61,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
 
 public extension Message {
     var receiptType: MsgRecipient {
-        senderID == currentUserID
-            ? .outgoing
-            : .incoming
+        isSender ? .outgoing : .incoming
     }
 }
 

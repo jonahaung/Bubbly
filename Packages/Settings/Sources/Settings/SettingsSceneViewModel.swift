@@ -99,7 +99,11 @@ final class SettingsSceneViewModel: ErrorPresenter {
     }
 
     private func handleSignOut() async {
-        await appLauncher.resetGetStarted()
+        do {
+            try await appLauncher.resetGetStarted()
+        } catch {
+            await showError(error)
+        }
     }
 
     private func handleSetChatCellVerticalSpacing(_ value: Int) {

@@ -29,7 +29,7 @@ public actor CurrentUserRepository {
         }
     }
 
-    @concurrent private func updateIfNeeded() async throws {
+    @concurrent public func updateIfNeeded() async throws {
         guard let firUser = Auth.auth().currentUser else {
             throw XError.notLoggedIn
         }
@@ -37,20 +37,26 @@ public actor CurrentUserRepository {
         let storage = GroupStorage.shared
 
         let newModel = CurrentUserModel(firUser)
-        storage.save(newModel.pushToken, for: .device(.deviceToken))
-
+        let pushToken = try await Messaging.messaging().token()
+        let publicKeyString = CryptoService.shared.base64PublicKeyString(for: firUser.uid)
+        storage.save(pushToken, for: .device(.deviceToken))
+        storage.save(firUser.uid, for: .auth(.currentUserID))
+        storage.save(publicKeyString, for: .security(.publicKey(id: firUser.uid)))
+        
         if let remoteModel: CurrentUserModel? = try? await FirestoreRepo.getModel(
             for: newModel.uid,
             collection: .users,
             field: .uid,
         ) {
             if newModel != remoteModel {
-                try await FirestoreRepo
-                    .update(
-                        value: newModel.dictionary,
-                        collectionPath: .users,
-                        to: newModel.uid,
-                    )
+                try await FirestoreRepo.set(newModel, collectionPath: .users, documentID: newModel.uid)
+                
+//                try await FirestoreRepo
+//                    .update(
+//                        value: newModel.dictionary,
+//                        collectionPath: .users,
+//                        to: newModel.uid,
+//                    )
                 await ToastPresenter.show("Profile Updated", allowsBackgroundTap: false)
             }
         } else {

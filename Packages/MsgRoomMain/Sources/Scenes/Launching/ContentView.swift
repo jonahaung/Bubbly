@@ -10,9 +10,7 @@ public struct ContentView: View {
     public init() {
         _appLauncher = .init(wrappedValue: .init())
     }
-
-    // MARK: Public
-
+    
     public var body: some View {
         switch appLauncher.route {
         case .loading:
@@ -27,8 +25,6 @@ public struct ContentView: View {
             )
         }
     }
-
     
-
     @LazyState private var appLauncher: AppLauncher
 }

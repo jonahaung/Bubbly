@@ -267,7 +267,7 @@ private actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
         for url in audio.urls {
             registeredSounds[url]?.count -= 1
 
-            if registeredSounds[url]?.isEmpty {
+            if let registeredSound = registeredSounds[url], registeredSound.count <= 0 {
                 #if DEBUG
                 print("Unregistering \(audio)")
                 #endif
@@ -385,7 +385,7 @@ private actor AVSoundEffectPlayer: SoundEffectPlayer {
 
         registeredSound.count -= 1
 
-        if registeredSound.isEmpty {
+        if registeredSound.count <= 0 {
             #if DEBUG
             print("Unregistering \(audio)")
             #endif

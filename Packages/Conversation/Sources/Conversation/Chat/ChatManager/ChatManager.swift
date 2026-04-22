@@ -96,8 +96,7 @@ extension ChatManager {
         }
         if models.contains(withID: lasMsg.uid) {
             scrollController.performScroll(to: .id(lasMsg.uid, .animated()))
-        }
-        else {
+        } else {
             scrollController.begin(updates: .resetting(msg: lasMsg))
         }
     }

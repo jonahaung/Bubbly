@@ -6,53 +6,53 @@ import Foundation
 import Services
 import SwiftUI
 import XUI
-import Combine
-
-// MARK: - MsgModels
 
 @MainActor
 final class Messages {
 
-    var headerModels = [HeaderModel]()
-    private var storage = [MsgCellViewModel]()
+    var headerModels: [HeaderModel] = []
+    private var storage: [MsgCellViewModel] = []
     private var indexMap: [String: Int] = [:]
 
-    private let bubbleFactory = BubbleFactory()
+    private let bubbleFactory: BubbleFactory = .init()
     private var modelCache = LRUCache<MsgCellViewModel.ID, MsgCellViewModel>()
-    private let markdownFormatter = MarkdownFormatter()
+    private let markdownFormatter: MarkdownFormatter = .init()
     private let richTextEnabled: Bool
-    
-    private let visibleIDsPublisher = PassthroughSubject<[String], Never>()
-    private let cancelBag = CancelBag()
+    private let debouncer = Debouncer(delay: 0.2)
 
     init(_ msgs: [Message] = [], _ headerModels: [HeaderModel] = []) {
         richTextEnabled = UserDefaults.group.bool(
-            forKey: GroupStorageKey.conversation(.richTextEnabled).value
+            forKey: GroupStorageKey.conversation(.richTextEnabled).value,
         )
         self.headerModels = headerModels
         storage = msgs.map(model(for:))
         rebuildIndexMap()
         layoutBatch(storage)
-        
-        visibleIDsPublisher
-            .debounce(for: 0.5, scheduler: RunLoop.main)
-            .sink { [weak self] value in
-                guard let self else { return }
-                displayVisibleMsgsIfNeeded(currentVisibleIDS: value)
-            }
-            .store(in: cancelBag)
     }
 
     deinit {
-        cancelBag.cancel()
         log("deinit")
     }
-    
-    var count: Int { storage.count }
-    var first: MsgCellViewModel? { storage.first }
-    var last: MsgCellViewModel? { storage.last }
-    var isEmpty: Bool { storage.isEmpty }
-    var renderedModels: [MsgCellViewModel] { storage }
+
+    var count: Int {
+        storage.count
+    }
+
+    var first: MsgCellViewModel? {
+        storage.first
+    }
+
+    var last: MsgCellViewModel? {
+        storage.last
+    }
+
+    var isEmpty: Bool {
+        storage.isEmpty
+    }
+
+    var renderedModels: [MsgCellViewModel] {
+        storage
+    }
 
     func contains(withID id: String) -> Bool {
         indexMap[id] != nil
@@ -67,25 +67,34 @@ final class Messages {
     }
 
     func element(withID id: String) -> MsgCellViewModel? {
-        guard let index = indexMap[id] else { return nil }
+        guard let index = indexMap[id] else {
+            return nil
+        }
         return storage[index]
     }
 }
+
 extension Messages {
     func onScrollTargetVisibilityChange(_ ids: [String]) {
-        visibleIDsPublisher.send(ids)
+        debouncer.debounce { [weak self] in
+            guard let self else {
+                return
+            }
+            displayVisibleMsgsIfNeeded(currentVisibleIDS: ids)
+        }
     }
+
     func getCurrentVisibleDateString() -> String? {
         guard let model = storage.first(where: { $0.isVisible }) else {
             return nil
         }
         return MsgTimeStringFormatter.string(for: model.msg.date)
     }
-    
+
     private func displayVisibleMsgsIfNeeded(currentVisibleIDS: [String]) {
-        let oldIDs =  storage.filter { $0.isVisible }.map(\.msg.uid)
+        let oldIDs = storage.filter(\.isVisible).map(\.msg.uid)
         let difference = currentVisibleIDS.difference(from: oldIDs)
-        difference.forEach { each in
+        for each in difference {
             switch each {
             case let .insert(_, id, _):
                 if let model = element(withID: id) {
@@ -99,9 +108,12 @@ extension Messages {
         }
     }
 }
+
 extension Messages {
     func didChangeSelection(_ selectedMsg: SelectedMsg?, for id: String) {
-        guard let index = indexMap[id] else { return }
+        guard let index = indexMap[id] else {
+            return
+        }
         storage[index].update(selectedMsg: selectedMsg)
     }
 
@@ -126,7 +138,9 @@ extension Messages {
     }
 
     func remove(msg: Message) {
-        guard let index = indexMap[msg.uid] else { return }
+        guard let index = indexMap[msg.uid] else {
+            return
+        }
 
         storage.remove(at: index)
         modelCache.remove(msg.uid)
@@ -155,7 +169,9 @@ extension Messages {
     }
 
     func retainOldest(_ limit: Int) async {
-        guard limit >= 0, storage.count > limit else { return }
+        guard limit >= 0, storage.count > limit else {
+            return
+        }
 
         storage.removeSubrange(limit..<storage.count)
         rebuildIndexMap()
@@ -166,7 +182,9 @@ extension Messages {
     }
 
     func retainNewest(_ limit: Int) async {
-        guard limit >= 0, storage.count > limit else { return }
+        guard limit >= 0, storage.count > limit else {
+            return
+        }
 
         let removeCount = storage.count - limit
         storage.removeSubrange(0..<removeCount)
@@ -187,15 +205,17 @@ extension Messages {
         }
 
         let attributedText: AttributedString? = {
-            guard let text = msg.text else { return nil }
+            guard let text = msg.text else {
+                return nil
+            }
             return richTextEnabled
                 ? markdownFormatter.richText(for: text)
                 : markdownFormatter.markDownText(for: text)
         }()
-        
+
         let state = MsgCellViewModel.State(
             msg: msg,
-            attributedText: attributedText
+            attributedText: attributedText,
         )
 
         let model = MsgCellViewModel(state)
@@ -208,7 +228,9 @@ extension Messages {
 extension Messages {
 
     private func layoutBatch(_ models: [MsgCellViewModel]) {
-        guard !models.isEmpty else { return }
+        guard !models.isEmpty else {
+            return
+        }
 
         for i in models.indices {
             let model = models[i]
@@ -218,7 +240,7 @@ extension Messages {
             let style = bubbleFactory.style(
                 for: model.msg,
                 previous: prev,
-                next: next
+                next: next,
             )
 
             model.update(layout: style)
@@ -226,12 +248,14 @@ extension Messages {
     }
 
     private func layoutAround(_ index: Int) {
-        guard !storage.isEmpty else { return }
+        guard !storage.isEmpty else {
+            return
+        }
 
         let lower = max(0, index - 1)
         let upper = min(storage.count - 1, index + 1)
 
-        for i in lower...upper {
+        for i in lower ... upper {
             layout(at: i)
         }
     }
@@ -244,7 +268,7 @@ extension Messages {
         let style = bubbleFactory.style(
             for: model.msg,
             previous: prev,
-            next: next
+            next: next,
         )
 
         model.update(layout: style)

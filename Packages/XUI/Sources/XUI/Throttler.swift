@@ -3,12 +3,17 @@
 import Foundation
 
 public final class Throttler {
-    
+
+    public enum Option {
+        case leading
+        case trailing
+        case both
+    }
 
     public init(
         delay: TimeInterval,
-        option: ThrottlerOption = .trailing,
-        queue: DispatchQueue = .main,
+        option: Option = .trailing,
+        queue: DispatchQueue = .main
     ) {
         self.delay = delay
         self.option = option
@@ -17,80 +22,79 @@ public final class Throttler {
 
     // MARK: Public
 
-    public enum ThrottlerOption {
-        case leading
-        case trailing
-        case both
-    }
-
     public func throttle(_ block: @escaping () -> Void) {
+        lock.lock(); defer { lock.unlock() }
+
+        let now = DispatchTime.now().uptimeNanoseconds
+        let delayNs = UInt64(delay * 1_000_000_000)
+
         switch option {
+
         case .leading:
-            throttleLeading(block)
+            if now - lastExecution >= delayNs {
+                execute(now, block)
+            }
+
         case .trailing:
-            throttleTrailing(block)
+            schedule(after: delayNs, block)
+
         case .both:
-            throttleBoth(block)
+            if now - lastExecution >= delayNs {
+                execute(now, block)
+                return
+            }
+
+            guard !pending else { return }
+            pending = true
+
+            let remaining = delayNs - (now - lastExecution)
+            schedule(after: remaining) { [weak self] in
+                guard let self else { return }
+                self.pending = false
+                block()
+            }
         }
     }
 
     public func cancel() {
+        lock.lock(); defer { lock.unlock() }
         workItem?.cancel()
         workItem = nil
-        pendingExecution = false
+        pending = false
     }
 
-    
+    // MARK: Private
 
     private let queue: DispatchQueue
     private let delay: TimeInterval
-    private let option: ThrottlerOption
+    private let option: Option
+
+    private let lock = NSLock()
+
     private var workItem: DispatchWorkItem?
-    private var lastExecutionTime: Date?
-    private var pendingExecution: Bool = false
+    private var lastExecution: UInt64 = 0
+    private var pending = false
 
-    private func throttleLeading(_ block: @escaping () -> Void) {
-        let now = Date()
-
-        if lastExecutionTime == nil || now.timeIntervalSince(lastExecutionTime!) >= delay {
-            execute(block)
-        }
-    }
-
-    private func throttleTrailing(_ block: @escaping () -> Void) {
+    private func schedule(after ns: UInt64, _ block: @escaping () -> Void) {
         workItem?.cancel()
-        let newWorkItem = DispatchWorkItem { [weak self] in
-            self?.execute(block)
+
+        let item = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+
+            self.lock.lock()
+            let now = DispatchTime.now().uptimeNanoseconds
+            self.lastExecution = now
+            self.lock.unlock()
+
+            block()
         }
 
-        workItem = newWorkItem
-        queue.asyncAfter(deadline: .now() + delay, execute: newWorkItem)
+        workItem = item
+        queue.asyncAfter(deadline: .now() + .nanoseconds(Int(ns)), execute: item)
     }
 
-    private func throttleBoth(_ block: @escaping () -> Void) {
-        let now = Date()
-        if lastExecutionTime == nil || now.timeIntervalSince(lastExecutionTime!) >= delay {
-            execute(block)
-            return
-        }
-        if pendingExecution {
-            return
-        }
-
-        pendingExecution = true
-
-        let remainingDelay = delay - now.timeIntervalSince(lastExecutionTime!)
-        let newWorkItem = DispatchWorkItem { [weak self] in
-            self?.pendingExecution = false
-            self?.execute(block)
-        }
-
-        workItem = newWorkItem
-        queue.asyncAfter(deadline: .now() + remainingDelay, execute: newWorkItem)
-    }
-
-    private func execute(_ block: () -> Void) {
-        lastExecutionTime = Date()
+    private func execute(_ now: UInt64, _ block: () -> Void) {
+        lastExecution = now
         block()
     }
 }

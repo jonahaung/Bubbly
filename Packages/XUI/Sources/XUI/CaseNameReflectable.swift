@@ -19,21 +19,15 @@ public extension CaseNameReflectable {
     }
 
     var localizedName: String {
-        caseName.camelCaseToWords
+        guard !caseName.isEmpty else { return "" }
+        let pattern = "([a-z])([A-Z])"
+        let spaced = caseName.replacingOccurrences(of: pattern, with: "$1 $2", options: .regularExpression)
+        return spaced.capitalized
     }
 
 	var rawValue: String {
 		caseName
 	}
-}
-
-public extension String {
-    var camelCaseToWords: String {
-        guard !isEmpty else { return "" }
-        let pattern = "([a-z])([A-Z])"
-        let spaced = replacingOccurrences(of: pattern, with: "$1 $2", options: .regularExpression)
-        return spaced.capitalized
-    }
 }
 
 extension Visibility: CaseNameReflectable {}

@@ -27,8 +27,8 @@ final class ChatComposer: ErrorPresenter {
 
 	var state: State = .init()
 
-	init() {
-		msgCreator = .init(currentUserId: currentUserID ?? "")
+    init() {
+		msgCreator = .init()
 		inputText.delegate = self
 		photoPicker.delegate = self
 	}
@@ -131,7 +131,7 @@ extension ChatComposer {
 	}
 
 	func send(msg: ChatEngineMsgGenerable, conversation: Conversation) async throws {
-		let msg = await msgCreator.message(
+        let msg = try await msgCreator.message(
 			text: msg.content,
 			attachments: [],
 			in: conversation,
@@ -242,7 +242,7 @@ private actor ChatComposerWorker {
 		msgCreator: MsgCreator,
 	) async throws {
 		let sanitizedText = sanitizeText(text, attachments: attachments)
-		let msg = await msgCreator.message(
+        let msg = try await msgCreator.message(
 			text: sanitizedText,
 			attachments: attachments,
 			in: conversation,

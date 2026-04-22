@@ -83,7 +83,7 @@ extension PMsg: SendableTransformable {
             senderID: senderID,
             conID: conID,
             text: text,
-            date: ServerTime(date).date,
+            date: ServerTime(stringLiteral: date).date,
             deliveryStatus: .init(rawValue: deliveryStatus) ?? .received,
             attachments: attachments,
             reactions: reactions,

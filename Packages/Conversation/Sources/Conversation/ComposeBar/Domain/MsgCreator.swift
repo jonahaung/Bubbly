@@ -1,48 +1,42 @@
 // © 2026 Aung Ko Min
 
-#if os(iOS)
-//
-    // Copyright © 2026 Aung Ko Min. All rights reserved.
-//
+import Database
+import Foundation
+import MediaPicker
+import Services
+import UIKit
+import XUI
+import Core
 
-    import Database
-    import Foundation
-    import MediaPicker
-    import Services
-    import UIKit
-    import XUI
-
-    public actor MsgCreator {
-        public enum Error: Swift.Error {
-            case noCurrentUserId
-            case imageProcessingFailed(Swift.Error? = nil)
-            case dataConversionFailed
-        }
-
-        private let mediaManager: MediaManager
-        private let currentUserId: String
-
-        public init(currentUserId: String, mediaManager: MediaManager = .shared) {
-            self.mediaManager = mediaManager
-            self.currentUserId = currentUserId
-        }
-
-        public func message(
-            text: String,
-            attachments: [Attachment],
-            in conversation: Conversation,
-        ) async -> Message {
-            await Message(
-                uid: IDGenerator.shared.make(),
-                senderID: currentUserId,
-                conID: conversation.uid,
-                text: text,
-                date: .now,
-                deliveryStatus: .sending,
-                attachments: attachments,
-                reactions: [],
-            )
-        }
+public actor MsgCreator {
+    public enum Error: Swift.Error {
+        case noCurrentUserId
+        case imageProcessingFailed(Swift.Error? = nil)
+        case dataConversionFailed
     }
 
-#endif
+    private let mediaManager: MediaManager
+
+    public init(mediaManager: MediaManager = .shared) {
+        self.mediaManager = mediaManager
+       
+    }
+
+    public func message(
+        text: String,
+        attachments: [Attachment],
+        in conversation: Conversation,
+    ) async throws -> Message {
+        let currentUserId = try CurrentUserID.get()
+        return await Message(
+            uid: IDGenerator.shared.make(),
+            senderID: currentUserId,
+            conID: conversation.uid,
+            text: text,
+            date: .now,
+            deliveryStatus: .sending,
+            attachments: attachments,
+            reactions: [],
+        )
+    }
+}

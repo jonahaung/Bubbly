@@ -59,9 +59,8 @@ extension Socket {
                 .updateAndSave(uid: status.conID) { model in
                     model.update(from: properties)
                 }
-            if let currentUserID {
-                try await MsgRepo.updateSentMsgs(statusPayload: status, currentUserID: currentUserID)
-            }
+            let currentUserID = try CurrentUserID.get()
+            try await MsgRepo.updateSentMsgs(statusPayload: status, currentUserID: currentUserID)
         }
 
         let appState = AppStateStore.read()

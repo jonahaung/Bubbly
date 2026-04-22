@@ -74,7 +74,7 @@ extension ChatManager {
             )
         let transaction = Transaction.withAnimation(.interactiveSpring)
         withTransaction(transaction) {
-            layoutManager.updateSelectedMsg(newValue)
+            
             if let oldValue {
                 models.didChangeSelection(newValue, for: oldValue.id)
                 if let id = oldValue.next {
@@ -93,6 +93,8 @@ extension ChatManager {
                     models.didChangeSelection(newValue, for: id)
                 }
             }
+            
+            layoutManager.updateSelectedMsg(newValue)
         }
     }
 }

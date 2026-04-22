@@ -18,6 +18,7 @@ struct BubblyApp: App {
 		WindowGroup {
 			ContentView()
                 .symbolColorRenderingMode(.gradient)
+                .allowsTightening(false)
                 .tint(Color.accent)
 				.onTask {
 					await Task.yield()

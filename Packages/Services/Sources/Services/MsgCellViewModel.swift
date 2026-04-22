@@ -8,7 +8,7 @@ import XUI
 
 @Observable
 public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
-    public var state: State
+    @ObservationIgnored public var state: State
     @ObservationIgnored public var isVisible: Bool = false
     public var reloadID: Int = 0
     
@@ -23,9 +23,8 @@ public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
         guard state.msg != msg else {
             return
         }
-        var state = state
         state.msg = msg
-        self.state = state
+        layoutIfNeeded()
     }
 
     @MainActor public func update(layout: MsgCellLayout) {

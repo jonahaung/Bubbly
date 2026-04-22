@@ -42,13 +42,14 @@ struct TopBar: View {
                 AsyncButton {
                     let id = manager.state.conversation.members.random()
                     try await AsyncOrderedStream.mapOrdered(inputs: Array(2 ... 200)) { i in
+                        let currentUserID = try CurrentUserID.get()
                         let msg = await Message(
                             uid: IDGenerator.shared.make(),
-                            senderID: [currentUserID!, id].random(),
+                            senderID: [currentUserID, id].random(),
                             conID: manager.conversationConfig.conID,
                             text: Lorem.random(),
                             date: Date.now
-                                .addingTimeInterval(-(i * (6000 ... 200_000).randomElement()!)
+                                .addingTimeInterval(-(i * [6000, 12000, 6100, 6050, 12050].randomElement()!)
                                     .double),
                             deliveryStatus: .delivered,
                             attachments: [],
@@ -76,16 +77,12 @@ struct TopBar: View {
                     case let .contact(contact):
                         ProfilePhoto(
                             contact,
-                            size: .custom(32), tapAction: .custom {
-                                Router.shared.pushToNav(NavPath.conversationDetails(manager.state.conversation))
-                            }
+                            size: .custom(32), tapAction: .none
                         )
                     case let .group(group):
                         ProfilePhoto(
                             group,
-                            size: .custom(32), tapAction: .custom {
-                                Router.shared.pushToNav(NavPath.conversationDetails(manager.state.conversation))
-                            }
+                            size: .custom(32), tapAction: .none
                         )
                     }
                 }

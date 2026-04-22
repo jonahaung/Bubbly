@@ -13,7 +13,6 @@ import XUI
 public struct AuthUserProfileView: View {
     @State private var viewModel: AuthUserProfileViewModel
     @FocusState private var isFocused: Bool
-
     let appLauncher: AppLauncher
 
     public init(user: User, appLauncher: AppLauncher) {
@@ -54,20 +53,12 @@ public struct AuthUserProfileView: View {
         }
         .safeAreaBar(edge: .bottom) {
             AsyncButton {
-                if viewModel.hasChanges {
-                    setFocus(false)
-                    do {
-                        try await viewModel.saveProfile()
-                    } catch {
-                        await viewModel.showError(error)
-                    }
-                } else {
-                    do {
-                        try await viewModel.updateRemoteUser()
-                        appLauncher.markGetStartedAsDone(user: viewModel.currentUser)
-                    } catch {
-                        log(error)
-                    }
+                setFocus(false)
+                do {
+                    try await viewModel.saveProfile()
+                    await appLauncher.markGetStartedAsDone(user: viewModel.currentUser)
+                } catch {
+                    await viewModel.showError(error)
                 }
             } label: {
                 Text(viewModel.hasChanges ? "Save Changes" : "Continue")
