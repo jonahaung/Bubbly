@@ -18,11 +18,11 @@ extension Socket {
         case let .newMsg(rMsg):
             _ = try await ConversationRepo.getOrCreate(
                 for: rMsg.conID,
-                refetch: false
+                refetch: false,
             )
             _ = try await ConversationPropertiesRepo.getOrCreate(
                 for: rMsg.conID,
-                refetch: false
+                refetch: false,
             )
             if try await Store.shared.msgStore?.exists(uid: rMsg.uid) != true {
                 var msg = Message(rMsg)
@@ -51,11 +51,12 @@ extension Socket {
         case let .seenStatus(status: status):
             var properties = try await ConversationPropertiesRepo.getOrCreate(
                 for: status.conID,
-                refetch: false
+                refetch: false,
             )
             properties.seenMembers.removeAll(where: { $0.uid == status.seenMember.uid })
             properties.seenMembers.append(status.seenMember)
-            try await Store.shared.conversationPropertiesStore?
+            try await Store.shared
+                .conversationPropertiesStore?
                 .updateAndSave(uid: status.conID) { model in
                     model.update(from: properties)
                 }
@@ -67,7 +68,7 @@ extension Socket {
         if appState == .background {
             var dataArray = GroupStorage.shared.codable(
                 [AnyMsgData].self,
-                for: .device(.anyMsgData)
+                for: .device(.anyMsgData),
             ) ?? []
             dataArray.append(data)
             GroupStorage.shared.save(dataArray, for: .device(.anyMsgData))
@@ -78,7 +79,7 @@ extension Socket {
 enum NotificationServiceExtensionReceiver {
     static func handleReceive(
         _ data: AnyMsgData,
-        completion: @escaping (Result<Void, Error>) -> Void
+        completion: @escaping (Result<Void, Error>) -> Void,
     ) {
         Task { @SocketActor in
             do {

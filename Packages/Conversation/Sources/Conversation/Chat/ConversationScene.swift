@@ -34,6 +34,7 @@ public struct ConversationScene: View {
             ConversationScrollView()
                 .layoutPriority(1)
             ConversationSceneOverlayBar()
+                .equatable(by: viewModel.state.conversation.uid)
             SeenStatusOverlay()
             if let frame = viewModel.presentation.state.overlayItem,
                 let overlayViewModel = viewModel.models.element(

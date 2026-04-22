@@ -7,14 +7,17 @@
 
 import Foundation
 
-public enum MsgTimeStringFormatter {
+public enum
+MsgTimeStringFormatter {
 
     public static func string(
         for date: Date,
         now: Date = Date(),
         calendar: Calendar = .current
     ) -> String {
-
+        if abs(Date.now.timeIntervalSince(date)) < 60 {
+            return "Just now"
+        }
         if calendar.isDateInToday(date) {
             if isWithinPastOneHour(date, now: now) {
                 return format(date, style: .relative)

@@ -9,6 +9,8 @@ import XUI
 struct TopBar: View {
 
     @Environment(\.conversationTheme) private var theme
+    private let mockMessageCreator = MockMessageCreator()
+
     var body: some View {
         ZStack(alignment: .top) {
             CustomButton {
@@ -40,38 +42,9 @@ struct TopBar: View {
                 Spacer()
 
                 AsyncButton {
-                    let id = manager.state.conversation.members.random()
-                    try await AsyncOrderedStream.mapOrdered(inputs: Array(2 ... 200)) { i in
-                        let currentUserID = try CurrentUserID.get()
-                        let msg = await Message(
-                            uid: IDGenerator.shared.make(),
-                            senderID: [currentUserID, id].random(),
-                            conID: manager.conversationConfig.conID,
-                            text: Lorem.random(),
-                            date: Date.now
-                                .addingTimeInterval(-(i * [6000, 12000, 6100, 6050, 12050].randomElement()!)
-                                    .double),
-                            deliveryStatus: .delivered,
-                            attachments: [],
-                            reactions: [],
-                        )
-                        try await Store.shared.msgStore?.insert(msg)
-                    }
-
-                    @Sendable func randomDateInCurrentWeek() -> Date? {
-                        let calendar = Calendar.current
-                        let now = Date()
-                        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: now) else {
-                            return nil
-                        }
-
-                        let start = weekInterval.start
-                        let end = weekInterval.end
-                        let randomTime = TimeInterval
-                            .random(in: start.timeIntervalSince1970 ... end.timeIntervalSince1970)
-
-                        return Date(timeIntervalSince1970: randomTime)
-                    }
+                    try await mockMessageCreator.createTextMessages(count: 1,
+                                                                     in: manager.state.conversation, direction: .incoming
+                    )
                 } label: {
                     switch manager.state.conversation.kind {
                     case let .contact(contact):

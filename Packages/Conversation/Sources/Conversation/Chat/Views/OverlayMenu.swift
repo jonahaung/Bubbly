@@ -68,7 +68,7 @@ struct OverlayMenu: View {
                 x: item.frame.midX,
                 y: item.frame.minY - (transitionState == .didAppear ? 15 : -15),
             )
-            MsgCell.Content()
+            MsgCellContent(state: viewModel.state)
                 .frame(size: item.frame.size)
                 .position(x: item.frame.midX, y: item.frame.midY)
 

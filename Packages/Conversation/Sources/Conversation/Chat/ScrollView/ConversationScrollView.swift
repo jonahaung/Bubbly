@@ -1,13 +1,10 @@
 // © 2026 Aung Ko Min
-
 import Core
 import Database
 import Services
 import SwiftUI
 import XUI
-
 struct ConversationScrollView: View {
-
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             MsgsScrollViewLayout(
@@ -15,78 +12,44 @@ struct ConversationScrollView: View {
                 config: .init(
                     spacing: manager.conversationConfig.lineSpacing,
                     contentInsets: .init(
-                        top: ChatLayoutConstants.topBarHeight,
-                        leading: Padding.sm,
-                        bottom: 0,
-                        trailing: Padding.sm
-                    ),
-                    screenSize: UIApplication.shared.screenSize()
-                )
+                        top: ChatLayoutConstants.topBarHeight, leading: Padding.sm, bottom: 0,
+                        trailing: Padding.sm), screenSize: UIApplication.shared.screenSize())
             ) {
                 ForEach(manager.models.headerModels) { model in
                     switch model.kind {
                     case .conversation(let conversation):
-                        HeaderProfileView(conversation: conversation)
-                            .id(conversation.uid)
+                        HeaderProfileView(conversation: conversation).id(conversation.uid)
                             .layoutValue(
                                 key: MsgLayoutValueKey.self,
                                 value: .init(
-                                    uid: conversation.uid,
-                                    recipient: .system,
-                                    attachmentsCount: 0,
-                                    headerStatus: 0
-                                )
-                            )
+                                    uid: conversation.uid, recipient: .system, attachmentsCount: 0,
+                                    headerStatus: 0))
                     }
                 }
-
                 ForEach(manager.models.renderedModels) { model in
-                    MsgCell(viewModel: model)
-                        .id(model.id)
-                        .layoutValue(
-                            key: MsgLayoutValueKey.self,
-                            value: model.msg.layoutValue(
-                                layout: model.state.layout
-                            )
-                        )
+                    MsgCell(viewModel: model).id(model.id).layoutValue(
+                        key: MsgLayoutValueKey.self,
+                        value: model.msg.layoutValue(layout: model.state.layout))
                 }
             }
-            .geometryGroup()
-            .scrollTargetLayout()
+            .clipped().geometryGroup().scrollTargetLayout()
         }
-        .tint(Color.tint)
-        .scrollEdgeEffectHidden(true, for: .all)
-        .scrollDismissesKeyboard(.never)
-        .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
-        .onScrollPhaseChange { oldPhase, newPhase, context in
+        .scrollContentBackground(.hidden).background(.clear).tint(Color.tint)
+        .scrollEdgeEffectHidden(true, for: .all).scrollDismissesKeyboard(.never)
+        .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight).onScrollPhaseChange {
+            oldPhase, newPhase, context in
             manager.send(
-                .scrollViewIntent(
-                    .onScrollPhaseChange(oldPhase, newPhase, context: context)
-                )
-            )
-        }
-        .scrollIndicatorsFlash(onAppear: true)
-        .onScrollGeometryChange(
-            for: VScrollGeometry.self,
-            of: { .init($0) },
+                .scrollViewIntent(.onScrollPhaseChange(oldPhase, newPhase, context: context)))
+        }.scrollIndicatorsFlash(onAppear: true).onScrollGeometryChange(
+            for: VScrollGeometry.self, of: { .init($0) },
         ) { oldValue, newValue in
-            manager.send(
-                .scrollViewIntent(.onScrollGeometryChange(oldValue, newValue))
-            )
-        }
-        .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.01) { ids in
+            manager.send(.scrollViewIntent(.onScrollGeometryChange(oldValue, newValue)))
+        }.onScrollTargetVisibilityChange(idType: String.self, threshold: 0.01) { ids in
             manager.onScrollTargetVisibilityChange(ids)
-        }
-        .equatable(by: manager.state.reloadID)
-        .defaultScrollAnchor(
-            manager.presentation.state.bottomAccessory == .scrollDownButton
-                ? nil : .bottom,
+        }.equatable(by: manager.state.reloadID).defaultScrollAnchor(
+            manager.presentation.state.bottomAccessory == .scrollDownButton ? nil : .bottom,
             for: .sizeChanges
-        )
-        .scrollPosition(
-            manager.scrollController.scrollPositionBindable
-        )
+        ).scrollPosition(manager.scrollController.scrollPositionBindable)
     }
-
     @Environment(ChatManager.self) private var manager
 }

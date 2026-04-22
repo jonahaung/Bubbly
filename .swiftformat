@@ -1,61 +1,86 @@
-rules:
-  # MARK: - Structure
-  - blankLinesBetweenScopes
-  - blankLinesAroundMark
-  - blankLinesAtStartOfScope
-  - blankLinesAtEndOfScope
-
-  # MARK: - Formatting
-  - indent
-  - linebreaks
-  - linebreakAtEndOfFile
-  - braces
-  - elseOnSameLine
-
-  # MARK: - Spacing
-  - consecutiveBlankLines
-  - consecutiveSpaces
-  - trailingSpace
-  - spaceAroundOperators
-  - spaceAroundBraces
-  - spaceAroundParens
-  - spaceAroundGenerics
-  - spaceAroundBrackets
-  - spaceAroundComments
-  - spaceInsideBraces
-  - spaceInsideParens
-  - spaceInsideGenerics
-  - spaceInsideBrackets
-  - spaceInsideComments
-
-  # MARK: - Code Simplification
-  - redundantSelf
-  - redundantReturn
-  - redundantInit
-  - redundantLet
-  - redundantNilInit
-  - redundantParens
-  - redundantPattern
-  - redundantGet
-  - redundantBackticks
-  - redundantRawValues
-  - redundantVoidReturnType
-
-  # MARK: - Safety / Correctness
-  - strongOutlets
-  - unusedArguments
-  - hoistPatternLet
-
-  # MARK: - Style
-  - semicolons
-  - numberFormatting
-  - ranges
-  - specifiers
-  - void
-
-  # MARK: - Imports
-  - duplicateImports
-  - sortedImports
-
-  # MARK: - Misc
-  - todos
+{
+  "version": 1,
+  "maximumBlankLines": 0,
+  "lineLength": 100,
+  "tabWidth": 8,
+  "indentation": {
+    "spaces": 4
+  },
+  "respectsExistingLineBreaks": false,
+  "lineBreakBeforeControlFlowKeywords": false,
+  "lineBreakBeforeEachArgument": false,
+  "lineBreakBeforeEachGenericRequirement": false,
+  "prioritizeKeepingFunctionOutputTogether": true,
+  "indentConditionalCompilationBlocks": true,
+  "lineBreakAroundMultilineExpressionChainComponents": false,
+  "fileScopedDeclarationPrivacy": {
+    "accessLevel": "private"
+  },
+  "indentSwitchCaseLabels": false,
+  "rules": {
+    "AllPublicDeclarationsHaveDocumentation": false,
+    "AlwaysUseLowerCamelCase": true,
+    "AmbiguousTrailingClosureOverload": true,
+    "BeginDocumentationCommentWithOneLineSummary": false,
+    "DoNotUseSemicolons": true,
+    "DontRepeatTypeInStaticProperties": true,
+    "FileScopedDeclarationPrivacy": true,
+    "FullyIndirectEnum": true,
+    "GroupNumericLiterals": true,
+    "IdentifiersMustBeASCII": true,
+    "NeverForceUnwrap": false,
+    "NeverUseForceTry": false,
+    "NeverUseImplicitlyUnwrappedOptionals": false,
+    "NoAccessLevelOnExtensionDeclaration": true,
+    "NoBlockComments": true,
+    "NoCasesWithOnlyFallthrough": true,
+    "NoEmptyTrailingClosureParentheses": true,
+    "NoLabelsInCasePatterns": true,
+    "NoLeadingUnderscores": false,
+    "NoParensAroundConditions": true,
+    "NoVoidReturnOnFunctionSignature": true,
+    "OneCasePerLine": true,
+    "OneVariableDeclarationPerLine": true,
+    "OnlyOneTrailingClosureArgument": true,
+    "OrderedImports": true,
+    "ReturnVoidInsteadOfEmptyTuple": true,
+    "UseLetInEveryBoundCaseVariable": true,
+    "UseShorthandTypeNames": true,
+    "UseSingleLinePropertyGetter": true,
+    "UseSynthesizedInitializer": true,
+    "UseTripleSlashForDocumentationComments": true,
+    "ValidateDocumentationComments": false
+  },
+  "AllPublicDeclarationsHaveDocumentation": false,
+  "AlwaysUseLowerCamelCase": true,
+  "AmbiguousTrailingClosureOverload": true,
+  "BeginDocumentationCommentWithOneLineSummary": false,
+  "DoNotUseSemicolons": true,
+  "DontRepeatTypeInStaticProperties": true,
+  "FileScopedDeclarationPrivacy": true,
+  "FullyIndirectEnum": true,
+  "GroupNumericLiterals": true,
+  "IdentifiersMustBeASCII": true,
+  "NeverForceUnwrap": true,
+  "NeverUseForceTry": true,
+  "NeverUseImplicitlyUnwrappedOptionals": true,
+  "NoAccessLevelOnExtensionDeclaration": true,
+  "NoBlockComments": true,
+  "NoCasesWithOnlyFallthrough": true,
+  "NoEmptyTrailingClosureParentheses": true,
+  "NoLabelsInCasePatterns": true,
+  "NoLeadingUnderscores": false,
+  "NoParensAroundConditions": true,
+  "NoVoidReturnOnFunctionSignature": true,
+  "OneCasePerLine": true,
+  "OneVariableDeclarationPerLine": true,
+  "OnlyOneTrailingClosureArgument": true,
+  "OrderedImports": true,
+  "ReturnVoidInsteadOfEmptyTuple": true,
+  "UseLetInEveryBoundCaseVariable": true,
+  "UseShorthandTypeNames": true,
+  "UseSingleLinePropertyGetter": true,
+  "UseSynthesizedInitializer": true,
+  "UseTripleSlashForDocumentationComments": true,
+  "ValidateDocumentationComments": false
+}

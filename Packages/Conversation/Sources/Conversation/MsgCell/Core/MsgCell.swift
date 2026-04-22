@@ -11,46 +11,22 @@ struct MsgCell: View {
     let viewModel: MsgCellViewModel
 
     var body: some View {
-        VStack(
-            alignment: viewModel.state.horizontalAlignment,
-            spacing: 0
-        ) {
-            if layout.showTimeSeparator {
-                TimeSeparator()
-            }
-            if layout.showTopPadding {
-                CellSpacer()
-            }
-            if isSelected {
-                Header()
-            }
+        VStack(alignment: viewModel.state.horizontalAlignment, spacing: 0) {
+            MsgCellHeader(state: viewModel.state)
             HStack(alignment: .bottom, spacing: Spacing.xs) {
                 if !viewModel.state.isSender {
-                    IncomingAccessory()
+                    MsgCell.IncomingAccessory(state: viewModel.state)
                 }
-                GestureAware {
-                    Content()
+                MsgCellGesture {
+                    MsgCellContent(state: viewModel.state)
                 }
                 if viewModel.state.isSender {
-                    OutgoingAccessory()
+                    MsgCell.OutgoingAccessory(state: viewModel.state)
                 }
-            }
-
-            if isSelected {
-                Footer()
-            }
+            }.equatable(by: viewModel.state)
+            MsgCellFooter(state: viewModel.state)
         }
-        .equatable(by: viewModel.reloadID)
-        .environment(\.isVisible, viewModel.isVisible)
+        .environment(\.isVisible, viewModel.state.isVisible)
         .environment(viewModel)
-        
-    }
-
-    private var isSelected: Bool {
-        viewModel.state.isSelected
-    }
-
-    private var layout: MsgCellLayout {
-        viewModel.state.layout
     }
 }

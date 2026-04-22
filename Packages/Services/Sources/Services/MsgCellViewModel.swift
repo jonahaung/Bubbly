@@ -7,10 +7,8 @@ import XUI
 // MARK: - MsgCellViewModel
 
 @Observable
-public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
-    @ObservationIgnored public var state: State
-    @ObservationIgnored public var isVisible: Bool = false
-    public var reloadID: Int = 0
+public final class MsgCellViewModel: Identifiable, Equatable {
+    public var state: State
     
     public init(_ state: State) {
         self.state = state
@@ -24,7 +22,7 @@ public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
             return
         }
         state.msg = msg
-        layoutIfNeeded()
+       
     }
 
     @MainActor public func update(layout: MsgCellLayout) {
@@ -41,17 +39,15 @@ public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
         state.bubbleCornor = state.computeBubbleCorner()
         state.computeDateString()
         self.state = state
-        layoutIfNeeded()
+        
     }
 
     public func setVisibility(_ isVisible: Bool) {
-        guard self.isVisible != isVisible else {
+        guard state.isVisible != isVisible else {
             return
         }
-        self.isVisible = isVisible
-        if !state.attachments.isEmpty {
-            layoutIfNeeded()
-        }
+        state.isVisible = isVisible
+        
     }
 
     public func update(selectedMsg: SelectedMsg?) {
@@ -62,13 +58,6 @@ public final class MsgCellViewModel: Identifiable, Equatable, ViewReloadable {
         state.selectedMsg = selectedMsg
         state.bubbleCornor = state.computeBubbleCorner()
         self.state = state
-        layoutIfNeeded()
-    }
-    
-    public func layoutIfNeeded() {
-        if isVisible {
-            reloadID += 1
-        }
     }
 
     public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
@@ -95,6 +84,7 @@ extension MsgCellViewModel {
         public var selectedMsg: SelectedMsg? = nil
         public var bubbleCornor: BubbleCorner = .none
         public var dateStString: String?
+        public var isVisible: Bool = false
 
         public var deliveryStatus: DeliveryStatus? {
             msg.deliveryStatus
@@ -171,3 +161,4 @@ public enum VerticalItemAlignment: Sendable, Hashable {
     case leading
     case trailing
 }
+

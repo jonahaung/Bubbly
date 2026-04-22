@@ -54,14 +54,12 @@ struct AttachmentPreview: View {
                     .flexible(.horizontal)
                 }
             }
-            .allowsTightening(true)
-            .background()
         }
     }
 
     private var content: some View {
         ZStack {
-            Color.appSecondary
+            
             if let data = model.attachmentData {
                 attachmentView(for: data)
             } else if let error = model.error {
@@ -71,11 +69,11 @@ struct AttachmentPreview: View {
                     .multilineTextAlignment(.center)
                     .padding(8)
             } else {
+                Color.clear
                 ProgressView().controlSize(.mini)
             }
         }
         .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
-        .clipShape(RoundedRectangle(cornerRadius: Radius.card))
         .task(id: viewIsVisible) {
             if viewIsVisible, let attachmentFetcher {
                 if model.attachmentData == nil {
@@ -124,6 +122,7 @@ struct AttachmentPreview: View {
         Image(uiImage: uiImage)
             .resizable()
             .scaledToFit()
+            .clipShape(RoundedRectangle(cornerRadius: Radius.card))
             .onTapGesture {
                 onSelect(model.attachment)
             }
