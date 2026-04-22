@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  MsgCellAction.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Database
 import SwiftUI
+import Database
 
 // MARK: - MsgCellAction
 

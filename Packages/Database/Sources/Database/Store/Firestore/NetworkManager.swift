@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  NetworkManager.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Core
-import Foundation
-import Network
 import XUI
+import Core
+import Network
+import Foundation
 
 // MARK: - NetworkActor
 
@@ -22,7 +25,7 @@ public final class NetworkManager: NSObject {
 
     private let monitor: NWPathMonitor = .init()
     private let monitorQueue: DispatchQueue = .init(
-        label: AppInformation.appID + ".NetworkMonitor",
+        label: AppInformation.appID + ".NetworkMonitor"
     )
 
     private let session: URLSession
@@ -42,7 +45,7 @@ public final class NetworkManager: NSObject {
             URLSessionConfiguration.default
         )
         session = .init(
-            configuration: config,
+            configuration: config
         )
         super.init()
         monitor.pathUpdateHandler = { [weak self] path in
@@ -70,34 +73,34 @@ public final class NetworkManager: NSObject {
         }
         monitor
             .start(
-                queue: monitorQueue,
+                queue: monitorQueue
             )
     }
 
     public func request(
         _ urlRequest: URLRequest,
         maxRetries: Int = 3,
-        baseDelay: TimeInterval = 0.5,
+        baseDelay: TimeInterval = 0.5
     ) async throws -> (
         Data,
-        URLResponse,
+        URLResponse
     ) {
         try await request(
             makeRequest: {
                 urlRequest
             },
             maxRetries: maxRetries,
-            baseDelay: baseDelay,
+            baseDelay: baseDelay
         )
     }
 
     public func request(
         makeRequest: @escaping () -> URLRequest,
         maxRetries: Int = 3,
-        baseDelay: TimeInterval = 0.5,
+        baseDelay: TimeInterval = 0.5
     ) async throws -> (
         Data,
-        URLResponse,
+        URLResponse
     ) {
         var attempt = 0
         var lastError: Error?
@@ -111,43 +114,43 @@ public final class NetworkManager: NSObject {
             do {
                 let (
                     data,
-                    response,
+                    response
                 ) = try await session.data(
-                    for: request,
+                    for: request
                 )
                 if let http = response as? HTTPURLResponse {
                     if isTransient(
-                        statusCode: http.statusCode,
+                        statusCode: http.statusCode
                     ), attempt < maxRetries {
                         // Honor Retry-After if provided
                         let delay = retryDelay(
                             from: http,
                             attempt: attempt,
-                            base: baseDelay,
+                            base: baseDelay
                         )
                         try? await Task
                             .sleep(
                                 nanoseconds: UInt64(
-                                    delay * 1_000_000_000,
-                                ),
+                                    delay * 1_000_000_000
+                                )
                             )
                         attempt += 1
                         continue
                     }
                     guard
                         (200 ..< 300).contains(
-                            http.statusCode,
+                            http.statusCode
                         ) else
                     {
                         // Non-transient HTTP error: surface it
                         throw URLError(
-                            .badServerResponse,
+                            .badServerResponse
                         )
                     }
                 }
                 return (
                     data,
-                    response,
+                    response
                 )
             } catch {
                 lastError = error
@@ -156,23 +159,23 @@ public final class NetworkManager: NSObject {
                 }
 
                 if shouldRetry(
-                    error: error,
+                    error: error
                 ), attempt < maxRetries {
                     let jitter = Double.random(
-                        in: 0 ... (baseDelay / 2),
+                        in: 0 ... (baseDelay / 2)
                     )
                     let delay =
                         pow(
                             2.0,
                             Double(
-                                attempt,
-                            ),
+                                attempt
+                            )
                         ) * baseDelay + jitter
                     try? await Task
                         .sleep(
                             nanoseconds: UInt64(
-                                delay * 1_000_000_000,
-                            ),
+                                delay * 1_000_000_000
+                            )
                         )
                     attempt += 1
                     continue
@@ -183,7 +186,7 @@ public final class NetworkManager: NSObject {
         }
         throw lastError
             ?? URLError(
-                .unknown,
+                .unknown
             )
     }
 
@@ -223,26 +226,26 @@ public final class NetworkManager: NSObject {
     private func retryDelay(
         from http: HTTPURLResponse,
         attempt: Int,
-        base: TimeInterval,
+        base: TimeInterval
     ) -> TimeInterval {
         if let retryAfter = http.value(
-            forHTTPHeaderField: "Retry-After",
+            forHTTPHeaderField: "Retry-After"
         ) {
             if let seconds = TimeInterval(
-                retryAfter,
+                retryAfter
             ) {
                 return seconds
             }
             // Retry-After can also be a HTTP-date; you could parse it if needed.
         }
         let jitter = Double.random(
-            in: 0 ... (base / 2),
+            in: 0 ... (base / 2)
         )
         return pow(
             2.0,
             Double(
-                attempt,
-            ),
+                attempt
+            )
         ) * base + jitter
     }
 }
@@ -250,10 +253,10 @@ public final class NetworkManager: NSObject {
 // MARK: URLSessionDelegate, URLSessionTaskDelegate
 
 extension NetworkManager: URLSessionDelegate, URLSessionTaskDelegate {
-    nonisolated public func urlSession(
+    public nonisolated func urlSession(
         _: URLSession,
         task _: URLSessionTask,
-        didCompleteWithError error: Error?,
+        didCompleteWithError error: Error?
     ) {
         if let error = error as? URLError, error.code == .networkConnectionLost {
             // Good place to log diagnostics or enqueue a retry
@@ -261,10 +264,10 @@ extension NetworkManager: URLSessionDelegate, URLSessionTaskDelegate {
         }
     }
 
-    nonisolated public func urlSession(
+    public nonisolated func urlSession(
         _: URLSession,
         task _: URLSessionTask,
-        didFinishCollecting _: URLSessionTaskMetrics,
+        didFinishCollecting _: URLSessionTaskMetrics
     ) {
         // Inspect metrics for connection reuse, protocol (HTTP/2), etc.
         // metrics.transactionMetrics.forEach { print($0.networkProtocolName ?? "unknown") }

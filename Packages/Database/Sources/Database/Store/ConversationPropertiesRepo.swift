@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  ConversationPropertiesRepo.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Core
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
 public enum ConversationPropertiesRepo {
     @discardableResult

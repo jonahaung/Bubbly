@@ -1,8 +1,6 @@
-//
 //  GroupScrollViewModifier.swift
-//  Core
 //
-//  Created by Aung Ko Min on 16/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI

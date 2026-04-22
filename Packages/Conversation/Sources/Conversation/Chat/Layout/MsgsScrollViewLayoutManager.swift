@@ -1,14 +1,12 @@
-//
 //  MsgsScrollViewLayoutManager.swift
-//  Conversation
 //
-//  Created by Aung Ko Min on 17/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Database
-import SwiftUI
 import XUI
 import UIKit
+import SwiftUI
+import Database
 
 final class MsgsScrollViewLayoutManager: @unchecked Sendable {
     let cache: MsgsScrollViewLayoutCache

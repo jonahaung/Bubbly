@@ -1,14 +1,16 @@
-// © 2026 Aung Ko Min
+//  ComposerSourceButton.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Services
-import SwiftUI
 import XUI
+import Core
+import SwiftUI
+import Services
 
 // MARK: - ComposerSourceButton
 
 struct ComposerSourceButton: View {
-    
 
     let source: ChatComposer.Source
 
@@ -28,8 +30,6 @@ struct ComposerSourceButton: View {
             action()
         }
     }
-
-    
 
     @Environment(ChatComposer.self) private var composer
     @Environment(ChatManager.self) private var manager
@@ -54,9 +54,9 @@ extension ComposerSourceButton {
                                                     .init(
                                                         id: pickedItem.id.uuidString,
                                                         image: pickedItem
-                                                            .underlyingMediaType,
-                                                    ),
-                                                ],
+                                                            .underlyingMediaType
+                                                    )
+                                                ]
                                             )
                                     }
                                 case let pickedItem as MovieCameraPickerItem:
@@ -65,8 +65,8 @@ extension ComposerSourceButton {
                                     break
                                 }
                             }
-                            .opaqueView(),
-                        ),
+                            .opaqueView()
+                        )
                 )
         case .liary:
             manager.router?
@@ -75,8 +75,8 @@ extension ComposerSourceButton {
                         .view(
                             node: PhotoPickerView()
                                 .environment(composer.photoPicker)
-                                .opaqueView(),
-                        ),
+                                .opaqueView()
+                        )
                 )
         case .audio:
             break
@@ -87,16 +87,16 @@ extension ComposerSourceButton {
                         .view(
                             node: DocumentPicker(fileContent: $composer.fileContent)
                                 .environment(composer.photoPicker)
-                                .opaqueView(),
-                        ),
+                                .opaqueView()
+                        )
                 )
         case .machineImag:
             manager.router?
                 .presentModel(
                     NavPath
                         .view(
-                            node: TextEditor(text: $composer.fileContent).opaqueView(),
-                        ),
+                            node: TextEditor(text: $composer.fileContent).opaqueView()
+                        )
                 )
         case .emoji:
             break

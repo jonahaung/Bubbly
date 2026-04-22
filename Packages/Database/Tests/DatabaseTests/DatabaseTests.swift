@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  DatabaseTests.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
+import Testing
 @testable import Database
 import Foundation
-import Testing
 
 final class DatabaseTests {
     @Test func groupDecodesLegacyDocumentWithoutTheme() throws {
@@ -54,7 +57,7 @@ final class DatabaseTests {
             members: ["u1", "u2"],
             createdBy: "u1",
             theme: .init(),
-            seenMembers: [.init(uid: "u2", msgId: "m1", date: "2026-04-06T12:35:56.789Z")],
+            seenMembers: [.init(uid: "u2", msgId: "m1", date: "2026-04-06T12:35:56.789Z")]
         )
 
         let data = try JSONEncoder().encode(original)

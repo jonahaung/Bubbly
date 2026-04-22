@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  ServerTime.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 
@@ -6,37 +9,37 @@ import Foundation
 
 @frozen
 public struct ServerTime: Codable, Hashable, Sendable, Comparable {
-    
+
     // MARK: Public Properties
-    
+
     public let value: String
     public let date: Date
-    
+
     // MARK: Initialization
-    
+
     public init(_ date: Date = .now) {
         self.date = date
-        self.value = Self.formatter.string(from: date)
+        value = Self.formatter.string(from: date)
     }
-    
+
     public init?(_ isoString: String) {
         guard let date = Self.parse(isoString) else { return nil }
         self.date = date
-        self.value = isoString
+        value = isoString
     }
-    
+
     public static var now: ServerTime {
         .init()
     }
-    
+
     // MARK: Comparable
-    
+
     public static func < (lhs: ServerTime, rhs: ServerTime) -> Bool {
         lhs.date < rhs.date
     }
-    
+
     // MARK: Localized Output
-    
+
     public func localizedString(
         dateStyle: DateFormatter.Style = .medium,
         timeStyle: DateFormatter.Style = .short
@@ -44,7 +47,7 @@ public struct ServerTime: Codable, Hashable, Sendable, Comparable {
         Self.cachedFormatter(dateStyle: dateStyle, timeStyle: timeStyle)
             .string(from: date)
     }
-    
+
     public static func localizedString(
         from value: String,
         dateStyle: DateFormatter.Style = .medium,
@@ -54,17 +57,17 @@ public struct ServerTime: Codable, Hashable, Sendable, Comparable {
         return cachedFormatter(dateStyle: dateStyle, timeStyle: timeStyle)
             .string(from: date)
     }
-    
+
     // MARK: Convenience Methods
-    
+
     public func timeIntervalSince(_ date: ServerTime) -> TimeInterval {
         self.date.timeIntervalSince(date.date)
     }
-    
+
     public func timeIntervalSinceNow() -> TimeInterval {
         date.timeIntervalSinceNow
     }
-    
+
     public func addingTimeInterval(_ interval: TimeInterval) -> ServerTime {
         ServerTime(date.addingTimeInterval(interval))
     }
@@ -73,11 +76,11 @@ public struct ServerTime: Codable, Hashable, Sendable, Comparable {
 // MARK: - Parsing
 
 private extension ServerTime {
-    
+
     static func parse(_ string: String) -> Date? {
         formatter.date(from: string)
     }
-    
+
     /// Thread-safe formatter with automatic fallback handling
     nonisolated(unsafe) static let formatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
@@ -85,13 +88,13 @@ private extension ServerTime {
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
         return formatter
     }()
-    
+
     /// Attempts to parse with fallback if primary fails
     static func parseWithFallback(_ string: String) -> Date? {
         if let date = formatter.date(from: string) {
             return date
         }
-        
+
         // Try without fractional seconds
         let fallbackFormatter = ISO8601DateFormatter()
         fallbackFormatter.formatOptions = [.withInternetDateTime]
@@ -103,39 +106,39 @@ private extension ServerTime {
 // MARK: - Cached Formatters
 
 private extension ServerTime {
-    
+
     /// Cache for localized formatters to avoid recreation
-    nonisolated(unsafe) private static var formatterCache: [FormatterKey: DateFormatter] = [:]
-    private static let cacheLock = NSLock()
-    
+    private nonisolated(unsafe) static var formatterCache: [FormatterKey: DateFormatter] = [:]
+    private static let cacheLock: NSLock = .init()
+
     struct FormatterKey: Hashable {
         let dateStyle: DateFormatter.Style
         let timeStyle: DateFormatter.Style
     }
-    
+
     static func cachedFormatter(
         dateStyle: DateFormatter.Style,
         timeStyle: DateFormatter.Style
     ) -> DateFormatter {
         let key = FormatterKey(dateStyle: dateStyle, timeStyle: timeStyle)
-        
+
         cacheLock.lock()
         defer { cacheLock.unlock() }
-        
+
         if let cached = formatterCache[key] {
             return cached
         }
-        
+
         let formatter = DateFormatter()
         formatter.locale = .current
         formatter.timeZone = .current
         formatter.dateStyle = dateStyle
         formatter.timeStyle = timeStyle
-        
+
         formatterCache[key] = formatter
         return formatter
     }
-    
+
     static func clearFormatterCache() {
         cacheLock.lock()
         defer { cacheLock.unlock() }

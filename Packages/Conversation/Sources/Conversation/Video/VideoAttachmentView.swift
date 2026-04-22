@@ -1,14 +1,17 @@
-// © 2026 Aung Ko Min
+//  VideoAttachmentView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-    import AVKit
-    import Database
-    import SwiftUI
     import XUI
+    import AVKit
+    import SwiftUI
+    import Database
 
     public struct VideoAttachmentView: View {
         let attachment: Attachment

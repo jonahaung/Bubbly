@@ -1,5 +1,6 @@
+//  Lorem.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -37,7 +38,7 @@ public struct LoremConfiguration {
     public var tone: LoremTone
 
     @MainActor
-    public static let `default` = LoremConfiguration(
+    public static let `default`: LoremConfiguration = .init(
         domain: .generic,
         emoji: .none,
         locale: .current,
@@ -51,7 +52,7 @@ public struct LoremConfiguration {
 public enum Lorem {
     // MARK: Configuration
 
-    public static var configuration = LoremConfiguration.default
+    public static var configuration: LoremConfiguration = .default
 
     // MARK: - Words
 
@@ -115,7 +116,7 @@ public enum Lorem {
     public static var paragraph: String {
         compose(
             sentence,
-            count: .random(in: minSentencesCountInParagraph...maxSentencesCountInParagraph),
+            count: .random(in: minSentencesCountInParagraph ... maxSentencesCountInParagraph),
             joinBy: .space
         )
     }
@@ -137,7 +138,7 @@ public enum Lorem {
     public static var title: String {
         compose(
             word,
-            count: .random(in: minWordsCountInTitle...maxWordsCountInTitle),
+            count: .random(in: minWordsCountInTitle ... maxWordsCountInTitle),
             joinBy: .space,
             decorate: { $0.capitalized }
         )
@@ -409,7 +410,8 @@ private struct EnglishSentencePack: LoremSentencePack {
 extension Lorem {
     fileprivate static var sentencePack: LoremSentencePack {
         switch configuration.locale.language.languageCode?.identifier {
-        case "en", .none:
+        case "en",
+             .none:
             EnglishSentencePack()
         default:
             EnglishSentencePack()
@@ -439,7 +441,7 @@ extension Lorem {
         joinBy separator: Separator,
         decorate: ((String) -> String)? = nil
     ) -> String {
-        let result = (0..<count)
+        let result = (0 ..< count)
             .map { _ in provider() }
             .joined(separator: separator.rawValue)
 
@@ -463,8 +465,7 @@ extension Lorem {
             guard
                 configuration.domain == .chat,
                 let previous = context.previousMessage,
-                configuration.tone == .friendly
-            else {
+                configuration.tone == .friendly else {
                 return sentence
             }
 

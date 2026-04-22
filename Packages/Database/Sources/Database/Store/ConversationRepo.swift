@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  ConversationRepo.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Core
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
 public enum ConversationRepo {
     public enum XError: Error {
@@ -32,8 +35,8 @@ public enum ConversationRepo {
 
         if !refetch,
            let existing: PGroup.SendableType = try await Store.shared
-           .groupStore?
-           .fetch(uid: conID)
+               .groupStore?
+               .fetch(uid: conID)
         {
             return .group(existing)
         }
@@ -45,7 +48,7 @@ public enum ConversationRepo {
             guard let fetched: Database.Group = try await FirestoreRepo.getModel(
                 for: conID,
                 collection: .groups,
-                field: .uid,
+                field: .uid
             ) else {
                 throw XError.noConversationGroupFound
             }

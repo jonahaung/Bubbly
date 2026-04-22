@@ -1,15 +1,19 @@
-// © 2026 Aung Ko Min
+//  CellSpacer.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Core
-import Database
 import SwiftUI
+import Database
 
 struct CellSpacer: View, @MainActor Equatable {
     var body: some View {
         Spacer()
             .frame(height: ChatLayoutConstants.Cell.sectionSpacing)
     }
-    static func == (lhs: Self, rhs: Self) -> Bool {
-       true
+
+    static func == (_: Self, _: Self) -> Bool {
+        true
     }
 }

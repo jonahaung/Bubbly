@@ -1,3 +1,8 @@
+//  CGPoint+Offset.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import CoreGraphics
 
 extension CGPoint {

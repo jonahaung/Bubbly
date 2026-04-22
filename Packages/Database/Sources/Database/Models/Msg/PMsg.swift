@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  PMsg.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
-import SwiftData
 import UIKit
+import SwiftData
+import Foundation
 
 // MARK: - PMsg
 
@@ -26,7 +29,7 @@ public final class PMsg {
         date: String,
         deliveryStatus: DeliveryStatus,
         attachments: [Attachment],
-        reactions: [Reaction],
+        reactions: [Reaction]
     ) {
         self.uid = uid
         self.senderID = senderID
@@ -73,7 +76,7 @@ extension PMsg: SendableTransformable {
             date: ServerTime(snapshot.date).value,
             deliveryStatus: snapshot.deliveryStatus,
             attachments: snapshot.attachments,
-            reactions: snapshot.reactions,
+            reactions: snapshot.reactions
         )
     }
 
@@ -86,7 +89,7 @@ extension PMsg: SendableTransformable {
             date: ServerTime(stringLiteral: date).date,
             deliveryStatus: .init(rawValue: deliveryStatus) ?? .received,
             attachments: attachments,
-            reactions: reactions,
+            reactions: reactions
         )
     }
 }

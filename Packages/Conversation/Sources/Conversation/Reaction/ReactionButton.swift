@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  ReactionButton.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
@@ -12,8 +15,8 @@
     //  Created by Aung Ko Min on 5/11/25.
 //
     import Core
-    import Database
     import SwiftUI
+    import Database
 
     struct ReactionButton: View {
         @Binding var reactionState: ReactionsBar.ReactionState
@@ -36,13 +39,13 @@
                                 .modifier(
                                     ReactionAnimationModifier(
                                         reaction: reactionState.reaction,
-                                        isActive: phase,
-                                    ),
+                                        isActive: phase
+                                    )
                                 )
                         } animation: { _ in
                             .bouncy(
                                 duration: reactionState.animationDuration,
-                                extraBounce: ReactionsBar.Constants.extraBounce,
+                                extraBounce: ReactionsBar.Constants.extraBounce
                             )
                         }
                 }

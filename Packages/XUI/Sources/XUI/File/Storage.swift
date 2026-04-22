@@ -1,5 +1,6 @@
+//  Storage.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -67,11 +68,11 @@ extension Storage {
         do {
             try fileManager.moveItem(atPath: path, toPath: newPath)
 
-            switch LocationType.kind {
+            path = switch LocationType.kind {
             case .file:
-                path = newPath
+                newPath
             case .folder:
-                path = newPath.appendingSuffixIfNeeded("/")
+                newPath.appendingSuffixIfNeeded("/")
             }
         } catch {
             throw LocationError(path: path, reason: errorReasonProvider(error))
@@ -160,8 +161,7 @@ extension Storage where LocationType == Folder {
         }
 
         guard fileManager.createFile(atPath: filePath, contents: contents),
-              let storage = try? Storage<File>(path: filePath, fileManager: fileManager)
-        else {
+              let storage = try? Storage<File>(path: filePath, fileManager: fileManager) else {
             throw WriteError(path: filePath, reason: .fileCreationFailed)
         }
 

@@ -1,5 +1,6 @@
+//  FixedSizeCenterLayout.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -17,18 +18,18 @@ public struct FixedSizeCenterLayout: Layout {
     }
 
     public func sizeThatFits(
-        proposal: ProposedViewSize,
-        subviews: Subviews,
-        cache: inout ()
+        proposal _: ProposedViewSize,
+        subviews _: Subviews,
+        cache _: inout ()
     ) -> CGSize {
         size
     }
 
     public func placeSubviews(
         in bounds: CGRect,
-        proposal: ProposedViewSize,
+        proposal _: ProposedViewSize,
         subviews: Subviews,
-        cache: inout ()
+        cache _: inout ()
     ) {
         let proposal = ProposedViewSize(size)
 

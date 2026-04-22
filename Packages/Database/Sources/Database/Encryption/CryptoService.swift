@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  CryptoService.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Core
 import Crypto
@@ -15,7 +18,7 @@ struct CryptoPayload: Codable, Sendable {
 public final class CryptoService: @unchecked Sendable {
     public static let shared: CryptoService = .init()
 
-    private let lock = NSLock()
+    private let lock: NSLock = .init()
 
     private init() {}
 
@@ -99,7 +102,7 @@ public extension CryptoService {
     func encrypt(
         dataString: String,
         recipientPublicKeyString: String,
-        currentUserID: String,
+        currentUserID: String
     ) throws -> String {
         let salt = Crypto.generateSalt()
 
@@ -111,8 +114,7 @@ public extension CryptoService {
                 salt: salt
             ),
             let data = Crypto.humanFriendlyPlainMessageToDataPlainMessage(dataString),
-            let encryptedData = Crypto.encrypt(data: data, using: symmetricKey)
-        else {
+            let encryptedData = Crypto.encrypt(data: data, using: symmetricKey) else {
             throw CryptoError.encryptionFailed
         }
 
@@ -128,7 +130,7 @@ public extension CryptoService {
 
     func decrypt(
         payloadString: String,
-        currentUserID: String,
+        currentUserID: String
     ) throws -> String {
         guard let payloadData = Data(base64Encoded: payloadString) else {
             throw CryptoError.decryptionFailed
@@ -154,8 +156,7 @@ public extension CryptoService {
             let decrypted = Crypto.decrypt(
                 encryptedData: encryptedData,
                 using: symmetricKey
-            )
-        else {
+            ) else {
             throw CryptoError.decryptionFailed
         }
 

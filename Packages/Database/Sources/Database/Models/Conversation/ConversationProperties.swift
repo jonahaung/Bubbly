@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  ConversationProperties.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
+import XUI
 import Core
 import Foundation
-import XUI
 
 public struct ConversationProperties: Codable, Sendable, Hashable, Equatable, UIdentifiable {
     public let uid: String

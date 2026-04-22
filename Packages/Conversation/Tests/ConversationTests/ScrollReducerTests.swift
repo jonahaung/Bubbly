@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  ScrollReducerTests.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-@testable import ConversationTestingSupport
 import SwiftUI
 import Testing
+@testable import ConversationTestingSupport
 
 struct ScrollReducerTests {
     private let reducer: ScrollReducer = .init()
@@ -11,28 +14,28 @@ struct ScrollReducerTests {
 
     private func makeState(
         phase: ConversationTestingSupport.ScrollPhase = .interacting,
-        updateState: ScrollCoordinator.ScrollViewUpdate = .didEndUpdates,
+        updateState: ScrollCoordinator.ScrollViewUpdate = .didEndUpdates
     ) -> ScrollCoordinator.State {
         .init(
             updateState: updateState,
             geometry: geo(offsetY: 200),
             phase: phase,
             isFirstResponder: false,
-            scrolledPosition: .atBottom,
+            scrolledPosition: .atBottom
         )
     }
 
     private func geo(
         offsetY: CGFloat,
         contentHeight: CGFloat = 1000,
-        boundsHeight: CGFloat = 500,
+        boundsHeight: CGFloat = 500
     ) -> VScrollGeometry {
         .init(
             contentHeight: contentHeight,
             boundsHeight: boundsHeight,
             offsetY: offsetY,
             topInset: 50,
-            bottomInset: 50,
+            bottomInset: 50
         )
     }
 
@@ -48,7 +51,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(g, g),
             canLoadOlder: true,
             canLoadNewer: true,
-            shouldAdjustWindow: false,
+            shouldAdjustWindow: false
         )
 
         #expect(effect == .noAction)
@@ -65,7 +68,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(old, new),
             canLoadOlder: true,
             canLoadNewer: true,
-            shouldAdjustWindow: false,
+            shouldAdjustWindow: false
         )
 
         #expect(effect == .noAction)
@@ -84,7 +87,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(old, new),
             canLoadOlder: true,
             canLoadNewer: false,
-            shouldAdjustWindow: false,
+            shouldAdjustWindow: false
         )
 
         #expect(effect == .begingUpdate(ScrollCoordinator.DataUpdate.insert(edge: .top)))
@@ -101,7 +104,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(old, new),
             canLoadOlder: false,
             canLoadNewer: false,
-            shouldAdjustWindow: true,
+            shouldAdjustWindow: true
         )
 
         #expect(effect == .begingUpdate(ScrollCoordinator.DataUpdate.remove(edge: .bottom)))
@@ -120,7 +123,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(old, new),
             canLoadOlder: false,
             canLoadNewer: true,
-            shouldAdjustWindow: false,
+            shouldAdjustWindow: false
         )
 
         #expect(effect == .begingUpdate(ScrollCoordinator.DataUpdate.insert(edge: .bottom)))
@@ -137,7 +140,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(old, new),
             canLoadOlder: false,
             canLoadNewer: true,
-            shouldAdjustWindow: false,
+            shouldAdjustWindow: false
         )
 
         #expect(effect == .noAction)
@@ -148,7 +151,7 @@ struct ScrollReducerTests {
     @Test
     func endUpdate_insertTop_withScrollAdjustment() {
         let state = makeState(
-            updateState: ScrollCoordinator.ScrollViewUpdate.insertingItems(.top),
+            updateState: ScrollCoordinator.ScrollViewUpdate.insertingItems(.top)
         )
         let old = geo(offsetY: 100, contentHeight: 1000)
         let new = geo(offsetY: 120, contentHeight: 1100)
@@ -158,7 +161,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(old, new),
             canLoadOlder: false,
             canLoadNewer: false,
-            shouldAdjustWindow: false,
+            shouldAdjustWindow: false
         )
 
         switch effect {
@@ -172,7 +175,7 @@ struct ScrollReducerTests {
     @Test
     func endUpdate_removeBottom_withoutScrollItem() {
         let state = makeState(
-            updateState: ScrollCoordinator.ScrollViewUpdate.removingItems(.bottom),
+            updateState: ScrollCoordinator.ScrollViewUpdate.removingItems(.bottom)
         )
         let old = geo(offsetY: 100, contentHeight: 1000)
         let new = geo(offsetY: 100, contentHeight: 900)
@@ -182,7 +185,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(old, new),
             canLoadOlder: false,
             canLoadNewer: false,
-            shouldAdjustWindow: false,
+            shouldAdjustWindow: false
         )
 
         switch effect {
@@ -196,7 +199,7 @@ struct ScrollReducerTests {
     @Test
     func endUpdate_appendItem_returnsAnimatedScroll() {
         let state = makeState(
-            updateState: ScrollCoordinator.ScrollViewUpdate.appendingItem("1"),
+            updateState: ScrollCoordinator.ScrollViewUpdate.appendingItem("1")
         )
         let old = geo(offsetY: 100, contentHeight: 1000)
         let new = geo(offsetY: 120, contentHeight: 1100)
@@ -206,7 +209,7 @@ struct ScrollReducerTests {
             intent: .onScrollGeometryChange(old, new),
             canLoadOlder: false,
             canLoadNewer: false,
-            shouldAdjustWindow: false,
+            shouldAdjustWindow: false
         )
 
         switch effect {

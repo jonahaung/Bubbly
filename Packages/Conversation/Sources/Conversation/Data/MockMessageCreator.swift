@@ -1,11 +1,14 @@
-// © 2026 Aung Ko Min
+//  MockMessageCreator.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Database
-import Foundation
-import Services
-import UIKit
 import XUI
+import Core
+import UIKit
+import Database
+import Services
+import Foundation
 
 public actor MockMessageCreator {
     public enum Direction: Sendable, Hashable {
@@ -28,7 +31,7 @@ public actor MockMessageCreator {
             photoCount: Int = 8,
             interval: TimeInterval = 60 * 12,
             newestDate: Date = .now,
-            direction: Direction = .mixed,
+            direction: Direction = .mixed
         ) {
             self.textCount = textCount
             self.attachmentCount = attachmentCount
@@ -52,7 +55,7 @@ public actor MockMessageCreator {
     @discardableResult
     public func createMessages(
         in conversation: Conversation,
-        batch: Batch = .init(),
+        batch: Batch = .init()
     ) async throws -> [Message] {
         let currentUserID = try CurrentUserID.get()
         guard let store = await Store.shared.msgStore else {
@@ -61,7 +64,7 @@ public actor MockMessageCreator {
 
         _ = try await ConversationPropertiesRepo.getOrCreate(
             for: conversation.uid,
-            refetch: false,
+            refetch: false
         )
 
         let kinds = messageKinds(for: batch)
@@ -70,10 +73,10 @@ public actor MockMessageCreator {
         }
 
         let oldestDate = batch.newestDate.addingTimeInterval(
-            -Double(max(0, kinds.count - 1)) * batch.interval,
+            -Double(max(0, kinds.count - 1)) * batch.interval
         )
 
-        var messages: [Message] = []
+        var messages = [Message]()
         messages.reserveCapacity(kinds.count)
 
         for (index, kind) in kinds.enumerated() {
@@ -81,7 +84,7 @@ public actor MockMessageCreator {
                 for: conversation,
                 currentUserID: currentUserID,
                 direction: batch.direction,
-                index: index,
+                index: index
             )
             let date = oldestDate.addingTimeInterval(Double(index) * batch.interval)
             let message = try await makeMessage(
@@ -90,7 +93,7 @@ public actor MockMessageCreator {
                 conversationID: conversation.uid,
                 date: date,
                 index: index,
-                currentUserID: currentUserID,
+                currentUserID: currentUserID
             )
             try await store.insert(message)
             await Socket.shared.notifyMessage(.newMsg(rMsg: .init(message)))
@@ -106,7 +109,7 @@ public actor MockMessageCreator {
         in conversation: Conversation,
         newestDate: Date = .now,
         interval: TimeInterval = 60 * 5,
-        direction: Direction = .mixed,
+        direction: Direction = .mixed
     ) async throws -> [Message] {
         try await createMessages(
             in: conversation,
@@ -116,8 +119,8 @@ public actor MockMessageCreator {
                 photoCount: 0,
                 interval: interval,
                 newestDate: newestDate,
-                direction: direction,
-            ),
+                direction: direction
+            )
         )
     }
 
@@ -127,7 +130,7 @@ public actor MockMessageCreator {
         in conversation: Conversation,
         newestDate: Date = .now,
         interval: TimeInterval = 60 * 5,
-        direction: Direction = .mixed,
+        direction: Direction = .mixed
     ) async throws -> [Message] {
         try await createMessages(
             in: conversation,
@@ -137,8 +140,8 @@ public actor MockMessageCreator {
                 photoCount: 0,
                 interval: interval,
                 newestDate: newestDate,
-                direction: direction,
-            ),
+                direction: direction
+            )
         )
     }
 
@@ -148,7 +151,7 @@ public actor MockMessageCreator {
         in conversation: Conversation,
         newestDate: Date = .now,
         interval: TimeInterval = 60 * 5,
-        direction: Direction = .mixed,
+        direction: Direction = .mixed
     ) async throws -> [Message] {
         try await createMessages(
             in: conversation,
@@ -158,8 +161,8 @@ public actor MockMessageCreator {
                 photoCount: count,
                 interval: interval,
                 newestDate: newestDate,
-                direction: direction,
-            ),
+                direction: direction
+            )
         )
     }
 }
@@ -180,7 +183,7 @@ private extension MockMessageCreator {
         var remainingText = max(0, batch.textCount)
         var remainingAttachments = max(0, batch.attachmentCount)
         var remainingPhotos = max(0, batch.photoCount)
-        var result: [MessageKind] = []
+        var result = [MessageKind]()
         result.reserveCapacity(total)
 
         while result.count < total {
@@ -205,7 +208,7 @@ private extension MockMessageCreator {
         for conversation: Conversation,
         currentUserID: String,
         direction: Direction,
-        index: Int,
+        index: Int
     ) -> String {
         let incomingSenders = conversation.members.filter { $0 != currentUserID }
 
@@ -234,7 +237,7 @@ private extension MockMessageCreator {
         conversationID: String,
         date: Date,
         index: Int,
-        currentUserID: String,
+        currentUserID: String
     ) async throws -> Message {
         let attachments: [Attachment]
         let text: String?
@@ -244,22 +247,22 @@ private extension MockMessageCreator {
             attachments = []
             text = await Lorem.random()
         case .attachment:
-            attachments = [try makeAttachment(index: index)]
+            attachments = try [makeAttachment(index: index)]
             text = index.isMultiple(of: 2) ? nil : attachmentCaptions[index % attachmentCaptions.count]
         case .photo:
-            attachments = [try await makePhotoAttachment(index: index)]
+            attachments = try await [makePhotoAttachment(index: index)]
             text = index.isMultiple(of: 2) ? nil : photoCaptions[index % photoCaptions.count]
         }
 
-        return Message(
-            uid: await IDGenerator.shared.make(),
+        return await Message(
+            uid: IDGenerator.shared.make(),
             senderID: senderID,
             conID: conversationID,
             text: text,
             date: date,
             deliveryStatus: senderID == currentUserID ? .delivered : .read,
             attachments: attachments,
-            reactions: [],
+            reactions: []
         )
     }
 
@@ -270,21 +273,21 @@ private extension MockMessageCreator {
             attachMentTypeRaw: AttachMentType.link.rawValue,
             aspectRatio: 1.6,
             title: attachmentTitles.randomElement() ?? attachmentTitles[index % attachmentTitles.count],
-            subTitle: attachmentSubtitles.randomElement() ?? attachmentSubtitles[index % attachmentSubtitles.count],
+            subTitle: attachmentSubtitles.randomElement() ?? attachmentSubtitles[index % attachmentSubtitles.count]
         )
         let data = try mediaManager.createData(from: previewImage(index: index, kind: .attachment))
         try attachment.file()?.write(data)
         return attachment
     }
 
-    func makePhotoAttachment(index: Int) async throws -> Attachment {
+    func makePhotoAttachment(index: Int) async -> Attachment {
         let url = DemoImages.demoPhotosURLs.randomElement() ?? DemoImages.demoPhotosURLs[index % DemoImages.demoPhotosURLs.count]
-        return Attachment(
-            uid: await IDGenerator.shared.make(),
+        return await Attachment(
+            uid: IDGenerator.shared.make(),
             url: url.absoluteString,
             thumbnailUrl: url.absoluteString,
             attachMentTypeRaw: AttachMentType.image.rawValue,
-            aspectRatio: 4.0 / 3.0,
+            aspectRatio: 4.0 / 3.0
         )
     }
 
@@ -292,14 +295,13 @@ private extension MockMessageCreator {
         let size = CGSize(width: 1200, height: 900)
         let renderer = UIGraphicsImageRenderer(size: size)
         let palette = palettes[index % palettes.count]
-        let symbolName: String
-        switch kind {
+        let symbolName = switch kind {
         case .text:
-            symbolName = "text.bubble.fill"
+            "text.bubble.fill"
         case .attachment:
-            symbolName = "paperclip.circle.fill"
+            "paperclip.circle.fill"
         case .photo:
-            symbolName = "photo.fill"
+            "photo.fill"
         }
 
         return renderer.image { context in
@@ -307,14 +309,14 @@ private extension MockMessageCreator {
             let gradient = CGGradient(
                 colorsSpace: CGColorSpaceCreateDeviceRGB(),
                 colors: [palette.0.cgColor, palette.1.cgColor] as CFArray,
-                locations: [0.0, 1.0],
+                locations: [0.0, 1.0]
             )
             if let gradient {
                 context.cgContext.drawLinearGradient(
                     gradient,
                     start: CGPoint(x: 0, y: 0),
                     end: CGPoint(x: size.width, y: size.height),
-                    options: [],
+                    options: []
                 )
             } else {
                 palette.0.setFill()
@@ -342,15 +344,11 @@ private extension MockMessageCreator {
 
             "https://developer.apple.com/documentation/swiftui/text",
 
-            
-
             // GitHub (very common in dev chats)
 
             "https://github.com/apple/swift",
 
             "https://github.com/pointfreeco/swift-composable-architecture",
-
-            
 
             // Articles / blogs (rich previews)
 
@@ -358,19 +356,13 @@ private extension MockMessageCreator {
 
             "https://www.avanderlee.com/swiftui/swiftui-performance-tips/",
 
-            
-
             // StackOverflow (very realistic)
 
             "https://stackoverflow.com/questions/56517610/swiftui-how-to-update-view",
 
-            
-
             // YouTube (video preview)
 
             "https://www.youtube.com/watch?v=comQ1-x2a1Q",
-
-            
 
             // Product / landing (nice OG images)
 
@@ -378,17 +370,13 @@ private extension MockMessageCreator {
 
             "https://linear.app/",
 
-            
-
             // News / tech (good metadata)
 
             "https://techcrunch.com/2024/01/01/apple-ios-update/",
 
-            
-
             // Image-based preview
 
-            "https://unsplash.com/photos/a-computer-screen-with-code-on-it",
+            "https://unsplash.com/photos/a-computer-screen-with-code-on-it"
 
         ]
     }
@@ -398,7 +386,7 @@ private extension MockMessageCreator {
             "Release Notes",
             "Design Spec",
             "API Contract",
-            "Launch Checklist",
+            "Launch Checklist"
         ]
     }
 
@@ -407,7 +395,7 @@ private extension MockMessageCreator {
             "Updated reference attached for review.",
             "Latest handoff bundle for the conversation.",
             "Shared context for the next iteration.",
-            "Attached details for the current thread.",
+            "Attached details for the current thread."
         ]
     }
 
@@ -416,7 +404,7 @@ private extension MockMessageCreator {
             "Sharing the latest attachment here.",
             "This is the file we referenced earlier.",
             "Attaching the updated material.",
-            "Dropping the supporting doc.",
+            "Dropping the supporting doc."
         ]
     }
 
@@ -425,7 +413,7 @@ private extension MockMessageCreator {
             "Here is the latest photo.",
             "Captured this just now.",
             "Sharing the visual update.",
-            "This should match the current state.",
+            "This should match the current state."
         ]
     }
 
@@ -435,7 +423,7 @@ private extension MockMessageCreator {
             (.systemPink, .systemOrange),
             (.systemIndigo, .systemPurple),
             (.systemGreen, .systemMint),
-            (.systemRed, .systemBrown),
+            (.systemRed, .systemBrown)
         ]
     }
 }

@@ -1,6 +1,11 @@
-import Database
-import SwiftUI
+//  AttachmentGalleryView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
+import SwiftUI
+import Database
 
 public struct AttachmentGalleryView: View {
     private let attachments: [Attachment]
@@ -58,15 +63,15 @@ public struct AttachmentGalleryView: View {
     @ViewBuilder private var shareButton: some View {
         let currentItem = attachments.first(where: { $0.id == selection })
         if let item = currentItem,
-            item.attachmentType == .image,
-            let url = item.galleryURL,
-            let data = try? Data(contentsOf: url),
-            let uIImage = UIImage(data: data)
+           item.attachmentType == .image,
+           let url = item.galleryURL,
+           let data = try? Data(contentsOf: url),
+           let uIImage = UIImage(data: data)
         {
             let image = Image(uiImage: uIImage)
             ShareLink(
                 item: image,
-                preview: SharePreview(item.galleryTitle ?? "", image: image),
+                preview: SharePreview(item.galleryTitle ?? "", image: image)
             )
             .labelStyle(.iconOnly)
         }

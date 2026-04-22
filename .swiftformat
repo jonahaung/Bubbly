@@ -1,86 +1,127 @@
-{
-  "version": 1,
-  "maximumBlankLines": 0,
-  "lineLength": 100,
-  "tabWidth": 8,
-  "indentation": {
-    "spaces": 4
-  },
-  "respectsExistingLineBreaks": false,
-  "lineBreakBeforeControlFlowKeywords": false,
-  "lineBreakBeforeEachArgument": false,
-  "lineBreakBeforeEachGenericRequirement": false,
-  "prioritizeKeepingFunctionOutputTogether": true,
-  "indentConditionalCompilationBlocks": true,
-  "lineBreakAroundMultilineExpressionChainComponents": false,
-  "fileScopedDeclarationPrivacy": {
-    "accessLevel": "private"
-  },
-  "indentSwitchCaseLabels": false,
-  "rules": {
-    "AllPublicDeclarationsHaveDocumentation": false,
-    "AlwaysUseLowerCamelCase": true,
-    "AmbiguousTrailingClosureOverload": true,
-    "BeginDocumentationCommentWithOneLineSummary": false,
-    "DoNotUseSemicolons": true,
-    "DontRepeatTypeInStaticProperties": true,
-    "FileScopedDeclarationPrivacy": true,
-    "FullyIndirectEnum": true,
-    "GroupNumericLiterals": true,
-    "IdentifiersMustBeASCII": true,
-    "NeverForceUnwrap": false,
-    "NeverUseForceTry": false,
-    "NeverUseImplicitlyUnwrappedOptionals": false,
-    "NoAccessLevelOnExtensionDeclaration": true,
-    "NoBlockComments": true,
-    "NoCasesWithOnlyFallthrough": true,
-    "NoEmptyTrailingClosureParentheses": true,
-    "NoLabelsInCasePatterns": true,
-    "NoLeadingUnderscores": false,
-    "NoParensAroundConditions": true,
-    "NoVoidReturnOnFunctionSignature": true,
-    "OneCasePerLine": true,
-    "OneVariableDeclarationPerLine": true,
-    "OnlyOneTrailingClosureArgument": true,
-    "OrderedImports": true,
-    "ReturnVoidInsteadOfEmptyTuple": true,
-    "UseLetInEveryBoundCaseVariable": true,
-    "UseShorthandTypeNames": true,
-    "UseSingleLinePropertyGetter": true,
-    "UseSynthesizedInitializer": true,
-    "UseTripleSlashForDocumentationComments": true,
-    "ValidateDocumentationComments": false
-  },
-  "AllPublicDeclarationsHaveDocumentation": false,
-  "AlwaysUseLowerCamelCase": true,
-  "AmbiguousTrailingClosureOverload": true,
-  "BeginDocumentationCommentWithOneLineSummary": false,
-  "DoNotUseSemicolons": true,
-  "DontRepeatTypeInStaticProperties": true,
-  "FileScopedDeclarationPrivacy": true,
-  "FullyIndirectEnum": true,
-  "GroupNumericLiterals": true,
-  "IdentifiersMustBeASCII": true,
-  "NeverForceUnwrap": true,
-  "NeverUseForceTry": true,
-  "NeverUseImplicitlyUnwrappedOptionals": true,
-  "NoAccessLevelOnExtensionDeclaration": true,
-  "NoBlockComments": true,
-  "NoCasesWithOnlyFallthrough": true,
-  "NoEmptyTrailingClosureParentheses": true,
-  "NoLabelsInCasePatterns": true,
-  "NoLeadingUnderscores": false,
-  "NoParensAroundConditions": true,
-  "NoVoidReturnOnFunctionSignature": true,
-  "OneCasePerLine": true,
-  "OneVariableDeclarationPerLine": true,
-  "OnlyOneTrailingClosureArgument": true,
-  "OrderedImports": true,
-  "ReturnVoidInsteadOfEmptyTuple": true,
-  "UseLetInEveryBoundCaseVariable": true,
-  "UseShorthandTypeNames": true,
-  "UseSingleLinePropertyGetter": true,
-  "UseSynthesizedInitializer": true,
-  "UseTripleSlashForDocumentationComments": true,
-  "ValidateDocumentationComments": false
-}
+--acronyms 
+--allman false
+--allow-partial-wrapping true
+--anonymous-for-each ignore
+--asset-literals visual-width
+--async-capturing 
+--before-marks 
+--binary-grouping 4,8
+--blank-line-after-switch-case multiline-only
+--call-site-paren default
+--category-mark "MARK: %c"
+--class-threshold 0
+--closing-paren balanced
+--closure-void remove
+--complex-attributes preserve
+--computed-var-attributes preserve
+--conditional-assignment always
+--conflict-markers reject
+--date-format "RFC 1123"
+--decimal-grouping 3,6
+--default-test-suite-attributes 
+--doc-comments preserve
+--else-position same-line
+--empty-braces no-space
+--enum-namespaces structs-only
+--enum-threshold 0
+--equatable-macro none
+--exponent-case lowercase
+--exponent-grouping disabled
+--extension-acl on-extension
+--extension-mark "MARK: - %t + %c"
+--extension-threshold 0
+--file-macro "#file"
+--fraction-grouping disabled
+--fragment false
+--func-attributes preserve
+--generic-types 
+--group-blank-lines true
+--grouped-extension "MARK: %c"
+--guard-else same-line
+--header "//  {file}\n//\n//  Copyright © {created.year} {author.name}.\n//"
+--hex-grouping 4,8
+--hex-literal-case uppercase
+--ifdef indent
+--import-grouping length
+--indent 4
+--indent-case false
+--indent-strings false
+--inferred-types always
+--init-coder-nil true
+--language-mode 0
+--lifecycle 
+--line-after-marks false
+--line-between-guards false
+--linebreaks lf
+--mark-categories true
+--mark-class-threshold 0
+--mark-enum-threshold 0
+--mark-extension-threshold 0
+--mark-extensions never
+--mark-struct-threshold 0
+--mark-types never
+--markdown-files ignore
+--max-width 200
+--modifier-order 
+--never-trailing 
+--nil-init remove
+--no-space-operators 
+--no-wrap-operators 
+--non-complex-attributes 
+--octal-grouping 4,8
+--operator-func spaced
+--organization-mode visibility
+--organize-types actor,class,enum,struct
+--pattern-let hoist
+--preserve-acronyms 
+--preserve-decls 
+--preserved-property-types Package
+--property-types infer-locals-only
+--ranges spaced
+--redundant-async always
+--redundant-throws always
+--self remove
+--self-required 
+--semicolons never
+--short-optionals except-properties
+--single-line-for-each ignore
+--smart-tabs enabled
+--some-any true
+--sort-swiftui-properties alphabetize
+--sorted-patterns 
+--stored-var-attributes preserve
+--strip-unused-args always
+--struct-threshold 0
+--swift-version 6.4
+--tab-width 4
+--throw-capturing 
+--timezone UTC
+--trailing-closures 
+--trailing-commas never
+--trim-whitespace always
+--type-attributes preserve
+--type-blank-lines remove
+--type-body-marks preserve
+--type-delimiter space-after
+--type-mark "MARK: - %t"
+--type-marks 
+--type-order 
+--url-macro none
+--visibility-marks 
+--visibility-order 
+--void-type Void
+--wrap-arguments preserve
+--wrap-collections preserve
+--wrap-conditions preserve
+--wrap-effects preserve
+--wrap-enum-cases always
+--wrap-parameters default
+--wrap-return-type preserve
+--wrap-string-interpolation default
+--wrap-ternary default
+--wrap-type-aliases preserve
+--xcode-indentation enabled
+--xctest-symbols 
+--yoda-swap literals-only
+--disable blankLinesAroundMark,blankLinesAtEndOfScope,blankLinesAtStartOfScope,blankLinesBetweenChainedFunctions,braces,docComments,docCommentsBeforeModifiers,enumNamespaces,redundantStaticSelf,spaceAroundParens,spaceInsideBraces,spaceInsideBrackets,spaceInsideComments,spaceInsideGenerics,spaceInsideParens,swiftTestingTestCaseNames,todos,unusedArguments,wrapFunctionBodies,wrapLoopBodies,wrapMultilineStatementBraces,wrapPropertyBodies,yodaConditions
+--enable acronyms,isEmpty,noExplicitOwnership,noGuardInTests,preferFinalClasses,preferSwiftTesting,privateStateVariables,propertyTypes,singlePropertyPerLine,sortSwitchCases,unusedPrivateDeclarations,wrapSwitchCases

@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  AppIconShape.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import SwiftUI
 
@@ -21,7 +24,7 @@ struct AppIconShape: Shape {
         p.addRoundedRect(
             in: CGRect(x: 0, y: 0, width: w, height: h - tailHeight),
             cornerSize: CGSize(width: radius, height: radius),
-            style: .continuous,
+            style: .continuous
         )
 
         // Sharper tail (pointed)

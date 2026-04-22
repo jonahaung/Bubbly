@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  PContact.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import SwiftData
+import Foundation
 
 // MARK: - PContact
 
@@ -21,7 +24,7 @@ public final class PContact: ContactRepresentable, SendableTransformable {
         mobile: String,
         photoURL: String,
         pushToken: String,
-        publicKeyString: String,
+        publicKeyString: String
     ) {
         self.uid = uid
         self.name = name
@@ -58,7 +61,7 @@ public extension PContact {
             mobile: item.mobile,
             photoURL: item.photoURL,
             pushToken: item.pushToken,
-            publicKeyString: item.publicKeyString,
+            publicKeyString: item.publicKeyString
         )
     }
 
@@ -69,7 +72,7 @@ public extension PContact {
             mobile: mobile,
             photoURL: photoURL,
             pushToken: pushToken,
-            publicKeyString: publicKeyString,
+            publicKeyString: publicKeyString
         )
     }
 }

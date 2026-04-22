@@ -1,5 +1,6 @@
+//  View+.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -58,24 +59,24 @@ public extension View {
         String(describing: self)
     }
 
-	@inlinable
-	static var defaultTitle: String {
-		var raw = String(describing: Self.self)
-			.split(separator: ".")
-			.last
-			.map(String.init) ?? ""
+    @inlinable
+    static var defaultTitle: String {
+        var raw = String(describing: Self.self)
+            .split(separator: ".")
+            .last
+            .map(String.init) ?? ""
 
-		if raw.hasSuffix("View") {
-			raw.removeLast(4)
-		}
+        if raw.hasSuffix("View") {
+            raw.removeLast(4)
+        }
 
-		return raw.reduce(into: "") { result, char in
-			if result.last?.isLowercase == true && char.isUppercase {
-				result.append(" ")
-			}
-			result.append(char)
-		}
-	}
+        return raw.reduce(into: "") { result, char in
+            if result.last?.isLowercase == true, char.isUppercase {
+                result.append(" ")
+            }
+            result.append(char)
+        }
+    }
 }
 
 public extension AnyView {

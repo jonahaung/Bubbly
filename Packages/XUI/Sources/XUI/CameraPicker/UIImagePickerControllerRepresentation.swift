@@ -1,34 +1,31 @@
-//
 //  UIImagePickerControllerRepresentation.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 5/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import SwiftUI
 import UIKit
-import UniformTypeIdentifiers
+import SwiftUI
 import AVFoundation
+import UniformTypeIdentifiers
 
 public enum CameraPickerMediaType: Hashable {
-	case image
-	case movie(
-		quality: UIImagePickerController.QualityType = .typeMedium,
-		maximumDuration: TimeInterval = 600
-	)
+    case image
+    case movie(
+        quality: UIImagePickerController.QualityType = .typeMedium,
+        maximumDuration: TimeInterval = 600
+    )
 
-	public var utTypeIdentifier: String {
-		switch self {
-		case .image: return UTType.image.identifier
-		case .movie: return UTType.movie.identifier
-		}
-	}
+    public var utTypeIdentifier: String {
+        switch self {
+        case .image: UTType.image.identifier
+        case .movie: UTType.movie.identifier
+        }
+    }
 
-	public func hash(into hasher: inout Hasher) {
-		hasher.combine(utTypeIdentifier)
-	}
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(utTypeIdentifier)
+    }
 }
-
 
 struct UIImagePickerControllerRepresentation: UIViewControllerRepresentable {
     @Binding var selection: [any CameraPickerItem]
@@ -56,7 +53,7 @@ struct UIImagePickerControllerRepresentation: UIViewControllerRepresentable {
             imagePickerController.mediaTypes = Array(intersection)
         }
 
-        for case .movie(let quality, let maximumDuration) in preferredMediaTypes {
+        for case let .movie(quality, maximumDuration) in preferredMediaTypes {
             imagePickerController.videoQuality = quality
             imagePickerController.videoMaximumDuration = maximumDuration
         }
@@ -64,7 +61,7 @@ struct UIImagePickerControllerRepresentation: UIViewControllerRepresentable {
         imagePickerController.allowsEditing = allowsEditing
         imagePickerController.cameraDevice = cameraDevice
 
-        if let availableCaptureModes =  UIImagePickerController.availableCaptureModes(for: cameraDevice) {
+        if let availableCaptureModes = UIImagePickerController.availableCaptureModes(for: cameraDevice) {
             let availableCaptureModesSet = Set(availableCaptureModes)
             let preferredCaptureModesSet = Set([preferredCaptureMode.rawValue as NSNumber])
             let intersection = availableCaptureModesSet.intersection(preferredCaptureModesSet)
@@ -90,9 +87,7 @@ struct UIImagePickerControllerRepresentation: UIViewControllerRepresentable {
         return imagePickerController
     }
 
-    func updateUIViewController(_ imagePickerController: UIImagePickerController, context: Context) {
-
-    }
+    func updateUIViewController(_: UIImagePickerController, context _: Context) {}
 
     func makeCoordinator() -> Coordinator {
         Coordinator(parent: self)
@@ -100,7 +95,7 @@ struct UIImagePickerControllerRepresentation: UIViewControllerRepresentable {
 }
 
 extension UIImagePickerControllerRepresentation {
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    final class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
         let parent: UIImagePickerControllerRepresentation
 
         init(parent: UIImagePickerControllerRepresentation) {
@@ -109,12 +104,11 @@ extension UIImagePickerControllerRepresentation {
 
         func imagePickerController(
             _ picker: UIImagePickerController,
-            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]
+            didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]
         ) {
             guard
                 let mediaTypeString = info[.mediaType] as? String,
-                let mediaType = UTType(mediaTypeString)
-            else {
+                let mediaType = UTType(mediaTypeString) else {
                 return
             }
 
@@ -143,7 +137,6 @@ extension UIImagePickerControllerRepresentation {
                     parent.selection = [movieCameraPickerItem]
                 }
             }
-
 
             picker.dismiss(animated: true)
         }

@@ -1,3 +1,8 @@
+//  DimensionLabel.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 struct DimensionLabel<Content: View & SendableMetatype>: View {
@@ -22,16 +27,20 @@ struct DimensionLabel<Content: View & SendableMetatype>: View {
             .background(.foreground, in: LabelBackground(edge: edge))
             .fixedSize()
             .alignmentGuide(HorizontalAlignment.dimensionLabel) { d in
-				
+
                 switch edge {
-                case .top, .bottom, nil: d[HorizontalAlignment.center]
+                case .bottom,
+                     nil,
+                     .top: d[HorizontalAlignment.center]
                 case .leading: d[.leading] - 8
                 case .trailing: d[.trailing] + 8
                 }
             }
             .alignmentGuide(VerticalAlignment.dimensionLabel) { d in
                 switch edge {
-                case .leading, .trailing, nil: d[VerticalAlignment.center]
+                case .leading,
+                     nil,
+                     .trailing: d[VerticalAlignment.center]
                 case .top: d[.top] - 8
                 case .bottom: d[.bottom] + 8
                 }
@@ -46,12 +55,12 @@ struct DimensionLabel<Content: View & SendableMetatype>: View {
     }
 
     init(edge: Edge? = nil, value: CGFloat) where Content == Text {
-        self.content = Text(value, format: .number.precision(.fractionLength(2 ... 2)))
+        content = Text(value, format: .number.precision(.fractionLength(2 ... 2)))
         self.edge = edge
     }
 
     init(edge: Edge? = nil, value: CGSize) where Content == Text {
-        self.content = Text("\(value.width, format: .number.precision(.fractionLength(2 ... 2)))×\(value.height, format: .number.precision(.fractionLength(2 ... 2)))")
+        content = Text("\(value.width, format: .number.precision(.fractionLength(2 ... 2)))×\(value.height, format: .number.precision(.fractionLength(2 ... 2)))")
         self.edge = edge
     }
 }
@@ -63,7 +72,7 @@ extension VerticalAlignment {
         }
     }
 
-    static let dimensionLabel = VerticalAlignment(DimensionLabel.self)
+    static let dimensionLabel: VerticalAlignment = .init(DimensionLabel.self)
 }
 
 extension HorizontalAlignment {
@@ -73,7 +82,7 @@ extension HorizontalAlignment {
         }
     }
 
-    static let dimensionLabel = HorizontalAlignment(DimensionLabel.self)
+    static let dimensionLabel: HorizontalAlignment = .init(DimensionLabel.self)
 }
 
 extension Alignment {
@@ -100,26 +109,26 @@ private struct LabelBackground: Shape {
             break
         case .leading:
             triangle.addLines([
-                rect[.leading].offset(y:  w),
+                rect[.leading].offset(y: w),
                 rect[.leading].offset(x: -4),
                 rect[.leading].offset(y: -w)
             ])
         case .trailing:
             triangle.addLines([
-                rect[.trailing].offset(y:  w),
-                rect[.trailing].offset(x:  4),
+                rect[.trailing].offset(y: w),
+                rect[.trailing].offset(x: 4),
                 rect[.trailing].offset(y: -w)
             ])
         case .top:
             triangle.addLines([
-                rect[.top].offset(x:  w),
+                rect[.top].offset(x: w),
                 rect[.top].offset(y: -4),
                 rect[.top].offset(x: -w)
             ])
         case .bottom:
             triangle.addLines([
-                rect[.bottom].offset(x:  w),
-                rect[.bottom].offset(y:  4),
+                rect[.bottom].offset(x: w),
+                rect[.bottom].offset(y: 4),
                 rect[.bottom].offset(x: -w)
             ])
         }
@@ -141,10 +150,10 @@ struct SubpixelRenderer: TextRenderer {
 
 #Preview {
     VStack {
-        DimensionLabel(edge: .leading, value: 1234567890)
-        DimensionLabel(edge: .top, value: 1234567890)
-        DimensionLabel(edge: .trailing, value: 1234567890)
-        DimensionLabel(edge: .bottom, value: 1234567890)
+        DimensionLabel(edge: .leading, value: 1_234_567_890)
+        DimensionLabel(edge: .top, value: 1_234_567_890)
+        DimensionLabel(edge: .trailing, value: 1_234_567_890)
+        DimensionLabel(edge: .bottom, value: 1_234_567_890)
 
         DimensionLabel(value: CGSize(width: 100, height: 100))
     }

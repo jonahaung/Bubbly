@@ -1,5 +1,6 @@
+//  Regex.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -58,7 +59,7 @@ enum Regex {
         do {
             let rx = try NSRegularExpression(pattern: regex, options: [.caseInsensitive])
 
-            var matches: [NSTextCheckingResult] = []
+            var matches = [NSTextCheckingResult]()
 
             let limit = Regex.kLimit
 

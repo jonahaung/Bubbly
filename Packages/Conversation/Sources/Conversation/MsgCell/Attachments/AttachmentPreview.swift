@@ -1,11 +1,16 @@
-import Database
-import ImageLoader
-import QuickLook
-import Services
-import SwiftUI
-import VideoLoader
+//  AttachmentPreview.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
 import Core
+import SwiftUI
+import Database
+import Services
+import QuickLook
+import ImageLoader
+import VideoLoader
 
 struct AttachmentPreview: View {
     let onSelect: (_ item: Attachment) -> Void
@@ -19,7 +24,7 @@ struct AttachmentPreview: View {
     init(
         attachment: Attachment,
         onSelect: @escaping (_: Attachment) -> Void,
-        onCompleteUpload: ((_ newValue: Attachment) -> Void)? = nil,
+        onCompleteUpload: ((_ newValue: Attachment) -> Void)? = nil
     ) {
         _model = .init(wrappedValue: .init(attachment: attachment))
         self.onSelect = onSelect
@@ -59,7 +64,6 @@ struct AttachmentPreview: View {
 
     private var content: some View {
         ZStack {
-            
             if let data = model.attachmentData {
                 attachmentView(for: data)
             } else if let error = model.error {
@@ -103,7 +107,7 @@ struct AttachmentPreview: View {
                         .overlay {
                             ImageUploadingLayer(
                                 attachment: model.attachment, url: url,
-                                conversationID: conversation.uid,
+                                conversationID: conversation.uid
                             ) {
                                 onCompleteUpload?($0)
                             }

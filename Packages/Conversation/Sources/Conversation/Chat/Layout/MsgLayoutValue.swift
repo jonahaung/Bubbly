@@ -1,10 +1,13 @@
-// © 2026 Aung Ko Min
+//  MsgLayoutValue.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
     let uid: String
@@ -26,7 +29,8 @@ struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
     static func == (lhs: MsgLayoutValue, rhs: MsgLayoutValue) -> Bool {
         lhs.uid == rhs.uid && lhs.recipient == rhs.recipient && lhs.headerStatus == rhs.headerStatus
     }
-    static let empty = MsgLayoutValue(
+
+    static let empty: MsgLayoutValue = .init(
         uid: String(),
         recipient: .outgoing,
         attachmentsCount: 0,

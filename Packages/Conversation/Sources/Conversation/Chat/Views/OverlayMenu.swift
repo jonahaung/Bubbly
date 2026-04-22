@@ -1,24 +1,24 @@
-// © 2026 Aung Ko Min
+//  OverlayMenu.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
 import Core
+import UIKit
+import SwiftUI
 import Database
 import Services
 import SFSafeSymbols
-import SwiftUI
-import UIKit
-import XUI
 
 // MARK: - OverlayMenu
 
 struct OverlayMenu: View {
-    
 
     enum TransitState: Hashable {
         case appeared
         case didAppear
         case hidden
-
-        
 
         var isDidAppear: Bool {
             self == .didAppear
@@ -36,7 +36,7 @@ struct OverlayMenu: View {
             Rectangle()
                 .fill(
                     theme.backgroundColor
-                        .opacity(transitionState.isDidAppear ? 0.8 : 0),
+                        .opacity(transitionState.isDidAppear ? 0.8 : 0)
                 )
                 .gesture(
                     DragGesture(minimumDistance: 0)
@@ -57,7 +57,7 @@ struct OverlayMenu: View {
                             withTransaction(transaction) {
                                 transitionState = .hidden
                             }
-                        },
+                        }
                 )
 
             ReactionsBar { reaction in
@@ -66,7 +66,7 @@ struct OverlayMenu: View {
             }
             .position(
                 x: item.frame.midX,
-                y: item.frame.minY - (transitionState == .didAppear ? 15 : -15),
+                y: item.frame.minY - (transitionState == .didAppear ? 15 : -15)
             )
             MsgCellContent(state: viewModel.state)
                 .frame(size: item.frame.size)
@@ -91,14 +91,10 @@ struct OverlayMenu: View {
         }
     }
 
-    
-
     @Environment(MsgCellViewModel.self) private var viewModel
     @Environment(\.msgCellActions) private var msgCellActions
     @Environment(\.conversation) private var conversation
     @State private var transitionState: TransitState = .hidden
-    @Environment(ChatManager.self) private var manager
-
     private func dismiss() {
         withTransaction(\.disablesAnimations, true) {
             msgCellActions?(.onFocusMsgBubble(nil))
@@ -109,7 +105,6 @@ struct OverlayMenu: View {
 // MARK: - RoomFocesedOverlayBar
 
 struct RoomFocesedOverlayBar: View {
-    
 
     var body: some View {
         HStack(spacing: 0) {
@@ -118,7 +113,7 @@ struct RoomFocesedOverlayBar: View {
                     let msg = item.msg
                     try? await Socket.send(
                         .deleteMsg(rMsg: .init(msg)),
-                        conversation: conversation,
+                        conversation: conversation
                     )
                     await MainActor.run {
                         msgCellActions?(.onFocusMsgBubble(nil))
@@ -164,8 +159,6 @@ struct RoomFocesedOverlayBar: View {
             }
         }
     }
-
-    
 
     @Environment(\.conversation) private var conversation
     @Environment(\.msgCellActions) private var msgCellActions

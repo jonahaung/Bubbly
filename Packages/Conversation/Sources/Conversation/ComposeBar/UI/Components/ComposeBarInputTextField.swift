@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  ComposeBarInputTextField.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Services
-import SwiftUI
 import XUI
+import Core
+import SwiftUI
+import Services
 
 extension ComposeBar {
     struct ComposeBarInputTextField: View {
@@ -15,7 +18,7 @@ extension ComposeBar {
                 TextField(
                     text: composer.inputText
                         .bindableText,
-                    axis: .vertical,
+                    axis: .vertical
                 ) {
                     if let source = composer.state.source {
                         Text("\(Image(systemName: source.systemImageName)) \(source.localizedName)")
@@ -29,11 +32,11 @@ extension ComposeBar {
                 .padding(.init(top: 10, leading: 16, bottom: 10, trailing: 8))
                 .focused(
                     focusState.binding,
-                    equals: "textField",
+                    equals: "textField"
                 )
                 .background(
                     Color.appPrimary,
-                    in: RoundedRectangle(cornerRadius: UIFont.buttonFontSize),
+                    in: RoundedRectangle(cornerRadius: UIFont.buttonFontSize)
                 )
                 .font(.system(size: UIFont.buttonFontSize))
             }

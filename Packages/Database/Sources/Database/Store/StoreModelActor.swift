@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  StoreModelActor.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import SwiftData
+import Foundation
 
 public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID == String,
     T.SendableType.UID == String
@@ -17,7 +20,7 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
 
     public init(
         modelContainer: ModelContainer,
-        modelExecutor: ModelExecutor,
+        modelExecutor: ModelExecutor
     ) {
         self.modelContainer = modelContainer
         self.modelExecutor = modelExecutor
@@ -57,8 +60,8 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
             .init(
                 predicate: #Predicate {
                     $0.uid == uid
-                },
-            ),
+                }
+            )
         )
     }
 
@@ -70,7 +73,7 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
 
     public func updateAndSave<Result: Sendable>(
         uid: String,
-        _ update: sending (inout T) -> Result,
+        _ update: sending (inout T) -> Result
     ) throws
         -> Result?
     {
@@ -86,7 +89,7 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
     public func updateAndSaveDebounced<Result: Sendable>(
         uid: String,
         _ update: @escaping (inout T)
-            -> Result,
+            -> Result
     ) throws -> Result? {
         guard var model = try getModel(for: uid) else {
             return nil
@@ -149,7 +152,7 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
         var descriptor = FetchDescriptor<T>(
             predicate: #Predicate {
                 $0.uid == uid
-            },
+            }
         )
         descriptor.fetchLimit = 1
         return try context.fetch(descriptor).first

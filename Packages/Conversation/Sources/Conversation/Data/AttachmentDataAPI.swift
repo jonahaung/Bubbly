@@ -1,25 +1,25 @@
-// © 2026 Aung Ko Min
+//  AttachmentDataAPI.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Database
-import Foundation
-import Services
-import UIKit
 import XUI
+import UIKit
+import Database
+import Services
+import Foundation
 
 actor AttachmentDataAPI {
-    
 
     init(
         mediaManager: MediaManager = .shared,
         urlSession: URLSession = .shared,
-        swiftLinkPreview: SwiftLinkPreview = SwiftLinkPreview(),
+        swiftLinkPreview: SwiftLinkPreview = SwiftLinkPreview()
     ) {
         self.mediaManager = mediaManager
         self.urlSession = urlSession
         self.swiftLinkPreview = swiftLinkPreview
     }
-
-    
 
     enum AttachmentError: LocalizedError {
         case missingFileURL
@@ -27,8 +27,6 @@ actor AttachmentDataAPI {
         case invalidAttachmentState(AttachMentType)
         case imageDecodingFailed
         case badResponse(Int)
-
-        
 
         var errorDescription: String? {
             switch self {
@@ -73,8 +71,6 @@ actor AttachmentDataAPI {
         }
     }
 
-    
-
     private let mediaManager: MediaManager
     private let urlSession: URLSession
     private let swiftLinkPreview: SwiftLinkPreview
@@ -91,8 +87,7 @@ actor AttachmentDataAPI {
         guard
             attachment.fileExist(),
             let localURL = attachment.file()?.url,
-            let thumbnail = attachment.thumbnailImage() else
-        {
+            let thumbnail = attachment.thumbnailImage() else {
             return nil
         }
 
@@ -148,10 +143,10 @@ actor AttachmentDataAPI {
             image = try await fetchImage(from: thumbnailURLString)
         } else {
             let linkData = try await swiftLinkPreview.preview(attachment.url)
-            if let imageURL = linkData.imageURL {
-                image = try await fetchImage(from: imageURL.absoluteString)
+            image = if let imageURL = linkData.imageURL {
+                try await fetchImage(from: imageURL.absoluteString)
             } else {
-                image = UIImage(systemSymbol: .photoOnRectangleAngled)
+                UIImage(systemSymbol: .photoOnRectangleAngled)
             }
         }
         try persistImageOnly(image, for: attachment)
@@ -189,8 +184,8 @@ actor AttachmentDataAPI {
     @discardableResult
     private func persistImageAndThumbnail(
         _ image: UIImage,
-        for attachment: Attachment,
-    ) async throws -> UIImage {
+        for attachment: Attachment
+    ) throws -> UIImage {
         let originalData = try mediaManager.createData(from: image)
         let thumbnailData = try mediaManager.createThumbnail(from: image)
         guard let thumbnail = UIImage(data: thumbnailData) else {
@@ -210,8 +205,8 @@ actor AttachmentDataAPI {
     @discardableResult
     private func persistThumbnailOnly(
         _ image: UIImage,
-        for attachment: Attachment,
-    ) async throws -> UIImage {
+        for attachment: Attachment
+    ) throws -> UIImage {
         let thumbnailData = try mediaManager.createThumbnail(from: image)
         guard let thumbnail = UIImage(data: thumbnailData) else {
             throw AttachmentError.imageDecodingFailed

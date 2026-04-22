@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  Attachment.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 
@@ -24,7 +27,7 @@ public struct Attachment: Codable, Sendable, Hashable, Identifiable {
         attachMentTypeRaw: Int,
         aspectRatio: Double,
         title: String? = nil,
-        subTitle: String? = nil,
+        subTitle: String? = nil
     ) {
         self.uid = uid
         self.url = url

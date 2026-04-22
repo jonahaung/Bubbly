@@ -1,16 +1,21 @@
-// © 2026 Aung Ko Min
-import Combine
-import Core
-import Database
-import ImageLoader
-import Services
-import SwiftUI
+//  ChatManager.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
+import Core
+import Combine
+import SwiftUI
+import Database
+import Services
+import ImageLoader
+
 @MainActor @Observable final class ChatManager: ErrorPresenter {
     init(
         _ data: ConversationInitializer.PrefetchedData,
         contactsRepository: ContactsRepositoryProtocol,
-        currentUserRepository: CurrentUserRepository, router: Router,
+        currentUserRepository: CurrentUserRepository, router: Router
     ) {
         let conID = data.configuration.conID
         self.contactsRepository = contactsRepository
@@ -24,15 +29,18 @@ import XUI
         attachmentFetcher = .init()
         state = .init(
             reloadID: 0, conversation: data.conversation, theme: .init(data.properties.theme),
-            properties: data.properties, )
+            properties: data.properties
+        )
         let headers: [HeaderModel] =
             data.configuration.canPaginate ? [] : [.init(kind: .conversation(data.conversation))]
         models = .init(data.msgs, headers)
     }
+
     deinit {
         serialQueue.cancelAllPendingTasks()
         log("Deinit")
     }
+
     @ObservationIgnored let datasource: PaginatedDatasource
     @ObservationIgnored let scrollController: ScrollCoordinator
     @ObservationIgnored var presentation: Presenter
@@ -48,24 +56,27 @@ import XUI
     @ObservationIgnored let layoutManager: MsgsScrollViewLayoutManager = .init(cache: .init())
     var state: State
 }
+
 extension ChatManager {
     func send(_ intent: Intent) {
         guard scrollController.delegate != nil else { return }
         switch intent {
-        case .scrollViewIntent(let newValue): scrollController.send(newValue)
+        case let .scrollViewIntent(newValue): scrollController.send(newValue)
         case .scrollDownButtonTapped:
             serialQueue.addOperation { [weak self] in
                 guard let self else { return }
                 try await handleScrollDownButtonTap()
             }
-        case .cellAction(let newValue): handleMsgCellInteraction(action: newValue)
+        case let .cellAction(newValue): handleMsgCellInteraction(action: newValue)
         }
     }
+
     func layoutIfNeeded() { state.reloadID += 1 }
 }
+
 extension ChatManager {
     private func handleScrollDownButtonTap() async throws {
-        guard let lasMsg = try await MsgRepo.lastMsg(conID: conversationConfig.conID, ) else {
+        guard let lasMsg = try await MsgRepo.lastMsg(conID: conversationConfig.conID ) else {
             return
         }
         if models.contains(withID: lasMsg.uid) {
@@ -74,6 +85,7 @@ extension ChatManager {
             scrollController.begin(updates: .resetting(msg: lasMsg))
         }
     }
+
     func onViewAppear() {
         let hasViewLoaded = dataObserver.delegate !== nil && scrollController.delegate !== nil
         if !hasViewLoaded {
@@ -92,5 +104,6 @@ extension ChatManager {
             }
         }
     }
+
     func onViewDisappear() {}
 }

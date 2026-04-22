@@ -1,3 +1,8 @@
+//  MsgCellTextBubble.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 //
 //  MsgCellTextBubble.swift
 //  Conversation
@@ -5,9 +10,9 @@
 //  Created by Aung Ko Min on 22/4/26.
 //
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
 
 struct MsgCellTextBubble: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
@@ -20,13 +25,13 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
                 .padding(
                     .init(
                         top: 0.2, leading: state.isSender ? 0.5 : 0.1, bottom: 0.7,
-                        trailing: state.isSender ? 0.1 : 0.5,
-                    ),
+                        trailing: state.isSender ? 0.1 : 0.5
+                    )
                 )
                 .background(Color.shadow)
                 .containerShape(bubbleShape)
                 .fixedSize(
-                    horizontal: false, vertical: true,
+                    horizontal: false, vertical: true
                 )
                 .geometryGroup()
         }

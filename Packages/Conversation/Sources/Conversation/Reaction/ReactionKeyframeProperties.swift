@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  ReactionKeyframeProperties.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
@@ -28,7 +31,7 @@
             content
                 .keyframeAnimator(
                     initialValue: ReactionKeyframeProperties(),
-                    trigger: trigger,
+                    trigger: trigger
                 ) { content, value in
                     content
                         .rotationEffect(value.rotation)

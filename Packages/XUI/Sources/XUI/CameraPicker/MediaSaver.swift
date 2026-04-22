@@ -1,10 +1,7 @@
-//
 //  MediaSaver.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 5/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
-
 
 import UIKit
 
@@ -32,12 +29,10 @@ final class MediaSaver: NSObject {
         try await withCheckedThrowingContinuation { (continuation: SaveMovieContinuation) in
             self.saveMovieContinuation = continuation
 
-            let path: String
-
-            if #available(iOS 16, *) {
-                path = url.path()
+            let path: String = if #available(iOS 16, *) {
+                url.path()
             } else {
-                path = url.path
+                url.path
             }
 
             if UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(path) {
@@ -52,9 +47,9 @@ final class MediaSaver: NSObject {
     }
 
     @objc func image(
-        _ image: UIImage,
+        _: UIImage,
         didFinishSavingWithError error: Error?,
-        contextInfo: UnsafeRawPointer
+        contextInfo _: UnsafeRawPointer
     ) {
         if let error {
             saveImageContinuation?.resume(throwing: error)
@@ -66,9 +61,9 @@ final class MediaSaver: NSObject {
     }
 
     @objc func video(
-        _ videoPath: String?,
+        _: String?,
         didFinishSavingWithError error: Error?,
-        contextInfo: UnsafeMutableRawPointer?
+        contextInfo _: UnsafeMutableRawPointer?
     ) {
         if let error {
             saveMovieContinuation?.resume(throwing: error)

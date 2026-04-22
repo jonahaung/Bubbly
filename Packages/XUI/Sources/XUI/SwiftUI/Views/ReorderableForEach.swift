@@ -1,5 +1,6 @@
+//  ReorderableForEach.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -54,8 +55,7 @@ public struct ReorderableForEach<Data: Hashable & Identifiable, Content: View>: 
             guard item != draggedItem,
                   let current = draggedItem,
                   let from = data.firstIndex(of: current),
-                  let to = data.firstIndex(of: item)
-            else {
+                  let to = data.firstIndex(of: item) else {
                 return
             }
             hasChangedLocation = true
@@ -64,7 +64,7 @@ public struct ReorderableForEach<Data: Hashable & Identifiable, Content: View>: 
                     fromOffsets: IndexSet(integer: from),
                     toOffset: (to > from) ? to + 1 : to
                 )
-                
+
             }
         }
 

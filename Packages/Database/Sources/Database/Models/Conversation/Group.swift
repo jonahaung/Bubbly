@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  Group.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 
@@ -16,7 +19,7 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         createdDate: ServerTime,
         photoURL: String?,
         members: [String],
-        createdBy: String,
+        createdBy: String
     ) {
         self.uid = uid
         self.name = name

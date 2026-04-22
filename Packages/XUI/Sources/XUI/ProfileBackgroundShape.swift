@@ -1,8 +1,6 @@
-//
 //  ProfileBackgroundShape.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 6/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -19,7 +17,7 @@ public struct ProfileBackgroundShape: Shape {
                 .addCurve(
                     to: CGPoint(x: width, y: height / 1.7),
                     control1: CGPoint(x: width * 1 / 3, y: height),
-                    control2: CGPoint(x: width * 2 / 3, y: height / 4.5),
+                    control2: CGPoint(x: width * 2 / 3, y: height / 4.5)
                 )
             path.addLine(to: CGPoint(x: width, y: 0))
         }

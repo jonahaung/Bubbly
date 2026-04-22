@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  HeaderProfileView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Database
-import SwiftUI
 import XUI
+import Core
+import SwiftUI
+import Database
 
 struct HeaderProfileView: View {
     let conversation: Conversation

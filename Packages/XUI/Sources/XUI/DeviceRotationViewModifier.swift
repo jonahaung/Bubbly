@@ -1,24 +1,21 @@
-//
 //  DeviceRotationViewModifier.swift
-//  StackOv (Common module)
 //
-//  Created by Владислав Климов
-//  Copyright © 2021 Erik Basargin. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
 
 struct DeviceRotationViewModifier: ViewModifier {
-    
+
     // MARK: - Properties
-    
+
     let action: (UIDeviceOrientation) -> Void
     let orientationChanged = NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)
-            .makeConnectable()
-            .autoconnect()
-    
+        .makeConnectable()
+        .autoconnect()
+
     // MARK: - View
-    
+
     func body(content: Content) -> some View {
         content
             .onAppear()

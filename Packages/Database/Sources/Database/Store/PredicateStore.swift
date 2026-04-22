@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  PredicateStore.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
 public enum PMsgPredicates {
     public static func deliveryStatusComparison(
@@ -11,7 +14,7 @@ public enum PMsgPredicates {
         currentUserID: String,
         recipient: MsgRecipient,
         deliveryStatus: DeliveryStatus,
-        comparison: PredicateExpressions.ComparisonOperator,
+        comparison: PredicateExpressions.ComparisonOperator
     ) -> Predicate<PMsg> {
         let status = deliveryStatus.rawValue
         switch recipient {
@@ -22,26 +25,26 @@ public enum PMsgPredicates {
                         lhs: PredicateExpressions.build_Equal(
                             lhs: PredicateExpressions.build_KeyPath(
                                 root: PredicateExpressions.build_Arg(msg),
-                                keyPath: \.conID,
+                                keyPath: \.conID
                             ),
-                            rhs: PredicateExpressions.build_Arg(conID),
+                            rhs: PredicateExpressions.build_Arg(conID)
                         ),
                         rhs: PredicateExpressions.build_Equal(
                             lhs: PredicateExpressions.build_KeyPath(
                                 root: PredicateExpressions.build_Arg(msg),
-                                keyPath: \.senderID,
+                                keyPath: \.senderID
                             ),
-                            rhs: PredicateExpressions.build_Arg(currentUserID),
-                        ),
+                            rhs: PredicateExpressions.build_Arg(currentUserID)
+                        )
                     ),
                     rhs: PredicateExpressions.build_Comparison(
                         lhs: PredicateExpressions.build_KeyPath(
                             root: PredicateExpressions.build_Arg(msg),
-                            keyPath: \.deliveryStatus,
+                            keyPath: \.deliveryStatus
                         ),
                         rhs: PredicateExpressions.build_Arg(status),
-                        op: comparison,
-                    ),
+                        op: comparison
+                    )
                 )
             }
         case .incoming:
@@ -51,26 +54,26 @@ public enum PMsgPredicates {
                         lhs: PredicateExpressions.build_Equal(
                             lhs: PredicateExpressions.build_KeyPath(
                                 root: PredicateExpressions.build_Arg(msg),
-                                keyPath: \.conID,
+                                keyPath: \.conID
                             ),
-                            rhs: PredicateExpressions.build_Arg(conID),
+                            rhs: PredicateExpressions.build_Arg(conID)
                         ),
                         rhs: PredicateExpressions.build_NotEqual(
                             lhs: PredicateExpressions.build_KeyPath(
                                 root: PredicateExpressions.build_Arg(msg),
-                                keyPath: \.senderID,
+                                keyPath: \.senderID
                             ),
-                            rhs: PredicateExpressions.build_Arg(currentUserID),
-                        ),
+                            rhs: PredicateExpressions.build_Arg(currentUserID)
+                        )
                     ),
                     rhs: PredicateExpressions.build_Comparison(
                         lhs: PredicateExpressions.build_KeyPath(
                             root: PredicateExpressions.build_Arg(msg),
-                            keyPath: \.deliveryStatus,
+                            keyPath: \.deliveryStatus
                         ),
                         rhs: PredicateExpressions.build_Arg(status),
-                        op: comparison,
-                    ),
+                        op: comparison
+                    )
                 )
             }
         case .system:
@@ -82,7 +85,7 @@ public enum PMsgPredicates {
         conID: String,
         currentUserID: String,
         recipient: MsgRecipient,
-        deliveryStatus: DeliveryStatus,
+        deliveryStatus: DeliveryStatus
     ) -> Predicate<PMsg> {
         let status = deliveryStatus.rawValue
         switch recipient {
@@ -93,25 +96,25 @@ public enum PMsgPredicates {
                         lhs: PredicateExpressions.build_Equal(
                             lhs: PredicateExpressions.build_KeyPath(
                                 root: PredicateExpressions.build_Arg(msg),
-                                keyPath: \.conID,
+                                keyPath: \.conID
                             ),
-                            rhs: PredicateExpressions.build_Arg(conID),
+                            rhs: PredicateExpressions.build_Arg(conID)
                         ),
                         rhs: PredicateExpressions.build_Equal(
                             lhs: PredicateExpressions.build_KeyPath(
                                 root: PredicateExpressions.build_Arg(msg),
-                                keyPath: \.senderID,
+                                keyPath: \.senderID
                             ),
-                            rhs: PredicateExpressions.build_Arg(currentUserID),
-                        ),
+                            rhs: PredicateExpressions.build_Arg(currentUserID)
+                        )
                     ),
                     rhs: PredicateExpressions.build_Equal(
                         lhs: PredicateExpressions.build_KeyPath(
                             root: PredicateExpressions.build_Arg(msg),
-                            keyPath: \.deliveryStatus,
+                            keyPath: \.deliveryStatus
                         ),
-                        rhs: PredicateExpressions.build_Arg(status),
-                    ),
+                        rhs: PredicateExpressions.build_Arg(status)
+                    )
                 )
             }
         case .incoming:
@@ -121,31 +124,32 @@ public enum PMsgPredicates {
                         lhs: PredicateExpressions.build_Equal(
                             lhs: PredicateExpressions.build_KeyPath(
                                 root: PredicateExpressions.build_Arg(msg),
-                                keyPath: \.conID,
+                                keyPath: \.conID
                             ),
-                            rhs: PredicateExpressions.build_Arg(conID),
+                            rhs: PredicateExpressions.build_Arg(conID)
                         ),
                         rhs: PredicateExpressions.build_NotEqual(
                             lhs: PredicateExpressions.build_KeyPath(
                                 root: PredicateExpressions.build_Arg(msg),
-                                keyPath: \.senderID,
+                                keyPath: \.senderID
                             ),
-                            rhs: PredicateExpressions.build_Arg(currentUserID),
-                        ),
+                            rhs: PredicateExpressions.build_Arg(currentUserID)
+                        )
                     ),
                     rhs: PredicateExpressions.build_Equal(
                         lhs: PredicateExpressions.build_KeyPath(
                             root: PredicateExpressions.build_Arg(msg),
-                            keyPath: \.deliveryStatus,
+                            keyPath: \.deliveryStatus
                         ),
-                        rhs: PredicateExpressions.build_Arg(status),
-                    ),
+                        rhs: PredicateExpressions.build_Arg(status)
+                    )
                 )
             }
         case .system:
             fatalError()
         }
     }
+
     public static func conID(_ value: String) -> Predicate<PMsg> {
         #Predicate<PMsg> { $0.conID == value }
     }
@@ -156,7 +160,7 @@ public enum PMsgPredicates {
 
     public static func delivery(
         _ op: PredicateExpressions.ComparisonOperator,
-        _ status: DeliveryStatus,
+        _ status: DeliveryStatus
     ) -> Predicate<PMsg> {
         let value = status.rawValue
         switch op {
@@ -172,25 +176,25 @@ public enum PMsgPredicates {
     public static func msgs(
         conID: String,
         date: String,
-        comparison: PredicateExpressions.ComparisonOperator,
+        comparison: PredicateExpressions.ComparisonOperator
     ) -> Predicate<PMsg> {
         Predicate<PMsg> {
             PredicateExpressions.build_Conjunction(
                 lhs: PredicateExpressions.build_Equal(
                     lhs: PredicateExpressions.build_KeyPath(
                         root: PredicateExpressions.build_Arg($0),
-                        keyPath: \.conID,
+                        keyPath: \.conID
                     ),
-                    rhs: PredicateExpressions.build_Arg(conID),
+                    rhs: PredicateExpressions.build_Arg(conID)
                 ),
                 rhs: PredicateExpressions.build_Comparison(
                     lhs: PredicateExpressions.build_KeyPath(
                         root: PredicateExpressions.build_Arg($0),
-                        keyPath: \.date,
+                        keyPath: \.date
                     ),
                     rhs: PredicateExpressions.build_Arg(date),
-                    op: comparison,
-                ),
+                    op: comparison
+                )
             )
         }
     }

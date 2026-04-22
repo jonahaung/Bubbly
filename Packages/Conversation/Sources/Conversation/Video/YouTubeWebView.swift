@@ -1,12 +1,15 @@
-// © 2026 Aung Ko Min
+//  YouTubeWebView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-    import SwiftUI
     import WebKit
+    import SwiftUI
 
     struct YouTubeWebView: UIViewRepresentable {
         let videoID: String
@@ -55,7 +58,7 @@
             func webView(
                 _: WKWebView,
                 didFail _: WKNavigation!,
-                withError _: Error,
+                withError _: Error
             ) {
                 onError()
             }
@@ -63,7 +66,7 @@
             func webView(
                 _: WKWebView,
                 didFailProvisionalNavigation _: WKNavigation!,
-                withError _: Error,
+                withError _: Error
             ) {
                 onError()
             }

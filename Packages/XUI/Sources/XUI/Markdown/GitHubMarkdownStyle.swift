@@ -1,13 +1,11 @@
-//
 //  GitHubMarkdownStyle.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 10/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Foundation
-import SwiftUI
 import UIKit
+import SwiftUI
+import Foundation
 
 public struct GitHubMarkdownStyle {
 
@@ -16,17 +14,17 @@ public struct GitHubMarkdownStyle {
     public var base: AttributeContainer = .paragraph
 
     public func block(
-        _ kind: PresentationIntent.Kind,
+        _ kind: PresentationIntent.Kind
     ) -> AttributeContainer {
         switch kind {
-        case .header(let level):
+        case let .header(level):
             let size =
                 UIFont.preferredFont(forTextStyle: .title1).pointSize
-                - CGFloat(level * 2)
+                    - CGFloat(level * 2)
             let font = Font.system(
                 size: size,
                 weight: .semibold,
-                design: .default,
+                design: .default
             ).width(.condensed)
             return .init()
                 .font(font)
@@ -34,8 +32,8 @@ public struct GitHubMarkdownStyle {
                 .lineHeight(.multiple(factor: 1.3))
                 .paragraphStyle(.default)
         case .listItem,
-            .orderedList,
-            .unorderedList:
+             .orderedList,
+             .unorderedList:
             return .init()
                 .font(.system(size: labelFontSize, design: .rounded))
                 .foregroundColor(Color.primaryText)
@@ -49,7 +47,7 @@ public struct GitHubMarkdownStyle {
                         weight: .medium,
                         design: .monospaced
                     )
-                    .width(.compressed),
+                    .width(.compressed)
                 )
                 .foregroundColor(.secondaryText)
         case .blockQuote:

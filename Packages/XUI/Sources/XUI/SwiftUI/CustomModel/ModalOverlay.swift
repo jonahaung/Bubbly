@@ -1,5 +1,6 @@
+//  ModalOverlay.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -31,8 +32,8 @@ public struct ModalOverlay<Content: View>: View {
         }, onClose: onClose)
             .transition(
                 .asymmetric(
-					insertion: .modal(edge: edge, curve: .easeOut(duration: 0.5)),
-					removal: .modal(edge: edge, curve: .easeIn(duration: 0.4))
+                    insertion: .modal(edge: edge, curve: .easeOut(duration: 0.5)),
+                    removal: .modal(edge: edge, curve: .easeIn(duration: 0.4))
                 )
             )
     }

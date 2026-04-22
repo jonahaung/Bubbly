@@ -1,10 +1,13 @@
-// © 2026 Aung Ko Min
+//  ComposeBarSendButton.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
-    import Core
-    import Database
-    import SwiftUI
     import XUI
+    import Core
+    import SwiftUI
+    import Database
 
     extension ComposeBar {
         struct ComposeBarSendButton: View {
@@ -31,14 +34,14 @@
                             .padding()
                             .rotationEffect(
                                 .degrees(hasText ? -45 : -180),
-                                anchor: .center,
+                                anchor: .center
                             )
                             .animation(.anticipateOvershoot, value: hasText)
                     }
                     .frame(
                         width: ChatLayoutConstants.bottomBarHeight,
                         height: ChatLayoutConstants.bottomBarHeight,
-                        alignment: .center,
+                        alignment: .center
                     )
                     .background(Color.appPrimary, in: .circle)
                     .geometryGroup()

@@ -1,10 +1,13 @@
-// © 2026 Aung Ko Min
+//  CurrentUserModel.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
+import XUI
 import Core
+import Foundation
 import FirebaseAuth
 import FirebaseMessaging
-import Foundation
-import XUI
 
 // MARK: - CurrentUserModel
 
@@ -22,7 +25,7 @@ public struct CurrentUserModel: ContactRepresentableSendable, Codable, Hashable,
         mobile: String,
         photoURL: String,
         pushToken: String,
-        publicKeyString: String,
+        publicKeyString: String
     ) {
         self.uid = uid
         self.name = name
@@ -41,7 +44,7 @@ public extension CurrentUserModel {
             mobile: user.phoneNumber.str,
             photoURL: user.photoURL?.absoluteString ?? "",
             pushToken: Messaging.messaging().fcmToken ?? "",
-            publicKeyString: CryptoService.shared.base64PublicKeyString(for: user.uid),
+            publicKeyString: CryptoService.shared.base64PublicKeyString(for: user.uid)
         )
     }
 
@@ -51,6 +54,6 @@ public extension CurrentUserModel {
         mobile: "",
         photoURL: "",
         pushToken: "",
-        publicKeyString: "",
+        publicKeyString: ""
     )
 }

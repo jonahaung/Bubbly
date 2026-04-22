@@ -1,7 +1,13 @@
-// © 2026 Aung Ko Min
-import Database
-import SwiftUI
+//  ChatManager+ChatDataReceiver.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
+import SwiftUI
+
+import Database
+
 extension ChatManager: ChatDataReceiverDelegate {
     func chatDataReceiver(didRecieveError error: any Error) {
         serialQueue.addOperation { [weak self] in
@@ -9,10 +15,12 @@ extension ChatManager: ChatDataReceiverDelegate {
             await showError(error)
         }
     }
-    func chatDataReceiver(didReceive typingStatus: AnyMsgData.TypingStatusPayload) async {
+
+    func chatDataReceiver(didReceive typingStatus: AnyMsgData.TypingStatusPayload) {
         presentation.send(.typing(typingStatus))
     }
-    func chatDataReceiver(didInsert msg: Message) async {
+
+    func chatDataReceiver(didInsert msg: Message) {
         if models.contains(withID: msg.uid) {
             models.update(msg: msg)
             return
@@ -25,7 +33,7 @@ extension ChatManager: ChatDataReceiverDelegate {
             if scrollCoordinator(scrollController, shouldPaginateAt: .bottom) {
                 ToastPresenter.shared.dismiss()
                 let toast = Toast(
-                    node: Text(msg.displayText).opaqueView(), allowsBackgroundTap: true,
+                    node: Text(msg.displayText).opaqueView(), allowsBackgroundTap: true
                 ) { [weak self] in
                     guard let self else { return }
                     ToastPresenter.shared.dismiss()
@@ -40,7 +48,7 @@ extension ChatManager: ChatDataReceiverDelegate {
                 layoutIfNeeded()
                 ToastPresenter.shared.dismiss()
                 let toast = Toast(
-                    node: Text(msg.displayText).opaqueView(), allowsBackgroundTap: false,
+                    node: Text(msg.displayText).opaqueView(), allowsBackgroundTap: false
                 ) { [weak self] in
                     guard let self else { return }
                     ToastPresenter.shared.dismiss()
@@ -53,17 +61,21 @@ extension ChatManager: ChatDataReceiverDelegate {
             }
         }
     }
+
     func chatDataReceiver(didReceiveMsg msg: Message) async {
         do { try await setIncomingMsgsAsRead(before: msg.date) } catch { await showError(error) }
     }
-    func chatDataReceiver(didUpdate msg: Message, animated _: Bool) async {
+
+    func chatDataReceiver(didUpdate msg: Message, animated _: Bool) {
         models.update(msg: msg)
     }
-    func chatDataReceiver(didRemove msg: Message, animated _: Bool) async {
+
+    func chatDataReceiver(didRemove msg: Message, animated _: Bool) {
         models.remove(msg: msg)
         let transition = Transaction.withAnimation(.snappy)
         withTransaction(transition) { layoutIfNeeded() }
     }
+
     func chatDataReceiver(didReceive status: AnyMsgData.SeenStatusPayload) async {
         do {
             try await reloadConversation(refetch: false)

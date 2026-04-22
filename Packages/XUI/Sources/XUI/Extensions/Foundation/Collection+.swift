@@ -1,5 +1,6 @@
+//  Collection+.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -24,8 +25,8 @@ public extension Array {
             return
         }
 
-        for index in 0..<(count - 1) {
-            let randomIndex = Int.random(in: index..<count)
+        for index in 0 ..< (count - 1) {
+            let randomIndex = Int.random(in: index ..< count)
             if randomIndex != index {
                 swapAt(index, randomIndex)
             }
@@ -64,7 +65,7 @@ public extension Array {
 
 public extension BidirectionalCollection where Iterator.Element: Equatable {
     func nextElement(_ item: Self.Iterator.Element, loop: Bool = false) -> Self.Iterator
-        .Element? {
+    .Element? {
         if let itemIndex = firstIndex(of: item) {
             let lastItem: Bool = (index(after: itemIndex) == endIndex)
             if loop, lastItem {
@@ -79,7 +80,7 @@ public extension BidirectionalCollection where Iterator.Element: Equatable {
     }
 
     func previous(_ item: Self.Iterator.Element, loop: Bool = false) -> Self.Iterator
-        .Element? {
+    .Element? {
         if let itemIndex = firstIndex(of: item) {
             let firstItem: Bool = (itemIndex == startIndex)
             if loop, firstItem {

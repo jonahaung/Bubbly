@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  PredicateBuilder.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 // import SwiftData
 // import Foundation

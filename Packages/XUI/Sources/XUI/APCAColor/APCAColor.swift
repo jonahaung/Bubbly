@@ -1,3 +1,8 @@
+//  APCAColor.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 @available(iOS 26.0, *)
@@ -5,11 +10,6 @@ private struct MinimumContrastColorFont<Foreground: ShapeStyle, Background: Shap
     var foreground: Foreground
 
     var background: Background
-
-    init(foreground: Foreground, background: Background) {
-        self.foreground = foreground
-        self.background = background
-    }
 
     func resolve(in environment: EnvironmentValues) -> Color {
         let t = foreground.resolve(in: environment)
@@ -87,14 +87,14 @@ public struct APCADerivedForegroundColor: ViewModifier {
 
     @Environment(\.self) var environment
 
-	public init(foregroundColor: Color, backgroundColor: Color, fontSize: CGFloat, relativeTo textStyle: Font.TextStyle = .body, weight: Font.Weight = .regular) {
-        self.foreground = foregroundColor
-        self.background = backgroundColor
-        self._fontSize = .init(wrappedValue: fontSize, relativeTo: textStyle)
+    public init(foregroundColor: Color, backgroundColor: Color, fontSize: CGFloat, relativeTo textStyle: Font.TextStyle = .body, weight: Font.Weight = .regular) {
+        foreground = foregroundColor
+        background = backgroundColor
+        _fontSize = .init(wrappedValue: fontSize, relativeTo: textStyle)
         self.weight = weight
     }
 
-	public func body(content: Content) -> some View {
+    public func body(content: Content) -> some View {
         let contrast = Font.APCAContrastTarget(for: fontSize, weight: weight)
 
         content.foregroundStyle(foreground.minimumContrast(contrast, over: background))
@@ -168,25 +168,23 @@ extension Color.Resolved {
         let opacity = a.opacity + b.opacity * i
 
         return .init(
-            red:     (a.red   * a.opacity + b.red   * b.opacity * i) / opacity,
-            green:   (a.green * a.opacity + b.green * b.opacity * i) / opacity,
-            blue:    (a.blue  * a.opacity + b.blue  * b.opacity * i) / opacity,
+            red: (a.red * a.opacity + b.red * b.opacity * i) / opacity,
+            green: (a.green * a.opacity + b.green * b.opacity * i) / opacity,
+            blue: (a.blue * a.opacity + b.blue * b.opacity * i) / opacity,
             opacity: opacity
         )
     }
 
     var apcaLuminance: Float {
-        pow(red,   2.4) * 0.2126729 +
-        pow(green, 2.4) * 0.7151522 +
-        pow(blue,  2.4) * 0.0721750
+        pow(red, 2.4) * 0.2126729 +
+            pow(green, 2.4) * 0.7151522 +
+            pow(blue, 2.4) * 0.0721750
     }
 
     func over(_ background: Color.Resolved) -> Color.Resolved {
         .over(a: self, b: background)
     }
 }
-
-
 
 #Preview("Over") {
     @Previewable @State var a = Color.Resolved(red: 0.6, green: 0.3, blue: 0.4, opacity: 0.5)
@@ -202,9 +200,9 @@ extension Color.Resolved {
 #Preview("Test Values") {
     let rgb2color: (UInt) -> Color.Resolved = { rgb in
         Color.Resolved(
-            red:   Float((rgb >> 16) & 0xFF) / 255,
+            red: Float((rgb >> 16) & 0xFF) / 255,
             green: Float((rgb >> 8) & 0xFF) / 255,
-            blue:  Float((rgb >> 0) & 0xFF) / 255
+            blue: Float((rgb >> 0) & 0xFF) / 255
         )
     }
 
@@ -224,11 +222,11 @@ extension Color.Resolved {
         .monospacedDigit()
     }
 
-    example(rgb2color(0x888888), rgb2color(0xffffff))
+    example(rgb2color(0x888888), rgb2color(0xFFFFFF))
 
-    example(rgb2color(0x000000), rgb2color(0xaaaaaa))
+    example(rgb2color(0x000000), rgb2color(0xAAAAAA))
 
-    example(rgb2color(0x112233), rgb2color(0xddeeff))
+    example(rgb2color(0x112233), rgb2color(0xDDEEFF))
 
     example(rgb2color(0x112233), rgb2color(0x444444))
 }
@@ -236,10 +234,10 @@ extension Color.Resolved {
 @available(iOS 18.0, *)
 #Preview("Modifier") {
     @Previewable @State var fontSize: CGFloat = 16
-    @Previewable @State var fontWeightIndex: Int = 3
+    @Previewable @State var fontWeightIndex = 3
 
-    @Previewable @State var text: Color = .yellow
-    @Previewable @State var background: Color = .orange
+    @Previewable @State var text = Color.yellow
+    @Previewable @State var background = Color.orange
 
     let weights: [Font.Weight] = [.ultraLight, .thin, .light, .regular, .medium, .semibold, .bold, .heavy, .black]
 
@@ -328,14 +326,14 @@ extension Color.Resolved {
                         Group {
                             switch fontWeight {
                             case .ultraLight: Text("Ultra Light")
-                            case .thin:       Text("Thin")
-                            case .light:      Text("Light")
-                            case .regular:    Text("Regular")
-                            case .medium:     Text("Medium")
-                            case .semibold:   Text("Semibold")
-                            case .bold:       Text("Bold")
-                            case .heavy:      Text("Heavy")
-                            case .black:      Text("Black")
+                            case .thin: Text("Thin")
+                            case .light: Text("Light")
+                            case .regular: Text("Regular")
+                            case .medium: Text("Medium")
+                            case .semibold: Text("Semibold")
+                            case .bold: Text("Bold")
+                            case .heavy: Text("Heavy")
+                            case .black: Text("Black")
                             default: EmptyView()
                             }
                         }
@@ -351,9 +349,7 @@ extension Color.Resolved {
                 }
 
                 GridRow {
-                    HStack {
-
-                    }
+                    HStack {}
                 }
             }
         }
@@ -366,8 +362,8 @@ extension Color.Resolved {
 
 @available(iOS 18.0, *)
 #Preview("ShapeStyle") {
-    @Previewable @State var foreground: Color = .red
-    @Previewable @State var background: Color = .blue
+    @Previewable @State var foreground = Color.red
+    @Previewable @State var background = Color.blue
     @Previewable @State var contrast: Float = 90
 
     GroupBox {

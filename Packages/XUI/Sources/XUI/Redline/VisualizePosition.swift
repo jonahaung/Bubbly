@@ -1,3 +1,8 @@
+//  VisualizePosition.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 public extension View {
@@ -82,7 +87,7 @@ struct PositionVisualizationModifier<S: ShapeStyle>: ViewModifier {
 }
 
 #Preview("Animation") {
-    @Previewable @State var offset: Date = .now
+    @Previewable @State var offset = Date.now
 
     TimelineView(.animation) { context in
         ZStack {

@@ -1,10 +1,13 @@
-// © 2026 Aung Ko Min
+//  MsgCell.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 struct MsgCell: View {
 
@@ -13,17 +16,18 @@ struct MsgCell: View {
     var body: some View {
         VStack(alignment: viewModel.state.horizontalAlignment, spacing: 0) {
             MsgCellHeader(state: viewModel.state)
-            HStack(alignment: .bottom, spacing: Spacing.xs) {
+            HStack(alignment: .bottom, spacing: 0) {
                 if !viewModel.state.isSender {
-                    MsgCell.IncomingAccessory(state: viewModel.state)
+                    IncomingAccessory(state: viewModel.state)
                 }
                 MsgCellGesture {
                     MsgCellContent(state: viewModel.state)
                 }
                 if viewModel.state.isSender {
-                    MsgCell.OutgoingAccessory(state: viewModel.state)
+                    OutgoingAccessory(state: viewModel.state)
                 }
-            }.equatable(by: viewModel.state)
+            }
+            .equatable(by: viewModel.state)
             MsgCellFooter(state: viewModel.state)
         }
         .environment(\.isVisible, viewModel.state.isVisible)

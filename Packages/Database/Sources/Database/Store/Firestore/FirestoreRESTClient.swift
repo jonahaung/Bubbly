@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  FirestoreRESTClient.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Core
-import FirebaseAuth
-import Foundation
 import XUI
+import Core
+import Foundation
+import FirebaseAuth
 
 // MARK: - FirestoreRESTClient
 
@@ -27,7 +30,7 @@ public final class FirestoreRESTClient {
 
     public init(
         projectId: String = AppInformation.firebaseProjectID,
-        database: String = "(default)",
+        database: String = "(default)"
     ) {
         baseURL = "https://firestore.googleapis.com/v1/projects/\(projectId)/databases/\(database)/documents"
         decoder = JSONDecoder()
@@ -37,7 +40,7 @@ public final class FirestoreRESTClient {
         timestampFormatterWithFractional = ISO8601DateFormatter()
         timestampFormatterWithFractional.formatOptions = [
             .withInternetDateTime,
-            .withFractionalSeconds,
+            .withFractionalSeconds
         ]
         timestampFormatter = ISO8601DateFormatter()
         timestampFormatter.formatOptions = [.withInternetDateTime]
@@ -48,14 +51,14 @@ public final class FirestoreRESTClient {
         method: String,
         body: [String: Any]? = nil,
         retry: Bool = false,
-        token: String? = nil,
+        token: String? = nil
     ) async throws -> [String: Any] {
         let result = try await performRawRequest(
             url: url,
             method: method,
             body: body,
             retry: retry,
-            token: token,
+            token: token
         )
         guard let json = result as? [String: Any] else {
             throw FirestoreError.invalidResponse
@@ -69,7 +72,7 @@ public final class FirestoreRESTClient {
         method: String,
         body: [String: Any]? = nil,
         retry: Bool = false,
-        token: String? = nil,
+        token: String? = nil
     ) async throws -> Any {
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -108,7 +111,7 @@ public final class FirestoreRESTClient {
                 method: method,
                 body: body,
                 retry: false,
-                token: token,
+                token: token
             )
         default:
             throw FirestoreError.serverError(errorMessage(from: data))
@@ -122,7 +125,7 @@ public final class FirestoreRESTClient {
             url: url,
             method: "GET",
             retry: true,
-            token: token,
+            token: token
         )
         guard let fields = json["fields"] as? [String: Any] else {
             throw FirestoreError.invalidResponse
@@ -134,12 +137,12 @@ public final class FirestoreRESTClient {
     public func createDocument(
         in collectionPath: String,
         documentID: String,
-        data: some Codable,
+        data: some Codable
     ) async throws {
         let token = try await getValidAuthToken()
         let url = try makeCreateDocumentURL(
             collectionPath: collectionPath,
-            documentID: documentID,
+            documentID: documentID
         )
         let payload: [String: Any]
         do {
@@ -152,14 +155,14 @@ public final class FirestoreRESTClient {
             method: "POST",
             body: payload,
             retry: true,
-            token: token,
+            token: token
         )
     }
 
     public func update(
         value: [String: Any],
         collectionPath: String,
-        to documentID: String,
+        to documentID: String
     ) async throws {
         let token = try await getValidAuthToken()
         let payload: [String: Any]
@@ -170,21 +173,21 @@ public final class FirestoreRESTClient {
         }
         let url = try makeUpdateDocumentURL(
             path: "\(collectionPath)/\(documentID)",
-            fieldPaths: payload.firestoreFieldPaths,
+            fieldPaths: payload.firestoreFieldPaths
         )
         _ = try await performRequest(
             url: url,
             method: "PATCH",
             body: payload,
             retry: true,
-            token: token,
+            token: token
         )
     }
 
     public func setDocument(
         _ data: some Codable,
         collectionPath: String,
-        documentID: String,
+        documentID: String
     ) async throws {
         let token = try await getValidAuthToken()
         let payload: [String: Any]
@@ -195,14 +198,14 @@ public final class FirestoreRESTClient {
         }
         let url = try makeUpdateDocumentURL(
             path: "\(collectionPath)/\(documentID)",
-            fieldPaths: payload.firestoreFieldPaths,
+            fieldPaths: payload.firestoreFieldPaths
         )
         _ = try await performRequest(
             url: url,
             method: "PATCH",
             body: payload,
             retry: true,
-            token: token,
+            token: token
         )
     }
 
@@ -213,27 +216,27 @@ public final class FirestoreRESTClient {
         limit: Int? = nil,
         as _: T.Type,
         retry: Bool = true,
-        token: String? = nil,
+        token: String? = nil
     ) async throws -> [T] {
         let url = try makeRunQueryURL()
 
         var structuredQuery: [String: Any] = [
-            "from": [["collectionId": collection]],
+            "from": [["collectionId": collection]]
         ]
 
         if !filters.isEmpty {
             structuredQuery["where"] = [
                 "compositeFilter": [
                     "op": "AND",
-                    "filters": filters,
-                ],
+                    "filters": filters
+                ]
             ]
         }
 
         if let orderBy {
             structuredQuery["orderBy"] = orderBy.map { [
                 "field": ["fieldPath": $0],
-                "direction": "ASCENDING",
+                "direction": "ASCENDING"
             ]
             }
         }
@@ -254,7 +257,7 @@ public final class FirestoreRESTClient {
             method: "POST",
             body: body,
             retry: retry,
-            token: authToken,
+            token: authToken
         )
         if let jsonArray = raw as? [[String: Any]] {
             return try jsonArray.compactMap { item -> T? in
@@ -294,7 +297,7 @@ public final class FirestoreRESTClient {
 
     private func decodeFirestoreDocument<T: Codable>(
         fields: [String: Any],
-        as _: T.Type,
+        as _: T.Type
     ) throws -> T {
         func unwrap(_ value: Any) -> Any? {
             guard let field = value as? [String: Any] else {
@@ -367,7 +370,7 @@ public final class FirestoreRESTClient {
 
     private func makeCreateDocumentURL(
         collectionPath: String,
-        documentID: String,
+        documentID: String
     ) throws -> URL {
         let components = collectionPath
             .split(separator: "/", omittingEmptySubsequences: true)
@@ -407,7 +410,7 @@ public final class FirestoreRESTClient {
 
     private func makeUpdateDocumentURL(
         path: String,
-        fieldPaths: [String],
+        fieldPaths: [String]
     ) throws -> URL {
         let documentURL = try makeDocumentURL(path: path)
         guard var components = URLComponents(url: documentURL, resolvingAgainstBaseURL: false) else {
@@ -417,8 +420,8 @@ public final class FirestoreRESTClient {
         var queryItems = [URLQueryItem(name: "currentDocument.exists", value: "true")]
         queryItems.append(contentsOf: fieldPaths.map { URLQueryItem(
             name: "updateMask.fieldPaths",
-            value: $0,
-        ) 
+            value: $0
+        )
         })
         components.queryItems = queryItems
         guard let url = components.url else {
@@ -570,14 +573,14 @@ public extension FirestoreRESTClient {
         collection: FirestoreCollectionPath,
         filters: [FirestoreFilter],
         orderBy: [String]? = nil,
-        limit: Int? = nil,
+        limit: Int? = nil
     ) async throws -> [T] {
         try await runQuery(
             collection: collection.rawValue,
             filters: createFilters(filters),
             orderBy: orderBy,
             limit: limit,
-            as: T.self,
+            as: T.self
         )
     }
 
@@ -585,13 +588,13 @@ public extension FirestoreRESTClient {
         collection: FirestoreCollectionPath,
         filter: FirestoreFilter,
         orderBy: [String]? = nil,
-        limit: Int? = nil,
+        limit: Int? = nil
     ) async throws -> [T] {
         try await query(
             collection: collection,
             filters: [filter],
             orderBy: orderBy,
-            limit: limit,
+            limit: limit
         )
     }
 }

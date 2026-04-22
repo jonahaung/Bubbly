@@ -1,15 +1,18 @@
+//  ComposeBar.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import _AVKit_SwiftUI
+import XUI
 import Core
+import SwiftUI
 import PhotosUI
 import Services
-import SwiftUI
-import XUI
+import _AVKit_SwiftUI
 
 // MARK: - ComposeBar
 
 struct ComposeBar: View {
-    
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,9 +36,9 @@ struct ComposeBar: View {
                 HamburgerButton(
                     isOpen: .init(
                         get: { composer.state.menuIsOpened },
-                        set: { composer.state.menuIsOpened = $0 },
+                        set: { composer.state.menuIsOpened = $0 }
                     ),
-                    size: 38,
+                    size: 38
                 ) { newValue in
                     if !newValue {
                         composer.updateSource(nil)
@@ -68,11 +71,11 @@ struct ComposeBar: View {
                 LinearGradient(
                     colors: [
                         .clear,
-                        theme.backgroundColor,
+                        theme.backgroundColor
                     ],
                     startPoint: .top,
-                    endPoint: .bottom,
-                ), ignoresSafeAreaEdges: .all,
+                    endPoint: .bottom
+                ), ignoresSafeAreaEdges: .all
             )
             .geometryGroup()
         }
@@ -80,8 +83,6 @@ struct ComposeBar: View {
         .geometryGroup()
         .equatable(by: composer.state)
     }
-
-    
 
     @Environment(ChatComposer.self) private var composer
     @Environment(\.conversationTheme) private var theme
@@ -91,7 +92,6 @@ struct ComposeBar: View {
 
 private extension ComposeBar {
     struct EmojiPanel: View {
-        
 
         var body: some View {
             EmojiPicker { emoji in
@@ -99,8 +99,6 @@ private extension ComposeBar {
             }
             .background(.regularMaterial, in: .rect)
         }
-
-        
 
         @Environment(ChatComposer.self) private var composer
     }

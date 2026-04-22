@@ -1,17 +1,20 @@
-// © 2026 Aung Ko Min
+//  MsgCellContent.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 struct MsgCellContent: View {
     var body: some View {
         ZStack(
             alignment: .init(
                 horizontal: state.horizontalAlignment.inverted,
-                vertical: .top,
-            ),
+                vertical: .top
+            )
         ) {
             if !state.attachments.isEmpty {
                 MsgCellAttachmentBubble(state: state)
@@ -21,6 +24,7 @@ struct MsgCellContent: View {
             MsgCellReactionOverlay(reactions: state.reactions)
         }
     }
+
     @Environment(\.conversationTheme) private var theme
     let state: MsgCellViewModel.State
 }

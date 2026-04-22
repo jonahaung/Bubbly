@@ -1,5 +1,6 @@
+//  ScrollViewPrefetcher.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -13,18 +14,15 @@ public protocol ScrollViewPrefetcherDelegate: AnyObject {
 
 @MainActor
 public final class ScrollViewPrefetcher {
-    
 
     private let windowSize: Int
     public weak var delegate: ScrollViewPrefetcherDelegate?
 
-    private var visibleIndices = Set<Int>()
-    private var lastVisibleIndices = Set<Int>()
+    private var visibleIndices: Set<Int> = []
+    private var lastVisibleIndices: Set<Int> = []
 
-    private var prefetchWindow: Range<Int> = 0..<0
+    private var prefetchWindow: Range<Int> = 0 ..< 0
     private var isRefreshScheduled = false
-
-    
 
     public init(windowSize: Int = 12) {
         self.windowSize = windowSize
@@ -63,15 +61,15 @@ public final class ScrollViewPrefetcher {
         if lastVisibleIndices.isEmpty {
             // First load: prefetch ahead of the initial max
             let start = (visibleIndices.max() ?? 0) + 1
-            newWindow = start..<(start + windowSize)
+            newWindow = start ..< (start + windowSize)
         } else {
             let scrollingDown = (visibleIndices.max() ?? 0) > (lastVisibleIndices.max() ?? 0)
             if scrollingDown || visibleIndices.contains(0) {
                 let start = (visibleIndices.max() ?? 0) + 1
-                newWindow = start..<(start + windowSize)
+                newWindow = start ..< (start + windowSize)
             } else {
                 let end = (visibleIndices.min() ?? 0) - 1
-                newWindow = (end - windowSize)..<end
+                newWindow = (end - windowSize) ..< end
             }
         }
         applyPrefetchWindow(newWindow)

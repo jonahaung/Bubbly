@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  ImageViewItem.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import UIKit
 import XUI
+import UIKit
 
 // MARK: - ImageViewItem
 

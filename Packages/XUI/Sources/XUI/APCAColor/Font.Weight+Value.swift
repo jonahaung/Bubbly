@@ -1,3 +1,8 @@
+//  Font.Weight+Value.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 public extension Font.Weight {

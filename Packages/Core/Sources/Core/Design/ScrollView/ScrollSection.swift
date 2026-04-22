@@ -1,8 +1,6 @@
-//
 //  ScrollSection.swift
-//  Core
 //
-//  Created by Aung Ko Min on 16/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -11,9 +9,8 @@ public struct ScrollSection<
     Data: RandomAccessCollection,
     Header: View,
     Footer: View,
-    Cell: View,
+    Cell: View
 >: View where Data.Element: Identifiable {
-    
 
     public init(
         data: Data,
@@ -21,7 +18,7 @@ public struct ScrollSection<
         showsDividers: Bool = true,
         @ViewBuilder cell: @escaping (Data.Element) -> Cell,
         @ViewBuilder header: () -> Header? = { EmptyView() },
-        @ViewBuilder footer: () -> Footer? = { EmptyView() },
+        @ViewBuilder footer: () -> Footer? = { EmptyView() }
     ) {
         self.data = data
         self.spacing = spacing
@@ -33,7 +30,6 @@ public struct ScrollSection<
 
     // MARK: Public
 
-    
     public var body: some View {
         if !data.isEmpty {
             VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -55,7 +51,7 @@ public struct ScrollSection<
                                 .intersperse {
                                     Divider()
                                 }
-                        },
+                        }
                     )
                 }
                 .padding(Padding.md)
@@ -70,8 +66,6 @@ public struct ScrollSection<
             .geometryGroup()
         }
     }
-
-    
 
     private let data: Data
     private let spacing: CGFloat

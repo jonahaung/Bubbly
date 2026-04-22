@@ -1,12 +1,10 @@
-//
 //  AsyncSerialQueue.swift
 //
-//
-//  Created by Danny Sung on 11/3/23.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Foundation
 import os
+import Foundation
 
 /// ``AsyncSerialQueue`` provides behavior similar to serial `DispatchQueue`s while relying solely on Swift concurrency.
 /// In other words, queued async blocks are guaranteed to execute in-order.
@@ -168,8 +166,7 @@ public final class AsyncSerialQueue: @unchecked Sendable {
                     let result = try await closure()
 
                     continuation.resume(returning: result)
-                }
-                catch {
+                } catch {
                     continuation.resume(throwing: error)
                 }
 
@@ -186,8 +183,7 @@ public final class AsyncSerialQueue: @unchecked Sendable {
         let delayDurations: BackoffValues<Int> =
             if duration == nil {
                 BackoffValues(1000, 125_000, 250_000, 500_000)
-            }
-            else {
+            } else {
                 BackoffValues(10, 25, 50, 100, 1000, 10000)
             }
 
@@ -233,8 +229,7 @@ private actor BackoffValues<T> {
         let nextIndex: Int =
             if (index + 1) >= values.count {
                 index
-            }
-            else {
+            } else {
                 index + 1
             }
         index = nextIndex

@@ -1,12 +1,13 @@
+//  PagerTabMenuBar.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
 
 @available(iOS 18.0, *)
 public struct PagerTabMenuBar<Page, Content>: View
-    where Page: Sendable & Equatable & Hashable & Identifiable, Content: View {
+where Page: Sendable & Equatable & Hashable & Identifiable, Content: View {
     let items: [Page]
     @Binding var selection: Page
     let content: ((Page, Bool)) -> Content

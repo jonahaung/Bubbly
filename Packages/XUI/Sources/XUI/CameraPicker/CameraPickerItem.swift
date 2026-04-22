@@ -1,10 +1,7 @@
-//
 //  CameraPickerItem.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 5/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
-
 
 import SwiftUI
 import AVFoundation
@@ -19,9 +16,9 @@ public protocol CameraPickerItem: Identifiable where ID == UUID {
 }
 
 public struct ImageCameraPickerItem: CameraPickerItem {
-    public let id = UUID()
+    public let id: UUID = .init()
     public var mediaType: Image
-	public var underlyingMediaType: UIImage
+    public var underlyingMediaType: UIImage
 
     public func save() async throws {
         let mediaSaver = MediaSaver()
@@ -30,7 +27,7 @@ public struct ImageCameraPickerItem: CameraPickerItem {
 }
 
 public struct MovieCameraPickerItem: CameraPickerItem {
-    public let id = UUID()
+    public let id: UUID = .init()
     public var mediaType: AVPlayer
     var underlyingMediaType: URL
 

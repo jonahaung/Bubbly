@@ -1,3 +1,8 @@
+//  MsgsScrollViewLayout+Models.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 //
 //  MsgsScrollViewLayout+Models.swift
 //  Conversation
@@ -19,6 +24,7 @@ extension MsgsScrollViewLayout {
         let layouts: [CellLayout]
         let signatureHash: Int
     }
+
     struct SizeKey: Hashable {
         let uid: String
         let width: CGFloat

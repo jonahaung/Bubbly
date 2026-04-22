@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  Store.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Core
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
 public final actor Store {
     public static let shared: Store = .init()
@@ -22,14 +25,14 @@ public final actor Store {
 
     public func hasSetUp(for id: String) -> Bool {
         modelContainer?.configurations.contains(
-            where: { $0.name == id },
+            where: { $0.name == id }
         ) == true
     }
 
     public func start(with id: String) {
         if let configurations = appContainer?.modelContainer.configurations,
            configurations.contains(
-               where: { $0.name == id },
+               where: { $0.name == id }
            ) {
             return
         }
@@ -41,19 +44,19 @@ public final actor Store {
         let modelExecutor = DefaultSerialModelExecutor(modelContext: context)
         msgStore = .init(
             modelContainer: modelContainer,
-            modelExecutor: modelExecutor,
+            modelExecutor: modelExecutor
         )
         contactStore = .init(
             modelContainer: modelContainer,
-            modelExecutor: modelExecutor,
+            modelExecutor: modelExecutor
         )
         groupStore = .init(
             modelContainer: modelContainer,
-            modelExecutor: modelExecutor,
+            modelExecutor: modelExecutor
         )
         conversationPropertiesStore = .init(
             modelContainer: modelContainer,
-            modelExecutor: modelExecutor,
+            modelExecutor: modelExecutor
         )
         self.appContainer = appContainer
     }

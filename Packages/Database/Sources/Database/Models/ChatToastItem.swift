@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  ChatToastItem.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import XUI
+import Foundation
 
 public enum ChatToastItem: Conformable {
     case scrollDownButton

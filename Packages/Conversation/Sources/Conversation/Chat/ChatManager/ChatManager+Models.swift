@@ -1,12 +1,10 @@
-//
 //  ChatManager+Models.swift
-//  Conversation
 //
-//  Created by Aung Ko Min on 19/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Foundation
 import Database
+import Foundation
 
 extension ChatManager {
     struct State: Equatable {

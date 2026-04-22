@@ -1,9 +1,11 @@
-// © 2026 Aung Ko Min
+//  IdentifiedArray.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Foundation
 
 public struct IdentifiedArray<ID: Hashable, Element>: Sequence {
-    
 
     public init(id: KeyPath<Element, ID>) {
         idKeyPath = id
@@ -118,8 +120,6 @@ public struct IdentifiedArray<ID: Hashable, Element>: Sequence {
     public func makeIterator() -> IndexingIterator<[Element]> {
         elements.makeIterator()
     }
-
-    
 
     private let idKeyPath: KeyPath<Element, ID>
     private var elements: [Element]

@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  Message.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 //
 //  MsgSnapshot.swift
@@ -8,8 +11,8 @@
 //
 import Core
 import CoreImage
-import Foundation
 import SwiftData
+import Foundation
 
 // MARK: - Message
 
@@ -32,7 +35,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         date: Date,
         deliveryStatus: DeliveryStatus,
         attachments: [Attachment],
-        reactions: [Reaction],
+        reactions: [Reaction]
     ) {
         self.uid = uid
         self.senderID = senderID
@@ -42,7 +45,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         self.deliveryStatus = deliveryStatus
         self.attachments = attachments
         self.reactions = reactions
-        self.isSender = senderID == (try? CurrentUserID.get())
+        isSender = senderID == (try? CurrentUserID.get())
     }
 
     public init(_ rMsg: RMsg) {
@@ -54,7 +57,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
             date: ServerTime(stringLiteral: rMsg.date).date,
             deliveryStatus: rMsg.deliveryStatus,
             attachments: rMsg.attachments,
-            reactions: rMsg.reactions,
+            reactions: rMsg.reactions
         )
     }
 }

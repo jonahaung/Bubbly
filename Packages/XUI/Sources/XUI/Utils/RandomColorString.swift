@@ -1,5 +1,6 @@
+//  RandomColorString.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -29,7 +30,7 @@ public extension String {
 }
 
 public extension Color {
-	@MainActor func readableText(over background: Color) -> some View {
-		apcaForeground(self, over: background, fontSize: 17, weight: .regular)
-	}
+    @MainActor func readableText(over background: Color) -> some View {
+        apcaForeground(self, over: background, fontSize: 17, weight: .regular)
+    }
 }

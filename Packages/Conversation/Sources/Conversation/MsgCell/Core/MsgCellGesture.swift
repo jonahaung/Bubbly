@@ -1,17 +1,25 @@
+//  MsgCellGesture.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import XUI
+import SwiftUI
+
 // © 2026 Aung Ko Min
 import Database
 import Services
-import SwiftUI
-import XUI
+
 private enum MsgCellGestureThresholds {
     static let dragMinDistance: CGFloat = 80
     static let markTrigger: CGFloat = 170
 }
+
 @Observable final class GestureViewModel {
     var draggedOffset: CGFloat = 0
     var isLongPressActive = false
     @ObservationIgnored private(set) var draggedLimitReached = false
-    func applyDrag(translation: CGFloat, isSender: Bool, onMark: () -> Void, ) {
+    func applyDrag(translation: CGFloat, isSender: Bool, onMark: () -> Void ) {
         guard isValidDirection(translation, isSender: isSender) else {
             resetOffsetIfNeeded()
             return
@@ -28,6 +36,7 @@ private enum MsgCellGestureThresholds {
             lastAppliedOffset = rounded
         }
     }
+
     func reset(animated: Bool) {
         draggedLimitReached = false
         guard draggedOffset != 0 else { return }
@@ -41,18 +50,21 @@ private enum MsgCellGestureThresholds {
             lastAppliedOffset = 0
         }
     }
+
     @ObservationIgnored private var lastAppliedOffset: CGFloat = 0
-    private func isValidDirection(_ translation: CGFloat, isSender: Bool, ) -> Bool {
+    private func isValidDirection(_ translation: CGFloat, isSender: Bool ) -> Bool {
         isSender
             ? translation < -MsgCellGestureThresholds.dragMinDistance
             : translation > MsgCellGestureThresholds.dragMinDistance
     }
+
     private func resetOffsetIfNeeded() {
         guard !draggedLimitReached else { return }
         draggedOffset = 0
         lastAppliedOffset = 0
     }
 }
+
 struct MsgCellGesture<Content: View>: View {
     let content: () -> Content
     var body: some View {
@@ -62,23 +74,27 @@ struct MsgCellGesture<Content: View>: View {
             in: .local
         ) { _ in activateLongPressIfNeeded() }
     }
+
     @Environment(MsgCellViewModel.self) private var viewModel
     @Environment(\.msgCellActions) private var sendInteraction
     @State private var model: GestureViewModel = .init()
 }
+
 extension MsgCellGesture {
     private var doubleTapGesture: some Gesture {
         TapGesture(count: 2).onEnded { sendInteraction?(.onTapMsg(viewModel.id)) }
     }
+
     private var dragGesture: some Gesture {
         DragGesture(
-            minimumDistance: MsgCellGestureThresholds.dragMinDistance, coordinateSpace: .local,
+            minimumDistance: MsgCellGestureThresholds.dragMinDistance, coordinateSpace: .local
         ).onChanged { value in
             model.applyDrag(
-                translation: value.translation.width, isSender: viewModel.state.isSender,
+                translation: value.translation.width, isSender: viewModel.state.isSender
             ) { sendInteraction?(.onMarkMsg(viewModel.msg)) }
         }.onEnded { _ in model.reset(animated: true) }
     }
+
     @ViewBuilder private var longPressOverlay: some View {
         if model.isLongPressActive {
             Color.clear.allowsHitTesting(false).accessibilityHidden(true).onGeometryChange(
@@ -88,11 +104,12 @@ extension MsgCellGesture {
             } action: { frame in
                 model.isLongPressActive = false
                 withTransaction(.withoutAnimation()) {
-                    sendInteraction?(.onFocusMsgBubble(.init(id: viewModel.id, frame: frame), ), )
+                    sendInteraction?(.onFocusMsgBubble(.init(id: viewModel.id, frame: frame) ) )
                 }
             }
         }
     }
+
     private func activateLongPressIfNeeded() {
         guard !model.isLongPressActive else { return }
         DispatchQueue.main.async { model.isLongPressActive = true }

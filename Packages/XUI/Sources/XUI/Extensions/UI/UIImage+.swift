@@ -1,13 +1,13 @@
+//  UIImage+.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
 
 public extension UIImage {
     @inlinable
-    @concurrent
-    func resizedImage(maxSize: CGFloat) async -> UIImage? {
+    func resizedImage(maxSize: CGFloat) -> UIImage? {
         let maxSizePixels = maxSize * scale
         let originalWidth = size.width
         let originalHeight = size.height

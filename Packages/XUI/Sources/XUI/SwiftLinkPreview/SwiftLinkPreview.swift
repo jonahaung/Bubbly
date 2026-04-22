@@ -1,5 +1,6 @@
+//  SwiftLinkPreview.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -19,8 +20,6 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 
     /// We keep a session with a delegate to force GET on redirects.
     public private(set) var session: URLSession
-
-    
 
     public init(
         session: URLSession? = nil,
@@ -164,10 +163,10 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
                                     regex: Regex.metaTagContentPattern,
                                     index: 2
                                 )?
-                                .decoded.extendedTrim,
-                                let redirectString = value.split(separator: ";")
-                                .first(where: { $0.lowercased().starts(with: "url=") })?
-                                .split(separator: "=", maxSplits: 1).last {
+                                    .decoded.extendedTrim,
+                                    let redirectString = value.split(separator: ";")
+                                        .first(where: { $0.lowercased().starts(with: "url=") })?
+                                        .split(separator: "=", maxSplits: 1).last {
                                 let redirectTarget = String(redirectString)
                                 if let redirectURL = URL(string: addImagePrefixIfNeeded(
                                     redirectTarget,
@@ -193,7 +192,7 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 
     /// Extract HTML code and the information contained on it
     private func extractInfo(response: SwiftLinkPreviewResponse) async throws
-        -> SwiftLinkPreviewResponse {
+    -> SwiftLinkPreviewResponse {
         try Task.checkCancellation()
         let url = response.finalUrl
 
@@ -206,8 +205,7 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
             return result
         } else {
             guard let sourceUrl = url.scheme == "http" || url
-                .scheme == "https" ? url : URL(string: "http://\(url)")
-            else {
+                .scheme == "https" ? url : URL(string: "http://\(url)") else {
                 throw SwiftLinkPreviewError.invalidURL(url.absoluteString)
             }
 
@@ -285,7 +283,7 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
         _ htmlCode: String,
         response: SwiftLinkPreviewResponse
     )
-        -> SwiftLinkPreviewResponse {
+    -> SwiftLinkPreviewResponse {
         var result = crawIcon(htmlCode, result: response)
         let sanitizedHtmlCode = htmlCode.deleteTagByPattern(Regex.linkPattern).extendedTrim
 
@@ -307,14 +305,14 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
         if let range = absoluteString.range(of: "url="),
            let lastChar = absoluteString.last,
            let lastCharIndex = absoluteString
-           .range(of: String(lastChar), options: .backwards, range: nil, locale: nil) {
-            absoluteString = String(absoluteString[range.upperBound..<lastCharIndex.upperBound])
+               .range(of: String(lastChar), options: .backwards, range: nil, locale: nil) {
+            absoluteString = String(absoluteString[range.upperBound ..< lastCharIndex.upperBound])
 
             if let range = absoluteString.range(of: "&"),
                let firstChar = absoluteString.first,
                let firstCharIndex = absoluteString.firstIndex(of: firstChar) {
                 absoluteString =
-                    String(absoluteString[firstCharIndex..<absoluteString
+                    String(absoluteString[firstCharIndex ..< absoluteString
                             .index(before: range.upperBound)])
 
                 if let decoded = absoluteString.removingPercentEncoding,
@@ -338,7 +336,7 @@ public final class SwiftLinkPreview: NSObject, @unchecked Sendable {
 
     public func formatImageURLs(_ array: [String]?, base: String?) -> [String]? {
         guard var array else { return nil }
-        for i in 0..<array.count {
+        for i in 0 ..< array.count {
             if let formatted = formatImageURL(array[i], base: base) {
                 array[i] = formatted
             }

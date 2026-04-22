@@ -1,5 +1,6 @@
+//  Platform.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -12,24 +13,24 @@ public enum Platform: Sendable {
     case visionOS
 
     #if os(macOS)
-    static let current = macOS
+        static let current = macOS
     #elseif os(iOS)
-    static let current = iOS
+        static let current = iOS
     #elseif os(tvOS)
-    static let current = tvOS
+        static let current = tvOS
     #elseif os(watchOS)
-    static let current = watchOS
+        static let current = watchOS
     #elseif os(visionOS)
-    static let current = visionOS
+        static let current = visionOS
     #else
-    #error("Unsupported platform")
+        #error("Unsupported platform")
     #endif
 
     public static var isSimulator: Bool {
         #if targetEnvironment(simulator)
-        return true
+            return true
         #else
-        return false
+            return false
         #endif
     }
 }
@@ -52,9 +53,9 @@ public extension View {
      ```
      */
     @ViewBuilder
-    func ifPlatform<Content: View>(
+    func ifPlatform(
         _ operatingSystems: Platform...,
-        modifier: (Self) -> Content
+        modifier: (Self) -> some View
     ) -> some View {
         if operatingSystems.contains(Platform.current) {
             modifier(self)

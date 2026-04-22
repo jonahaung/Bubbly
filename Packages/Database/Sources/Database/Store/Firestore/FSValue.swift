@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  FSValue.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 
@@ -39,13 +42,13 @@ public enum FSValue: Codable, Sendable {
         case let .map(dict):
             var mapContainer = container.nestedContainer(
                 keyedBy: CodingKeys.self,
-                forKey: .mapValue,
+                forKey: .mapValue
             )
             try mapContainer.encode(FSMap(fields: dict), forKey: .fields)
         case let .array(arr):
             var arrContainer = container.nestedContainer(
                 keyedBy: CodingKeys.self,
-                forKey: .arrayValue,
+                forKey: .arrayValue
             )
             try arrContainer.encode(FSArray(values: arr), forKey: .values)
         case .null:
@@ -75,14 +78,14 @@ public enum FSValue: Codable, Sendable {
         } else if container.contains(.mapValue) {
             let mapContainer = try container.nestedContainer(
                 keyedBy: CodingKeys.self,
-                forKey: .mapValue,
+                forKey: .mapValue
             )
             let fsMap = try mapContainer.decode(FSMap.self, forKey: .fields)
             self = .map(fsMap.fields)
         } else if container.contains(.arrayValue) {
             let arrContainer = try container.nestedContainer(
                 keyedBy: CodingKeys.self,
-                forKey: .arrayValue,
+                forKey: .arrayValue
             )
             let fsArray = try arrContainer.decode(FSArray.self, forKey: .values)
             self = .array(fsArray.values)
@@ -92,8 +95,8 @@ public enum FSValue: Codable, Sendable {
             throw DecodingError.dataCorrupted(
                 .init(
                     codingPath: decoder.codingPath,
-                    debugDescription: "Unknown Firestore value type",
-                ),
+                    debugDescription: "Unknown Firestore value type"
+                )
             )
         }
     }

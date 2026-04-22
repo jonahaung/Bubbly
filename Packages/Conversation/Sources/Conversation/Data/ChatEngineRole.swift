@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  ChatEngineRole.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Database
-import FoundationModels
 import SwiftData
+import FoundationModels
 
 // MARK: - ChatEngineRole
 

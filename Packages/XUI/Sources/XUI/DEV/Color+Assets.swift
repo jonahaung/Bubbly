@@ -1,23 +1,22 @@
+//  Color+Assets.swift
 //
-//  Color.swift
-//  XUI
-//
-//  Created by Aung Ko Min on 9/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
+
 public extension Color {
-	static let background = Color(.background)
-	static let appPrimary = Color(.primary)
-	static let appSecondary = Color(.secondary)
-	static let appTertiary = Color(.tertiary)
-	static let primaryText = Color(.primaryText)
-	static let secondaryText = Color(.secondaryText)
-	static let tertiaryText = Color(.tertiaryText)
-    static let quaternaryText = Color(.quaternaryText)
-    static let quinaryText = Color(.quinaryText)
-	static let border = Color(.border)
-	static let shadow = Color(.shadow)
-    static let container = Color(.primary)
-    
+    static let background: Color = .init(.background)
+    static let appPrimary: Color = .init(.primary)
+    static let appSecondary: Color = .init(.secondary)
+    static let appTertiary: Color = .init(.tertiary)
+    static let primaryText: Color = .init(.primaryText)
+    static let secondaryText: Color = .init(.secondaryText)
+    static let tertiaryText: Color = .init(.tertiaryText)
+    static let quaternaryText: Color = .init(.quaternaryText)
+    static let quinaryText: Color = .init(.quinaryText)
+    static let border: Color = .init(.border)
+    static let shadow: Color = .init(.shadow)
+    static let container: Color = .init(.primary)
+
 }

@@ -1,12 +1,15 @@
-// © 2026 Aung Ko Min
+//  VelocityTracker.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-    import CoreGraphics
     import QuartzCore
+    import CoreGraphics
 
     struct VelocityTracker {
         private(set) var velocity: CGFloat = 0

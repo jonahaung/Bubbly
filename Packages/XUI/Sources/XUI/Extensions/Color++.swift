@@ -1,5 +1,6 @@
+//  Color++.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -20,15 +21,15 @@ public extension Color {
 
 #if canImport(UIKit)
 
-import UIKit
+    import UIKit
 
-public typealias UXColor = UIColor
+    public typealias UXColor = UIColor
 
 #elseif canImport(AppKit)
 
-import AppKit
+    import AppKit
 
-public typealias UXColor = NSColor
+    public typealias UXColor = NSColor
 
 #endif
 

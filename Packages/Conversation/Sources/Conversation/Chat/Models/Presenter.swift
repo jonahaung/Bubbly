@@ -1,10 +1,13 @@
-// © 2026 Aung Ko Min
+//  Presenter.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Database
-import Foundation
-import Services
-import SwiftUI
 import XUI
+import SwiftUI
+import Database
+import Services
+import Foundation
 
 // MARK: - Presenter
 
@@ -12,7 +15,7 @@ import XUI
 @Observable
 final class Presenter {
 
-    init(_ conID: String) {
+    init(_: String) {
         state = .init()
     }
 
@@ -25,11 +28,11 @@ final class Presenter {
     }
 
     struct State: Equatable, Sendable {
-        var toast: ChatToastItem? = nil
-        var dateText: String? = nil
-        var overlayItem: OverlayMenuItem? = nil
-        var bottomAccessory: AccessoryBarItem? = nil
-        var typingStatus: AnyMsgData.TypingStatusPayload? = nil
+        var toast: ChatToastItem?
+        var dateText: String?
+        var overlayItem: OverlayMenuItem?
+        var bottomAccessory: AccessoryBarItem?
+        var typingStatus: AnyMsgData.TypingStatusPayload?
     }
 
     var state: State
@@ -38,15 +41,15 @@ final class Presenter {
 extension Presenter {
     func send(_ intent: Intent) {
         switch intent {
-        case .toast(let newValue):
+        case let .toast(newValue):
             state.toast = newValue
-        case .date(let newValue):
+        case let .date(newValue):
             state.dateText = newValue
-        case .overlayItem(let newValue):
+        case let .overlayItem(newValue):
             state.overlayItem = newValue
-        case .bottomAccessory(let newValue):
+        case let .bottomAccessory(newValue):
             state.bottomAccessory = newValue
-        case .typing(let newValue):
+        case let .typing(newValue):
             state.typingStatus = newValue
         }
     }

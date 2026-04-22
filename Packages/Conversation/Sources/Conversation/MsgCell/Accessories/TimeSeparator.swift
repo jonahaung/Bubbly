@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  TimeSeparator.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Services
-import SwiftUI
 import XUI
+import Core
+import SwiftUI
+import Services
 
 struct TimeSeparator: View, @MainActor Equatable {
     @Environment(\.typography) private var typography
@@ -20,8 +23,9 @@ struct TimeSeparator: View, @MainActor Equatable {
         )
         .flexible(.horizontal)
     }
+
     let dateString: String?
-    
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.dateString == rhs.dateString
     }

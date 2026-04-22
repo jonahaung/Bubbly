@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  Emoji.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //

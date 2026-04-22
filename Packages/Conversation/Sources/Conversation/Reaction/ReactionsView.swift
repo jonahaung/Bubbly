@@ -1,9 +1,14 @@
-// © 2026 Aung Ko Min
+//  ReactionsView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
+
+    import SwiftUI
 
 //
     //  ReactionsView.swift
@@ -12,7 +17,6 @@
     //  Created by Aung Ko Min on 5/11/25.
 //
     import Database
-    import SwiftUI
 
     public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable, CaseIterable {
         public static var allCases: [ReactionType] {
@@ -51,14 +55,14 @@
         }
 
         public init?(rawValue: String) {
-            switch rawValue {
-            case "❤️": self = .heart
-            case "👍": self = .thumbUp
-            case "👎": self = .thumbDown
-            case "😊": self = .smile
-            case "😂": self = .laugh
-            case "😓": self = .sad
-            default: self = .custom(rawValue)
+            self = switch rawValue {
+            case "❤️": .heart
+            case "👍": .thumbUp
+            case "👎": .thumbDown
+            case "😊": .smile
+            case "😂": .laugh
+            case "😓": .sad
+            default: .custom(rawValue)
             }
         }
     }
@@ -128,7 +132,7 @@
         private func animateAppearance() {
             withAnimation(.interpolatingSpring(
                 stiffness: Constants.springStiffness,
-                damping: Constants.springDamping,
+                damping: Constants.springDamping
             ).delay(Constants.appearDelayIncrement / 2)) {
                 for each in $allStates {
                     each.wrappedValue.count += 1

@@ -1,12 +1,15 @@
-// © 2026 Aung Ko Min
+//  ComposeBarAttachmentView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-    import SwiftUI
     import XUI
+    import SwiftUI
 
     extension ComposeBar {
         struct ComposeBarAttachmentView: View {
@@ -30,7 +33,7 @@
                                         .padding(5)
                                         .background(Color.red, in: .circle)
                                 }
-                                .buttonStyle(.borderless),
+                                .buttonStyle(.borderless)
                             )
                             .transition(.move(edge: .leading).animation(.bouncy))
                             .id(attachment.uid)

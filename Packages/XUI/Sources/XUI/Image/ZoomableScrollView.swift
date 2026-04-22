@@ -1,5 +1,6 @@
+//  ZoomableScrollView.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Combine
@@ -7,7 +8,7 @@ import SwiftUI
 
 public struct ZoomableScrollView<Content: View>: View {
     private let content: Content
-    @State private var doubleTap = PassthroughSubject<Void, Never>()
+    @State private var doubleTap: PassthroughSubject<Void, Never> = .init()
 
     public init(@ViewBuilder content: () -> Content) {
         self.content = content()
@@ -42,7 +43,7 @@ private struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepresenta
 
     // MARK: - Coordinator
 
-    class Coordinator: NSObject, UIScrollViewDelegate {
+    final class Coordinator: NSObject, UIScrollViewDelegate {
         let hostingController: UIHostingController<Content>
 
         init(hostingController: UIHostingController<Content>) {
@@ -54,7 +55,7 @@ private struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepresenta
 // MARK: - ZoomableScrollViewController
 
 extension ZoomableScrollViewImpl {
-    class ZoomableScrollViewController: UIViewController, UIScrollViewDelegate {
+    final class ZoomableScrollViewController: UIViewController, UIScrollViewDelegate {
         let coordinator: Coordinator
 
         private let scrollView: UIScrollView = {
@@ -80,7 +81,7 @@ extension ZoomableScrollViewImpl {
 
         @available(*, unavailable)
         required init?(coder _: NSCoder) {
-            fatalError("explanation")
+            nil
         }
 
         init(coordinator: Coordinator, doubleTap: AnyPublisher<Void, Never>) {

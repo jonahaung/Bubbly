@@ -1,8 +1,6 @@
-//
 //  UnclippedTextRenderer.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 18/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -19,8 +17,8 @@ struct UnclippedTextRenderer: TextRenderer {
     }
 }
 
-extension View {
-    public nonisolated func unclippedTextRenderer() -> some View {
+public extension View {
+    nonisolated func unclippedTextRenderer() -> some View {
         textRenderer(UnclippedTextRenderer())
     }
 }

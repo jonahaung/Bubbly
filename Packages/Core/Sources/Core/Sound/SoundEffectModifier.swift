@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  SoundEffectModifier.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 //
 //  SoundEffectModifier.swift
@@ -6,28 +9,28 @@
 //
 //  Created by Aung Ko Min on 10/3/26.
 //
-import AVFoundation
-import CoreHaptics
 import SwiftUI
+import CoreHaptics
+import AVFoundation
 import UniformTypeIdentifiers
 
 public extension View {
     func soundEffect(
         _ audio: SoundEffect,
-        trigger: some Equatable,
+        trigger: some Equatable
     ) -> some View {
         modifier(SoundEffectModifier(audio: audio, trigger: trigger))
     }
 
     func soundEffect(
         _ sound: Sound,
-        trigger: some Equatable,
+        trigger: some Equatable
     ) -> some View {
         modifier(
             SoundEffectModifier(
                 audio: .init(sound.rawValue, bundle: .module),
-                trigger: trigger,
-            ),
+                trigger: trigger
+            )
         )
     }
 }

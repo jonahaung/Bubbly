@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  NetworkMonitor.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import Network
+import Foundation
 
 @MainActor
 final class NetworkMonitor {

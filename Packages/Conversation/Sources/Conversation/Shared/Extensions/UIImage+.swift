@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  UIImage+.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
@@ -17,7 +20,7 @@
             let scale = maxDimension / maxSide
             let newSize = CGSize(
                 width: size.width * scale,
-                height: size.height * scale,
+                height: size.height * scale
             )
 
             let format = UIGraphicsImageRendererFormat.default()

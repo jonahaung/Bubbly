@@ -1,9 +1,10 @@
+//  SystemImageWithShape.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import SFSafeSymbols
 import SwiftUI
+import SFSafeSymbols
 
 public struct SystemImageWithShape: View {
     private let icon: SFSymbol

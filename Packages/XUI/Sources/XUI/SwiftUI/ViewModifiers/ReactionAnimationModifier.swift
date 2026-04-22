@@ -1,5 +1,6 @@
+//  ReactionAnimationModifier.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -9,7 +10,7 @@ private struct ReactionAnimationModifier<T: Equatable & Sendable>: ViewModifier 
     struct AnimationValues {
         var scale = 1.0
         var verticalStretch = 1.0
-        var angle = Angle.zero
+        var angle: Angle = .zero
         var offset: CGSize = .zero
     }
 

@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  GroupStorage.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 
@@ -93,8 +96,8 @@ public extension GroupStorage {
         throw MissingValueError(key: key.name)
     }
 
-    func delete<Value>(
-        _ key: StorageKey<Value>
+    func delete(
+        _ key: StorageKey<some Any>
     ) {
         store.removeObject(forKey: key.name)
     }
@@ -176,11 +179,11 @@ public actor GroupStorageActor {
         storage.set(value, for: key)
     }
 
-    public func save<Value: Encodable>(_ value: Value?, for key: GroupStorageKey) {
+    public func save(_ value: (some Encodable)?, for key: GroupStorageKey) {
         storage.save(value, for: key)
     }
 
-    public func delete<Value>(_ key: StorageKey<Value>) {
+    public func delete(_ key: StorageKey<some Any>) {
         storage.delete(key)
     }
 

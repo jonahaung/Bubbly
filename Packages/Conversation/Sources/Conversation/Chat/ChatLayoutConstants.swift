@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  ChatLayoutConstants.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
-import UIKit
 import XUI
+import UIKit
+import Foundation
 
 public enum ChatLayoutConstants {
     public enum Cell {

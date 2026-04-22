@@ -1,30 +1,28 @@
-//
 //  Executor.swift
-//  
 //
-//  Created by Danny Sung on 6/18/24.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
 
-class Executor: @unchecked Sendable {
+final class Executor: @unchecked Sendable {
 
     let taskPriority: TaskPriority?
 
-    public typealias closure = @Sendable () async -> Void
+    typealias closure = @Sendable () async -> Void
     private var task: Task<Void, Never>!
     private var taskStream: AsyncStream<closure>!
     private var continuation: AsyncStream<closure>.Continuation?
 
-    init(priority: TaskPriority?=nil, _ completion: @Sendable @escaping () async -> Void = {}) {
-        self.taskPriority = priority
+    init(priority: TaskPriority? = nil, _ completion: @Sendable @escaping () async -> Void = {}) {
+        taskPriority = priority
 
         let taskStream = AsyncStream<closure>(bufferingPolicy: .unbounded) { continuation in
             self.continuation = continuation
         }
         self.taskStream = taskStream
 
-        self.task = Task.detached(priority: priority) {
+        task = Task.detached(priority: priority) {
             for await closure in taskStream {
                 await closure()
 
@@ -37,10 +35,9 @@ class Executor: @unchecked Sendable {
         }
     }
 
-
     func cancel() {
-        self.task.cancel()
-        self.continuation!.finish()
+        task.cancel()
+        continuation!.finish()
     }
 
     enum TaskState {
@@ -48,11 +45,11 @@ class Executor: @unchecked Sendable {
         case didComplete
     }
 
-    func async(_ closure: @escaping closure, block: @Sendable @escaping (TaskState, Task<Void,Never>) async -> Void = { _,_ in }) {
-        self.continuation!.yield { [weak self] in
+    func async(_ closure: @escaping closure, block: @Sendable @escaping (TaskState, Task<Void, Never>) async -> Void = { _, _ in }) {
+        continuation!.yield { [weak self] in
             guard let self else { return }
 
-            let task = Task.detached(priority: self.taskPriority) {
+            let task = Task.detached(priority: taskPriority) {
                 await closure()
             }
 

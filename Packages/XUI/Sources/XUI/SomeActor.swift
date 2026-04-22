@@ -1,5 +1,6 @@
+//  SomeActor.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
@@ -7,5 +8,5 @@ import Foundation
 @globalActor
 public struct SomeActor {
     public actor SomeActor {}
-    public static let shared = SomeActor()
+    public static let shared: SomeActor = .init()
 }

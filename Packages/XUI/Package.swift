@@ -15,10 +15,10 @@ let package = Package(
         )
     ],
     dependencies: [
-		.package(
-			url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
-			.upToNextMajor(from: "5.3.0")
-		),
+        .package(
+            url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
+            .upToNextMajor(from: "5.3.0")
+        ),
         .package(name: "Pow", path: "../Pow")
     ],
     targets: [
@@ -26,11 +26,11 @@ let package = Package(
             name: "XUI",
             dependencies: [
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
-				.product(name: "Pow", package: "Pow")
+                .product(name: "Pow", package: "Pow")
             ],
-			resources: [
-				.process("Resources")
-			],
+            resources: [
+                .process("Resources")
+            ]
         ),
         .testTarget(
             name: "XUITests",

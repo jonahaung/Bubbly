@@ -1,8 +1,6 @@
-//
 //  AutoVisualizer.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 14/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Combine
@@ -12,6 +10,7 @@ public extension View {
     func visualizeTouches(_ isEnabled: Bool) -> some View {
         modifier(TouchVisualizer(isEnabled: isEnabled))
     }
+
     func visualizeTouches() -> some View {
         modifier(AutoVisualizer())
     }
@@ -128,7 +127,7 @@ private struct TouchVisualizerGesture: UIGestureRecognizerRepresentable {
     final class Coordinator: NSObject, UIGestureRecognizerDelegate {
         func gestureRecognizer(
             _: UIGestureRecognizer,
-            shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer,
+            shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer
         ) -> Bool {
             true
         }
@@ -152,7 +151,7 @@ private struct TouchVisualizerGesture: UIGestureRecognizerRepresentable {
 
     func handleUIGestureRecognizerAction(
         _ recognizer: Self.UIGestureRecognizerType,
-        context: Self.Context,
+        context: Self.Context
     ) {
         guard isEnabled else {
             return

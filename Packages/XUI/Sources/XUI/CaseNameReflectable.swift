@@ -1,9 +1,10 @@
+//  CaseNameReflectable.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import SwiftUI
+import Foundation
 
 public protocol CaseNameReflectable {
     var caseName: String { get }
@@ -25,9 +26,9 @@ public extension CaseNameReflectable {
         return spaced.capitalized
     }
 
-	var rawValue: String {
-		caseName
-	}
+    var rawValue: String {
+        caseName
+    }
 }
 
 extension Visibility: CaseNameReflectable {}

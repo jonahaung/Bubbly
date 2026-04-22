@@ -1,5 +1,6 @@
+//  Array+.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -49,7 +50,7 @@ public extension Array where Element: Identifiable {
         let safeRadius = Swift.max(0, radius)
         let lowerBound = Swift.max(0, index - safeRadius)
         let upperBound = Swift.min(count - 1, index + safeRadius)
-        return Array(self[lowerBound...upperBound])
+        return Array(self[lowerBound ... upperBound])
     }
 }
 
@@ -57,7 +58,7 @@ public extension Array where Element: Identifiable, Element.ID: Hashable {
     @inlinable
     func duplicates() -> [Element] {
         var seen = Set<Element.ID>()
-        var duplicates: [Element] = []
+        var duplicates = [Element]()
         duplicates.reserveCapacity(count / 2)
 
         for item in self where !seen.insert(item.id).inserted {
@@ -171,7 +172,7 @@ public extension Array {
         let lower = Swift.max(range.lowerBound, startIndex)
         let upper = Swift.min(range.upperBound, endIndex)
         guard lower < upper else { return [] }
-        return Array(self[lower..<upper])
+        return Array(self[lower ..< upper])
     }
 
     // MARK: - Mutating
@@ -209,7 +210,7 @@ public extension Array where Element: Identifiable, Element.ID: Hashable {
     ) {
         guard !newElements.isEmpty else { return }
 
-        var indexByID: [Element.ID: Int] = [:]
+        var indexByID = [Element.ID: Int]()
         indexByID.reserveCapacity(count)
         for (index, element) in enumerated() {
             indexByID[element.id] = index
@@ -248,7 +249,7 @@ public extension Array where Element: Identifiable, Element.ID: Hashable {
             return
         }
 
-        var uniqueNewElements: [Element] = []
+        var uniqueNewElements = [Element]()
         var seenNewIDs = Set<Element.ID>()
 
         for element in newElements where seenNewIDs.insert(element.id).inserted {
@@ -257,12 +258,12 @@ public extension Array where Element: Identifiable, Element.ID: Hashable {
 
         guard !uniqueNewElements.isEmpty else { return }
 
-        var result: [Element] = []
+        var result = [Element]()
         var resultIDs = Set<Element.ID>()
         let newIDs = Set(uniqueNewElements.map(\.id))
 
         // Add elements before insertion point
-        for idx in 0..<insertionIndex {
+        for idx in 0 ..< insertionIndex {
             let element = self[idx]
             if replaceExisting, newIDs.contains(element.id) {
                 continue
@@ -278,7 +279,7 @@ public extension Array where Element: Identifiable, Element.ID: Hashable {
         }
 
         // Add elements after insertion point
-        for idx in insertionIndex..<count {
+        for idx in insertionIndex ..< count {
             let element = self[idx]
             if replaceExisting, newIDs.contains(element.id) {
                 continue

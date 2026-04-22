@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  AnyMsgData.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import FirebaseAuth
-import Foundation
 import XUI
+import Foundation
+import FirebaseAuth
 
 // MARK: - AnyMsgData
 

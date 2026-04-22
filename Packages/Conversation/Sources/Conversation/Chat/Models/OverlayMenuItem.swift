@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  OverlayMenuItem.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Database
-import Foundation
 import Services
+import Foundation
 
 struct OverlayMenuItem: Hashable, Sendable, Identifiable {
     let id: String

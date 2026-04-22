@@ -1,11 +1,13 @@
-// © 2026 Aung Ko Min
+//  Identified.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 // MARK: - Identified
 
 /// A wrapper around a value and a hashable identifier that conforms to identifiable.
 @dynamicMemberLookup
 public struct Identified<ID: Hashable, Value>: Identifiable {
-    
 
     /// Initializes an identified value from a given value and a hashable identifier.
     ///
@@ -52,14 +54,14 @@ public struct Identified<ID: Hashable, Value>: Identifiable {
     public var value: Value
 
     public subscript<Subject>(
-        dynamicMember keyPath: WritableKeyPath<Value, Subject>,
+        dynamicMember keyPath: WritableKeyPath<Value, Subject>
     ) -> Subject {
         get { self.value[keyPath: keyPath] }
         set { self.value[keyPath: keyPath] = newValue }
     }
 
     public subscript<Subject>(
-        dynamicMember keyPath: KeyPath<Value, Subject>,
+        dynamicMember keyPath: KeyPath<Value, Subject>
     ) -> Subject {
         self.value[keyPath: keyPath]
     }

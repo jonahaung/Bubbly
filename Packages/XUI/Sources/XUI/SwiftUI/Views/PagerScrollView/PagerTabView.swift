@@ -1,12 +1,13 @@
+//  PagerTabView.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
 
 @available(iOS 18.0, *)
 public struct PagerTabView<Item, Content, TabButton>: View
-    where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, TabButton: View {
+where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, TabButton: View {
     private let items: [Item]
     private let content: (Item) -> Content
     private let tab: (Item, Bool) -> TabButton

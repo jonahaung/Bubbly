@@ -2,6 +2,7 @@
 
 import SwiftUI
 import UIKit
+import Core
 
 // MARK: - BubbleCorner
 
@@ -85,11 +86,11 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
     @MainActor
     public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle {
         UnevenRoundedRectangle(
-            topLeadingRadius: topLeadingRadius ? cornerRadius : 2,
-            bottomLeadingRadius: bottomLeadingRadius ? cornerRadius : 2,
-            bottomTrailingRadius: bottomTrailingRadius ? cornerRadius : 2,
-            topTrailingRadius: topTrailingRadius ? cornerRadius : 2,
-            style: .continuous,
+            topLeadingRadius: topLeadingRadius ? cornerRadius : 0,
+            bottomLeadingRadius: bottomLeadingRadius ? cornerRadius : 0,
+            bottomTrailingRadius: bottomTrailingRadius ? cornerRadius : 0,
+            topTrailingRadius: topTrailingRadius ? cornerRadius : 0,
+            style: .continuous
         )
     }
 

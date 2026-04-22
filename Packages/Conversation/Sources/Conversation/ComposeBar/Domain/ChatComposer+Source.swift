@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  ChatComposer+Source.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
+import SwiftUI
 import Database
 import Foundation
-import SwiftUI
-import XUI
 
 // MARK: - ChatComposer.Source
 

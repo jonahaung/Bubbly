@@ -1,9 +1,16 @@
+//  MsgAttachmentsView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import XUI
+import WebKit
+import SwiftUI
+
 // © 2026 Aung Ko Min
 import Database
 import Services
-import SwiftUI
-import WebKit
-import XUI
+
 struct MsgAttachmentsView: View {
     let attachments: [Attachment]
     let alignment: HorizontalAlignment
@@ -14,7 +21,7 @@ struct MsgAttachmentsView: View {
     @Environment(\.conversation) private var conversation
     @State private var uploadedAttachments: [Attachment] = []
     var body: some View {
-        AttachmentsDeck(items: attachments, alignment: alignment, ) { attachment in
+        AttachmentsDeck(items: attachments, alignment: alignment ) { attachment in
             AttachmentPreview(attachment: attachment) { item in
                 selection = item
             } onCompleteUpload: {
@@ -27,9 +34,11 @@ struct MsgAttachmentsView: View {
                 .presentationContentInteraction(.scrolls).presentationBackgroundInteraction(
                     .disabled
                 ).presentationBackground(.clear).navigationTransition(
-                    .zoom(sourceID: attachment.uid, in: namespace), )
+                    .zoom(sourceID: attachment.uid, in: namespace)
+                )
         }
     }
+
     private func onUploaded(attachment: Attachment) {
         uploadedAttachments.append(attachment)
         if attachments.count == uploadedAttachments.count {

@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  AppIcon.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import SwiftUI
 

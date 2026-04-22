@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  AppContainer.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Core
-import Foundation
 import SwiftData
+import Foundation
 
 // MARK: - AppSchemaV1
 
@@ -13,7 +16,7 @@ public enum AppSchemaV1: VersionedSchema {
             PContact.self,
             PMsg.self,
             PGroup.self,
-            PConversationProperties.self,
+            PConversationProperties.self
         ]
     }
 }
@@ -23,7 +26,7 @@ public enum AppSchemaV1: VersionedSchema {
 public enum AppSchemaMigrationPlan: SchemaMigrationPlan {
     public static var schemas: [any VersionedSchema.Type] {
         [
-            AppSchemaV1.self,
+            AppSchemaV1.self
         ]
     }
 
@@ -45,19 +48,19 @@ public final class AppContainer: Sendable {
             isStoredInMemoryOnly: false,
             allowsSave: true,
             groupContainer: .identifier(AppInformation.groupID),
-            cloudKitDatabase: .none,
+            cloudKitDatabase: .none
         )
         do {
             modelContainer = try ModelContainer(
                 for: schema,
                 migrationPlan: nil,
-                configurations: configuration,
+                configurations: configuration
             )
         } catch {
             if migrationPlan == nil,
                let legacyModelContainer = try? ModelContainer(
                    for: schema,
-                   configurations: configuration,
+                   configurations: configuration
                )
             {
                 modelContainer = legacyModelContainer

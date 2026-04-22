@@ -1,9 +1,10 @@
+//  ChatTypography.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import SwiftUI
 import UIKit
+import SwiftUI
 
 public struct Typography: Sendable {
     public let body: Font
@@ -34,8 +35,8 @@ public struct Typography: Sendable {
 }
 
 public extension Typography {
-    static let `default` = Typography(
-		body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize).leading(.tight),
+    static let `default`: Typography = .init(
+        body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize).leading(.tight),
         callout: .system(size: UIFont.preferredFont(forTextStyle: .callout).pointSize),
         subHeadline: .system(size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize),
         headLine:
@@ -62,5 +63,5 @@ public extension Typography {
 }
 
 public extension EnvironmentValues {
-    @Entry var typography = Typography.default
+    @Entry var typography: Typography = .default
 }

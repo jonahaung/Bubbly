@@ -1,3 +1,8 @@
+//  VisualizeAlignmentGuide.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 public extension View {
@@ -16,11 +21,11 @@ public extension View {
 
 struct AlignmentGuideVisualizationModifier<S: ShapeStyle>: ViewModifier {
     struct AligningLayout: Layout {
-        func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) -> CGSize {
             subviews.first?.sizeThatFits(proposal) ?? .zero
         }
 
-        func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()) {
             guard let dimensions = subviews.first?.dimensions(in: proposal) else { return }
 
             for (i, subview) in subviews.enumerated() {
@@ -44,17 +49,17 @@ struct AlignmentGuideVisualizationModifier<S: ShapeStyle>: ViewModifier {
     var alignments: [IdentifiedAlignment] = []
 
     init(content: S, _ alignments: [Alignment]) {
-        self.shapeStyle = content
+        shapeStyle = content
         self.alignments = alignments.map(IdentifiedAlignment.init)
     }
 
     init(content: S, _ alignmentGuides: [VerticalAlignment]) {
-        self.shapeStyle = content
+        shapeStyle = content
         self.alignmentGuides = alignmentGuides.map(AlignmentGuide.vertical)
     }
 
     init(content: S, _ alignmentGuides: [HorizontalAlignment]) {
-        self.shapeStyle = content
+        shapeStyle = content
         self.alignmentGuides = alignmentGuides.map(AlignmentGuide.horizontal)
     }
 
@@ -69,12 +74,12 @@ struct AlignmentGuideVisualizationModifier<S: ShapeStyle>: ViewModifier {
             Group {
                 ForEach(alignmentGuides) { guide in
                     switch guide {
-                    case .horizontal(let alignment):
+                    case let .horizontal(alignment):
                         Line(axis: .vertical)
                             .containerValue(\.horizontalAlignment, alignment)
                             .frame(maxWidth: 1, maxHeight: .infinity)
 
-                    case .vertical(let alignment):
+                    case let .vertical(alignment):
                         Line(axis: .horizontal)
                             .containerValue(\.verticalAlignment, alignment)
                             .frame(maxWidth: .infinity, maxHeight: 1)
@@ -128,8 +133,8 @@ enum AlignmentGuide: Identifiable {
 
     var id: some Hashable {
         switch self {
-        case .horizontal(let alignment): alignment.key
-        case .vertical(let alignment): alignment.key
+        case let .horizontal(alignment): alignment.key
+        case let .vertical(alignment): alignment.key
         }
     }
 }
@@ -154,7 +159,7 @@ struct IdentifiedAlignment: Identifiable {
 }
 
 #Preview {
-    @Previewable @State var offset: Date = .now
+    @Previewable @State var offset = Date.now
 
     HStack(alignment: .center) {
         Image(systemName: "leaf.fill").foregroundStyle(.green)

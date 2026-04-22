@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  EmojiCategoryType.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
@@ -19,8 +22,6 @@
         case objects
         case symbols
         case flags
-
-        
 
         var title: String {
             switch self {

@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  RMsg.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import XUI
+import Foundation
 
 public struct RMsg: Codable, Sendable, Hashable {
     public let uid: String
@@ -21,7 +24,7 @@ public struct RMsg: Codable, Sendable, Hashable {
         text: String?,
         incomingStatus: DeliveryStatus,
         attachments: [Attachment],
-        reactions: [Reaction],
+        reactions: [Reaction]
     ) {
         self.uid = uid
         self.conID = conID
@@ -42,7 +45,7 @@ public struct RMsg: Codable, Sendable, Hashable {
             text: msg.text,
             incomingStatus: msg.deliveryStatus,
             attachments: msg.attachments,
-            reactions: msg.reactions,
+            reactions: msg.reactions
         )
     }
 }

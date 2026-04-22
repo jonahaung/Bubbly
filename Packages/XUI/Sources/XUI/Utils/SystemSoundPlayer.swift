@@ -1,9 +1,10 @@
+//  SystemSoundPlayer.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import AudioToolbox
 import SwiftUI
+import AudioToolbox
 
 public struct SystemSoundItem: Identifiable, Hashable, Sendable {
     public let id: UInt32
@@ -33,7 +34,7 @@ public enum SystemSoundCatalog {
         .init(id: 1057, name: "Call Waiting"),
         .init(id: 1058, name: "Call Waiting 2"),
         .init(id: 1104, name: "Tock"),
-        .init(id: 1157, name: "Tink"),
+        .init(id: 1157, name: "Tink")
     ]
 }
 
@@ -82,8 +83,7 @@ public final class SystemSoundRegistry: ObservableObject {
 
     private static func applyStoredNames(to items: [SystemSoundItem]) -> [SystemSoundItem] {
         guard let stored = UserDefaults.standard
-            .dictionary(forKey: "xui.systemsounds.names") as? [String: String]
-        else {
+            .dictionary(forKey: "xui.systemsounds.names") as? [String: String] else {
             return items
         }
         return items.map { item in

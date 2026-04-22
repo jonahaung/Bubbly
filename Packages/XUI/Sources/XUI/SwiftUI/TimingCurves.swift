@@ -1,10 +1,7 @@
-//
 //  TimingCurves.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 10/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
-
 
 import SwiftUI
 
@@ -52,7 +49,7 @@ public extension Animation {
     static func ultraSmoothPower(duration: Double) -> Animation {
         .timingCurve(0.15, 0.9, 0.25, 1.0, duration: duration)
     }
-    
+
     static func ultraSmoothAggressive(duration: Double) -> Animation {
         .timingCurve(0.05, 1.0, 0.2, 1.0, duration: duration)
     }
@@ -107,7 +104,7 @@ public extension Animation {
     static func easeInOutExponential(duration: Double) -> Animation {
         .timingCurve(1, 0, 0, 1, duration: duration)
     }
-    
+
     static var linearSmooth: Animation {
         linearSmooth(duration: 0.5)
     }

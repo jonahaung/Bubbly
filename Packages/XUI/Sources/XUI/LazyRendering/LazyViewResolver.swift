@@ -1,8 +1,6 @@
-//
 //  LazyViewResolver.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 17/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -50,6 +48,7 @@ private struct DefaultLazyViewResolver: LazyViewResolver {
 public extension EnvironmentValues {
     @Entry var lazyViewResolver: any LazyViewResolver = DefaultLazyViewResolver()
 }
+
 @MainActor
 @frozen
 @_documentation(visibility: internal)

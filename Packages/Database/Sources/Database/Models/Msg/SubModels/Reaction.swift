@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  Reaction.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
 import Core
 import Foundation
-import XUI
 
 public struct Reaction: Codable, Sendable, Hashable, Equatable, Identifiable {
     public var id: String {

@@ -1,5 +1,6 @@
+//  UIApplication+.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -15,9 +16,11 @@ public extension UIApplication {
         }
         return windowScene
     }
+
     var keyWindow: UIWindow? {
         windowScene.keyWindow
     }
+
     func screenSize() -> CGSize {
         guard let keyWindow else {
             fatalError()
@@ -27,16 +30,17 @@ public extension UIApplication {
         }
         return windowScene.screen.bounds.inset(by: UIApplication.safeAreInset).integral.size
     }
-    
+
     func screenScale() -> CGFloat {
         let size = screenSize()
-        return size.width/size.height
+        return size.width / size.height
     }
-    
+
     var statusBarHeight: CGFloat {
         windowScene.statusBarManager?.statusBarFrame.height ?? .zero
     }
 }
+
 public extension UIApplication {
     static var safeAreInset: UIEdgeInsets {
         UIApplication.shared.keyWindow?.safeAreaInsets ?? .init()

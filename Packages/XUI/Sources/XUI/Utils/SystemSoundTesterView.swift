@@ -1,5 +1,6 @@
+//  SystemSoundTesterView.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -53,7 +54,7 @@ public struct SystemSoundTesterView: View {
     private func nameBinding(for id: UInt32) -> Binding<String> {
         .init(
             get: { registry.name(for: id) },
-            set: { registry.rename(id: id, name: $0) },
+            set: { registry.rename(id: id, name: $0) }
         )
     }
 }

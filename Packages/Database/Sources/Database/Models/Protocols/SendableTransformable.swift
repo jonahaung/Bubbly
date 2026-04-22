@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  SendableTransformable.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import SwiftData
+import Foundation
 
 public protocol SendableTransformable: PersistentModel, UIdentifiable {
     associatedtype SendableType: Sendable & Hashable & UIdentifiable

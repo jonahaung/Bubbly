@@ -1,5 +1,6 @@
+//  IDGenerator.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
@@ -8,7 +9,7 @@ public actor IDGenerator {
     public static let shared: IDGenerator = .init()
 
     private static let ascendingChars: Array = .init(
-        "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz",
+        "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz"
     )
 
     private static let descendingChars: Array = .init(ascendingChars.reversed())
@@ -44,8 +45,7 @@ public actor IDGenerator {
 
         if isDuplicateTimestamp {
             incrementRandomValues()
-        }
-        else {
+        } else {
             generateRandomValues()
         }
 
@@ -60,7 +60,7 @@ public actor IDGenerator {
     private func generateRandomValues() {
         for index in 0 ..< lastRandomValues.count {
             lastRandomValues[index] = Int(
-                64 * Double(arc4random()) / Double(UInt32.max),
+                64 * Double(arc4random()) / Double(UInt32.max)
             )
         }
     }

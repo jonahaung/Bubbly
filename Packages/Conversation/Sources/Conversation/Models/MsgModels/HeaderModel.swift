@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  HeaderModel.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Database
 import XUI
+import Database
 
 // MARK: - HeaderKind
 

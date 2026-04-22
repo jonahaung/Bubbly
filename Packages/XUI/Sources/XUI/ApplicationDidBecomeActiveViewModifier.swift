@@ -1,22 +1,19 @@
-//
 //  ApplicationDidBecomeActiveViewModifier.swift
-//  StackOv (Common module)
 //
-//  Created by Владислав Климов
-//  Copyright © 2021 Erik Basargin. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
 
 struct ApplicationDidBecomeActiveViewModifier: ViewModifier {
-    
+
     // MARK: - Properties
-    
+
     let action: () -> Void
     let didBecomeVisibleNotification = NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)
-            .makeConnectable()
-            .autoconnect()
-    
+        .makeConnectable()
+        .autoconnect()
+
     // MARK: - Views
 
     func body(content: Content) -> some View {
@@ -31,7 +28,7 @@ struct ApplicationDidBecomeActiveViewModifier: ViewModifier {
 // MARK: - View extension
 
 public extension View {
-    
+
     func onApplicationDidBecomeActive(perform action: @escaping () -> Void) -> some View {
         modifier(ApplicationDidBecomeActiveViewModifier(action: action))
     }

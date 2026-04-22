@@ -1,25 +1,28 @@
-// © 2026 Aung Ko Min
+//  AccessoryBar.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
 import Core
 import SwiftUI
-import XUI
 
 struct AccessoryBar: View {
     @Environment(ChatManager.self) private var manager
     var body: some View {
         HStack(alignment: .bottom) {
             Spacer()
-            
+
             if let accessory = manager.presentation.state.bottomAccessory {
                 switch accessory {
                 case .scrollDownButton:
-                    CircleButton(.arrowshapeDownFill) {
+                    CircleButton(.chevronDown) {
                         manager.send(.scrollDownButtonTapped)
                     }
                     .transition(
                         .movingParts
                             .skid(direction: .trailing)
-                            .animation(.easeOut),
+                            .animation(.easeOut)
                     )
                 case .keyboardButton:
                     CircleButton(.keyboardChevronCompactDown) {
@@ -28,7 +31,7 @@ struct AccessoryBar: View {
                     .transition(
                         .movingParts
                             .skid(direction: .trailing)
-                            .animation(.easeOut),
+                            .animation(.easeOut)
                     )
                 case .contactAvator:
                     ZeroSizeView()

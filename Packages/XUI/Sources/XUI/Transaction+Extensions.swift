@@ -1,5 +1,6 @@
+//  Transaction+Extensions.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -7,7 +8,7 @@ import SwiftUI
 public extension Transaction {
     static func withAnimation(
         _ animation: Animation = .timingCurve(0.0, 1.0, 0.4, 1.0, duration: 0.55),
-        completion: (() -> Void)? = nil,
+        completion: (() -> Void)? = nil
     )
         -> Transaction
     {

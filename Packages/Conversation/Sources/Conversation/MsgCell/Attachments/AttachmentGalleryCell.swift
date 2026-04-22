@@ -1,8 +1,13 @@
+//  AttachmentGalleryCell.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import XUI
+import WebKit
+import SwiftUI
 import Database
 import ImageLoader
-import SwiftUI
-import WebKit
-import XUI
 
 public struct AttachmentGalleryCell: View {
     let attachment: Attachment
@@ -11,7 +16,7 @@ public struct AttachmentGalleryCell: View {
     public var body: some View {
         switch attachment.attachmentType {
         case .image,
-            .imageUploading:
+             .imageUploading:
             if let data = attachment.data(), let uiImage = UIImage(data: data) {
                 Image(uiImage: uiImage)
                     .resizable()
@@ -23,7 +28,7 @@ public struct AttachmentGalleryCell: View {
         case .link:
             VStack(spacing: 8) {
                 if let data = attachment.data(),
-                    let uiImage = UIImage(data: data)
+                   let uiImage = UIImage(data: data)
                 {
                     Image(uiImage: uiImage)
                         .resizable()
@@ -46,7 +51,7 @@ public struct AttachmentGalleryCell: View {
                             Link(destination: url) {
                                 Label(
                                     url.host() ?? url.absoluteString,
-                                    systemImage: "globe.fill",
+                                    systemImage: "globe.fill"
                                 )
                             }
                         }
@@ -67,7 +72,7 @@ public struct AttachmentGalleryCell: View {
                 .padding(.horizontal)
             }.padding()
         case .video,
-            .videoUploading:
+             .videoUploading:
             VideoAttachmentView(attachment: attachment)
         }
     }

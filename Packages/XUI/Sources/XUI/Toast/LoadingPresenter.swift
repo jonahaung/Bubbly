@@ -1,5 +1,6 @@
+//  LoadingPresenter.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 // LoadingPresenter.swift (in XUI)
@@ -12,7 +13,7 @@ public final class LoadingPresenter {
 
     public func loading(_ value: Bool) {
         guard value != showLoading else { return }
-		showLoading = value
+        showLoading = value
     }
 
     public static let shared: LoadingPresenter = .init()

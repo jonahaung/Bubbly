@@ -1,5 +1,6 @@
+//  Deque.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -12,8 +13,6 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
     @usableFromInline var buffer: [Element?]
     @usableFromInline var head: Int = 0
     public private(set) var count: Int = 0
-
-    
 
     public init(_ capacity: Int = 16) {
         buffer = Array(repeating: nil, count: Swift.max(1, capacity))
@@ -56,8 +55,6 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
         }
     }
 
-    
-
     public var isEmpty: Bool {
         count == 0
     }
@@ -89,8 +86,7 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
         if atFront {
             head = previousIndex(head)
             buffer[head] = element
-        }
-        else {
+        } else {
             buffer[physicalIndex(count)] = element
         }
         count += 1
@@ -143,8 +139,7 @@ public struct Deque<Element>: RandomAccessCollection, MutableCollection, CustomS
             for i in 0 ..< buffer.count {
                 buffer[i] = nil
             }
-        }
-        else {
+        } else {
             buffer = Array(repeating: nil, count: 16)
         }
         head = 0

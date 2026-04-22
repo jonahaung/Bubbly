@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  FloatingDateView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 //
 //  FloatingDateView.swift
@@ -6,9 +9,9 @@
 //
 //  Created by Aung Ko Min on 27/4/25.
 //
+import XUI
 import Core
 import SwiftUI
-import XUI
 
 struct FloatingDateView: View {
     @Environment(ChatManager.self) private var manager

@@ -1,5 +1,6 @@
+//  PressGestureViewModifier.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Combine
@@ -11,7 +12,7 @@ public struct PressGestureViewModifier: ViewModifier {
     private var onPressing: (TimeInterval) -> Void
     private var onEnded: () -> Void
 
-    private let displayLink = DisplayLink()
+    private let displayLink: DisplayLink = .init()
 
     public init(
         interval: TimeInterval = 0.016,
@@ -70,8 +71,6 @@ public struct PressGestureViewModifier: ViewModifier {
         }
         displayLink.stop()
     }
-
-    private func onUpdate(_: Double) {}
 
     private func onTargetReached(_: Double) {}
 }

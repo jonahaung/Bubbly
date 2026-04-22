@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  BackgroundView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Core
 import SwiftUI

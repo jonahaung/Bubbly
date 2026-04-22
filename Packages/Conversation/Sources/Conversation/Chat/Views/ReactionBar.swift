@@ -1,10 +1,12 @@
-// © 2026 Aung Ko Min
+//  ReactionBar.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Core
 import SwiftUI
 
 struct ReactionBar: View {
-    
 
     var body: some View {
         HStack(spacing: Spacing.sm) {
@@ -45,8 +47,6 @@ struct ReactionBar: View {
         }
         .tint(Color.darkGray)
     }
-
-    
 
     @State private var heartReactionCount = 0
     @State private var upReactionCount = 0

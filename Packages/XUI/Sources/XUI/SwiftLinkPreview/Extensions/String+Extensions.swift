@@ -1,16 +1,17 @@
+//  String+Extensions.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
 
 #if os(iOS) || os(watchOS) || os(tvOS)
 
-import UIKit
+    import UIKit
 
 #elseif os(OSX)
 
-import Cocoa
+    import Cocoa
 
 #endif
 
@@ -103,7 +104,7 @@ public extension String {
 
         while startIndex < endIndex {
             let endIndex = index(startIndex, offsetBy: length, limitedBy: endIndex) ?? endIndex
-            results.append(self[startIndex..<endIndex])
+            results.append(self[startIndex ..< endIndex])
             startIndex = endIndex
         }
 

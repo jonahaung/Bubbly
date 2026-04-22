@@ -1,5 +1,6 @@
+//  SerialTaskQueue.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -18,7 +19,7 @@ public final class SerialTaskQueue: SerialTaskQueueProtocol, Sendable {
 
     public private(set) nonisolated(unsafe) var isBusy = false
     public private(set) nonisolated(unsafe) var isStopped = true
-    private nonisolated(unsafe) var tasksQueue = [TaskClosure]()
+    private nonisolated(unsafe) var tasksQueue: [TaskClosure] = []
 
     public init() {
         start()

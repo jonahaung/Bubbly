@@ -1,12 +1,15 @@
-// © 2026 Aung Ko Min
+//  MsgCreator.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Database
-import Foundation
-import MediaPicker
-import Services
-import UIKit
 import XUI
 import Core
+import UIKit
+import Database
+import Services
+import Foundation
+import MediaPicker
 
 public actor MsgCreator {
     public enum Error: Swift.Error {
@@ -19,13 +22,13 @@ public actor MsgCreator {
 
     public init(mediaManager: MediaManager = .shared) {
         self.mediaManager = mediaManager
-       
+
     }
 
     public func message(
         text: String,
         attachments: [Attachment],
-        in conversation: Conversation,
+        in conversation: Conversation
     ) async throws -> Message {
         let currentUserId = try CurrentUserID.get()
         return await Message(
@@ -36,7 +39,7 @@ public actor MsgCreator {
             date: .now,
             deliveryStatus: .sending,
             attachments: attachments,
-            reactions: [],
+            reactions: []
         )
     }
 }

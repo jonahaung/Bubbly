@@ -1,5 +1,6 @@
+//  AsyncOrderedStream.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -12,7 +13,7 @@ public enum AsyncOrderedStream {
             ProcessInfo.processInfo
                 .activeProcessorCount,
         transform: @Sendable @escaping (Input) async throws
-            -> Output,
+            -> Output
     ) async throws
         -> [
             Output
@@ -54,11 +55,11 @@ public enum AsyncOrderedStream {
         at index: Int,
         in group: inout ThrowingTaskGroup<
             (Int, Output),
-            Error,
+            Error
         >,
         inputs: [Input],
         transform: @Sendable @escaping (Input) async throws
-            -> Output,
+            -> Output
     ) {
         group.addTask {
             let output = try await transform(inputs[index])

@@ -1,6 +1,11 @@
-import Database
-import SwiftUI
+//  AttachmentsDeck.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
+import SwiftUI
+import Database
 
 struct AttachmentsDeck<Content: View>: View {
 
@@ -16,7 +21,7 @@ struct AttachmentsDeck<Content: View>: View {
                     .offset(x: offsetX(for: index), y: offsetY(for: index))
                     .rotationEffect(
                         .degrees(rotation(for: index)),
-                        anchor: alignment == .trailing ? .leading : .trailing,
+                        anchor: alignment == .trailing ? .leading : .trailing
                     )
                     .zIndex(zIndex(for: index))
             }

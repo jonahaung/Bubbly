@@ -1,5 +1,6 @@
+//  MarkdownPhaser.swift
 //
-//  Created by Aung Ko Min on 10/4/26.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -32,7 +33,7 @@ public enum MarkdownParser {
                             language: codeBlockLanguage,
                             content: codeBlockContent.trimmingCharacters(
                                 in: .whitespacesAndNewlines
-                            ),
+                            )
                         )
                     )
                     codeBlockContent = ""
@@ -82,7 +83,7 @@ public enum MarkdownParser {
             // Ordered list
             if let match = orderedListItemRegex.firstMatch(
                 in: rawLine,
-                range: NSRange(location: 0, length: rawLine.utf16.count),
+                range: NSRange(location: 0, length: rawLine.utf16.count)
             ) {
                 let nsLine = rawLine as NSString
                 let indent = nsLine.substring(with: match.range(at: 1))
@@ -101,7 +102,7 @@ public enum MarkdownParser {
             // Unordered list
             if let match = unorderedListItemRegex.firstMatch(
                 in: rawLine,
-                range: NSRange(location: 0, length: rawLine.utf16.count),
+                range: NSRange(location: 0, length: rawLine.utf16.count)
             ) {
                 let nsLine = rawLine as NSString
                 let indent = nsLine.substring(with: match.range(at: 1))
@@ -128,7 +129,7 @@ public enum MarkdownParser {
                     language: codeBlockLanguage,
                     content: codeBlockContent.trimmingCharacters(
                         in: .whitespacesAndNewlines
-                    ),
+                    )
                 )
             )
         }
@@ -150,7 +151,7 @@ public enum MarkdownParser {
         let nsText = text as NSString
         let matches = mentionHashtagRegex.matches(
             in: text,
-            range: NSRange(location: 0, length: nsText.length),
+            range: NSRange(location: 0, length: nsText.length)
         )
         var lastIndex = 0
 
@@ -160,7 +161,7 @@ public enum MarkdownParser {
                 let substring = nsText.substring(
                     with: NSRange(
                         location: lastIndex,
-                        length: range.location - lastIndex,
+                        length: range.location - lastIndex
                     )
                 )
                 if !substring.trimmingCharacters(in: .whitespaces).isEmpty {

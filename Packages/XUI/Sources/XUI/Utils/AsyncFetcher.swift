@@ -1,5 +1,6 @@
+//  AsyncFetcher.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -70,8 +71,7 @@ public actor AsyncFetcher<T: Sendable> {
         if hasCapacity {
             startTask(for: id)
             return true
-        }
-        else {
+        } else {
             // Enqueue (FIFO)
             pendingQueue.append(id)
             return false
@@ -99,8 +99,7 @@ public actor AsyncFetcher<T: Sendable> {
                 throw CancellationError()
             }
             return try await task.value
-        }
-        else {
+        } else {
             // Avoid duplicate pending entries for the same id
             if !pendingQueue.contains(id) {
                 pendingQueue.append(id)
@@ -209,8 +208,7 @@ public actor AsyncFetcher<T: Sendable> {
                 // Notify completions (nonisolated helper will forward to actor)
                 handleCompletion(id: id, result: .success(value))
                 return value
-            }
-            catch {
+            } catch {
                 handleCompletion(id: id, result: .failure(error))
                 throw error
             }
@@ -236,7 +234,7 @@ public actor AsyncFetcher<T: Sendable> {
 
         return try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<
             T,
-            Error,
+            Error
         >) in
             waiters[id, default: []].append(continuation)
             // If the id was removed from pending before it starts (e.g. cancelled),

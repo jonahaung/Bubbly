@@ -1,4 +1,10 @@
+//  AsyncSemaphore.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Foundation
+
 public final class AsyncSemaphore: @unchecked Sendable {
     private final class Suspension: @unchecked Sendable {
         enum State {
@@ -112,8 +118,7 @@ public final class AsyncSemaphore: @unchecked Sendable {
             do {
                 // All code paths check for cancellation
                 try Task.checkCancellation()
-            }
-            catch {
+            } catch {
                 // Cancellation is like a signal: we don't really "consume"
                 // the semaphore, and restore the value.
                 value += 1
@@ -136,8 +141,7 @@ public final class AsyncSemaphore: @unchecked Sendable {
                     // Resume with a CancellationError.
                     unlock()
                     continuation.resume(throwing: CancellationError())
-                }
-                else {
+                } else {
                     // Current task is not cancelled: register the continuation
                     // that `signal` will resume.
                     suspension.state = .suspendedUnlessCancelled(continuation)
@@ -165,8 +169,7 @@ public final class AsyncSemaphore: @unchecked Sendable {
                 // from the semaphore. Resume with a CancellationError.
                 unlock()
                 continuation.resume(throwing: CancellationError())
-            }
-            else {
+            } else {
                 // Early cancellation: waitUnlessCancelled() is called from
                 // a cancelled task.
                 //

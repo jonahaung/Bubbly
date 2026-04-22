@@ -1,6 +1,9 @@
+//  AsyncButton.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
+
+import Pow
 
 // private enum Phase: Equatable {
 //	case idle
@@ -142,70 +145,69 @@
 //	}
 // }
 import SwiftUI
-import Pow
 
 public struct AsyncButton<Label: View>: View {
-	private var action: () async throws -> Void
-	private var options: Set<AsyncButtonOption>
-	@ViewBuilder private var label: () -> Label
+    private var action: () async throws -> Void
+    private var options: Set<AsyncButtonOption>
+    @ViewBuilder private var label: () -> Label
 
-	@State private var isDisabled = false
+    public var body: some View {
+        Button {
+            Task {
+                do {
+                    try await action()
+                } catch {
+                    ToastPresenter.show(error.localizedDescription, allowsBackgroundTap: true)
+                }
+            }
+        } label: {
+            label()
+        }
+    }
 
-	public var body: some View {
-		Button {
-			Task {
-				do {
-					try await action()
-				} catch {
-					ToastPresenter.show(error.localizedDescription, allowsBackgroundTap: true)
-				}
-			}
-		} label: {
-			label()
-		}
-	}
-
-	public init(
-		action: @escaping () async throws -> Void,
-		options: Set<AsyncButtonOption> = .allCases,
-		@ViewBuilder label: @escaping () -> Label
-	) {
-		self.action = action
-		self.options = options
-		self.label = label
-	}
+    public init(
+        action: @escaping () async throws -> Void,
+        options: Set<AsyncButtonOption> = .allCases,
+        @ViewBuilder label: @escaping () -> Label
+    ) {
+        self.action = action
+        self.options = options
+        self.label = label
+    }
 }
 
 public enum AsyncButtonOption: CaseIterable {
-	case disableButton
-	case showProgressView
+    case disableButton
+    case showProgressView
 }
-extension AsyncButton where Label == Text {
-	public init(
-		_ title: String,
-		options: Set<AsyncButtonOption> = .allCases,
-		action: @escaping () async throws -> Void
-	) {
-		self.init(action: action) {
-			Text(title)
-		}
-	}
+
+public extension AsyncButton where Label == Text {
+    init(
+        _ title: String,
+        options _: Set<AsyncButtonOption> = .allCases,
+        action: @escaping () async throws -> Void
+    ) {
+        self.init(action: action) {
+            Text(title)
+        }
+    }
 }
-extension AsyncButton where Label == Image {
-	public init(
-		systemImageName: String,
-		options: Set<AsyncButtonOption> = .allCases,
-		action: @escaping () async throws -> Void
-	) {
-		self.init(action: action) {
-			Image(systemName: systemImageName)
-		}
-	}
+
+public extension AsyncButton where Label == Image {
+    init(
+        systemImageName: String,
+        options _: Set<AsyncButtonOption> = .allCases,
+        action: @escaping () async throws -> Void
+    ) {
+        self.init(action: action) {
+            Image(systemName: systemImageName)
+        }
+    }
 }
 
 @available(iOS 15, macOS 12, tvOS 15, watchOS 8, *)
-extension Set where Element == AsyncButtonOption {
-	public static var allCases: Self {
-		.init(Element.allCases)
-	}
+public extension Set<AsyncButtonOption> {
+    static var allCases: Self {
+        .init(Element.allCases)
+    }
 }

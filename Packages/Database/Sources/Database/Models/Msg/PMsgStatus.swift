@@ -1,7 +1,11 @@
-// © 2026 Aung Ko Min
+//  PMsgStatus.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Foundation
 import SwiftData
+import Foundation
+
 //
 // @Model
 // public final class PMsgStatus {

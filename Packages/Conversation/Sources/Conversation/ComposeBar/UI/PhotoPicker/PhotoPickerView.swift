@@ -1,9 +1,14 @@
-// © 2026 Aung Ko Min
+//  PhotoPickerView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
+
+    import SwiftUI
 
 //
     //  PhotoPickerView.swift
@@ -12,7 +17,6 @@
     //  Created by Aung Ko Min on 13/2/26.
 //
     import PhotosUI
-    import SwiftUI
 
     struct PhotoPickerView: View {
         @Environment(PhotoPickerManager.self) private var manager
@@ -22,7 +26,7 @@
                 maxSelectionCount: 5,
                 selectionBehavior: .continuousAndOrdered,
                 preferredItemEncoding: .automatic,
-                photoLibrary: .shared(),
+                photoLibrary: .shared()
             ) {
                 EmptyView()
             }

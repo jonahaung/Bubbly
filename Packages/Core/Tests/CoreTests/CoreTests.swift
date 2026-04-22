@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  CoreTests.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 @testable import Core
-import Foundation
 import Testing
+import Foundation
 
 final class CoreTests {
     @Test func example() {

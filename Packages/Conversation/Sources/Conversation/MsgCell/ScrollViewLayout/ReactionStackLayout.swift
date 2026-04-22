@@ -1,11 +1,17 @@
+//  ReactionStackLayout.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 // © 2026 Aung Ko Min
 import SwiftUI
+
 public struct ReactionStackLayout: Layout {
     public init(overlap: CGFloat = 12) { self.overlap = overlap }
     // MARK: Public
     public var overlap: CGFloat
     public func sizeThatFits(
-        proposal: ProposedViewSize, subviews: Subviews, cache _: inout (),
+        proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()
     ) -> CGSize {
         var width: CGFloat = 0
         var height: CGFloat = 0
@@ -16,8 +22,9 @@ public struct ReactionStackLayout: Layout {
         }
         return CGSize(width: width, height: height)
     }
+
     public func placeSubviews(
-        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache _: inout (),
+        in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache _: inout ()
     ) {
         var x = bounds.maxX
         for subview in subviews {
@@ -25,7 +32,8 @@ public struct ReactionStackLayout: Layout {
             x -= size.width
             subview.place(
                 at: CGPoint(x: x, y: bounds.midY - size.height / 2), anchor: .topLeading,
-                proposal: ProposedViewSize(size), )
+                proposal: ProposedViewSize(size)
+            )
             x += overlap
         }
     }

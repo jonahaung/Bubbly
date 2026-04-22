@@ -1,20 +1,21 @@
+//  EditMode+Extensions.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
 
 public extension EditMode {
     mutating func toggle() {
-        switch self {
+        self = switch self {
         case .inactive:
-            self = .active
+            .active
         case .transient:
-            self = .inactive
+            .inactive
         case .active:
-            self = .inactive
+            .inactive
         @unknown default:
-            self = .inactive
+            .inactive
         }
     }
 }

@@ -1,3 +1,8 @@
+//  Line.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 struct Line: View {

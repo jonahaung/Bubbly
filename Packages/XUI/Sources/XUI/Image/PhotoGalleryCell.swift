@@ -1,9 +1,10 @@
+//  PhotoGalleryCell.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import ImageLoader
 import SwiftUI
+import ImageLoader
 
 public struct PhotoGalleryCell: View {
     private let item: any PhotoGalleryItem

@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  Settings.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 
@@ -8,7 +11,7 @@ public enum Settings {
             get {
                 if let value = GroupStorage.shared
                     .integer(
-                        for: .layout(.chatMsgSpacing),
+                        for: .layout(.chatMsgSpacing)
                     )
                 {
                     return value == 0 ? 1 : value
@@ -24,7 +27,7 @@ public enum Settings {
             get {
                 if let value = GroupStorage.shared
                     .integer(
-                        for: .limit(.minutesForChatMsgGrouping),
+                        for: .limit(.minutesForChatMsgGrouping)
                     )
                 {
                     return value == 0 ? 15 : value
@@ -42,7 +45,7 @@ public enum Settings {
             get {
                 if let value = GroupStorage.shared
                     .integer(
-                        for: .limit(.paginationPageSize),
+                        for: .limit(.paginationPageSize)
                     )
                 {
                     return value == 0 ? 30 : value

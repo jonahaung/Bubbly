@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  ConversationTheme.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
-import SwiftUI
 import XUI
 import Core
+import SwiftUI
+import Foundation
 
 public struct ConversationTheme: Codable, Sendable, Hashable {
     public var bubbleColor: BubbleColor
@@ -11,9 +14,9 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
     public var bubbleCornorRadius: CGFloat
 
     public init(
-		bubbleColor: BubbleColor = .empty,
+        bubbleColor: BubbleColor = .empty,
         background: ChatBackground = .bg_6,
-        bubbleCornorRadius: CGFloat = 17,
+        bubbleCornorRadius: CGFloat = 17
     ) {
         self.bubbleColor = bubbleColor
         self.background = background
@@ -21,8 +24,8 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
     }
 
     public static let `default`: ConversationTheme = .init(
-		bubbleColor: .empty,
+        bubbleColor: .empty,
         background: .bg_6,
-        bubbleCornorRadius: 17,
+        bubbleCornorRadius: 17
     )
 }

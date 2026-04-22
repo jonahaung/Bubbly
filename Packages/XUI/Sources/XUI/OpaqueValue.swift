@@ -1,3 +1,7 @@
+//  OpaqueValue.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 
@@ -81,7 +85,7 @@ extension OpaqueValue: Decodable {
                 guard container.decodeNil() else {
                     throw DecodingError.dataCorruptedError(
                         in: container,
-                        debugDescription: "Data unrecognizable",
+                        debugDescription: "Data unrecognizable"
                     )
                 }
                 self = .null

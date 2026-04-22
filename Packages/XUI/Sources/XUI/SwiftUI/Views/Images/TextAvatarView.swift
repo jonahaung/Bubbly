@@ -1,5 +1,6 @@
+//  TextAvatarView.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -29,10 +30,10 @@ public struct TextAvatarView: View {
                         .system(size: geo.size.height * 0.5, weight: .medium)
                             .width(.condensed)
                     )
-					.foregroundStyle(Color(.tertiarySystemBackground))
+                    .foregroundStyle(Color(.tertiarySystemBackground))
                     .unclippedTextRenderer()
             }
-			.aspectRatio(1, contentMode: .fit)
+            .aspectRatio(1, contentMode: .fit)
         }
         .equatable(by: text)
     }

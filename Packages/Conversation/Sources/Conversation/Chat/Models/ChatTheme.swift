@@ -1,20 +1,22 @@
-// © 2026 Aung Ko Min
+//  ChatTheme.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Database
-import SwiftUI
 import XUI
+import Core
+import SwiftUI
+import Database
 
 // MARK: - ChatTheme
 
 public struct ChatTheme: Equatable, EmptyRepresentable {
-    
 
     public init(_ theme: Database.ConversationTheme) {
         backgroundColor = Color.background
         secondaryColor = Color.tint
         outgoing = .init(
-			bubbleCoor: theme.bubbleColor.value,
+            bubbleCoor: theme.bubbleColor.value
         )
         incoming = .init(
             bubbleCoor: Color.container
@@ -28,7 +30,7 @@ public struct ChatTheme: Equatable, EmptyRepresentable {
             top: verticalPadding,
             leading: horizontalPadding,
             bottom: verticalPadding,
-            trailing: horizontalPadding,
+            trailing: horizontalPadding
         )
         bubbleCornerRadius = theme.bubbleCornorRadius
     }
@@ -50,11 +52,9 @@ public struct ChatTheme: Equatable, EmptyRepresentable {
             top: 0.2,
             leading: isSender ? 1 : 0.2,
             bottom: 1,
-            trailing: isSender ? 0.2 : 1,
+            trailing: isSender ? 0.2 : 1
         )
     }
-
-    
 
     struct Theme: Equatable {
         let bubbleCoor: Color

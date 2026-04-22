@@ -1,12 +1,15 @@
-// © 2026 Aung Ko Min
+//  ReactionAnimationModifier.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-    import Database
     import SwiftUI
+    import Database
 
     struct ReactionAnimationModifier: ViewModifier {
         let reaction: ReactionType
@@ -19,14 +22,14 @@
                     .offset(y: isActive ? ReactionsBar.Constants.floatOffset / 2 : 0)
                     .scaleEffect(
                         isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0,
-                        anchor: .bottom,
+                        anchor: .bottom
                     )
 
             case .thumbUp:
                 content
                     .rotationEffect(
                         .degrees(isActive ? -ReactionsBar.Constants.rotationAngle : 0),
-                        anchor: .bottomLeading,
+                        anchor: .bottomLeading
                     )
                     .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
@@ -34,7 +37,7 @@
                 content
                     .rotationEffect(
                         .degrees(isActive ? -ReactionsBar.Constants.rotationAngle : 0),
-                        anchor: .leading,
+                        anchor: .leading
                     )
                     .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
@@ -47,7 +50,7 @@
                 content
                     .offset(y: isActive ? ReactionsBar.Constants.floatOffset : 0)
                     .rotationEffect(
-                        .degrees(isActive ? ReactionsBar.Constants.rotationAngle : 0),
+                        .degrees(isActive ? ReactionsBar.Constants.rotationAngle : 0)
                     )
                     .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
@@ -55,7 +58,7 @@
                 content
                     .scaleEffect(
                         isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0,
-                        anchor: .bottom,
+                        anchor: .bottom
                     )
             }
         }

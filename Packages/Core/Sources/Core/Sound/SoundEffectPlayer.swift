@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  SoundEffectPlayer.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 //
 //  SoundEffectPlayer.swift
@@ -6,9 +9,9 @@
 //
 //  Created by Aung Ko Min on 10/3/26.
 //
-import AVFoundation
-import CoreHaptics
 import SwiftUI
+import CoreHaptics
+import AVFoundation
 import UniformTypeIdentifiers
 
 // MARK: - SoundEffectPlayer
@@ -30,10 +33,10 @@ public actor AnySoundEffectPlayer: SoundEffectPlayer {
         #if targetEnvironment(simulator)
             player = AVSoundEffectPlayer()
         #else
-            if CHHapticEngine.capabilitiesForHardware().supportsAudio {
-                player = HapticEngineSoundEffectPlayer()
+            player = if CHHapticEngine.capabilitiesForHardware().supportsAudio {
+                HapticEngineSoundEffectPlayer()
             } else {
-                player = EmptySoundEffectPlayer()
+                EmptySoundEffectPlayer()
             }
         #endif
     }
@@ -91,10 +94,10 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
         let audioSession: AVAudioSession? = await MainActor.run { () -> AVAudioSession? in
             SoundEffect.audioSession
         }
-        if let audioSession {
-            engine = try? CHHapticEngine(audioSession: audioSession)
+        engine = if let audioSession {
+            try? CHHapticEngine(audioSession: audioSession)
         } else {
-            engine = try? CHHapticEngine()
+            try? CHHapticEngine()
         }
 
         guard let engine else {
@@ -125,7 +128,7 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
     }
 
     func register(_ audio: SoundEffect) async throws {
-		await setUp()
+        await setUp()
 
         guard let engine else {
             return
@@ -186,7 +189,7 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
             let event = CHHapticEvent(
                 audioResourceID: resourceID,
                 parameters: [.init(parameterID: .audioVolume, value: Float(audio.volume))],
-                relativeTime: CHHapticTimeImmediate,
+                relativeTime: CHHapticTimeImmediate
             )
 
             do {
@@ -272,10 +275,10 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
 
         registeredSound.count -= 1
 
-        if registeredSound.count <= 0 {
-            registeredSounds[audio] = nil
+        registeredSounds[audio] = if registeredSound.count <= 0 {
+            nil
         } else {
-            registeredSounds[audio] = registeredSound
+            registeredSound
         }
 
         if registeredSounds.isEmpty {

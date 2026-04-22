@@ -1,11 +1,12 @@
+//  SafeStorage.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
 
 public final class SafeStorage<T> {
-    private let lock = NSRecursiveLock()
+    private let lock: NSRecursiveLock = .init()
     private var stored: T
 
     public init(_ stored: T) {
@@ -17,16 +18,16 @@ public final class SafeStorage<T> {
         defer { self.lock.unlock() }
         return stored
     }
-    
+
     private func set(stored: T) {
         lock.lock()
         defer { self.lock.unlock() }
         self.stored = stored
     }
-    
+
     public var value: T {
-        get { self.get() }
-        set { self.set(stored: newValue) }
+        get { get() }
+        set { set(stored: newValue) }
     }
 
     public func apply<R>(block: (inout T) -> R) -> R {

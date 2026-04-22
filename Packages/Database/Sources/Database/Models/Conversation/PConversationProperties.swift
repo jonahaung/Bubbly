@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  PConversationProperties.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import SwiftData
 
@@ -14,7 +17,7 @@ public final class PConversationProperties {
     public init(
         uid: String,
         theme: ConversationTheme,
-        seenMembers: [SeenMember],
+        seenMembers: [SeenMember]
     ) {
         self.uid = uid
         self.theme = theme
@@ -38,7 +41,7 @@ extension PConversationProperties: SendableTransformable {
         self.init(
             uid: sendable.uid,
             theme: sendable.theme,
-            seenMembers: sendable.seenMembers,
+            seenMembers: sendable.seenMembers
         )
     }
 
@@ -46,7 +49,7 @@ extension PConversationProperties: SendableTransformable {
         .init(
             uid: uid,
             theme: theme,
-            seenMembers: seenMembers,
+            seenMembers: seenMembers
         )
     }
 }

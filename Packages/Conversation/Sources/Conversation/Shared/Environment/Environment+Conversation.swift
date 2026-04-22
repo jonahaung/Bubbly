@@ -1,7 +1,12 @@
+//  Environment+Conversation.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import XUI
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 public extension EnvironmentValues {
     @Entry var conversation: Conversation = .empty

@@ -1,19 +1,22 @@
-// © 2026 Aung Ko Min
+//  PhotoPickerManager.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-    import MediaPicker
+    import SwiftUI
     import PhotosUI
     import Services
-    import SwiftUI
+    import MediaPicker
 
     @MainActor protocol PhotoPickerManagerDelegate: AnyObject {
         func photoPickerManager(
             _ manager: PhotoPickerManager,
-            didSelectImages images: [SelectedImage],
+            didSelectImages images: [SelectedImage]
         )
     }
 
@@ -27,15 +30,15 @@
         var photoPickerItems: Binding<[PhotosPickerItem]> {
             .init(
                 get: { self.items.map(\.item) },
-                set: { self.items = $0.map(SelectedPhotoItem.init) },
+                set: { self.items = $0.map(SelectedPhotoItem.init) }
             )
         }
 
         var selectedImages: [SelectedImage] = []
 
-        private var debounceTask: Task<Void, Never>? = nil
+        private var debounceTask: Task<Void, Never>?
         private let debounceInterval: Duration = .milliseconds(350)
-        weak var delegate: PhotoPickerManagerDelegate? = nil
+        weak var delegate: PhotoPickerManagerDelegate?
 
         private func scheduleDebouncedUpdate() {
             debounceTask?.cancel()
@@ -66,7 +69,7 @@
         }
 
         private func processSelections(
-            _ selections: [SelectedPhotoItem],
+            _ selections: [SelectedPhotoItem]
         ) async -> [SelectedImage] {
             await withTaskGroup(of: SelectedImage?.self) { group in
                 for item in selections {
@@ -89,7 +92,7 @@
         }
 
         private func decodeImage(
-            from photo: SelectedPhotoItem,
+            from photo: SelectedPhotoItem
         ) async -> SelectedImage? {
             let image = await ImageProcessingActor.shared.process(item: photo)
             guard let image else {

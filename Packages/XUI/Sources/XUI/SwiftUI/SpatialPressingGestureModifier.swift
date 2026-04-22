@@ -1,5 +1,6 @@
+//  SpatialPressingGestureModifier.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -51,7 +52,9 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
                 if let converter, let coordinateSpace {
                     onChange?(converter.location(in: coordinateSpace))
                 }
-            case .ended, .cancelled, .failed:
+            case .cancelled,
+                 .ended,
+                 .failed:
                 onChange?(nil)
             case .recognized:
                 break
@@ -66,7 +69,7 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
             _: UIGestureRecognizer,
             shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer
         )
-            -> Bool {
+        -> Bool {
             false
         }
 

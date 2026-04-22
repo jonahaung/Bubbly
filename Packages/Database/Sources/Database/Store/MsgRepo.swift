@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  MsgRepo.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
 // MARK: - MsgRepo
 
@@ -15,7 +18,7 @@ public enum MsgRepo {
 
     private static func withMsgStore<T>(
         _ block: (StoreModelActor<PMsg>) async throws -> T,
-        defaultValue: T,
+        defaultValue: T
     ) async throws -> T {
         guard let store = await Store.shared.msgStore else {
             return defaultValue
@@ -28,7 +31,7 @@ public enum MsgRepo {
         for conID: String,
         order: SortOrder,
         limit: Int? = nil,
-        offset: Int? = nil,
+        offset: Int? = nil
     ) -> FetchDescriptor<PMsg> {
         var descriptor = FetchDescriptor<PMsg>(predicate: PMsgPredicates.conID(conID))
         descriptor.sortBy = [.init(\.date, order: order)]
@@ -43,39 +46,39 @@ public enum MsgRepo {
         try await withMsgStore(
             {
                 try await $0.fetch(
-                    descriptor(for: conID, order: .reverse, limit: limit, offset: offset),
+                    descriptor(for: conID, order: .reverse, limit: limit, offset: offset)
                 )
                 .reversed()
             },
-            defaultValue: [],
+            defaultValue: []
         )
     }
 
     public static func deleteMessages(conID: String) async throws {
         try await withMsgStore(
             { try await $0.delete(where: PMsgPredicates.conID(conID)) },
-            defaultValue: (),
+            defaultValue: ()
         )
     }
 
     public static func lastMsg(conID: String) async throws -> Message? {
         try await withMsgStore(
             { try await $0.fetch(descriptor(for: conID, order: .reverse, limit: 1)).first },
-            defaultValue: nil,
+            defaultValue: nil
         )
     }
 
     public static func firstMsg(conID: String) async throws -> Message? {
         try await withMsgStore(
             { try await $0.fetch(descriptor(for: conID, order: .forward, limit: 1)).first },
-            defaultValue: nil,
+            defaultValue: nil
         )
     }
 
     public static func totalMsgsCount(conID: String) async throws -> Int {
         try await withMsgStore(
             { try await $0.fetchCount(FetchDescriptor(predicate: PMsgPredicates.conID(conID))) },
-            defaultValue: 0,
+            defaultValue: 0
         )
     }
 }
@@ -94,12 +97,12 @@ public extension MsgRepo {
                                 currentUserID: currentUserID,
                                 recipient: .incoming,
                                 deliveryStatus: .read,
-                                comparison: .lessThan,
-                            ),
-                    ),
+                                comparison: .lessThan
+                            )
+                    )
                 )
             },
-            defaultValue: 0,
+            defaultValue: 0
         )
     }
 
@@ -115,14 +118,14 @@ public extension MsgRepo {
                             currentUserID: currentUserID,
                             recipient: .incoming,
                             deliveryStatus: .read,
-                            comparison: .lessThan,
-                        ),
+                            comparison: .lessThan
+                        )
                 )
                 descriptor.fetchLimit = limit
                 descriptor.sortBy = [.init(\.date, order: .forward)]
                 return try await store.fetch(descriptor)
             },
-            defaultValue: [],
+            defaultValue: []
         )
     }
 
@@ -138,13 +141,13 @@ public extension MsgRepo {
                             currentUserID: currentUserID,
                             recipient: .outgoing,
                             deliveryStatus: .delivered,
-                            comparison: .greaterThanOrEqual,
-                        ),
+                            comparison: .greaterThanOrEqual
+                        )
                 )
                 descriptor.sortBy = [.init(\.date, order: .forward)]
                 return try await store.fetch(descriptor)
             },
-            defaultValue: [],
+            defaultValue: []
         )
     }
 
@@ -168,7 +171,7 @@ public extension MsgRepo {
     @discardableResult
     static func updateSentMsgs(
         statusPayload: AnyMsgData.SeenStatusPayload,
-        currentUserID: String,
+        currentUserID: String
     ) async throws
         -> [Message]
     {
@@ -176,7 +179,7 @@ public extension MsgRepo {
             conID: statusPayload.conID,
             deliveryStatus: .delivered,
             recipient: .outgoing,
-            currentUserID: currentUserID,
+            currentUserID: currentUserID
         )
         guard !deliveredMsgs.isEmpty else {
             return []
@@ -195,7 +198,7 @@ public extension MsgRepo {
         conID: String,
         deliveryStatus: DeliveryStatus,
         recipient: MsgRecipient,
-        currentUserID: String,
+        currentUserID: String
     )
         async throws -> [Message]
     {
@@ -207,13 +210,13 @@ public extension MsgRepo {
                             conID: conID,
                             currentUserID: currentUserID,
                             recipient: recipient,
-                            deliveryStatus: deliveryStatus,
-                        ),
+                            deliveryStatus: deliveryStatus
+                        )
                 )
                 descriptor.sortBy = [.init(\.date, order: .forward)]
                 return try await store.fetch(descriptor)
             },
-            defaultValue: [],
+            defaultValue: []
         )
     }
 }

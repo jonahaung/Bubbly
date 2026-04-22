@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  ImageProcessingActor.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import MediaPicker
-import PhotosUI
 import UIKit
+import PhotosUI
+import MediaPicker
 
 actor ImageProcessingActor {
     static let shared: ImageProcessingActor = .init()
@@ -16,7 +19,7 @@ actor ImageProcessingActor {
     func process(
         item: SelectedPhotoItem,
         thumbnailSize _: CGFloat = 300,
-        fullSize _: CGFloat = 1600,
+        fullSize _: CGFloat = 1600
     ) async -> UIImage? {
         let key = item.id as NSString
         if let cached = cache.object(forKey: key) {
@@ -24,8 +27,7 @@ actor ImageProcessingActor {
         }
 
         guard let data = try? await item.loadTransferable(type: Data.self),
-              let original = UIImage(data: data) else
-        {
+              let original = UIImage(data: data) else {
             return nil
         }
 

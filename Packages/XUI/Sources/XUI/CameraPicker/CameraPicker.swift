@@ -1,8 +1,6 @@
-//
 //  CameraPicker.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 5/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -16,16 +14,14 @@ public extension CameraPicker {
 
 public struct CameraPicker: View {
 
-	@State var selection: (any CameraPickerItem)?
+    @State private var selection: (any CameraPickerItem)?
     @State private var imagePickerControllerError: LocalizedError?
-    @State private var showingCamera = false
-
     let allowesEditing: Bool
     let preferredMediaTypes: Set<CameraPickerMediaType>
     let cameraDevice: Device
     let preferredCaptureMode: CaptureMode
     let flashMode: FlashMode
-	let onPicked: (any CameraPickerItem) -> Void
+    let onPicked: (any CameraPickerItem) -> Void
 
     public init(
         allowsEditing: Bool = false,
@@ -33,32 +29,32 @@ public struct CameraPicker: View {
         cameraDevice: Device = .rear,
         preferredCaptureMode: CaptureMode = .photo,
         flashMode: FlashMode = .auto,
-		onPicked: @escaping (any CameraPickerItem) -> Void
+        onPicked: @escaping (any CameraPickerItem) -> Void
     ) {
-        self.allowesEditing = allowsEditing
+        allowesEditing = allowsEditing
         self.preferredMediaTypes = preferredMediaTypes
         self.cameraDevice = cameraDevice
         self.preferredCaptureMode = preferredCaptureMode
         self.flashMode = flashMode
-		self.onPicked = onPicked
+        self.onPicked = onPicked
     }
 
     public var body: some View {
-		UIImagePickerControllerRepresentation(
-			selection: Self.arrayBindingFrom(optionalBinding: $selection),
-			error: $imagePickerControllerError,
-			allowsEditing: allowesEditing,
-			preferredMediaTypes: preferredMediaTypes,
-			cameraDevice: cameraDevice,
-			preferredCaptureMode: preferredCaptureMode,
-			flashMode: flashMode
-		)
-		.ignoresSafeArea()
-		.onChange(of: selection?.id) { oldValue, newValue in
-			if let item = selection {
-				onPicked(item)
-			}
-		}
+        UIImagePickerControllerRepresentation(
+            selection: Self.arrayBindingFrom(optionalBinding: $selection),
+            error: $imagePickerControllerError,
+            allowsEditing: allowesEditing,
+            preferredMediaTypes: preferredMediaTypes,
+            cameraDevice: cameraDevice,
+            preferredCaptureMode: preferredCaptureMode,
+            flashMode: flashMode
+        )
+        .ignoresSafeArea()
+        .onChange(of: selection?.id) { _, _ in
+            if let item = selection {
+                onPicked(item)
+            }
+        }
     }
 }
 
@@ -68,15 +64,15 @@ extension CameraPicker {
     ) -> Binding<[any CameraPickerItem]> {
         Binding<[any CameraPickerItem]> {
             if let item = optionalBinding.wrappedValue {
-                return [item]
+                [item]
             } else {
-                return []
+                []
             }
         } set: { newItems in
-            if let item = newItems.first {
-                optionalBinding.wrappedValue = item
+            optionalBinding.wrappedValue = if let item = newItems.first {
+                item
             } else {
-                optionalBinding.wrappedValue = nil
+                nil
             }
         }
     }

@@ -1,8 +1,6 @@
-//
 //  HamburgerButton.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 7/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -18,12 +16,15 @@ public struct HamburgerButton: View {
     private var thickness: CGFloat {
         (size - padding) * 0.12
     }
+
     private var spacing: CGFloat {
         (size - padding) * 0.25
     }
+
     private var width: CGFloat {
         size - padding
     }
+
     private var height: CGFloat {
         thickness * 2 + spacing
     }
@@ -33,10 +34,10 @@ public struct HamburgerButton: View {
         size: CGFloat = 48,
         color: Color = .accentColor,
         padding: CGFloat = 14,
-        action: @escaping (Bool) -> Void,
+        action: @escaping (Bool) -> Void
     ) {
         self.action = action
-        self._isOpen = isOpen
+        _isOpen = isOpen
         self.size = size
         self.color = color
         self.padding = padding
@@ -65,8 +66,8 @@ public struct HamburgerButton: View {
         .animation(.anticipateOvershoot, value: isOpen)
         .geometryGroup()
         ._onButtonGesture { pressing in
-            if pressing {
-            } else {
+            if pressing {}
+            else {
                 UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
             }
         } perform: {

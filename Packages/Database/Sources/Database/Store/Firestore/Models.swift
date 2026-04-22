@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  Models.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 
@@ -32,8 +35,8 @@ public struct FirestoreFilter {
             "fieldFilter": [
                 "field": ["fieldPath": field],
                 "op": `operator`.rawValue,
-                "value": value.dictionary,
-            ],
+                "value": value.dictionary
+            ]
         ]
     }
 }

@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  SoundEffect.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import AVFoundation
-import CoreHaptics
 import SwiftUI
+import CoreHaptics
+import AVFoundation
 import UniformTypeIdentifiers
 
 public struct SoundEffect: Hashable, Sendable {
@@ -26,7 +29,7 @@ public struct SoundEffect: Hashable, Sendable {
                     .wav,
                     UTType(filenameExtension: "caf")!,
                     .mpeg4Audio,
-                    UTType(filenameExtension: "m4a")!,
+                    UTType(filenameExtension: "m4a")!
                 ]
             } else {
                 [type]
@@ -49,7 +52,7 @@ public struct SoundEffect: Hashable, Sendable {
         }
 
         print(
-            "No sound resource named \(names.map { "'\($0)'" }.formatted(.list(type: .and))) with type '\(type)' found in bundle \(bundle)",
+            "No sound resource named \(names.map { "'\($0)'" }.formatted(.list(type: .and))) with type '\(type)' found in bundle \(bundle)"
         )
     }
 

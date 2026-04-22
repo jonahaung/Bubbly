@@ -1,5 +1,6 @@
+//  NumberTextField.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -28,11 +29,6 @@ public struct NumberTextField: View {
             .bold()
             .multilineTextAlignment(.trailing)
         }
-    }
-
-    private func getValue() -> String {
-        if value.wrappedValue == 0 { return String() }
-        return "\(delima.str)\(value)"
     }
 
     private func setValue(_ newValue: String) {

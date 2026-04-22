@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  AppState.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Foundation
 

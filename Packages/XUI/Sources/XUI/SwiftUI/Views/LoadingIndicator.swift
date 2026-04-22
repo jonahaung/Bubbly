@@ -1,16 +1,17 @@
+//  LoadingIndicator.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
 
 public struct LoadingIndicator: View {
-    
-    static let gradient = AngularGradient(
+
+    static let gradient: AngularGradient = .init(
         gradient: Gradient(colors: [.white, .yellow, .orange, .red, .pink, .blue, .indigo]),
         center: .center
     )
-    
+
     private let size: CGFloat
     private let lineWidth: CGFloat
     private let progress: Double?

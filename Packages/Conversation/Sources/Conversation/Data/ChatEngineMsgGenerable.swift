@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  ChatEngineMsgGenerable.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import FoundationModels
 

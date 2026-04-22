@@ -1,12 +1,14 @@
-// © 2026 Aung Ko Min
+//  PhotoPickerButton.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Services
-import SwiftUI
 import XUI
+import Core
+import SwiftUI
+import Services
 
 struct PhotoPickerButton: View {
-    
 
     var body: some View {
         CustomButton {
@@ -23,13 +25,11 @@ struct PhotoPickerButton: View {
                 .presentModel(
                     NavPath
                         .view(
-                            node: PhotoPickerView().environment(composer.photoPicker).opaqueView(),
-                        ),
+                            node: PhotoPickerView().environment(composer.photoPicker).opaqueView()
+                        )
                 )
         }
     }
-
-    
 
     @Environment(ChatComposer.self) private var composer
     @Environment(ChatManager.self) private var manager

@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  ChatEngine.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Database
-import FoundationModels
-import Playgrounds
 import SwiftUI
+import Database
+import Playgrounds
+import FoundationModels
 
 // MARK: - ChatEngine
 
@@ -13,7 +16,7 @@ final class ChatEngine {
     private let model: SystemLanguageModel = .default
     private let chatSession: LanguageModelSession
     private let summarySession: LanguageModelSession
-    var cachedSummary: String? = nil
+    var cachedSummary: String?
 
     var isAvailable: Bool {
         switch model.availability {
@@ -26,7 +29,7 @@ final class ChatEngine {
 
     init() {
         chatSession = LanguageModelSession(
-            model: .init(guardrails: .permissiveContentTransformations),
+            model: .init(guardrails: .permissiveContentTransformations)
         ) {
             """
             You are a chat assistant.
@@ -40,7 +43,7 @@ final class ChatEngine {
         }
 
         summarySession = LanguageModelSession(
-            model: .init(guardrails: .permissiveContentTransformations),
+            model: .init(guardrails: .permissiveContentTransformations)
         ) {
             """
             You are a deterministic summarization engine.
@@ -59,27 +62,27 @@ final class ChatEngine {
 
     func respondTo(
         msgs: [Message],
-        summary: String?,
+        summary: String?
     ) async throws -> ChatEngineMsgGenerable {
         let lastUserMsg = msgs.last
         if let summary {
             let response = try await chatSession.respond(
-                generating: ChatEngineMsgGenerable.self,
+                generating: ChatEngineMsgGenerable.self
             ) {
                 self.buildResponsePrompt(
                     summary: summary,
-                    lastMessage: lastUserMsg?.text,
+                    lastMessage: lastUserMsg?.text
                 )
             }
             return response.content
         } else {
             let history = makeHistory(msgs: msgs)
             let response = try await chatSession.respond(
-                generating: ChatEngineMsgGenerable.self,
+                generating: ChatEngineMsgGenerable.self
             ) {
                 self.buildResponsePrompt(
                     history: history,
-                    lastMessage: lastUserMsg?.text,
+                    lastMessage: lastUserMsg?.text
                 )
             }
             return response.content
@@ -97,7 +100,7 @@ final class ChatEngine {
         \(history)
         """
         let response = try await summarySession.respond(
-            generating: [TopicGenerable].self,
+            generating: [TopicGenerable].self
         ) {
             prompt
         }
@@ -106,16 +109,16 @@ final class ChatEngine {
 
     func summarize(
         msgs: [Message],
-        previousSummary: String?,
+        previousSummary: String?
     ) async throws -> String {
         let history = makeHistory(msgs: msgs)
         let prompt = buildSummaryPrompt(
             history: history,
-            previousSummary: previousSummary,
+            previousSummary: previousSummary
         )
 
         let response = try await summarySession.respond(
-            generating: String.self,
+            generating: String.self
         ) {
             prompt
         }
@@ -142,7 +145,7 @@ final class ChatEngine {
 private extension ChatEngine {
     func buildResponsePrompt(
         summary: String,
-        lastMessage: String?,
+        lastMessage: String?
     ) -> String {
         """
         Here is the conversation summary:
@@ -157,7 +160,7 @@ private extension ChatEngine {
 
     func buildResponsePrompt(
         history: String,
-        lastMessage: String?,
+        lastMessage: String?
     ) -> String {
         """
         Here is the conversation history:
@@ -173,12 +176,12 @@ private extension ChatEngine {
 
     func buildSummaryPrompt(
         history: String,
-        previousSummary: String?,
+        previousSummary: String?
     ) -> String {
         if let previousSummary {
             buildIncrementalSummaryPrompt(
                 history: history,
-                previousSummary: previousSummary,
+                previousSummary: previousSummary
             )
         } else {
             buildInitialSummaryPrompt(history: history)
@@ -187,7 +190,7 @@ private extension ChatEngine {
 
     func buildIncrementalSummaryPrompt(
         history: String,
-        previousSummary: String,
+        previousSummary: String
     ) -> String {
         """
         You are maintaining a running factual summary.

@@ -1,8 +1,6 @@
-//
 //  BackArrowMenuButton.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 7/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -18,7 +16,7 @@ public struct BackArrowMenuButton: View {
         isOpen: Binding<Bool>,
         size: CGFloat = 64,
         barColor: Color = .primary,
-        cornerRadius: CGFloat = 5,
+        cornerRadius: CGFloat = 5
     ) {
         _isOpen = isOpen
         self.size = size

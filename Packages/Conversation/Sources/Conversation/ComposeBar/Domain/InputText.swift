@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  InputText.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Database
-import SwiftUI
 import XUI
+import SwiftUI
+import Database
 
 // MARK: - InputTextDelegate
 
@@ -30,7 +33,7 @@ final class InputText {
 
                 self.delegate?.inputText(self, didBeganEditing: newValue)
                 self.parseLinks(newValue)
-            },
+            }
         )
     }
 
@@ -39,7 +42,7 @@ final class InputText {
         selectAll()
     }
 
-    var selection: TextSelection? = nil
+    var selection: TextSelection?
     var hasText: Bool {
         !text.isWhitespace
     }

@@ -1,5 +1,6 @@
+//  ProducerConsumerQueue.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -122,8 +123,7 @@ public actor AsyncProducerConsumerQueue<T: Sendable> {
         if let waiter = waiting.first {
             waiting.removeFirst()
             waiter.resume(returning: item)
-        }
-        else {
+        } else {
             buffer.append(item)
         }
     }

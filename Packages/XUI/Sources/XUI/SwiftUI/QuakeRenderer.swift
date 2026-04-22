@@ -1,5 +1,6 @@
+//  QuakeRenderer.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -21,7 +22,7 @@ public struct QuakeRenderer: TextRenderer {
                 for run in line {
                     for glyph in run {
                         var copy = context
-                        let yOffset = Double.random(in: -moveAmount...moveAmount)
+                        let yOffset = Double.random(in: -moveAmount ... moveAmount)
                         copy.translateBy(x: 0, y: yOffset)
                         copy.draw(glyph, options: .disablesSubpixelQuantization)
                     }

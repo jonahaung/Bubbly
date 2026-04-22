@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  AnyMsgData+Extensions.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Core
 import Foundation
@@ -22,7 +25,7 @@ public extension AnyMsgData {
         let currentUserID = try CurrentUserID.get()
         let decrypted = try CryptoService.shared.decrypt(
             payloadString: encryptedMessage,
-            currentUserID: currentUserID,
+            currentUserID: currentUserID
         )
 
         guard let data = decrypted.data(using: .utf8) else {
@@ -31,7 +34,7 @@ public extension AnyMsgData {
 
         return try JSONDecoder().decode(
             AnyMsgData.self,
-            from: data,
+            from: data
         )
     }
 }

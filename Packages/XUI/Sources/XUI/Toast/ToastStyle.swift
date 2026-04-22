@@ -1,9 +1,10 @@
+//  ToastStyle.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import SwiftUI
+import Foundation
 
 public enum ToastStyle: Sendable, Hashable, CaseIterable {
     case `default`, top, bottom

@@ -1,15 +1,17 @@
-// © 2026 Aung Ko Min
+//  ImageUploadingLayer.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import Core
-import Database
-import ImageLoader
-import Services
-import SwiftUI
-import VideoLoader
 import XUI
+import Core
+import SwiftUI
+import Database
+import Services
+import ImageLoader
+import VideoLoader
 
 struct ImageUploadingLayer: View {
-    
 
     let attachment: Attachment
     let url: URL
@@ -35,8 +37,6 @@ struct ImageUploadingLayer: View {
         }
     }
 
-    
-
     @Environment(\.isVisible) private var viewIsVisible
     @State private var progress: ImageTask.Progress?
     @State private var uploading = false
@@ -55,16 +55,16 @@ struct ImageUploadingLayer: View {
         do {
             let url = try await uploader.uploadFile(
                 url,
-                to: .conversation(conID: conID, attachmentID: attachmentID),
+                to: .conversation(conID: conID, attachmentID: attachmentID)
             ) { progress in
                 Task { @MainActor in
                     if let progress {
-                        if progress.completedUnitCount == progress.totalUnitCount {
-                            self.progress = nil
+                        self.progress = if progress.completedUnitCount == progress.totalUnitCount {
+                            nil
                         } else {
-                            self.progress = .init(
+                            .init(
                                 completed: progress.completedUnitCount,
-                                total: progress.totalUnitCount,
+                                total: progress.totalUnitCount
                             )
                         }
                     }

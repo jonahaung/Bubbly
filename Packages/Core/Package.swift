@@ -7,13 +7,13 @@ let package = Package(
     name: "Core",
     platforms: [
         .iOS(.v26),
-        .macOS(.v12),
+        .macOS(.v12)
     ],
     products: [
         .library(
             name: "Core",
-            targets: ["Core"],
-        ),
+            targets: ["Core"]
+        )
     ],
     dependencies: [
         .package(name: "XUI", path: "../XUI"),
@@ -22,7 +22,7 @@ let package = Package(
         .package(name: "MediaPicker", path: "../MediaPicker"),
         .package(name: "FCM_V1", path: "../FCM_V1"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.4.0"),
-        .package(name: "FirePhoneOTP", path: "../FirePhoneOTP"),
+        .package(name: "FirePhoneOTP", path: "../FirePhoneOTP")
     ],
 
     targets: [
@@ -38,19 +38,19 @@ let package = Package(
                 .product(name: "FirebaseMessaging", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseStorage", package: "firebase-ios-sdk"),
                 .product(name: "FirePhoneOTP", package: "FirePhoneOTP"),
-                .product(name: "Crypto", package: "Crypto"),
+                .product(name: "Crypto", package: "Crypto")
 
             ],
             resources: [
-                .process("Resources"),
+                .process("Resources")
             ],
             swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency"),
-            ],
+                .enableExperimentalFeature("StrictConcurrency")
+            ]
         ),
         .testTarget(
             name: "CoreTests",
-            dependencies: ["Core"],
-        ),
-    ],
+            dependencies: ["Core"]
+        )
+    ]
 )

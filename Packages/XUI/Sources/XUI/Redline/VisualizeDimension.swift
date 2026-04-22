@@ -1,3 +1,8 @@
+//  VisualizeDimension.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 public extension View {
@@ -45,7 +50,6 @@ struct DimensionVisualizationModifier<S: ShapeStyle>: ViewModifier {
                                 .overlay(alignment: overlayAlignment) {
                                     DimensionLabel(value: geometry.size)
                                 }
-
                         case [.height]:
                             IBeam(axis: .vertical).overlay(alignment: .dimensionLabel) {
                                 DimensionLabel(

@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  MsgRecipient.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import SwiftUI
 import XUI
+import SwiftUI
 
 public enum MsgRecipient: Int, Codable, Sendable, Hashable {
     case outgoing

@@ -1,16 +1,19 @@
-// © 2026 Aung Ko Min
+//  ConversationScene.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 public struct ConversationScene: View {
-    
+
     public init(
         coordinator: AppCoordinator,
-        prefretchData: ConversationInitializer.PrefetchedData,
+        prefretchData: ConversationInitializer.PrefetchedData
     ) {
         _viewModel = .init(
             wrappedValue: .init(
@@ -18,7 +21,7 @@ public struct ConversationScene: View {
                 contactsRepository: coordinator.container.contactsRepository,
                 currentUserRepository: coordinator.container
                     .currentUserRepository,
-                router: coordinator.router,
+                router: coordinator.router
             )
         )
         _composer = .init(wrappedValue: .init())
@@ -37,9 +40,9 @@ public struct ConversationScene: View {
                 .equatable(by: viewModel.state.conversation.uid)
             SeenStatusOverlay()
             if let frame = viewModel.presentation.state.overlayItem,
-                let overlayViewModel = viewModel.models.element(
-                    withID: frame.id
-                )
+               let overlayViewModel = viewModel.models.element(
+                   withID: frame.id
+               )
             {
                 OverlayMenu(item: frame)
                     .id(frame.id)
@@ -53,13 +56,14 @@ public struct ConversationScene: View {
         .environment(\.sharedNamespace, SharedNamespace(namespace))
         .environment(
             \.msgCellActions,
-            MsgCellAction(action: { viewModel.send(.cellAction($0)) }),
+            MsgCellAction(action: { viewModel.send(.cellAction($0)) })
         )
         .environment(viewModel)
         .environment(composer)
         .onAppear(perform: viewModel.onViewAppear)
         .onDisappear(perform: viewModel.onViewDisappear)
     }
+
     @FocusState private var focusState: String?
     @Namespace private var namespace
 

@@ -1,5 +1,6 @@
+//  LazyLoadedView.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -203,7 +204,7 @@ public extension LazyAppearView {
 }
 
 private struct DestroyOnDisappear: ViewModifier {
-    @State private var id = UUID()
+    @State private var id: UUID = .init()
 
     func body(content: Content) -> some View {
         content

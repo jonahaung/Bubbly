@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  ContactRepo.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Core
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
 public enum ContactRepo {
     enum XError: Error {
@@ -21,7 +24,7 @@ public enum ContactRepo {
         let serverValue: Contact? = try? await FirestoreRepo.getModel(
             for: uid,
             collection: .users,
-            field: .uid,
+            field: .uid
         )
         guard let serverValue else {
             if let localValue {
@@ -40,7 +43,7 @@ public enum ContactRepo {
         try await AsyncOrderedStream.mapOrdered(inputs: uids) { uid in
             try await ContactRepo.getOrCreate(
                 uid: uid,
-                refetch: refatch,
+                refetch: refatch
             )
         }
     }
@@ -50,7 +53,7 @@ public enum ContactRepo {
         var descriptor = FetchDescriptor<PContact>(
             predicate: #Predicate {
                 $0.name == targetName
-            },
+            }
         )
         descriptor.fetchLimit = 1
         return try await Store.shared.contactStore?.fetch(descriptor).first
@@ -61,7 +64,7 @@ public enum ContactRepo {
         var descriptor = FetchDescriptor<PGroup>(
             predicate: #Predicate {
                 $0.name == targetName
-            },
+            }
         )
         descriptor.fetchLimit = 1
         return try await Store.shared.groupStore?.fetch(descriptor).first

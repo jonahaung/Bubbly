@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  PGroup.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import SwiftData
+import Foundation
 
 // MARK: - PGroup
 
@@ -23,7 +26,7 @@ public final class PGroup {
         photoURL: String,
         members: [String],
         createdBy: String,
-        theme _: ConversationTheme = ConversationTheme(),
+        theme _: ConversationTheme = ConversationTheme()
     ) {
         self.uid = uid
         self.name = name
@@ -76,7 +79,7 @@ extension PGroup: SendableTransformable {
             createdDate: snapshot.createdDate,
             photoURL: snapshot.photoURL ?? "",
             members: snapshot.members,
-            createdBy: snapshot.createdBy,
+            createdBy: snapshot.createdBy
         )
     }
 
@@ -87,7 +90,7 @@ extension PGroup: SendableTransformable {
             createdDate: .init(stringLiteral: createdDate),
             photoURL: photoURL,
             members: members,
-            createdBy: createdBy,
+            createdBy: createdBy
         )
     }
 }

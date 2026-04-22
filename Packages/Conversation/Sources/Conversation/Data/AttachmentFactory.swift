@@ -1,11 +1,14 @@
-// © 2026 Aung Ko Min
+//  AttachmentFactory.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
-import AVFoundation
-import Database
-import MediaPicker
-import Services
-import UIKit
 import XUI
+import UIKit
+import Database
+import Services
+import MediaPicker
+import AVFoundation
 
 // MARK: - AttachmentFactory
 
@@ -20,7 +23,7 @@ extension AttachmentFactory {
         }
     }
 
-    static func createImageAttachment(from item: SelectedImage) async throws -> Attachment {
+    static func createImageAttachment(from item: SelectedImage) throws -> Attachment {
         let image = item.image
         let imageData = try MediaManager.shared.createData(from: image)
         let thumbnailData = try MediaManager.shared.createThumbnail(from: image)
@@ -29,7 +32,7 @@ extension AttachmentFactory {
             uid: item.id,
             url: "",
             attachMentTypeRaw: AttachMentType.imageUploading.rawValue,
-            aspectRatio: image.aspectRatio,
+            aspectRatio: image.aspectRatio
         )
         guard let url = attachment.file()?.url else {
             throw CocoaError(.fileReadUnknown)
@@ -55,7 +58,7 @@ extension AttachmentFactory {
             uid: IDGenerator.shared.make(),
             url: "",
             attachMentTypeRaw: AttachMentType.imageUploading.rawValue,
-            aspectRatio: uiImage.aspectRatio,
+            aspectRatio: uiImage.aspectRatio
         )
         guard let url = attachment.file()?.url else {
             throw CocoaError(.fileReadUnknown)
@@ -71,7 +74,7 @@ extension AttachmentFactory {
 extension AttachmentFactory {
     static func createLinkAttachments(from items: [ExtractedLink]) async throws -> [Attachment] {
         try await AsyncOrderedStream.mapOrdered(inputs: items) { item in
-			await createLinkAttachment(from: item.url)
+            await createLinkAttachment(from: item.url)
         }.compactMap(\.self)
     }
 
@@ -81,15 +84,14 @@ extension AttachmentFactory {
         }
         let swiftLinkPreview = SwiftLinkPreview()
         let extracted: SwiftLinkPreviewResponse? = try? await swiftLinkPreview.preview(
-            url.absoluteString,
+            url.absoluteString
         )
         guard let extracted else {
             return nil
         }
 
         guard let imageURL = extracted.imageURL,
-              let image = try? await getImage(from: imageURL) else
-        {
+              let image = try? await getImage(from: imageURL) else {
             return nil
         }
 
@@ -100,7 +102,7 @@ extension AttachmentFactory {
             attachMentTypeRaw: AttachMentType.link.rawValue,
             aspectRatio: image.aspectRatio,
             title: extracted.title,
-            subTitle: extracted.description,
+            subTitle: extracted.description
         )
     }
 
@@ -122,8 +124,7 @@ extension AttachmentFactory {
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
             guard let http = response as? HTTPURLResponse,
-                  let contentType = http.value(forHTTPHeaderField: "Content-Type") else
-            {
+                  let contentType = http.value(forHTTPHeaderField: "Content-Type") else {
                 return false
             }
 
@@ -137,8 +138,7 @@ extension AttachmentFactory {
 extension AttachmentFactory {
     static func makeVideoAttachment(from text: String) async -> Attachment? {
         guard let url = URL(string: text),
-              let thumbnail = try? await VideoFactory.generateVideoThumbnail(from: url) else
-        {
+              let thumbnail = try? await VideoFactory.generateVideoThumbnail(from: url) else {
             return nil
         }
 
@@ -147,7 +147,7 @@ extension AttachmentFactory {
             url: text,
             attachMentTypeRaw: AttachMentType.video.rawValue,
             aspectRatio: thumbnail.aspectRatio,
-            title: "",
+            title: ""
         )
     }
 

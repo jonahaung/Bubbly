@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  GroupStorageKey.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import XUI
+import Foundation
 
 public enum GroupStorageKey: Hashable, Sendable, CaseNameReflectable {
     case device(Device)
@@ -11,11 +14,11 @@ public enum GroupStorageKey: Hashable, Sendable, CaseNameReflectable {
     case limit(Limit)
     case custom(String)
     case router(Router)
-	case conversation(GroupStorageKey.Conversation)
+    case conversation(GroupStorageKey.Conversation)
 }
 
 public extension GroupStorageKey {
-	enum Router: CaseNameReflectable, Sendable {
+    enum Router: CaseNameReflectable, Sendable {
         case targetedDeepLinkPath
         case tappedConversationID
     }
@@ -30,9 +33,9 @@ public extension GroupStorageKey {
         case authToken
     }
 
-	enum Conversation: CaseNameReflectable, Sendable {
-		case richTextEnabled
-	}
+    enum Conversation: CaseNameReflectable, Sendable {
+        case richTextEnabled
+    }
 
     enum Layout: CaseNameReflectable, Sendable {
         case chatMsgSpacing
@@ -76,9 +79,9 @@ public extension GroupStorageKey {
                 limit.rawValue
             case let .router(router):
                 router.rawValue
-			case let .conversation(conversation):
-				conversation.rawValue
-			}
+            case let .conversation(conversation):
+                conversation.rawValue
+            }
         }
         return AppInformation.appID + "." + key
     }

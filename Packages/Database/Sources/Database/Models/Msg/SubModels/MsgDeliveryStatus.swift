@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  MsgDeliveryStatus.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
 import XUI
+import Foundation
 
 public enum DeliveryStatus: Int, Conformable, Codable, CaseNameReflectable {
     case received

@@ -1,5 +1,6 @@
+//  WrappedGridLayout.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -57,8 +58,8 @@ public struct WrappedGridLayout: Layout {
     }
 
     struct FlowResult {
-        var bounds = CGSize.zero
-        var rows = [Row]()
+        var bounds: CGSize = .zero
+        var rows: [Row] = []
 
         struct Row {
             var range: Range<Int>
@@ -77,7 +78,7 @@ public struct WrappedGridLayout: Layout {
                 .isFinite ? maxPossibleWidth : .greatestFiniteMagnitude
             var rowMinY = 0.0
             var rowHeight = 0.0
-            var xOffsets: [Double] = []
+            var xOffsets = [Double]()
             for (index, subview) in zip(subviews.indices, subviews) {
                 let idealSize = subview.sizeThatFits(.unspecified)
                 if index != 0,
@@ -116,7 +117,7 @@ public struct WrappedGridLayout: Layout {
                 let rowWidth = maxPossibleWidth - remainingWidth
                 rows.append(
                     Row(
-                        range: index - max(itemsInRow - 1, 0)..<index + 1,
+                        range: index - max(itemsInRow - 1, 0) ..< index + 1,
                         xOffsets: xOffsets,
                         frame: CGRect(x: 0, y: rowMinY, width: rowWidth, height: rowHeight)
                     )

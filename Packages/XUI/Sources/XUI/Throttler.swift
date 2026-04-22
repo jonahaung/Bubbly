@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  Throttler.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Foundation
 
@@ -23,7 +26,8 @@ public final class Throttler {
     // MARK: Public
 
     public func throttle(_ block: @escaping () -> Void) {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
 
         let now = DispatchTime.now().uptimeNanoseconds
         let delayNs = UInt64(delay * 1_000_000_000)
@@ -50,14 +54,15 @@ public final class Throttler {
             let remaining = delayNs - (now - lastExecution)
             schedule(after: remaining) { [weak self] in
                 guard let self else { return }
-                self.pending = false
+                pending = false
                 block()
             }
         }
     }
 
     public func cancel() {
-        lock.lock(); defer { lock.unlock() }
+        lock.lock()
+        defer { lock.unlock() }
         workItem?.cancel()
         workItem = nil
         pending = false
@@ -69,7 +74,7 @@ public final class Throttler {
     private let delay: TimeInterval
     private let option: Option
 
-    private let lock = NSLock()
+    private let lock: NSLock = .init()
 
     private var workItem: DispatchWorkItem?
     private var lastExecution: UInt64 = 0
@@ -81,10 +86,10 @@ public final class Throttler {
         let item = DispatchWorkItem { [weak self] in
             guard let self else { return }
 
-            self.lock.lock()
+            lock.lock()
             let now = DispatchTime.now().uptimeNanoseconds
-            self.lastExecution = now
-            self.lock.unlock()
+            lastExecution = now
+            lock.unlock()
 
             block()
         }

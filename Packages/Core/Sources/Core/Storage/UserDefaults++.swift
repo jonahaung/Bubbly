@@ -1,8 +1,6 @@
-//
 //  UserDefaults++.swift
-//  Core
 //
-//  Created by Aung Ko Min on 13/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation

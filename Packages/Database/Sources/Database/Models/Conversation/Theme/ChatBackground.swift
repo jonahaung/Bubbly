@@ -1,7 +1,10 @@
-// © 2026 Aung Ko Min
+//  ChatBackground.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import SwiftUI
 import XUI
+import SwiftUI
 
 // MARK: - ChatBackground
 
@@ -25,17 +28,17 @@ extension ChatBackground: Identifiable {
 
     public var imageName: String {
         switch self {
-        case .bg_1: return "bg_1"
-        case .bg_2: return "bg_2"
-        case .bg_3: return "bg_3"
-        case .bg_4: return "bg_4"
-        case .bg_5: return "bg_5"
-        case .bg_6: return "bg_6"
-        case .bg_7: return "bg_7"
-        case .bg_8: return "bg_8"
+        case .bg_1: "bg_1"
+        case .bg_2: "bg_2"
+        case .bg_3: "bg_3"
+        case .bg_4: "bg_4"
+        case .bg_5: "bg_5"
+        case .bg_6: "bg_6"
+        case .bg_7: "bg_7"
+        case .bg_8: "bg_8"
         }
     }
-    
+
     public var `default`: Self { .bg_6 }
 }
 

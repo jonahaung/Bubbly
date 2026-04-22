@@ -1,8 +1,6 @@
-//
 //  Debouncer.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 21/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation

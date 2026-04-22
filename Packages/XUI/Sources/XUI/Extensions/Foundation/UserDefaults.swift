@@ -1,5 +1,6 @@
+//  UserDefaults.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -13,8 +14,7 @@ public extension UserDefaults {
 
     func codable<T: Codable>(forKey key: String) -> T? {
         guard let data = data(forKey: key),
-              let value = try? JSONDecoder().decode(T.self, from: data)
-        else {
+              let value = try? JSONDecoder().decode(T.self, from: data) else {
             return nil
         }
         return value

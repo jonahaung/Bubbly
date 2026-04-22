@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  ContactRepresentableSendable.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
 import Foundation
 

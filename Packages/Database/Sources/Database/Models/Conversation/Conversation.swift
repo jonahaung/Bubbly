@@ -1,8 +1,11 @@
-// © 2026 Aung Ko Min
+//  Conversation.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
+import XUI
 import Core
 import Foundation
-import XUI
 
 // MARK: - Conversation
 
@@ -46,13 +49,13 @@ public extension Conversation {
             let uid = ConversationIDGenerator.generate(currentUserID, contact.uid)
             self.init(
                 kind: kind,
-                uid: uid,
+                uid: uid
             )
         case let .group(group):
             let uid = group.uid
             self.init(
                 kind: kind,
-                uid: uid,
+                uid: uid
             )
         }
     }

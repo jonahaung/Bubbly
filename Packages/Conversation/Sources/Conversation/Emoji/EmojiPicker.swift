@@ -1,12 +1,15 @@
-// © 2026 Aung Ko Min
+//  EmojiPicker.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
     // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-    import SwiftUI
     import XUI
+    import SwiftUI
 
     struct EmojiPicker: View {
         var onSelect: (Emoji) -> Void

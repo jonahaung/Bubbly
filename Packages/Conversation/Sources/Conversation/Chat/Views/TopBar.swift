@@ -1,15 +1,18 @@
-// © 2026 Aung Ko Min
+//  TopBar.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
+import XUI
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 struct TopBar: View {
 
     @Environment(\.conversationTheme) private var theme
-    private let mockMessageCreator = MockMessageCreator()
+    private let mockMessageCreator: MockMessageCreator = .init()
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -21,11 +24,11 @@ struct TopBar: View {
                     .badgeView(
                         Text(
                             manager.conversationConfig.totalMsgsCount,
-                            format: .number,
+                            format: .number
                         )
                         .font(.system(size: UIFont.smallSystemFontSize, weight: .medium).width(.compressed))
                         .lineHeight(.multiple(factor: 1.2))
-                        .textScale(.secondary),
+                        .textScale(.secondary)
                     )
                     .background(theme.backgroundColor)
             } onFinished: {
@@ -40,24 +43,13 @@ struct TopBar: View {
                         .background(Color.appPrimary, in: .circle)
                 }
                 Spacer()
-
-                AsyncButton {
-                    try await mockMessageCreator.createTextMessages(count: 1,
-                                                                     in: manager.state.conversation, direction: .incoming
-                    )
+                CustomButton {
+                    Task {try await mockMessageCreator.createTextMessages(count: 1,
+                                                                          in: manager.state.conversation, direction: .incoming)}
                 } label: {
-                    switch manager.state.conversation.kind {
-                    case let .contact(contact):
-                        ProfilePhoto(
-                            contact,
-                            size: .custom(32), tapAction: .none
-                        )
-                    case let .group(group):
-                        ProfilePhoto(
-                            group,
-                            size: .custom(32), tapAction: .none
-                        )
-                    }
+                    Image(systemSymbol: .quoteClosing)
+                        .frame(square: 44)
+                        .background(Color.appPrimary, in: .circle)
                 }
             }
             .padding(.horizontal, Padding.sm)
@@ -70,8 +62,8 @@ struct TopBar: View {
                     theme.backgroundColor.opacity(0.5)
                 ],
                 startPoint: .top,
-                endPoint: .bottom,
-            ),
+                endPoint: .bottom
+            )
         )
         .geometryGroup()
         .equatable(by: manager.conversationConfig.conID)

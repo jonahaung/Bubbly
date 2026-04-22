@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  EmojiRepository.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 #if os(iOS)
 //
@@ -8,7 +11,6 @@
     import Foundation
 
     struct EmojiRepository {
-        
 
         @MainActor
         static let shared: EmojiRepository = .init()
@@ -31,7 +33,7 @@
             let bundle = Bundle.module
             let url = bundle.url(
                 forResource: "emojis",
-                withExtension: "json",
+                withExtension: "json"
             )
             let data = try Data(contentsOf: url!)
             return try JSONDecoder().decode([Emoji].self, from: data)
@@ -48,7 +50,7 @@
                 let category = EmojiCategory(
                     title: categoryType.title,
                     iconName: categoryType.iconName,
-                    emojis: emojis,
+                    emojis: emojis
                 )
 
                 categories.append(category)

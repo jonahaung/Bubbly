@@ -1,4 +1,7 @@
-// © 2026 Aung Ko Min
+//  ExtractedLink.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
 
 import Foundation
 
@@ -21,7 +24,6 @@ struct ExtractedLink: Hashable, Identifiable {
 // MARK: - LinkExtractor
 
 enum LinkExtractor {
-    
 
     static func extractLinks(from text: String) -> [ExtractedLink] {
         guard let regularExpression = try? NSRegularExpression(pattern: pattern, options: []) else {
@@ -32,7 +34,7 @@ enum LinkExtractor {
         let matches = regularExpression.matches(
             in: text,
             options: [],
-            range: NSRange(location: 0, length: nsString.length),
+            range: NSRange(location: 0, length: nsString.length)
         )
 
         var seen = Set<URL>()
@@ -50,8 +52,8 @@ enum LinkExtractor {
             // If no scheme, assume https
             let normalized: String =
                 if rawString.lowercased().hasPrefix("http://") || rawString
-                    .lowercased()
-                    .hasPrefix("https://")
+                        .lowercased()
+                        .hasPrefix("https://")
                 {
                     rawString
                 } else {
@@ -76,8 +78,6 @@ enum LinkExtractor {
     static func extractURLs(from text: String) -> [URL] {
         extractLinks(from: text).map(\.url)
     }
-
-    
 
     /// Matches:
     /// 1) http(s)://...

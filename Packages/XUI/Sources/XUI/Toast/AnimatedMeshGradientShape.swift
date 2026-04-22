@@ -1,5 +1,6 @@
+//  AnimatedMeshGradientShape.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI

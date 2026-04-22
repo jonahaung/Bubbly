@@ -1,5 +1,6 @@
+//  Checkbox.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -10,18 +11,18 @@ struct Checkbox<Label: View>: View {
 
     var body: some View {
         #if os(iOS)
-        Button(action: { isOn.toggle() }) {
-            HStack {
-                Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
-                    .font(.body)
-                    .foregroundColor(isOn ? .blue : .secondary)
-                label()
-                Spacer()
-            }
-            .contentShape(Rectangle())
-        }.buttonStyle(.plain)
+            Button(action: { isOn.toggle() }) {
+                HStack {
+                    Image(systemName: isOn ? "checkmark.circle.fill" : "circle")
+                        .font(.body)
+                        .foregroundColor(isOn ? .blue : .secondary)
+                    label()
+                    Spacer()
+                }
+                .contentShape(Rectangle())
+            }.buttonStyle(.plain)
         #else
-        Toggle(isOn: $isOn, label: label)
+            Toggle(isOn: $isOn, label: label)
         #endif
     }
 }

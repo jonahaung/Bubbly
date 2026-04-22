@@ -1,26 +1,36 @@
-// © 2026 Aung Ko Min
+//  ChatManager+Datasource.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import XUI
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
+
 extension ChatManager {
     func reloadConversation(refetch: Bool) async throws {
         state = try await conversationDataUpdater.reloadConversation(
-            currentState: state, refetch: refetch)
+            currentState: state, refetch: refetch
+        )
     }
+
     func setIncomingMsgsAsRead(before date: Date = .now) async throws {
         guard let currentUserID = await currentUserRepository?.model.uid else { return }
         let updatedMsgs = try await conversationDataUpdater.updateMsgs(
             before: date, of: .incoming, from: .received, to: .read, currentState: state,
-            currentUserID: currentUserID, )
+            currentUserID: currentUserID
+        )
         for msg in updatedMsgs { models.update(msg: msg) }
         if let lastReadMsg = updatedMsgs.last {
             try await conversationDataUpdater.sendSeenStatus(
                 lastReadMsg: lastReadMsg, currentUserID: currentUserID,
-                conversation: state.conversation, )
+                conversation: state.conversation
+            )
         }
     }
+
     func setOutgoingMsgsAsRead(status: AnyMsgData.SeenStatusPayload) async throws {
         guard let msg = try await Store.shared.msgStore?.fetch(uid: status.msgID) else { return }
         let msgIDs = models.renderedModels.filter {

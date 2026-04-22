@@ -1,14 +1,12 @@
-//
 //  MsgCellAttachmentBubble.swift
-//  Conversation
 //
-//  Created by Aung Ko Min on 22/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
 
 struct MsgCellAttachmentBubble: View {
     @Environment(\.conversationTheme) private var theme
@@ -17,7 +15,7 @@ struct MsgCellAttachmentBubble: View {
         VStack(alignment: state.horizontalAlignment, spacing: .zero) {
             MsgAttachmentsView(
                 attachments: state.attachments,
-                alignment: state.horizontalAlignment,
+                alignment: state.horizontalAlignment
             )
 
             if let attributedText = state.attributedText {

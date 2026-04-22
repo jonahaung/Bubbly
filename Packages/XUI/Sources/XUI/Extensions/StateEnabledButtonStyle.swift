@@ -1,5 +1,6 @@
+//  StateEnabledButtonStyle.swift
 //
-// Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -12,11 +13,11 @@ public protocol StateEnabledButtonStyle: ButtonStyle {
     var isEnabled: Bool { get }
 
     #if DEBUG
-    /// Whether or not the button has a state override,
-    /// which is useful for SwiftUI previews.
-    var previewState: ButtonState? {
-        get
-    }
+        /// Whether or not the button has a state override,
+        /// which is useful for SwiftUI previews.
+        var previewState: ButtonState? {
+            get
+        }
     #endif
 
     @ViewBuilder
@@ -31,7 +32,7 @@ public enum ButtonState {
 
 public extension StateEnabledButtonStyle {
     func makeBody(configuration: ButtonStyle.Configuration) -> some View {
-        let state = self.state(for: configuration)
+        let state = state(for: configuration)
 
         return makeBody(label: configuration.label, state: state)
     }
@@ -39,9 +40,9 @@ public extension StateEnabledButtonStyle {
     func state(for configuration: Configuration) -> ButtonState {
         #if DEBUG
 
-        if let previewState = previewState {
-            return previewState
-        }
+            if let previewState {
+                return previewState
+            }
 
         #endif
 
