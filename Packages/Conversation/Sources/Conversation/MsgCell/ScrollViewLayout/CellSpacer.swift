@@ -9,7 +9,7 @@ import Database
 
 struct CellSpacer: View, @MainActor Equatable {
     var body: some View {
-        Spacer()
+        Color.clear
             .frame(height: ChatLayoutConstants.Cell.sectionSpacing)
     }
 

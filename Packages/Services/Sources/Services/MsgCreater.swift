@@ -5,6 +5,7 @@ import Foundation
 import MediaPicker
 import UIKit
 import XUI
+import Core
 
 public actor MsgCreator {
     public enum Error: Swift.Error {
@@ -25,14 +26,24 @@ public actor MsgCreator {
         text: String,
         attachments: [Attachment],
         in conversation: Conversation,
-    ) async -> Message {
-        await Message(
-            uid: IDGenerator.shared.make(),
+    ) async throws -> Message {
+        let msgID = await IDGenerator.shared.make()
+        let currentUserID = try CurrentUserID.get()
+        let outgoingStatus = MsgDeliveryState(
+            msgID: msgID,
+            senderID: currentUserID,
+            aggregateStatus: .sending,
+            recipientIDs: conversation.members.filter { $0 != currentUserId },
+            updatedAt: .now
+        )
+        return await Message(
+            uid: msgID,
             senderID: currentUserId,
             conID: conversation.uid,
             text: text,
-            date: .now,
-            deliveryStatus: .sending,
+            serverTime: .now,
+            incomingStatus: .sending,
+            outgoingStatus: outgoingStatus,
             attachments: attachments,
             reactions: [],
         )

@@ -12,14 +12,17 @@ import Database
 import Services
 
 struct MsgAttachmentsView: View {
-    let attachments: [Attachment]
-    let alignment: HorizontalAlignment
+    let state: MsgCellViewModel.State
+
     @Namespace private var namespace
     @State private var selection: Attachment?
-    @Environment(MsgCellViewModel.self) private var viewModel
     @Environment(\.msgCellActions) private var msgCellActions
     @Environment(\.conversation) private var conversation
     @State private var uploadedAttachments: [Attachment] = []
+
+    private var attachments: [Attachment] { state.attachments ?? [] }
+    private var alignment: HorizontalAlignment { state.horizontalAlignment }
+
     var body: some View {
         AttachmentsDeck(items: attachments, alignment: alignment ) { attachment in
             AttachmentPreview(attachment: attachment) { item in
@@ -31,7 +34,8 @@ struct MsgAttachmentsView: View {
             }
         }.fullScreenCover(item: $selection) { attachment in
             AttachmentGalleryView(attachments: attachments, selection: attachment.id)
-                .presentationContentInteraction(.scrolls).presentationBackgroundInteraction(
+                .presentationContentInteraction(.scrolls)
+                .presentationBackgroundInteraction(
                     .disabled
                 ).presentationBackground(.clear).navigationTransition(
                     .zoom(sourceID: attachment.uid, in: namespace)
@@ -44,7 +48,7 @@ struct MsgAttachmentsView: View {
         if attachments.count == uploadedAttachments.count {
             Task {
                 let newValues = uploadedAttachments
-                var msg = viewModel.msg
+                var msg = state.msg
                 msg.attachments = newValues
                 msgCellActions?(.onUploadedAttachments(msg))
             }

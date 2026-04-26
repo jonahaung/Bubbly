@@ -13,4 +13,5 @@ public extension EnvironmentValues {
     @Entry var isVisible = false
     @Entry var attachmentFetcher: AttachmentFetcher? = nil
     @Entry var conversationTheme: ChatTheme = .empty
+    @Entry var msgCellState: MsgCellViewModel.State! = nil
 }

@@ -16,6 +16,7 @@ struct MsgCellAction {
         case onFocusMsgBubble(_ item: OverlayMenuItem?)
         case onUploadedAttachments(Message)
         case onReact(Message, ReactionType)
+        case performSend(AnyMsgData)
     }
 
     let action: (ActionType) -> Void

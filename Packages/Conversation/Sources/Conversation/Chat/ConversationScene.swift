@@ -34,19 +34,20 @@ public struct ConversationScene: View {
             BackgroundView(
                 imageName: viewModel.state.properties.theme.background.imageName
             )
-            ConversationScrollView()
+            
+            SeenStatusOverlay()
+            
+            ConversationScrollView(manager: viewModel)
                 .layoutPriority(1)
             ConversationSceneOverlayBar()
                 .equatable(by: viewModel.state.conversation.uid)
-            SeenStatusOverlay()
-            if let frame = viewModel.presentation.state.overlayItem,
-               let overlayViewModel = viewModel.models.element(
-                   withID: frame.id
-               )
-            {
+        }
+        .fullScreenCover(item: $viewModel.presentation.state.overlayItem) { frame in
+            if let overlayViewModel = viewModel.models.element(withID: frame.id) {
                 OverlayMenu(item: frame)
-                    .id(frame.id)
                     .environment(overlayViewModel)
+                    .id(frame.id)
+                    .presentationBackground(.clear)
             }
         }
         .environment(\.conversation, viewModel.state.conversation)
@@ -54,10 +55,7 @@ public struct ConversationScene: View {
         .environment(\.attachmentFetcher, viewModel.attachmentFetcher)
         .environment(\.sharedFocusState, SharedFocusState($focusState))
         .environment(\.sharedNamespace, SharedNamespace(namespace))
-        .environment(
-            \.msgCellActions,
-            MsgCellAction(action: { viewModel.send(.cellAction($0)) })
-        )
+        .environment(\.msgCellActions, .init(action: { viewModel.send(.cellAction($0)) }))
         .environment(viewModel)
         .environment(composer)
         .onAppear(perform: viewModel.onViewAppear)

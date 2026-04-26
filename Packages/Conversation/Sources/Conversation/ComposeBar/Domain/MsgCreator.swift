@@ -36,8 +36,9 @@ public actor MsgCreator {
             senderID: currentUserId,
             conID: conversation.uid,
             text: text,
-            date: .now,
+            serverTime: .now,
             deliveryStatus: .sending,
+            recipientIDs: conversation.members.filter { $0 != currentUserId },
             attachments: attachments,
             reactions: []
         )

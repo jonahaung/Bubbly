@@ -120,7 +120,7 @@ actor AttachmentDataAPI {
 
     private func processImageAttachment(_ attachment: Attachment) async throws -> AttachmentData {
         let image = try await fetchImage(from: attachment.url)
-        let thumbnail = try await persistImageAndThumbnail(image, for: attachment)
+        let thumbnail = try persistImageAndThumbnail(image, for: attachment)
         return .image(thumbnail: thumbnail)
     }
 
@@ -130,7 +130,7 @@ actor AttachmentDataAPI {
         }
 
         let thumbnail = try await VideoFactory.generateVideoThumbnail(from: remoteURL)
-        let persistedThumbnail = try await persistThumbnailOnly(thumbnail, for: attachment)
+        let persistedThumbnail = try persistThumbnailOnly(thumbnail, for: attachment)
         if attachment.fileExist(), let localURL = attachment.localURL() {
             return .video(videoURL: localURL, thumbnail: persistedThumbnail)
         }

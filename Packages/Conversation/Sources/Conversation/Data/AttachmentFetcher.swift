@@ -3,10 +3,10 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import Database
-import Foundation
-import Services
 import XUI
+import Database
+import Services
+import Foundation
 
 public enum FetchIntent: Sendable {
     case prefetch
@@ -14,8 +14,8 @@ public enum FetchIntent: Sendable {
     case userInitiated
 }
 
-extension FetchIntent {
-    fileprivate var priority: TaskPriority {
+private extension FetchIntent {
+    var priority: TaskPriority {
         switch self {
         case .prefetch:
             .background
@@ -342,8 +342,7 @@ public actor AttachmentFetcher {
             return
         }
 
-        guard let continuation = attachmentWaiters.removeValue(forKey: waiterID)
-        else {
+        guard let continuation = attachmentWaiters.removeValue(forKey: waiterID) else {
             return
         }
 
@@ -396,9 +395,9 @@ public actor AttachmentFetcher {
         if let continuations = waiters.removeValue(forKey: key)?.values {
             for continuation in continuations {
                 switch result {
-                case .success(let data):
+                case let .success(data):
                     continuation.resume(returning: data)
-                case .failure(let error):
+                case let .failure(error):
                     continuation.resume(throwing: error)
                 }
             }
@@ -453,16 +452,16 @@ public actor AttachmentFetcher {
     }
 }
 
-extension AttachmentFetcher {
-    public struct TimeoutError: Error, LocalizedError {
+public extension AttachmentFetcher {
+    struct TimeoutError: Error, LocalizedError {
         public var errorDescription: String? {
             "Operation timed out waiting for pending task to start"
         }
     }
 }
 
-extension AttachmentFetcher {
-    public func prefetch(
+public extension AttachmentFetcher {
+    func prefetch(
         _ attachments: [Attachment],
         intent: FetchIntent = .prefetch
     ) {
@@ -471,13 +470,13 @@ extension AttachmentFetcher {
         }
     }
 
-    public enum FetchState: Sendable {
+    enum FetchState: Sendable {
         case fetching
         case pending
         case idle
     }
 
-    public func state(for attachment: Attachment) -> FetchState {
+    func state(for attachment: Attachment) -> FetchState {
         if isFetching(attachment) {
             return .fetching
         }

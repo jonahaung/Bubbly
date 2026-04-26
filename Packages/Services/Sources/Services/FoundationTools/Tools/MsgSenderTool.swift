@@ -53,7 +53,7 @@ public struct MsgSenderTool: Tool {
             return createErrorOutput(error: LocalError.conversationNotFoune)
         }
 
-        let msg = await MsgCreator(currentUserId: currentUserId).message(
+        let msg = try await MsgCreator(currentUserId: currentUserId).message(
             text: arguments.text,
             attachments: [],
             in: conversation,

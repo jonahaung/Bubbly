@@ -24,7 +24,7 @@ struct MsgCellHeader: View, @MainActor Equatable {
 
     private var headerText: String {
         if state.isSender {
-            return MsgTimeStringFormatter.string(for: state.date)
+            return state.date.formatted(date: .abbreviated, time: .shortened)
         } else {
             let name: String? = ContactsRepository.shared.contact(for: state.senderID)?.name
             return name ?? "Unknown"

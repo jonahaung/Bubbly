@@ -19,40 +19,19 @@ let package = Package(
         .package(name: "Services", path: "../Services"),
         .package(name: "XUI", path: "../XUI"),
         .package(name: "ImageLoader", path: "../ImageLoader"),
-        .package(name: "MediaPicker", path: "../MediaPicker")
-
+        .package(name: "MediaPicker", path: "../MediaPicker"),
     ],
     targets: [
         .target(
             name: "Conversation",
             dependencies: [
-                .product(name: "Core", package: "Core", condition: .when(platforms: [.iOS])),
-                .product(
-                    name: "Database",
-                    package: "Database",
-                    condition: .when(platforms: [.iOS])
-                ),
-                .product(
-                    name: "Services",
-                    package: "Services",
-                    condition: .when(platforms: [.iOS])
-                ),
-                .product(name: "XUI", package: "XUI", condition: .when(platforms: [.iOS])),
-                .product(
-                    name: "ImageLoader",
-                    package: "ImageLoader",
-                    condition: .when(platforms: [.iOS])
-                ),
-                .product(
-                    name: "VideoLoader",
-                    package: "ImageLoader",
-                    condition: .when(platforms: [.iOS])
-                ),
-                .product(
-                    name: "MediaPicker",
-                    package: "MediaPicker",
-                    condition: .when(platforms: [.iOS])
-                )
+                .product(name: "Core", package: "Core"),
+                .product(name: "Database", package: "Database"),
+                .product(name: "Services", package: "Services"),
+                .product(name: "XUI", package: "XUI"),
+                .product(name: "ImageLoader", package: "ImageLoader"),
+                .product(name: "VideoLoader", package: "ImageLoader"),
+                .product(name: "MediaPicker", package: "MediaPicker"),
             ],
             resources: [
                 .process("Resources")

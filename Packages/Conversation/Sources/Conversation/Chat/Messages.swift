@@ -55,12 +55,12 @@ extension Messages {
     }
 
     func getCurrentVisibleDateString() -> String? {
-        guard let model = storage.first(where: { $0.state.isVisible }) else { return nil }
+        guard let model = storage.first(where: { $0.isVisible }) else { return nil }
         return MsgTimeStringFormatter.string(for: model.msg.date)
     }
 
     private func displayVisibleMsgsIfNeeded(currentVisibleIDS: [String]) {
-        let oldIDs = storage.filter(\.state.isVisible).map(\.msg.uid)
+        let oldIDs = storage.filter(\.isVisible).map(\.msg.uid)
         let difference = currentVisibleIDS.difference(from: oldIDs)
         for each in difference {
             switch each {
@@ -69,6 +69,21 @@ extension Messages {
             case let .remove(_, id, _):
                 if let model = element(withID: id) { model.setVisibility(false) }
             }
+        }
+    }
+}
+
+extension Messages {
+    func refreshMsg(uid: String) async throws {
+        if let updated = try await Store.shared.msgStore?.fetch(uid: uid) {
+            element(withID: uid)?.update(with: updated)
+        }
+    }
+
+    func refreshMsgs(uids: [String]) async throws {
+        try await AsyncOrderedStream.mapOrdered(inputs: uids) { [weak self] uid in
+            guard let self else { return }
+            try await refreshMsg(uid: uid)
         }
     }
 }
@@ -156,7 +171,7 @@ extension Messages {
             let model = models[i]
             let prev = i > 0 ? models[i - 1].msg : nil
             let next = i + 1 < models.count ? models[i + 1].msg : nil
-            let style = bubbleFactory.style(for: model.msg, previous: prev, next: next )
+            let style = bubbleFactory.style(for: model.msg, previous: prev, next: next)
             model.update(layout: style)
         }
     }
@@ -172,7 +187,7 @@ extension Messages {
         let model = storage[index]
         let prev = index > 0 ? storage[index - 1].msg : nil
         let next = index + 1 < storage.count ? storage[index + 1].msg : nil
-        let style = bubbleFactory.style(for: model.msg, previous: prev, next: next )
+        let style = bubbleFactory.style(for: model.msg, previous: prev, next: next)
         model.update(layout: style)
     }
 }
@@ -197,8 +212,4 @@ extension Messages {
         if lhs.date != rhs.date { return lhs.date < rhs.date }
         return lhs.uid < rhs.uid
     }
-}
-
-extension MsgCellViewModel {
-    var identified: Identified<String, MsgCellViewModel> { .init(self, id: \.id) }
 }

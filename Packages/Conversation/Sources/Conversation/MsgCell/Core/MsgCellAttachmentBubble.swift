@@ -13,11 +13,7 @@ struct MsgCellAttachmentBubble: View {
     let state: MsgCellViewModel.State
     var body: some View {
         VStack(alignment: state.horizontalAlignment, spacing: .zero) {
-            MsgAttachmentsView(
-                attachments: state.attachments,
-                alignment: state.horizontalAlignment
-            )
-
+            MsgAttachmentsView(state: state)
             if let attributedText = state.attributedText {
                 TextContent(attributedText: attributedText)
                     .padding(theme.bubblePading)

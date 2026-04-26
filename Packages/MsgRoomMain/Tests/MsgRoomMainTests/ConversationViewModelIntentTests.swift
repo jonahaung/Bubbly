@@ -91,7 +91,7 @@ struct ConversationViewModelIntentTests {
                 reactions: [],
             ),
         ]
-        let configuration = ConversationInitializer.Configuration(
+        let configuration = ConversationInitializer.PaginationState(
             conID: conID,
             pageSize: 20,
             lineSpacing: 0,

@@ -11,8 +11,6 @@ import Database
 import Services
 import SFSafeSymbols
 
-// MARK: - OverlayMenu
-
 struct OverlayMenu: View {
 
     enum TransitState: Hashable {
@@ -29,14 +27,12 @@ struct OverlayMenu: View {
         }
     }
 
-    let item: OverlayMenuItem
-    @Environment(\.conversationTheme) private var theme
     var body: some View {
         ZStack {
             Rectangle()
                 .fill(
                     theme.backgroundColor
-                        .opacity(transitionState.isDidAppear ? 0.8 : 0)
+                        .opacity(transitionState.isDidAppear ? 0.9 : 0)
                 )
                 .gesture(
                     DragGesture(minimumDistance: 0)
@@ -49,7 +45,9 @@ struct OverlayMenu: View {
                         }
                         .onEnded { _ in
                             var transaction = Transaction.withAnimation()
-                            transaction.addAnimationCompletion(criteria: .removed) {
+                            transaction.addAnimationCompletion(
+                                criteria: .removed
+                            ) {
                                 withTransaction(.withoutAnimation()) {
                                     dismiss()
                                 }
@@ -91,10 +89,13 @@ struct OverlayMenu: View {
         }
     }
 
+    let item: OverlayMenuItem
+    @Environment(\.conversationTheme) private var theme
     @Environment(MsgCellViewModel.self) private var viewModel
     @Environment(\.msgCellActions) private var msgCellActions
     @Environment(\.conversation) private var conversation
     @State private var transitionState: TransitState = .hidden
+
     private func dismiss() {
         withTransaction(\.disablesAnimations, true) {
             msgCellActions?(.onFocusMsgBubble(nil))
@@ -102,39 +103,34 @@ struct OverlayMenu: View {
     }
 }
 
-// MARK: - RoomFocesedOverlayBar
-
 struct RoomFocesedOverlayBar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            AnimatedButton(.center) {
-                Task {
-                    let msg = item.msg
-                    try? await Socket.send(
-                        .deleteMsg(rMsg: .init(msg)),
-                        conversation: conversation
-                    )
-                    await MainActor.run {
-                        msgCellActions?(.onFocusMsgBubble(nil))
-                    }
-                }
+            AsyncButton {
+                let msg = item.msg
+                try await Socket.send(
+                    .deleteMsg(rMsg: .init(msg)),
+                    conversation: conversation
+                )
+                await Task.delay(1)
+                msgCellActions?(.onFocusMsgBubble(nil))
             } label: {
                 SystemImageWithShape(.trashFill, iconStyle)
             }
-            AnimatedButton(.leading) {} label: {
+            Button {} label: {
                 SystemImageWithShape(.arrowshapeTurnUpLeftFill, iconStyle)
             }
 
-            AnimatedButton(.trailing) {} label: {
+            Button {} label: {
                 SystemImageWithShape(.arrowshapeTurnUpRightFill, iconStyle)
             }
-            AnimatedButton(.center) {
+            Button {
                 UIPasteboard.general.string = item.msg.text
             } label: {
                 SystemImageWithShape(.squareFilledOnSquare, iconStyle)
             }
-            AnimatedButton(.center) {
+            AsyncButton {
                 showInfo = true
             } label: {
                 SystemImageWithShape(.ellipsis, iconStyle)
@@ -142,20 +138,18 @@ struct RoomFocesedOverlayBar: View {
         }
         .sheet(isPresented: $showInfo) {
             NavigationStack {
-                VStack {
-                    TextEditor(text: .constant(item.msg.preetyPrinted))
-                        .textSelection(.enabled)
-                        .font(.footnote.monospaced())
-                        .scrollIndicators(.hidden)
-                }
-                .padding()
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(role: .close) {
-                            showInfo = false
+                TextEditor(text: .constant(item.msg.preetyPrinted))
+                    .textSelection(.enabled)
+                    .font(.footnote.monospaced())
+                    .scrollIndicators(.hidden)
+                    .scrollContentBackground(.hidden)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button(role: .close) {
+                                showInfo = false
+                            }
                         }
                     }
-                }
             }
         }
     }
@@ -165,5 +159,7 @@ struct RoomFocesedOverlayBar: View {
     @Environment(MsgCellViewModel.self) private var item
     @State private var showInfo = false
 
-    private let iconStyle = SystemImageWithShape.IconStyle.circle(.plain)
+    private let iconStyle = SystemImageWithShape.IconStyle.circle(
+        .color(.secondaryText)
+    )
 }

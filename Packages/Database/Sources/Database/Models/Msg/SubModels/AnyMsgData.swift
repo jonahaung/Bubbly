@@ -13,9 +13,9 @@ public enum AnyMsgData: Codable, Sendable, Hashable {
     case newMsg(rMsg: RMsg)
     case updatedMsg(rMsg: RMsg)
     case deleteMsg(rMsg: RMsg)
-    case reaction(reaction: ReactionPayload)
-    case typingStatus(status: TypingStatusPayload)
-    case seenStatus(status: SeenStatusPayload)
+    case reaction(payload: ReactionPayload)
+    case typingStatus(payload: TypingStatusPayload)
+    case msgRecipientReceipt(payload: MsgRecipientReceiptPayload)
 
     enum CodingKeys: String, CodingKey {
         case newMsg
@@ -23,7 +23,8 @@ public enum AnyMsgData: Codable, Sendable, Hashable {
         case deleteMsg
         case reaction
         case typingStatus
-        case seenStatus
+        case msgRecipientReceipt
+//        case seenStatus
     }
 }
 
@@ -52,17 +53,27 @@ public extension AnyMsgData {
         }
     }
 
-    struct SeenStatusPayload: Sendable, Codable, Hashable {
+//    struct SeenStatusPayload: Sendable, Codable, Hashable {
+//        public let msgID: String
+//        public let userID: String
+//        public let conID: String
+//        public let date: String
+//
+//        public init(msgID: String, userID: String, conID: String, date: String) {
+//            self.msgID = msgID
+//            self.userID = userID
+//            self.conID = conID
+//            self.date = date
+//        }
+//    }
+    struct MsgRecipientReceiptPayload: Sendable, Codable, Hashable {
         public let msgID: String
-        public let userID: String
         public let conID: String
-        public let date: String
-
-        public init(msgID: String, userID: String, conID: String, date: String) {
+        public let recipientReceipt: MsgRecipientReceipt
+        public init(msgID: String, conID: String, recipientReceipt: MsgRecipientReceipt) {
             self.msgID = msgID
-            self.userID = userID
             self.conID = conID
-            self.date = date
+            self.recipientReceipt = recipientReceipt
         }
     }
 }
@@ -74,12 +85,12 @@ public extension AnyMsgData {
              let .newMsg(rMsg),
              let .updatedMsg(rMsg):
             rMsg.conID
-        case let .typingStatus(typingStatus):
-            typingStatus.conID
-        case let .reaction(reaction):
-            reaction.conID
-        case let .seenStatus(status):
-            status.conID
+        case let .typingStatus(payload):
+            payload.conID
+        case let .reaction(payload):
+            payload.conID
+        case let .msgRecipientReceipt(payload):
+            payload.conID
         }
     }
 
@@ -87,15 +98,15 @@ public extension AnyMsgData {
         switch self {
         case let .newMsg(rMsg),
              let .updatedMsg(rMsg):
-            rMsg.text ?? rMsg.attachments.first?.displayText ?? "New Message"
+            rMsg.text ?? rMsg.attachments?.first?.displayText ?? "New Message"
         case let .deleteMsg(rMsg):
             "Deleted: \(rMsg.uid)"
         case let .typingStatus(typingStatus):
             typingStatus.conID
         case let .reaction(reaction):
             reaction.reaction.rawValue
-        case .seenStatus:
-            "Seen"
+        case .msgRecipientReceipt(_):
+            "Receipt"
         }
     }
 
@@ -115,7 +126,9 @@ public extension AnyMsgData {
         case .deleteMsg: "Deleted"
         case .reaction: "Reacted"
         case .typingStatus: "Typing Status"
-        case let .seenStatus(status): "Has seen the \(status.msgID)"
+//        case let .seenStatus(payload): "Has seen the \(payload.msgID)"
+        case let .msgRecipientReceipt(payload):
+            "Has seen the \(payload.recipientReceipt.status.localizedName)"
         }
     }
 
@@ -123,15 +136,17 @@ public extension AnyMsgData {
         switch self {
         case let .newMsg(msg),
              let .updatedMsg(msg):
-            msg.text ?? msg.attachments.first?.displayText ?? "New Message"
+            msg.text ?? msg.attachments?.first?.displayText ?? "New Message"
         case .deleteMsg:
             "Message Deleted"
         case let .reaction(reaction):
             "Reacted with \(reaction.reaction)"
         case let .typingStatus(typingStatus):
             typingStatus.isTyping ? "is typing..." : "stopped typing"
-        case let .seenStatus(status):
-            status.msgID
+//        case let .seenStatus(status):
+//            status.msgID
+        case let .msgRecipientReceipt(payload):
+            payload.preetyPrinted
         }
     }
 }

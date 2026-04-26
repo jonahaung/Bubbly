@@ -17,29 +17,16 @@ extension ChatManager {
     }
 
     func setIncomingMsgsAsRead(before date: Date = .now) async throws {
-        guard let currentUserID = await currentUserRepository?.model.uid else { return }
-        let updatedMsgs = try await conversationDataUpdater.updateMsgs(
-            before: date, of: .incoming, from: .received, to: .read, currentState: state,
-            currentUserID: currentUserID
-        )
-        for msg in updatedMsgs { models.update(msg: msg) }
-        if let lastReadMsg = updatedMsgs.last {
-            try await conversationDataUpdater.sendSeenStatus(
-                lastReadMsg: lastReadMsg, currentUserID: currentUserID,
+        let newlyReadMsgs = try await conversationDataUpdater.markReadToUnreadIncomingMsgs(conID: conversationConfig.conID, lessThan: date)
+        if newlyReadMsgs.isEmpty {
+            return
+        }
+        for msg in newlyReadMsgs { models.update(msg: msg) }
+        if let lastReadMsg = newlyReadMsgs.last {
+            try await conversationDataUpdater.sendRecipientStatus(
+                lastReadMsg: lastReadMsg,
                 conversation: state.conversation
             )
         }
-    }
-
-    func setOutgoingMsgsAsRead(status: AnyMsgData.SeenStatusPayload) async throws {
-        guard let msg = try await Store.shared.msgStore?.fetch(uid: status.msgID) else { return }
-        let msgIDs = models.renderedModels.filter {
-            $0.msg.receiptType == .outgoing && $0.state.date <= msg.date
-                && $0.state.deliveryStatus == .delivered
-        }.map(\.id)
-        let msgs = try await AsyncOrderedStream.mapOrdered(inputs: msgIDs) { msgID in
-            try await Store.shared.msgStore?.fetch(uid: msgID)
-        }.compactMap(\.self)
-        for msg in msgs { models.update(msg: msg) }
     }
 }

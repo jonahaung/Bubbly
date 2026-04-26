@@ -4,12 +4,11 @@ import Database
 import SwiftUI
 import XUI
 
-// MARK: - MsgCellViewModel
-
+@MainActor
 @Observable
-public final class MsgCellViewModel: Identifiable, Equatable {
+public final class MsgCellViewModel: @MainActor Identifiable, @MainActor Equatable {
     public var state: State
-    
+    public var isVisible: Bool = false
     public init(_ state: State) {
         self.state = state
     }
@@ -22,10 +21,9 @@ public final class MsgCellViewModel: Identifiable, Equatable {
             return
         }
         state.msg = msg
-       
     }
 
-    @MainActor public func update(layout: MsgCellLayout) {
+    public func update(layout: MsgCellLayout) {
         guard state.layout != layout else {
             return
         }
@@ -43,10 +41,10 @@ public final class MsgCellViewModel: Identifiable, Equatable {
     }
 
     public func setVisibility(_ isVisible: Bool) {
-        guard state.isVisible != isVisible else {
+        guard self.isVisible != isVisible else {
             return
         }
-        state.isVisible = isVisible
+        self.isVisible = isVisible
         
     }
 
@@ -67,7 +65,7 @@ public final class MsgCellViewModel: Identifiable, Equatable {
 }
 
 extension MsgCellViewModel {
-    public struct State: Sendable, Equatable, Identifiable {
+    public struct State: Equatable, Hashable, Identifiable {
 
         public init(msg: Message, attributedText: AttributedString?) {
             self.msg = msg
@@ -79,28 +77,25 @@ extension MsgCellViewModel {
         public var msg: Message
         public let attributedText: AttributedString?
 
-        public var sender: Contact? = nil
+        public var sender: Contact?
         public var layout: MsgCellLayout = .init()
-        public var selectedMsg: SelectedMsg? = nil
+        public var selectedMsg: SelectedMsg?
         public var bubbleCornor: BubbleCorner = .none
         public var dateStString: String?
-        public var isVisible: Bool = false
-
-        public var deliveryStatus: DeliveryStatus? {
-            msg.deliveryStatus
-        }
-
+        
         public var isSender: Bool { msg.isSender }
 
         public var id: String {
             msg.uid
         }
-
+        public var incomingStatus: DeliveryStatus? { msg.incomingStatus }
+        public var outgoingStatus: MsgDeliveryState? { msg.outgoingStatus }
+        
         public var senderID: String {
             msg.senderID
         }
 
-        public var attachments: [Attachment] {
+        public var attachments: [Attachment]? {
             msg.attachments
         }
 
@@ -145,7 +140,7 @@ extension MsgCellViewModel {
     }
 
     public var id: String {
-        state.msg.uid
+        state.id
     }
 }
 
@@ -161,4 +156,3 @@ public enum VerticalItemAlignment: Sendable, Hashable {
     case leading
     case trailing
 }
-

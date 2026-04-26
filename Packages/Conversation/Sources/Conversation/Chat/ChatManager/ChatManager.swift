@@ -15,7 +15,8 @@ import ImageLoader
     init(
         _ data: ConversationInitializer.PrefetchedData,
         contactsRepository: ContactsRepositoryProtocol,
-        currentUserRepository: CurrentUserRepository, router: Router
+        currentUserRepository: CurrentUserRepository,
+        router: Router
     ) {
         let conID = data.configuration.conID
         self.contactsRepository = contactsRepository
@@ -27,10 +28,7 @@ import ImageLoader
         presentation = .init(conID)
         dataObserver = .init(conID)
         attachmentFetcher = .init()
-        state = .init(
-            reloadID: 0, conversation: data.conversation, theme: .init(data.properties.theme),
-            properties: data.properties
-        )
+        state = State(conversation: data.conversation, theme: .init(data.properties.theme), properties: data.properties)
         let headers: [HeaderModel] =
             data.configuration.canPaginate ? [] : [.init(kind: .conversation(data.conversation))]
         models = .init(data.msgs, headers)
@@ -44,7 +42,7 @@ import ImageLoader
     @ObservationIgnored let datasource: PaginatedDatasource
     @ObservationIgnored let scrollController: ScrollCoordinator
     @ObservationIgnored var presentation: Presenter
-    @ObservationIgnored let conversationConfig: ConversationInitializer.Configuration
+    @ObservationIgnored let conversationConfig: ConversationInitializer.PaginationState
     @ObservationIgnored let attachmentFetcher: AttachmentFetcher
     @ObservationIgnored let models: Messages
     @ObservationIgnored private let dataObserver: ChatDataReceiver
@@ -82,7 +80,7 @@ extension ChatManager {
         if models.contains(withID: lasMsg.uid) {
             scrollController.performScroll(to: .id(lasMsg.uid, .animated()))
         } else {
-            scrollController.begin(updates: .resetting(msg: lasMsg))
+            scrollController.send(.begin(.resetting(msg: lasMsg)))
         }
     }
 
@@ -100,7 +98,7 @@ extension ChatManager {
         if !hasViewLoaded {
             serialQueue.addOperation { [weak self] in
                 guard let self else { return }
-                try await setIncomingMsgsAsRead()
+                try await setIncomingMsgsAsRead(before: .now)
             }
         }
     }

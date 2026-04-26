@@ -16,7 +16,7 @@ public struct CircleButton: View {
 
     public init(
         _ symbol: SFSymbol,
-        _ size: CGFloat = 40,
+        _ size: CGFloat = 38,
         color: Color = .accentColor,
         action: @escaping () -> Void
     ) {
@@ -35,7 +35,7 @@ public struct CircleButton: View {
                     .frame(square: size)
                     .layoutPriority(1)
                 SystemImage(symbol, size * 0.4)
-                    .foregroundStyle(color.gradient)
+                    .foregroundStyle(color)
                     .fontWeight(.semibold)
             }
         }

@@ -1,8 +1,3 @@
-//  MsgCellReactionOverlay.swift
-//
-//  Copyright © 2026 Aung Ko Min.
-//
-
 //
 //  MsgCellReactionOverlay.swift
 //  Conversation
@@ -12,7 +7,26 @@
 import SwiftUI
 import Database
 
-struct MsgCellReactionOverlay: View {
-    var body: some View { Reactions(reactions: reactions).fixedSize().equatable(by: reactions) }
+struct MsgCellReactionOverlay: View, @MainActor Equatable {
+    
     let reactions: [Reaction]
+    var body: some View {
+        ReactionStackLayout {
+            ForEach(
+                Array(reactions.reversed().enumerated()),
+                id: \.element
+            ) { index, reaction in
+                Text(reaction.rawValue)
+                    .font(.footnote)
+                    .offset(x: index.cgFloat * -12)
+                    .transition(.movingParts.pop(.yellow))
+            }
+        }
+        .offset(y: -10)
+        .padding(.horizontal, 8)
+    }
+    
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.reactions == rhs.reactions
+    }
 }

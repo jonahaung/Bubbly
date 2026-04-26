@@ -35,8 +35,8 @@ extension SeenMember: Comparable {
     }
 }
 
-public extension AnyMsgData.SeenStatusPayload {
-    var seenMember: SeenMember {
-        .init(uid: userID, msgId: msgID, date: ServerTime.now.value)
-    }
-}
+//public extension AnyMsgData.SeenStatusPayload {
+//    var seenMember: SeenMember {
+//        .init(uid: userID, msgId: msgID, date: ServerTime.now.value)
+//    }
+//}

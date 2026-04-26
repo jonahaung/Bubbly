@@ -8,7 +8,7 @@ import XUI
 // MARK: - ConversationInitializer
 
 public enum ConversationInitializer {
-    public struct Configuration: Hashable, Sendable {
+    public struct PaginationState: Hashable, Sendable {
         public let conID: String
         public let pageSize: Int
         public let lineSpacing: CGFloat
@@ -22,13 +22,13 @@ public enum ConversationInitializer {
         public let conversation: Conversation
         public let properties: ConversationProperties
         public let msgs: [Message]
-        public let configuration: Configuration
+        public let configuration: PaginationState
 
         public init(
             conversation: Conversation,
             properties: ConversationProperties,
             msgs: [Message],
-            configuration: Configuration,
+            configuration: PaginationState,
         ) {
             self.conversation = conversation
             self.properties = properties

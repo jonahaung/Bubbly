@@ -90,6 +90,7 @@ public actor MockMessageCreator {
             let message = try await makeMessage(
                 kind: kind,
                 senderID: senderID,
+                conversation: conversation,
                 conversationID: conversation.uid,
                 date: date,
                 index: index,
@@ -234,6 +235,7 @@ private extension MockMessageCreator {
     func makeMessage(
         kind: MessageKind,
         senderID: String,
+        conversation: Conversation,
         conversationID: String,
         date: Date,
         index: Int,
@@ -250,7 +252,7 @@ private extension MockMessageCreator {
             attachments = try [makeAttachment(index: index)]
             text = index.isMultiple(of: 2) ? nil : attachmentCaptions[index % attachmentCaptions.count]
         case .photo:
-            attachments = try await [makePhotoAttachment(index: index)]
+            attachments = await [makePhotoAttachment(index: index)]
             text = index.isMultiple(of: 2) ? nil : photoCaptions[index % photoCaptions.count]
         }
 
@@ -259,15 +261,18 @@ private extension MockMessageCreator {
             senderID: senderID,
             conID: conversationID,
             text: text,
-            date: date,
+            serverTime: .init(date),
             deliveryStatus: senderID == currentUserID ? .delivered : .read,
+            recipientIDs: senderID == currentUserID
+                ? conversation.members.filter { $0 != currentUserID }
+                : [currentUserID],
             attachments: attachments,
             reactions: []
         )
     }
 
     func makeAttachment(index: Int) throws -> Attachment {
-        var attachment = Attachment(
+        let attachment = Attachment(
             uid: UUID().uuidString,
             url: attachmentURLs.random(),
             attachMentTypeRaw: AttachMentType.link.rawValue,

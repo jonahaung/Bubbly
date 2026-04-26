@@ -8,21 +8,16 @@ import XUI
 
 extension Socket {
     public static func send(_ data: AnyMsgData, conversation: Conversation) async throws {
-        try await Task { @SocketActor in
-            try await Socket.shared.send(data, conversation: conversation)
-        }
-        .value
+        try await Socket.shared.send(data, conversation: conversation)
     }
 
     func send(_ data: AnyMsgData, conversation _: Conversation) async throws {
         switch data {
         case let .newMsg(rMsg):
+            notifyMessage(data)
             let msg = Message(rMsg)
             try await Store.shared.msgStore?.insert(msg)
-            notifyMessage(data)
-            if msg.isSender {
-                addToQueue()
-            }
+            addToQueue()
         case let .deleteMsg(rMsg: rMsg):
             let currentUserID = try CurrentUserID.get()
             try await Store.shared.msgStore?.delete(uid: rMsg.uid)
@@ -41,46 +36,14 @@ extension Socket {
             addToQueue()
         }
         func addToQueue() {
-            if sendingQueue.isEmpty {
-                sendingQueue.enqueue(data)
-                dequeueIfNeeded()
-            } else {
-                sendingQueue.enqueue(data)
-            }
-        }
-    }
-
-    private func dequeueIfNeeded() {
-        guard let data = sendingQueue.dequeue() else {
-            return
-        }
-
-        Task { [weak self] in
-            guard let self else {
-                return
-            }
-
-            try await queue.sync { [weak self] in
-                guard let self else {
-                    return
-                }
-
-                defer {
-                    Task { [weak self] in
-                        guard let self else {
-                            return
-                        }
-
-                        try await Task.sleep(seconds: 1)
-                        await self.dequeueIfNeeded()
-                    }
-                }
+            queue.addOperation { [weak self] in
+                guard let self else { return }
                 try await performSend(data)
             }
         }
     }
 
-    private func performSend(_ data: AnyMsgData) async throws {
+    public func performSend(_ data: AnyMsgData) async throws {
         let conversation = try await ConversationRepo.getOrCreate(
             for: data.conID,
             refetch: false,
@@ -88,16 +51,17 @@ extension Socket {
         switch data {
         case let .newMsg(rMsg):
             var msg = Message(rMsg)
-            msg.deliveryStatus = try await sendToRemote(
-                .newMsg(rMsg: rMsg),
+            let receipts = try await sendToRemote(
+                .newMsg(rMsg: rMsg.outgoing()),
                 conversation: conversation,
             )
+            msg.outgoingStatus = msg.outgoingStatus?.replacingReceipts(receipts)
             try await Store.shared.msgStore?.updateAndSave(uid: rMsg.uid) { model in
                 model.update(from: msg)
             }
             notifyMessage(.updatedMsg(rMsg: .init(msg)))
         case let .updatedMsg(rMsg):
-            try await sendToRemote(.updatedMsg(rMsg: rMsg), conversation: conversation)
+            try await sendToRemote(.updatedMsg(rMsg: rMsg.outgoing()), conversation: conversation)
             try await Store.shared.msgStore?.updateAndSave(uid: rMsg.uid) { model in
                 model.update(with: rMsg)
             }
@@ -108,33 +72,15 @@ extension Socket {
             try await sendToRemote(data, conversation: conversation)
         case .deleteMsg:
             try await sendToRemote(data, conversation: conversation)
-        case let .seenStatus(status: status):
-            guard
-                let msg = try await Store.shared.msgStore?.fetch(
-                    uid: status.msgID,
-                ) else
-            {
-                return
-            }
-
-            guard let contact = await ContactsRepository.shared.contact(for: msg.senderID) else {
-                return
-            }
-
-            let title = data.pushNotificationTitle(for: conversation)
-            let body = data.pushNotificationSubtitle
-            try await sendToRemote(
-                data,
-                alert: .init(title: title, body: body),
-                contacts: [contact],
-            )
+        case .msgRecipientReceipt(let payload):
+            try await sendToRemote(data, conversation: conversation)
         }
     }
 
     @discardableResult public func sendToRemote(
         _ data: AnyMsgData,
         conversation: Conversation,
-    ) async throws -> DeliveryStatus {
+    ) async throws -> [MsgRecipientReceipt] {
         let currentUserID = try CurrentUserID.get()
         let contacts = try await getContacts(
             from: conversation,
@@ -169,13 +115,13 @@ extension Socket {
         _ data: AnyMsgData,
         alert: APNSAlert,
         contacts: [Contact],
-    ) async throws -> DeliveryStatus {
+    ) async throws -> [MsgRecipientReceipt] {
         let encoded = try JSONEncoder().encode(data)
         guard let encodedString = String(data: encoded, encoding: .utf8) else {
             throw SocketError.encodingFailed
         }
 
-        let results: [(Contact, Bool)] = try await AsyncOrderedStream.mapOrdered(
+        return try await AsyncOrderedStream.mapOrdered(
             inputs: contacts,
         ) { contact in
             let encrypted = try await self.encrypt(
@@ -188,11 +134,16 @@ extension Socket {
                 deviceToken: contact.pushToken,
                 messageContent: encrypted,
                 alert: alert,
+                interruptionLevel: .timeSensitive
             )
             let success = try? await self.pushNotificationSender.send(notification: notification)
-            return (contact, success != nil)
+            return MsgRecipientReceipt(
+                memberID: contact.uid,
+                state: success == nil ? .partiallyFailed : .delivered,
+                updatedAt: .now,
+                failure: success == nil ? .init(code: "push_failed", isRetryable: true) : nil
+            )
         }
-        return results.contains(where: { $0.1 == true }) ? .delivered : .sendingFailed
     }
 
     private func encrypt(_ dataString: String, publicKeyString: String) throws -> String {

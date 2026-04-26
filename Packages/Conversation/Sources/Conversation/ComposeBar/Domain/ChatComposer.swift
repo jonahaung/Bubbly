@@ -250,11 +250,7 @@ private actor ChatComposerWorker {
             attachments: attachments,
             in: conversation
         )
-        if msg.attachments.contains(where: { $0.attachmentType == .imageUploading }) {
-            await Socket.shared.notifyMessage(.newMsg(rMsg: .init(msg)))
-        } else {
-            try await Socket.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
-        }
+        try await Socket.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
     }
 
     private func sanitizeText(_ text: String, attachments: [Attachment]) -> String {

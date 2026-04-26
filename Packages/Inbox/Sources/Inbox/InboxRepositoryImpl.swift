@@ -50,11 +50,8 @@ struct InboxRepositoryImpl: InboxRepository {
                         } else {
                             currentUser
                         }
-                    let unreadMsgsCount = try await MsgRepo.incomingUnreadMsgsCount(
-                        conID: conversation.uid,
-                        currentUserID: currentUser.uid,
-                    )
-                    print(unreadMsgsCount)
+                    let unreadMsgsCount = try await MsgRepo.incomingUnreadMsgsCount(conID: conversation.uid)
+                    
                     return InboxItem(
                         conversation: conversation,
                         msg: msg,

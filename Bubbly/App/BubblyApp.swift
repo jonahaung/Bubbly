@@ -17,9 +17,8 @@ struct BubblyApp: App {
 	var body: some Scene {
 		WindowGroup {
 			ContentView()
-                .symbolColorRenderingMode(.gradient)
+                .tint(Color.accent.gradient)
                 .allowsTightening(false)
-                .tint(Color.accent)
 				.onTask {
 					await Task.yield()
 					do {

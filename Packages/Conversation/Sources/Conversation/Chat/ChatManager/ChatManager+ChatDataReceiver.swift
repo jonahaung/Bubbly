@@ -4,11 +4,12 @@
 //
 
 import XUI
+import Core
 import SwiftUI
-
 import Database
 
 extension ChatManager: ChatDataReceiverDelegate {
+
     func chatDataReceiver(didRecieveError error: any Error) {
         serialQueue.addOperation { [weak self] in
             guard let self else { return }
@@ -16,7 +17,9 @@ extension ChatManager: ChatDataReceiverDelegate {
         }
     }
 
-    func chatDataReceiver(didReceive typingStatus: AnyMsgData.TypingStatusPayload) {
+    func chatDataReceiver(
+        didReceive typingStatus: AnyMsgData.TypingStatusPayload
+    ) {
         presentation.send(.typing(typingStatus))
     }
 
@@ -26,14 +29,17 @@ extension ChatManager: ChatDataReceiverDelegate {
             return
         }
         if scrollController.isNear(.bottom) {
-            scrollController.updateStateUpdate(to: .dataUpdate(.append(msgID: msg.uid)))
+            scrollController.updateStateUpdate(
+                to: .dataUpdate(.append(msgID: msg.uid))
+            )
             models.insert(msg: msg)
             layoutIfNeeded()
         } else {
             if scrollCoordinator(scrollController, shouldPaginateAt: .bottom) {
                 ToastPresenter.shared.dismiss()
                 let toast = Toast(
-                    node: Text(msg.displayText).opaqueView(), allowsBackgroundTap: true
+                    node: Text(msg.displayText).opaqueView(),
+                    allowsBackgroundTap: true
                 ) { [weak self] in
                     guard let self else { return }
                     ToastPresenter.shared.dismiss()
@@ -48,7 +54,8 @@ extension ChatManager: ChatDataReceiverDelegate {
                 layoutIfNeeded()
                 ToastPresenter.shared.dismiss()
                 let toast = Toast(
-                    node: Text(msg.displayText).opaqueView(), allowsBackgroundTap: false
+                    node: Text(msg.displayText).opaqueView(),
+                    allowsBackgroundTap: false
                 ) { [weak self] in
                     guard let self else { return }
                     ToastPresenter.shared.dismiss()
@@ -63,10 +70,12 @@ extension ChatManager: ChatDataReceiverDelegate {
     }
 
     func chatDataReceiver(didReceiveMsg msg: Message) async {
-        do { try await setIncomingMsgsAsRead(before: msg.date) } catch { await showError(error) }
+        do {
+            try await setIncomingMsgsAsRead(before: msg.date)
+        } catch { await showError(error) }
     }
 
-    func chatDataReceiver(didUpdate msg: Message, animated _: Bool) {
+    func chatDataReceiver(didUpdate msg: Message, animated _: Bool){
         models.update(msg: msg)
     }
 
@@ -76,10 +85,14 @@ extension ChatManager: ChatDataReceiverDelegate {
         withTransaction(transition) { layoutIfNeeded() }
     }
 
-    func chatDataReceiver(didReceive status: AnyMsgData.SeenStatusPayload) async {
-        do {
-            try await reloadConversation(refetch: false)
-            try await setOutgoingMsgsAsRead(status: status)
-        } catch { await showError(error) }
+    func chatDataReceiver(
+        didReceive payload: AnyMsgData.MsgRecipientReceiptPayload
+    ) async throws {
+        try await models.refreshMsg(uid: payload.msgID)
+        try await reloadConversation(refetch: false)
+        let models = models.renderedModels.filter { model in
+            model.state.isSender && model.state.outgoingStatus?.aggregateStatus ?? .initial < .read
+        }
+        try await self.models.refreshMsgs(uids: models.map(\.id))
     }
 }

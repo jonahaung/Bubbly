@@ -52,7 +52,7 @@ extension Message {
         return .init(
             uid: uid,
             recipient: receiptType,
-            attachmentsCount: attachments.count,
+            attachmentsCount: attachments?.count ?? 0,
             headerStatus: headerStatus
         )
     }

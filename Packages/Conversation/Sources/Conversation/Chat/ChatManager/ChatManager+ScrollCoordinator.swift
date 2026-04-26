@@ -5,12 +5,9 @@
 
 import XUI
 import SwiftUI
-
-// © 2026 Aung Ko Min
 import Database
 import Services
 
-// MARK: - ChatManager + ScrollCoordinatorDelegate
 extension ChatManager: ScrollCoordinatorDelegate {
     func scrollCoordinator(
         _ coordinator: ScrollCoordinator, begin update: ScrollCoordinator.DataUpdate
@@ -19,7 +16,7 @@ extension ChatManager: ScrollCoordinatorDelegate {
             guard let self else { return }
             switch update {
             case let .insert(edge, _):
-                let message = edge == .top ? oldestMessage : newestMessage
+                let message = edge == .top ? lastMsg : firstMsg
                 guard let message else {
                     scrollController.updateStateUpdate(to: .didEndUpdates)
                     return
@@ -43,11 +40,11 @@ extension ChatManager: ScrollCoordinatorDelegate {
                 let limit = conversationConfig.pageSize * 2
                 switch edge {
                 case .top:
-                    await models.retainNewest(limit)
+                    models.retainNewest(limit)
                     coordinator.updateStateUpdate(to: .dataUpdate(update))
                     layoutIfNeeded()
                 case .bottom:
-                    await models.retainOldest(limit)
+                    models.retainOldest(limit)
                     coordinator.updateStateUpdate(to: .dataUpdate(update))
                     withAnimation { layoutIfNeeded() }
                 }
@@ -108,8 +105,8 @@ extension ChatManager: ScrollCoordinatorDelegate {
 }
 
 extension ChatManager {
-    var newestMessage: Database.Message? { models.last?.msg }
-    var oldestMessage: Database.Message? { models.first?.msg }
+    var firstMsg: Database.Message? { models.last?.msg }
+    var lastMsg: Database.Message? { models.first?.msg }
     func scrollTo(msg: Message) async throws {
         scrollController.updateStateUpdate(to: .willBeginUpdates)
         let query = ServerTime(msg.date).value

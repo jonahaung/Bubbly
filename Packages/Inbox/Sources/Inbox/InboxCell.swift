@@ -17,16 +17,22 @@ struct InboxCell: View {
             onSelect(item)
         } label: {
             HStack(spacing: Spacing.md) {
-                ProfilePhoto(item, size: .custom(50))
-                LabeledContent {
-                    if item.unreadMsgsCount > 0 {
-                        Image(systemName: "\(item.unreadMsgsCount).circle.fill")
-                            .foregroundStyle(Color.blue)
-                            .imageScale(.small)
+                ProfilePhoto(item, size: .custom(55))
+                    .overlay(alignment: .bottomTrailing) {
+                        if item.unreadMsgsCount > 0 {
+                            Text(item.unreadMsgsCount, format: .number)
+                                .padding(.vertical, 2)
+                                .padding(.horizontal, 6)
+                                .background(.blue.gradient, in: .capsule)
+                                .foregroundStyle(Color.container)
+                                .font(.system(size: UIFont.smallSystemFontSize-1, weight: .semibold))
+                                .lineHeight(.multiple(factor: 1.2))
+                        }
                     }
-                } label: {
+                VStack(alignment: .leading, spacing: 0) {
                     Text(item.title)
                         .font(typography.headLine)
+                    
                     Text(item.msg.displayText)
                         .font(typography.subHeadline)
                         .lineHeight(.multiple(factor: 1.1))

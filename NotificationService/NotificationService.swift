@@ -95,7 +95,7 @@ final class NotificationService: UNNotificationServiceExtension {
                 try Task.checkCancellation()
                 try await prepareStoreIfNeeded(for: data)
                 try Task.checkCancellation()
-                try await Socket.shared.handleReceive(data)
+                try await Socket.shared.handleReceiveBackground(data)
                 finishSession(id: requestID, with: currentContent(for: requestID))
             } catch is CancellationError {
                 logger.info("Notification processing cancelled before completion.")
@@ -139,10 +139,12 @@ final class NotificationService: UNNotificationServiceExtension {
             rMsg.senderID
         case let .typingStatus(status):
             status.senderID
-        case let .seenStatus(status):
-            status.userID
+//        case let .seenStatus(status):
+//            status.userID
         case .reaction:
             nil
+        case .msgRecipientReceipt(payload: let payload):
+            payload.recipientReceipt.userID
         }
 
         guard

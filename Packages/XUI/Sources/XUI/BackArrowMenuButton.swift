@@ -65,6 +65,7 @@ public struct BackArrowMenuButton: View {
                     .rotationEffect(.degrees(isOpen ? 30 : 0), anchor: .leading)
                     .offset(x: isOpen ? -offsetX : 0)
             }
+            .rotationEffect(.degrees(isOpen ? 90 : 0), anchor: .center)
             .frame(width: size, height: size)
             .contentShape(Rectangle())
         }

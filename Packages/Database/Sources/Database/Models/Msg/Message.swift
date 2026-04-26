@@ -21,9 +21,10 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
     public let senderID: String
     public let conID: String
     public var text: String?
-    public let date: Date
-    public var deliveryStatus: DeliveryStatus
-    public var attachments: [Attachment]
+    public let serverTime: ServerTime
+    public var incomingStatus: DeliveryStatus
+    public var outgoingStatus: MsgDeliveryState?
+    public var attachments: [Attachment]?
     public var reactions: [Reaction]
     public let isSender: Bool
 
@@ -32,30 +33,64 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         senderID: String,
         conID: String,
         text: String?,
-        date: Date,
-        deliveryStatus: DeliveryStatus,
-        attachments: [Attachment],
+        serverTime: ServerTime,
+        incomingStatus: DeliveryStatus,
+        outgoingStatus: MsgDeliveryState?,
+        attachments: [Attachment]?,
         reactions: [Reaction]
     ) {
         self.uid = uid
         self.senderID = senderID
         self.conID = conID
         self.text = text
-        self.date = date
-        self.deliveryStatus = deliveryStatus
+        self.serverTime = serverTime
+        self.incomingStatus = incomingStatus
+        self.outgoingStatus = outgoingStatus
         self.attachments = attachments
         self.reactions = reactions
         isSender = senderID == (try? CurrentUserID.get())
     }
 
+    
+    public init(
+        uid: String,
+        senderID: String,
+        conID: String,
+        text: String?,
+        serverTime: ServerTime,
+        deliveryStatus: DeliveryStatus,
+        recipientIDs: [String] = [],
+        attachments: [Attachment]?,
+        reactions: [Reaction]
+    ) {
+        self.init(
+            uid: uid,
+            senderID: senderID,
+            conID: conID,
+            text: text,
+            serverTime: serverTime,
+            incomingStatus: .initial,
+            outgoingStatus: .init(
+                msgID: uid,
+                senderID: senderID,
+                aggregateStatus: deliveryStatus,
+                recipientIDs: recipientIDs,
+                updatedAt: serverTime
+            ),
+            attachments: attachments,
+            reactions: reactions
+        )
+    }
     public init(_ rMsg: RMsg) {
+       
         self.init(
             uid: rMsg.uid,
             senderID: rMsg.senderID,
             conID: rMsg.conID,
             text: rMsg.text,
-            date: ServerTime(stringLiteral: rMsg.date).date,
-            deliveryStatus: rMsg.deliveryStatus,
+            serverTime: ServerTime(rMsg.date),
+            incomingStatus: rMsg.incomingStatus,
+            outgoingStatus: rMsg.outgoingStatus,
             attachments: rMsg.attachments,
             reactions: rMsg.reactions
         )
@@ -66,12 +101,13 @@ public extension Message {
     var receiptType: MsgRecipient {
         isSender ? .outgoing : .incoming
     }
+    var date: Date { serverTime.date }
 }
 
 public extension Message {
     var displayText: String {
         guard let text, !text.isWhitespace else {
-            return attachments.first?.displayText ?? ""
+            return attachments?.first?.displayText ?? ""
         }
 
         return text

@@ -14,9 +14,9 @@ import SwiftUI
 import Database
 import Services
 
-struct MsgCellTextBubble: View, @MainActor Equatable {
+struct MsgCellTextBubble: View {
     let state: MsgCellViewModel.State
-    let theme: ChatTheme
+    @Environment(\.conversationTheme) private var theme
     var body: some View {
         if let attributedText = state.attributedText {
             TextContent(attributedText: attributedText)
@@ -30,20 +30,11 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
                 )
                 .background(Color.shadow)
                 .containerShape(bubbleShape)
-                .fixedSize(
-                    horizontal: false, vertical: true
-                )
-                .geometryGroup()
         }
     }
 
     private var bubbleShape: UnevenRoundedRectangle {
         state.bubbleCornor.roundedRectange(cornerRadius: theme.bubbleCornerRadius)
-    }
-
-    static func == (lhs: MsgCellTextBubble, rhs: MsgCellTextBubble) -> Bool {
-        lhs.state.attributedText == rhs.state.attributedText && lhs.theme == rhs.theme
-            && lhs.state.bubbleCornor == rhs.state.bubbleCornor
     }
 }
 

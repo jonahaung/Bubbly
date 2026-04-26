@@ -8,7 +8,8 @@ import SwiftUI
 import Database
 import Services
 
-struct MsgCellContent: View {
+struct MsgCellContent: View, @MainActor Equatable {
+    let state: MsgCellViewModel.State
     var body: some View {
         ZStack(
             alignment: .init(
@@ -16,15 +17,16 @@ struct MsgCellContent: View {
                 vertical: .top
             )
         ) {
-            if !state.attachments.isEmpty {
+            if state.attachments?.isEmpty == false {
                 MsgCellAttachmentBubble(state: state)
             } else {
-                MsgCellTextBubble(state: state, theme: theme)
+                MsgCellTextBubble(state: state)
             }
             MsgCellReactionOverlay(reactions: state.reactions)
         }
     }
 
-    @Environment(\.conversationTheme) private var theme
-    let state: MsgCellViewModel.State
+    static func == (lhs: MsgCellContent, rhs: MsgCellContent) -> Bool {
+        lhs.state == rhs.state
+    }
 }

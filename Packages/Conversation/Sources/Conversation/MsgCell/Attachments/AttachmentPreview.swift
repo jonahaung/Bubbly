@@ -66,6 +66,7 @@ struct AttachmentPreview: View {
         ZStack {
             if let data = model.attachmentData {
                 attachmentView(for: data)
+                    .transition(.opacity)
             } else if let error = model.error {
                 Text(error.localizedDescription)
                     .font(.footnote)
@@ -73,11 +74,12 @@ struct AttachmentPreview: View {
                     .multilineTextAlignment(.center)
                     .padding(8)
             } else {
-                Color.clear
+                RoundedRectangle(cornerRadius: Radius.md).fill(Color.background)
                 ProgressView().controlSize(.mini)
             }
         }
         .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
+        .animation(.smooth, value: model.attachmentData)
         .task(id: viewIsVisible) {
             if viewIsVisible, let attachmentFetcher {
                 if model.attachmentData == nil {

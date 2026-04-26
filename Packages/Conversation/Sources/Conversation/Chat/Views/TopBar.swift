@@ -15,7 +15,7 @@ struct TopBar: View {
     private let mockMessageCreator: MockMessageCreator = .init()
 
     var body: some View {
-        ZStack(alignment: .top) {
+        ZStack(alignment: .center) {
             CustomButton {
                 UIApplication.shared.endEditing()
             } label: {
@@ -30,6 +30,7 @@ struct TopBar: View {
                         .lineHeight(.multiple(factor: 1.2))
                         .textScale(.secondary)
                     )
+                    .padding(Padding.sm)
                     .background(theme.backgroundColor)
             } onFinished: {
                 manager.router?.pushToNav(.conversationDetails(manager.state.conversation))
@@ -44,8 +45,8 @@ struct TopBar: View {
                 }
                 Spacer()
                 CustomButton {
-                    Task {try await mockMessageCreator.createTextMessages(count: 1,
-                                                                          in: manager.state.conversation, direction: .incoming)}
+                    Task {try await mockMessageCreator.createTextMessages(count: 100,
+                                                                          in: manager.state.conversation, direction: .mixed)}
                 } label: {
                     Image(systemSymbol: .quoteClosing)
                         .frame(square: 44)

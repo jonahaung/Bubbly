@@ -4,8 +4,6 @@
 //
 
 import XUI
-
-// © 2026 Aung Ko Min
 import Core
 import OSLog
 import SwiftUI
@@ -27,7 +25,6 @@ import ImageLoader
 extension ScrollCoordinator {
     func isNear(_ edge: VerticalEdge) -> Bool { state.geometry.isNear(edge) }
     func updateStateUpdate(to value: ScrollViewUpdate) { state.updateState.update(to: value) }
-    func updatedState(is value: ScrollViewUpdate) -> Bool { state.updateState == value }
 }
 
 extension ScrollCoordinator {
@@ -35,7 +32,9 @@ extension ScrollCoordinator {
         switch intent {
         case let .onScrollGeometryChange(oldValue, newValue):
             guard state.updateState.hasViewLoaded else {
-                handleHasViewLoaded(newValue)
+                Task { @MainActor in
+                    handleHasViewLoaded(newValue)
+                }
                 return
             }
             guard oldValue.boundsSize == newValue.boundsSize else {
@@ -46,44 +45,50 @@ extension ScrollCoordinator {
             if state.updateState.isUpdating {
                 guard state.updateState.canReduceUpdates else { return }
                 if let effect = reducer.handleUpdating(
-                    state: state.updateState, oldValue: oldValue, newValue: newValue
-                )
-                {
+                    state: state.updateState, oldValue: oldValue,
+                    newValue: newValue
+                ) {
                     handleEffect(effect)
                 }
             } else {
                 self.state.geometry = newValue
                 if state.isFirstResponder {
                     handleFirstResponder(oldValue, newValue)
-                    return
                 }
-                guard state.phase == .decelerating || state.phase == .interacting else { return }
+                guard state.phase == .decelerating else { return }
                 if let effect = reducer.reduceGeometry(
-                    newValue: newValue, paginationState: getPaginationState()
-                )
-                {
+                    newValue: newValue, paginationState: getPaginationState(), scrollDirection: state.scrollDirection) {
                     handleEffect(effect)
                 }
             }
         case let .onScrollPhaseChange(oldValue, newValue, context):
-            debouncer.cancel()
-            if state.updateState == .willEndUpdates { state.updateState.update(to: .didEndUpdates) }
+           
             guard oldValue != newValue else { return }
-            //            let velocity = context.velocity?.dy ?? 0
-            //            if velocity != 0 {
-            //                let scrollDirection: ScrollDirection = velocity == 0 ? .none : velocity < 0 ? .down : .up
-            //                state.scrollDirection = scrollDirection
-            //            }
             state.phase = newValue
+            
             switch newValue {
             case .idle:
-                //                state.scrollDirection = .none
+                if state.updateState == .willEndUpdates {
+                    state.updateState.update(to: .didEndUpdates)
+                }
                 debouncer.debounce { [weak self] in
                     guard let self else { return }
                     finalizeScrollUpdates()
                 }
+            case .interacting:
+                if state.updateState == .willEndUpdates {
+                    state.updateState.update(to: .didEndUpdates)
+                }
+            case .decelerating:
+                let velocity = context.velocity?.dy ?? 0
+                if velocity != 0 {
+                    let scrollDirection: ScrollDirection = velocity == 0 ? .none : velocity < 0 ? .down : .up
+                    state.scrollDirection = scrollDirection
+                }
             default: break
             }
+        case let .begin(update):
+            begin(updates: update)
         }
     }
 
@@ -112,23 +117,24 @@ extension ScrollCoordinator {
     private func handleFirstResponder(_ oldValue: VScrollGeometry, _ newValue: VScrollGeometry) {
         if state.phase == .interacting {
             if newValue.offsetY < oldValue.offsetY {
-                if oldValue.offsetY - newValue.offsetY > 20 { UIApplication.shared.endEditing() }
+                if oldValue.offsetY - newValue.offsetY > 20 {
+                    UIApplication.shared.endEditing()
+                }
             }
         }
     }
 
-    private func onScrollViewSizeChange(_ oldValue: VScrollGeometry, _ newValue: VScrollGeometry) {
+    private func onScrollViewSizeChange(
+        _ oldValue: VScrollGeometry, _ newValue: VScrollGeometry
+    ) {
         delegate?.layoutIfNeeded()
         guard oldValue.boundsSize.height != newValue.boundsSize.height else { return }
         let isFirstResponder = newValue.boundsHeight < oldValue.boundsHeight
         guard state.isFirstResponder != isFirstResponder else { return }
         state.isFirstResponder = isFirstResponder
         finalizeScrollUpdates()
-        guard isFirstResponder else { return }
         let diff = oldValue.boundsHeight - newValue.boundsHeight
-        guard abs(diff) > 1 else { return }
-        if state.scrolledPosition == .atBottom {}
-        else {
+        if state.scrolledPosition != .atBottom {
             let y = newValue.offsetY + diff
             scrollPosition.scrollTo(y: y)
         }
@@ -144,10 +150,14 @@ extension ScrollCoordinator {
         }
     }
 
-    func begin(updates: DataUpdate) {
+    private func begin(updates: DataUpdate) {
+        scrollPosition = .init()
+        var state = state
+        state.phase = .animating
         state.updateState.update(to: .willBeginUpdates)
         state.paginationState = nil
         delegate?.scrollCoordinator(self, begin: updates)
+        self.state = state
     }
 
     private func end(updates: DataUpdate) {
@@ -160,7 +170,15 @@ extension ScrollCoordinator {
         case let .remove(edge, _):
             switch edge {
             case .top: state.updateState.update(to: .didEndUpdates)
-            case .bottom: state.updateState.update(to: .willEndUpdates)
+            case .bottom:
+                state.updateState.update(to: .didEndUpdates)
+                var state = state
+                Task {
+                    await Task.delay(0.2)
+                    state.updateState.update(to: .didEndUpdates)
+                    state.phase = .decelerating
+                    self.state = state
+                }
             }
         case .append: state.updateState.update(to: .didEndUpdates)
         case let .resetting(msg):
@@ -180,7 +198,8 @@ extension ScrollCoordinator {
         switch newValue.properties {
         case let .animated(animation):
             withTransaction(.withAnimation(animation)) { scroll(to: newValue.position) }
-        case .notAnimated: withTransaction(.withoutAnimation()) { scroll(to: newValue.position) }
+        case .notAnimated:
+            withTransaction(.withoutAnimation()) { scroll(to: newValue.position) }
         case .scroll: withTransaction(.scrollView()) { scroll(to: newValue.position) }
         }
     }
@@ -192,7 +211,7 @@ extension ScrollCoordinator {
         case let .edge(edge):
             switch edge {
             case .top: scrollPosition.scrollTo(y: 0)
-            case .bottom: scrollPosition.scrollTo(y: state.geometry.bottomMostOffset )
+            case .bottom: scrollPosition.scrollTo(y: state.geometry.bottomMostOffset)
             default: break
             }
         }

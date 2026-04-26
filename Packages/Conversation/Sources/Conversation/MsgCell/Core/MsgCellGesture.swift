@@ -19,13 +19,15 @@ private enum MsgCellGestureThresholds {
     var draggedOffset: CGFloat = 0
     var isLongPressActive = false
     @ObservationIgnored private(set) var draggedLimitReached = false
-    func applyDrag(translation: CGFloat, isSender: Bool, onMark: () -> Void ) {
+    func applyDrag(translation: CGFloat, isSender: Bool, onMark: () -> Void) {
         guard isValidDirection(translation, isSender: isSender) else {
             resetOffsetIfNeeded()
             return
         }
         let magnitude = abs(translation)
-        if !draggedLimitReached, magnitude > MsgCellGestureThresholds.markTrigger {
+        if !draggedLimitReached,
+           magnitude > MsgCellGestureThresholds.markTrigger
+        {
             draggedLimitReached = true
             onMark()
         }
@@ -52,7 +54,9 @@ private enum MsgCellGestureThresholds {
     }
 
     @ObservationIgnored private var lastAppliedOffset: CGFloat = 0
-    private func isValidDirection(_ translation: CGFloat, isSender: Bool ) -> Bool {
+    private func isValidDirection(_ translation: CGFloat, isSender: Bool)
+        -> Bool
+    {
         isSender
             ? translation < -MsgCellGestureThresholds.dragMinDistance
             : translation > MsgCellGestureThresholds.dragMinDistance
@@ -65,48 +69,70 @@ private enum MsgCellGestureThresholds {
     }
 }
 
-struct MsgCellGesture<Content: View>: View {
+struct MsgCellGesture<Content: View>: View, @MainActor Equatable {
+    let viewModel: MsgCellViewModel
     let content: () -> Content
     var body: some View {
-        content().offset(x: round(model.draggedOffset)).highPriorityGesture(
-            dragGesture, including: .gesture
-        ).simultaneousGesture(doubleTapGesture).background { longPressOverlay }.onPressingChanged(
-            in: .local
-        ) { _ in activateLongPressIfNeeded() }
+        content()
+            .offset(x: round(model.draggedOffset))
+            .highPriorityGesture(dragGesture, including: .gesture)
+            .simultaneousGesture(doubleTapGesture)
+            .background { longPressOverlay }
+            .onPressingChanged(in: .local) { _ in
+                activateLongPressIfNeeded()
+            }
     }
 
-    @Environment(MsgCellViewModel.self) private var viewModel
-    @Environment(\.msgCellActions) private var sendInteraction
+    @Environment(\.msgCellActions) private var msgCellActions
     @State private var model: GestureViewModel = .init()
+
+    static func == (lhs: MsgCellGesture<Content>, rhs: MsgCellGesture<Content>)
+        -> Bool
+    {
+        lhs.viewModel.state == rhs.viewModel.state
+            && lhs.model.isLongPressActive == rhs.model.isLongPressActive
+            && lhs.model.draggedLimitReached == rhs.model.draggedLimitReached
+            && lhs.model.draggedOffset == rhs.model.draggedOffset
+    }
 }
 
 extension MsgCellGesture {
     private var doubleTapGesture: some Gesture {
-        TapGesture(count: 2).onEnded { sendInteraction?(.onTapMsg(viewModel.id)) }
+        TapGesture(count: 2).onEnded {
+            msgCellActions?(.onTapMsg(viewModel.id))
+        }
     }
 
     private var dragGesture: some Gesture {
         DragGesture(
-            minimumDistance: MsgCellGestureThresholds.dragMinDistance, coordinateSpace: .local
+            minimumDistance: MsgCellGestureThresholds.dragMinDistance,
+            coordinateSpace: .local
         ).onChanged { value in
             model.applyDrag(
-                translation: value.translation.width, isSender: viewModel.state.isSender
-            ) { sendInteraction?(.onMarkMsg(viewModel.msg)) }
+                translation: value.translation.width,
+                isSender: viewModel.state.isSender
+            ) { msgCellActions?(.onMarkMsg(viewModel.msg)) }
         }.onEnded { _ in model.reset(animated: true) }
     }
 
     @ViewBuilder private var longPressOverlay: some View {
         if model.isLongPressActive {
-            Color.clear.allowsHitTesting(false).accessibilityHidden(true).onGeometryChange(
-                for: CGRect.self
-            ) { proxy in
-                proxy.frame(in: .global)
-            } action: { frame in
-                model.isLongPressActive = false
-                withTransaction(.withoutAnimation()) {
-                    sendInteraction?(.onFocusMsgBubble(.init(id: viewModel.id, frame: frame) ) )
+            Color.clear
+                .hidden()
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+                .onGeometryChange(for: CGRect.self) { proxy in
+                    proxy.frame(in: .global)
+                } action: { frame in
+                    model.isLongPressActive = false
+                    withTransaction(.withoutAnimation()) {
+                        msgCellActions?(
+                            .onFocusMsgBubble(
+                                .init(id: viewModel.id, frame: frame)
+                            )
+                        )
+                    }
                 }
-            }
         }
     }
 

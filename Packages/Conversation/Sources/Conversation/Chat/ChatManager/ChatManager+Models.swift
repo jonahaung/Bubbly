@@ -8,9 +8,9 @@ import Foundation
 
 extension ChatManager {
     struct State: Equatable {
-        var reloadID: Int
+        var reloadID: Int = 0
         var conversation: Conversation
-        var theme: ChatTheme
+        var theme: ChatTheme = .empty
         var properties: ConversationProperties
     }
 

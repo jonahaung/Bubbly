@@ -13,18 +13,15 @@ public struct ServerTime: Codable, Hashable, Sendable, Comparable {
     // MARK: Public Properties
 
     public let value: String
-    public let date: Date
+    public var date: Date { Self.formatter.date(from: value) ?? .now }
 
     // MARK: Initialization
 
     public init(_ date: Date = .now) {
-        self.date = date
         value = Self.formatter.string(from: date)
     }
 
-    public init?(_ isoString: String) {
-        guard let date = Self.parse(isoString) else { return nil }
-        self.date = date
+    public init(_ isoString: String) {
         value = isoString
     }
 
@@ -37,50 +34,11 @@ public struct ServerTime: Codable, Hashable, Sendable, Comparable {
     public static func < (lhs: ServerTime, rhs: ServerTime) -> Bool {
         lhs.date < rhs.date
     }
-
-    // MARK: Localized Output
-
-    public func localizedString(
-        dateStyle: DateFormatter.Style = .medium,
-        timeStyle: DateFormatter.Style = .short
-    ) -> String {
-        Self.cachedFormatter(dateStyle: dateStyle, timeStyle: timeStyle)
-            .string(from: date)
-    }
-
-    public static func localizedString(
-        from value: String,
-        dateStyle: DateFormatter.Style = .medium,
-        timeStyle: DateFormatter.Style = .short
-    ) -> String {
-        guard let date = parse(value) else { return value }
-        return cachedFormatter(dateStyle: dateStyle, timeStyle: timeStyle)
-            .string(from: date)
-    }
-
-    // MARK: Convenience Methods
-
-    public func timeIntervalSince(_ date: ServerTime) -> TimeInterval {
-        self.date.timeIntervalSince(date.date)
-    }
-
-    public func timeIntervalSinceNow() -> TimeInterval {
-        date.timeIntervalSinceNow
-    }
-
-    public func addingTimeInterval(_ interval: TimeInterval) -> ServerTime {
-        ServerTime(date.addingTimeInterval(interval))
-    }
 }
 
 // MARK: - Parsing
 
 private extension ServerTime {
-
-    static func parse(_ string: String) -> Date? {
-        formatter.date(from: string)
-    }
-
     /// Thread-safe formatter with automatic fallback handling
     nonisolated(unsafe) static let formatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
@@ -88,19 +46,6 @@ private extension ServerTime {
         formatter.timeZone = TimeZone(secondsFromGMT: 0)
         return formatter
     }()
-
-    /// Attempts to parse with fallback if primary fails
-    static func parseWithFallback(_ string: String) -> Date? {
-        if let date = formatter.date(from: string) {
-            return date
-        }
-
-        // Try without fractional seconds
-        let fallbackFormatter = ISO8601DateFormatter()
-        fallbackFormatter.formatOptions = [.withInternetDateTime]
-        fallbackFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        return fallbackFormatter.date(from: string)
-    }
 }
 
 // MARK: - Cached Formatters
@@ -151,30 +96,5 @@ private extension ServerTime {
 extension ServerTime: CustomStringConvertible {
     public var description: String {
         value
-    }
-}
-
-// MARK: - ExpressibleByStringLiteral
-
-extension ServerTime: ExpressibleByStringLiteral {
-    public init(stringLiteral value: String) {
-        guard let serverTime = Self(value) else {
-            fatalError("Invalid server time string: \(value)")
-        }
-        self = serverTime
-    }
-}
-
-// MARK: - Convenience Extensions
-
-public extension Date {
-    var serverTime: ServerTime {
-        ServerTime(self)
-    }
-}
-
-public extension String {
-    var serverTime: ServerTime? {
-        ServerTime(self)
     }
 }

@@ -9,16 +9,16 @@ import SwiftUI
 struct BackgroundView: View {
     let imageName: String
     var body: some View {
-        Color.background
+        Rectangle().fill(Color.background)
             .overlay {
                 Image(imageName)
-                    .resizable()
-                    .aspectRatio(UIApplication.shared.screenScale(), contentMode: .fit)
-                    .foregroundStyle(Color.container)
+                    .resizable(resizingMode: .tile)
+                    .foregroundStyle(Color.quinaryText)
+                    .clipped()
             }
-            .ignoresSafeArea(.keyboard)
-            .backgroundExtensionEffect()
+            .ignoresSafeArea(.all)
             .allowsHitTesting(false)
+            .geometryGroup()
             .equatable(by: imageName)
     }
 }

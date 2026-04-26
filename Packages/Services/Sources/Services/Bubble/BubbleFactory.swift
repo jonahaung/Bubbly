@@ -114,14 +114,14 @@ public struct BubbleFactory: Sendable {
         isEqual(of: msg, to: previousMsg) && isSimilarDateTime(
             of: msg.date,
             from: previousMsg,
-        ) && msg.attachments.isEmpty && previousMsg.attachments.isEmpty
+        ) && msg.attachments?.isEmpty == true && previousMsg.attachments?.isEmpty == true
     }
 
     private func shouldGroupWithNext(msg: Message, nextMsg: Message) -> Bool {
         isEqual(of: msg, to: nextMsg) && isSimilarDateTime(
             of: msg.date,
             from: nextMsg,
-        ) && msg.attachments.isEmpty && nextMsg.attachments.isEmpty
+        ) && msg.attachments?.isEmpty == true && nextMsg.attachments?.isEmpty == true
     }
 
     private func isEqual(of thisMsg: Message, to msg: Message) -> Bool {

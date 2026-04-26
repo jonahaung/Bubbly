@@ -26,7 +26,7 @@ extension ChatManager {
                 guard let currentUserID = await currentUserRepository?.model.uid else { return }
                 try? await Socket.send(
                     .reaction(
-                        reaction: .init(
+                        payload: .init(
                             reaction: .init(
                                 rawValue: reactionType.rawValue, senderID: currentUserID,
                                 date: .now
@@ -35,6 +35,10 @@ extension ChatManager {
                     ),
                     conversation: conversation
                 )
+            }
+        case let .performSend(data):
+            serialQueue.addOperation {
+                try await Socket.shared.performSend(data)
             }
         }
     }

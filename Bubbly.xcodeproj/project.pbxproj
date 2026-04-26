@@ -8,8 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		47B1B2762F9A9FE6008FCD86 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */; };
 		47DE272D2F93637400B6BDF2 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47DE272C2F93637400B6BDF2 /* MsgRoomMain */; };
-		47DE272F2F93638100B6BDF2 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 47DE272E2F93638100B6BDF2 /* Services */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,7 +66,6 @@
 		47AD343C2DCD650B00C4FA62 /* ImageLoader */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ImageLoader; sourceTree = "<group>"; };
 		47AD343D2DCD650B00C4FA62 /* MediaPicker */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MediaPicker; sourceTree = "<group>"; };
 		47AD343F2DCD650B00C4FA62 /* MsgRoomMain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MsgRoomMain; sourceTree = "<group>"; };
-		47AD34402DCD650B00C4FA62 /* Services */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Services; sourceTree = "<group>"; };
 		47AD34442DCD650B00C4FA62 /* XUI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = XUI; sourceTree = "<group>"; };
 		47D43B212F83F1B900A76A42 /* BubblyContacts */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = BubblyContacts; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -152,7 +151,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47DE272F2F93638100B6BDF2 /* Services in Frameworks */,
+				47B1B2762F9A9FE6008FCD86 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,7 +199,6 @@
 				47A653C52E99B92B005A2E50 /* FirePhoneOTP */,
 				47AD343A2DCD650B00C4FA62 /* Core */,
 				47AD343B2DCD650B00C4FA62 /* Database */,
-				47AD34402DCD650B00C4FA62 /* Services */,
 				47AD343F2DCD650B00C4FA62 /* MsgRoomMain */,
 				479C830E2DDE71D70019971C /* Crypto */,
 				4735A5E12DCEB7F3002854E4 /* FCM_V1 */,
@@ -302,7 +300,7 @@
 			);
 			name = NotificationService;
 			packageProductDependencies = (
-					47DE272E2F93638100B6BDF2 /* Services */,
+				47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */,
 			);
 			productName = NotificationService;
 			productReference = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */;
@@ -845,13 +843,13 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		47DE272C2F93637400B6BDF2 /* MsgRoomMain */ = {
+		47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MsgRoomMain;
 		};
-		47DE272E2F93638100B6BDF2 /* Services */ = {
+		47DE272C2F93637400B6BDF2 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = Services;
+			productName = MsgRoomMain;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

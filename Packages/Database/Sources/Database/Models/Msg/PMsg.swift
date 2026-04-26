@@ -17,9 +17,11 @@ public final class PMsg {
     public var conID: String
     public var text: String?
     public var date: String
-    public var deliveryStatus: Int
-    public var attachments: [Attachment] = []
-    public var reactions: [Reaction] = []
+    public var incomingStatus: Int = 0
+    public var outgoingStatus: MsgDeliveryState?
+    public var deliveryStatusAggregateRaw: Int
+    public var attachments: [Attachment]?
+    public var reactions: [Reaction]
 
     public init(
         uid: String,
@@ -27,8 +29,9 @@ public final class PMsg {
         conID: String,
         text: String?,
         date: String,
-        deliveryStatus: DeliveryStatus,
-        attachments: [Attachment],
+        incomingStatus: DeliveryStatus = .initial,
+        outgoingStatus: MsgDeliveryState?,
+        attachments: [Attachment]?,
         reactions: [Reaction]
     ) {
         self.uid = uid
@@ -36,7 +39,9 @@ public final class PMsg {
         self.conID = conID
         self.text = text
         self.date = date
-        self.deliveryStatus = deliveryStatus.rawValue
+        self.incomingStatus = incomingStatus.rawValue
+        self.outgoingStatus = outgoingStatus
+        deliveryStatusAggregateRaw = outgoingStatus?.aggregateStatus.rawValue ?? 0
         self.attachments = attachments
         self.reactions = reactions
     }
@@ -44,14 +49,20 @@ public final class PMsg {
 
 public extension PMsg {
     func update(with rMsg: RMsg) {
-        deliveryStatus = rMsg.deliveryStatus.rawValue
+        incomingStatus = rMsg.incomingStatus.rawValue
+        outgoingStatus = rMsg.outgoingStatus
+        deliveryStatusAggregateRaw = outgoingStatus?.aggregateStatus.rawValue ?? 0
         attachments = rMsg.attachments
         reactions = rMsg.reactions
     }
 
     func update(from item: Message) {
-        if deliveryStatus != item.deliveryStatus.rawValue {
-            deliveryStatus = item.deliveryStatus.rawValue
+        if outgoingStatus != item.outgoingStatus {
+            outgoingStatus = item.outgoingStatus
+            deliveryStatusAggregateRaw = outgoingStatus?.aggregateStatus.rawValue ?? 0
+        }
+        if incomingStatus != item.incomingStatus.rawValue {
+            incomingStatus = item.incomingStatus.rawValue
         }
         if attachments != item.attachments {
             attachments = item.attachments
@@ -73,8 +84,9 @@ extension PMsg: SendableTransformable {
             senderID: snapshot.senderID,
             conID: snapshot.conID,
             text: snapshot.text,
-            date: ServerTime(snapshot.date).value,
-            deliveryStatus: snapshot.deliveryStatus,
+            date: snapshot.serverTime.value,
+            incomingStatus: snapshot.incomingStatus,
+            outgoingStatus: snapshot.outgoingStatus,
             attachments: snapshot.attachments,
             reactions: snapshot.reactions
         )
@@ -86,8 +98,9 @@ extension PMsg: SendableTransformable {
             senderID: senderID,
             conID: conID,
             text: text,
-            date: ServerTime(stringLiteral: date).date,
-            deliveryStatus: .init(rawValue: deliveryStatus) ?? .received,
+            serverTime: ServerTime(date),
+            incomingStatus: .init(rawValue: incomingStatus) ?? .initial,
+            outgoingStatus: outgoingStatus,
             attachments: attachments,
             reactions: reactions
         )

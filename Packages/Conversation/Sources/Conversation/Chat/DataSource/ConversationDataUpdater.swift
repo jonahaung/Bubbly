@@ -4,8 +4,7 @@
 //
 
 import XUI
-
-// © 2026 Aung Ko Min
+import Core
 import Database
 import Services
 import Foundation
@@ -25,38 +24,27 @@ struct ConversationDataUpdater {
         updatedState.theme = .init(updatedState.properties.theme)
         return updatedState
     }
-
-    func updateMsgs(
-        before date: Date, of recipient: MsgRecipient, from fromStatus: DeliveryStatus,
-        to toStatus: DeliveryStatus, currentState: ChatManager.State, currentUserID: String
-    ) async throws -> [Message] {
-        let conID = currentState.conversation.uid
-        let msgs = try await MsgRepo.msgs(
-            conID: conID, deliveryStatus: fromStatus, recipient: recipient,
-            currentUserID: currentUserID
-        ).filter { $0.date <= date }
-        guard let store = await Store.shared.msgStore else { return [] }
-        let results = try await AsyncOrderedStream.mapOrdered(inputs: msgs) { msg in
-            var mutable = msg
-            mutable.deliveryStatus = toStatus
-            return try await store.updateAndSave(uid: msg.uid) { model in
-                model.update(from: mutable)
-                return mutable
+    func markReadToUnreadIncomingMsgs(conID: String, lessThan date: Date) async throws -> [Message] {
+        let msgs = try await MsgRepo.incomingUnreadMsgs(conID: conID).filter { $0.date <= date }
+       let updated = try await AsyncOrderedStream.mapOrdered(inputs: msgs) { msg in
+            var msg = msg
+            msg.incomingStatus = .read
+            try await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
+                model.update(from: msg)
             }
+            return msg
         }
-        return results.compactMap(\.self)
+        return updated
     }
-
-    func sendSeenStatus(
-        lastReadMsg: Message, currentUserID: String, conversation: Conversation
+    
+    func sendRecipientStatus(
+        lastReadMsg: Message,
+        conversation: Conversation
     ) async throws {
+        let currentUserID = try CurrentUserID.get()
         try await Socket.send(
-            .seenStatus(
-                status: .init(
-                    msgID: lastReadMsg.uid, userID: currentUserID, conID: lastReadMsg.conID,
-                    date: ServerTime.now.value
-                )
-            ), conversation: conversation
+            .msgRecipientReceipt(payload: .init(msgID: lastReadMsg.uid, conID: conversation.uid, recipientReceipt: .init(memberID: currentUserID, state: .read, updatedAt: .now))),
+            conversation: conversation
         )
     }
 }

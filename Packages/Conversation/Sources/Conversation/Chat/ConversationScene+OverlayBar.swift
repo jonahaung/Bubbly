@@ -13,25 +13,9 @@ struct ConversationSceneOverlayBar: View {
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
             TopBar()
-            AsyncButton {
-                
-            } label: {
-                switch manager.state.conversation.kind {
-                case let .contact(contact):
-                    ProfilePhoto(
-                        contact,
-                        size: .custom(26), tapAction: .none
-                    )
-                case let .group(group):
-                    ProfilePhoto(
-                        group,
-                        size: .custom(26), tapAction: .none
-                    )
-                }
-            }
             FloatingDateView()
             Spacer()
-            AccessoryBar()
+            AccessoryBar(item: manager.presentation.state.bottomAccessory)
             ComposeBar()
         }
     }

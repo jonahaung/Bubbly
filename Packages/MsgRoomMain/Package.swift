@@ -30,7 +30,7 @@ let package = Package(
                 .product(name: "BubblyContacts", package: "BubblyContacts"),
                 .product(name: "Inbox", package: "Inbox"),
                 .product(name: "Settings", package: "Settings"),
-            ],
+            ]
         ),
         .testTarget(
             name: "MsgRoomMainTests",
@@ -43,6 +43,7 @@ let package = Package(
                 .product(name: "Inbox", package: "Inbox"),
                 .product(name: "Settings", package: "Settings"),
             ],
+            path: "Tests/MsgRoomMainTests"
         ),
     ],
 )

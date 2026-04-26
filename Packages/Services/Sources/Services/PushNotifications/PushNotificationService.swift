@@ -21,8 +21,7 @@ public final class PushNotificationService: NSObject, Sendable {
             .current()
             .requestAuthorization(
                 options: [
-                    .alert, .badge, .sound, .provisional, .criticalAlert,
-                    .providesAppNotificationSettings,
+                    .alert, .badge, .sound,
                 ]
             )
         await UIApplication.shared.registerForRemoteNotifications()
@@ -60,8 +59,8 @@ public final class PushNotificationService: NSObject, Sendable {
                 throw error
             }
         }
-        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-        try await UNUserNotificationCenter.current().setBadgeCount(0)
+//        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+//        try await UNUserNotificationCenter.current().setBadgeCount(0)
     }
 }
 
@@ -88,7 +87,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
             switch currentNavPath {
             case .conversation(let prefetchData)
             where data.conID == prefetchData.configuration.conID:
-                try await Socket.shared.receive(data)
+                try await Socket.shared.notifyMessage(data)
                 return []
             default:
                 let didAffectInbox = try await process(
@@ -142,10 +141,10 @@ extension PushNotificationService {
         switch currentNavPath {
         case .conversation(let prefetchData)
         where data.conID == prefetchData.configuration.conID:
-            try await Socket.shared.receive(data)
+//            try await Socket.shared.receive(data)
             return false
         default:
-            try await Socket.shared.receive(data)
+//            try await Socket.shared.receive(data)
             return true
         }
     }

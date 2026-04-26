@@ -12,8 +12,9 @@ public struct RMsg: Codable, Sendable, Hashable {
     public let senderID: String
     public let date: String
     public let text: String?
-    public let deliveryStatus: DeliveryStatus
-    public let attachments: [Attachment]
+    public var incomingStatus: DeliveryStatus
+    public var outgoingStatus: MsgDeliveryState?
+    public let attachments: [Attachment]?
     public let reactions: [Reaction]
 
     public init(
@@ -23,7 +24,8 @@ public struct RMsg: Codable, Sendable, Hashable {
         date: String,
         text: String?,
         incomingStatus: DeliveryStatus,
-        attachments: [Attachment],
+        outgoingStatus: MsgDeliveryState?,
+        attachments: [Attachment]?,
         reactions: [Reaction]
     ) {
         self.uid = uid
@@ -31,7 +33,8 @@ public struct RMsg: Codable, Sendable, Hashable {
         self.senderID = senderID
         self.date = date
         self.text = text
-        deliveryStatus = incomingStatus
+        self.incomingStatus = incomingStatus
+        self.outgoingStatus = outgoingStatus
         self.attachments = attachments
         self.reactions = reactions
     }
@@ -41,11 +44,21 @@ public struct RMsg: Codable, Sendable, Hashable {
             uid: msg.uid,
             conID: msg.conID,
             senderID: msg.senderID,
-            date: ServerTime(msg.date).value,
+            date: msg.serverTime.value,
             text: msg.text,
-            incomingStatus: msg.deliveryStatus,
+            incomingStatus: msg.incomingStatus,
+            outgoingStatus: msg.outgoingStatus,
             attachments: msg.attachments,
             reactions: msg.reactions
         )
+    }
+    
+    public func outgoing() -> RMsg {
+        var copy = self
+        copy.outgoingStatus = nil
+        if copy.incomingStatus == .initial {
+            copy.incomingStatus = .sending
+        }
+        return copy
     }
 }

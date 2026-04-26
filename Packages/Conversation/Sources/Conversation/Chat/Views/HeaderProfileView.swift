@@ -22,7 +22,6 @@ struct HeaderProfileView: View {
         }
         .lineHeight(.multiple(factor: 1.2))
         .frame(maxWidth: .infinity, minHeight: UIApplication.shared.screenSize().height / 2)
-        .fixedSize(horizontal: false, vertical: true)
         .padding(Padding.md)
         .background(Color.container)
         .containerShape(RoundedRectangle(cornerRadius: Radius.card))

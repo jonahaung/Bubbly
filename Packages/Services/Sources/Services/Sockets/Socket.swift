@@ -25,8 +25,7 @@ public final class Socket: Sendable {
 
     private init() {}
 
-    let queue: AsyncSerialQueue = .init()
-    var sendingQueue: Deque<AnyMsgData> = .init()
+    public let queue = AsyncQueue()
 
     enum SocketError: Error {
         case encodingFailed

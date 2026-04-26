@@ -19,7 +19,7 @@ public struct AttachmentFactory {
 extension AttachmentFactory {
     static func createImageAttachments(from items: [SelectedImage]) async throws -> [Attachment] {
         try await AsyncOrderedStream.mapOrdered(inputs: items) { item in
-            try await createImageAttachment(from: item)
+            try createImageAttachment(from: item)
         }
     }
 

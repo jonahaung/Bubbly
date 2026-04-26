@@ -5,24 +5,26 @@
 
 import XUI
 import SwiftUI
-
-// © 2026 Aung Ko Min
 import Database
 
 extension ScrollCoordinator {
+    
     struct PaginationState: Hashable {
         var canLoadOlder: Bool
         var canLoadNewer: Bool
         var canAdjustSize: Bool
-        init(canLoadOlder: Bool = false, canLoadNewer: Bool = false, canAdjustSize: Bool = false )
-        {
+        init(
+            canLoadOlder: Bool = false,
+            canLoadNewer: Bool = false,
+            canAdjustSize: Bool = false
+        ) {
             self.canLoadOlder = canLoadOlder
             self.canLoadNewer = canLoadNewer
             self.canAdjustSize = canAdjustSize
         }
     }
 
-    enum ScrollDirection: Sendable, Hashable {
+    enum ScrollDirection: Hashable {
         case up
         case down
         case none
@@ -39,13 +41,17 @@ extension ScrollCoordinator {
     }
 
     enum Intent {
-        case onScrollGeometryChange(_ oldValue: VScrollGeometry, _ newValue: VScrollGeometry )
-        case onScrollPhaseChange(
-            _ oldValue: ScrollPhase, _ newPhase: ScrollPhase, context: ScrollPhaseChangeContext
+        case onScrollGeometryChange(
+            _ oldValue: VScrollGeometry, _ newValue: VScrollGeometry
         )
+        case onScrollPhaseChange(
+            _ oldValue: ScrollPhase, _ newPhase: ScrollPhase,
+            context: ScrollPhaseChangeContext
+        )
+        case begin(_ update: DataUpdate)
     }
 
-    enum DataUpdate: Sendable, Hashable {
+    enum DataUpdate: Hashable {
         case insert(edge: VerticalEdge, geometry: VScrollGeometry)
         case remove(edge: VerticalEdge, geometry: VScrollGeometry)
         case append(msgID: String)
@@ -58,18 +64,18 @@ extension ScrollCoordinator {
         case willEndUpdates
         case willBeginUpdates
         case dataUpdate(DataUpdate)
+        
         var hasViewLoaded: Bool { self != .initial }
         var isUpdating: Bool { self != .didEndUpdates }
+        var isNotUpdating: Bool { !isUpdating }
         var canReduceUpdates: Bool {
             isUpdating && self != .didEndUpdates && self != .willEndUpdates
         }
-
-        var isNotUpdating: Bool { !isUpdating }
+        
         mutating func update(to newValue: Self) {
             guard self != newValue else { return }
             self = newValue
         }
-
         mutating func setHasViewLoaded() {
             guard self == .initial else { return }
             self = .didEndUpdates

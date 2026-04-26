@@ -9,6 +9,7 @@
 //
 //  Created by Aung Ko Min on 22/4/26.
 //
+import Core
 import SwiftUI
 import Services
 
@@ -20,20 +21,27 @@ struct MsgCellFooter: View, @MainActor Equatable {
 
 private struct Footer: View, @MainActor Equatable {
     var body: some View {
-        Text(footerText).font(
-            .system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded)
-        ).foregroundStyle(Color.tertiaryText).padding(.horizontal, 35).allowsHitTesting(false)
-            .transition(.asymmetric(insertion: .push(from: .top), removal: .opacity)).equatable(
-                by: state.id
-            )
+        VStack(alignment: .trailing, spacing: 0) {
+            if let receipts = state.outgoingStatus?.receipts, receipts.count > 1 {
+                MessageReceiptDetails(state: state)
+            } else {
+                Text(footerText).font(
+                    .system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded)
+                )
+            }
+        }
+        .foregroundStyle(Color.tertiaryText)
+        .padding(.horizontal, Padding.lg)
+        .allowsHitTesting(false)
+        .equatable(by: state.outgoingStatus)
     }
 
     let state: MsgCellViewModel.State
     private var footerText: String {
         if state.isSender {
-            state.msg.deliveryStatus.localizedName
+            state.msg.outgoingStatus?.localizedName ?? ""
         } else {
-            MsgTimeStringFormatter.string(for: state.date)
+            state.date.formatted(date: .abbreviated, time: .shortened)
         }
     }
 

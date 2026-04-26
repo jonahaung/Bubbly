@@ -51,7 +51,7 @@ extension UIImagePickerController {
     }
 
     private func findCropView(from view: UIView) -> UIView? {
-        let width = UIScreen.main.bounds.width
+        let width = UIApplication.shared.screenSize().width
         let size = view.bounds.size
 
         if width == size.height, width == size.height {
