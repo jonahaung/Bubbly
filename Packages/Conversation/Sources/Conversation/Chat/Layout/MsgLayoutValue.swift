@@ -13,8 +13,10 @@ struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
     let uid: String
     let recipient: MsgRecipient
     let attachmentsCount: Int
-    let headerStatus: Int
+    let headerID: Int
+}
 
+extension MsgLayoutValue {
     var anchor: UnitPoint {
         switch recipient {
         case .outgoing:
@@ -26,15 +28,11 @@ struct MsgLayoutValue: Sendable, Hashable, Equatable, UIdentifiable {
         }
     }
 
-    static func == (lhs: MsgLayoutValue, rhs: MsgLayoutValue) -> Bool {
-        lhs.uid == rhs.uid && lhs.recipient == rhs.recipient && lhs.headerStatus == rhs.headerStatus
-    }
-
     static let empty: MsgLayoutValue = .init(
         uid: String(),
         recipient: .outgoing,
         attachmentsCount: 0,
-        headerStatus: 0
+        headerID: 0
     )
 }
 
@@ -44,16 +42,11 @@ struct MsgLayoutValueKey: LayoutValueKey {
 
 extension Message {
     func layoutValue(layout: MsgCellLayout) -> MsgLayoutValue {
-        let headerStatus: Int = {
-            let timeSeparator = layout.showTimeSeparator ? 1 : 0
-            let topPadding = layout.showTopPadding ? 2 : 0
-            return timeSeparator + topPadding
-        }()
-        return .init(
+        .init(
             uid: uid,
             recipient: receiptType,
             attachmentsCount: attachments?.count ?? 0,
-            headerStatus: headerStatus
+            headerID: layout.id
         )
     }
 }

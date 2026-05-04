@@ -102,7 +102,7 @@ private extension MsgsScrollViewLayout {
 
     func sizeKey(for value: MsgLayoutValue) -> MsgsScrollViewLayout.SizeKey {
         let selected = value.uid == manager.selectedMsg?.id
-        return .init(uid: value.uid, width: config.boundsWidth, selected: selected)
+        return .init(uid: value.uid, width: config.boundsWidth, selected: selected, headerID: value.headerID)
     }
 
     func xPosition(for recipient: MsgRecipient) -> CGFloat {

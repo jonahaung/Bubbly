@@ -25,17 +25,7 @@ struct ConversationScrollView: View {
                     ), screenSize: UIApplication.shared.screenSize()
                 )
             ) {
-                ForEach(manager.models.headerModels) { model in
-                    switch model.kind {
-                    case let .conversation(conversation):
-                        HeaderProfileView(conversation: conversation)
-                            .id(conversation.uid)
-                            .layoutValue(
-                                key: MsgLayoutValueKey.self,
-                                value: .init(uid: conversation.uid, recipient: .system, attachmentsCount: 0, headerStatus: 0)
-                            )
-                    }
-                }
+                
                 ForEach(manager.models.renderedModels) { model in
                     MsgCell(viewModel: model)
                         .id(model.id)

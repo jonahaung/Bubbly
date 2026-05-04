@@ -29,5 +29,6 @@ extension MsgsScrollViewLayout {
         let uid: String
         let width: CGFloat
         let selected: Bool
+        let headerID: Int
     }
 }

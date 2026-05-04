@@ -4,6 +4,15 @@ import Core
 import XUI
 
 public struct MsgCellLayout: Conformable {
+    
+    public var id: Int {
+            var hasher = Hasher()
+            hasher.combine(showTimeSeparator)
+            hasher.combine(bubbleCorner)
+            hasher.combine(showTopPadding)
+            return hasher.finalize()
+        }
+    
     public let showTimeSeparator: Bool
     public let showTopPadding: Bool
     public var bubbleCorner: BubbleCorner

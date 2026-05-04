@@ -55,14 +55,9 @@ extension ScrollCoordinator {
                 if state.isFirstResponder {
                     handleFirstResponder(oldValue, newValue)
                 }
-                guard state.phase == .decelerating else { return }
-                if let effect = reducer.reduceGeometry(
-                    newValue: newValue, paginationState: getPaginationState(), scrollDirection: state.scrollDirection) {
-                    handleEffect(effect)
-                }
             }
         case let .onScrollPhaseChange(oldValue, newValue, context):
-           
+            let geometry = VScrollGeometry(context.geometry)
             guard oldValue != newValue else { return }
             state.phase = newValue
             
@@ -75,10 +70,12 @@ extension ScrollCoordinator {
                     guard let self else { return }
                     finalizeScrollUpdates()
                 }
+                paginateIfNeeded(geometry)
             case .interacting:
                 if state.updateState == .willEndUpdates {
                     state.updateState.update(to: .didEndUpdates)
                 }
+                paginateIfNeeded(geometry)
             case .decelerating:
                 let velocity = context.velocity?.dy ?? 0
                 if velocity != 0 {
@@ -89,6 +86,15 @@ extension ScrollCoordinator {
             }
         case let .begin(update):
             begin(updates: update)
+        }
+    }
+    
+    private func paginateIfNeeded(_ geometry: VScrollGeometry) {
+        if state.updateState.isNotUpdating {
+            if let effect = reducer.reduceGeometry(
+                newValue: geometry, paginationState: getPaginationState(), scrollDirection: state.scrollDirection) {
+                handleEffect(effect)
+            }
         }
     }
 
@@ -172,13 +178,6 @@ extension ScrollCoordinator {
             case .top: state.updateState.update(to: .didEndUpdates)
             case .bottom:
                 state.updateState.update(to: .didEndUpdates)
-                var state = state
-                Task {
-                    await Task.delay(0.2)
-                    state.updateState.update(to: .didEndUpdates)
-                    state.phase = .decelerating
-                    self.state = state
-                }
             }
         case .append: state.updateState.update(to: .didEndUpdates)
         case let .resetting(msg):
@@ -200,7 +199,13 @@ extension ScrollCoordinator {
             withTransaction(.withAnimation(animation)) { scroll(to: newValue.position) }
         case .notAnimated:
             withTransaction(.withoutAnimation()) { scroll(to: newValue.position) }
-        case .scroll: withTransaction(.scrollView()) { scroll(to: newValue.position) }
+        case .scroll:
+            switch state.phase {
+            case .idle, .animating:
+                withTransaction(.withoutAnimation()) { scroll(to: newValue.position) }
+            default:
+                withTransaction(.scrollView()) { scroll(to: newValue.position) }
+            }
         }
     }
 
