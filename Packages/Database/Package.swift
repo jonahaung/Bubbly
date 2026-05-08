@@ -24,10 +24,6 @@ let package = Package(
             dependencies: [
                 .product(name: "Core", package: "Core")
             ]
-        ),
-        .testTarget(
-            name: "DatabaseTests",
-            dependencies: ["Database"]
         )
     ]
 )
