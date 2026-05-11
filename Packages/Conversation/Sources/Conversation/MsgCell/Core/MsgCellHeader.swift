@@ -18,7 +18,7 @@ struct MsgCellHeader: View, @MainActor Equatable {
         if state.layout.showTimeSeparator {
             TimeSeparator(dateString: state.dateStString)
         }
-        if state.layout.showTopPadding { CellSpacer() }
+
         if state.isSelected { Header(headerText: headerText) }
     }
 
@@ -33,7 +33,6 @@ struct MsgCellHeader: View, @MainActor Equatable {
 
     static func == (lhs: MsgCellHeader, rhs: MsgCellHeader) -> Bool {
         lhs.state.layout.showTimeSeparator == rhs.state.layout.showTimeSeparator
-            && lhs.state.layout.showTopPadding == rhs.state.layout.showTopPadding
             && lhs.state.isSelected == rhs.state.isSelected
     }
 }

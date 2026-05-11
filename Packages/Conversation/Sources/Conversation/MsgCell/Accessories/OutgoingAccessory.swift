@@ -59,7 +59,7 @@ struct OutgoingAccessory: View, @MainActor Equatable {
             .geometryGroup()
         }
     }
-    
+
     static func == (lhs: OutgoingAccessory, rhs: OutgoingAccessory) -> Bool {
         lhs.state.outgoingStatus?.aggregateStatus == rhs.state.outgoingStatus?.aggregateStatus
     }

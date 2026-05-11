@@ -28,44 +28,37 @@ extension ChatManager: ChatDataReceiverDelegate {
             models.update(msg: msg)
             return
         }
-        if scrollController.isNear(.bottom) {
-            scrollController.updateStateUpdate(
-                to: .dataUpdate(.append(msgID: msg.uid))
-            )
+        switch true {
+        case models.isAbsoluteScrolled(at: .bottom):
+            scrollController.send(.begin(.append(msg: msg)))
+        case models.canPaginate(at: .bottom):
+            ToastPresenter.shared.dismiss()
+            let toast = Toast(
+                node: Text(msg.displayText).opaqueView(),
+                allowsBackgroundTap: true
+            ) { [weak self] in
+                guard let self else { return }
+                serialQueue.addOperation { [weak self] in
+                    guard let self else { return }
+                    try await scrollTo(msg: msg)
+                    ToastPresenter.shared.dismiss()
+                }
+            }
+            ToastPresenter.show(toast)
+        default:
+            
+            ToastPresenter.shared.dismiss()
+            let toast = Toast(
+                node: Text(msg.displayText).opaqueView(),
+                allowsBackgroundTap: true
+            ) { [weak self] in
+                guard let self else { return }
+                scrollController.performScroll(to: .id(msg.uid, anchor: .bottom, .animated()))
+                ToastPresenter.shared.dismiss()
+            }
+            ToastPresenter.show(toast)
             models.insert(msg: msg)
             layoutIfNeeded()
-        } else {
-            if scrollCoordinator(scrollController, shouldPaginateAt: .bottom) {
-                ToastPresenter.shared.dismiss()
-                let toast = Toast(
-                    node: Text(msg.displayText).opaqueView(),
-                    allowsBackgroundTap: true
-                ) { [weak self] in
-                    guard let self else { return }
-                    ToastPresenter.shared.dismiss()
-                    serialQueue.addOperation { [weak self] in
-                        guard let self else { return }
-                        try await scrollTo(msg: msg)
-                    }
-                }
-                ToastPresenter.show(toast)
-            } else {
-                models.insert(msg: msg)
-                layoutIfNeeded()
-                ToastPresenter.shared.dismiss()
-                let toast = Toast(
-                    node: Text(msg.displayText).opaqueView(),
-                    allowsBackgroundTap: false
-                ) { [weak self] in
-                    guard let self else { return }
-                    ToastPresenter.shared.dismiss()
-                    serialQueue.addBarrierOperation { [weak self] in
-                        guard let self else { return }
-                        try await scrollTo(msg: msg)
-                    }
-                }
-                ToastPresenter.show(toast)
-            }
         }
     }
 
@@ -75,7 +68,7 @@ extension ChatManager: ChatDataReceiverDelegate {
         } catch { await showError(error) }
     }
 
-    func chatDataReceiver(didUpdate msg: Message, animated _: Bool){
+    func chatDataReceiver(didUpdate msg: Message, animated _: Bool) {
         models.update(msg: msg)
     }
 
@@ -90,7 +83,7 @@ extension ChatManager: ChatDataReceiverDelegate {
     ) async throws {
         try await models.refreshMsg(uid: payload.msgID)
         try await reloadConversation(refetch: false)
-        let models = models.renderedModels.filter { model in
+        let models = models.storage.filter { model in
             model.state.isSender && model.state.outgoingStatus?.aggregateStatus ?? .initial < .read
         }
         try await self.models.refreshMsgs(uids: models.map(\.id))

@@ -5,35 +5,33 @@ import Database
 import SwiftUI
 import XUI
 
-// MARK: - ConversationInitializer
+public struct PaginationState: Hashable, Sendable {
+    public let conID: String
+    public let pageSize: Int
+    public let lastMsgID: String?
+    public let firstMsgID: String?
+    public var totalMsgsCount: Int
+    public let canPaginate: Bool
+}
 
 public enum ConversationInitializer {
-    public struct PaginationState: Hashable, Sendable {
-        public let conID: String
-        public let pageSize: Int
-        public let lineSpacing: CGFloat
-        public let lastMsgID: String?
-        public let firstMsgID: String?
-        public var totalMsgsCount: Int
-        public let canPaginate: Bool
-    }
 
     public struct PrefetchedData: Hashable, Sendable {
         public let conversation: Conversation
         public let properties: ConversationProperties
         public let msgs: [Message]
-        public let configuration: PaginationState
+        public let pagination: PaginationState
 
         public init(
             conversation: Conversation,
             properties: ConversationProperties,
             msgs: [Message],
-            configuration: PaginationState,
+            pagination: PaginationState,
         ) {
             self.conversation = conversation
             self.properties = properties
             self.msgs = msgs
-            self.configuration = configuration
+            self.pagination = pagination
         }
     }
 }
@@ -62,10 +60,9 @@ public extension ConversationInitializer {
             conversation: conversation,
             properties: properties,
             msgs: msgs,
-            configuration: .init(
+            pagination: .init(
                 conID: conversation.uid,
                 pageSize: pageSize,
-                lineSpacing: lineSpacing,
                 lastMsgID: lastMsg?.uid,
                 firstMsgID: firstMsg?.uid,
                 totalMsgsCount: msgsCount,

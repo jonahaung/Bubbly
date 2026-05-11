@@ -11,7 +11,6 @@ import Services
 struct AccessoryBar: View {
     let item: AccessoryBarItem
     @Environment(ChatManager.self) private var manager
-    @Namespace private var namespace
     var body: some View {
         HStack(alignment: .bottom) {
             Spacer()

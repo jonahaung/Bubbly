@@ -17,7 +17,7 @@ extension ChatManager {
     }
 
     func setIncomingMsgsAsRead(before date: Date = .now) async throws {
-        let newlyReadMsgs = try await conversationDataUpdater.markReadToUnreadIncomingMsgs(conID: conversationConfig.conID, lessThan: date)
+        let newlyReadMsgs = try await conversationDataUpdater.markReadToUnreadIncomingMsgs(conID: models.pagination.conID, lessThan: date)
         if newlyReadMsgs.isEmpty {
             return
         }

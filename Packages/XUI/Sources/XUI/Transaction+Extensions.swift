@@ -25,7 +25,8 @@ public extension Transaction {
     static func withoutAnimation(completion: (() -> Void)? = nil) -> Transaction {
         var transaction = Transaction(animation: nil)
         transaction.disablesAnimations = true
-        transaction.tracksVelocity = true
+        transaction.tracksVelocity = false
+        transaction.isContinuous = true
         if let completion {
             transaction.addAnimationCompletion(criteria: .logicallyComplete) {
                 completion()
@@ -37,8 +38,9 @@ public extension Transaction {
     @MainActor static func scrollPositionPreserved() -> Transaction {
         var transaction = Transaction()
         transaction.scrollPositionUpdatePreservesVelocity = true
-        transaction.disablesAnimations = false
+        transaction.scrollTargetAnchor = .none
         transaction.isContinuous = true
+        transaction.tracksVelocity = false
         return transaction
     }
 

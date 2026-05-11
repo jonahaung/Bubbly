@@ -5,8 +5,6 @@
 
 import XUI
 import SwiftUI
-
-// © 2026 Aung Ko Min
 import Database
 import Services
 
@@ -23,30 +21,61 @@ struct MsgsScrollViewLayout: Layout {
 
 extension MsgsScrollViewLayout {
     func makeCache(subviews: Subviews) -> Cache { buildCache(subviews: subviews) }
-    func updateCache(_ cache: inout Cache, subviews: Subviews) {
-        cache = buildCache(subviews: subviews)
-    }
-
+    
     func sizeThatFits(
         proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache
     ) -> CGSize {
         let size = proposal.replacingUnspecifiedDimensions()
-        guard !subviews.isEmpty else { return size }
-        return .init(width: size.width, height: max(size.height, cache.totalHeight, config.screenSize.height) )
+        guard !subviews.isEmpty else { return config.screenSize }
+        return .init(width: size.width, height: cache.totalHeight)
     }
 
     func placeSubviews(
         in rect: CGRect, proposal _: ProposedViewSize, subviews: Subviews, cache: inout Cache
     ) {
-        guard cache.layouts.count == subviews.count else { return }
-        for (i, subview) in subviews.enumerated() {
+        for i in subviews.indices {
             let layout = cache.layouts[i]
-            let value = subview[MsgLayoutValueKey.self]
-            subview.place(
-                at: layout.position, anchor: value.anchor, proposal: ProposedViewSize(layout.size)
+            subviews[i].place(
+                at: layout.position, anchor: layout.anchor, proposal: ProposedViewSize(layout.size)
             )
         }
     }
+    func updateCache(_ cache: inout Cache, subviews: Subviews) {
+        cache = buildCache(subviews: subviews)
+    }
+    
+//    func explicitAlignment(of guide: HorizontalAlignment, in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGFloat? {
+//        guard !subviews.isEmpty else { return nil }
+//        if cache.layouts.count != subviews.count { cache = buildCache(subviews: subviews) }
+//        guard cache.layouts.count == subviews.count else { return nil }
+//
+//        switch guide {
+//        case .leading:
+//            let minX = cache.layouts.map { $0.position.x }.min()
+//            return minX
+//        case .trailing:
+//            let maxX = cache.layouts.map { $0.position.x }.max()
+//            return maxX
+//        default:
+//            return nil
+//        }
+//    }
+//    func explicitAlignment(of guide: VerticalAlignment, in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGFloat? {
+//        guard !subviews.isEmpty else { return nil }
+//        if cache.layouts.count != subviews.count { cache = buildCache(subviews: subviews) }
+//        guard cache.layouts.count == subviews.count else { return nil }
+//
+//        switch guide {
+//        case .top:
+//            let minY = cache.layouts.map { $0.position.y }.min()
+//            return minY
+//        case .bottom:
+//            let maxY = cache.layouts.map { $0.position.y }.max()
+//            return maxY
+//        default:
+//            return nil
+//        }
+//    }
 }
 
 // MARK: - Cache Builder
@@ -71,7 +100,7 @@ extension MsgsScrollViewLayout {
             let value = subview[MsgLayoutValueKey.self]
             let size = size(for: subview, value: value)
             let x = xPosition(for: value.recipient)
-            layouts.append(.init(id: value.uid, size: size, position: .init(x: x, y: y)) )
+            layouts.append(.init(id: value.uid, size: size, position: .init(x: x, y: y), anchor: value.anchor) )
             y += size.height + config.spacing
         }
         return (layouts, totalHeight(for: layouts))
@@ -97,12 +126,12 @@ private extension MsgsScrollViewLayout {
         let availableTotalWidth = (config.boundsWidth - config.contentInsets.horizontal) * ratio
         let targetedMaxWidth = availableTotalWidth * config.bubbleWidthRatio
         let measured = subview.sizeThatFits(ProposedViewSize(width: targetedMaxWidth, height: nil))
-        return .init(width: measured.width, height: measured.height )
+        return measured
     }
 
     func sizeKey(for value: MsgLayoutValue) -> MsgsScrollViewLayout.SizeKey {
         let selected = value.uid == manager.selectedMsg?.id
-        return .init(uid: value.uid, width: config.boundsWidth, selected: selected, headerID: value.headerID)
+        return .init(uid: value.uid, width: config.boundsWidth.int, selected: selected, headerID: value.headerID)
     }
 
     func xPosition(for recipient: MsgRecipient) -> CGFloat {
@@ -126,7 +155,11 @@ extension MsgsScrollViewLayout {
         var hasher = Hasher()
         hasher.combine(Int(config.boundsWidth))
         if let selected = manager.selectedMsg { hasher.combine(selected.id) }
-        for subview in subviews { hasher.combine(subview[MsgLayoutValueKey.self].id) }
+        for subview in subviews {
+            let value = subview[MsgLayoutValueKey.self]
+            hasher.combine(value.id)
+            hasher.combine(value.headerID)
+        }
         return hasher.finalize()
     }
 }

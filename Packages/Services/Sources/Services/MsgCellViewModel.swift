@@ -9,18 +9,27 @@ import XUI
 public final class MsgCellViewModel: @MainActor Identifiable, @MainActor Equatable {
     public var state: State
     public var isVisible: Bool = false
+
     public init(_ state: State) {
         self.state = state
     }
-
     public var msg: Message {
         state.msg
     }
+
     public func update(with msg: Message) {
         guard state.msg != msg else {
             return
         }
+        var state = state
         state.msg = msg
+        if state.layout.showAvatar {
+            state.sender = ContactsRepository.shared.contact(for: state.senderID)
+        }
+        state.bubbleCornor = state.computeBubbleCorner()
+        state.dateStString = nil
+        state.computeDateString()
+        self.state = state
     }
 
     public func update(layout: MsgCellLayout) {
@@ -67,9 +76,15 @@ public final class MsgCellViewModel: @MainActor Identifiable, @MainActor Equatab
 extension MsgCellViewModel {
     public struct State: Equatable, Hashable, Identifiable {
 
-        public init(msg: Message, attributedText: AttributedString?) {
+        @MainActor
+        public init(msg: Message, attributedText: AttributedString?, layout: MsgCellLayout) {
             self.msg = msg
             self.attributedText = attributedText
+            self.sender = layout.showAvatar ? ContactsRepository.shared.contact(for: msg.senderID) : nil
+            self.layout = layout
+            self.bubbleCornor = .none
+            self.bubbleCornor = computeBubbleCorner()
+            computeDateString()
         }
 
         // MARK: Public
@@ -78,7 +93,7 @@ extension MsgCellViewModel {
         public let attributedText: AttributedString?
 
         public var sender: Contact?
-        public var layout: MsgCellLayout = .init()
+        public var layout: MsgCellLayout
         public var selectedMsg: SelectedMsg?
         public var bubbleCornor: BubbleCorner = .none
         public var dateStString: String?

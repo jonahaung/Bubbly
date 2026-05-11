@@ -24,9 +24,10 @@ struct ConversationDataUpdater {
         updatedState.theme = .init(updatedState.properties.theme)
         return updatedState
     }
+
     func markReadToUnreadIncomingMsgs(conID: String, lessThan date: Date) async throws -> [Message] {
         let msgs = try await MsgRepo.incomingUnreadMsgs(conID: conID).filter { $0.date <= date }
-       let updated = try await AsyncOrderedStream.mapOrdered(inputs: msgs) { msg in
+        return try await AsyncOrderedStream.mapOrdered(inputs: msgs) { msg in
             var msg = msg
             msg.incomingStatus = .read
             try await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
@@ -34,9 +35,8 @@ struct ConversationDataUpdater {
             }
             return msg
         }
-        return updated
     }
-    
+
     func sendRecipientStatus(
         lastReadMsg: Message,
         conversation: Conversation

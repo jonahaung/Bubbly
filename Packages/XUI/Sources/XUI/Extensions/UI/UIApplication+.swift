@@ -28,7 +28,7 @@ public extension UIApplication {
         if let viewController = keyWindow.rootViewController {
             return viewController.view.bounds.inset(by: viewController.view.safeAreaInsets).size
         }
-        return windowScene.screen.bounds.inset(by: UIApplication.safeAreInset).integral.size
+        return windowScene.screen.bounds.inset(by: UIApplication.safeAreInset).size
     }
 
     func screenScale() -> CGFloat {

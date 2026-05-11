@@ -9,8 +9,8 @@ import Database
 
 struct CellSpacer: View, @MainActor Equatable {
     var body: some View {
-        Color.clear
-            .frame(height: ChatLayoutConstants.Cell.sectionSpacing)
+        Color.background
+            .frame(height: Spacing.xs)
     }
 
     static func == (_: Self, _: Self) -> Bool {

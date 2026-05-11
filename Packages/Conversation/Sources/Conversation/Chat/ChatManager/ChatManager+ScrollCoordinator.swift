@@ -8,7 +8,7 @@ import SwiftUI
 import Database
 import Services
 
-extension ChatManager: ScrollCoordinatorDelegate {
+extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
     func scrollCoordinator(
         _ coordinator: ScrollCoordinator, begin update: ScrollCoordinator.DataUpdate
     ) {
@@ -16,28 +16,32 @@ extension ChatManager: ScrollCoordinatorDelegate {
             guard let self else { return }
             switch update {
             case let .insert(edge, _):
-                let message = edge == .top ? lastMsg : firstMsg
-                guard let message else {
-                    scrollController.updateStateUpdate(to: .didEndUpdates)
-                    return
-                }
-                let query = ServerTime(message.date).value
-                let msgs =
-                    switch edge {
-                    case .top: try await datasource.previous(before: query, conID: message.conID )
-                    case .bottom: try await datasource.more(after: query, conID: message.conID )
+                switch edge {
+                case .top:
+                    let message = models.first?.msg
+                    guard let message else {
+                        scrollController.updateStateUpdate(to: .didEndUpdates)
+                        return
                     }
-                if edge == .top {
+                    let query = ServerTime(message.date).value
+                    let msgs = try await datasource.previous(before: query, conID: message.conID )
                     models.prepend(msgs)
                     coordinator.updateStateUpdate(to: .dataUpdate(update) )
                     layoutIfNeeded()
-                } else {
+                case .bottom:
+                    let message = models.last?.msg
+                    guard let message else {
+                        scrollController.updateStateUpdate(to: .didEndUpdates)
+                        return
+                    }
+                    let query = ServerTime(message.date).value
+                    let msgs = try await datasource.more(after: query, conID: message.conID )
                     models.append(msgs)
                     coordinator.updateStateUpdate(to: .dataUpdate(update) )
-                    withAnimation { layoutIfNeeded() }
+                    layoutIfNeeded()
                 }
             case let .remove(edge, _):
-                let limit = conversationConfig.pageSize * 2
+                let limit = models.pagination.pageSize * 2
                 switch edge {
                 case .top:
                     models.retainNewest(limit)
@@ -48,65 +52,40 @@ extension ChatManager: ScrollCoordinatorDelegate {
                     coordinator.updateStateUpdate(to: .dataUpdate(update))
                     withAnimation { layoutIfNeeded() }
                 }
-            case .append: break
-            case let .resetting(msg): try await scrollTo(msg: msg)
+            case let .append(msg):
+                models.insert(msg: msg)
+                coordinator.updateStateUpdate(to: .dataUpdate(.append(msg: msg)))
+                layoutIfNeeded()
+            case let .resetting(msg):
+                try await scrollTo(msg: msg)
             }
         }
     }
-
-    func edgeMsg(at edge: VerticalEdge) -> Database.Message? {
-        switch edge {
-        case .top: models.first?.msg
-        case .bottom: models.last?.msg
-        }
-    }
-
-    private var isPaginatonEnabled: Bool { conversationConfig.canPaginate }
+    
     func scrollCoordinator(_: ScrollCoordinator, shouldPaginateAt edge: VerticalEdge ) -> Bool {
-        guard isPaginatonEnabled else { return false }
-        switch edge {
-        case .top:
-            guard let firstMsgID = conversationConfig.firstMsgID else { return false }
-            return !models.contains(withID: firstMsgID)
-        case .bottom:
-            guard let lastMsgID = conversationConfig.lastMsgID else { return false }
-            return !models.contains(withID: lastMsgID)
-        }
+        models.canPaginate(at: edge)
     }
 
     func scrollCoordinatorShouldRemove(_: ScrollCoordinator) -> Bool {
-        isPaginatonEnabled && models.count > conversationConfig.pageSize * 2
+        models.shouldAdjustSize
     }
 
     func scrollCoordinator(
         _: ScrollCoordinator, finalizeScrollViewUpdatesWith state: ScrollCoordinator.State
     ) {
-        let item: AccessoryBarItem? = {
-            if state.scrolledPosition != .atBottom { return .scrollDownButton }
-            if state.isFirstResponder { return .keyboardButton }
-            return nil
-        }()
+        let item: AccessoryBarItem? = models.isAbsoluteScrolled(at: .bottom) ? nil : .scrollDownButton
         presentation.send(.bottomAccessory(item))
         if let dateString = models.getCurrentVisibleDateString() {
             presentation.send(.date(dateString))
         }
     }
-
-    func scrollCoordinator(_: ScrollCoordinator, reset msg: Message) {
-        serialQueue.addOperation { [weak self] in
-            guard let self else { return }
-            try await scrollTo(msg: msg)
-        }
-    }
-
+    
     func onScrollTargetVisibilityChange(_ newValue: [String]) {
         models.onScrollTargetVisibilityChange(newValue)
     }
 }
 
 extension ChatManager {
-    var firstMsg: Database.Message? { models.last?.msg }
-    var lastMsg: Database.Message? { models.first?.msg }
     func scrollTo(msg: Message) async throws {
         scrollController.updateStateUpdate(to: .willBeginUpdates)
         let query = ServerTime(msg.date).value

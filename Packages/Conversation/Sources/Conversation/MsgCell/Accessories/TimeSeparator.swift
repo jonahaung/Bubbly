@@ -9,10 +9,10 @@ import SwiftUI
 import Services
 
 struct TimeSeparator: View, @MainActor Equatable {
-    
+
     @Environment(\.typography) private var typography
     let dateString: String?
-    
+
     var body: some View {
         VStack {
             if let dateString {
@@ -26,7 +26,7 @@ struct TimeSeparator: View, @MainActor Equatable {
         )
         .flexible(.horizontal)
     }
-    
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.dateString == rhs.dateString
     }

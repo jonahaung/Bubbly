@@ -15,8 +15,14 @@ import Services
 
 struct MsgCellFooter: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
-    var body: some View { if state.isSelected { Footer(state: state) } }
-    static func == (lhs: Self, rhs: Self) -> Bool { lhs.state.isSelected == rhs.state.isSelected }
+    var body: some View {
+        if state.isSelected { Footer(state: state) }
+        if state.layout.showTopPadding { CellSpacer() }
+    }
+
+    static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.state.isSelected == rhs.state.isSelected && lhs.state.layout.showTopPadding == rhs.state.layout.showTopPadding
+    }
 }
 
 private struct Footer: View, @MainActor Equatable {

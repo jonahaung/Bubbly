@@ -19,31 +19,24 @@ extension ScrollReducer {
     func reduceGeometry(
         newValue: VScrollGeometry,
         paginationState: ScrollCoordinator.PaginationState,
-        scrollDirection: ScrollCoordinator.ScrollDirection
+        phase: ScrollPhase
     ) -> Effect? {
         let ratio = newValue.offsetY / newValue.contentHeight
-        switch scrollDirection {
-        case .down:
-            if ratio < 0.2, paginationState.canLoadOlder {
-                return .begingUpdate(.insert(edge: .top, geometry: newValue))
-            }
-            return nil
-        case .up:
-            if ratio > 0.85 {
-                if paginationState.canLoadNewer {
-                    return .begingUpdate(
-                        paginationState.canAdjustSize
-                            ? .remove(edge: .top, geometry: newValue)
-                            : .insert(edge: .bottom, geometry: newValue)
-                    )
-                }
-                return paginationState.canAdjustSize
-                    ? .begingUpdate(.remove(edge: .top, geometry: newValue)) : nil
-            }
-            return nil
-        case .none:
-            return nil
+        if ratio < 0.2, paginationState.canLoadOlder {
+            return .begingUpdate(.insert(edge: .top, geometry: newValue))
         }
+        if ratio > 0.85 {
+            if paginationState.canLoadNewer {
+                return .begingUpdate(
+                    paginationState.canAdjustSize && phase.isScrolling
+                        ? .remove(edge: .top, geometry: newValue)
+                        : .insert(edge: .bottom, geometry: newValue)
+                )
+            }
+            return paginationState.canAdjustSize
+                ? .begingUpdate(.remove(edge: .top, geometry: newValue)) : nil
+        }
+        return nil
     }
 
     func handleUpdating(
@@ -58,8 +51,8 @@ extension ScrollReducer {
                 guard diff != 0 else { return nil }
                 if edge == .top {
                     let y =
-                        diff + newValue.offsetY
-                            - (newValue.offsetY - geometry.offsetY)
+                        diff + max(0, newValue.offsetY)
+                        - (newValue.offsetY - geometry.offsetY)
                     return .endUpdate(
                         .insert(edge: edge, geometry: geometry),
                         scrollItem: .y(y, .scroll)
@@ -69,23 +62,24 @@ extension ScrollReducer {
                     .insert(edge: edge, geometry: newValue), scrollItem: nil
                 )
             case let .remove(edge, geometry):
-                if edge == .top {
+                switch edge {
+                case .top:
                     let diff = newValue.contentHeight - geometry.contentHeight
-                    let y =
-                        newValue.offsetY + diff
-                            + (newValue.offsetY - oldValue.offsetY)
+                    guard diff != 0 else { return nil }
+                    let y = max(0, newValue.offsetY) + diff
                     var newGeometry = newValue
                     newGeometry.offsetY = y
                     return .endUpdate(
                         .remove(edge: edge, geometry: newGeometry),
                         scrollItem: .y(y, .scroll)
                     )
+                case .bottom:
+                    return .endUpdate(.remove(edge: .bottom, geometry: newValue), scrollItem: nil)
                 }
-                return .endUpdate(.remove(edge: .bottom, geometry: newValue), scrollItem: nil)
-            case let .append(id):
+            case let .append(msg):
                 return .endUpdate(
-                    .append(msgID: id),
-                    scrollItem: .id(id, .animated(.easeOut(duration: 0.2)))
+                    .append(msg: msg),
+                    scrollItem: .id(msg.uid, .animated(.easeOut(duration: 0.2)))
                 )
             case let .resetting(msg):
                 return .endUpdate(

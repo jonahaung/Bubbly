@@ -10,14 +10,16 @@
 //  Created by Aung Ko Min on 21/4/26.
 //
 import Foundation
+import SwiftUI
 
 extension MsgsScrollViewLayout {
 
-    struct Cache: Hashable {
-        struct CellLayout: Hashable {
+    struct Cache: Sendable, Hashable {
+        struct CellLayout: Sendable, Hashable {
             let id: String
             let size: CGSize
             let position: CGPoint
+            let anchor: UnitPoint
         }
 
         let totalHeight: CGFloat
@@ -25,9 +27,9 @@ extension MsgsScrollViewLayout {
         let signatureHash: Int
     }
 
-    struct SizeKey: Hashable {
+    struct SizeKey: Sendable, Hashable {
         let uid: String
-        let width: CGFloat
+        let width: Int
         let selected: Bool
         let headerID: Int
     }

@@ -23,7 +23,7 @@ public actor IDGenerator {
         self.dateProvider = dateProvider
     }
 
-    public func make(ascending: Bool = true) -> String {
+    public func make(ascending: Bool = false) -> String {
         let chars = ascending
             ? Self.ascendingChars
             : Self.descendingChars

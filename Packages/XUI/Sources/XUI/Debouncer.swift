@@ -6,7 +6,6 @@
 import Foundation
 
 public final class Debouncer {
-
     private let delay: TimeInterval
     private let queue: DispatchQueue
     private var workItem: DispatchWorkItem?
@@ -16,12 +15,20 @@ public final class Debouncer {
         self.queue = queue
     }
 
-    public func debounce(_ block: @escaping () -> Void) {
+    deinit {
+        cancel()
+    }
+
+    public func debounce(_ block: @escaping @Sendable () -> sending Void) {
         workItem?.cancel()
 
-        let item = DispatchWorkItem(block: block)
-        workItem = item
+        let item = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            defer { self.workItem = nil }
+            block()
+        }
 
+        workItem = item
         queue.asyncAfter(deadline: .now() + delay, execute: item)
     }
 

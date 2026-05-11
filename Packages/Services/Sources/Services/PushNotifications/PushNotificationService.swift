@@ -86,7 +86,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
         do {
             switch currentNavPath {
             case .conversation(let prefetchData)
-            where data.conID == prefetchData.configuration.conID:
+                where data.conID == prefetchData.conversation.uid:
                 try await Socket.shared.notifyMessage(data)
                 return []
             default:
@@ -140,7 +140,7 @@ extension PushNotificationService {
     ) async throws -> Bool {
         switch currentNavPath {
         case .conversation(let prefetchData)
-        where data.conID == prefetchData.configuration.conID:
+        where data.conID == prefetchData.conversation.uid:
 //            try await Socket.shared.receive(data)
             return false
         default:

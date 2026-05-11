@@ -13,7 +13,7 @@ struct BackgroundView: View {
             .overlay {
                 Image(imageName)
                     .resizable(resizingMode: .tile)
-                    .foregroundStyle(Color.quinaryText)
+                    .foregroundStyle(Color.container)
                     .clipped()
             }
             .ignoresSafeArea(.all)

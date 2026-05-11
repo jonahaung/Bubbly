@@ -3,59 +3,74 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
 import Core
-import SwiftUI
 import Database
 import Services
+import SwiftUI
+import XUI
 
 struct ConversationScrollView: View {
-    
+
     let manager: ChatManager
-    
+
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             MsgsScrollViewLayout(
                 manager: manager.layoutManager,
                 config: .init(
-                    spacing: manager.conversationConfig.lineSpacing,
+                    spacing: 0,
                     contentInsets: .init(
-                        top: ChatLayoutConstants.topBarHeight, leading: Padding.sm, bottom: 0,
+                        top: ChatLayoutConstants.topBarHeight,
+                        leading: Padding.sm,
+                        bottom: 0,
                         trailing: Padding.sm
-                    ), screenSize: UIApplication.shared.screenSize()
+                    ),
+                    screenSize: UIApplication.shared.screenSize()
                 )
             ) {
-                
-                ForEach(manager.models.renderedModels) { model in
+                ForEach(manager.models.storage) { model in
                     MsgCell(viewModel: model)
-                        .id(model.id)
-                        .layoutValue(key: MsgLayoutValueKey.self, value: model.msg.layoutValue(layout: model.state.layout))
                 }
             }
-            .geometryGroup()
             .scrollTargetLayout()
         }
         .tint(Color.tint)
+        .equatable(by: manager.state.reloadID)
         .scrollEdgeEffectHidden(true, for: .all)
         .scrollDismissesKeyboard(.never)
-        .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
+        .safeAreaPadding(
+            .bottom,
+            ChatLayoutConstants.bottomBarHeight
+        )
         .onScrollPhaseChange { oldPhase, newPhase, context in
             manager.send(
-                .scrollViewIntent(.onScrollPhaseChange(oldPhase, newPhase, context: context))
+                .scrollViewIntent(
+                    .onScrollPhaseChange(oldPhase, newPhase, context: context)
+                )
             )
         }
-        .onScrollGeometryChange(for: VScrollGeometry.self, of: { .init($0) }) { oldValue, newValue in
-            manager.send(.scrollViewIntent(.onScrollGeometryChange(oldValue, newValue)))
+        .onScrollGeometryChange(for: VScrollGeometry.self, of: { .init($0) }) {
+            oldValue,
+            newValue in
+            manager.send(
+                .scrollViewIntent(.onScrollGeometryChange(oldValue, newValue))
+            )
         }
-        .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.01) { ids in
+        .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) {
+            ids in
             manager.onScrollTargetVisibilityChange(ids)
         }
         .defaultScrollAnchor(.bottom, for: .initialOffset)
-        .equatable(by: manager.state.reloadID)
+        .scrollIndicatorsFlash(trigger: manager.state.reloadID)
+        .scrollClipDisabled()
+        .scrollBounceBehavior(.basedOnSize)
         .defaultScrollAnchor(
-            manager.presentation.state.bottomAccessory == .scrollDownButton ? nil : .bottom,
+            manager.models.isAbsoluteScrolled(at: .bottom) ? .bottom : nil,
             for: .sizeChanges
         )
-        .scrollPosition(manager.scrollController.scrollPositionBindable, anchor: .bottom)
+        .scrollPosition(
+            manager.scrollController.scrollPositionBindable,
+            anchor: .bottom
+        )
     }
 }

@@ -19,18 +19,18 @@ public struct MsgCellLayout: Conformable {
 
     public init(
         showTimeSeparator: Bool,
-        showTopPadding: Bool,
+        showBottomPadding: Bool,
         bubbleCorner: BubbleCorner,
     ) {
         self.showTimeSeparator = showTimeSeparator
-        self.showTopPadding = showTopPadding
+        self.showTopPadding = showBottomPadding
         self.bubbleCorner = bubbleCorner
     }
 
     public init() {
         self.init(
             showTimeSeparator: false,
-            showTopPadding: false,
+            showBottomPadding: false,
             bubbleCorner: .none,
         )
     }

@@ -23,7 +23,7 @@ struct TopBar: View {
                     .font(.system(size: UIFont.systemFontSize + 1, weight: .semibold))
                     .badgeView(
                         Text(
-                            manager.conversationConfig.totalMsgsCount,
+                            manager.models.pagination.totalMsgsCount,
                             format: .number
                         )
                         .font(.system(size: UIFont.smallSystemFontSize, weight: .medium).width(.compressed))
@@ -67,7 +67,7 @@ struct TopBar: View {
             )
         )
         .geometryGroup()
-        .equatable(by: manager.conversationConfig.conID)
+        .equatable(by: manager.models.pagination.conID)
     }
 
     @Environment(ChatManager.self) private var manager

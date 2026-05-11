@@ -31,5 +31,12 @@ struct MsgCell: View {
             MsgCellFooter(state: viewModel.state)
         }
         .environment(\.isVisible, viewModel.isVisible)
+        .id(viewModel.id)
+        .layoutValue(
+            key: MsgLayoutValueKey.self,
+            value: viewModel.msg.layoutValue(
+                layout: viewModel.state.layout
+            )
+        )
     }
 }

@@ -7,7 +7,6 @@ import XUI
 import SwiftUI
 import Database
 
-@MainActor
 protocol ScrollCoordinatorDelegate: AnyObject {
     func scrollCoordinatorShouldRemove(_ coordinator: ScrollCoordinator) -> Bool
     func scrollCoordinator(_ coordinator: ScrollCoordinator, shouldPaginateAt edge: VerticalEdge) -> Bool

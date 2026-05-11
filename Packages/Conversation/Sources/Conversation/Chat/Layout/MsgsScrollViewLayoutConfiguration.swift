@@ -16,6 +16,6 @@ struct MsgsScrollViewLayoutConfiguration {
     }
 
     var bubbleWidthRatio: CGFloat {
-        screenSize.height > screenSize.width ? 0.96 : 0.7
+        screenSize.height > screenSize.width ? 0.91 : 0.7
     }
 }

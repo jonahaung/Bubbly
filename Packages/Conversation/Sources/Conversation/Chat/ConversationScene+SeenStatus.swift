@@ -39,7 +39,7 @@ struct SeenStatusOverlay: View {
             .geometryGroup()
             .equatable(by: manager.state.properties.seenMembers)
         }
-        
+
     }
 
     @Environment(\.sharedNamespace) private var namespace

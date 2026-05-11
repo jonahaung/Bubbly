@@ -34,13 +34,12 @@ public struct ConversationScene: View {
             BackgroundView(
                 imageName: viewModel.state.properties.theme.background.imageName
             )
-            
+
             SeenStatusOverlay()
-            
+
             ConversationScrollView(manager: viewModel)
                 .layoutPriority(1)
             ConversationSceneOverlayBar()
-                .equatable(by: viewModel.state.conversation.uid)
         }
         .fullScreenCover(item: $viewModel.presentation.state.overlayItem) { frame in
             if let overlayViewModel = viewModel.models.element(withID: frame.id) {

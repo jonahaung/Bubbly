@@ -18,20 +18,17 @@ import ImageLoader
         currentUserRepository: CurrentUserRepository,
         router: Router
     ) {
-        let conID = data.configuration.conID
+        let conID = data.pagination.conID
         self.contactsRepository = contactsRepository
         self.currentUserRepository = currentUserRepository
         self.router = router
-        conversationConfig = data.configuration
-        datasource = .init(pageSize: data.configuration.pageSize)
+        datasource = .init(pageSize: data.pagination.pageSize)
         scrollController = .init()
         presentation = .init(conID)
         dataObserver = .init(conID)
         attachmentFetcher = .init()
         state = State(conversation: data.conversation, theme: .init(data.properties.theme), properties: data.properties)
-        let headers: [HeaderModel] =
-            data.configuration.canPaginate ? [] : [.init(kind: .conversation(data.conversation))]
-        models = .init(data.msgs, headers)
+        models = .init(data.msgs, pagination: data.pagination)
     }
 
     deinit {
@@ -42,7 +39,6 @@ import ImageLoader
     @ObservationIgnored let datasource: PaginatedDatasource
     @ObservationIgnored let scrollController: ScrollCoordinator
     @ObservationIgnored var presentation: Presenter
-    @ObservationIgnored let conversationConfig: ConversationInitializer.PaginationState
     @ObservationIgnored let attachmentFetcher: AttachmentFetcher
     @ObservationIgnored let models: Messages
     @ObservationIgnored private let dataObserver: ChatDataReceiver
@@ -74,13 +70,11 @@ extension ChatManager {
 
 extension ChatManager {
     private func handleScrollDownButtonTap() async throws {
-        guard let lasMsg = try await MsgRepo.lastMsg(conID: conversationConfig.conID ) else {
-            return
-        }
-        if models.contains(withID: lasMsg.uid) {
-            scrollController.performScroll(to: .id(lasMsg.uid, .animated()))
+        guard let lastMsg = try await MsgRepo.lastMsg(conID: state.conversation.uid) else { return }
+        if models.canPaginate(at: .bottom) {
+            scrollController.send(.begin(.resetting(msg: lastMsg)))
         } else {
-            scrollController.send(.begin(.resetting(msg: lasMsg)))
+            scrollController.performScroll(to: .id(lastMsg.uid, .animated()))
         }
     }
 

@@ -4,53 +4,89 @@
 //
 
 import XUI
-
-// © 2026 Aung Ko Min
 import Core
 import SwiftUI
 import Database
 import Services
 import Foundation
 
-@MainActor final class Messages {
-
+@MainActor final class Messages: Sendable {
     private var storage: [MsgCellViewModel] = []
     private var indexMap: [String: Int] = [:]
     private let bubbleFactory: BubbleFactory = .init()
-    private var modelCache = LRUCache<MsgCellViewModel.ID, MsgCellViewModel>(
-        capacity: 500
-    )
+    private var modelCache = LRUCache<MsgCellViewModel.ID, MsgCellViewModel>()
     private let markdownFormatter: MarkdownFormatter = .init()
     private let richTextEnabled: Bool
-    private let debouncer: Debouncer = .init(delay: 1)
-    var pagination: Pagination
-    private var visibleIDs: Set<String> = []
+    private var visibleIDs: [String] = []
+    var pagination: PaginationState
 
-    init(_ pagination: Pagination) {
+    init(_ msgs: [Message], pagination: PaginationState) {
         self.pagination = pagination
         richTextEnabled = UserDefaults.group.bool(
             forKey: GroupStorageKey.conversation(.richTextEnabled).value
         )
-        storage = pagination.msgs.map(model(for:))
+        storage = makeModels(from: uniqueMessages(in: msgs))
         rebuildIndexMap()
-        layoutBatch(storage)
     }
 
-    deinit { log("deinit") }
     var count: Int { storage.count }
     var first: MsgCellViewModel? { storage.first }
     var last: MsgCellViewModel? { storage.last }
     var isEmpty: Bool { storage.isEmpty }
-    var renderedModels: [MsgCellViewModel] { storage }
+    func contains(withID id: String) -> Bool { indexMap[id] != nil }
+    func index(of id: String) -> Int? { indexMap[id] }
+    subscript(position: Int) -> MsgCellViewModel? { storage[safe: position] }
+    func element(withID id: String) -> MsgCellViewModel? {
+        guard let index = indexMap[id] else { return nil }
+        return storage[index]
+    }
+
+    deinit { log("deinit") }
+}
+
+extension Messages {
+    var shouldAdjustSize: Bool {
+        count > pagination.pageSize * 2
+    }
+
+    func isScrolled(at edge: VerticalEdge) -> Bool {
+        switch edge {
+        case .top:
+            guard let first else { return false }
+            return visibleIDs.contains(first.id)
+        case .bottom:
+            guard let last else { return false }
+            return visibleIDs.contains(last.id)
+        }
+    }
+
+    func canPaginate(at edge: VerticalEdge) -> Bool {
+        guard pagination.canPaginate else { return false }
+        switch edge {
+        case .top:
+            return if let firstMsgID = pagination.firstMsgID {
+                !contains(withID: firstMsgID)
+            } else { false }
+        case .bottom:
+            return if let lastMsgID = pagination.lastMsgID {
+                !contains(withID: lastMsgID)
+            } else { false }
+        }
+    }
+
+    func isAbsoluteScrolled(at edge: VerticalEdge) -> Bool {
+        switch edge {
+        case .top:
+            isScrolled(at: .top) && canPaginate(at: .top) == false
+        case .bottom:
+            isScrolled(at: .bottom) && canPaginate(at: .bottom) == false
+        }
+    }
 }
 
 extension Messages {
     func onScrollTargetVisibilityChange(_ ids: [String]) {
-        visibleIDs = .init(ids)
-        debouncer.debounce { [weak self] in
-            guard let self else { return }
-            displayVisibleMsgsIfNeeded(currentVisibleIDS: ids)
-        }
+        displayVisibleMsgsIfNeeded(currentVisibleIDS: ids)
     }
 
     func getCurrentVisibleDateString() -> String? {
@@ -61,9 +97,7 @@ extension Messages {
     }
 
     private func displayVisibleMsgsIfNeeded(currentVisibleIDS: [String]) {
-        let oldIDs = storage.filter(\.isVisible).map(\.msg.uid)
-        let difference = currentVisibleIDS.difference(from: oldIDs)
-        for each in difference {
+        for each in currentVisibleIDS.difference(from: visibleIDs) {
             switch each {
             case let .insert(_, id, _):
                 if let model = element(withID: id) { model.setVisibility(true) }
@@ -73,10 +107,7 @@ extension Messages {
                 }
             }
         }
-    }
-
-    func isVisible(_ id: String) -> Bool {
-        visibleIDs.contains(id)
+        visibleIDs = currentVisibleIDS
     }
 }
 
@@ -97,29 +128,14 @@ extension Messages {
 }
 
 extension Messages {
-    func contains(withID id: String) -> Bool {
-        indexMap[id] != nil
-    }
-
-    func index(of id: String) -> Int? {
-        indexMap[id]
-    }
-
-    subscript(position: Int) -> MsgCellViewModel? { storage[safe: position] }
-    func element(withID id: String) -> MsgCellViewModel? {
-        guard let index = indexMap[id] else { return nil }
-        return storage[index]
-    }
-
     func didChangeSelection(_ selectedMsg: SelectedMsg?, for id: String) {
         guard let index = indexMap[id] else { return }
         storage[index].update(selectedMsg: selectedMsg)
     }
 
     func set(msgs: [Message]) {
-        storage = uniqueMessages(in: msgs).map(model(for:))
+        storage = makeModels(from: uniqueMessages(in: msgs))
         rebuildIndexMap()
-        layoutBatch(storage)
     }
 
     func insert(msg: Message) {
@@ -128,47 +144,52 @@ extension Messages {
             return
         }
         let index = insertionIndex(for: msg)
-        let model = model(for: msg)
+        let previous = index > 0 ? storage[index - 1].msg : nil
+        let next = index < storage.count ? storage[index].msg : nil
+        let model = model(for: msg, previous: previous, next: next)
         storage.insert(model, at: index)
         rebuildIndexMap()
-        layoutAround(index)
+        relayoutNeighbors(aroundInsertionAt: index)
     }
 
     func update(msg: Message) { modelCache.get(msg.uid)?.update(with: msg) }
+
     func remove(msg: Message) {
         guard let index = indexMap[msg.uid] else { return }
         storage.remove(at: index)
+        modelCache.remove(msg.uid)
         rebuildIndexMap()
-        layoutAround(index)
+        relayoutNeighbors(aroundRemovalAt: index)
     }
 
     func prepend(_ msgs: [Message]) {
-        let models = messagesToMerge(msgs).map(model(for:))
-        let count = models.count
-        guard count > 0 else { return }
-        layoutBatch(models)
+        let merged = messagesToMerge(msgs)
+        guard !merged.isEmpty else { return }
+        let models = makeModels(from: merged, nextBoundary: storage.first?.msg)
         storage.insert(contentsOf: models, at: 0)
         rebuildIndexMap()
-        layoutAround(count - 1)
+        if storage.count > models.count { layout(at: models.count) }
     }
 
     func append(_ msgs: [Message]) {
-        let models = messagesToMerge(msgs)
+        let merged = messagesToMerge(msgs)
             .sorted(by: { $0.date < $1.date })
-            .map(model(for:))
-        guard !models.isEmpty else { return }
-        layoutBatch(models)
+        guard !merged.isEmpty else { return }
         let start = storage.count
+        let models = makeModels(
+            from: merged,
+            previousBoundary: storage.last?.msg
+        )
         storage.append(contentsOf: models)
         rebuildIndexMap()
-        layoutAround(start)
+        if start > 0 { layout(at: start - 1) }
     }
 
     func retainOldest(_ limit: Int) {
         guard limit >= 0, storage.count > limit else { return }
         storage.removeSubrange(limit ..< storage.count)
         rebuildIndexMap()
-        if let lastIndex = storage.indices.last { layoutAround(lastIndex) }
+        if let lastIndex = storage.indices.last { layout(at: lastIndex) }
     }
 
     func retainNewest(_ limit: Int) {
@@ -176,12 +197,14 @@ extension Messages {
         let removeCount = storage.count - limit
         storage.removeSubrange(0 ..< removeCount)
         rebuildIndexMap()
-        if !storage.isEmpty { layoutAround(0) }
+        if !storage.isEmpty { layout(at: 0) }
     }
 }
 
 extension Messages {
-    func model(for msg: Message) -> MsgCellViewModel {
+    func model(for msg: Message, previous: Message? = nil, next: Message? = nil)
+        -> MsgCellViewModel
+    {
         if let cached = modelCache.get(msg.uid) { return cached }
         let attributedText: AttributedString? = {
             guard let text = msg.text else { return nil }
@@ -189,17 +212,21 @@ extension Messages {
                 ? markdownFormatter.richText(for: text)
                 : markdownFormatter.markDownText(for: text)
         }()
+        let style = bubbleFactory.style(
+            for: msg,
+            previous: previous,
+            next: next
+        )
         let state = MsgCellViewModel.State(
             msg: msg,
-            attributedText: attributedText
+            attributedText: attributedText,
+            layout: style
         )
         let model = MsgCellViewModel(state)
-        modelCache.set(model, for: msg.uid, ttl: 300)
+        modelCache.set(msg.uid, value: model)
         return model
     }
-}
 
-extension Messages {
     private func uniqueMessages(in msgs: [Message]) -> [Message] {
         var seen = Set<String>()
         var result = [Message]()
@@ -227,26 +254,26 @@ extension Messages {
         return result
     }
 
-    private func layoutBatch(_ models: [MsgCellViewModel]) {
-        guard !models.isEmpty else { return }
-        for i in models.indices {
-            let model = models[i]
-            let prev = i > 0 ? models[i - 1].msg : nil
-            let next = i + 1 < models.count ? models[i + 1].msg : nil
-            let style = bubbleFactory.style(
-                for: model.msg,
-                previous: prev,
-                next: next
-            )
-            model.update(layout: style)
+    private func makeModels(
+        from msgs: [Message],
+        previousBoundary: Message? = nil,
+        nextBoundary: Message? = nil
+    ) -> [MsgCellViewModel] {
+        msgs.indices.map { index in
+            let previous = index > 0 ? msgs[index - 1] : previousBoundary
+            let next = index + 1 < msgs.count ? msgs[index + 1] : nextBoundary
+            return model(for: msgs[index], previous: previous, next: next)
         }
     }
 
-    private func layoutAround(_ index: Int) {
-        guard !storage.isEmpty else { return }
-        let lower = max(0, index - 1)
-        let upper = min(storage.count - 1, index + 1)
-        for i in lower ... upper { layout(at: i) }
+    private func relayoutNeighbors(aroundInsertionAt index: Int) {
+        if index > 0 { layout(at: index - 1) }
+        if index + 1 < storage.count { layout(at: index + 1) }
+    }
+
+    private func relayoutNeighbors(aroundRemovalAt index: Int) {
+        if index > 0 { layout(at: index - 1) }
+        if index < storage.count { layout(at: index) }
     }
 
     private func layout(at index: Int) {
@@ -285,48 +312,5 @@ extension Messages {
     private func precedes(_ lhs: Message, _ rhs: Message) -> Bool {
         if lhs.date != rhs.date { return lhs.date < rhs.date }
         return lhs.uid < rhs.uid
-    }
-}
-
-extension Messages {
-    func shouldPaginate(at edge: VerticalEdge) -> Bool {
-        switch edge {
-        case .top:
-            guard let id = pagination.firstMsgID else { return false }
-            return storage.contains(where: { $0.msg.uid == id }) == false
-        case .bottom:
-            guard let id = pagination.lastMsgID else { return false }
-            return storage.contains(where: { $0.msg.uid == id }) == false
-        }
-    }
-
-    func isScrolled(at edge: VerticalEdge) -> Bool {
-        switch edge {
-        case .top:
-            guard let id = first?.id else { return false }
-            return isVisible(id)
-        case .bottom:
-            guard let id = last?.id else { return false }
-            return isVisible(id)
-        }
-    }
-
-    func lasMsg() async throws -> Message? {
-        guard let uid = pagination.lastMsgID else { return nil }
-        return try await Store.shared.msgStore?.fetch(uid: uid)
-    }
-
-    func updatePagination() {
-        Task {
-            pagination.lastMsgID = try await MsgRepo.lastMsg(
-                conID: pagination.conID
-            )?.uid
-            pagination.firstMsgID = try await MsgRepo.firstMsg(
-                conID: pagination.conID
-            )?.uid
-            pagination.totalMsgsCount = try await MsgRepo.totalMsgsCount(
-                conID: pagination.conID
-            )
-        }
     }
 }

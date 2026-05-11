@@ -102,6 +102,9 @@ public extension Message {
         isSender ? .outgoing : .incoming
     }
     var date: Date { serverTime.date }
+    var deliveryStatus: DeliveryStatus? {
+        isSender ? outgoingStatus?.aggregateStatus : incomingStatus
+    }
 }
 
 public extension Message {
