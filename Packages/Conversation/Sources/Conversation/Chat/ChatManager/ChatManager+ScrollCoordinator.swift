@@ -23,7 +23,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                         scrollController.updateStateUpdate(to: .didEndUpdates)
                         return
                     }
-                    let query = ServerTime(message.date).value
+                    let query = message.date
                     let msgs = try await datasource.previous(before: query, conID: message.conID )
                     models.prepend(msgs)
                     coordinator.updateStateUpdate(to: .dataUpdate(update) )
@@ -34,7 +34,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                         scrollController.updateStateUpdate(to: .didEndUpdates)
                         return
                     }
-                    let query = ServerTime(message.date).value
+                    let query = message.date
                     let msgs = try await datasource.more(after: query, conID: message.conID )
                     models.append(msgs)
                     coordinator.updateStateUpdate(to: .dataUpdate(update) )
@@ -56,6 +56,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                 models.insert(msg: msg)
                 coordinator.updateStateUpdate(to: .dataUpdate(.append(msg: msg)))
                 layoutIfNeeded()
+                coordinator.performScroll(to: .id(msg.uid, anchor: .bottom, .animated(.interactiveSpring)))
             case let .resetting(msg):
                 try await scrollTo(msg: msg)
             }
@@ -63,7 +64,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
     }
     
     func scrollCoordinator(_: ScrollCoordinator, shouldPaginateAt edge: VerticalEdge ) -> Bool {
-        models.canPaginate(at: edge)
+        models.shouldPaginate(at: edge)
     }
 
     func scrollCoordinatorShouldRemove(_: ScrollCoordinator) -> Bool {
@@ -75,7 +76,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
     ) {
         let item: AccessoryBarItem? = models.isAbsoluteScrolled(at: .bottom) ? nil : .scrollDownButton
         presentation.send(.bottomAccessory(item))
-        if let dateString = models.getCurrentVisibleDateString() {
+        if let dateString = models.firstVisibleDateString() {
             presentation.send(.date(dateString))
         }
     }
@@ -88,7 +89,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
 extension ChatManager {
     func scrollTo(msg: Message) async throws {
         scrollController.updateStateUpdate(to: .willBeginUpdates)
-        let query = ServerTime(msg.date).value
+        let query = msg.date
         let msgs = try await datasource.msg(from: query, conID: msg.conID)
         models.set(msgs: msgs)
         scrollController.updateStateUpdate(to: .dataUpdate(.resetting(msg: msg)))

@@ -28,7 +28,10 @@ struct ConversationScrollView: View {
                     screenSize: UIApplication.shared.screenSize()
                 )
             ) {
-                ForEach(manager.models.storage) { model in
+                if manager.models.shouldShowHeader {
+                    HeaderProfileView(conversation: manager.state.conversation)
+                }
+                ForEach(manager.models.wrappedValue) { model in
                     MsgCell(viewModel: model)
                 }
             }

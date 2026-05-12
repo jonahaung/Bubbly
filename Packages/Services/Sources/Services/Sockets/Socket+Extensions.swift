@@ -57,7 +57,7 @@ private extension Socket {
                     refetch: false,
                 )
                 properties.seenMembers.removeAll(where: { $0.uid == payload.recipientReceipt.userID })
-                properties.seenMembers.append(.init(uid: payload.recipientReceipt.userID, msgId: payload.msgID, date: payload.recipientReceipt.date.value))
+                properties.seenMembers.append(.init(uid: payload.recipientReceipt.userID, msgId: payload.msgID, date: payload.recipientReceipt.date))
                 try await Store.shared
                     .conversationPropertiesStore?
                     .updateAndSave(uid: payload.conID) { model in
@@ -68,7 +68,7 @@ private extension Socket {
                 model.outgoingStatus?.updatingReceipt(memberID: payload.recipientReceipt.userID, state: payload.recipientReceipt.status)
             }
             
-            let msgs = try await MsgRepo.outgoingUnreadMsgs(conID: payload.conID).filter { $0.date < payload.recipientReceipt.date.date }
+            let msgs = try await MsgRepo.outgoingUnreadMsgs(conID: payload.conID).filter { $0.date < payload.recipientReceipt.date }
             AsyncOrderedStream.streamOrdered(inputs: msgs) { [weak self] msg in
                 guard let self else { return }
                 var msg = msg

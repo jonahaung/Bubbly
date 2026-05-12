@@ -24,14 +24,10 @@ extension ChatManager: ChatDataReceiverDelegate {
     }
 
     func chatDataReceiver(didInsert msg: Message) {
-        if models.contains(withID: msg.uid) {
-            models.update(msg: msg)
-            return
-        }
         switch true {
         case models.isAbsoluteScrolled(at: .bottom):
             scrollController.send(.begin(.append(msg: msg)))
-        case models.canPaginate(at: .bottom):
+        case models.shouldPaginate(at: .bottom):
             ToastPresenter.shared.dismiss()
             let toast = Toast(
                 node: Text(msg.displayText).opaqueView(),
@@ -45,8 +41,7 @@ extension ChatManager: ChatDataReceiverDelegate {
                 }
             }
             ToastPresenter.show(toast)
-        default:
-            
+        case !models.shouldPaginate(at: .bottom):
             ToastPresenter.shared.dismiss()
             let toast = Toast(
                 node: Text(msg.displayText).opaqueView(),
@@ -59,6 +54,8 @@ extension ChatManager: ChatDataReceiverDelegate {
             ToastPresenter.show(toast)
             models.insert(msg: msg)
             layoutIfNeeded()
+        default:
+            break
         }
     }
 
@@ -83,7 +80,7 @@ extension ChatManager: ChatDataReceiverDelegate {
     ) async throws {
         try await models.refreshMsg(uid: payload.msgID)
         try await reloadConversation(refetch: false)
-        let models = models.storage.filter { model in
+        let models = models.wrappedValue.filter { model in
             model.state.isSender && model.state.outgoingStatus?.aggregateStatus ?? .initial < .read
         }
         try await self.models.refreshMsgs(uids: models.map(\.id))

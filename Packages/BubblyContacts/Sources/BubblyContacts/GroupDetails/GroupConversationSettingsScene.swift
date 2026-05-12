@@ -66,7 +66,7 @@ public struct GroupConversationSettingsScene: View {
             Section {
                 LabeledContent(
                     "Created",
-                    value: ServerTime(viewModel.group.createdDate).date,
+                    value: viewModel.group.createdDate,
                     format: .dateTime,
                 )
                 if let admin: (any ContactRepresentable) = viewModel.group

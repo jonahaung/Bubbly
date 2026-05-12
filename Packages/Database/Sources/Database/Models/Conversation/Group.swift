@@ -8,7 +8,7 @@ import Foundation
 public struct Group: Codable, Sendable, Hashable, UIdentifiable {
     public var uid: String
     public var name: String
-    public var createdDate: String
+    public var createdDate: Date
     public var photoURL: String?
     public var members: [String]
     public var createdBy: String
@@ -16,14 +16,14 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
     public init(
         uid: String,
         name: String,
-        createdDate: ServerTime,
+        createdDate: Date,
         photoURL: String?,
         members: [String],
         createdBy: String
     ) {
         self.uid = uid
         self.name = name
-        self.createdDate = createdDate.value
+        self.createdDate = createdDate
         self.photoURL = photoURL
         self.members = members
         self.createdBy = createdBy

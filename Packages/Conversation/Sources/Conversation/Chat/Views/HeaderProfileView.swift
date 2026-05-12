@@ -15,18 +15,19 @@ struct HeaderProfileView: View {
         VStack(alignment: .leading, spacing: Spacing.md) {
             Text(conversation.name)
                 .bold()
-            //			Text(manager.state.properties.preetyPrinted)
-            //				.font(.system(.footnote, design: .rounded))
             Text(conversation.preetyPrinted)
-                .font(.system(.footnote, design: .rounded))
+                .font(.system(.footnote, design: .serif))
         }
-        .lineHeight(.multiple(factor: 1.2))
-        .frame(maxWidth: .infinity, minHeight: UIApplication.shared.screenSize().height / 2)
+        .frame(maxWidth: .infinity, minHeight: UIApplication.shared.screenSize().height)
         .padding(Padding.md)
-        .background(Color.container)
+        .background(.windowBackground)
         .containerShape(RoundedRectangle(cornerRadius: Radius.card))
         .padding(.vertical, Padding.md)
-        .id("header")
+        .id(conversation.uid)
         .equatable(by: conversation.uid)
+        .layoutValue(
+            key: MsgLayoutValueKey.self,
+            value: .init(uid: conversation.uid, recipient: .system, attachmentsCount: 0, headerID: 0)
+        )
     }
 }

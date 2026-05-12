@@ -13,7 +13,7 @@ public final class PGroup {
     @Attribute(.unique)
     public var uid: String
     public var name: String
-    public var createdDate: String
+    public var createdDate: Date
     public var photoURL: String
     public var members: [String]
     public var createdBy: String
@@ -22,7 +22,7 @@ public final class PGroup {
     public init(
         uid: String,
         name: String,
-        createdDate: String,
+        createdDate: Date,
         photoURL: String,
         members: [String],
         createdBy: String,
@@ -87,7 +87,7 @@ extension PGroup: SendableTransformable {
         SendableType(
             uid: uid,
             name: name,
-            createdDate: .init(createdDate),
+            createdDate: createdDate,
             photoURL: photoURL,
             members: members,
             createdBy: createdBy

@@ -21,7 +21,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
     public let senderID: String
     public let conID: String
     public var text: String?
-    public let serverTime: ServerTime
+    public let date: Date
     public var incomingStatus: DeliveryStatus
     public var outgoingStatus: MsgDeliveryState?
     public var attachments: [Attachment]?
@@ -33,7 +33,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         senderID: String,
         conID: String,
         text: String?,
-        serverTime: ServerTime,
+        serverTime: Date,
         incomingStatus: DeliveryStatus,
         outgoingStatus: MsgDeliveryState?,
         attachments: [Attachment]?,
@@ -43,7 +43,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         self.senderID = senderID
         self.conID = conID
         self.text = text
-        self.serverTime = serverTime
+        self.date = serverTime
         self.incomingStatus = incomingStatus
         self.outgoingStatus = outgoingStatus
         self.attachments = attachments
@@ -57,7 +57,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
         senderID: String,
         conID: String,
         text: String?,
-        serverTime: ServerTime,
+        serverTime: Date,
         deliveryStatus: DeliveryStatus,
         recipientIDs: [String] = [],
         attachments: [Attachment]?,
@@ -88,7 +88,7 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
             senderID: rMsg.senderID,
             conID: rMsg.conID,
             text: rMsg.text,
-            serverTime: ServerTime(rMsg.date),
+            serverTime: rMsg.date,
             incomingStatus: rMsg.incomingStatus,
             outgoingStatus: rMsg.outgoingStatus,
             attachments: rMsg.attachments,
@@ -101,7 +101,6 @@ public extension Message {
     var receiptType: MsgRecipient {
         isSender ? .outgoing : .incoming
     }
-    var date: Date { serverTime.date }
     var deliveryStatus: DeliveryStatus? {
         isSender ? outgoingStatus?.aggregateStatus : incomingStatus
     }

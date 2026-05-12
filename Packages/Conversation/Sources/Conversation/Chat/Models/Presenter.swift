@@ -40,6 +40,7 @@ final class Presenter {
 
 extension Presenter {
     func send(_ intent: Intent) {
+        var state = state
         switch intent {
         case let .toast(newValue):
             state.toast = newValue
@@ -56,5 +57,7 @@ extension Presenter {
         case let .typing(newValue):
             state.typingStatus = newValue
         }
+        guard self.state != state else { return }
+        self.state = state
     }
 }

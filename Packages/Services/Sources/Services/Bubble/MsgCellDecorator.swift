@@ -4,7 +4,7 @@ import Core
 import Database
 import Foundation
 
-public struct BubbleFactory: Sendable {
+public struct MsgCellDecorator: Sendable {
     private let minutesForChatMsgGrouping: Int
 
     public init(_ minutesForChatMsgGrouping: Int = Settings.Layout.minutesForChatMsgGrouping) {

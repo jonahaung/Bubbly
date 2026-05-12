@@ -148,7 +148,6 @@ extension ScrollCoordinator {
         _ oldValue: VScrollGeometry,
         _ newValue: VScrollGeometry
     ) {
-        delegate?.layoutIfNeeded()
         guard oldValue.boundsSize.height != newValue.boundsSize.height else {
             return
         }
@@ -198,7 +197,8 @@ extension ScrollCoordinator {
             case .bottom:
                 state.updateState.update(to: .didEndUpdates)
             }
-        case .append: state.updateState.update(to: .didEndUpdates)
+        case .append:
+            state.updateState.update(to: .didEndUpdates)
         case .resetting(let msg):
             state.updateState.update(to: .didEndUpdates)
             Task.detached { [weak self] in

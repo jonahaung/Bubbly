@@ -287,7 +287,7 @@ public enum PMsgPredicates {
 
     public static func msgs(
         conID: String,
-        date: String,
+        date: Date,
         comparison: PredicateExpressions.ComparisonOperator
     ) -> Predicate<PMsg> {
         Predicate<PMsg> {

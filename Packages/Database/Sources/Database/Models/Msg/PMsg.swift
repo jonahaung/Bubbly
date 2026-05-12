@@ -16,7 +16,7 @@ public final class PMsg {
     public var senderID: String
     public var conID: String
     public var text: String?
-    public var date: String
+    public var date: Date
     public var incomingStatus: Int = 0
     public var outgoingStatus: MsgDeliveryState?
     public var deliveryStatusAggregateRaw: Int
@@ -28,7 +28,7 @@ public final class PMsg {
         senderID: String,
         conID: String,
         text: String?,
-        date: String,
+        date: Date,
         incomingStatus: DeliveryStatus = .initial,
         outgoingStatus: MsgDeliveryState?,
         attachments: [Attachment]?,
@@ -84,7 +84,7 @@ extension PMsg: SendableTransformable {
             senderID: snapshot.senderID,
             conID: snapshot.conID,
             text: snapshot.text,
-            date: snapshot.serverTime.value,
+            date: snapshot.date,
             incomingStatus: snapshot.incomingStatus,
             outgoingStatus: snapshot.outgoingStatus,
             attachments: snapshot.attachments,
@@ -98,7 +98,7 @@ extension PMsg: SendableTransformable {
             senderID: senderID,
             conID: conID,
             text: text,
-            serverTime: ServerTime(date),
+            serverTime: date,
             incomingStatus: .init(rawValue: incomingStatus) ?? .initial,
             outgoingStatus: outgoingStatus,
             attachments: attachments,

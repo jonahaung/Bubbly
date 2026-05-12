@@ -21,7 +21,7 @@ public struct MsgDeliveryState: Sendable, Equatable, Hashable, Codable {
         msgID: String,
         recipientIDs: [String],
         initialState: DeliveryStatus,
-        updatedAt: ServerTime = .now
+        updatedAt: Date = .now
     ) {
         self.init(
             msgID: msgID,
@@ -40,7 +40,7 @@ public struct MsgDeliveryState: Sendable, Equatable, Hashable, Codable {
         senderID: String,
         aggregateStatus: DeliveryStatus,
         recipientIDs: [String],
-        updatedAt: ServerTime = .now
+        updatedAt: Date = .now
     ) {
         if aggregateStatus == .sending, recipientIDs.isEmpty {
             self.init(msgID: msgID, receipts: [])
@@ -59,7 +59,7 @@ extension MsgDeliveryState {
     public mutating func updatingReceipt(
         memberID: String,
         state: DeliveryStatus,
-        updatedAt: ServerTime = .now,
+        updatedAt: Date = .now,
         failure: DeliveryFailure? = nil
     ) {
         var receipts = receipts
@@ -87,7 +87,7 @@ extension MsgDeliveryState {
 
     public func updatingAllReceipts(
         to state: DeliveryStatus,
-        updatedAt: ServerTime = .now,
+        updatedAt: Date = .now,
         failure: DeliveryFailure? = nil
     ) -> Self {
         Self(

@@ -33,8 +33,6 @@ extension ScrollReducer {
                         : .insert(edge: .bottom, geometry: newValue)
                 )
             }
-            return paginationState.canAdjustSize
-                ? .begingUpdate(.remove(edge: .top, geometry: newValue)) : nil
         }
         return nil
     }

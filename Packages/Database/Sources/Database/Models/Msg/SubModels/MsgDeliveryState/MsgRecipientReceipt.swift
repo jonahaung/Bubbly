@@ -10,13 +10,13 @@ import Foundation
 public struct MsgRecipientReceipt: Sendable, Equatable, Hashable, Codable {
     public let userID: String
     public var status: DeliveryStatus
-    public let date: ServerTime
+    public let date: Date
     public let failure: DeliveryFailure?
     
     public init(
         memberID: String,
         state: DeliveryStatus,
-        updatedAt: ServerTime,
+        updatedAt: Date,
         failure: DeliveryFailure? = nil
     ) {
         self.userID = memberID

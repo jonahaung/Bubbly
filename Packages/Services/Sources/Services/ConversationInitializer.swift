@@ -8,10 +8,9 @@ import XUI
 public struct PaginationState: Hashable, Sendable {
     public let conID: String
     public let pageSize: Int
-    public let lastMsgID: String?
+    public var lastMsgID: String?
     public let firstMsgID: String?
     public var totalMsgsCount: Int
-    public let canPaginate: Bool
 }
 
 public enum ConversationInitializer {
@@ -50,7 +49,7 @@ public extension ConversationInitializer {
             limit: pageSize * 2,
         )
         let firstMsg = try await MsgRepo.firstMsg(conID: conID)
-        let lastMsg = msgs.last
+        let lastMsg = try await MsgRepo.lastMsg(conID: conID)
         let properties = try await ConversationPropertiesRepo.getOrCreate(
             for: conID,
             refetch: false,
@@ -65,8 +64,7 @@ public extension ConversationInitializer {
                 pageSize: pageSize,
                 lastMsgID: lastMsg?.uid,
                 firstMsgID: firstMsg?.uid,
-                totalMsgsCount: msgsCount,
-                canPaginate: msgsCount > msgs.count,
+                totalMsgsCount: msgsCount
             ),
         )
     }

@@ -261,7 +261,7 @@ private extension MockMessageCreator {
             senderID: senderID,
             conID: conversationID,
             text: text,
-            serverTime: .init(date),
+            serverTime: date,
             deliveryStatus: senderID == currentUserID ? .delivered : .read,
             recipientIDs: senderID == currentUserID
                 ? conversation.members.filter { $0 != currentUserID }

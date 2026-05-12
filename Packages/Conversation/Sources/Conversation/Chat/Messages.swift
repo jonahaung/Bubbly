@@ -11,9 +11,11 @@ import Services
 import Foundation
 
 @MainActor final class Messages: Sendable {
-    private var storage: [MsgCellViewModel] = []
+    
+    var wrappedValue: [MsgCellViewModel] = []
+    
     private var indexMap: [String: Int] = [:]
-    private let bubbleFactory: BubbleFactory = .init()
+    private let cellDecorator: MsgCellDecorator = .init()
     private var modelCache = LRUCache<MsgCellViewModel.ID, MsgCellViewModel>()
     private let markdownFormatter: MarkdownFormatter = .init()
     private let richTextEnabled: Bool
@@ -25,26 +27,38 @@ import Foundation
         richTextEnabled = UserDefaults.group.bool(
             forKey: GroupStorageKey.conversation(.richTextEnabled).value
         )
-        storage = makeModels(from: uniqueMessages(in: msgs))
+        wrappedValue = makeModels(from: uniqueMessages(in: msgs))
         rebuildIndexMap()
     }
-
-    var count: Int { storage.count }
-    var first: MsgCellViewModel? { storage.first }
-    var last: MsgCellViewModel? { storage.last }
-    var isEmpty: Bool { storage.isEmpty }
-    func contains(withID id: String) -> Bool { indexMap[id] != nil }
-    func index(of id: String) -> Int? { indexMap[id] }
-    subscript(position: Int) -> MsgCellViewModel? { storage[safe: position] }
-    func element(withID id: String) -> MsgCellViewModel? {
-        guard let index = indexMap[id] else { return nil }
-        return storage[index]
-    }
-
+    
     deinit { log("deinit") }
 }
 
 extension Messages {
+    
+    var count: Int { wrappedValue.count }
+    
+    var first: MsgCellViewModel? { wrappedValue.first }
+    var last: MsgCellViewModel? { wrappedValue.last }
+    
+    func contains(withID id: String) -> Bool {
+        indexMap[id] != nil
+    }
+    func index(of id: String) -> Int? {
+        indexMap[id]
+    }
+    subscript(position: Int) -> MsgCellViewModel? {
+        guard position >= 0 && position < count else { return nil }
+        return wrappedValue[position]
+    }
+    func element(withID id: String) -> MsgCellViewModel? {
+        guard let index = indexMap[id] else { return nil }
+        return wrappedValue[index]
+    }
+    
+    var shouldShowHeader: Bool {
+        !shouldPaginate(at: .top)
+    }
     var shouldAdjustSize: Bool {
         count > pagination.pageSize * 2
     }
@@ -60,8 +74,7 @@ extension Messages {
         }
     }
 
-    func canPaginate(at edge: VerticalEdge) -> Bool {
-        guard pagination.canPaginate else { return false }
+    func shouldPaginate(at edge: VerticalEdge) -> Bool {
         switch edge {
         case .top:
             return if let firstMsgID = pagination.firstMsgID {
@@ -77,20 +90,21 @@ extension Messages {
     func isAbsoluteScrolled(at edge: VerticalEdge) -> Bool {
         switch edge {
         case .top:
-            isScrolled(at: .top) && canPaginate(at: .top) == false
+            isScrolled(at: .top) && !shouldPaginate(at: .top)
         case .bottom:
-            isScrolled(at: .bottom) && canPaginate(at: .bottom) == false
+            isScrolled(at: .bottom) && !shouldPaginate(at: .bottom)
         }
     }
 }
 
 extension Messages {
+    
     func onScrollTargetVisibilityChange(_ ids: [String]) {
         displayVisibleMsgsIfNeeded(currentVisibleIDS: ids)
     }
 
-    func getCurrentVisibleDateString() -> String? {
-        guard let model = storage.first(where: { $0.isVisible }) else {
+    func firstVisibleDateString() -> String? {
+        guard let id = visibleIDs.first, let model = element(withID: id) else {
             return nil
         }
         return MsgTimeStringFormatter.string(for: model.msg.date)
@@ -130,11 +144,11 @@ extension Messages {
 extension Messages {
     func didChangeSelection(_ selectedMsg: SelectedMsg?, for id: String) {
         guard let index = indexMap[id] else { return }
-        storage[index].update(selectedMsg: selectedMsg)
+        wrappedValue[index].update(selectedMsg: selectedMsg)
     }
 
     func set(msgs: [Message]) {
-        storage = makeModels(from: uniqueMessages(in: msgs))
+        wrappedValue = makeModels(from: uniqueMessages(in: msgs))
         rebuildIndexMap()
     }
 
@@ -144,19 +158,24 @@ extension Messages {
             return
         }
         let index = insertionIndex(for: msg)
-        let previous = index > 0 ? storage[index - 1].msg : nil
-        let next = index < storage.count ? storage[index].msg : nil
+        let previous = index > 0 ? wrappedValue[index - 1].msg : nil
+        let next = index < wrappedValue.count ? wrappedValue[index].msg : nil
         let model = model(for: msg, previous: previous, next: next)
-        storage.insert(model, at: index)
+        wrappedValue.insert(model, at: index)
         rebuildIndexMap()
         relayoutNeighbors(aroundInsertionAt: index)
+        if index == count-1 {
+            pagination.lastMsgID = msg.uid
+        }
     }
 
-    func update(msg: Message) { modelCache.get(msg.uid)?.update(with: msg) }
+    func update(msg: Message) {
+        modelCache.get(msg.uid)?.update(with: msg)
+    }
 
     func remove(msg: Message) {
         guard let index = indexMap[msg.uid] else { return }
-        storage.remove(at: index)
+        wrappedValue.remove(at: index)
         modelCache.remove(msg.uid)
         rebuildIndexMap()
         relayoutNeighbors(aroundRemovalAt: index)
@@ -165,39 +184,39 @@ extension Messages {
     func prepend(_ msgs: [Message]) {
         let merged = messagesToMerge(msgs)
         guard !merged.isEmpty else { return }
-        let models = makeModels(from: merged, nextBoundary: storage.first?.msg)
-        storage.insert(contentsOf: models, at: 0)
+        let models = makeModels(from: merged, nextBoundary: wrappedValue.first?.msg)
+        wrappedValue.insert(contentsOf: models, at: 0)
         rebuildIndexMap()
-        if storage.count > models.count { layout(at: models.count) }
+        if wrappedValue.count > models.count { layout(at: models.count) }
     }
 
     func append(_ msgs: [Message]) {
         let merged = messagesToMerge(msgs)
             .sorted(by: { $0.date < $1.date })
         guard !merged.isEmpty else { return }
-        let start = storage.count
+        let start = wrappedValue.count
         let models = makeModels(
             from: merged,
-            previousBoundary: storage.last?.msg
+            previousBoundary: wrappedValue.last?.msg
         )
-        storage.append(contentsOf: models)
+        wrappedValue.append(contentsOf: models)
         rebuildIndexMap()
         if start > 0 { layout(at: start - 1) }
     }
 
     func retainOldest(_ limit: Int) {
-        guard limit >= 0, storage.count > limit else { return }
-        storage.removeSubrange(limit ..< storage.count)
+        guard limit >= 0, wrappedValue.count > limit else { return }
+        wrappedValue.removeSubrange(limit ..< wrappedValue.count)
         rebuildIndexMap()
-        if let lastIndex = storage.indices.last { layout(at: lastIndex) }
+        if let lastIndex = wrappedValue.indices.last { layout(at: lastIndex) }
     }
 
     func retainNewest(_ limit: Int) {
-        guard limit >= 0, storage.count > limit else { return }
-        let removeCount = storage.count - limit
-        storage.removeSubrange(0 ..< removeCount)
+        guard limit >= 0, wrappedValue.count > limit else { return }
+        let removeCount = wrappedValue.count - limit
+        wrappedValue.removeSubrange(0 ..< removeCount)
         rebuildIndexMap()
-        if !storage.isEmpty { layout(at: 0) }
+        if !wrappedValue.isEmpty { layout(at: 0) }
     }
 }
 
@@ -212,7 +231,7 @@ extension Messages {
                 ? markdownFormatter.richText(for: text)
                 : markdownFormatter.markDownText(for: text)
         }()
-        let style = bubbleFactory.style(
+        let style = cellDecorator.style(
             for: msg,
             previous: previous,
             next: next
@@ -223,7 +242,7 @@ extension Messages {
             layout: style
         )
         let model = MsgCellViewModel(state)
-        modelCache.set(msg.uid, value: model)
+        modelCache.set(model, for: msg.uid)
         return model
     }
 
@@ -268,19 +287,19 @@ extension Messages {
 
     private func relayoutNeighbors(aroundInsertionAt index: Int) {
         if index > 0 { layout(at: index - 1) }
-        if index + 1 < storage.count { layout(at: index + 1) }
+        if index + 1 < wrappedValue.count { layout(at: index + 1) }
     }
 
     private func relayoutNeighbors(aroundRemovalAt index: Int) {
         if index > 0 { layout(at: index - 1) }
-        if index < storage.count { layout(at: index) }
+        if index < wrappedValue.count { layout(at: index) }
     }
 
     private func layout(at index: Int) {
-        let model = storage[index]
-        let prev = index > 0 ? storage[index - 1].msg : nil
-        let next = index + 1 < storage.count ? storage[index + 1].msg : nil
-        let style = bubbleFactory.style(
+        let model = wrappedValue[index]
+        let prev = index > 0 ? wrappedValue[index - 1].msg : nil
+        let next = index + 1 < wrappedValue.count ? wrappedValue[index + 1].msg : nil
+        let style = cellDecorator.style(
             for: model.msg,
             previous: prev,
             next: next
@@ -292,15 +311,15 @@ extension Messages {
 extension Messages {
     private func rebuildIndexMap() {
         indexMap.removeAll(keepingCapacity: true)
-        for (i, model) in storage.enumerated() { indexMap[model.id] = i }
+        for (i, model) in wrappedValue.enumerated() { indexMap[model.id] = i }
     }
 
     private func insertionIndex(for msg: Message) -> Int {
         var low = 0
-        var high = storage.count
+        var high = wrappedValue.count
         while low < high {
             let mid = (low + high) / 2
-            if precedes(storage[mid].msg, msg) {
+            if precedes(wrappedValue[mid].msg, msg) {
                 low = mid + 1
             } else {
                 high = mid

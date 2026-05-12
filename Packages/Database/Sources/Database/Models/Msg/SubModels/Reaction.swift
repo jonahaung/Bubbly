@@ -14,9 +14,9 @@ public struct Reaction: Codable, Sendable, Hashable, Equatable, Identifiable {
 
     public let rawValue: String
     public let senderID: String
-    public let date: ServerTime
+    public let date: Date
 
-    public init(rawValue: String, senderID: String, date: ServerTime) {
+    public init(rawValue: String, senderID: String, date: Date) {
         self.rawValue = rawValue
         self.senderID = senderID
         self.date = date

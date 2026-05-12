@@ -10,7 +10,7 @@ public struct RMsg: Codable, Sendable, Hashable {
     public let uid: String
     public let conID: String
     public let senderID: String
-    public let date: String
+    public let date: Date
     public let text: String?
     public var incomingStatus: DeliveryStatus
     public var outgoingStatus: MsgDeliveryState?
@@ -21,7 +21,7 @@ public struct RMsg: Codable, Sendable, Hashable {
         uid: String,
         conID: String,
         senderID: String,
-        date: String,
+        date: Date,
         text: String?,
         incomingStatus: DeliveryStatus,
         outgoingStatus: MsgDeliveryState?,
@@ -44,7 +44,7 @@ public struct RMsg: Codable, Sendable, Hashable {
             uid: msg.uid,
             conID: msg.conID,
             senderID: msg.senderID,
-            date: msg.serverTime.value,
+            date: msg.date,
             text: msg.text,
             incomingStatus: msg.incomingStatus,
             outgoingStatus: msg.outgoingStatus,

@@ -46,7 +46,7 @@ final class CreateGroupViewModel {
         let group = Group(
             uid: groupID,
             name: groupName,
-            createdDate: .init(.now),
+            createdDate: .now,
             photoURL: url.absoluteString,
             members: memberIDs,
             createdBy: currentUserID,
