@@ -20,7 +20,7 @@ struct MsgsScrollViewLayout: Layout {
 }
 
 extension MsgsScrollViewLayout {
-    func makeCache(subviews: Subviews) -> Cache { buildCache(subviews: subviews) }
+    func makeCache(subviews: Subviews) -> Cache { buildCache(subviews: subviews, signature: makeSignature(subviews: subviews)) }
     
     func sizeThatFits(
         proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache
@@ -33,6 +33,7 @@ extension MsgsScrollViewLayout {
     func placeSubviews(
         in rect: CGRect, proposal _: ProposedViewSize, subviews: Subviews, cache: inout Cache
     ) {
+        guard subviews.count == cache.layouts.count else { return }
         for i in subviews.indices {
             let layout = cache.layouts[i]
             subviews[i].place(
@@ -41,47 +42,23 @@ extension MsgsScrollViewLayout {
         }
     }
     func updateCache(_ cache: inout Cache, subviews: Subviews) {
-        cache = buildCache(subviews: subviews)
+        let signature = makeSignature(subviews: subviews)
+        guard cache.signatureHash != signature else {
+            return }
+        let newCache = buildCache(subviews: subviews, signature: signature)
+        guard cache != newCache else {
+            return
+        }
+        cache = newCache
     }
-    
-//    func explicitAlignment(of guide: HorizontalAlignment, in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGFloat? {
-//        guard !subviews.isEmpty else { return nil }
-//        if cache.layouts.count != subviews.count { cache = buildCache(subviews: subviews) }
-//        guard cache.layouts.count == subviews.count else { return nil }
-//
-//        switch guide {
-//        case .leading:
-//            let minX = cache.layouts.map { $0.position.x }.min()
-//            return minX
-//        case .trailing:
-//            let maxX = cache.layouts.map { $0.position.x }.max()
-//            return maxX
-//        default:
-//            return nil
-//        }
-//    }
-//    func explicitAlignment(of guide: VerticalAlignment, in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout Cache) -> CGFloat? {
-//        guard !subviews.isEmpty else { return nil }
-//        if cache.layouts.count != subviews.count { cache = buildCache(subviews: subviews) }
-//        guard cache.layouts.count == subviews.count else { return nil }
-//
-//        switch guide {
-//        case .top:
-//            let minY = cache.layouts.map { $0.position.y }.min()
-//            return minY
-//        case .bottom:
-//            let maxY = cache.layouts.map { $0.position.y }.max()
-//            return maxY
-//        default:
-//            return nil
-//        }
-//    }
+    func spacing(subviews: Subviews, cache: inout Cache) -> ViewSpacing {
+        .init()
+    }
 }
 
 // MARK: - Cache Builder
 extension MsgsScrollViewLayout {
-    private func buildCache(subviews: Subviews) -> Cache {
-        let signature = makeSignature(subviews: subviews)
+    private func buildCache(subviews: Subviews, signature: Int) -> Cache {
         if let cached = cacheStore.cache(signature: signature) { return cached }
         let (layouts, totalHeight) = computeLayouts(subviews: subviews)
         let cache = Cache(totalHeight: totalHeight, layouts: layouts, signatureHash: signature )
@@ -96,10 +73,11 @@ extension MsgsScrollViewLayout {
         var layouts = [Cache.CellLayout]()
         layouts.reserveCapacity(subviews.count)
         var y = config.contentInsets.top
+        let minX = config.screenBounds.minX
         for subview in subviews {
             let value = subview[MsgLayoutValueKey.self]
             let size = size(for: subview, value: value)
-            let x = xPosition(for: value.recipient)
+            let x = xPosition(for: value.recipient) + minX
             layouts.append(.init(id: value.uid, size: size, position: .init(x: x, y: y), anchor: value.anchor) )
             y += size.height + config.spacing
         }

@@ -7,34 +7,17 @@ import Database
 import SwiftUI
 import XUI
 
+enum ScrollDirection: Sendable, Hashable {
+    case up
+    case down
+    case none
+}
+
 extension ScrollCoordinator {
-
-    struct PaginationState: Sendable, Hashable {
-        var canLoadOlder: Bool
-        var canLoadNewer: Bool
-        var canAdjustSize: Bool
-        init(
-            canLoadOlder: Bool = false,
-            canLoadNewer: Bool = false,
-            canAdjustSize: Bool = false
-        ) {
-            self.canLoadOlder = canLoadOlder
-            self.canLoadNewer = canLoadNewer
-            self.canAdjustSize = canAdjustSize
-        }
-    }
-
-    enum ScrollDirection: Sendable, Hashable {
-        case up
-        case down
-        case none
-    }
-
     struct State: Sendable, Hashable {
         var isFirstResponder = false
         var updateState: ScrollViewUpdate = .initial
-        var phase: ScrollPhase = .idle
-        var scrollDirection: ScrollDirection = .none
+        var phase: ScrollPhase = .tracking
     }
 
     enum Intent {
@@ -51,25 +34,21 @@ extension ScrollCoordinator {
     }
 
     enum DataUpdate: Sendable, Hashable {
-        case insert(edge: VerticalEdge, geometry: VScrollGeometry)
-        case remove(edge: VerticalEdge, geometry: VScrollGeometry)
+        case insert(edge: VerticalEdge)
+        case remove(edge: VerticalEdge)
         case append(msg: Message)
-        case resetting(msg: Message)
+        case focus(msg: Message)
     }
 
     enum ScrollViewUpdate: Sendable, Hashable {
         case initial
         case didEndUpdates
-        case willEndUpdates
         case willBeginUpdates
         case dataUpdate(DataUpdate)
 
         var hasViewLoaded: Bool { self != .initial }
         var isUpdating: Bool { self != .didEndUpdates }
         var isNotUpdating: Bool { !isUpdating }
-        var canReduceUpdates: Bool {
-            isUpdating && self != .didEndUpdates && self != .willEndUpdates
-        }
 
         mutating func update(to newValue: Self) {
             guard self != newValue else { return }

@@ -25,7 +25,7 @@ struct ConversationScrollView: View {
                         bottom: 0,
                         trailing: Padding.sm
                     ),
-                    screenSize: UIApplication.shared.screenSize()
+                    screenBounds: UIApplication.shared.screenBounds()
                 )
             ) {
                 if manager.models.shouldShowHeader {
@@ -41,9 +41,10 @@ struct ConversationScrollView: View {
         .equatable(by: manager.state.reloadID)
         .scrollEdgeEffectHidden(true, for: .all)
         .scrollDismissesKeyboard(.never)
-        .safeAreaPadding(
+        .contentMargins(
             .bottom,
-            ChatLayoutConstants.bottomBarHeight
+            ChatLayoutConstants.bottomBarHeight,
+            for: .scrollContent
         )
         .onScrollPhaseChange { oldPhase, newPhase, context in
             manager.send(
@@ -64,11 +65,9 @@ struct ConversationScrollView: View {
             manager.onScrollTargetVisibilityChange(ids)
         }
         .defaultScrollAnchor(.bottom, for: .initialOffset)
-        .scrollIndicatorsFlash(trigger: manager.state.reloadID)
         .scrollClipDisabled()
-        .scrollBounceBehavior(.basedOnSize)
         .defaultScrollAnchor(
-            manager.models.isAbsoluteScrolled(at: .bottom) ? .bottom : nil,
+            manager.presentation.state.bottomAccessory == .scrollDownButton ? nil : .bottom,
             for: .sizeChanges
         )
         .scrollPosition(

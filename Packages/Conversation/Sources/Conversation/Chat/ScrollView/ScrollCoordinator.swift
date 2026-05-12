@@ -12,13 +12,17 @@ import SwiftUI
 import XUI
 
 @MainActor @Observable final class ScrollCoordinator {
+    @ObservationIgnored
     weak var delegate: ScrollCoordinatorDelegate?
     @ObservationIgnored
     private let reducer: ScrollReducer = .init()
     @ObservationIgnored
-    private let debouncer: Debouncer = .init(delay: 0.3)
+    private let debouncer: Debouncer = .init(delay: 0.5)
     @ObservationIgnored
     private var state: State = .init()
+    @ObservationIgnored
+    private var scrollDirection: ScrollDirection = .none
+    
     private var scrollPosition: ScrollPosition = .init()
     @ObservationIgnored
     var scrollPositionBindable: Binding<ScrollPosition> {
@@ -27,6 +31,8 @@ import XUI
 }
 
 extension ScrollCoordinator {
+    var isFirstResponder: Bool { state.isFirstResponder }
+    var updateState: ScrollViewUpdate { state.updateState }
     func updateStateUpdate(to value: ScrollViewUpdate) {
         state.updateState.update(to: value)
     }
@@ -36,7 +42,6 @@ extension ScrollCoordinator {
     func send(_ intent: Intent) {
         switch intent {
         case .onScrollGeometryChange(let oldValue, let newValue):
-            let state = state
             guard state.updateState.hasViewLoaded else {
                 handleHasViewLoaded(newValue)
                 return
@@ -46,7 +51,6 @@ extension ScrollCoordinator {
                 return
             }
             if state.updateState.isUpdating {
-                guard state.updateState.canReduceUpdates else { return }
                 if let effect = reducer.handleUpdating(
                     state: state.updateState,
                     oldValue: oldValue,
@@ -60,68 +64,56 @@ extension ScrollCoordinator {
                 }
             }
         case .onScrollPhaseChange(let oldValue, let newValue, let context):
-            let geometry = VScrollGeometry(context.geometry)
-            var state = self.state
+            guard oldValue != newValue else { return }
+            
             state.phase = newValue
+           
+            let geometry = VScrollGeometry(context.geometry)
             switch newValue {
             case .idle:
                 debouncer.debounce { [weak self] in
                     guard let self else { return }
                     Task { @MainActor [weak self] in
                         guard let self else { return }
-                        self.finalizeScrollUpdates()
+                        self.finalizeScrollUpdates(geometry: geometry)
                     }
                 }
-                if oldValue != .interacting {
-                    paginateIfNeeded(geometry, state: state)
-                }
-                state.scrollDirection = .none
             case .interacting:
                 if oldValue == .decelerating {
-                    paginateIfNeeded(geometry, state: state)
+                    paginateIfNeeded(geometry, state: state, direction: scrollDirection)
                 }
             case .decelerating:
-                let velocity = context.velocity?.dy ?? 0
-                if velocity != 0 {
-                    let scrollDirection: ScrollDirection =
-                        velocity <= 0 ? .down : .up
-                    state.scrollDirection = scrollDirection
-                }
-                if oldValue == .interacting {
-                    paginateIfNeeded(geometry, state: state)
+                if let dy = context.velocity?.dy, abs(dy) != 0 {
+                    let direction = dy < 0 ? ScrollDirection.down : .up
+                    if scrollDirection != direction {
+                        scrollDirection = direction
+                    }
+                    if oldValue == .interacting {
+                        paginateIfNeeded(geometry, state: state, direction: direction)
+                    }
                 }
             default:
                 break
             }
-            self.state = state
         case .begin(let update):
             begin(updates: update)
         }
     }
 
-    private func paginateIfNeeded(_ geometry: VScrollGeometry, state: State) {
+    private func paginateIfNeeded(_ geometry: VScrollGeometry, state: State, direction: ScrollDirection) {
         if state.updateState.isNotUpdating {
             if let effect = reducer.reduceGeometry(
                 newValue: geometry,
                 paginationState: paginatedState(),
-                phase: state.phase
+                phase: state.phase,
+                direction: direction
             ) {
                 handleEffect(effect)
             }
         }
     }
-    private func paginatedState() -> PaginationState {
-        func shouldPaginate(_ edge: VerticalEdge) -> Bool {
-            delegate?.scrollCoordinator(self, shouldPaginateAt: edge) == true
-        }
-        let shouldAdjustWindow =
-            delegate?.scrollCoordinatorShouldRemove(self) == true
-        let newValue = PaginationState(
-            canLoadOlder: shouldPaginate(.top),
-            canLoadNewer: shouldPaginate(.bottom),
-            canAdjustSize: shouldAdjustWindow
-        )
-        return newValue
+    private func paginatedState() -> PaginatableState? {
+        delegate?.getPaginationState()
     }
 }
 
@@ -137,9 +129,7 @@ extension ScrollCoordinator {
     ) {
         if state.phase == .interacting {
             if newValue.offsetY < oldValue.offsetY {
-                if oldValue.offsetY - newValue.offsetY > 20 {
-                    UIApplication.shared.endEditing()
-                }
+                UIApplication.shared.endEditing()
             }
         }
     }
@@ -151,12 +141,12 @@ extension ScrollCoordinator {
         guard oldValue.boundsSize.height != newValue.boundsSize.height else {
             return
         }
-        let isFirstResponder = newValue.boundsHeight < oldValue.boundsHeight
+        delegate?.layoutIfNeeded()
+        let isFirstResponder = newValue.boundsHeight < oldValue.boundsHeight && !UIApplication.shared.isFirstResponder
         guard state.isFirstResponder != isFirstResponder else { return }
         state.isFirstResponder = isFirstResponder
-        finalizeScrollUpdates()
-        let diff = oldValue.boundsHeight - newValue.boundsHeight
-        if oldValue.scrolledPosition != .atBottom {
+        if isFirstResponder, oldValue.scrolledPosition != .atBottom {
+            let diff = oldValue.boundsHeight - newValue.boundsHeight
             let y = newValue.offsetY + diff
             scrollPosition.scrollTo(y: y)
         }
@@ -164,7 +154,8 @@ extension ScrollCoordinator {
 
     private func handleEffect(_ effect: ScrollReducer.Effect) {
         switch effect {
-        case .begingUpdate(let updates): begin(updates: updates)
+        case .begingUpdate(let updates):
+            begin(updates: updates)
         case .endUpdate(let updates, let item):
             if let item { performScroll(to: item) }
             Task.detached { [weak self] in
@@ -175,31 +166,26 @@ extension ScrollCoordinator {
     }
 
     private func begin(updates: DataUpdate) {
+        state.updateState.update(to: .willBeginUpdates)
         delegate?.scrollCoordinator(self, begin: updates)
     }
 
     private func end(updates: DataUpdate) {
         switch updates {
-        case .insert(let edge, let geometry):
+        case .remove, .append:
+            state.updateState.update(to: .didEndUpdates)
+        case .insert(let edge):
             switch edge {
             case .top:
                 if state.phase.isScrolling {
-                    begin(updates: .remove(edge: .bottom, geometry: geometry))
+                    begin(updates: .remove(edge: .bottom))
                 } else {
                     state.updateState.update(to: .didEndUpdates)
                 }
             case .bottom:
                 state.updateState.update(to: .didEndUpdates)
             }
-        case .remove(let edge, _):
-            switch edge {
-            case .top: state.updateState.update(to: .didEndUpdates)
-            case .bottom:
-                state.updateState.update(to: .didEndUpdates)
-            }
-        case .append:
-            state.updateState.update(to: .didEndUpdates)
-        case .resetting(let msg):
+        case .focus(let msg):
             state.updateState.update(to: .didEndUpdates)
             Task.detached { [weak self] in
                 guard let self else { return }
@@ -208,8 +194,11 @@ extension ScrollCoordinator {
         }
     }
 
-    private func finalizeScrollUpdates() {
+    private func finalizeScrollUpdates(geometry: VScrollGeometry?) {
         delegate?.scrollCoordinator(self, finalizeScrollViewUpdatesWith: state)
+        if let geometry {
+            paginateIfNeeded(geometry, state: state, direction: .none)
+        }
     }
 }
 
@@ -221,14 +210,14 @@ extension ScrollCoordinator {
             withTransaction(
                 .withAnimation(animation) { [weak self] in
                     guard let self else { return }
-                    scrollPosition = .init()
+                    scrollPosition.isPositionedByUser = true
                 }
             ) { scroll(to: newValue.position) }
         case .notAnimated:
             withTransaction(
                 .withoutAnimation { [weak self] in
                     guard let self else { return }
-                    scrollPosition = .init()
+                    scrollPosition.isPositionedByUser = true
                 }
             ) { scroll(to: newValue.position) }
         case .scroll:
@@ -236,14 +225,14 @@ extension ScrollCoordinator {
                 withTransaction(
                     .scrollView { [weak self] in
                         guard let self else { return }
-                        scrollPosition = .init()
+                        scrollPosition.isPositionedByUser = true
                     }
                 ) { scroll(to: newValue.position) }
             } else {
                 withTransaction(
                     .withoutAnimation { [weak self] in
                         guard let self else { return }
-                        scrollPosition = .init()
+                        scrollPosition.isPositionedByUser = true
                     }
                 ) { scroll(to: newValue.position) }
             }

@@ -6,10 +6,8 @@
 import SwiftUI
 import Database
 
-// MARK: - MsgCellAction
-
 struct MsgCellAction {
-    enum ActionType {
+    enum ActionType: Sendable {
         case onTapMsg(String)
         case onMarkMsg(Message)
         case onTapAvatar(String)
@@ -19,7 +17,7 @@ struct MsgCellAction {
         case performSend(AnyMsgData)
     }
 
-    let action: (ActionType) -> Void
+    let action: (sending ActionType) -> Void
     func callAsFunction(_ type: ActionType) {
         action(type)
     }

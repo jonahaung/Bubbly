@@ -10,7 +10,7 @@ import Database
 
 // MARK: - ChatTheme
 
-public struct ChatTheme: Equatable, EmptyRepresentable {
+public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
 
     public init(_ theme: Database.ConversationTheme) {
         backgroundColor = Color.background

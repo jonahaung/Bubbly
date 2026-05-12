@@ -21,7 +21,7 @@ final class Presenter {
 
     enum Intent {
         case toast(_ newValue: ChatToastItem?)
-        case date(_ newValue: String)
+        case date(_ newValue: String?)
         case overlayItem(_ newValue: OverlayMenuItem?)
         case bottomAccessory(_ newValue: AccessoryBarItem?)
         case typing(_ newValue: AnyMsgData.TypingStatusPayload?)

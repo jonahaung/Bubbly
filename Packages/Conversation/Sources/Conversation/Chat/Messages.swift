@@ -20,7 +20,9 @@ import Foundation
     private let markdownFormatter: MarkdownFormatter = .init()
     private let richTextEnabled: Bool
     private var visibleIDs: [String] = []
+    var paginatableState: PaginatableState?
     var pagination: PaginationState
+    private let debouncer = Debouncer(delay: 0.4, queue: .global())
 
     init(_ msgs: [Message], pagination: PaginationState) {
         self.pagination = pagination
@@ -29,11 +31,17 @@ import Foundation
         )
         wrappedValue = makeModels(from: uniqueMessages(in: msgs))
         rebuildIndexMap()
+        updatePaginatableState()
     }
     
     deinit { log("deinit") }
 }
 
+extension Messages {
+    private func updatePaginatableState() {
+        paginatableState = .init(canLoadOlder: shouldPaginate(at: .top), canLoadNewer: shouldPaginate(at: .bottom), canAdjustSize: shouldAdjustWindow)
+    }
+}
 extension Messages {
     
     var count: Int { wrappedValue.count }
@@ -59,8 +67,8 @@ extension Messages {
     var shouldShowHeader: Bool {
         !shouldPaginate(at: .top)
     }
-    var shouldAdjustSize: Bool {
-        count > pagination.pageSize * 2
+    var shouldAdjustWindow: Bool {
+        count > pagination.pageSize*2
     }
 
     func isScrolled(at edge: VerticalEdge) -> Bool {
@@ -100,7 +108,14 @@ extension Messages {
 extension Messages {
     
     func onScrollTargetVisibilityChange(_ ids: [String]) {
-        displayVisibleMsgsIfNeeded(currentVisibleIDS: ids)
+        debouncer.debounce { [weak self] in
+            guard let self else { return }
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                displayVisibleMsgsIfNeeded(currentVisibleIDS: ids)
+            }
+        }
+       
     }
 
     func firstVisibleDateString() -> String? {
@@ -150,6 +165,7 @@ extension Messages {
     func set(msgs: [Message]) {
         wrappedValue = makeModels(from: uniqueMessages(in: msgs))
         rebuildIndexMap()
+        updatePaginatableState()
     }
 
     func insert(msg: Message) {
@@ -179,6 +195,7 @@ extension Messages {
         modelCache.remove(msg.uid)
         rebuildIndexMap()
         relayoutNeighbors(aroundRemovalAt: index)
+        updatePaginatableState()
     }
 
     func prepend(_ msgs: [Message]) {
@@ -188,6 +205,7 @@ extension Messages {
         wrappedValue.insert(contentsOf: models, at: 0)
         rebuildIndexMap()
         if wrappedValue.count > models.count { layout(at: models.count) }
+        updatePaginatableState()
     }
 
     func append(_ msgs: [Message]) {
@@ -202,6 +220,7 @@ extension Messages {
         wrappedValue.append(contentsOf: models)
         rebuildIndexMap()
         if start > 0 { layout(at: start - 1) }
+        updatePaginatableState()
     }
 
     func retainOldest(_ limit: Int) {
@@ -209,6 +228,7 @@ extension Messages {
         wrappedValue.removeSubrange(limit ..< wrappedValue.count)
         rebuildIndexMap()
         if let lastIndex = wrappedValue.indices.last { layout(at: lastIndex) }
+        updatePaginatableState()
     }
 
     func retainNewest(_ limit: Int) {
@@ -217,6 +237,7 @@ extension Messages {
         wrappedValue.removeSubrange(0 ..< removeCount)
         rebuildIndexMap()
         if !wrappedValue.isEmpty { layout(at: 0) }
+        updatePaginatableState()
     }
 }
 
@@ -247,13 +268,14 @@ extension Messages {
     }
 
     private func uniqueMessages(in msgs: [Message]) -> [Message] {
-        var seen = Set<String>()
-        var result = [Message]()
-        result.reserveCapacity(msgs.count)
-        for msg in msgs where seen.insert(msg.uid).inserted {
-            result.append(msg)
-        }
-        return result
+        msgs
+//        var seen = Set<String>()
+//        var result = [Message]()
+//        result.reserveCapacity(msgs.count)
+//        for msg in msgs where seen.insert(msg.uid).inserted {
+//            result.append(msg)
+//        }
+//        return result
     }
 
     private func messagesToMerge(_ msgs: [Message]) -> [Message] {

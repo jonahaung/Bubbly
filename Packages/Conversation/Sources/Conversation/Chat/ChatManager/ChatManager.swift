@@ -72,9 +72,9 @@ extension ChatManager {
     private func handleScrollDownButtonTap() async throws {
         guard let lastMsg = try await MsgRepo.lastMsg(conID: state.conversation.uid) else { return }
         if models.shouldPaginate(at: .bottom) {
-            scrollController.send(.begin(.resetting(msg: lastMsg)))
+            scrollController.send(.begin(.focus(msg: lastMsg)))
         } else {
-            scrollController.performScroll(to: .id(lastMsg.uid, .animated()))
+            scrollController.performScroll(to: .edge(.bottom, .animated()))
         }
     }
 

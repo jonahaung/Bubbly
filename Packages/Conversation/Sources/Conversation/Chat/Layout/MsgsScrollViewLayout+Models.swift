@@ -14,7 +14,7 @@ import SwiftUI
 
 extension MsgsScrollViewLayout {
 
-    struct Cache: Sendable, Hashable {
+    struct Cache: Sendable, Hashable, Equatable {
         struct CellLayout: Sendable, Hashable {
             let id: String
             let size: CGSize
@@ -25,6 +25,9 @@ extension MsgsScrollViewLayout {
         let totalHeight: CGFloat
         let layouts: [CellLayout]
         let signatureHash: Int
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.totalHeight == rhs.totalHeight && lhs.layouts == rhs.layouts
+        }
     }
 
     struct SizeKey: Sendable, Hashable {
@@ -33,4 +36,5 @@ extension MsgsScrollViewLayout {
         let selected: Bool
         let headerID: Int
     }
+    
 }

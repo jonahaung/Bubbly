@@ -1,3 +1,4 @@
+//
 //  Throttler.swift
 //
 //  Copyright © 2026 Aung Ko Min.
@@ -5,101 +6,105 @@
 
 import Foundation
 
-public final class Throttler {
+public final class Throttler: @unchecked Sendable {
 
-    public enum Option {
+    public enum Option: Sendable {
         case leading
         case trailing
         case both
     }
 
+    private let delay: TimeInterval
+    private let option: Option
+    private let queue: DispatchQueue
+    private let lock = NSLock()
+
+    private var lastExecution: DispatchTime?
+    private var workItem: DispatchWorkItem?
+    private var latestBlock: (() -> Void)?
+
     public init(
         delay: TimeInterval,
-        option: Option = .trailing,
+        option: Option = .leading,
         queue: DispatchQueue = .main
     ) {
-        self.delay = delay
+        self.delay = max(0, delay)
         self.option = option
         self.queue = queue
     }
 
-    // MARK: Public
-
     public func throttle(_ block: @escaping () -> Void) {
-        lock.lock()
-        defer { lock.unlock() }
+        let action: (() -> Void)?
 
-        let now = DispatchTime.now().uptimeNanoseconds
+        lock.lock()
+
+        let now = DispatchTime.now()
         let delayNs = UInt64(delay * 1_000_000_000)
+        let elapsed = lastExecution.map { now.uptimeNanoseconds - $0.uptimeNanoseconds } ?? .max
+        let canExecute = elapsed >= delayNs
 
         switch option {
-
         case .leading:
-            if now - lastExecution >= delayNs {
-                execute(now, block)
+            if canExecute {
+                lastExecution = now
+                action = block
+            } else {
+                action = nil
             }
 
         case .trailing:
-            schedule(after: delayNs, block)
+            latestBlock = block
+            action = nil
+            scheduleLocked(after: canExecute ? 0 : delayNs - elapsed)
 
         case .both:
-            if now - lastExecution >= delayNs {
-                execute(now, block)
-                return
-            }
-
-            guard !pending else { return }
-            pending = true
-
-            let remaining = delayNs - (now - lastExecution)
-            schedule(after: remaining) { [weak self] in
-                guard let self else { return }
-                pending = false
-                block()
+            if canExecute {
+                lastExecution = now
+                action = block
+            } else {
+                latestBlock = block
+                action = nil
+                scheduleLocked(after: delayNs - elapsed)
             }
         }
+
+        lock.unlock()
+
+        action?()
     }
 
     public func cancel() {
         lock.lock()
-        defer { lock.unlock() }
         workItem?.cancel()
         workItem = nil
-        pending = false
+        latestBlock = nil
+        lock.unlock()
     }
 
-    // MARK: Private
-
-    private let queue: DispatchQueue
-    private let delay: TimeInterval
-    private let option: Option
-
-    private let lock: NSLock = .init()
-
-    private var workItem: DispatchWorkItem?
-    private var lastExecution: UInt64 = 0
-    private var pending = false
-
-    private func schedule(after ns: UInt64, _ block: @escaping () -> Void) {
-        workItem?.cancel()
+    private func scheduleLocked(after ns: UInt64) {
+        guard workItem == nil else { return }
 
         let item = DispatchWorkItem { [weak self] in
-            guard let self else { return }
-
-            lock.lock()
-            let now = DispatchTime.now().uptimeNanoseconds
-            lastExecution = now
-            lock.unlock()
-
-            block()
+            self?.executeTrailing()
         }
 
         workItem = item
-        queue.asyncAfter(deadline: .now() + .nanoseconds(Int(ns)), execute: item)
+        queue.asyncAfter(
+            deadline: .now() + .nanoseconds(Int(ns)),
+            execute: item
+        )
     }
 
-    private func execute(_ now: UInt64, _ block: () -> Void) {
-        lastExecution = now
-        block()
+    private func executeTrailing() {
+        let block: (() -> Void)?
+
+        lock.lock()
+        block = latestBlock
+        latestBlock = nil
+        workItem = nil
+        lastExecution = .now()
+        lock.unlock()
+
+        block?()
     }
 }

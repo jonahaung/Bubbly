@@ -35,7 +35,7 @@ struct SeenStatusOverlay: View {
             }
             .allowsHitTesting(false)
             .flexible(.all)
-            .animation(.easeInExponential, value: manager.state.properties.seenMembers)
+            .animation(.linear, value: manager.state.properties.seenMembers)
             .geometryGroup()
             .equatable(by: manager.state.properties.seenMembers)
         }

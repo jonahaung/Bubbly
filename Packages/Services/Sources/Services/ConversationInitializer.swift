@@ -46,7 +46,7 @@ public extension ConversationInitializer {
         let pageSize = Settings.Pagination.pageSize
         let msgs = try await MsgRepo.msgs(
             conID: conID,
-            limit: pageSize * 2,
+            limit: pageSize,
         )
         let firstMsg = try await MsgRepo.firstMsg(conID: conID)
         let lastMsg = try await MsgRepo.lastMsg(conID: conID)

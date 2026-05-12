@@ -7,7 +7,7 @@ import Database
 import Foundation
 
 extension ChatManager {
-    struct State: Equatable {
+    struct State: Sendable, Equatable {
         var reloadID: Int = 0
         var conversation: Conversation
         var theme: ChatTheme = .empty

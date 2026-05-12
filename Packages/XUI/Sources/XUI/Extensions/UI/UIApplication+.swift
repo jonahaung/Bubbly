@@ -22,15 +22,17 @@ public extension UIApplication {
     }
 
     func screenSize() -> CGSize {
+       screenBounds().size
+    }
+    func screenBounds() -> CGRect {
         guard let keyWindow else {
             fatalError()
         }
         if let viewController = keyWindow.rootViewController {
-            return viewController.view.bounds.inset(by: viewController.view.safeAreaInsets).size
+            return viewController.view.bounds.inset(by: viewController.view.safeAreaInsets)
         }
-        return windowScene.screen.bounds.inset(by: UIApplication.safeAreInset).size
+        return windowScene.screen.bounds.inset(by: UIApplication.safeAreInset)
     }
-
     func screenScale() -> CGFloat {
         let size = screenSize()
         return size.width / size.height

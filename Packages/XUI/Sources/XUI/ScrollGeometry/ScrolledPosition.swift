@@ -66,10 +66,8 @@ public extension VScrollGeometry {
     }
 }
 
-// MARK: - ScrollPositionValue
-
 @frozen
-public indirect enum ScrollPositionValue: Hashable {
+public indirect enum ScrollPositionValue: Sendable, Hashable {
     case y(CGFloat)
     case id(String?, anchor: UnitPoint)
     case edge(Edge)
@@ -78,12 +76,12 @@ public indirect enum ScrollPositionValue: Hashable {
 // MARK: - ScrollPositionItem
 
 @frozen
-public struct ScrollPositionItem: Hashable {
+public struct ScrollPositionItem: Sendable, Hashable {
     public let position: ScrollPositionValue
     public let properties: Properties
 
-    public enum Properties: Hashable, Equatable {
-        case animated(Animation = .linearSmooth)
+    public enum Properties: Sendable, Hashable {
+        case animated(Animation = .spring)
         case notAnimated
         case scroll
     }
@@ -105,8 +103,6 @@ public struct ScrollPositionItem: Hashable {
         .init(.edge(value), properties: properties)
     }
 }
-
-// MARK: - ScrolledPosition
 
 @frozen
 public enum ScrolledPosition: Sendable, Hashable {

@@ -10,7 +10,8 @@ struct MsgsScrollViewLayoutConfiguration {
 
     let spacing: CGFloat
     let contentInsets: EdgeInsets
-    let screenSize: CGSize
+    let screenBounds: CGRect
+    var screenSize: CGSize { screenBounds.size }
     var boundsWidth: CGFloat {
         screenSize.width
     }
