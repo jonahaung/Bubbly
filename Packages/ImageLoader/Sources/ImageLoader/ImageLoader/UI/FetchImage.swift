@@ -121,9 +121,7 @@ public final class FetchImage: Identifiable {
 		let task = Task {
 			do {
 				let response = try await action()
-				withTransaction(transaction) {
-					handle(result: .success(response))
-				}
+                handle(result: .success(response))
 			} catch {
 				handle(result: .failure(error))
 			}

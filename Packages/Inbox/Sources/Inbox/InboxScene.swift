@@ -9,9 +9,9 @@ import SwiftUI
 import XUI
 
 public struct InboxScene: View {
+    
     private let coordinator: AppCoordinator
     @Environment(\.openURL) private var openURL
-    @Environment(\.currentUser) private var currentUser
     @State private var viewModel: InboxViewModel
 
     public init(coordinator: AppCoordinator) {
@@ -24,8 +24,7 @@ public struct InboxScene: View {
             LazyVStack(alignment: .leading) {
                 ScrollSection(data: viewModel.state.items) { item in
                     InboxCell(item: item) {
-                        if let url = coordinator.deeplinkCoordinator
-                            .url(for: .conversation(conID: $0.conversation.uid))
+                        if let url = DeeplinkCodec.standard.url(for: .conversation(conID: $0.conversation.uid))
                         {
                             openURL(url)
                         }
@@ -35,7 +34,7 @@ public struct InboxScene: View {
         }
         .groupScrollViewStyle()
         .task {
-            await viewModel.send(.appear(currentUser))
+            await viewModel.send(.appear(coordinator.container.currentUserRepository.model))
         }
         .refreshable {
             await viewModel.send(.refresh)

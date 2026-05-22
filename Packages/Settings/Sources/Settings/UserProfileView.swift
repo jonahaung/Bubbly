@@ -70,7 +70,7 @@ public struct UserProfileView: View {
                 Button("Sign Out") {
                     Task {
                         do {
-                            try await appLauncher.resetGetStarted()
+                            try await appLauncher.resetGetStarted(router: Router.shared)
                         } catch {
                             await viewModel.showError(error)
                         }

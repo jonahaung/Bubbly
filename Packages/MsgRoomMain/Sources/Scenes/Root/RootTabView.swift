@@ -39,11 +39,6 @@ struct RootTabView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .toastPresentable()
         .fullScreenCover(item: fullScreenCover) { coordinator.view(for: $0) }
-        .onOpenURL { url in
-            Task.detached {
-                await coordinator.handleDeeplink(url)
-            }
-        }
     }
 }
 

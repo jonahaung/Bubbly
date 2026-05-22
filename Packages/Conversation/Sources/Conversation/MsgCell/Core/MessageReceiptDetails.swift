@@ -37,7 +37,7 @@ struct MessageReceiptDetails: View, @MainActor Equatable {
     }
 
     private func lineText(for receipt: MsgRecipientReceipt) -> String {
-        let name = manager.contactsRepository?.contact(for: receipt.userID)?.name ?? receipt.userID
+        let name = manager.members.contact(for: receipt.userID)?.name ?? receipt.userID
         return "\(name) \u{2022} \(receipt.status.localizedName)"
     }
 

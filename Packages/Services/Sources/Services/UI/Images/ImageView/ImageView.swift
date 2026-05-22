@@ -27,9 +27,7 @@ public struct ImageView: View {
                 if manager.isLocallyCached() {
                     progressView
                         .task {
-                            manager.image = config.size == .original ? manager.item
-                                .image() : manager.item
-                                .thumbnailImage()
+                            manager.loadLocalImage(isThumbnil: config.size != .original)
                         }
                 } else {
                     ZStack {
@@ -50,7 +48,6 @@ public struct ImageView: View {
                             return
                         }
                         fetchImage.processors = config.processors
-                        fetchImage.transaction = .withoutAnimation()
                         fetchImage.pipeline = .shared
                         fetchImage.onStart = manager.onStart
                         fetchImage.onCompletion = manager.onCompletion(_:)
@@ -63,6 +60,7 @@ public struct ImageView: View {
             }
         }
         .frame(square: config.size.value)
+        .fixedSize()
     }
 }
 

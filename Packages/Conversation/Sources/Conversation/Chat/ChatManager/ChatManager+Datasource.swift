@@ -17,15 +17,14 @@ extension ChatManager {
     }
 
     func setIncomingMsgsAsRead(before date: Date = .now) async throws {
-        let newlyReadMsgs = try await conversationDataUpdater.markReadToUnreadIncomingMsgs(conID: models.pagination.conID, lessThan: date)
+        let newlyReadMsgs = try await conversationDataUpdater.markReadToUnreadIncomingMsgs(conID: messages.pagination.conID, lessThan: date)
         if newlyReadMsgs.isEmpty {
             return
         }
-        for msg in newlyReadMsgs { models.update(msg: msg) }
+        try await messages.refreshMsgs(uids: newlyReadMsgs.map(\.uid))
         if let lastReadMsg = newlyReadMsgs.last {
             try await conversationDataUpdater.sendRecipientStatus(
-                lastReadMsg: lastReadMsg,
-                conversation: state.conversation
+                lastReadMsg: lastReadMsg
             )
         }
     }

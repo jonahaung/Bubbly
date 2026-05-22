@@ -5,52 +5,62 @@
 
 import SwiftUI
 
-public extension UIApplication {
-    func endEditing() {
-        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+extension UIApplication {
+    public func endEditing() {
+        sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
     }
 
-    var windowScene: UIWindowScene {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+    public var windowScene: UIWindowScene {
+        guard
+            let windowScene = UIApplication.shared.connectedScenes.first
+                as? UIWindowScene
+        else {
             fatalError("explanation")
         }
         return windowScene
     }
 
-    var keyWindow: UIWindow? {
+    public var keyWindow: UIWindow? {
         windowScene.keyWindow
     }
 
-    func screenSize() -> CGSize {
-       screenBounds().size
+    public func screenSize() -> CGSize {
+        screenBounds().size
     }
-    func screenBounds() -> CGRect {
+    public func screenBounds() -> CGRect {
         guard let keyWindow else {
             fatalError()
         }
         if let viewController = keyWindow.rootViewController {
-            return viewController.view.bounds.inset(by: viewController.view.safeAreaInsets)
+            return viewController.view.bounds.inset(
+                by: viewController.view.safeAreaInsets
+            )
         }
         return windowScene.screen.bounds.inset(by: UIApplication.safeAreInset)
     }
-    func screenScale() -> CGFloat {
+    public func screenScale() -> CGFloat {
         let size = screenSize()
         return size.width / size.height
     }
 
-    var statusBarHeight: CGFloat {
+    public var statusBarHeight: CGFloat {
         windowScene.statusBarManager?.statusBarFrame.height ?? .zero
     }
 }
 
-public extension UIApplication {
-    static var safeAreInset: UIEdgeInsets {
+extension UIApplication {
+    public static var safeAreInset: UIEdgeInsets {
         UIApplication.shared.keyWindow?.safeAreaInsets ?? .init()
     }
 }
 
-private extension UIEdgeInsets {
-    var swiftUiInsets: EdgeInsets {
+extension UIEdgeInsets {
+    fileprivate var swiftUiInsets: EdgeInsets {
         EdgeInsets(top: top, leading: left, bottom: bottom, trailing: right)
     }
 }

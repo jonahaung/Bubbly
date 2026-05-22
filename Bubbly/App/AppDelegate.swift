@@ -2,71 +2,54 @@
 // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-import Core
-import Database
-import FirebaseAuth
-import FirebaseCore
-import FirebaseMessaging
 import Services
-import SwiftUI
-import XUI
+import UIKit
 
 @MainActor
 final class AppDelegate: NSObject, UIApplicationDelegate {
 
-	var pushNotificationServie: PushNotificationService?
-	let backgroundTaskHandler: BackgroundTaskHandler = .init()
+    let runtime = AppRuntime()
 
-	func application(
-		_: UIApplication,
-		didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil,
-	)
-		-> Bool
-	{
-		FirebaseApp.configure()
-		FirebaseKeychainSanitizer.sanitize()
-		FirebaseConfiguration.shared.setLoggerLevel(.error)
-		Auth.auth().shareAuthStateAcrossDevices = true
-		pushNotificationServie = .init()
-		return true
-	}
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions options: [UIApplication
+            .LaunchOptionsKey:
+            Any]? = nil,
+    ) -> Bool {
+        runtime.configureApplication()
+        return true
+    }
 
-	func application(
-		_: UIApplication,
-		didFailToRegisterForRemoteNotificationsWithError error: any Error,
-	) {
-		log(error)
-	}
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        runtime.didBecomeActive()
+    }
 
-	func application(
-		_: UIApplication,
-		didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data,
-	) {
-		Auth.auth().setAPNSToken(deviceToken, type: .sandbox)
-		Messaging.messaging().apnsToken = deviceToken
-	}
+    func applicationWillResignActive(_ application: UIApplication) {
+        runtime.willResignActive()
+    }
 
-	func application(
-		_: UIApplication,
-		didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-	) async
-		-> UIBackgroundFetchResult
-	{
-		if Auth.auth().canHandleNotification(userInfo) {
-			return .noData
-		}
-		return .noData
-	}
-}
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        runtime.didEnterBackground()
+    }
 
-private extension AppDelegate {
-	func registerForRemoteNotifications() {
-		Task {
-			do {
-				try await pushNotificationServie?.registerForPushNotifications()
-			} catch {
-				log(error)
-			}
-		}
-	}
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: any Error,
+    ) {
+        runtime.didFailToRegisterForRemoteNotifications(error: error)
+    }
+
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data,
+    ) {
+        runtime.didRegisterForRemoteNotifications(deviceToken: deviceToken)
+    }
+
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+    ) async -> UIBackgroundFetchResult {
+        runtime.didReceiveRemoteNotification(userInfo)
+    }
 }

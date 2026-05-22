@@ -17,7 +17,8 @@ struct AttachmentPreview: View {
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
     @Environment(\.attachmentFetcher) private var attachmentFetcher
-    @Environment(\.isVisible) private var viewIsVisible
+    @Environment(MsgCellViewModel.self) private var viewModel
+    private var viewIsVisible: Bool { viewModel.isVisible }
     @Environment(\.conversation) private var conversation
     @LazyState private var model: AttachmentPreviewViewModel
 
@@ -66,7 +67,6 @@ struct AttachmentPreview: View {
         ZStack {
             if let data = model.attachmentData {
                 attachmentView(for: data)
-                    .transition(.opacity)
             } else if let error = model.error {
                 Text(error.localizedDescription)
                     .font(.footnote)

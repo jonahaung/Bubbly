@@ -10,7 +10,7 @@ public extension EnvironmentValues {
 }
 
 extension AnyTransition {
-    struct CustomModalModifier: @preconcurrency AnimatableModifier {
+    struct CustomModalModifier: @MainActor AnimatableModifier {
         let edge: Edge
         var progress: CGFloat
 
@@ -48,6 +48,7 @@ extension AnyTransition {
 }
 
 public extension AnyTransition {
+    @MainActor
     static func modal(
         edge: Edge,
         curve: Animation? = nil

@@ -1,14 +1,12 @@
+//
 //  EmojiPicker.swift
+//  Conversation
 //
-//  Copyright © 2026 Aung Ko Min.
-//
-
-#if os(iOS)
-//
-    // Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Created by Aung Ko Min on 15/5/26.
 //
 
-    import XUI
+
+ import XUI
     import SwiftUI
 
     struct EmojiPicker: View {
@@ -36,5 +34,3 @@
             Array(repeating: GridItem(.fixed(30)), count: 4)
         }
     }
-
-#endif

@@ -10,8 +10,9 @@ import Services
 
 public extension EnvironmentValues {
     @Entry var conversation: Conversation = .empty
-    @Entry var isVisible = false
     @Entry var attachmentFetcher: AttachmentFetcher? = nil
     @Entry var conversationTheme: ChatTheme = .empty
     @Entry var msgCellState: MsgCellViewModel.State! = nil
+    @Entry var members: Members = Members(members: [])
+    @Entry var seenMembers: [SeenMember] = []
 }

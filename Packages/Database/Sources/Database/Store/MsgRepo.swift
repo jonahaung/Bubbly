@@ -57,6 +57,19 @@ public enum MsgRepo {
     public static func totalMsgsCount(conID: String) async throws -> Int {
         try await withMsgStore { try await $0.fetchCount(FetchDescriptor(predicate: PMsgPredicates.conID(conID))) }
     }
+    
+    public static func messages(conID: String, from: Date, to: Date) async throws -> [Message] {
+        var descriptor = FetchDescriptor<PMsg>(
+            predicate: #Predicate {
+                $0.conID == conID && $0.date >= from && $0.date <= to
+            },
+            sortBy: [.init(\.date, order: .forward)]
+        )
+        descriptor.sortBy = [.init(\.date, order: .forward)]
+        return try await withMsgStore {
+            try await $0.fetch(descriptor)
+        }
+    }
 }
 
 public extension MsgRepo {

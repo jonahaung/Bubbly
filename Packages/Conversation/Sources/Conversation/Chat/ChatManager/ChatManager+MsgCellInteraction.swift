@@ -6,6 +6,7 @@
 import SwiftUI
 import Database
 import Services
+import Core
 
 extension ChatManager {
     func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
@@ -13,27 +14,35 @@ extension ChatManager {
         case let .onTapMsg(string): setSelectedMsg(string)
         case .onMarkMsg: break
         case let .onTapAvatar(string):
-            guard let vieModel = models.element(withID: string) else { return }
-            if let contact = vieModel.state.sender { router?.pushToNav(.contactDetails(contact)) }
+            guard let vieModel = messages.element(withID: string) else { return }
+            if let contact = members.contact(for: vieModel.msg.senderID) {
+                router?.pushToNav(.contactDetails(contact))
+            }
         case let .onFocusMsgBubble(frame):
             presentation.send(.overlayItem(frame))
             layoutIfNeeded()
-        case .onUploadedAttachments: break
-        case let .onReact(message, reactionType):
-            let conversation = state.conversation
+        case let .onUploadedAttachments(msg):
             serialQueue.addOperation { [weak self] in
                 guard let self else { return }
-                guard let currentUserID = await currentUserRepository?.model.uid else { return }
-                try? await Socket.send(
+                try await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
+                    model.attachments = msg.attachments
+                }
+                try await messages.refreshMsg(uid: msg.uid)
+            }
+        case let .onReact(message, reactionType):
+            serialQueue.addOperation {
+                let currentUserID = try CurrentUserID.get()
+                try? await Socket.shared.send(
                     .reaction(
                         payload: .init(
                             reaction: .init(
                                 rawValue: reactionType.rawValue, senderID: currentUserID,
                                 date: .now
-                            ), msgID: message.uid, conID: conversation.uid
+                            ),
+                            msgID: message.uid,
+                            conID: message.conID
                         )
-                    ),
-                    conversation: conversation
+                    )
                 )
             }
         case let .performSend(data):
@@ -46,26 +55,26 @@ extension ChatManager {
 
 private extension ChatManager {
     func setSelectedMsg(_ uid: String) {
-        guard let index = models.index(of: uid) else { return }
-        let oldValue = layoutManager.selectedMsg
-        let nextMsg = models[index + 1]?.msg
-        let previousMsg = models[index - 1]?.msg
+        guard let index = messages.index(of: uid) else { return }
+        let oldValue = messages.selectedMsg
+        let nextMsg = messages[index + 1]?.msg
+        let previousMsg = messages[index - 1]?.msg
         let newValue: SelectedMsg? =
             oldValue?.id == uid
                 ? nil : SelectedMsg(id: uid, previous: previousMsg?.uid, next: nextMsg?.uid )
         let transaction = Transaction.withAnimation(.interactiveSpring)
         withTransaction(transaction) {
             if let oldValue {
-                models.didChangeSelection(newValue, for: oldValue.id)
-                if let id = oldValue.next { models.didChangeSelection(newValue, for: id) }
-                if let id = oldValue.previous { models.didChangeSelection(newValue, for: id) }
+                messages.didChangeSelection(newValue, for: oldValue.id)
+                if let id = oldValue.next { messages.didChangeSelection(newValue, for: id) }
+                if let id = oldValue.previous { messages.didChangeSelection(newValue, for: id) }
             }
             if let newValue {
-                models.didChangeSelection(newValue, for: newValue.id)
-                if let id = newValue.next { models.didChangeSelection(newValue, for: id) }
-                if let id = newValue.previous { models.didChangeSelection(newValue, for: id) }
+                messages.didChangeSelection(newValue, for: newValue.id)
+                if let id = newValue.next { messages.didChangeSelection(newValue, for: id) }
+                if let id = newValue.previous { messages.didChangeSelection(newValue, for: id) }
             }
-            layoutManager.updateSelectedMsg(newValue)
+            messages.selectedMsg = newValue
         }
     }
 }

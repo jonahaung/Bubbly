@@ -40,7 +40,7 @@ public struct MsgCellDecorator: Sendable {
         let bubbleCorner = resolveCorner(isSent: msg.isSender, canGroupWithPrevious: cangroupWithPrevious, canGroupWithNext: canGroupWithNext)
         let showTimeSeparator = if let previous { !msg.isSimilarDateTime(with: previous, timeGap: minutesForChatMsgGrouping)} else { false }
         let showBottomPadding = if let next { !canGroupWithNext && msg.isSimilarDateTime(with: next, timeGap: minutesForChatMsgGrouping) } else { false }
-        return .init(showTimeSeparator: showTimeSeparator, showBottomPadding: showBottomPadding, bubbleCorner: bubbleCorner)
+        return .init(showTimeSeparator: showTimeSeparator, showBottomSpacer: showBottomPadding, bubbleCorner: bubbleCorner)
         
     }
 }

@@ -6,17 +6,14 @@ import FCM_V1
 import Foundation
 import XUI
 
-extension Socket {
-    public static func send(_ data: AnyMsgData, conversation: Conversation) async throws {
-        try await Socket.shared.send(data, conversation: conversation)
-    }
-
-    func send(_ data: AnyMsgData, conversation _: Conversation) async throws {
+public extension Socket {
+    
+    func send(_ data: AnyMsgData) async throws {
         switch data {
         case let .newMsg(rMsg):
-            notifyMessage(data)
             let msg = Message(rMsg)
             try await Store.shared.msgStore?.insert(msg)
+            notifyMessage(data)
             addToQueue()
         case let .deleteMsg(rMsg: rMsg):
             let currentUserID = try CurrentUserID.get()

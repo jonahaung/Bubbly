@@ -56,7 +56,7 @@ public struct AuthUserProfileView: View {
                 setFocus(false)
                 do {
                     try await viewModel.saveProfile()
-                    await appLauncher.markGetStartedAsDone(user: viewModel.currentUser)
+                    await appLauncher.markGetStartedAsDone(user: viewModel.currentUser, router: .shared)
                 } catch {
                     await viewModel.showError(error)
                 }

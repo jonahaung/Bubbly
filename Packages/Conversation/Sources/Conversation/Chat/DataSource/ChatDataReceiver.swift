@@ -4,14 +4,11 @@
 //
 
 import XUI
-
-// © 2026 Aung Ko Min
 import Core
 import Database
 import Services
 import Foundation
 
-// MARK: - ChatDataReceiverDelegate
 @MainActor protocol ChatDataReceiverDelegate: AnyObject {
     func chatDataReceiver(didInsert msg: Message) async
     func chatDataReceiver(didReceiveMsg msg: Message) async
@@ -22,7 +19,6 @@ import Foundation
     func chatDataReceiver(didRecieveError error: Error)
 }
 
-// MARK: - ChatDataReceiver
 @MainActor final class ChatDataReceiver {
     init(_ conID: String) {
         NotificationCenter.default.publisher(for: .msgNoti(for: conID)).compactMap(\.anyMsgData)

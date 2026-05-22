@@ -5,8 +5,8 @@
 
 import Foundation
 
-public extension DispatchQueue {
-    static func delay(
+extension DispatchQueue {
+    public static func delay(
         _ time: TimeInterval = 0.2,
         _ completion: @escaping @MainActor @Sendable () -> Void
     ) {

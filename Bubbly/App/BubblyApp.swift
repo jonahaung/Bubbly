@@ -4,56 +4,36 @@
 
 import BackgroundTasks
 import Core
-import FirebaseAuth
 import MsgRoomMain
-import Services
 import SwiftUI
-import XUI
-import FirebaseCore
 
 @main
 struct BubblyApp: App {
-    
-	var body: some Scene {
-		WindowGroup {
-			ContentView()
-                .tint(Color.accent)
-                .allowsTightening(true)
-				.onTask {
-					await Task.yield()
-					do {
-						try await appDelegate.pushNotificationServie?.registerForPushNotifications()
-					} catch {
-						log(error)
-					}
-				}
-				.task(id: scenePhase) {
-					switch scenePhase {
-					case .background:
-						AppStateStore.set(.background)
-						appDelegate.backgroundTaskHandler.scheduleAppRefresh()
-					case .inactive:
-						AppStateStore.set(.inactive)
-					case .active:
-						AppStateStore.set(.active)
-						do {
-							try await appDelegate.pushNotificationServie?.applicationDidBecomeActive()
-						} catch {
-							log(error)
-						}
-					@unknown default:
-						AppStateStore.set(.unknown)
-					}
-				}
-		}
-		.defaultAppStorage(.init(suiteName: AppInformation.groupID) ?? .standard)
-		.backgroundTask(.appRefresh(AppInformation.BackgroundTask.appRefresh)) { _ in
-			await appDelegate.backgroundTaskHandler.handleAppRefresh()
-		}
-	}
 
-	
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
-	@Environment(\.scenePhase) private var scenePhase
-	@UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+    var body: some Scene {
+        WindowGroup {
+            ContentView(
+                appLauncher: appDelegate.runtime.appLauncher,
+                router: appDelegate.runtime.router
+            )
+            .tint(Color.accent)
+            .allowsTightening(true)
+            .onOpenURL { url in
+                appDelegate.runtime.openURL(url)
+            }
+            .onTask {
+                try? await appDelegate.runtime.registerForPushNotificationsIfNeeded()
+                await appDelegate.runtime.startAppLauncher()
+            }
+        }
+        .defaultAppStorage(
+            .init(suiteName: AppInformation.groupID) ?? .standard
+        )
+        .backgroundTask(.appRefresh(AppInformation.BackgroundTask.appRefresh)) {
+            _ in
+            await appDelegate.runtime.handleAppRefresh()
+        }
+    }
 }

@@ -7,8 +7,6 @@ import UIKit
 import SwiftData
 import Foundation
 
-// MARK: - PMsg
-
 @Model
 public final class PMsg {
     @Attribute(.unique)
@@ -44,6 +42,47 @@ public final class PMsg {
         deliveryStatusAggregateRaw = outgoingStatus?.aggregateStatus.rawValue ?? 0
         self.attachments = attachments
         self.reactions = reactions
+    }
+
+    public required init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.uid = try container.decode(String.self, forKey: .uid)
+        self.senderID = try container.decode(String.self, forKey: .senderID)
+        self.conID = try container.decode(String.self, forKey: .conID)
+        self.text = try container.decodeIfPresent(String.self, forKey: .text)
+        self.date = try container.decode(Date.self, forKey: .date)
+        self.incomingStatus = try container.decode(Int.self, forKey: .incomingStatus)
+        self.outgoingStatus = try container.decodeIfPresent(MsgDeliveryState.self, forKey: .outgoingStatus)
+        self.deliveryStatusAggregateRaw = try container.decode(Int.self, forKey: .deliveryStatusAggregateRaw)
+        self.attachments = try container.decodeIfPresent([Attachment].self, forKey: .attachments)
+        self.reactions = try container.decode([Reaction].self, forKey: .reactions)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(uid, forKey: .uid)
+        try container.encode(senderID, forKey: .senderID)
+        try container.encode(conID, forKey: .conID)
+        try container.encodeIfPresent(text, forKey: .text)
+        try container.encode(date, forKey: .date)
+        try container.encode(incomingStatus, forKey: .incomingStatus)
+        try container.encodeIfPresent(outgoingStatus, forKey: .outgoingStatus)
+        try container.encode(deliveryStatusAggregateRaw, forKey: .deliveryStatusAggregateRaw)
+        try container.encodeIfPresent(attachments, forKey: .attachments)
+        try container.encode(reactions, forKey: .reactions)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case uid
+        case senderID
+        case conID
+        case text
+        case date
+        case incomingStatus
+        case outgoingStatus
+        case deliveryStatusAggregateRaw
+        case attachments
+        case reactions
     }
 }
 

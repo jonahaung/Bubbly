@@ -1,108 +1,251 @@
-//  Redactions.swift
-//
-//  Copyright © 2026 Aung Ko Min.
-//
-
 import SwiftUI
 
-public extension RedactionReasons {
-    static let animatedPlaceholder: RedactionReasons = .init(rawValue: 100)
-    static let hidden: RedactionReasons = .init(rawValue: 101)
+extension RedactionReasons {
+    public static let shimmer: RedactionReasons = .init(rawValue: 1 << 8)
+    public static let blurred: RedactionReasons = .init(rawValue: 1 << 9)
+    public static let thumbnail: RedactionReasons = .init(rawValue: 1 << 10)
 }
 
-public enum ShapeType {
+public struct RedactionConfiguration: Sendable {
+    public var shape: PlaceholderShape
+    public var animationDuration: TimeInterval
+    public var shimmerColors: [Color]
+    
+    public static let `default` = RedactionConfiguration(
+        shape: .roundedRectangle(12),
+        animationDuration: 1.5,
+        shimmerColors: [.gray.opacity(0.3), .gray.opacity(0.6), .gray.opacity(0.3)]
+    )
+    
+    public init(
+        shape: PlaceholderShape = .roundedRectangle(12),
+        animationDuration: TimeInterval = 1.5,
+        shimmerColors: [Color] = [.gray.opacity(0.3), .gray.opacity(0.6), .gray.opacity(0.3)]
+    ) {
+        self.shape = shape
+        self.animationDuration = animationDuration
+        self.shimmerColors = shimmerColors
+    }
+}
+
+public struct AnyShape: Shape, @unchecked Sendable {
+    private let _path: @Sendable (CGRect) -> Path
+
+    public init<S: Shape & Sendable>(_ shape: S) {
+        self._path = { rect in
+            shape.path(in: rect)
+        }
+    }
+
+    public func path(in rect: CGRect) -> Path {
+        _path(rect)
+    }
+}
+
+public enum PlaceholderShape: Sendable {
     case rectangle
-    case roundedRectangle(cornerRadius: CGFloat)
+    case roundedRectangle(CGFloat)
     case circle
+    case capsule
+    
+    func makeShape() -> AnyShape {
+        switch self {
+        case .rectangle:
+            return AnyShape(Rectangle())
+        case .roundedRectangle(let radius):
+            return AnyShape(RoundedRectangle(cornerRadius: radius))
+        case .circle:
+            return AnyShape(Circle())
+        case .capsule:
+            return AnyShape(Capsule())
+        }
+    }
 }
 
 public extension View {
-    func redactable(shapeType: ShapeType = .roundedRectangle(cornerRadius: 12)) -> some View
-    {
-        modifier(Redactable(shapeType: shapeType))
+    func customRedaction(_ configuration: RedactionConfiguration = .default) -> some View {
+        modifier(CustomRedactionModifier(configuration: configuration))
+    }
+    func redactedWithShimmer(when condition: Bool) -> some View {
+        redacted(reason: condition ? .shimmer : [])
+    }
+    
+    func redactedWithBlur(when condition: Bool) -> some View {
+        redacted(reason: condition ? .blurred : [])
+    }
+    
+    func redactedAsThumbnail(when condition: Bool) -> some View {
+        redacted(reason: condition ? .thumbnail : [])
     }
 }
 
-private struct AnimatedPlaceholder: ViewModifier {
-    let shapeType: ShapeType
+private struct CustomRedactionModifier: ViewModifier {
+    @Environment(\.redactionReasons) private var reasons
+    let configuration: RedactionConfiguration
+    
+    func body(content: Content) -> some View {
+        if reasons.isEmpty {
+            content
+        } else if reasons.contains(.shimmer) {
+            content
+                .modifier(ShimmerPlaceholder(configuration: configuration))
+        } else if reasons.contains(.blurred) {
+            content
+                .modifier(BlurredPlaceholder())
+        } else if reasons.contains(.thumbnail) {
+            content
+                .modifier(ThumbnailPlaceholder(configuration: configuration))
+        } else {
+            content
+        }
+    }
+}
+
+private struct ShimmerPlaceholder: ViewModifier {
+    let configuration: RedactionConfiguration
+    @State private var offset: CGFloat = -1
     @State private var size: CGSize = .zero
-
-    @State private var xOffset: CGFloat = .zero
-    private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
-
-    let gradient: Gradient = .init(colors: [Color.appSecondary, .appTertiary, .appSecondary])
-
+    
     func body(content: Content) -> some View {
         content
-            .opacity(.zero)
+            .hidden()
             .overlay(overlayView)
-            .onReceive(timer) { _ in
-                if xOffset == size.width {
-                    xOffset = -size.width
-                } else {
-                    withAnimation(.linear(duration: 1)) {
-                        xOffset = size.width
-                    }
-                }
+            .onAppear {
+                startAnimation()
             }
-            .overlay(
-                ZStack {
-                    GeometryReader { geometry in
-                        Color.clear
-                            .onAppear {
-                                size = geometry.size
-                            }
-                    }
+            .background(
+                GeometryReader { geometry in
+                    Color.clear
+                        .onAppear {
+                            size = geometry.size
+                        }
                 }
             )
     }
-
+    
     @ViewBuilder
-    var overlayView: some View {
-        switch shapeType {
-        case .rectangle:
-            addAnimationContainer { Rectangle() }
-        case let .roundedRectangle(cornerRadius):
-            addAnimationContainer { RoundedRectangle(cornerRadius: cornerRadius) }
-        case .circle:
-            addAnimationContainer { Circle() }
-        }
+    private var overlayView: some View {
+        configuration.shape.makeShape()
+            .fill(Color.gray.opacity(0.2))
+            .overlay(shimmerGradient)
+            .clipShape(configuration.shape.makeShape())
     }
-
-    func addAnimationContainer(content: () -> some Shape) -> some View {
-        ZStack {
-            content()
-                .fill(Color.appSecondary)
-
-            Rectangle()
-                .fill(
-                    LinearGradient(
-                        gradient: gradient,
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                )
-                .offset(x: xOffset)
-        }
-        .clipShape(content())
+    
+    private var shimmerGradient: some View {
+        LinearGradient(
+            colors: configuration.shimmerColors,
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        .offset(x: offset * max(size.width, size.height))
+        .animation(
+            .linear(duration: configuration.animationDuration).repeatForever(autoreverses: false),
+            value: offset
+        )
+    }
+    
+    private func startAnimation() {
+        offset = 2
     }
 }
 
-private struct Redactable: ViewModifier {
-    @Environment(\.redactionReasons) private var reasons
-
-    let shapeType: ShapeType
-
+private struct BlurredPlaceholder: ViewModifier {
+    @State private var isBlurred = true
+    
     func body(content: Content) -> some View {
-        switch reasons {
-        case .animatedPlaceholder:
-            content
-                .modifier(AnimatedPlaceholder(shapeType: shapeType))
-        case .hidden:
-            content
-                .hidden()
-        default:
-            content
+        content
+            .blur(radius: isBlurred ? 10 : 0)
+            .animation(.easeInOut(duration: 0.3), value: isBlurred)
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    isBlurred = false
+                }
+            }
+    }
+}
+
+private struct ThumbnailPlaceholder: ViewModifier {
+    let configuration: RedactionConfiguration
+    @State private var isThumbnail = true
+    
+    func body(content: Content) -> some View {
+        ZStack {
+            if isThumbnail {
+                configuration.shape.makeShape()
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 50, height: 50)
+            } else {
+                content
+            }
         }
+        .animation(.spring(), value: isThumbnail)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                isThumbnail = false
+            }
+        }
+    }
+}
+
+public extension EnvironmentValues {
+    @Entry var redactionConfiguration = RedactionConfiguration.default
+}
+
+struct RedactionExamples: View {
+    @State private var isLoading = true
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            VStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 8)
+                    .frame(height: 200)
+                Text("Title Placeholder")
+                    .font(.title)
+                Text("Description text that will be replaced with shimmer effect")
+                    .font(.body)
+            }
+            .customRedaction()
+            .redacted(reason: isLoading ? .shimmer : [])
+            
+            Text("Profile Name")
+                .font(.headline)
+                .customRedaction(.init(shape: .roundedRectangle(4)))
+                .redactedWithShimmer(when: isLoading)
+            
+            AvatarView()
+                .customRedaction(.init(
+                    shape: .circle,
+                    animationDuration: 2.0,
+                    shimmerColors: [.blue.opacity(0.2), .blue.opacity(0.5), .blue.opacity(0.2)]
+                ))
+                .redacted(reason: isLoading ? .shimmer : [])
+            
+            SensitiveDataView()
+                .customRedaction()
+                .redactedWithBlur(when: isLoading)
+            
+            Button("Toggle Loading") {
+                isLoading.toggle()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+    }
+}
+
+struct AvatarView: View {
+    var body: some View {
+        Circle()
+            .fill(Color.blue)
+            .frame(width: 60, height: 60)
+    }
+}
+
+struct SensitiveDataView: View {
+    var body: some View {
+        Text("Sensitive Information")
+            .padding()
+            .background(Color.yellow.opacity(0.3))
+            .cornerRadius(8)
     }
 }

@@ -3,13 +3,11 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
-import SwiftUI
 import Database
-import Services
 import Foundation
-
-// MARK: - Presenter
+import Services
+import SwiftUI
+import XUI
 
 @MainActor
 @Observable
@@ -42,19 +40,19 @@ extension Presenter {
     func send(_ intent: Intent) {
         var state = state
         switch intent {
-        case let .toast(newValue):
+        case .toast(let newValue):
             state.toast = newValue
-        case let .date(newValue):
+        case .date(let newValue):
             state.dateText = newValue
-        case let .overlayItem(newValue):
+        case .overlayItem(let newValue):
             state.overlayItem = newValue
-        case let .bottomAccessory(newValue):
+        case .bottomAccessory(let newValue):
             if let newValue {
                 state.bottomAccessory = newValue
             } else {
                 state.bottomAccessory = .contactAvator
             }
-        case let .typing(newValue):
+        case .typing(let newValue):
             state.typingStatus = newValue
         }
         guard self.state != state else { return }

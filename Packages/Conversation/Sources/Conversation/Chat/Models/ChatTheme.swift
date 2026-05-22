@@ -3,12 +3,10 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
 import Core
-import SwiftUI
 import Database
-
-// MARK: - ChatTheme
+import SwiftUI
+import XUI
 
 public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
 
@@ -21,9 +19,16 @@ public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
         incoming = .init(
             bubbleCoor: Color.container
         )
-        let uiFont = UIFont.systemFont(ofSize: UIFont.labelFontSize, weight: .regular)
+        let uiFont = UIFont.systemFont(
+            ofSize: UIFont.labelFontSize,
+            weight: .regular
+        )
         font =
-            .system(size: UIFont.labelFontSize, weight: .regular, design: .default)
+            .system(
+                size: UIFont.labelFontSize,
+                weight: .regular,
+                design: .default
+            )
         let verticalPadding = uiFont.chatVerticalPadding
         let horizontalPadding = uiFont.chatHorizontalPadding
         bubblePading = .init(
@@ -71,7 +76,7 @@ public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
 
 extension UIFont {
     var chatOpticalOffset: CGFloat {
-        let topExtra = ascender - capHeight // space above capital letters
+        let topExtra = ascender - capHeight  // space above capital letters
         let bottom = abs(descender)
         return (topExtra * 0.18) - (bottom * 0.06)
     }

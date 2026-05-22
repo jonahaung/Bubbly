@@ -12,81 +12,35 @@ import Services
 import SFSafeSymbols
 
 struct OverlayMenu: View {
-
-    enum TransitState: Hashable {
-        case appeared
-        case didAppear
-        case hidden
-
-        var isDidAppear: Bool {
-            self == .didAppear
-        }
-
-        var isAppeared: Bool {
-            self == .appeared
-        }
-    }
-
     var body: some View {
-        ZStack {
+        ZStack(alignment: .topLeading) {
             Rectangle()
                 .fill(
-                    theme.backgroundColor
-                        .opacity(transitionState.isDidAppear ? 0.9 : 0)
+                    LinearGradient(colors: [Color.background.opacity(0.7), Color.background.opacity(0.9), Color.background.opacity(0.7)], startPoint: .top, endPoint: .bottom)
                 )
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { _ in
-                            if transitionState == .didAppear {
-                                withTransaction(.withAnimation()) {
-                                    transitionState = .appeared
-                                }
-                            }
+                            
                         }
                         .onEnded { _ in
-                            var transaction = Transaction.withAnimation()
-                            transaction.addAnimationCompletion(
-                                criteria: .removed
-                            ) {
-                                withTransaction(.withoutAnimation()) {
-                                    dismiss()
-                                }
-                            }
-                            withTransaction(transaction) {
-                                transitionState = .hidden
-                            }
+                            handleDismiss()
                         }
                 )
-
-            ReactionsBar { reaction in
-                msgCellActions?(.onReact(viewModel.msg, reaction))
-                dismiss()
-            }
-            .position(
-                x: item.frame.midX,
-                y: item.frame.minY - (transitionState == .didAppear ? 15 : -15)
-            )
             MsgCellContent(state: viewModel.state)
                 .frame(size: item.frame.size)
-                .position(x: item.frame.midX, y: item.frame.midY)
+                .offset(x: item.frame.minX, y: item.frame.minY)
+            
+            ReactionsBar { reaction in
+                msgCellActions?(.onReact(viewModel.msg, reaction))
+                handleDismiss()
+            }
+            .offset(x: item.frame.minX, y: item.frame.minY-20)
 
             RoomFocesedOverlayBar()
-                .position(x: item.frame.midX, y: item.frame.maxY + 10)
-                .opacity(transitionState.isDidAppear ? 1 : 0)
+                .offset(x: item.frame.minX, y: item.frame.maxY)
         }
-        .statusBarHidden()
-        .ignoresSafeArea(.container)
-        .onAppear {
-            var transaction = Transaction.withAnimation()
-            transaction.addAnimationCompletion(criteria: .removed) {
-                withTransaction(.withAnimation()) {
-                    transitionState = .didAppear
-                }
-            }
-            withTransaction(transaction) {
-                transitionState = .appeared
-            }
-        }
+        .ignoresSafeArea(.all)
     }
 
     let item: OverlayMenuItem
@@ -94,11 +48,11 @@ struct OverlayMenu: View {
     @Environment(MsgCellViewModel.self) private var viewModel
     @Environment(\.msgCellActions) private var msgCellActions
     @Environment(\.conversation) private var conversation
-    @State private var transitionState: TransitState = .hidden
+    @Environment(\.dismiss) private var dismiss
 
-    private func dismiss() {
+    private func handleDismiss() {
         withTransaction(\.disablesAnimations, true) {
-            msgCellActions?(.onFocusMsgBubble(nil))
+           dismiss()
         }
     }
 }
@@ -109,9 +63,8 @@ struct RoomFocesedOverlayBar: View {
         HStack(spacing: 0) {
             AsyncButton {
                 let msg = item.msg
-                try await Socket.send(
-                    .deleteMsg(rMsg: .init(msg)),
-                    conversation: conversation
+                try await Socket.shared.send(
+                    .deleteMsg(rMsg: .init(msg))
                 )
                 await Task.delay(1)
                 msgCellActions?(.onFocusMsgBubble(nil))
@@ -138,7 +91,7 @@ struct RoomFocesedOverlayBar: View {
         }
         .sheet(isPresented: $showInfo) {
             NavigationStack {
-                TextEditor(text: .constant(item.msg.preetyPrinted))
+                TextEditor(text: .constant(item.msg.prettyPrinted))
                     .textSelection(.enabled)
                     .font(.footnote.monospaced())
                     .scrollIndicators(.hidden)

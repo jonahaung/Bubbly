@@ -8,7 +8,7 @@ import SwiftUI
 import Database
 import Services
 
-struct MsgCellContent: View, @MainActor Equatable {
+struct MsgCellContent: View {
     let state: MsgCellViewModel.State
     @Environment(\.conversationTheme) private var theme
     var body: some View {
@@ -19,15 +19,11 @@ struct MsgCellContent: View, @MainActor Equatable {
             )
         ) {
             if state.attachments?.isEmpty == false {
-                MsgCellAttachmentBubble(state: state)
+                MsgCellAttachmentBubble(state: state, theme: theme)
             } else {
                 MsgCellTextBubble(state: state, theme: theme)
             }
             MsgCellReactionOverlay(reactions: state.reactions)
         }
-    }
-
-    static func == (lhs: MsgCellContent, rhs: MsgCellContent) -> Bool {
-        lhs.state.id == rhs.state.id
     }
 }

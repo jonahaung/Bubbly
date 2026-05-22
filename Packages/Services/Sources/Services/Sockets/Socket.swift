@@ -6,15 +6,11 @@ import FCM_V1
 import Foundation
 import XUI
 
-// MARK: - SocketActor
-
 @globalActor
 public struct SocketActor {
     public actor SocketActor {}
     public static let shared: SocketActor = .init()
 }
-
-// MARK: - Socket
 
 @SocketActor
 public final class Socket: Sendable {

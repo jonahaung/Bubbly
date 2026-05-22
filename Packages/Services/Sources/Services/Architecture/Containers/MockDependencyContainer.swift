@@ -2,18 +2,13 @@
 
 import Foundation
 
-// MARK: - MockDependencyContainer
-
 public final class MockDependencyContainer: DependencyContainer {
     public let currentUserRepository: CurrentUserRepository
-    public let contactsRepository: any ContactsRepositoryProtocol
 
     public init(
         currentUserRepository: CurrentUserRepository,
-        contactsRepository: any ContactsRepositoryProtocol,
     ) {
         self.currentUserRepository = currentUserRepository
-        self.contactsRepository = contactsRepository
     }
 }
 

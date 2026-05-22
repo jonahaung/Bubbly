@@ -12,6 +12,7 @@ struct PlaygroundView: View {
     @State private var showModal = false
     @State private var searchText = ""
     @State private var text = ""
+    @State private var fontName = ""
 
     var body: some View {
         List {
@@ -24,21 +25,18 @@ struct PlaygroundView: View {
                     .foregroundStyle(.red)
             }
 
-            NavigationLink("Exampl View") {
-                ExampleView()
-            }
+
             Button("Show modal") {
                 text = Lorem.random()
                 showModal = true
             }
+            Text(fontName)
             Button("Font Picker") {
-                //				Router.shared.presentModel(.view(FontPicker(selection: $fontName).opaqueView()))
+                Router.shared.presentModel(.view(node: NavigationStack{ FontPicker(selection:$fontName) }.opaqueView()))
             }
-            Button("Markdown View") {
-                //				Router.shared.presentModel(.view(MarkdownView.ExampleView().opaqueView()))
-            }
+    
             Button("System Sounds") {
-                //				Router.shared.presentModel(.view(SystemSoundTesterView().opaqueView()))
+                Router.shared.presentModel(.view(node: SystemSoundTesterView().opaqueView()))
             }
             Button("Show Toast") {
                 ToastPresenter.show(allowsBackgroundTap: true) {
@@ -50,16 +48,14 @@ struct PlaygroundView: View {
             Text("Example View").tapToPush {
                 ExampleView1()
             }
-            Button("Show Loading") {
-                Loading.show(true)
-            }
-            Label(text, systemImage: "bubble.right")
             Spacer()
             Button("Submit") {
                 Task {
                     await viewModel.send(.submit)
                 }
             }
+            
+            Text(Lorem.paragraphs(8))
         }
         .navigationTitle(Self.defaultTitle)
         .searchable(text: $searchText)
@@ -77,6 +73,7 @@ struct PlaygroundView: View {
                 }
             }
         }
+        .font(.custom(fontName, size: UIFont.labelFontSize))
         .task {
             await viewModel.send(.appear)
         }

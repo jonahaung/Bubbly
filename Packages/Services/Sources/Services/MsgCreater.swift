@@ -20,7 +20,7 @@ public actor MsgCreator {
     public init(currentUserId: String, mediaManager: MediaManager = .shared) {
         self.mediaManager = mediaManager
         self.currentUserId = currentUserId
-    }
+    } 
 
     public func message(
         text: String,

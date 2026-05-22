@@ -37,7 +37,9 @@ struct MsgAttachmentsView: View {
                 .presentationContentInteraction(.scrolls)
                 .presentationBackgroundInteraction(
                     .disabled
-                ).presentationBackground(.clear).navigationTransition(
+                )
+                .presentationBackground(.clear)
+                .navigationTransition(
                     .zoom(sourceID: attachment.uid, in: namespace)
                 )
         }

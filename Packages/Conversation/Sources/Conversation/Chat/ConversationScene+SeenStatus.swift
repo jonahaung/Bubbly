@@ -3,26 +3,37 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
 import Core
-import SwiftUI
 import Database
 import Services
+import SwiftUI
+import XUI
 
 struct SeenStatusOverlay: View {
+    
+    @Environment(\.sharedNamespace) private var namespace
+    @Environment(\.seenMembers) private var seenMembers
+    @Environment(\.members) private var members
+    
     var body: some View {
         if let namespace {
-            VStack {
-                ForEach(manager.state.properties.seenMembers) { member in
-                    if let contact = manager.contactsRepository?.contact(
-                        for: member.uid
-                    ) {
+            ZStack {
+                ForEach(seenMembers) { member in
+                    if let contact = members.contact(for: member.uid) {
                         ProfilePhoto(
                             contact,
                             size: .custom(13),
                             tapAction: .none
                         )
-                        .changeEffect(.pulse(shape: .capsule, style: .green, drawingMode: .stroke, count: 1), value: member.msgId)
+                        .changeEffect(
+                            .pulse(
+                                shape: .circle,
+                                style: .green,
+                                drawingMode: .stroke,
+                                count: 2
+                            ),
+                            value: member.msgId
+                        )
                         .matchedGeometryEffect(
                             id: member.msgId,
                             in: namespace.value,
@@ -35,13 +46,9 @@ struct SeenStatusOverlay: View {
             }
             .allowsHitTesting(false)
             .flexible(.all)
-            .animation(.linear, value: manager.state.properties.seenMembers)
+            .animation(.bouncy, value: seenMembers)
             .geometryGroup()
-            .equatable(by: manager.state.properties.seenMembers)
+            .equatable(by: seenMembers)
         }
-
     }
-
-    @Environment(\.sharedNamespace) private var namespace
-    @Environment(ChatManager.self) private var manager
 }

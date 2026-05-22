@@ -16,7 +16,7 @@ public struct ProfilePhoto: View {
         self.item = item
         config = .init(
             size: size,
-            processors: [], tapAction: tapAction,
+            processors: [.circle()], tapAction: tapAction,
         )
     }
 

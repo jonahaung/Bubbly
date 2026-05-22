@@ -37,7 +37,8 @@ struct ImageUploadingLayer: View {
         }
     }
 
-    @Environment(\.isVisible) private var viewIsVisible
+    @Environment(MsgCellViewModel.self) private var viewModel
+    private var viewIsVisible: Bool { viewModel.isVisible }
     @State private var progress: ImageTask.Progress?
     @State private var uploading = false
 

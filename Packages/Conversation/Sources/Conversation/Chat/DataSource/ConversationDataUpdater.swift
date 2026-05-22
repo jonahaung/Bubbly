@@ -38,13 +38,11 @@ struct ConversationDataUpdater {
     }
 
     func sendRecipientStatus(
-        lastReadMsg: Message,
-        conversation: Conversation
+        lastReadMsg: Message
     ) async throws {
         let currentUserID = try CurrentUserID.get()
-        try await Socket.send(
-            .msgRecipientReceipt(payload: .init(msgID: lastReadMsg.uid, conID: conversation.uid, recipientReceipt: .init(memberID: currentUserID, state: .read, updatedAt: .now))),
-            conversation: conversation
+        try await Socket.shared.send(
+            .msgRecipientReceipt(payload: .init(msgID: lastReadMsg.uid, conID: lastReadMsg.conID, recipientReceipt: .init(memberID: currentUserID, state: .read, updatedAt: .now)))
         )
     }
 }

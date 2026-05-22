@@ -18,7 +18,6 @@ struct MsgCellHeader: View, @MainActor Equatable {
         if state.layout.showTimeSeparator {
             TimeSeparator(dateString: state.dateStString)
         }
-
         if state.isSelected { Header(headerText: headerText) }
     }
 
@@ -26,7 +25,7 @@ struct MsgCellHeader: View, @MainActor Equatable {
         if state.isSender {
             return state.date.formatted(date: .abbreviated, time: .shortened)
         } else {
-            let name: String? = ContactsRepository.shared.contact(for: state.senderID)?.name
+            let name: String? = state.senderID
             return name ?? "Unknown"
         }
     }
@@ -40,9 +39,13 @@ struct MsgCellHeader: View, @MainActor Equatable {
 private struct Header: View, Equatable {
     let headerText: String
     var body: some View {
-        Text(headerText).font(
-            .system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded)
-        ).foregroundStyle(Color.tertiaryText).padding(.horizontal, 35).allowsHitTesting(false)
-            .transition(.push(from: .bottom)).geometryGroup().equatable(by: headerText)
+        Text(headerText)
+            .font(.system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded))
+            .foregroundStyle(Color.tertiaryText)
+            .padding(.horizontal, 35)
+            .allowsHitTesting(false)
+            .transition(.invisible())
+            .geometryGroup()
+            .equatable(by: headerText)
     }
 }

@@ -3,12 +3,6 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-//
-//  MsgCellTextBubble.swift
-//  Conversation
-//
-//  Created by Aung Ko Min on 22/4/26.
-//
 import Core
 import SwiftUI
 import Database
@@ -22,7 +16,6 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
     var body: some View {
         if let attributedText = state.attributedText {
             TextContent(attributedText: attributedText)
-                .background(.clear)
                 .padding(theme.bubblePading)
                 .background(theme.bubbleColor(for: state.isSender))
                 .padding(
@@ -34,7 +27,8 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
                     )
                 )
                 .background(Color.shadow)
-                .background(.background)
+                .padding(0.5)
+                .background(Color.background)
                 .containerShape(bubbleShape)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -45,7 +39,9 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
     }
 
     static func == (lhs: MsgCellTextBubble, rhs: MsgCellTextBubble) -> Bool {
-        lhs.state.bubbleCornor == rhs.state.bubbleCornor && lhs.theme == rhs.theme && lhs.state.id == rhs.state.id
+        lhs.state.bubbleCornor == rhs.state.bubbleCornor &&
+        lhs.theme == rhs.theme &&
+        lhs.state.attributedText == rhs.state.attributedText
     }
 
 }
@@ -55,6 +51,5 @@ struct TextContent: View {
         Text(attributedText)
             .equatable(by: attributedText)
     }
-
     let attributedText: AttributedString
 }

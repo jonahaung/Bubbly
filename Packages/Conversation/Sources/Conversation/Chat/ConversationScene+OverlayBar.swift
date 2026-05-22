@@ -3,10 +3,10 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
-import SwiftUI
 import Database
 import Services
+import SwiftUI
+import XUI
 
 struct ConversationSceneOverlayBar: View {
     @Environment(ChatManager.self) private var manager

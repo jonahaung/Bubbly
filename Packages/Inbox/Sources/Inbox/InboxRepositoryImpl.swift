@@ -8,6 +8,7 @@ import XUI
 
 @MainActor
 struct InboxRepositoryImpl: InboxRepository {
+    
     private let manager: InboxManager
 
     init(manager: InboxManager) {
@@ -23,7 +24,6 @@ struct InboxRepositoryImpl: InboxRepository {
 
     func refresh() async throws -> InboxSnapshot {
         let items = try await loadInboxItems(currentUser: manager.currentUser)
-        try await ContactsRepository.shared.refresh()
         manager.setItems(items)
         return snapshot()
     }

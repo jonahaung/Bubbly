@@ -2,13 +2,15 @@
 
 import Services
 import SwiftUI
-import XUI
 
 public struct ContentView: View {
-    
 
-    public init() {
-        _appLauncher = .init(wrappedValue: .init())
+    let appLauncher: AppLauncher
+    let router: Router
+    
+    public init(appLauncher: AppLauncher, router: Router) {
+        self.appLauncher = appLauncher
+        self.router = router
     }
     
     public var body: some View {
@@ -17,14 +19,9 @@ public struct ContentView: View {
             LaunchScreen(appLauncher: appLauncher)
         case .getStarted:
             AuthFlow(appLauncher: appLauncher)
-        case let .main(currentUser):
-            ArchitecturalView(
-                launcher: appLauncher,
-                currentUser: currentUser,
-                router: appLauncher.router,
-            )
+        case .main(let currentUser):
+            ArchitecturalView(launcher: appLauncher, currentUser: currentUser, router: router)
         }
     }
-    
-    @LazyState private var appLauncher: AppLauncher
+
 }

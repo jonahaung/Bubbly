@@ -3,14 +3,13 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
 import Core
-import SwiftUI
 import Database
 import Services
+import SwiftUI
+import XUI
 
 public struct ConversationScene: View {
-
     public init(
         coordinator: AppCoordinator,
         prefretchData: ConversationInitializer.PrefetchedData
@@ -18,7 +17,6 @@ public struct ConversationScene: View {
         _viewModel = .init(
             wrappedValue: .init(
                 prefretchData,
-                contactsRepository: coordinator.container.contactsRepository,
                 currentUserRepository: coordinator.container
                     .currentUserRepository,
                 router: coordinator.router
@@ -27,38 +25,24 @@ public struct ConversationScene: View {
         _composer = .init(wrappedValue: .init())
     }
 
-    // MARK: Public
-
     public var body: some View {
         ZStack(alignment: .bottomTrailing) {
-            BackgroundView(
-                imageName: viewModel.state.properties.theme.background.imageName
-            )
-
+            BackgroundView(imageName: viewModel.state.properties.theme.background.imageName)
             SeenStatusOverlay()
-
             ConversationScrollView(manager: viewModel)
-                .layoutPriority(1)
             ConversationSceneOverlayBar()
-        }
-        .fullScreenCover(item: $viewModel.presentation.state.overlayItem) { frame in
-            if let overlayViewModel = viewModel.models.element(withID: frame.id) {
-                OverlayMenu(item: frame)
-                    .environment(overlayViewModel)
-                    .id(frame.id)
-                    .presentationBackground(.clear)
-            }
         }
         .environment(\.conversation, viewModel.state.conversation)
         .environment(\.conversationTheme, viewModel.state.theme)
         .environment(\.attachmentFetcher, viewModel.attachmentFetcher)
+        .environment(\.seenMembers, viewModel.state.properties.seenMembers)
         .environment(\.sharedFocusState, SharedFocusState($focusState))
+        .environment(\.members, viewModel.members)
         .environment(\.sharedNamespace, SharedNamespace(namespace))
         .environment(\.msgCellActions, .init(action: { viewModel.send(.cellAction($0)) }))
         .environment(viewModel)
         .environment(composer)
         .onAppear(perform: viewModel.onViewAppear)
-        .onDisappear(perform: viewModel.onViewDisappear)
     }
 
     @FocusState private var focusState: String?

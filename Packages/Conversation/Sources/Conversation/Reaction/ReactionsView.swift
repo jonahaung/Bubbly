@@ -3,25 +3,12 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-//
-//  ReactionsView.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 5/11/25.
-//
 import Database
 import SwiftUI
 
 public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable,
     CaseIterable
 {
-    public static var allCases: [ReactionType] {
-        [.heart, .thumbUp, .thumbDown, .smile, .laugh, .sad]
-    }
-
-    public var id: String {
-        rawValue
-    }
 
     case heart
     case thumbUp
@@ -30,6 +17,14 @@ public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable,
     case laugh
     case sad
     case custom(String)
+
+    public static var allCases: [ReactionType] {
+        [.heart, .thumbUp, .thumbDown, .smile, .laugh, .sad]
+    }
+
+    public var id: String {
+        rawValue
+    }
 
     public var rawValue: String {
         switch self {

@@ -28,8 +28,8 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
 
     public func insert(_ data: T.SendableType) throws {
         if try exists(uid: data.uid) {
-            try updateAndSave(uid: data.uid) { model in
-                model.update(from: data)
+            _ = try updateAndSave(uid: data.uid) { model in
+                _ = try? model.update(from: data)
             }
             return
         }

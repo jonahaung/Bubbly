@@ -19,6 +19,7 @@ private enum MsgCellGestureThresholds {
     var draggedOffset: CGFloat = 0
     var isLongPressActive = false
     @ObservationIgnored private(set) var draggedLimitReached = false
+    
     func applyDrag(translation: CGFloat, isSender: Bool, onMark: () -> Void) {
         guard isValidDirection(translation, isSender: isSender) else {
             resetOffsetIfNeeded()
@@ -72,15 +73,16 @@ private enum MsgCellGestureThresholds {
 struct MsgCellGesture<Content: View>: View, @MainActor Equatable {
     let viewModel: MsgCellViewModel
     let content: () -> Content
+    @State private var overlayItem: OverlayMenuItem?
     var body: some View {
         content()
             .offset(x: round(model.draggedOffset))
             .highPriorityGesture(dragGesture, including: .gesture)
             .simultaneousGesture(doubleTapGesture)
-            .background { longPressOverlay }
             .onPressingChanged(in: .local) { _ in
                 activateLongPressIfNeeded()
             }
+            .background(longPressOverlay)
     }
 
     @Environment(\.msgCellActions) private var msgCellActions
@@ -124,14 +126,18 @@ extension MsgCellGesture {
                 .onGeometryChange(for: CGRect.self) { proxy in
                     proxy.frame(in: .global)
                 } action: { frame in
-                    model.isLongPressActive = false
                     withTransaction(.withoutAnimation()) {
-                        msgCellActions?(
-                            .onFocusMsgBubble(
-                                .init(id: viewModel.id, frame: frame)
-                            )
-                        )
+                        overlayItem = .init(id: viewModel.id, frame: frame)
                     }
+                }
+                .fullScreenCover(item: $overlayItem, onDismiss: {
+                    model.isLongPressActive = false
+                }) { item in
+                    OverlayMenu(item: item)
+                        .environment(viewModel)
+                        .id(viewModel.id)
+                        .presentationBackground(.clear)
+                        .transition(.movingParts.snapshot)
                 }
         }
     }

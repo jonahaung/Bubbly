@@ -11,7 +11,6 @@ import XUI
 
 public final class ContactsRepository: ContactsRepositoryProtocol, @unchecked Sendable, ErrorPresenter {
 
-    public static let shared: ContactsRepository = .init()
     private init() {}
 
     public var contacts: [Contact] = []

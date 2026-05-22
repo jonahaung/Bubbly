@@ -7,7 +7,8 @@ import Foundation
 import XUI
 
 public actor PushNotificationStore {
-    struct NotificationCenterProxy: @unchecked Sendable {
+    @SocketActor
+    struct NotificationCenterProxy: Sendable {
         let center: NotificationCenter
     }
 
@@ -40,12 +41,22 @@ public actor PushNotificationStore {
         deps = dependencies
     }
 
-    public func consumePendingAnyMsgData() -> [AnyMsgData] {
-        if let datas = deps.storage.codable([AnyMsgData].self, for: .device(.anyMsgData)) {
-            deps.storage.delete(for: .device(.anyMsgData))
-            return datas
+    public func consumePendingAnyMsgData(navPath: NavPath?) async throws {
+        guard let datas = deps.storage.codable([AnyMsgData].self, for: .device(.anyMsgData)) else {
+            return
         }
-        return []
+        deps.storage.delete(for: .device(.anyMsgData))
+        switch navPath {
+        case .conversation(let prefetchData):
+            let center = deps.notificationCenter
+            try await AsyncOrderedStream.mapOrdered(inputs: datas) { data in
+                if data.conID == prefetchData.conversation.uid {
+                    center.center.post(name: .msgNoti(for: data.conID), object: data)
+                }
+            }
+        default:
+            await postInboxChanges()
+        }
     }
 
     public func savePendingAnyMsgData(_ datas: [AnyMsgData]) {
@@ -64,6 +75,12 @@ public actor PushNotificationStore {
     }
 
     public func postInboxChanges() async {
+        let center = deps.notificationCenter
+        await MainActor.run {
+            center.center.post(name: .inboxChanges, object: nil)
+        }
+    }
+    public func postReceiveNewMessages(data: [AnyMsgData]) async {
         let center = deps.notificationCenter
         await MainActor.run {
             center.center.post(name: .inboxChanges, object: nil)

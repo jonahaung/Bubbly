@@ -25,9 +25,9 @@ extension ChatManager: ChatDataReceiverDelegate {
 
     func chatDataReceiver(didInsert msg: Message) {
         switch true {
-        case models.isAbsoluteScrolled(at: .bottom):
+        case messages.isAbsoluteScrolled(at: .bottom):
             scrollController.send(.begin(.append(msg: msg)))
-        case models.shouldPaginate(at: .bottom):
+        case messages.shouldPaginate(at: .bottom):
             ToastPresenter.shared.dismiss()
             let toast = Toast(
                 node: Text(msg.displayText).opaqueView(),
@@ -41,7 +41,7 @@ extension ChatManager: ChatDataReceiverDelegate {
                 }
             }
             ToastPresenter.show(toast)
-        case !models.shouldPaginate(at: .bottom):
+        case !messages.shouldPaginate(at: .bottom):
             ToastPresenter.shared.dismiss()
             let toast = Toast(
                 node: Text(msg.displayText).opaqueView(),
@@ -52,7 +52,7 @@ extension ChatManager: ChatDataReceiverDelegate {
                 ToastPresenter.shared.dismiss()
             }
             ToastPresenter.show(toast)
-            models.insert(msg: msg)
+            messages.insert(msg: msg)
             layoutIfNeeded()
         default:
             break
@@ -66,11 +66,14 @@ extension ChatManager: ChatDataReceiverDelegate {
     }
 
     func chatDataReceiver(didUpdate msg: Message, animated _: Bool) {
-        models.update(msg: msg)
+        serialQueue.addOperation { [weak self] in
+            guard let self else { return }
+            try await messages.refreshMsg(uid: msg.uid)
+        }
     }
 
     func chatDataReceiver(didRemove msg: Message, animated _: Bool) {
-        models.remove(msg: msg)
+        messages.remove(msg: msg)
         let transition = Transaction.withAnimation(.snappy)
         withTransaction(transition) { layoutIfNeeded() }
     }
@@ -78,11 +81,11 @@ extension ChatManager: ChatDataReceiverDelegate {
     func chatDataReceiver(
         didReceive payload: AnyMsgData.MsgRecipientReceiptPayload
     ) async throws {
-        try await models.refreshMsg(uid: payload.msgID)
+        try await messages.refreshMsg(uid: payload.msgID)
         try await reloadConversation(refetch: false)
-        let models = models.wrappedValue.filter { model in
+        let models = messages.wrappedValue.filter { model in
             model.state.isSender && model.state.outgoingStatus?.aggregateStatus ?? .initial < .read
         }
-        try await self.models.refreshMsgs(uids: models.map(\.id))
+        try await self.messages.refreshMsgs(uids: models.map(\.id))
     }
 }

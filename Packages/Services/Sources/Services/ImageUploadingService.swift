@@ -4,8 +4,7 @@ import FirebaseStorage
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
-
-// MARK: - ImageUploadingService
+import XUI
 
 public struct ImageUploadingService: Sendable {
     public enum Path {
@@ -62,11 +61,12 @@ public struct ImageUploadingService: Sendable {
 
         let metadata = StorageMetadata()
         metadata.contentType = "image/png"
-        _ = try await reference.putDataAsync(
+        let put = try await reference.putDataAsync(
             data,
             metadata: metadata,
             onProgress: onProgress,
         )
+        log(put)
         return try await reference.downloadURL()
     }
 
@@ -79,17 +79,9 @@ public struct ImageUploadingService: Sendable {
             .reference(withPath: path.path)
             .child(path.childPath)
         let metadata = StorageMetadata()
-        metadata.contentType = contentType(for: url)
+        metadata.contentType = "image/jpg"
         _ = try await reference.putFileAsync(from: url, metadata: metadata, onProgress: onProgress)
         return try await reference.downloadURL()
-    }
-
-    private func contentType(for fileURL: URL) -> String {
-        let ext = fileURL.pathExtension
-        if ext.isEmpty {
-            return "application/octet-stream"
-        }
-        return UTType(filenameExtension: ext)?.preferredMIMEType ?? "application/octet-stream"
     }
 }
 

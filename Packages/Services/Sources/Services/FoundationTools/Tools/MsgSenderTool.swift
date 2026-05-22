@@ -58,7 +58,7 @@ public struct MsgSenderTool: Tool {
             attachments: [],
             in: conversation,
         )
-        try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
+        try await Socket.shared.send(.newMsg(rMsg: .init(msg)))
         return GeneratedContent(properties: [
             "name": arguments.name,
             "text": arguments.text,

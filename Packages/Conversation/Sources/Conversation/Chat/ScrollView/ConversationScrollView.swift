@@ -12,33 +12,24 @@ import XUI
 struct ConversationScrollView: View {
 
     let manager: ChatManager
-
+    
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             MsgsScrollViewLayout(
-                manager: manager.layoutManager,
-                config: .init(
-                    spacing: 0,
-                    contentInsets: .init(
-                        top: ChatLayoutConstants.topBarHeight,
-                        leading: Padding.sm,
-                        bottom: 0,
-                        trailing: Padding.sm
-                    ),
-                    screenBounds: UIApplication.shared.screenBounds()
-                )
+                manager: manager.messages.layout,
+                config: layoutConfiguration
             ) {
-                if manager.models.shouldShowHeader {
+                if manager.messages.shouldShowHeader {
                     HeaderProfileView(conversation: manager.state.conversation)
                 }
-                ForEach(manager.models.wrappedValue) { model in
+                ForEach(manager.messages.wrappedValue) { model in
                     MsgCell(viewModel: model)
                 }
             }
+            .equatable(by: manager.reloadID)
             .scrollTargetLayout()
         }
         .tint(Color.tint)
-        .equatable(by: manager.state.reloadID)
         .scrollEdgeEffectHidden(true, for: .all)
         .scrollDismissesKeyboard(.never)
         .contentMargins(
@@ -61,18 +52,32 @@ struct ConversationScrollView: View {
             )
         }
         .onScrollTargetVisibilityChange(idType: String.self, threshold: 0.1) {
-            ids in
-            manager.onScrollTargetVisibilityChange(ids)
+            manager.onScrollTargetVisibilityChange($0)
         }
         .defaultScrollAnchor(.bottom, for: .initialOffset)
         .scrollClipDisabled()
-        .defaultScrollAnchor(
-            manager.presentation.state.bottomAccessory == .scrollDownButton ? nil : .bottom,
-            for: .sizeChanges
-        )
+        .defaultScrollAnchor(defaultScrollAnchor, for: .sizeChanges)
         .scrollPosition(
             manager.scrollController.scrollPositionBindable,
             anchor: .bottom
         )
+    }
+
+    private var layoutConfiguration: MsgsScrollViewLayoutConfiguration {
+        MsgsScrollViewLayoutConfiguration(
+            spacing: 0,
+            contentInsets: .init(
+                top: ChatLayoutConstants.topBarHeight,
+                leading: Padding.sm,
+                bottom: 0,
+                trailing: Padding.sm
+            ),
+            screenBounds: UIApplication.shared.screenBounds()
+        )
+    }
+
+    private var defaultScrollAnchor: UnitPoint? {
+        manager.presentation.state.bottomAccessory == .scrollDownButton
+            ? .none : .bottom
     }
 }

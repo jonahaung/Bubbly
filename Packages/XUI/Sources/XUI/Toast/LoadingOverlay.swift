@@ -3,7 +3,7 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import Pow
+import Anima
 import SwiftUI
 
 public struct LoadingOverlay: View {

@@ -139,7 +139,7 @@ extension ChatComposer {
             attachments: [],
             in: conversation
         )
-        try await Socket.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
+        try await Socket.shared.send(.newMsg(rMsg: .init(msg)))
     }
 
     func resetDraft() {
@@ -250,7 +250,7 @@ private actor ChatComposerWorker {
             attachments: attachments,
             in: conversation
         )
-        try await Socket.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
+        try await Socket.shared.send(.newMsg(rMsg: .init(msg)))
     }
 
     private func sanitizeText(_ text: String, attachments: [Attachment]) -> String {

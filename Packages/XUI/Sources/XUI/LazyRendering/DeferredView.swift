@@ -8,8 +8,8 @@ import SwiftUI
 @frozen
 @_documentation(visibility: internal)
 public struct DeferredView<Content: View>: View {
-    @usableFromInline
-    let content: () -> Content
+    
+    @usableFromInline  let content: () -> Content
 
     @State private var didAppear: Bool = false
 

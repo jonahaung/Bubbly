@@ -14,10 +14,12 @@ enum ScrollDirection: Sendable, Hashable {
 }
 
 extension ScrollCoordinator {
+
     struct State: Sendable, Hashable {
         var isFirstResponder = false
         var updateState: ScrollViewUpdate = .initial
         var phase: ScrollPhase = .tracking
+        var geometry: VScrollGeometry = .empty
     }
 
     enum Intent {
@@ -53,11 +55,6 @@ extension ScrollCoordinator {
         mutating func update(to newValue: Self) {
             guard self != newValue else { return }
             self = newValue
-        }
-
-        mutating func setHasViewLoaded() {
-            guard self == .initial else { return }
-            self = .didEndUpdates
         }
     }
 }

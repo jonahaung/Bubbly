@@ -23,25 +23,26 @@ public final class AppLauncher {
     }
 
     public private(set) var route: MainRoute = .loading
-    public let router: Router = .shared
 
     public init() {}
 }
 
 public extension AppLauncher {
-    func startEvaluate() async {
+    func startEvaluate(router: Router) async {
         let route = evaluateRoute()
         switch route {
         case .getStarted:
             router.reset()
             await Store.shared.destory()
             GroupStorage.shared.delete(for: .auth(.currentUserID))
+            await PendingDeeplinkStore.shared.setMainRouteReady(false)
         case .loading:
             break
         case let .main(currentUser):
-            router.reset()
             GroupStorage.shared.save(currentUser.uid, for: .auth(.currentUserID))
             await Store.shared.start(with: currentUser.uid)
+            await PendingDeeplinkStore.shared.setMainRouteReady(true)
+            await PendingDeeplinkStore.shared.drainIfReady()
         }
         self.route = route
     }
@@ -56,22 +57,25 @@ public extension AppLauncher {
         return .getStarted
     }
 
-    func markGetStartedAsDone(user: CurrentUserModel) async {
+    func markGetStartedAsDone(user: CurrentUserModel, router: Router) async {
         let defaults = UserDefaults.standard
         defaults.set(true, forKey: DefaultKeys.getStarted)
         router.reset()
         GroupStorage.shared.save(user.uid, for: .auth(.currentUserID))
         await Store.shared.start(with: user.uid)
+        await PendingDeeplinkStore.shared.setMainRouteReady(true)
+        await PendingDeeplinkStore.shared.drainIfReady()
         route = .main(user)
     }
 
-    func resetGetStarted() async throws {
+    func resetGetStarted(router: Router) async throws {
         try Auth.auth().signOut()
         router.reset()
         await Store.shared.destory()
+        await PendingDeeplinkStore.shared.setMainRouteReady(false)
         GroupStorage.shared.delete(for: .auth(.currentUserID))
         let defaults = UserDefaults.standard
         defaults.set(false, forKey: DefaultKeys.getStarted)
-        await startEvaluate()
+        await startEvaluate(router: router)
     }
 }

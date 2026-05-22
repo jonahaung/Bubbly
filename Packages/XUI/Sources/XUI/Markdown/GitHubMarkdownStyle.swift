@@ -85,10 +85,11 @@ public struct GitHubMarkdownStyle {
 extension NSParagraphStyle: @unchecked @retroactive Sendable {
     public static let `default`: NSParagraphStyle = { paragraphStyle in
         paragraphStyle.lineBreakMode = .byWordWrapping
-        paragraphStyle.lineBreakStrategy = .hangulWordPriority
+        paragraphStyle.lineBreakStrategy = .pushOut
+        paragraphStyle.allowsDefaultTighteningForTruncation = false
         paragraphStyle.alignment = .natural
-        paragraphStyle.lineSpacing = 0
-        paragraphStyle.lineHeightMultiple = 1.2
+        paragraphStyle.lineSpacing = 1
+        paragraphStyle.lineHeightMultiple = 1.3
         return paragraphStyle
     }(NSMutableParagraphStyle())
 }
@@ -96,8 +97,8 @@ extension NSParagraphStyle: @unchecked @retroactive Sendable {
 extension AttributeContainer {
     static let paragraph: AttributeContainer = {
         var container = AttributeContainer()
-        container.font = .system(size: UIFont.labelFontSize)
-        container.lineHeight = .multiple(factor: 1.2)
+        container.font = Typography.system.body
+        container.lineHeight = .multiple(factor: 1.3)
         container.paragraphStyle = .default
         return container
     }()

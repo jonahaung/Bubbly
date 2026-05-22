@@ -11,8 +11,8 @@ import XUI
 // MARK: - PushNotificationService
 
 public final class PushNotificationService: NSObject, Sendable {
-    override public init() {
-        super.init()
+    
+    public override init() {
     }
 
     @concurrent
@@ -31,36 +31,12 @@ public final class PushNotificationService: NSObject, Sendable {
 
     @concurrent
     public func applicationDidBecomeActive() async throws {
-        let datas = await PushNotificationStore.shared
-            .consumePendingAnyMsgData()
-        if !datas.isEmpty {
-            let currentNavPath = await Router.shared.visiblePath()
-            var shouldRefreshInbox = false
-            var nextPendingIndex: Int? = nil
-
-            do {
-                for (index, data) in datas.enumerated() {
-                    nextPendingIndex = index
-                    let didAffectInbox = try await process(
-                        data,
-                        for: currentNavPath,
-                    )
-                    shouldRefreshInbox = shouldRefreshInbox || didAffectInbox
-                }
-                if shouldRefreshInbox {
-                    await PushNotificationStore.shared.postInboxChanges()
-                }
-            } catch {
-                let pending =
-                    nextPendingIndex.map { Array(datas[$0...]) } ?? datas
-                await PushNotificationStore.shared.savePendingAnyMsgData(
-                    pending
-                )
-                throw error
-            }
-        }
-//        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-//        try await UNUserNotificationCenter.current().setBadgeCount(0)
+        let currentNavPath = await Router.shared.visiblePath()
+        try await PushNotificationStore.shared.consumePendingAnyMsgData(
+            navPath: currentNavPath
+        )
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        try await UNUserNotificationCenter.current().setBadgeCount(0)
     }
 }
 
@@ -82,11 +58,11 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
             return [.badge, .banner, .list, .sound]
         }
 
-        let currentNavPath = await MainActor.run { Router.shared.visiblePath() }
+        let currentNavPath = await Router.shared.visiblePath()
         do {
             switch currentNavPath {
             case .conversation(let prefetchData)
-                where data.conID == prefetchData.conversation.uid:
+            where data.conID == prefetchData.conversation.uid:
                 try await Socket.shared.notifyMessage(data)
                 return []
             default:
@@ -121,13 +97,9 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
             completionHandler()
             return
         }
-
-        Task { @MainActor in
-            if let url = data.deeplinkURL(
-                coordinator: .init(router: Router.shared)
-            ) {
-                UIApplication.shared.open(url)
-            }
+        Task {
+            await PendingDeeplinkStore.shared.enqueue(.conversation(conID: data.conID))
+            await PendingDeeplinkStore.shared.drainIfReady()
         }
         completionHandler()
     }
@@ -141,10 +113,10 @@ extension PushNotificationService {
         switch currentNavPath {
         case .conversation(let prefetchData)
         where data.conID == prefetchData.conversation.uid:
-//            try await Socket.shared.receive(data)
+            //            try await Socket.shared.receive(data)
             return false
         default:
-//            try await Socket.shared.receive(data)
+            //            try await Socket.shared.receive(data)
             return true
         }
     }

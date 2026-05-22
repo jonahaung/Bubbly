@@ -9,8 +9,8 @@ import Database
 import Services
 
 struct MsgCellAttachmentBubble: View {
-    @Environment(\.conversationTheme) private var theme
     let state: MsgCellViewModel.State
+    let theme: ChatTheme
     var body: some View {
         VStack(alignment: state.horizontalAlignment, spacing: .zero) {
             MsgAttachmentsView(state: state)

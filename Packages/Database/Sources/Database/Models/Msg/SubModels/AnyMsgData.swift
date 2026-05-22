@@ -146,7 +146,7 @@ public extension AnyMsgData {
 //        case let .seenStatus(status):
 //            status.msgID
         case let .msgRecipientReceipt(payload):
-            payload.preetyPrinted
+            payload.prettyPrinted
         }
     }
 }

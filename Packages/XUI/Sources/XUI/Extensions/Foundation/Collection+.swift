@@ -20,26 +20,6 @@ public extension Collection where Indices.Iterator.Element == Index {
 }
 
 public extension Array {
-    mutating func shuffle() {
-        if isEmpty {
-            return
-        }
-
-        for index in 0 ..< (count - 1) {
-            let randomIndex = Int.random(in: index ..< count)
-            if randomIndex != index {
-                swapAt(index, randomIndex)
-            }
-        }
-    }
-
-    func shuffled() -> [Element] {
-        var list = self
-        list.shuffle()
-
-        return list
-    }
-
     func removeDuplicates(by predicate: (Element, Element) -> Bool) -> Self {
         var result = [Element]()
         for value in self where result.filter({ predicate($0, value) }).isEmpty {
@@ -60,38 +40,6 @@ public extension Array {
 public extension Array {
     func groupByKey<Key: Hashable>(keyPath: KeyPath<Element, Key>) -> [Key: [Element]] {
         Dictionary(grouping: self, by: { $0[keyPath: keyPath] })
-    }
-}
-
-public extension BidirectionalCollection where Iterator.Element: Equatable {
-    func nextElement(_ item: Self.Iterator.Element, loop: Bool = false) -> Self.Iterator
-    .Element? {
-        if let itemIndex = firstIndex(of: item) {
-            let lastItem: Bool = (index(after: itemIndex) == endIndex)
-            if loop, lastItem {
-                return first
-            } else if lastItem {
-                return nil
-            } else {
-                return self[index(after: itemIndex)]
-            }
-        }
-        return nil
-    }
-
-    func previous(_ item: Self.Iterator.Element, loop: Bool = false) -> Self.Iterator
-    .Element? {
-        if let itemIndex = firstIndex(of: item) {
-            let firstItem: Bool = (itemIndex == startIndex)
-            if loop, firstItem {
-                return last
-            } else if firstItem {
-                return nil
-            } else {
-                return self[index(before: itemIndex)]
-            }
-        }
-        return nil
     }
 }
 

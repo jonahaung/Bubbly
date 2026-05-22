@@ -93,7 +93,7 @@ public struct SettingsScene: View {
 				Text("Permissions")
 			}
 			Section {
-				Text(currentUser.preetyPrinted)
+				Text(currentUser.prettyPrinted)
 			}
 			Section {
 				AsyncButton {

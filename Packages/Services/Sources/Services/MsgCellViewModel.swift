@@ -4,15 +4,26 @@ import Database
 import SwiftUI
 import XUI
 
-@MainActor
 @Observable
-public final class MsgCellViewModel: @MainActor Identifiable, @MainActor Equatable {
+public final class MsgCellViewModel: @preconcurrency Identifiable {
+    
     public var state: State
     public var isVisible: Bool = false
+    @ObservationIgnored
+    public var layoutValue: MsgLayoutValue
 
     public init(_ state: State) {
         self.state = state
+        layoutValue = .init(
+            uid: state.msg.uid,
+            recipient: state.msg.receiptType,
+            hasAttachment: state.msg.attachments?.isEmpty ?? true == false,
+            headerID: state.layout.id,
+            isSelected: state.isSelected
+        )
+        isVisible = state.msg.attachments.isNilOrEmpty ? true : false
     }
+
     public var msg: Message {
         state.msg
     }
@@ -23,12 +34,7 @@ public final class MsgCellViewModel: @MainActor Identifiable, @MainActor Equatab
         }
         var state = state
         state.msg = msg
-        if state.layout.showAvatar {
-            state.sender = ContactsRepository.shared.contact(for: state.senderID)
-        }
-        state.bubbleCornor = state.computeBubbleCorner()
-        state.dateStString = nil
-        state.computeDateString()
+        state.refreshDerivedState()
         self.state = state
     }
 
@@ -37,24 +43,40 @@ public final class MsgCellViewModel: @MainActor Identifiable, @MainActor Equatab
             return
         }
         var state = state
-        if layout.showAvatar, state.sender == nil {
-            state.sender = ContactsRepository.shared.contact(
-                for: state.senderID
-            )
-        }
         state.layout = layout
-        state.bubbleCornor = state.computeBubbleCorner()
-        state.computeDateString()
+        state.refreshDerivedState()
         self.state = state
-        
+    }
+
+    public func sync(
+        msg: Message,
+        attributedText: AttributedString?,
+        layout: MsgCellLayout
+    ) {
+        guard
+            state.msg != msg
+                || state.attributedText != attributedText
+                || state.layout != layout
+        else {
+            return
+        }
+
+        var state = state
+        state.msg = msg
+        state.attributedText = attributedText
+        state.layout = layout
+        state.refreshDerivedState()
+        self.state = state
     }
 
     public func setVisibility(_ isVisible: Bool) {
+        if state.attachments.isNilOrEmpty {
+            return
+        }
         guard self.isVisible != isVisible else {
             return
         }
         self.isVisible = isVisible
-        
     }
 
     public func update(selectedMsg: SelectedMsg?) {
@@ -63,49 +85,54 @@ public final class MsgCellViewModel: @MainActor Identifiable, @MainActor Equatab
         }
         var state = state
         state.selectedMsg = selectedMsg
-        state.bubbleCornor = state.computeBubbleCorner()
+        state.computeBubbleCorner()
         self.state = state
+        layoutValue = .init(
+            uid: state.msg.uid,
+            recipient: state.msg.receiptType,
+            hasAttachment: state.msg.attachments?.isEmpty ?? true == false,
+            headerID: state.layout.id,
+            isSelected: state.isSelected
+        )
     }
 
-    public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
+    public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool
+    {
         lhs.id == rhs.id
     }
-
 }
 
 extension MsgCellViewModel {
     public struct State: Equatable, Hashable, Identifiable {
-
-        @MainActor
-        public init(msg: Message, attributedText: AttributedString?, layout: MsgCellLayout) {
+        public init(
+            msg: Message,
+            attributedText: AttributedString?,
+            layout: MsgCellLayout
+        ) {
             self.msg = msg
             self.attributedText = attributedText
-            self.sender = layout.showAvatar ? ContactsRepository.shared.contact(for: msg.senderID) : nil
             self.layout = layout
             self.bubbleCornor = .none
-            self.bubbleCornor = computeBubbleCorner()
-            computeDateString()
+            refreshDerivedState()
         }
 
-        // MARK: Public
-
         public var msg: Message
-        public let attributedText: AttributedString?
+        public var attributedText: AttributedString?
 
-        public var sender: Contact?
         public var layout: MsgCellLayout
         public var selectedMsg: SelectedMsg?
-        public var bubbleCornor: BubbleCorner = .none
+        public var bubbleCornor: BubbleCorner
         public var dateStString: String?
-        
+
         public var isSender: Bool { msg.isSender }
 
         public var id: String {
             msg.uid
         }
+
         public var incomingStatus: DeliveryStatus? { msg.incomingStatus }
         public var outgoingStatus: MsgDeliveryState? { msg.outgoingStatus }
-        
+
         public var senderID: String {
             msg.senderID
         }
@@ -134,9 +161,15 @@ extension MsgCellViewModel {
             selectedMsg?.id == id
         }
 
-        func computeBubbleCorner() -> BubbleCorner {
+        public mutating func refreshDerivedState() {
+            computeBubbleCorner()
+            updateDateString()
+        }
+
+        public mutating func computeBubbleCorner() {
             if selectedMsg?.id == id {
-                return .all
+                bubbleCornor = .all
+                return
             }
             var corner = layout.bubbleCorner
             if selectedMsg?.previous == id {
@@ -145,12 +178,15 @@ extension MsgCellViewModel {
             if selectedMsg?.next == id {
                 corner.append(.top)
             }
-            return corner
+            bubbleCornor = corner
         }
 
-        public mutating func computeDateString() {
-            guard layout.showTimeSeparator, dateStString == nil else { return }
-            dateStString = MsgTimeStringFormatter.string(for: date)
+        private mutating func updateDateString() {
+            if layout.showTimeSeparator {
+                dateStString = MsgTimeStringFormatter.string(for: date)
+            } else if dateStString != nil {
+                dateStString = nil
+            }
         }
     }
 

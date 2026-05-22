@@ -6,6 +6,6 @@ import Foundation
 public extension AnyMsgData {
     @MainActor
     func deeplinkURL(coordinator: DeepLinkCoordinator) -> URL? {
-        coordinator.url(for: .conversation(conID: conID))
+        DeeplinkCodec.standard.url(for: .conversation(conID: conID))
     }
 }

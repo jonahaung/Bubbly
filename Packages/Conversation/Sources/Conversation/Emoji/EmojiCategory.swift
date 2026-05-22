@@ -1,20 +1,15 @@
+//
 //  EmojiCategory.swift
+//  Conversation
 //
-//  Copyright © 2026 Aung Ko Min.
-//
-
-#if os(iOS)
-//
-    // Copyright © 2026 Aung Ko Min. All rights reserved.
+//  Created by Aung Ko Min on 15/5/26.
 //
 
-    import Foundation
+import Foundation
 
-    struct EmojiCategory: Hashable, Identifiable {
-        let id: UUID = .init()
-        let title: String
-        let iconName: String
-        let emojis: [Emoji]
-    }
-
-#endif
+struct EmojiCategory: Hashable, Identifiable {
+    let id: UUID = .init()
+    let title: String
+    let iconName: String
+    let emojis: [Emoji]
+}

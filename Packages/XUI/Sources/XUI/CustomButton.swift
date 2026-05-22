@@ -4,7 +4,9 @@
 //
 
 import SwiftUI
+import Anima
 
+@MainActor
 public struct CustomButton<Content: View>: View {
 
     let label: () -> Content
@@ -21,19 +23,19 @@ public struct CustomButton<Content: View>: View {
     public var body: some View {
         label()
             .opacity(buttonIsPressing ? 0.3 : 1.0)
+            .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.5), trigger: buttonIsPressing, condition: { oldValue, newValue in
+                !oldValue && newValue
+            })
             ._onButtonGesture { pressing in
-                if pressing {
-                    buttonIsPressing = true
-                } else {
-                    UIImpactFeedbackGenerator(style: .soft).impactOccurred(intensity: 0.8)
+                buttonIsPressing = pressing
+                if !pressing {
+                    action()
                 }
             } perform: {
-                action()
-                Task.detached {
-                    try? await Task.sleep(seconds: 0.5)
-                    Task { @MainActor in
-                        onFinished?()
-                        buttonIsPressing = false
+                if let onFinished {
+                    Task {
+                        try? await Task.sleep(for: .milliseconds(500))
+                        onFinished()
                     }
                 }
             }

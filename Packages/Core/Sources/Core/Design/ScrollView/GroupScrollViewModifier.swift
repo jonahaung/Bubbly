@@ -11,7 +11,7 @@ private struct GroupScrollViewModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .contentMargins(.horizontal, Padding.md, for: .scrollContent)
-            .applyBackground()
+            .background(Color.background)
     }
 }
 

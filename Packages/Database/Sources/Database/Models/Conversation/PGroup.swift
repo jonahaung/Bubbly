@@ -35,6 +35,35 @@ public final class PGroup {
         self.members = members
         self.createdBy = createdBy
     }
+    
+    public required init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.uid = try container.decode(String.self, forKey: .uid)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.createdDate = try container.decode(Date.self, forKey: .createdDate)
+        self.photoURL = try container.decode(String.self, forKey: .photoURL)
+        self.members = try container.decode([String].self, forKey: .members)
+        self.createdBy = try container.decode(String.self, forKey: .createdBy)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(uid, forKey: .uid)
+        try container.encode(name, forKey: .name)
+        try container.encode(createdDate, forKey: .createdDate)
+        try container.encode(photoURL, forKey: .photoURL)
+        try container.encode(members, forKey: .members)
+        try container.encode(createdBy, forKey: .createdBy)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case uid
+        case name
+        case createdDate
+        case photoURL
+        case members
+        case createdBy
+    }
 }
 
 // MARK: UIdentifiable

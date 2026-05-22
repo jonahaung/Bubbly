@@ -23,7 +23,7 @@ struct TopBar: View {
                     .font(.system(size: UIFont.systemFontSize + 1, weight: .semibold))
                     .badgeView(
                         Text(
-                            manager.models.pagination.totalMsgsCount,
+                            manager.messages.pagination.totalMsgsCount,
                             format: .number
                         )
                         .font(.system(size: UIFont.smallSystemFontSize, weight: .medium).width(.compressed))
@@ -33,11 +33,13 @@ struct TopBar: View {
                     .padding(Padding.sm)
                     .background(theme.backgroundColor)
             } onFinished: {
-                manager.router?.pushToNav(.conversationDetails(manager.state.conversation))
+                Task { @MainActor in
+                    manager.router?.pushToNav(.conversationDetails(manager.state.conversation))
+                }
             }
             HStack(alignment: .top) {
-                CustomButton {
-                    manager.router?.pop()
+                AsyncButton {
+                    try await manager.pop()
                 } label: {
                     Image(systemSymbol: .chevronBackward)
                         .frame(square: 44)
@@ -67,7 +69,7 @@ struct TopBar: View {
             )
         )
         .geometryGroup()
-        .equatable(by: manager.models.pagination.conID)
+        .equatable(by: manager.messages.pagination.conID)
     }
 
     @Environment(ChatManager.self) private var manager

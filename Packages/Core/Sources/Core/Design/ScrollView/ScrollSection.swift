@@ -49,13 +49,13 @@ public struct ScrollSection<
                         { view in
                             view
                                 .intersperse {
-                                    Divider()
+                                    Rectangle().fill(Color.background).frame(height: 1)
                                 }
                         }
                     )
                 }
                 .padding(Padding.md)
-                .background(Color.container, in: RoundedRectangle(cornerRadius: Radius.card))
+                .background(Color.container, in: RoundedRectangle(cornerRadius: Radius.sm))
 
                 if let footer {
                     footer

@@ -86,7 +86,7 @@ public extension OpaqueRenderableView where Self: View {
 public protocol OpaqueDiffableView: OpaqueRenderableView {
     func isVisuallyEqual(to other: OpaqueDiffableView) -> Bool
 }
-
+ 
 public extension OpaqueDiffableView {
     func isVisuallyEqual(to other: OpaqueDiffableView) -> Bool {
         renderKey() == other.renderKey()

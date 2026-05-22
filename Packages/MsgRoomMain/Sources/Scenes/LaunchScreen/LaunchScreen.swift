@@ -11,8 +11,5 @@ struct LaunchScreen: View {
         ProgressView()
             .controlSize(.mini)
             .statusBarHidden()
-            .onTask {
-                await appLauncher.startEvaluate()
-            }
     }
 }

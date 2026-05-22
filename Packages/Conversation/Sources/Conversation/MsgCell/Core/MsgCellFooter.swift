@@ -17,11 +17,11 @@ struct MsgCellFooter: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
     var body: some View {
         if state.isSelected { Footer(state: state) }
-        if state.layout.showTopPadding { CellSpacer() }
+        if state.layout.showBottomSpacer { CellSpacer() }
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {
-        lhs.state.isSelected == rhs.state.isSelected && lhs.state.layout.showTopPadding == rhs.state.layout.showTopPadding
+        lhs.state.isSelected == rhs.state.isSelected && lhs.state.layout.showBottomSpacer == rhs.state.layout.showBottomSpacer
     }
 }
 
@@ -37,8 +37,9 @@ private struct Footer: View, @MainActor Equatable {
             }
         }
         .foregroundStyle(Color.tertiaryText)
-        .padding(.horizontal, Padding.lg)
+        .padding(.horizontal, 35)
         .allowsHitTesting(false)
+        .transition(.invisible())
         .equatable(by: state.outgoingStatus)
     }
 

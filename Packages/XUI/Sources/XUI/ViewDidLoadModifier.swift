@@ -24,6 +24,7 @@ public struct ViewDidLoadModifier: ViewModifier {
 }
 
 public struct ViewDidTaskModifier: ViewModifier {
+    
     @State private var didTask = false
     private let action: () async -> Void
 

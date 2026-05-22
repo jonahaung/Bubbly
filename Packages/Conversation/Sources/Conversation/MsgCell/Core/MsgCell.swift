@@ -11,8 +11,8 @@ import Services
 
 struct MsgCell: View {
 
-    let viewModel: MsgCellViewModel
-
+    @LazyState var viewModel: MsgCellViewModel
+    
     var body: some View {
         VStack(alignment: viewModel.state.horizontalAlignment, spacing: 0) {
             MsgCellHeader(state: viewModel.state)
@@ -30,13 +30,9 @@ struct MsgCell: View {
             }
             MsgCellFooter(state: viewModel.state)
         }
-        .environment(\.isVisible, viewModel.isVisible)
+        .environment(viewModel)
+        .transition(.invisible())
         .id(viewModel.id)
-        .layoutValue(
-            key: MsgLayoutValueKey.self,
-            value: viewModel.msg.layoutValue(
-                layout: viewModel.state.layout
-            )
-        )
+        .layoutValue(key: MsgLayoutValueKey.self, value: viewModel.layoutValue)
     }
 }

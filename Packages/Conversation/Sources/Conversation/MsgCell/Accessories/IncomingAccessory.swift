@@ -14,6 +14,7 @@ struct IncomingAccessory: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
     let status: DeliveryStatus
     @Environment(\.msgCellActions) private var msgCellActions
+    @Environment(\.members) private var members
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -39,13 +40,13 @@ struct IncomingAccessory: View, @MainActor Equatable {
             case .read:
                 ZeroSizeView()
             case .initial:
-                ZeroSizeView()
+                Circle().fill(Color.orange)
             }
-            if state.layout.showAvatar, let sender = state.sender {
+            if state.layout.showAvatar, let sender = members.contact(for: state.msg.senderID) {
                 ProfilePhoto(
                     sender, size: .custom(Spacing.md),
                     tapAction: .custom { msgCellActions?(.onTapAvatar(state.id)) }
-                ).equatable(by: sender.uid)
+                )
             }
         }
         .frame(width: Spacing.md + 4)

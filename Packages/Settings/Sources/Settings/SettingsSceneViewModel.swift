@@ -100,7 +100,7 @@ final class SettingsSceneViewModel: ErrorPresenter {
 
     private func handleSignOut() async {
         do {
-            try await appLauncher.resetGetStarted()
+            try await appLauncher.resetGetStarted(router: coordinator.router)
         } catch {
             await showError(error)
         }

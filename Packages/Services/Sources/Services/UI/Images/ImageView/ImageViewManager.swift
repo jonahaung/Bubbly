@@ -8,6 +8,7 @@ import XUI
 @MainActor
 @Observable
 final class ImageViewManager {
+    
     let item: any ImageViewItem
     var image: UIImage? = nil
     var progress: ImageTask.Progress? = nil

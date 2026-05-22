@@ -12,19 +12,20 @@ struct TimeSeparator: View, @MainActor Equatable {
 
     @Environment(\.typography) private var typography
     let dateString: String?
-
+    
     var body: some View {
-        VStack {
+        ZStack {
             if let dateString {
                 Text(dateString)
             }
         }
-        .font(typography.footnote.weight(.semibold))
-        .foregroundStyle(Color.secondaryText)
+        .font(typography.footnote)
+        .foregroundStyle(Color.tertiaryText)
         .frame(
             height: ChatLayoutConstants.Cell.timeSeparatorHeight
         )
-        .flexible(.horizontal)
+        .padding(.horizontal, Padding.lg)
+        .allowsHitTesting(false)
     }
 
     static func == (lhs: Self, rhs: Self) -> Bool {

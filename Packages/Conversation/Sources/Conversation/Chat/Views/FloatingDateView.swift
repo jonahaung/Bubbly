@@ -3,12 +3,6 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-//
-//  FloatingDateView.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 27/4/25.
-//
 import XUI
 import Core
 import SwiftUI
@@ -24,7 +18,7 @@ struct FloatingDateView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(Color.container.opacity(0.8), in: RoundedRectangle(cornerRadius: Radius.md))
+            .background(Color.background, in: RoundedRectangle(cornerRadius: Radius.md))
             .geometryGroup()
             .equatable(by: dateString)
         }
