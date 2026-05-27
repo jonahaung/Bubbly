@@ -13,7 +13,11 @@ public struct SideEffectHandler: Sendable {
     public static let `default` = SideEffectHandler { effect in
         switch effect {
         case let .prepareForConversation(id):
-            try await ConversationInitializer.start(conID: id, refetch: false)
+            do {
+                try await ConversationInitializer.start(conID: id, refetch: false)
+            } catch {
+                try await ConversationInitializer.start(conID: id, refetch: true)
+            }
         case let .track(event, props):
             print("Track \(event) \(props)")
         case .requireAuth:

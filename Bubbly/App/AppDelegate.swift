@@ -17,6 +17,9 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
             Any]? = nil,
     ) -> Bool {
         runtime.configureApplication()
+        if let userInfo = options?[.remoteNotification] as? [AnyHashable: Any] {
+            runtime.captureLaunchNotification(userInfo)
+        }
         return true
     }
 
@@ -50,6 +53,6 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didReceiveRemoteNotification userInfo: [AnyHashable: Any],
     ) async -> UIBackgroundFetchResult {
-        runtime.didReceiveRemoteNotification(userInfo)
+        return runtime.didReceiveRemoteNotification(userInfo)
     }
 }

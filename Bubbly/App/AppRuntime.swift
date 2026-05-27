@@ -22,6 +22,11 @@ final class AppRuntime {
         FirebaseKeychainSanitizer.sanitize()
         FirebaseConfiguration.shared.setLoggerLevel(.error)
         Auth.auth().shareAuthStateAcrossDevices = true
+        pushNotificationService.configureDelegates()
+    }
+
+    func captureLaunchNotification(_ userInfo: [AnyHashable: Any]) {
+        pushNotificationService.captureLaunchNotification(userInfo)
     }
 
     func openURL(_ url: URL) {

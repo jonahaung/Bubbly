@@ -11,8 +11,10 @@ import XUI
 // MARK: - PushNotificationService
 
 public final class PushNotificationService: NSObject, Sendable {
-    
+    private let routeParser: PushNotificationRouteParser
+
     public override init() {
+        routeParser = .init()
     }
 
     @concurrent
@@ -25,8 +27,23 @@ public final class PushNotificationService: NSObject, Sendable {
                 ]
             )
         await UIApplication.shared.registerForRemoteNotifications()
+        configureDelegates()
+    }
+
+    public func configureDelegates() {
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
+    }
+
+    public func captureLaunchNotification(_ userInfo: [AnyHashable: Any]) {
+        do {
+            let route = try routeParser.parse(userInfo: userInfo)
+            Task {
+                await enqueuePendingRoute(route)
+            }
+        } catch {
+            log(error)
+        }
     }
 
     @concurrent
@@ -88,24 +105,26 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
             @escaping ()
             -> Void,
     ) {
-        let userInfo = response.notification.request.content.userInfo
-        let data: AnyMsgData
         do {
-            data = try AnyMsgData.parse(from: userInfo)
+            let route = try routeParser.parse(
+                userInfo: response.notification.request.content.userInfo
+            )
+            Task {
+                await enqueuePendingRoute(route)
+            }
         } catch {
             log(error)
-            completionHandler()
-            return
-        }
-        Task {
-            await PendingDeeplinkStore.shared.enqueue(.conversation(conID: data.conID))
-            await PendingDeeplinkStore.shared.drainIfReady()
         }
         completionHandler()
     }
 }
 
 extension PushNotificationService {
+    private func enqueuePendingRoute(_ route: Deeplink) async {
+        await PendingDeeplinkStore.shared.enqueue(route)
+        await PendingDeeplinkStore.shared.drainIfReady()
+    }
+
     fileprivate func process(
         _ data: AnyMsgData,
         for currentNavPath: NavPath?
