@@ -145,7 +145,9 @@ public struct GroupConversationSettingsScene: View {
                 try? await Store.shared
                     .conversationPropertiesStore?
                     .updateAndSave(uid: viewModel.group.uid) { model in
-                        model.update(from: properties)
+                        model.theme = properties.theme
+                        model.seenMembers = properties.seenMembers
+                        model.lastPage = properties.lastPage
                     }
             }
         }

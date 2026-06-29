@@ -3,10 +3,10 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
 import Core
-import SwiftUI
 import Database
+import SwiftUI
+import XUI
 
 extension ComposeBar {
     struct ComposeBarSendButton: View {
@@ -15,25 +15,34 @@ extension ComposeBar {
 
         var body: some View {
             AsyncButton {
-                if composer.hasContent {
+                if composer.canSend {
                     composer.send(conversation: manager.state.conversation)
                 } else {
-                    composer.inputText.text = Lorem.random()
+                    composer.inputText.set(text: Lorem.random())
                 }
             } label: {
                 ZStack {
-                    let hasText = composer.hasContent
-                    Image(systemName: "paperplane.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(square: 24)
-                        .foregroundStyle(hasText ? .primary : .secondary)
-                        .padding()
-                        .rotationEffect(
-                            .degrees(hasText ? -45 : -180),
-                            anchor: .center
-                        )
-                        .animation(.anticipateOvershoot, value: hasText)
+                    if composer.state.isProcessing {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "paperplane.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(square: 24)
+                            .foregroundStyle(
+                                composer.hasContent ? .primary : .secondary
+                            )
+                            .padding()
+                            .rotationEffect(
+                                .degrees(composer.hasContent ? -45 : -180),
+                                anchor: .center
+                            )
+                            .animation(
+                                .anticipateOvershoot,
+                                value: composer.hasContent
+                            )
+                    }
                 }
                 .frame(
                     width: ChatLayoutConstants.bottomBarHeight,
@@ -43,6 +52,8 @@ extension ComposeBar {
                 .background(Color.appPrimary, in: .circle)
                 .geometryGroup()
             }
+//            .disabled(composer.canSend == false)
+            .accessibilityLabel("Send message")
         }
     }
 }

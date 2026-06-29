@@ -50,8 +50,14 @@ public struct BackArrowMenuButton: View {
 
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(barColor)
-                    .frame(width: isOpen ? shrinkWidth : size, height: barHeight)
-                    .rotationEffect(.degrees(isOpen ? -30 : 0), anchor: .leading)
+                    .frame(
+                        width: isOpen ? shrinkWidth : size,
+                        height: barHeight
+                    )
+                    .rotationEffect(
+                        .degrees(isOpen ? -30 : 0),
+                        anchor: .leading
+                    )
                     .offset(x: isOpen ? -offsetX : 0)
 
                 RoundedRectangle(cornerRadius: cornerRadius)
@@ -61,7 +67,10 @@ public struct BackArrowMenuButton: View {
 
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .fill(barColor)
-                    .frame(width: isOpen ? shrinkWidth : size, height: barHeight)
+                    .frame(
+                        width: isOpen ? shrinkWidth : size,
+                        height: barHeight
+                    )
                     .rotationEffect(.degrees(isOpen ? 30 : 0), anchor: .leading)
                     .offset(x: isOpen ? -offsetX : 0)
             }

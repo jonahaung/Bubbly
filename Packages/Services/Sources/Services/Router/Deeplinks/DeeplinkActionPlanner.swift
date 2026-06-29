@@ -45,6 +45,12 @@ public extension DeeplinkActionPlanner {
                     event: "deeplink_open_conversation",
                     properties: ["id": route.conID],
                 )))
+            case let .message(route):
+                actions.append(.sideEffect(.prepareForMessage(id: route.msgID)))
+                actions.append(.sideEffect(.track(
+                    event: "deeplink_open_message",
+                    properties: ["id": route.msgID],
+                )))
             }
             return .init(actions)
         }

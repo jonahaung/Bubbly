@@ -1,8 +1,3 @@
-//  MsgCellHeader.swift
-//
-//  Copyright © 2026 Aung Ko Min.
-//
-
 //
 //  MsgCellHeader.swift
 //  Conversation
@@ -14,6 +9,7 @@ import Services
 
 struct MsgCellHeader: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
+    @Environment(\.members) private var members
     var body: some View {
         if state.layout.showTimeSeparator {
             TimeSeparator(dateString: state.dateStString)
@@ -25,7 +21,7 @@ struct MsgCellHeader: View, @MainActor Equatable {
         if state.isSender {
             return state.date.formatted(date: .abbreviated, time: .shortened)
         } else {
-            let name: String? = state.senderID
+            let name: String? = members.contact(for: state.senderID)?.name
             return name ?? "Unknown"
         }
     }

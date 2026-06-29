@@ -10,9 +10,7 @@ struct ConversationGroupCell: View {
 
     var body: some View {
         AsyncButton {
-            try await ConversationInitializer.start(conversation: Conversation(
-                .group(group),
-            ), router: .shared)
+            try await ConversationInitializer.start(conID: group.uid, refetch: false)
         } label: {
             HStack(spacing: 20) {
                 ProfilePhoto(

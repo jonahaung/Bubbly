@@ -62,8 +62,10 @@ private extension ToastPresenter {
     func processQueue() {
         guard !queue.isEmpty else { return }
         let next = queue.dequeue()
-        toast = next
-        startTracking()
+        withTransaction(\.disablesAnimations, true) {
+            toast = next
+            startTracking()
+        }
     }
 }
 

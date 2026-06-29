@@ -12,13 +12,16 @@ public extension Socket {
         switch data {
         case let .newMsg(rMsg):
             let msg = Message(rMsg)
-            try await Store.shared.msgStore?.insert(msg)
             notifyMessage(data)
-            addToQueue()
+            try await Store.shared.msgStore?.insert(msg)
+            try await Task.sleep(seconds: 0.5)
+            if msg.isSender {
+                addToQueue()
+            }
         case let .deleteMsg(rMsg: rMsg):
             let currentUserID = try CurrentUserID.get()
             try await Store.shared.msgStore?.delete(uid: rMsg.uid)
-            notifyMessage(data)
+            notifyMessage(.newMsg(rMsg: rMsg))
             if rMsg.senderID == currentUserID {
                 addToQueue()
             }
@@ -125,13 +128,19 @@ public extension Socket {
                 encodedString,
                 publicKeyString: contact.publicKeyString,
             )
+            let deepLink = DeeplinkCodec.standard
+                .url(for: .conversation(conID: data.conID))?
+                .absoluteString
 
-            // Build APNs notification
             let notification = APNSNotification(
                 deviceToken: contact.pushToken,
                 messageContent: encrypted,
                 alert: alert,
-                interruptionLevel: .timeSensitive
+                interruptionLevel: .timeSensitive,
+                customData: [
+                    "con_id": data.conID,
+                    "deep_link": deepLink ?? "",
+                ]
             )
             let success = try? await self.pushNotificationSender.send(notification: notification)
             return MsgRecipientReceipt(

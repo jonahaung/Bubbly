@@ -10,7 +10,7 @@ import Services
 import Foundation
 
 struct ConversationDataUpdater {
-    func reloadConversation(
+    func reloadState(
         currentState: ChatManager.State, refetch: Bool
     ) async throws -> ChatManager.State {
         let conID = currentState.conversation.uid

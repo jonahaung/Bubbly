@@ -54,7 +54,9 @@ public final class PConversationProperties: Codable {
 // MARK: SendableTransformable
 
 extension PConversationProperties: SendableTransformable {
-    public func update(from item: ConversationProperties) {
+    public typealias SendableType = ConversationProperties
+
+    public func update(from item: SendableType) throws -> Self {
         if theme != item.theme {
             theme = item.theme
         }
@@ -64,9 +66,10 @@ extension PConversationProperties: SendableTransformable {
         if lastPage != item.lastPage {
             lastPage = item.lastPage
         }
+        return self
     }
 
-    public convenience init(from sendable: ConversationProperties) {
+    public convenience init(from sendable: SendableType) {
         self.init(
             uid: sendable.uid,
             theme: sendable.theme,

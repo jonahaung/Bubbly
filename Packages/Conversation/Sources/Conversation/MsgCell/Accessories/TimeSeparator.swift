@@ -14,17 +14,15 @@ struct TimeSeparator: View, @MainActor Equatable {
     let dateString: String?
     
     var body: some View {
-        ZStack {
-            if let dateString {
-                Text(dateString)
-            }
-        }
-        .font(typography.footnote)
-        .foregroundStyle(Color.tertiaryText)
+        Text(dateString ?? "")
+            .foregroundStyle(Color.tertiaryText)
         .frame(
-            height: ChatLayoutConstants.Cell.timeSeparatorHeight
+            height: ChatLayoutConstants.Cell.timeSeparatorHeight, alignment: .bottom
         )
+        .font(.system(size: UIFont.systemFontSize, weight: .medium))
         .padding(.horizontal, Padding.lg)
+        .padding(.bottom, Padding.xs)
+        .background(Color.background)
         .allowsHitTesting(false)
     }
 

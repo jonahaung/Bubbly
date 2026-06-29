@@ -9,7 +9,6 @@ public final class MsgCellViewModel: @preconcurrency Identifiable {
     
     public var state: State
     public var isVisible: Bool = false
-    @ObservationIgnored
     public var layoutValue: MsgLayoutValue
 
     public init(_ state: State) {
@@ -21,7 +20,6 @@ public final class MsgCellViewModel: @preconcurrency Identifiable {
             headerID: state.layout.id,
             isSelected: state.isSelected
         )
-        isVisible = state.msg.attachments.isNilOrEmpty ? true : false
     }
 
     public var msg: Message {
@@ -45,34 +43,11 @@ public final class MsgCellViewModel: @preconcurrency Identifiable {
         var state = state
         state.layout = layout
         state.refreshDerivedState()
-        self.state = state
-    }
-
-    public func sync(
-        msg: Message,
-        attributedText: AttributedString?,
-        layout: MsgCellLayout
-    ) {
-        guard
-            state.msg != msg
-                || state.attributedText != attributedText
-                || state.layout != layout
-        else {
-            return
-        }
-
-        var state = state
-        state.msg = msg
-        state.attributedText = attributedText
-        state.layout = layout
-        state.refreshDerivedState()
+        layoutValue.headerID = layout.id
         self.state = state
     }
 
     public func setVisibility(_ isVisible: Bool) {
-        if state.attachments.isNilOrEmpty {
-            return
-        }
         guard self.isVisible != isVisible else {
             return
         }
@@ -103,7 +78,7 @@ public final class MsgCellViewModel: @preconcurrency Identifiable {
 }
 
 extension MsgCellViewModel {
-    public struct State: Equatable, Hashable, Identifiable {
+    public struct State: Sendable, Equatable, Hashable, Identifiable {
         public init(
             msg: Message,
             attributedText: AttributedString?,
@@ -167,15 +142,19 @@ extension MsgCellViewModel {
         }
 
         public mutating func computeBubbleCorner() {
-            if selectedMsg?.id == id {
+            guard let selectedMsg else {
+                bubbleCornor = layout.bubbleCorner
+                return
+            }
+            if selectedMsg.id == id {
                 bubbleCornor = .all
                 return
             }
             var corner = layout.bubbleCorner
-            if selectedMsg?.previous == id {
+            if selectedMsg.previous == id {
                 corner.append(.bottom)
             }
-            if selectedMsg?.next == id {
+            if selectedMsg.next == id {
                 corner.append(.top)
             }
             bubbleCornor = corner
@@ -183,7 +162,9 @@ extension MsgCellViewModel {
 
         private mutating func updateDateString() {
             if layout.showTimeSeparator {
-                dateStString = MsgTimeStringFormatter.string(for: date)
+                if dateStString == nil {
+                    dateStString = MsgTimeStringFormatter.string(for: date)
+                }
             } else if dateStString != nil {
                 dateStString = nil
             }

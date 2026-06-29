@@ -19,14 +19,16 @@ let package = Package(
             url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
             .upToNextMajor(from: "5.3.0")
         ),
-        .package(name: "Anima", path: "../Anima")
+        .package(name: "Anima", path: "../Anima"),
+        .package(name: "ImageLoader", path: "../ImageLoader")
     ],
     targets: [
         .target(
             name: "XUI",
             dependencies: [
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
-                .product(name: "Anima", package: "Anima")
+                .product(name: "Anima", package: "Anima"),
+                .product(name: "ImageLoader", package: "ImageLoader")
             ],
             resources: [
                 .process("Resources")

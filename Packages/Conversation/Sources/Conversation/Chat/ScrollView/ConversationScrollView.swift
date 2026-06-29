@@ -27,16 +27,12 @@ struct ConversationScrollView: View {
                 }
             }
             .equatable(by: manager.reloadID)
+            .geometryGroup()
             .scrollTargetLayout()
         }
         .tint(Color.tint)
-        .scrollEdgeEffectHidden(true, for: .all)
         .scrollDismissesKeyboard(.never)
-        .contentMargins(
-            .bottom,
-            ChatLayoutConstants.bottomBarHeight,
-            for: .scrollContent
-        )
+        .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
         .onScrollPhaseChange { oldPhase, newPhase, context in
             manager.send(
                 .scrollViewIntent(
@@ -44,9 +40,7 @@ struct ConversationScrollView: View {
                 )
             )
         }
-        .onScrollGeometryChange(for: VScrollGeometry.self, of: { .init($0) }) {
-            oldValue,
-            newValue in
+        .onScrollGeometryChange(for: VScrollGeometry.self, of: { .init($0) }) { oldValue, newValue in
             manager.send(
                 .scrollViewIntent(.onScrollGeometryChange(oldValue, newValue))
             )
@@ -55,7 +49,6 @@ struct ConversationScrollView: View {
             manager.onScrollTargetVisibilityChange($0)
         }
         .defaultScrollAnchor(.bottom, for: .initialOffset)
-        .scrollClipDisabled()
         .defaultScrollAnchor(defaultScrollAnchor, for: .sizeChanges)
         .scrollPosition(
             manager.scrollController.scrollPositionBindable,

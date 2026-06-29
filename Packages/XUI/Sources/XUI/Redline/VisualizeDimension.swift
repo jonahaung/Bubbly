@@ -108,7 +108,6 @@ extension Edge {
             Text("Hello, world!")
                 .background(.blue)
         }
-        .visualizeSize()
 
         HStack {
             Text("Hallo")

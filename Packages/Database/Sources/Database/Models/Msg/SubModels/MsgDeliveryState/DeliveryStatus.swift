@@ -8,8 +8,7 @@
 import XUI
 
 public enum DeliveryStatus: Int, Sendable, Equatable, Hashable, Codable {
-    case initial = 0
-    case sending
+    case sending = 1
     case sent
     case partiallyFailed
     case delivered
@@ -36,7 +35,7 @@ public extension DeliveryStatus {
     }
 
     var isSending: Bool {
-        self == .sending || self == .initial
+        self == .sending
     }
 
     var isFailure: Bool {

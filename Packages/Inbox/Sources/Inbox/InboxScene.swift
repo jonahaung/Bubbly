@@ -24,8 +24,7 @@ public struct InboxScene: View {
             LazyVStack(alignment: .leading) {
                 ScrollSection(data: viewModel.state.items) { item in
                     InboxCell(item: item) {
-                        if let url = DeeplinkCodec.standard.url(for: .conversation(conID: $0.conversation.uid))
-                        {
+                        if let url = DeeplinkCodec.standard.url(for: .conversation(conID: $0.conversation.uid)) {
                             openURL(url)
                         }
                     }

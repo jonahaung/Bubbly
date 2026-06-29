@@ -27,7 +27,7 @@ public final class PMsg {
         conID: String,
         text: String?,
         date: Date,
-        incomingStatus: DeliveryStatus = .initial,
+        incomingStatus: DeliveryStatus,
         outgoingStatus: MsgDeliveryState?,
         attachments: [Attachment]?,
         reactions: [Reaction]
@@ -138,7 +138,7 @@ extension PMsg: SendableTransformable {
             conID: conID,
             text: text,
             serverTime: date,
-            incomingStatus: .init(rawValue: incomingStatus) ?? .initial,
+            incomingStatus: .init(rawValue: incomingStatus) ?? .sending,
             outgoingStatus: outgoingStatus,
             attachments: attachments,
             reactions: reactions

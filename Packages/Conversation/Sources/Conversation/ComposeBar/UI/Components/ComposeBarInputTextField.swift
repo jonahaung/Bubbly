@@ -3,42 +3,37 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
 import Core
-import SwiftUI
 import Services
+import SwiftUI
+import XUI
 
 extension ComposeBar {
     struct ComposeBarInputTextField: View {
-        @Bindable var composer: ChatComposer
+        let inputText: InputText
         @Environment(\.sharedFocusState) private var focusState
 
         var body: some View {
             if let focusState {
                 TextField(
-                    text: composer.inputText
-                        .bindableText,
+                    "Text ...",
+                    text: .init(get: { inputText.text }, set: { inputText.set(text: $0) }),
                     axis: .vertical
-                ) {
-                    if let source = composer.state.source {
-                        Text("\(Image(systemName: source.systemImageName)) \(source.localizedName)")
-                            .symbolRenderingMode(.multicolor)
-                    } else {
-                        Text("Text ...")
-                    }
-                }
-                .lineLimit(1 ... 10)
-                .tint(.link)
-                .padding(.init(top: 10, leading: 16, bottom: 10, trailing: 8))
-                .focused(
-                    focusState.binding,
-                    equals: "textField"
                 )
+                .lineLimit(1...10)
+                .font(.system(size: UIFont.labelFontSize))
+                .lineHeight(.multiple(factor: 1.3))
+                .focused(focusState.binding, equals: .inputTextField)
+                .padding(.init(top: 8, leading: 12, bottom: 8, trailing: 8))
+                .tint(.link)
                 .background(
                     Color.appPrimary,
-                    in: RoundedRectangle(cornerRadius: UIFont.buttonFontSize)
+                    in: RoundedRectangle(
+                        cornerRadius: UIFont.labelFontSize,
+                        style: .continuous
+                    )
                 )
-                .font(.system(size: UIFont.buttonFontSize))
+                .accessibilityElement(children: .contain)
             }
         }
     }

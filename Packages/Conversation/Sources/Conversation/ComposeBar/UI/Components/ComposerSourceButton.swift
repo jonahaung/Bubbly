@@ -3,12 +3,10 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
 import Core
-import SwiftUI
 import Services
-
-// MARK: - ComposerSourceButton
+import SwiftUI
+import XUI
 
 struct ComposerSourceButton: View {
 
@@ -29,6 +27,7 @@ struct ComposerSourceButton: View {
         } onFinished: {
             action()
         }
+        .accessibilityLabel(source.localizedName)
     }
 
     @Environment(ChatComposer.self) private var composer
@@ -52,15 +51,16 @@ extension ComposerSourceButton {
                                             .parseImages(
                                                 selectedImages: [
                                                     .init(
-                                                        id: pickedItem.id.uuidString,
+                                                        id: pickedItem.id
+                                                            .uuidString,
                                                         image: pickedItem
                                                             .underlyingMediaType
                                                     )
                                                 ]
                                             )
                                     }
-                                case let pickedItem as MovieCameraPickerItem:
-                                    print(pickedItem)
+                                case is MovieCameraPickerItem:
+                                    break
                                 default:
                                     break
                                 }
@@ -85,9 +85,11 @@ extension ComposerSourceButton {
                 .presentModel(
                     NavPath
                         .view(
-                            node: DocumentPicker(fileContent: $composer.fileContent)
-                                .environment(composer.photoPicker)
-                                .opaqueView()
+                            node: DocumentPicker(
+                                fileContent: $composer.fileContent
+                            )
+                            .environment(composer.photoPicker)
+                            .opaqueView()
                         )
                 )
         case .machineImag:
@@ -95,7 +97,8 @@ extension ComposerSourceButton {
                 .presentModel(
                     NavPath
                         .view(
-                            node: TextEditor(text: $composer.fileContent).opaqueView()
+                            node: TextEditor(text: $composer.fileContent)
+                                .opaqueView()
                         )
                 )
         case .emoji:

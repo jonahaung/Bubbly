@@ -18,6 +18,8 @@ public struct SideEffectHandler: Sendable {
             } catch {
                 try await ConversationInitializer.start(conID: id, refetch: true)
             }
+        case let .prepareForMessage(id):
+            try await ConversationInitializer.start(msgID: id)
         case let .track(event, props):
             print("Track \(event) \(props)")
         case .requireAuth:

@@ -47,7 +47,7 @@ extension MsgsScrollViewLayout {
         subviews: Subviews,
         cache: inout Cache
     ) {
-        var y = rect.maxY - config.contentInsets.bottom
+        var y = cache.totalHeight - config.contentInsets.bottom
         let minX = rect.minX
         let spacing = config.spacing
 
@@ -123,10 +123,10 @@ private extension MsgsScrollViewLayout {
     }
 
     func measure(subview: LayoutSubview, value: MsgLayoutValue) -> CGSize {
-        let availableTotalWidth = config.boundsWidth - config.contentInsets.horizontal
+        let availableTotalWidth = max(0, config.boundsWidth - config.contentInsets.horizontal)
         let maxWidthRatio: CGFloat = value.hasAttachment ? 0.7 : config.bubbleWidthRatio
-        let targetedMaxWidth = availableTotalWidth * maxWidthRatio
-        return subview.sizeThatFits(ProposedViewSize(width: targetedMaxWidth, height: .infinity))
+        let targetedMaxWidth = max(0, availableTotalWidth * maxWidthRatio)
+        return subview.sizeThatFits(ProposedViewSize(width: targetedMaxWidth, height: nil))
     }
 
     func xPosition(for recipient: MsgRecipient) -> CGFloat {
@@ -139,15 +139,33 @@ private extension MsgsScrollViewLayout {
             config.boundsWidth * 0.5
         }
     }
+
+//    func sanitize(_ size: CGSize) -> CGSize {
+//        .init(
+//            width: sanitize(size.width),
+//            height: sanitize(size.height)
+//        )
+//    }
+
+    func sanitize(_ value: CGFloat) -> CGFloat {
+        guard value.isFinite else {
+            return 0
+        }
+        return max(0, value)
+    }
 }
 
 extension MsgsScrollViewLayout {
     private func makeSignature(subviews: Subviews) -> Int {
         var hasher = Hasher()
         hasher.combine(subviews.count)
+        hasher.combine(config.screenBounds)
+        hasher.combine(config.spacing)
         for subview in subviews {
             let value = subview[MsgLayoutValueKey.self]
-            hasher.combine(value)
+            hasher.combine(value.uid)
+            hasher.combine(value.headerID)
+            hasher.combine(value.isSelected)
         }
         return hasher.finalize()
     }

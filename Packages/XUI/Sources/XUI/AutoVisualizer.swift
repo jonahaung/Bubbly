@@ -6,12 +6,12 @@
 import Combine
 import SwiftUI
 
-public extension View {
-    func visualizeTouches(_ isEnabled: Bool) -> some View {
+extension View {
+    public func visualizeTouches(_ isEnabled: Bool) -> some View {
         modifier(TouchVisualizer(isEnabled: isEnabled))
     }
 
-    func visualizeTouches() -> some View {
+    public func visualizeTouches() -> some View {
         modifier(AutoVisualizer())
     }
 }
@@ -23,27 +23,28 @@ private struct AutoVisualizer: ViewModifier {
     @Environment(\.isSceneCaptured) private var isSceneCaptured
     func body(content: Content) -> some View {
         content
-        #if targetEnvironment(simulator)
-        .visualizeTouches(true)
-        #else
-        .visualizeTouches(true)
-        .onAppear {
-            isCaptured = isSceneCaptured
+            #if targetEnvironment(simulator)
+                .visualizeTouches(true)
+            #else
+                .visualizeTouches(true)
+                .onAppear {
+                    isCaptured = isSceneCaptured
 
-            cancellable = NotificationCenter.default
-                .publisher(for: UIScreen.capturedDidChangeNotification)
-                .sink { notification in
-                    guard let screen = notification.object as? UIScreen else {
-                        return
+                    cancellable = NotificationCenter.default
+                    .publisher(for: UIScreen.capturedDidChangeNotification)
+                    .sink { notification in
+                        guard let screen = notification.object as? UIScreen
+                        else {
+                            return
+                        }
+
+                        isCaptured = screen.isCaptured
                     }
-
-                    isCaptured = screen.isCaptured
                 }
-        }
-        .onDisappear {
-            cancellable = nil
-        }
-        #endif
+                .onDisappear {
+                    cancellable = nil
+                }
+            #endif
     }
 }
 
@@ -60,7 +61,9 @@ private struct TouchVisualizer: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .gesture(TouchVisualizerGesture(isEnabled: isEnabled, touches: $touches))
+            .gesture(
+                TouchVisualizerGesture(isEnabled: isEnabled, touches: $touches)
+            )
             .overlay {
                 ForEach(isEnabled ? touches : []) { touch in
                     TouchView()
@@ -87,7 +90,8 @@ private struct TouchVisualizerGesture: UIGestureRecognizerRepresentable {
     final class Recognizer: UIGestureRecognizer {
         var touches = 0
 
-        override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent)
+        {
             super.touchesBegan(touches, with: event)
 
             self.touches += touches.count
@@ -103,7 +107,8 @@ private struct TouchVisualizerGesture: UIGestureRecognizerRepresentable {
             }
         }
 
-        override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+        override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent)
+        {
             super.touchesEnded(touches, with: event)
 
             self.touches -= touches.count
@@ -113,7 +118,10 @@ private struct TouchVisualizerGesture: UIGestureRecognizerRepresentable {
             }
         }
 
-        override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+        override func touchesCancelled(
+            _ touches: Set<UITouch>,
+            with event: UIEvent
+        ) {
             super.touchesCancelled(touches, with: event)
 
             self.touches -= touches.count
@@ -159,10 +167,12 @@ private struct TouchVisualizerGesture: UIGestureRecognizerRepresentable {
         touches =
             switch recognizer.state {
             case .began,
-                 .changed:
-                (0 ..< recognizer.numberOfTouches).map { i in
+                .changed:
+                (0..<recognizer.numberOfTouches).map { i in
                     let globalPoint = recognizer.location(ofTouch: i, in: nil)
-                    let point = context.converter.convert(globalPoint: globalPoint)
+                    let point = context.converter.convert(
+                        globalPoint: globalPoint
+                    )
 
                     return TouchVisualizer.Touch(id: i, coordinates: point)
                 }

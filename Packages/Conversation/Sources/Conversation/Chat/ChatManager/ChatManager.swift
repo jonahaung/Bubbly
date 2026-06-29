@@ -38,9 +38,10 @@ import ImageLoader
     
     var state: State
     var reloadID = true
+    var focusState: SharedFocusState<ConversationFocusState>?
 
     init(
-        _ data: ConversationInitializer.PrefetchedData,
+        _ data: ConversationInitializedData,
         currentUserRepository: CurrentUserRepository,
         router: Router
     ) {
@@ -121,7 +122,7 @@ extension ChatManager {
         }
     }
 
-    func pop() async throws {
+    func prepareToExit() async throws {
         serialQueue.cancelAllPendingTasks()
         guard scrollController.geometry != .empty, scrollController.geometry.scrolledPosition != .atBottom else {
             router?.pop()

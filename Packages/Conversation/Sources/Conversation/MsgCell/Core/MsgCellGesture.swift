@@ -5,8 +5,6 @@
 
 import XUI
 import SwiftUI
-
-// © 2026 Aung Ko Min
 import Database
 import Services
 

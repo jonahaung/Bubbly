@@ -16,6 +16,12 @@ protocol ScrollCoordinatorDelegate: AnyObject {
         _ coordinator: ScrollCoordinator,
         finalizeScrollViewUpdatesWith state: ScrollCoordinator.State
     )
+    @discardableResult
+    func scrollCoordinator(
+        _ coordinator: ScrollCoordinator,
+        setEditing isEditing: Bool
+    ) -> Bool
     func getPaginationState() -> PaginatableState?
     func layoutIfNeeded()
+    var isFirstResponder: Bool { get }
 }

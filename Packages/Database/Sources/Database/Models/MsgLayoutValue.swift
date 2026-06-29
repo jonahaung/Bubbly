@@ -12,8 +12,8 @@ public struct MsgLayoutValue: Sendable, Hashable, UIdentifiable {
     public let uid: String
     public let recipient: MsgRecipient
     public let hasAttachment: Bool
-    public let headerID: Int
-    public let isSelected: Bool
+    public var headerID: Int
+    public var isSelected: Bool
 
     public init(
         uid: String,

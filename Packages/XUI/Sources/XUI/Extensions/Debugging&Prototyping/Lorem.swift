@@ -104,8 +104,6 @@ public enum Lorem {
             sentence,
             tweet,
             paragraph,
-            title,
-            shortTweet,
             url.absoluteString,
             reply(to: .init(previousMessage: sentence))
         ].random()
@@ -175,7 +173,7 @@ public enum Lorem {
     }
 
     public static var url: URL {
-        URL(string: sentencePack.urls.random())!
+        URL(string: (sentencePack.urls + DemoImages.demoPhotosURLs.shuffled().prefix(5).map(\.absoluteString)).random())!
     }
 }
 
@@ -266,7 +264,7 @@ private struct EnglishSentencePack: LoremSentencePack {
         },
 
         {
-            "The system processes requests efficiently in the background to ensure a responsive and reliable experience for all users."
+            "The system processes requests **efficiently** in the background to ensure a responsive and reliable experience for all users."
         },
 
         {
@@ -401,7 +399,10 @@ private struct EnglishSentencePack: LoremSentencePack {
         "https://apple.com",
         "https://developer.apple.com",
         "https://figma.com",
-        "https://support.apple.com"
+        "https://support.apple.com",
+        "https://randomimageurl.com",
+        "https://www.tinyzone.is/movie/the-super-mario-galaxy-movie-2026/",
+        "https://www.hackingwithswift.com/quick-start/swiftui/how-to-render-markdown-content-in-text"
     ]
 }
 

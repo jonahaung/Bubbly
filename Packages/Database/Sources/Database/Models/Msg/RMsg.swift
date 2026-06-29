@@ -56,9 +56,7 @@ public struct RMsg: Codable, Sendable, Hashable {
     public func outgoing() -> RMsg {
         var copy = self
         copy.outgoingStatus = nil
-        if copy.incomingStatus == .initial {
-            copy.incomingStatus = .sending
-        }
+        copy.incomingStatus = .sending
         return copy
     }
 }

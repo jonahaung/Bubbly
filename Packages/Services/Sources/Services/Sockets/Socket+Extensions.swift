@@ -61,7 +61,7 @@ private extension Socket {
                 try await Store.shared
                     .conversationPropertiesStore?
                     .updateAndSave(uid: payload.conID) { model in
-                        model.update(from: properties)
+                        try model.update(from: properties)
                     }
             }
             try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in

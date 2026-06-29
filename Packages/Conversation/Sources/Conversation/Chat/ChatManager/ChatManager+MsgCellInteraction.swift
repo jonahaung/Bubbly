@@ -11,8 +11,10 @@ import Core
 extension ChatManager {
     func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
         switch action {
-        case let .onTapMsg(string): setSelectedMsg(string)
-        case .onMarkMsg: break
+        case let .onTapMsg(string):
+            setSelectedMsg(string)
+        case .onMarkMsg:
+            break
         case let .onTapAvatar(string):
             guard let vieModel = messages.element(withID: string) else { return }
             if let contact = members.contact(for: vieModel.msg.senderID) {

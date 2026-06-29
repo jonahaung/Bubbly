@@ -6,12 +6,14 @@ public enum Deeplink: Hashable, Sendable {
     case home
     case profile(ProfileDeeplinkRoute)
     case conversation(ConversationDeeplinkRoute)
+    case message(MessageDeepLinkRoute)
     case settings
 
     public enum RouteKind: String, CaseIterable, Hashable, Sendable {
         case home
         case profile
         case conversation
+        case message
         case settings
 
         public init?(name: String) {
@@ -42,6 +44,8 @@ public enum Deeplink: Hashable, Sendable {
                 Self.profileDefinition
             case .conversation:
                 Self.conversationDefinition
+            case .message:
+                Self.messageDefinition
             case .settings:
                 Self.settingsDefinition
             }
@@ -82,6 +86,13 @@ public enum Deeplink: Hashable, Sendable {
             makeLink: { ConversationDeeplinkRoute(query: $0).map(Deeplink.conversation) },
         )
 
+        private static let messageDefinition = Definition(
+            requiredQueryKeys: idQueryKeys,
+            allowedQueryKeys: idQueryKeySet,
+            allowedQueryKeyNames: idQueryKeyNames,
+            makeLink: { MessageDeepLinkRoute(query: $0).map(Deeplink.message) },
+        )
+
         private static let settingsDefinition = Definition(
             requiredQueryKeys: noQueryKeys,
             allowedQueryKeys: noQueryKeySet,
@@ -98,6 +109,8 @@ public enum Deeplink: Hashable, Sendable {
             route.encode(into: &writer)
         case let .conversation(route):
             route.encode(into: &writer)
+        case let .message(route):
+            route.encode(into: &writer)
         }
     }
 
@@ -109,6 +122,10 @@ public enum Deeplink: Hashable, Sendable {
         .conversation(.init(conID: conID))
     }
 
+    public static func message(msgID: String) -> Deeplink {
+        .message(.init(msgID: msgID))
+    }
+
     var routeKind: RouteKind {
         switch self {
         case .home:
@@ -117,6 +134,8 @@ public enum Deeplink: Hashable, Sendable {
             .profile
         case .conversation:
             .conversation
+        case .message:
+            .message
         case .settings:
             .settings
         }

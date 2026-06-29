@@ -26,11 +26,12 @@
                     }
                 }.padding(.leading, 8)
             }
-            .fixedSize(horizontal: false, vertical: true)
-            .equatable(by: 1)
+            .contentMargins(.vertical, 8, for: .scrollContent)
+            .scrollContentBackground(.hidden)
+            .background(Color.background)
         }
 
         var rows: [GridItem] {
-            Array(repeating: GridItem(.fixed(30)), count: 4)
+            Array(repeating: GridItem(.fixed(30)), count: 5)
         }
     }

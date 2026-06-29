@@ -7,7 +7,7 @@ import XUI
 
 public enum NavPath: Sendable, Hashable, Identifiable, CaseNameReflectable {
     case conversationDetails(_ conversation: Conversation)
-    case conversation(_ prefatchData: ConversationInitializer.PrefetchedData)
+    case conversation(_ prefatchData: ConversationInitializedData)
     case contactDetails(_ contact: Contact)
     case currentUserDetails
     case view(node: RenderNode)

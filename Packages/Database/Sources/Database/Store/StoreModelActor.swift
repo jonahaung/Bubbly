@@ -73,7 +73,7 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
 
     public func updateAndSave<Result: Sendable>(
         uid: String,
-        _ update: sending (inout T) -> Result
+        _ update: sending (inout T) throws -> Result
     ) throws
         -> Result?
     {
@@ -81,21 +81,21 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
             return nil
         }
 
-        let result = update(&model)
+        let result = try update(&model)
         try save()
         return result
     }
 
     public func updateAndSaveDebounced<Result: Sendable>(
         uid: String,
-        _ update: @escaping (inout T)
+        _ update: @escaping (inout T) throws
             -> Result
     ) throws -> Result? {
         guard var model = try getModel(for: uid) else {
             return nil
         }
 
-        let result = update(&model)
+        let result = try update(&model)
         saveDebounced()
         return result
     }

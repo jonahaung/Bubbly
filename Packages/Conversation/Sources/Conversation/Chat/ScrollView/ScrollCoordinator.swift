@@ -75,8 +75,8 @@ extension ScrollCoordinator {
                 if state.isFirstResponder {
                     handleFirstResponder(oldValue, newValue)
                 }
-                if newValue.offsetY < 0 {
-                    scrollPosition.scrollTo(y: 0)
+                if newValue.offsetY < 0, (oldValue.offsetY > newValue.offsetY && oldValue.offsetY < newValue.offsetY) {
+                    paginateIfNeeded(newValue, state: state, direction: .down)
                 }
             }
         case .onScrollPhaseChange(let oldValue, let newValue, let context):
@@ -99,23 +99,40 @@ extension ScrollCoordinator {
                 }
             case .interacting:
                 debouncer.cancel()
-//                paginateIfNeeded(
-//                    geometry,
-//                    state: state,
-//                    direction: scrollDirection
-//                )
             case .decelerating:
+               
                 if let dy = context.velocity?.dy, abs(dy) != 0 {
                     let direction = dy < 0 ? ScrollDirection.down : .up
                     if scrollDirection != direction {
                         scrollDirection = direction
                     }
+                } else {
+                    scrollDirection = .none
                 }
-                paginateIfNeeded(
-                    geometry,
-                    state: state,
-                    direction: scrollDirection
-                )
+                
+                if scrollDirection == .up {
+                    paginateIfNeeded(
+                        geometry,
+                        state: state,
+                        direction: .up
+                    )
+                    
+//                    let bottomSpace = geometry.offsetY+geometry.boundsHeight - geometry.contentHeight
+//                    if bottomSpace > 0 {
+//                        if !state.isFirstResponder {
+//                            state.isFirstResponder = delegate?.scrollCoordinator(self, setEditing: true) == true
+//                        }
+//                    } else {
+//                        
+//                    }
+                } else {
+                    paginateIfNeeded(
+                        geometry,
+                        state: state,
+                        direction: .down
+                    )
+                }
+                
             default:
                 break
             }
@@ -168,7 +185,7 @@ extension ScrollCoordinator {
     ) {
         if state.phase == .interacting {
             if newValue.offsetY < oldValue.offsetY {
-                UIApplication.shared.endEditing()
+                delegate?.scrollCoordinator(self, setEditing: false)
             }
         }
     }
@@ -185,18 +202,17 @@ extension ScrollCoordinator {
         }
         let isFirstResponder =
             newValue.boundsHeight < oldValue.boundsHeight
-            && !UIApplication.shared.isFirstResponder
+        && delegate?.isFirstResponder == true
         guard state.isFirstResponder != isFirstResponder else { return }
         state.isFirstResponder = isFirstResponder
-        if oldValue.scrolledPosition != .atBottom {
-            let diff = oldValue.boundsHeight - newValue.boundsHeight
-            let y = newValue.offsetY + diff
-            if isFirstResponder {
-                scrollPosition.scrollTo(y: y)
-            } else {
+        let diff = oldValue.boundsHeight - newValue.boundsHeight
+        let y = newValue.offsetY + diff
+        if newValue.scrolledPosition != .atBottom {
+            state.phase.isScrolling ? performScroll(to: .y(y, .notAnimated)) : performScroll(to: .y(y, .scroll))
+        } else {
+            if state.phase.isScrolling {
                 performScroll(to: .y(y, .scroll))
             }
-
         }
     }
 
@@ -247,6 +263,7 @@ extension ScrollCoordinator {
 
     fileprivate func finalizeScrollUpdates() {
         delegate?.scrollCoordinator(self, finalizeScrollViewUpdatesWith: state)
+        state.isFirstResponder = delegate?.isFirstResponder == true
     }
 }
 
@@ -257,14 +274,14 @@ extension ScrollCoordinator {
             withTransaction(
                 .withAnimation(animation) { [weak self] in
                     guard let self else { return }
-                    scrollPosition.isPositionedByUser = true
+                    scrollPosition = .init()
                 }
             ) { scroll(to: newValue.position) }
         case .notAnimated:
             withTransaction(
                 .withoutAnimation { [weak self] in
                     guard let self else { return }
-                    scrollPosition.isPositionedByUser = true
+                    scrollPosition = .init()
                 }
             ) { scroll(to: newValue.position) }
         case .scroll:
@@ -272,14 +289,14 @@ extension ScrollCoordinator {
                 withTransaction(
                     .scrollView { [weak self] in
                         guard let self else { return }
-                        scrollPosition.isPositionedByUser = true
+                        scrollPosition = .init()
                     }
                 ) { scroll(to: newValue.position) }
             } else {
                 withTransaction(
                     .withoutAnimation { [weak self] in
                         guard let self else { return }
-                        scrollPosition.isPositionedByUser = true
+                        scrollPosition = .init()
                     }
                 ) { scroll(to: newValue.position) }
             }

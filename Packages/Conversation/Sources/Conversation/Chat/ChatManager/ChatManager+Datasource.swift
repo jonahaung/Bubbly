@@ -10,8 +10,9 @@ import Database
 import Services
 
 extension ChatManager {
+    
     func reloadConversation(refetch: Bool) async throws {
-        state = try await conversationDataUpdater.reloadConversation(
+        state = try await conversationDataUpdater.reloadState(
             currentState: state, refetch: refetch
         )
     }

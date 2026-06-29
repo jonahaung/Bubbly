@@ -9,6 +9,23 @@ import Database
 import Services
 
 extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
+    var isFirstResponder: Bool {
+        focusState?.value != nil
+    }
+    
+    
+    func scrollCoordinator(_ coordinator: ScrollCoordinator, setEditing isEditing: Bool) -> Bool {
+        if isEditing && focusState?.value == nil && messages.shouldPaginate(at: .bottom) == false {
+            UIImpactFeedbackGenerator().impactOccurred(intensity: 0.7)
+            coordinator.performScroll(to: .edge(.bottom, .notAnimated))
+            focusState?.value = .inputTextField
+            return true
+        } else if !isEditing && focusState?.value != nil {
+            focusState?.value =  nil
+            return true
+        }
+        return false
+    }
 
     func getPaginationState() -> PaginatableState? {
         messages.paginatableState
@@ -68,9 +85,12 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                 withAnimation(.linear) { layoutIfNeeded() }
             }
         case let .append(msg):
-            messages.insert(msg: msg)
-            coordinator.updateState(.dataUpdate(.append(msg: msg)))
-            layoutIfNeeded()
+            serialQueue.addOperation { [weak self] in
+                guard let self else { return }
+                coordinator.updateState(.dataUpdate(.append(msg: msg)))
+                messages.insert(msg: msg)
+                layoutIfNeeded()
+            }
         case let .focus(msg):
             serialQueue.addOperation { [weak self] in
                 guard let self else { return }

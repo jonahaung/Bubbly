@@ -18,7 +18,7 @@ import Foundation
 
 public struct Message: Codable, Sendable, Hashable, UIdentifiable {
     public let uid: String
-    public let senderID: String
+    public var senderID: String
     public let conID: String
     public var text: String?
     public let date: Date
@@ -52,35 +52,6 @@ public struct Message: Codable, Sendable, Hashable, UIdentifiable {
     }
 
     
-    public init(
-        uid: String,
-        senderID: String,
-        conID: String,
-        text: String?,
-        serverTime: Date,
-        deliveryStatus: DeliveryStatus,
-        recipientIDs: [String] = [],
-        attachments: [Attachment]?,
-        reactions: [Reaction]
-    ) {
-        self.init(
-            uid: uid,
-            senderID: senderID,
-            conID: conID,
-            text: text,
-            serverTime: serverTime,
-            incomingStatus: .initial,
-            outgoingStatus: .init(
-                msgID: uid,
-                senderID: senderID,
-                aggregateStatus: deliveryStatus,
-                recipientIDs: recipientIDs,
-                updatedAt: serverTime
-            ),
-            attachments: attachments,
-            reactions: reactions
-        )
-    }
     public init(_ rMsg: RMsg) {
        
         self.init(

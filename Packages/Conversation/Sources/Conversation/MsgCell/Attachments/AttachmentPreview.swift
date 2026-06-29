@@ -17,8 +17,6 @@ struct AttachmentPreview: View {
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
     @Environment(\.attachmentFetcher) private var attachmentFetcher
-    @Environment(MsgCellViewModel.self) private var viewModel
-    private var viewIsVisible: Bool { viewModel.isVisible }
     @Environment(\.conversation) private var conversation
     @LazyState private var model: AttachmentPreviewViewModel
 
@@ -34,15 +32,11 @@ struct AttachmentPreview: View {
 
     var body: some View {
         switch model.attachment.attachmentType {
-        case .image,
-             .imageUploading,
-             .video,
-             .videoUploading:
+        case .image, .imageUploading, .video, .videoUploading:
             content
         case .link:
             VStack(alignment: .center, spacing: 0) {
                 content
-                    .layoutPriority(1)
                 if let title = model.attachment.title, title.isWhitespace == false {
                     VStack(alignment: .center, spacing: 4) {
                         Text(title)
@@ -65,34 +59,47 @@ struct AttachmentPreview: View {
 
     private var content: some View {
         ZStack {
+            RoundedRectangle(cornerRadius: Radius.md)
+                .fill(Color.background)
             if let data = model.attachmentData {
-                attachmentView(for: data)
+                AttachmentDataView(data: data) {
+                    onSelect(model.attachment)
+                }
             } else if let error = model.error {
-                Text(error.localizedDescription)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(8)
+                SystemImage(.exclamationmarkTriangleFill)
+                    .foregroundColor(.red)
+                    .presentSheet {
+                        Text(error.localizedDescription)
+                            .padding()
+                    }
             } else {
-                RoundedRectangle(cornerRadius: Radius.md).fill(Color.background)
-                ProgressView().controlSize(.mini)
+                ProgressView()
+                    .controlSize(.mini)
             }
         }
         .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
-        .animation(.smooth, value: model.attachmentData)
-        .task(id: viewIsVisible) {
-            if viewIsVisible, let attachmentFetcher {
-                if model.attachmentData == nil {
-                    if let cached = await model.cachedAttachmentData() {
-                        model.attachmentData = cached
-                    } else {
-                        await model.loadAttachment(attachmentFetcher: attachmentFetcher)
-                    }
+        .onTask {
+            if model.attachmentData == nil, let attachmentFetcher {
+                if let cached = await model.cachedAttachmentData() {
+                    model.attachmentData = cached
+                } else {
+                    await model.loadAttachment(attachmentFetcher: attachmentFetcher)
                 }
-            } else {
-                await attachmentFetcher?.cancel(model.attachment)
             }
         }
+//        .task(id: viewIsVisible) {
+//            if viewIsVisible, let attachmentFetcher {
+//                if model.attachmentData == nil {
+//                    if let cached = await model.cachedAttachmentData() {
+//                        model.attachmentData = cached
+//                    } else {
+//                        await model.loadAttachment(attachmentFetcher: attachmentFetcher)
+//                    }
+//                }
+//            } else {
+//                await attachmentFetcher?.cancel(model.attachment)
+//            }
+//        }
     }
 
     @ViewBuilder
@@ -130,6 +137,7 @@ struct AttachmentPreview: View {
             .scaledToFit()
             .clipShape(RoundedRectangle(cornerRadius: Radius.card))
             .onTapGesture {
+                print("tapped")
                 onSelect(model.attachment)
             }
     }

@@ -31,8 +31,7 @@ public struct MediaPickerVideoThumbnil: View {
 
     let asset: AVAsset
     private let imageGenerator: AVAssetImageGenerator
-
-    // @State private var frameImage: UIImage? = nil
+    
     @State private var duration: CMTime?
     @State private var time: CMTime = .zero
 
@@ -48,6 +47,7 @@ public struct MediaPickerVideoThumbnil: View {
 
     private func updateFrame(atTime time: CMTime) {
         var actualTime: CMTime = .zero
+        
         if let cgImage = try? imageGenerator.copyCGImage(at: time, actualTime: &actualTime) {
             frameImage = UIImage(cgImage: cgImage)
         }

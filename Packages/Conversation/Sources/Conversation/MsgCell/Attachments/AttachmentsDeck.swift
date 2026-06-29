@@ -25,6 +25,7 @@ struct AttachmentsDeck<Content: View>: View {
                     )
                     .zIndex(zIndex(for: index))
             }
+            
         }
     }
 

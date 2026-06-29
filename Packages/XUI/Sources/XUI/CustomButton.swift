@@ -3,8 +3,8 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import SwiftUI
 import Anima
+import SwiftUI
 
 @MainActor
 public struct CustomButton<Content: View>: View {
@@ -14,7 +14,11 @@ public struct CustomButton<Content: View>: View {
     let onFinished: (() -> Void)?
     @State private var buttonIsPressing: Bool = false
 
-    public init(action: @escaping () -> Void, label: @escaping () -> Content, onFinished: (() -> Void)? = nil) {
+    public init(
+        action: @escaping () -> Void,
+        label: @escaping () -> Content,
+        onFinished: (() -> Void)? = nil
+    ) {
         self.label = label
         self.action = action
         self.onFinished = onFinished
@@ -23,9 +27,13 @@ public struct CustomButton<Content: View>: View {
     public var body: some View {
         label()
             .opacity(buttonIsPressing ? 0.3 : 1.0)
-            .sensoryFeedback(.impact(flexibility: .solid, intensity: 0.5), trigger: buttonIsPressing, condition: { oldValue, newValue in
-                !oldValue && newValue
-            })
+            .sensoryFeedback(
+                .impact(flexibility: .solid, intensity: 0.5),
+                trigger: buttonIsPressing,
+                condition: { oldValue, newValue in
+                    !oldValue && newValue
+                }
+            )
             ._onButtonGesture { pressing in
                 buttonIsPressing = pressing
                 if !pressing {

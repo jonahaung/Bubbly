@@ -101,7 +101,7 @@ extension ScrollReducer {
             case .append(let msg):
                 return .endUpdate(
                     .append(msg: msg),
-                    scrollItem: .id(msg.uid, .animated(.easeOut(duration: 0.2)))
+                    scrollItem: .edge(.bottom, .animated(.easeInExponential))
                 )
             case .focus(let msg):
                 return .endUpdate(

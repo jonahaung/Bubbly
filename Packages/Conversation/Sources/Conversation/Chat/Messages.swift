@@ -31,8 +31,7 @@ import XUI
         richTextEnabled = UserDefaults.group.bool(
             forKey: GroupStorageKey.conversation(.richTextEnabled).value
         )
-        let normalized = deduplicatedMessages(msgs)
-        wrappedValue = makeModels(from: normalized)
+        wrappedValue = makeModels(from: msgs)
         rebuildIndexMap()
         updatePaginatableState()
     }
@@ -108,13 +107,6 @@ extension Messages {
 extension Messages {
     func onScrollTargetVisibilityChange(_ ids: [String]) {
         displayVisibleMsgsIfNeeded(currentVisibleIDs: ids)
-//        debouncer.debounce { [weak self] in
-//            guard let self else { return }
-//            Task { @MainActor [weak self] in
-//                guard let self else { return }
-//                displayVisibleMsgsIfNeeded(currentVisibleIDs: ids)
-//            }
-//        }
     }
 
     func refreshMsg(uid: String) async throws {
@@ -122,7 +114,7 @@ extension Messages {
         else {
             return
         }
-        upsert(updated)
+        element(withID: uid)?.update(with: updated)
     }
 
     func refreshMsgs(uids: [String]) async throws {
@@ -141,8 +133,7 @@ extension Messages {
 
 extension Messages {
     func set(msgs: [Message]) {
-        let normalized = deduplicatedMessages(msgs)
-        wrappedValue = makeModels(from: normalized)
+        wrappedValue = makeModels(from: msgs)
         rebuildIndexMap()
         pruneVisibleIDs()
         updatePaginatableState()
@@ -159,19 +150,18 @@ extension Messages {
         updateIndexMap(from: index)
         relayoutNeighbors(aroundRemovalAt: index)
         removeVisibleID(msg.uid)
-        updatePaginatableState()
+        updatePagination()
     }
 
     func prepend(_ msgs: [Message]) {
-        let incoming = deduplicatedMessages(msgs)
-        guard !incoming.isEmpty else { return }
+        guard !msgs.isEmpty else { return }
 
         var newMessages: [Message] = []
-        newMessages.reserveCapacity(incoming.count)
+        newMessages.reserveCapacity(msgs.count)
 
-        for msg in incoming {
+        for msg in msgs {
             if let index = indexMap[msg.uid] {
-                refreshExistingMessage(at: index, with: msg)
+                layout(at: index)
             } else {
                 newMessages.append(msg)
             }
@@ -195,15 +185,14 @@ extension Messages {
     }
 
     func append(_ msgs: [Message]) {
-        let incoming = deduplicatedMessages(msgs)
-        guard !incoming.isEmpty else { return }
+        guard !msgs.isEmpty else { return }
 
         var newMessages: [Message] = []
-        newMessages.reserveCapacity(incoming.count)
+        newMessages.reserveCapacity(msgs.count)
 
-        for msg in incoming {
+        for msg in msgs {
             if let index = indexMap[msg.uid] {
-                refreshExistingMessage(at: index, with: msg)
+                layout(at: index)
             } else {
                 newMessages.append(msg)
             }
@@ -284,11 +273,6 @@ extension Messages {
         let layout = makeLayout(for: msg, previous: previous, next: next)
 
         if let cached = modelCache.get(msg.uid) {
-            cached.sync(
-                msg: msg,
-                attributedText: attributedText,
-                layout: layout
-            )
             return cached
         }
 
@@ -320,7 +304,7 @@ extension Messages {
 
     fileprivate func upsert(_ msg: Message) {
         if let index = indexMap[msg.uid] {
-            refreshExistingMessage(at: index, with: msg)
+            layout(at: index)
             return
         }
 
@@ -334,30 +318,9 @@ extension Messages {
         if index == wrappedValue.count - 1 {
             pagination.lastMsgID = msg.uid
         }
-        updatePaginatableState()
+        updatePagination()
     }
-
-    fileprivate func refreshExistingMessage(at index: Int, with msg: Message) {
-        let current = wrappedValue[index].msg
-        guard current != msg else { return }
-
-        if needsReorder(for: msg, at: index) {
-            remove(msg: current)
-            upsert(msg)
-            return
-        }
-
-        let previous = index > 0 ? wrappedValue[index - 1].msg : nil
-        let next =
-            index + 1 < wrappedValue.count ? wrappedValue[index + 1].msg : nil
-        wrappedValue[index].sync(
-            msg: msg,
-            attributedText: makeAttributedText(for: msg),
-            layout: makeLayout(for: msg, previous: previous, next: next)
-        )
-        relayoutNeighbors(aroundUpdateAt: index)
-    }
-
+    
     fileprivate func relayoutNeighbors(aroundInsertionAt index: Int) {
         if index > 0 {
             layout(at: index - 1)
@@ -410,22 +373,6 @@ extension Messages {
     ) -> MsgCellLayout {
         cellDecorator.style(for: msg, previous: previous, next: next)
     }
-
-    fileprivate func deduplicatedMessages(_ msgs: [Message]) -> [Message] {
-        guard msgs.count > 1 else { return msgs }
-
-        var seen = Set<String>()
-        var result: [Message] = []
-        result.reserveCapacity(msgs.count)
-
-        for msg in msgs.reversed() where seen.insert(msg.uid).inserted {
-            result.append(msg)
-        }
-
-        result.reverse()
-        return result
-    }
-
     fileprivate func rebuildIndexMap() {
         indexMap.removeAll(keepingCapacity: true)
         for (index, model) in wrappedValue.enumerated() {
@@ -484,5 +431,20 @@ extension Messages {
             return lhs.date < rhs.date
         }
         return lhs.uid < rhs.uid
+    }
+    private func updatePagination() {
+        Task {
+            do {
+               guard let firstMsgID = try await MsgRepo.firstMsg(conID: pagination.conID),
+                        let lasMsgID = try await MsgRepo.lastMsg(conID: pagination.conID) else { return }
+                let totalMsgCount = try await MsgRepo.totalMsgsCount(conID: pagination.conID)
+                print(totalMsgCount)
+                pagination = .init(conID: pagination.conID, pageSize: pagination.pageSize, lastMsgID: lasMsgID.uid, firstMsgID: firstMsgID.uid, totalMsgsCount: totalMsgCount)
+                print(pagination)
+                updatePaginatableState()
+            } catch {
+                log(error)
+            }
+        }
     }
 }

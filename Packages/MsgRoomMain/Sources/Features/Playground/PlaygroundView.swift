@@ -3,6 +3,7 @@
 import Services
 import SwiftUI
 import XUI
+import RichText
 
 // MARK: - PlaygroundView
 
@@ -28,7 +29,9 @@ struct PlaygroundView: View {
 
             Button("Show modal") {
                 text = Lorem.random()
-                showModal = true
+                withTransaction(\.disablesAnimations, true) {
+                    showModal = true
+                }
             }
             Text(fontName)
             Button("Font Picker") {
@@ -45,6 +48,9 @@ struct PlaygroundView: View {
                     print("tapped")
                 }
             }
+            Text("Reduction").tapToPush {
+                RedactionExamples()
+            }
             Text("Example View").tapToPush {
                 ExampleView1()
             }
@@ -55,24 +61,61 @@ struct PlaygroundView: View {
                 }
             }
             
+            ForEach(MarkdownParser.parse(markdownTestData), id: \.self) { item in
+                switch item {
+                case let .heading(level, text):
+                    Text(text)
+                        .font(.system(size: 18 + CGFloat((6 - min(level,6)) * 2), weight: .bold))
+                        .padding(.vertical, 4)
+                case let .paragraph(text):
+                    Text(text)
+                case let .codeBlock(_, content):
+                    Text(content)
+                        .font(.system(.body, design: .monospaced))
+                        .padding(6)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(5)
+                case let .listItem(_, text):
+                    Text("• " + text)
+                case let .orderedListItem(_, idx, text):
+                    Text("\(idx). " + text)
+                case let .blockquote(text):
+                    Text(text)
+                        .italic()
+                        .padding(.leading, 16)
+                        .border(.gray.opacity(0.4))
+                case .horizontalRule:
+                    Divider()
+                case let .mention(username):
+                    Text("@" + username)
+                        .foregroundColor(.red)
+                case let .hashtag(topic):
+                    Text("#" + topic)
+                        .foregroundColor(.blue)
+                case let .unknown(text):
+                    Text(text)
+                }
+            }
+            
             Text(Lorem.paragraphs(8))
         }
         .navigationTitle(Self.defaultTitle)
         .searchable(text: $searchText)
-        .overlay {
-            if showModal {
-                ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {
-                    Text(text)
-                        .padding()
-                        .background(.bar, in: .rect)
-                        .foregroundStyle(Color.white)
-                        .colorScheme(.dark)
+        .fullScreenCover(isPresented: $showModal, content: {
+            ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {
+                Text(text)
+                    .padding()
+                    .background(.regularMaterial, in: .rect)
+                    .overlay {
+                        Rectangle().strokeBorder(.primary, lineWidth: 1)
+                    }
+                    .colorScheme(.dark)
 
-                } onClose: {
-                    showModal = false
-                }
             }
-        }
+            .presentationContentInteraction(.automatic)
+            .presentationBackgroundInteraction(.enabled)
+            .presentationBackground(.clear)
+        })
         .font(.custom(fontName, size: UIFont.labelFontSize))
         .task {
             await viewModel.send(.appear)
@@ -146,5 +189,111 @@ struct ExpandingTextEditor: View {
 
     private var clampedHeight: CGFloat {
         min(max(measuredHeight, minHeight), maxHeight)
+    }
+}
+
+let name = "Aung Ko Min"
+
+let markdownTestData = """
+# Welcome to the Markdown Test
+
+This is the first paragraph. It contains **bold text**, *italic text*, ***bold italic text***, and `inline code`. You can also test links such as https://www.example.com and email addresses like test@example.com.
+
+---
+
+## Lists and Formatting
+
+This second paragraph contains a list:
+
+- Apple
+- Banana
+- Orange
+  - Nested item A
+  - Nested item B
+
+And an ordered list:
+
+1. First item
+2. Second item
+3. Third item
+
+You can also test ~~strikethrough~~ and > blockquotes.
+
+> This is a blockquote.
+> It spans multiple lines.
+> Useful for testing rendering behavior.
+
+---
+
+## Code Examples
+
+The third paragraph contains a Swift code block:
+
+```swift
+struct User {
+    let id: Int
+    let name: String
+
+    func greeting() -> String {
+        "Hello, \(name)"
+    }
+}
+"""
+struct RedactionExamples: View {
+    @State private var isLoading = true
+    
+    var body: some View {
+        VStack(spacing: 20) {
+            VStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 8)
+                    .frame(height: 200)
+                Text("Title Placeholder")
+                    .font(.title)
+                Text("Description text that will be replaced with shimmer effect")
+                    .font(.body)
+            }
+            .customRedaction()
+            .redacted(reason: isLoading ? .shimmer : [])
+            
+            Text("Profile Name")
+                .font(.headline)
+                .customRedaction(.init(shape: .roundedRectangle(4)))
+                .redactedWithShimmer(when: isLoading)
+            
+            AvatarView()
+                .customRedaction(.init(
+                    shape: .circle,
+                    animationDuration: 2.0,
+                    shimmerColors: [.blue.opacity(0.2), .blue.opacity(0.5), .blue.opacity(0.2)]
+                ))
+                .redacted(reason: isLoading ? .shimmer : [])
+            
+            SensitiveDataView()
+                .customRedaction()
+                .redactedWithBlur(when: isLoading)
+            
+            Button("Toggle Loading") {
+                isLoading.toggle()
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+    }
+}
+
+struct AvatarView: View {
+    var body: some View {
+        Circle()
+            .fill(Color.blue)
+            .frame(width: 60, height: 60)
+    }
+}
+
+struct SensitiveDataView: View {
+    var body: some View {
+        Text("Sensitive Information")
+            .padding()
+            .background(Color.yellow.opacity(0.3))
+            .cornerRadius(8)
     }
 }

@@ -70,6 +70,18 @@ public enum MsgRepo {
             try await $0.fetch(descriptor)
         }
     }
+    public static func messages(conID: String, to: Date, limit: Int) async throws -> [Message] {
+        var descriptor = FetchDescriptor<PMsg>(
+            predicate: #Predicate {
+                $0.conID == conID && $0.date <= to
+            },
+            sortBy: [.init(\.date, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
+        return try await withMsgStore {
+            try await $0.fetch(descriptor).reversed()
+        }
+    }
 }
 
 public extension MsgRepo {

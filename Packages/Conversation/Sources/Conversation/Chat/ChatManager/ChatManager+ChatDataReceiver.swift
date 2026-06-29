@@ -84,7 +84,7 @@ extension ChatManager: ChatDataReceiverDelegate {
         try await messages.refreshMsg(uid: payload.msgID)
         try await reloadConversation(refetch: false)
         let models = messages.wrappedValue.filter { model in
-            model.state.isSender && model.state.outgoingStatus?.aggregateStatus ?? .initial < .read
+            model.state.isSender && model.state.outgoingStatus?.aggregateStatus ?? .sending < .read
         }
         try await self.messages.refreshMsgs(uids: models.map(\.id))
     }

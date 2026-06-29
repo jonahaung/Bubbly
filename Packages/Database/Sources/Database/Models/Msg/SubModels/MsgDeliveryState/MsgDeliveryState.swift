@@ -116,19 +116,19 @@ extension MsgDeliveryState {
 extension MsgDeliveryState {
     public var aggregateStatus: DeliveryStatus {
         guard !receipts.isEmpty else { return .sending }
+        if receipts.allSatisfy({
+            $0.status == .sending
+        }) {
+            return .sending
+        }
         if receipts.contains(where: { $0.status == .partiallyFailed }) {
             return .partiallyFailed
         }
         if receipts.allSatisfy({ $0.status == .read }) { return .read }
         if receipts.allSatisfy({
-            $0.status >= .delivered
+            $0.status == .delivered
         }) {
             return .delivered
-        }
-        if receipts.allSatisfy({
-            $0.status >= .initial
-        }) {
-            return .initial
         }
         return .sending
     }

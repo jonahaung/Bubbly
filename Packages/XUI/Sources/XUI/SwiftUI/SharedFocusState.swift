@@ -7,34 +7,29 @@ import SwiftUI
 
 @MainActor
 @Observable
-public final class SharedFocusState {
-    public let binding: FocusState<String?>.Binding
+public final class SharedFocusState<T: Hashable> {
+    public let binding: FocusState<T?>.Binding
 
-    public init(_ binding: FocusState<String?>.Binding) {
+    public init(_ binding: FocusState<T?>.Binding) {
         self.binding = binding
     }
 
-    public var value: String? {
+    public var value: T? {
         get { binding.wrappedValue }
         set { binding.wrappedValue = newValue }
     }
 
-    public func focus(_ value: String?) {
+    public func focus(_ value: T?) {
         self.value = value
     }
 
-    public func isFocused(for value: String) -> Bool {
+    public func isFocused(for value: T) -> Bool {
         self.value == value
     }
-
     public func defocus() {
         guard value != nil else { return }
         withTransaction(.withAnimation(.interactiveSpring)) {
             self.value = nil
         }
     }
-}
-
-public extension EnvironmentValues {
-    @Entry var sharedFocusState: SharedFocusState?
 }

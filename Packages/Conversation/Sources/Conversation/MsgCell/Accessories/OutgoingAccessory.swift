@@ -14,6 +14,8 @@ import Services
 struct OutgoingAccessory: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
     @Environment(\.sharedNamespace) private var namespace
+    @Environment(\.conversationTheme) private var theme
+    
     var body: some View {
         if let namespace {
             ZStack(alignment: .bottomLeading) {
@@ -22,40 +24,39 @@ struct OutgoingAccessory: View, @MainActor Equatable {
                     Image(systemName: "checkmark.circle.fill")
                         .resizable()
                         .scaledToFit()
-                        .frame(square: 8)
+                        .frame(width: 10)
+                        .fontWeight(.black)
+                        .foregroundStyle(Color.tertiaryText)
                 case .sent:
-                    Image(systemName: "checkmark.circle")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(square: 8)
+                    ZeroSizeView()
                 case .sending:
-                    Image(systemName: "circle")
+                    Image(systemName: "progress.indicator")
                         .resizable()
                         .scaledToFit()
-                        .frame(square: 8)
+                        .frame(square: 10)
+                        .symbolEffect(.rotate.clockwise.wholeSymbol, options: .repeat(.continuous).speed(10))
                 case .partiallyFailed:
-                    Circle()
-                        .fill(.orange)
-                        .frame(square: 8)
-                        .matchedGeometryEffect(
-                            id: state.id, in: namespace.value, anchor: .bottom, isSource: true
-                        )
+                    AsyncButton {
+                        try await Socket.shared.send(.newMsg(rMsg: .init(state.msg)))
+                    } label: {
+                        Image(systemName: "arrow.counterclockwise.circle.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(square: 13)
+                            .foregroundStyle(.red)
+                    }
                 case .read:
                     Circle().fill(.clear)
                         .frame(square: 12)
                         .matchedGeometryEffect(
                             id: state.id, in: namespace.value, anchor: .bottom, isSource: true
                         )
-                case .initial:
-                    ZeroSizeView()
                 case .none:
                     ZeroSizeView()
                 }
             }
-            .fontWeight(.bold)
-            .foregroundStyle(Color.blue.secondary)
+            .symbolRenderingMode(.hierarchical)
             .frame(width: 13)
-            .allowsHitTesting(false)
             .geometryGroup()
         }
     }

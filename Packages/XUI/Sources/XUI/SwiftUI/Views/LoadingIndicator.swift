@@ -28,12 +28,10 @@ public struct LoadingIndicator: View {
     }
 
     public var body: some View {
-        FixedSizeCenterLayout(square: size) {
-            if let progress {
-                determinate(progress: progress)
-            } else {
-                indeterminate
-            }
+        if let progress {
+            determinate(progress: progress)
+        } else {
+            indeterminate
         }
     }
 

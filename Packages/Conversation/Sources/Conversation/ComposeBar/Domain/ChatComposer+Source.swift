@@ -17,6 +17,9 @@ extension ChatComposer {
         }
 
         case camera, liary, audio, document, machineImag, emoji
+
+        static let mediaSources: [Self] = [.camera, .liary, .audio]
+        static let utilitySources: [Self] = [.document, .machineImag, .emoji]
     }
 }
 
@@ -52,6 +55,24 @@ extension ChatComposer.Source {
             Color(.systemBlue)
         case .document:
             Color(.systemTeal)
+        }
+    }
+
+    var keepsMenuOpen: Bool {
+        switch self {
+        case .emoji:
+            true
+        case .camera, .liary, .audio, .document, .machineImag:
+            false
+        }
+    }
+
+    var usesInlinePanel: Bool {
+        switch self {
+        case .emoji, .camera, .liary, .document, .machineImag:
+            true
+        case .audio:
+            false
         }
     }
 }

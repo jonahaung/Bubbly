@@ -36,12 +36,12 @@ extension UIApplication {
         guard let keyWindow else {
             fatalError()
         }
-        if let viewController = keyWindow.rootViewController {
-            return viewController.view.bounds.inset(
-                by: viewController.view.safeAreaInsets
-            )
-        }
-        return windowScene.screen.bounds.inset(by: UIApplication.safeAreInset)
+//        if let viewController = keyWindow.rootViewController {
+//            return viewController.view.bounds.inset(
+//                by: viewController.view.safeAreaInsets
+//            )
+//        }
+        return windowScene.screen.bounds.inset(by: keyWindow.safeAreaInsets)
     }
     public func screenScale() -> CGFloat {
         let size = screenSize()

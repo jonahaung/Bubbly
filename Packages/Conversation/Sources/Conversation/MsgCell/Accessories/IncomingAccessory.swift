@@ -39,8 +39,6 @@ struct IncomingAccessory: View, @MainActor Equatable {
                     .frame(width: 8, height: 8)
             case .read:
                 ZeroSizeView()
-            case .initial:
-                Circle().fill(Color.orange)
             }
             if state.layout.showAvatar, let sender = members.contact(for: state.msg.senderID) {
                 ProfilePhoto(

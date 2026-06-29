@@ -12,27 +12,27 @@ struct ToastHolderView: View {
         ModalOverlay(
             toast.style.alignment,
             from: toast.style.edge,
-            allowsBackgroundTap: toast.allowsBackgroundTap
+            allowsBackgroundTap: false
         ) {
-            toast.node.eraseToNode()
-                .lineHeight(.multiple(factor: 1.1))
-                .opacity(isPressing ? 0.3 : 1)
-                .sensoryFeedback(.selection, trigger: isPressing, condition: { oldValue, newValue in
-                    oldValue == false && newValue == true
-                })
-                .padding(16)
-                .glassEffect(.regular, in: .containerRelative)
-                .runningBorder(lineWidth: 2, cornerRadius: 12)
-                .containerShape(RoundedRectangle(cornerRadius: 12))
-                .padding(.horizontal, 4)
-                ._onButtonGesture(pressing: { pressing in
-                    isPressing = pressing
-                }, perform: {
-                    toast.action?()
-                    ToastPresenter.shared.dismiss()
-                })
-        } onClose: {
-            ToastPresenter.shared.dismiss()
+            ZStack {
+                toast.node.eraseToNode()
+                    .lineHeight(.multiple(factor: 1.1))
+                    .opacity(isPressing ? 0.3 : 1)
+                    .padding(16)
+                    ._onButtonGesture(pressing: { pressing in
+                        isPressing = pressing
+                    }, perform: {
+                        toast.action?()
+                        ToastPresenter.shared.dismiss()
+                    })
+            }
+            .sensoryFeedback(.selection, trigger: isPressing, condition: { oldValue, newValue in
+                oldValue == false && newValue == true
+            })
+            .glassEffect(.regular.tint(.white), in: .containerRelative)
+            .runningBorder(lineWidth: 1.5, cornerRadius: 7)
+            .containerShape(RoundedRectangle(cornerRadius: 12))
+            .padding(.horizontal, 4)
         }
     }
 }

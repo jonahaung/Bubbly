@@ -28,7 +28,7 @@ public struct EarthquakeRenderer: TextRenderer {
         for line in layout {
             for run in line {
                 for glyph in run {
-                    let yOffset = Double.random(in: -moveAmount ... moveAmount)
+                    let yOffset = Double.random(in: -moveAmount...moveAmount)
                     var copy = context
 
                     if shouldBlur {

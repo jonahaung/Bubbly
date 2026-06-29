@@ -1,109 +1,113 @@
-//  ExtractedLink.swift
 //
-//  Copyright © 2026 Aung Ko Min.
+//  ExtractedLink 2.swift
+//  Conversation
+//
+//  Created by Aung Ko Min on 22/5/26.
 //
 
 import Foundation
 
-// MARK: - ExtractedLink
+public struct ExtractedLink: Hashable, Identifiable, Sendable {
+    public let url: URL
+    public let range: Range<String.Index>
+    public let matchedText: String
 
-struct ExtractedLink: Hashable, Identifiable {
-    let url: URL
-    let range: Range<String.Index>
-    let matchedText: String
-
-    var id: String {
-        matchedText
+    public var id: String {
+        "\(url.absoluteString)-\(range.lowerBound.utf16Offset(in: matchedText))"
     }
 
-    var host: String {
-        url.host() ?? "unknown"
+    public var host: String {
+        url.host(percentEncoded: false) ?? "unknown"
+    }
+
+    public init(url: URL, range: Range<String.Index>, matchedText: String) {
+        self.url = url
+        self.range = range
+        self.matchedText = matchedText
     }
 }
 
-// MARK: - LinkExtractor
+public enum LinkExtractor {
 
-enum LinkExtractor {
+    public static func extractLinks(from text: String) -> [ExtractedLink] {
+        guard let regex = regex else { return [] }
 
-    static func extractLinks(from text: String) -> [ExtractedLink] {
-        guard let regularExpression = try? NSRegularExpression(pattern: pattern, options: []) else {
-            return []
-        }
+        let nsRange = NSRange(text.startIndex..<text.endIndex, in: text)
+        let matches = regex.matches(in: text, range: nsRange)
 
-        let nsString = text as NSString
-        let matches = regularExpression.matches(
-            in: text,
-            options: [],
-            range: NSRange(location: 0, length: nsString.length)
-        )
-
-        var seen = Set<URL>()
+        var seen = Set<String>()
         var links = [ExtractedLink]()
         links.reserveCapacity(matches.count)
 
         for match in matches {
-            guard let range = Range(match.range(at: 1), in: text) else {
-                continue
-            }
+            guard let originalRange = Range(match.range(at: 1), in: text) else { continue }
 
-            var rawString = String(text[range])
-            rawString = trimTrailingPunctuation(rawString)
+            let original = String(text[originalRange])
+            let trimmed = original.trimmedLinkText
 
-            // If no scheme, assume https
-            let normalized: String =
-                if rawString.lowercased().hasPrefix("http://") || rawString
-                        .lowercased()
-                        .hasPrefix("https://")
-                {
-                    rawString
-                } else {
-                    "https://" + rawString
-                }
+            guard !trimmed.isEmpty else { continue }
 
-            guard let url = URL(string: normalized) else {
-                continue
-            }
+            let normalized = trimmed.hasHTTPPrefix ? trimmed : "https://\(trimmed)"
+            guard
+                let url = URL(string: normalized),
+                let scheme = url.scheme?.lowercased(),
+                scheme == "http" || scheme == "https",
+                url.host(percentEncoded: false) != nil
+            else { continue }
 
-            // De-dupe (optional)
-            guard seen.insert(url).inserted else {
-                continue
-            }
+            guard seen.insert(url.absoluteString).inserted else { continue }
 
-            links.append(.init(url: url, range: range, matchedText: rawString))
+            let trimmedRange = originalRange.lowerBound..<text.index(
+                originalRange.lowerBound,
+                offsetBy: trimmed.count
+            )
+
+            links.append(
+                ExtractedLink(
+                    url: url,
+                    range: trimmedRange,
+                    matchedText: trimmed
+                )
+            )
         }
 
         return links
     }
 
-    static func extractURLs(from text: String) -> [URL] {
+    public static func extractURLs(from text: String) -> [URL] {
         extractLinks(from: text).map(\.url)
     }
 
-    /// Matches:
-    /// 1) http(s)://...
-    /// 2) www.example.com/...
-    /// 3) example.com/... (with a TLD)
-    ///
-    /// Note: This is pragmatic, not “perfect URL spec”.
-    private static let pattern =
-        #"""
-        (?xi)
-        \b(
-         https?://[^\s<>()"\]]+
-         |
-         (?:www\.)[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s<>()"\]]*)?
-         |
-         [a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:/[^\s<>()"\]]*)?
-        )
-        """#
+    private static let regex = try? NSRegularExpression(
+        pattern: pattern,
+        options: []
+    )
 
-    private static func trimTrailingPunctuation(_ string: String) -> String {
-        var result = string
-        while let last = result.unicodeScalars.last,
-              CharacterSet(charactersIn: ".,;:!?)\u{201D}\u{2019}").contains(last)
-        {
+    private static let pattern = #"""
+    (?xi)
+    \b(
+      https?://[^\s<>()"\]]+
+      |
+      (?:www\.)[a-z0-9-]+(?:\.[a-z0-9-]+)+(?:/[^\s<>()"\]]*)?
+      |
+      [a-z0-9-]+(?:\.[a-z0-9-]+)+\b(?:/[^\s<>()"\]]*)?
+    )
+    """#
+}
+
+private extension String {
+    var hasHTTPPrefix: Bool {
+        lowercased().hasPrefix("http://") || lowercased().hasPrefix("https://")
+    }
+
+    var trimmedLinkText: String {
+        var result = self
+        let trailing = CharacterSet(charactersIn: ".,;:!?)\u{201D}\u{2019}")
+
+        while let last = result.unicodeScalars.last, trailing.contains(last) {
             result.removeLast()
         }
+
         return result
     }
 }

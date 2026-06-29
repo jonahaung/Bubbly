@@ -10,9 +10,16 @@ import SwiftUI
 import XUI
 
 public struct ConversationScene: View {
+    
+    @FocusState private var focusState: ConversationFocusState?
+    @Namespace private var namespace
+
+    @LazyState private var viewModel: ChatManager
+    @LazyState private var composer: ChatComposer
+    
     public init(
         coordinator: AppCoordinator,
-        prefretchData: ConversationInitializer.PrefetchedData
+        prefretchData: ConversationInitializedData
     ) {
         _viewModel = .init(
             wrappedValue: .init(
@@ -30,24 +37,22 @@ public struct ConversationScene: View {
             BackgroundView(imageName: viewModel.state.properties.theme.background.imageName)
             SeenStatusOverlay()
             ConversationScrollView(manager: viewModel)
+                .layoutPriority(1)
             ConversationSceneOverlayBar()
         }
         .environment(\.conversation, viewModel.state.conversation)
         .environment(\.conversationTheme, viewModel.state.theme)
         .environment(\.attachmentFetcher, viewModel.attachmentFetcher)
         .environment(\.seenMembers, viewModel.state.properties.seenMembers)
-        .environment(\.sharedFocusState, SharedFocusState($focusState))
+        .environment(\.sharedFocusState, viewModel.focusState)
         .environment(\.members, viewModel.members)
         .environment(\.sharedNamespace, SharedNamespace(namespace))
         .environment(\.msgCellActions, .init(action: { viewModel.send(.cellAction($0)) }))
         .environment(viewModel)
         .environment(composer)
-        .onAppear(perform: viewModel.onViewAppear)
+        .onAppear {
+            viewModel.focusState = .init($focusState)
+            viewModel.onViewAppear()
+        }
     }
-
-    @FocusState private var focusState: String?
-    @Namespace private var namespace
-
-    @LazyState private var viewModel: ChatManager
-    @LazyState private var composer: ChatComposer
 }

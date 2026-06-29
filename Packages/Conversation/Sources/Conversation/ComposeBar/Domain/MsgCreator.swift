@@ -22,11 +22,10 @@ public actor MsgCreator {
 
     public init(mediaManager: MediaManager = .shared) {
         self.mediaManager = mediaManager
-
     }
 
     public func message(
-        text: String,
+        text: String?,
         attachments: [Attachment],
         in conversation: Conversation
     ) async throws -> Message {
@@ -37,8 +36,8 @@ public actor MsgCreator {
             conID: conversation.uid,
             text: text,
             serverTime: .now,
-            deliveryStatus: .sending,
-            recipientIDs: conversation.members.filter { $0 != currentUserId },
+            incomingStatus: .sending,
+            outgoingStatus: .empty,
             attachments: attachments,
             reactions: []
         )

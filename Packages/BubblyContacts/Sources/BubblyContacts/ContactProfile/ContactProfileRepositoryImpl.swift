@@ -30,9 +30,10 @@ struct ContactProfileRepositoryImpl: ContactProfileRepository {
 
     func updateContact(_ contact: Contact) async throws -> ContactProfileSnapshot {
         manager.setContact(contact)
-		if try await Store.shared.contactStore?.updateAndSave(uid: contact.uid, { model in
-			model.merge(from: contact)
-		}) == nil {
+        let updatedContact: ()? = try await Store.shared.contactStore?.updateAndSave(uid: contact.uid) { model in
+            model.merge(from: contact)
+        }
+        if updatedContact == nil {
             try await Store.shared.contactStore?.insert(contact)
         }
         manager.setLoading(false)
@@ -42,10 +43,14 @@ struct ContactProfileRepositoryImpl: ContactProfileRepository {
 
     func updateProperties(_ properties: ConversationProperties) async throws -> ContactProfileSnapshot {
         manager.setProperties(properties)
-		if try await Store.shared.conversationPropertiesStore?
-			.updateAndSave(uid: properties.uid, { model in
-				model.update(from: properties)
-			}) == nil {
+        let updatedProperties: ()? = try await Store.shared.conversationPropertiesStore?.updateAndSave(
+            uid: properties.uid
+        ) { model in
+            model.theme = properties.theme
+            model.seenMembers = properties.seenMembers
+            model.lastPage = properties.lastPage
+        }
+        if updatedProperties == nil {
             try await Store.shared.conversationPropertiesStore?.insert(properties)
         }
         manager.setLoading(false)

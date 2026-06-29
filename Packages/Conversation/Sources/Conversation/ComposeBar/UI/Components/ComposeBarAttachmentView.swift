@@ -3,8 +3,8 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
 import SwiftUI
+import XUI
 
 extension ComposeBar {
     struct ComposeBarAttachmentView: View {
@@ -14,8 +14,7 @@ extension ComposeBar {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
                     ForEach(composer.state.attachments) { attachment in
-                        AttachmentPreview(attachment: attachment) {
-                            log($0)
+                        AttachmentPreview(attachment: attachment) { _ in
                         }
                         .cornerRadius(8)
                         .frame(maxWidth: 200, maxHeight: 100)
@@ -29,6 +28,7 @@ extension ComposeBar {
                                     .background(Color.red, in: .circle)
                             }
                             .buttonStyle(.borderless)
+                            .accessibilityLabel("Remove attachment")
                         )
                         .transition(.move(edge: .leading).animation(.bouncy))
                         .id(attachment.uid)
@@ -42,6 +42,7 @@ extension ComposeBar {
             .scrollClipDisabled()
             .contentMargins(.leading, 16, for: .scrollContent)
             .contentMargins(.top, 16, for: .scrollContent)
+            .background(Color.background, ignoresSafeAreaEdges: .all)
         }
     }
 }

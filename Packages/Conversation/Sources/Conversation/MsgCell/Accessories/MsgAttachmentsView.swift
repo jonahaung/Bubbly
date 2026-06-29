@@ -29,16 +29,13 @@ struct MsgAttachmentsView: View {
                 selection = item
             } onCompleteUpload: {
                 onUploaded(attachment: $0)
-            }.matchedTransitionSource(id: attachment.uid, in: namespace) { source in
+            }
+            .matchedTransitionSource(id: attachment.uid, in: namespace) { source in
                 source.background(.clear)
             }
-        }.fullScreenCover(item: $selection) { attachment in
+        }
+        .fullScreenCover(item: $selection) { attachment in
             AttachmentGalleryView(attachments: attachments, selection: attachment.id)
-                .presentationContentInteraction(.scrolls)
-                .presentationBackgroundInteraction(
-                    .disabled
-                )
-                .presentationBackground(.clear)
                 .navigationTransition(
                     .zoom(sourceID: attachment.uid, in: namespace)
                 )

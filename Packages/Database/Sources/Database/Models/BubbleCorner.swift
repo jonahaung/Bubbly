@@ -84,20 +84,33 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
             break
         }
     }
+    
+    public func contains(_ edge: Edge) -> Bool {
+        switch edge {
+        case .top:
+            topLeading && topTrailing
+        case .bottom:
+            bottomLeading && bottomTrailing
+        case .leading:
+            topLeading && bottomLeading
+        case .trailing:
+            topTrailing && bottomTrailing
+        }
+    }
 
     @MainActor
     public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle
     {
         UnevenRoundedRectangle(
-            topLeadingRadius: topLeadingRadius ? cornerRadius : 0,
-            bottomLeadingRadius: bottomLeadingRadius ? cornerRadius : 0,
-            bottomTrailingRadius: bottomTrailingRadius ? cornerRadius : 0,
-            topTrailingRadius: topTrailingRadius ? cornerRadius : 0,
+            topLeadingRadius: topLeading ? cornerRadius : 0,
+            bottomLeadingRadius: bottomLeading ? cornerRadius : 0,
+            bottomTrailingRadius: bottomTrailing ? cornerRadius : 0,
+            topTrailingRadius: topTrailing ? cornerRadius : 0,
             style: .continuous
         )
     }
 
-    var topLeadingRadius: Bool {
+    public var topLeading: Bool {
         switch self {
         case .all,
             .receivingTop,
@@ -110,7 +123,7 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
         }
     }
 
-    var topTrailingRadius: Bool {
+    public var topTrailing: Bool {
         switch self {
         case .all,
             .receivingBottom,
@@ -123,7 +136,7 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
         }
     }
 
-    var bottomLeadingRadius: Bool {
+    public var bottomLeading: Bool {
         switch self {
         case .all,
             .receivingBottom,
@@ -136,7 +149,7 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
         }
     }
 
-    var bottomTrailingRadius: Bool {
+    public var bottomTrailing: Bool {
         switch self {
         case .all,
             .receivingBottom,

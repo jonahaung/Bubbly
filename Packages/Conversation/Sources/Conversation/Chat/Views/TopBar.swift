@@ -12,7 +12,6 @@ import Services
 struct TopBar: View {
 
     @Environment(\.conversationTheme) private var theme
-    private let mockMessageCreator: MockMessageCreator = .init()
 
     var body: some View {
         ZStack(alignment: .center) {
@@ -39,16 +38,17 @@ struct TopBar: View {
             }
             HStack(alignment: .top) {
                 AsyncButton {
-                    try await manager.pop()
+                    try await manager.prepareToExit()
                 } label: {
                     Image(systemSymbol: .chevronBackward)
                         .frame(square: 44)
                         .background(Color.appPrimary, in: .circle)
                 }
                 Spacer()
-                CustomButton {
-                    Task {try await mockMessageCreator.createTextMessages(count: 100,
-                                                                          in: manager.state.conversation, direction: .mixed)}
+                AsyncButton {
+                    var msg = try await MsgCreator().message(text: Lorem.random(), attachments: [], in: manager.state.conversation)
+                    msg.senderID = manager.state.conversation.members.random()
+                    try await Socket.shared.send(.newMsg(rMsg: .init(msg)))
                 } label: {
                     Image(systemSymbol: .quoteClosing)
                         .frame(square: 44)
