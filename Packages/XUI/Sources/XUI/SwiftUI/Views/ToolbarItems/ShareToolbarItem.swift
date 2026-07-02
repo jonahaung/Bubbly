@@ -1,5 +1,6 @@
+//  ShareToolbarItem.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -28,11 +29,13 @@ enum DisplayType {
     case audioVideo
 
     init(from attachmentType: MediaAttachment.SupportedType) {
-        switch attachmentType {
+        self = switch attachmentType {
         case .image:
-            self = .image
-        case .video, .gifv, .audio:
-            self = .audioVideo
+            .image
+        case .audio,
+             .gifv,
+             .video:
+            .audioVideo
         }
     }
 }

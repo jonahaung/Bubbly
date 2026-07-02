@@ -1,81 +1,103 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
 import SwiftUI
 import XUI
 
+// MARK: - Route
+
+public struct Route: Sendable, Hashable, Identifiable {
+    public var tabPath: TabPath
+    public var navPaths: [NavPath]
+    public var id: TabPath {
+        tabPath
+    }
+}
+
+// MARK: - Router
+
 @MainActor
 @Observable
-public final class Router: Sendable {
-
-    private var allPaths: [TabPath: [NavPath]]
+public final class Router {
+    public var routes: [TabPath: [NavPath]] = [:]
+    @ObservationIgnored
     public var selectedTab: TabPath
-    public var sheet: NavPath?
+    public var sheet: NavPath? = nil
 
     public init(_ selected: TabPath) {
         selectedTab = selected
-        allPaths = Dictionary(
-            uniqueKeysWithValues: TabPath.allCases.map { ($0, []) }
-        )
+        for each in TabPath.allCases {
+            routes[each] = []
+        }
     }
 
     public func navPaths(for tab: TabPath) -> [NavPath] {
-        allPaths[tab] ?? []
+        routes[tab] ?? []
     }
 
     public func navPathsBinding(for tab: TabPath) -> Binding<[NavPath]> {
         Binding(
-            get: { self.allPaths[tab] ?? [] },
-            set: { self.allPaths[tab] = $0 }
+            get: { self.navPaths(for: tab) },
+            set: { newValue in
+                self.routes[tab] = newValue
+            },
         )
     }
 
     public func tabPathBinding() -> Binding<TabPath> {
         Binding(
             get: { self.selectedTab },
-            set: { self.selectedTab = $0 }
+            set: { self.selectedTab = $0 },
         )
+    }
+
+    public func reset() {
+        for (key, _) in routes {
+            routes[key] = []
+        }
+        sheet = nil
+        selectedTab = .inbox
     }
 }
 
 private extension Router {
     @ObservationIgnored
-    var currentNavPaths: [NavPath]? {
-        allPaths[selectedTab]
+    var currentNavPaths: [NavPath] {
+        navPaths(for: selectedTab)
     }
 }
 
 public extension Router {
-
     func selectTab(_ newValue: TabPath) {
-        guard selectedTab != newValue else { return }
-        selectedTab = newValue
-    }
-
-    func visiblePath() -> NavPath {
-        allPaths[selectedTab]?.last ?? .currentUserDetails
-    }
-
-    func pushToNav(_ path: NavPath) {
-
-        if let index = allPaths[selectedTab]?.firstIndex(of: path),
-           let array = allPaths[selectedTab] {
-            allPaths[selectedTab] = Array(array[0...index])
+        guard selectedTab != newValue else {
             return
         }
 
-        allPaths[selectedTab]?.append(path)
+        selectedTab = newValue
+    }
+
+    func visiblePath() -> NavPath? {
+        navPaths(for: selectedTab).last
+    }
+
+    func pushToNav(_ path: NavPath) {
+        var paths = navPaths(for: selectedTab)
+        if let index = paths.firstIndex(where: { $0.id == path.id }) {
+            paths = Array(paths[...index])
+            routes[selectedTab] = paths
+            return
+        }
+        paths.append(path)
+        routes[selectedTab] = paths
     }
 
     func pop() {
-        allPaths[selectedTab]?.removeLast()
+        navPathsBinding(for: selectedTab).wrappedValue.removeLast()
     }
 
     func popToRoot() {
-        allPaths[selectedTab] = []
+        navPathsBinding(for: selectedTab).wrappedValue = []
     }
 
     func presentModel(_ value: NavPath) {
@@ -87,10 +109,12 @@ public extension Router {
     }
 }
 
-public extension Router {
+extension Router {
     @MainActor
     private static var _shared: Router = .init(.inbox)
 
     @MainActor
-    static var shared: Router { _shared }
+    public static var shared: Router {
+        _shared
+    }
 }

@@ -1,59 +1,67 @@
+//  ReactionAnimationModifier.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Database
-import SwiftUI
+#if os(iOS)
+//
+    // Copyright © 2026 Aung Ko Min. All rights reserved.
+//
 
-struct ReactionAnimationModifier: ViewModifier {
-    let reaction: ReactionType
-    let isActive: Bool
+    import SwiftUI
+    import Database
 
-    func body(content: Content) -> some View {
-        switch reaction {
-        case .heart:
-            content
-                .offset(y: isActive ? ReactionsBar.Constants.floatOffset / 2 : 0)
-                .scaleEffect(
-                    isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0,
-                    anchor: .bottom
-                )
+    struct ReactionAnimationModifier: ViewModifier {
+        let reaction: ReactionType
+        let isActive: Bool
 
-        case .thumbUp:
-            content
-                .rotationEffect(
-                    .degrees(isActive ? -ReactionsBar.Constants.rotationAngle : 0),
-                    anchor: .bottomLeading
-                )
-                .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
+        func body(content: Content) -> some View {
+            switch reaction {
+            case .heart:
+                content
+                    .offset(y: isActive ? ReactionsBar.Constants.floatOffset / 2 : 0)
+                    .scaleEffect(
+                        isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0,
+                        anchor: .bottom
+                    )
 
-        case .thumbDown:
-            content
-                .rotationEffect(
-                    .degrees(isActive ? -ReactionsBar.Constants.rotationAngle : 0),
-                    anchor: .leading
-                )
-                .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
+            case .thumbUp:
+                content
+                    .rotationEffect(
+                        .degrees(isActive ? -ReactionsBar.Constants.rotationAngle : 0),
+                        anchor: .bottomLeading
+                    )
+                    .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
-        case .laugh:
-            content
-                .offset(y: isActive ? ReactionsBar.Constants.floatOffset : 0)
-                .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
+            case .thumbDown:
+                content
+                    .rotationEffect(
+                        .degrees(isActive ? -ReactionsBar.Constants.rotationAngle : 0),
+                        anchor: .leading
+                    )
+                    .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
-        case .sad:
-            content
-                .offset(y: isActive ? ReactionsBar.Constants.floatOffset : 0)
-                .rotationEffect(
-                    .degrees(isActive ? ReactionsBar.Constants.rotationAngle : 0)
-                )
-                .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
+            case .laugh:
+                content
+                    .offset(y: isActive ? ReactionsBar.Constants.floatOffset : 0)
+                    .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
 
-        default:
-            content
-                .scaleEffect(
-                    isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0,
-                    anchor: .bottom
-                )
+            case .sad:
+                content
+                    .offset(y: isActive ? ReactionsBar.Constants.floatOffset : 0)
+                    .rotationEffect(
+                        .degrees(isActive ? ReactionsBar.Constants.rotationAngle : 0)
+                    )
+                    .scaleEffect(isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0)
+
+            default:
+                content
+                    .scaleEffect(
+                        isActive ? ReactionsBar.Constants.scaleMultiplier : 1.0,
+                        anchor: .bottom
+                    )
+            }
         }
     }
-}
+
+#endif

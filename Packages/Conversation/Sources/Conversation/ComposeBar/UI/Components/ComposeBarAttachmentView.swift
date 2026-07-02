@@ -1,5 +1,6 @@
+//  ComposeBarAttachmentView.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -12,9 +13,8 @@ extension ComposeBar {
         var body: some View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    ForEach(composer.attachments) { attachment in
-                        AttachmentPreview(attachment: attachment) {
-                            log($0)
+                    ForEach(composer.state.attachments) { attachment in
+                        AttachmentPreview(attachment: attachment) { _ in
                         }
                         .cornerRadius(8)
                         .frame(maxWidth: 200, maxHeight: 100)
@@ -28,6 +28,7 @@ extension ComposeBar {
                                     .background(Color.red, in: .circle)
                             }
                             .buttonStyle(.borderless)
+                            .accessibilityLabel("Remove attachment")
                         )
                         .transition(.move(edge: .leading).animation(.bouncy))
                         .id(attachment.uid)
@@ -36,12 +37,12 @@ extension ComposeBar {
                 .fixedSize(horizontal: false, vertical: true)
                 .scrollTargetLayout()
             }
-            .scrollPosition(id: .constant(composer.attachments.last?.uid))
+            .scrollPosition(id: .constant(composer.state.attachments.last?.uid))
             .scrollBounceBehavior(.basedOnSize)
             .scrollClipDisabled()
             .contentMargins(.leading, 16, for: .scrollContent)
             .contentMargins(.top, 16, for: .scrollContent)
-            .environment(\.isVisible, true)
+            .background(Color.background, ignoresSafeAreaEdges: .all)
         }
     }
 }

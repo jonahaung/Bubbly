@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 
@@ -12,7 +10,9 @@ extension URLComponents {
     mutating func setQueryItem(name: String, value: String?) {
         var items = queryItems ?? []
         items.removeAll { $0.name == name }
-        if let value { items.append(.init(name: name, value: value)) }
+        if let value {
+            items.append(.init(name: name, value: value))
+        }
         queryItems = items.isEmpty ? nil : items
     }
 }

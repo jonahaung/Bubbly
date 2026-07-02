@@ -1,8 +1,6 @@
-//
 //  IconView.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 10/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -26,7 +24,7 @@ public struct IconView<Content: View>: View {
                 .brightness(colorScheme == .dark ? -0.2 : -0.03)
 
             content
-                .foregroundStyle(.white)
+                .foregroundStyle(Color(.tertiarySystemBackground))
         }
         .font(.system(size: 18))
         .imageScale(.small)

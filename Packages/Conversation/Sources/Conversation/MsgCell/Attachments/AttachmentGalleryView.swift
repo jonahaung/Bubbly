@@ -1,6 +1,11 @@
-import Database
-import SwiftUI
+//  AttachmentGalleryView.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
+import SwiftUI
+import Database
 
 public struct AttachmentGalleryView: View {
     private let attachments: [Attachment]
@@ -47,22 +52,23 @@ public struct AttachmentGalleryView: View {
     }
 
     private var bottomBar: some View {
-        XPhotoPageControl(selection: $selection, items: attachments.map(\.id), size: 20)
-            .padding()
+        XPhotoPageControl(
+            selection: $selection,
+            items: attachments.map(\.id),
+            size: 20
+        )
+        .padding()
     }
 
     @ViewBuilder private var shareButton: some View {
         let currentItem = attachments.first(where: { $0.id == selection })
-        if
-            let item = currentItem,
-            item.attachmentType == .image,
-            let url = item.galleryURL,
-            let data = try? Data(contentsOf: url),
-            let uIImage = UIImage(data: data) {
-            let image = Image(uiImage: uIImage)
+        if let item = currentItem,
+           item.attachmentType == .image,
+           let url = item.galleryURL
+        {
             ShareLink(
-                item: image,
-                preview: SharePreview(item.galleryTitle ?? "", image: image)
+                item: url,
+                preview: SharePreview(item.galleryTitle ?? "")
             )
             .labelStyle(.iconOnly)
         }

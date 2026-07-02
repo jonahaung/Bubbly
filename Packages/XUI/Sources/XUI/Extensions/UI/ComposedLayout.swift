@@ -1,12 +1,13 @@
+//  ComposedLayout.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
 
 public struct ComposedLayout: Layout {
-    private let hStack = AnyLayout(HStackLayout(spacing: 1))
-    private let vStack = AnyLayout(VStackLayout(spacing: 1))
+    private let hStack: AnyLayout = .init(HStackLayout(spacing: 1))
+    private let vStack: AnyLayout = .init(VStackLayout(spacing: 1))
 
     public struct Caches {
         var topCache: AnyLayout.Cache
@@ -41,7 +42,7 @@ public struct ComposedLayout: Layout {
         if subviews.count < topColumns + 1 {
             subviews.dropLast(subviews.count) // return empty LayoutSubviews
         } else {
-            subviews[max(subviews.count - bottomColumns, topColumns)..<subviews.count]
+            subviews[max(subviews.count - bottomColumns, topColumns) ..< subviews.count]
         }
     }
 

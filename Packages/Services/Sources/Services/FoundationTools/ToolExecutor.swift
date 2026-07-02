@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import FoundationModels
@@ -11,9 +9,9 @@ import FoundationModels
 @Observable
 public final class ToolExecutor {
     public private(set) var isRunning = false
-    public var result: String?
-    public var errorMessage: String?
-    public private(set) var successMessage: String?
+    public var result: String? = nil
+    public var errorMessage: String? = nil
+    public private(set) var successMessage: String? = nil
 
     public init() {}
 
@@ -24,12 +22,12 @@ public final class ToolExecutor {
         type: T.Type,
         successMessage: String? = nil,
         formatter: @Sendable @escaping (T) -> String,
-        clearForm: (@MainActor @Sendable () -> Void)? = nil
+        clearForm: (@MainActor @Sendable () -> Void)? = nil,
     ) async {
         await performExecution(successMessage: successMessage, clearForm: clearForm) { @Sendable in
             let session = LanguageModelSession(
                 model: .init(useCase: .general, guardrails: .permissiveContentTransformations),
-                tools: [tool]
+                tools: [tool],
             )
             let response = try await session.respond(to: prompt, generating: type)
             return formatter(response.content)
@@ -41,12 +39,12 @@ public final class ToolExecutor {
         tool: some Tool,
         successMessage: String? = nil,
         clearForm: (@MainActor @Sendable () -> Void)? = nil,
-        @PromptBuilder promptBuilder: @Sendable () -> Prompt
+        @PromptBuilder promptBuilder: @Sendable () -> Prompt,
     ) async {
         await performExecution(successMessage: successMessage, clearForm: clearForm) { @Sendable in
             let session = LanguageModelSession(
                 model: .init(useCase: .general, guardrails: .permissiveContentTransformations),
-                tools: [tool]
+                tools: [tool],
             )
             let response = try await session.respond(to: promptBuilder())
             return response.content
@@ -58,7 +56,7 @@ public final class ToolExecutor {
         sessionBuilder: @Sendable () -> LanguageModelSession,
         prompt: String,
         successMessage: String? = nil,
-        clearForm: (@MainActor @Sendable () -> Void)? = nil
+        clearForm: (@MainActor @Sendable () -> Void)? = nil,
     ) async {
         await performExecution(successMessage: successMessage, clearForm: clearForm) { @Sendable in
             let session = sessionBuilder()
@@ -72,7 +70,7 @@ public final class ToolExecutor {
     private func performExecution(
         successMessage: String? = nil,
         clearForm: (@MainActor @Sendable () -> Void)? = nil,
-        operation: @Sendable () async throws -> String
+        operation: @Sendable () async throws -> String,
     ) async {
         await prepareForNewExecution()
 
@@ -98,7 +96,7 @@ public final class ToolExecutor {
     private func finalizeExecution(
         result: String? = nil,
         successMessage: String? = nil,
-        errorMessage: String? = nil
+        errorMessage: String? = nil,
     ) {
         isRunning = false
         self.result = result

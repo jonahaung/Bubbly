@@ -1,31 +1,32 @@
+//  PGroup.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import SwiftData
+import Foundation
+
+// MARK: - PGroup
 
 @Model
 public final class PGroup {
     @Attribute(.unique)
     public var uid: String
     public var name: String
-    public var createdDate: String
+    public var createdDate: Date
     public var photoURL: String
     public var members: [String]
     public var createdBy: String
-    public var theme: ConversationTheme
-    public var seenMembers: [SeenMember]
+//    public var theme: ConversationTheme
 
     public init(
         uid: String,
         name: String,
-        createdDate: String,
+        createdDate: Date,
         photoURL: String,
         members: [String],
         createdBy: String,
-        theme: ConversationTheme = ConversationTheme(),
-        seenMembers: [SeenMember]
+        theme _: ConversationTheme = ConversationTheme()
     ) {
         self.uid = uid
         self.name = name
@@ -33,10 +34,39 @@ public final class PGroup {
         self.photoURL = photoURL
         self.members = members
         self.createdBy = createdBy
-        self.theme = theme
-        self.seenMembers = seenMembers
+    }
+    
+    public required init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.uid = try container.decode(String.self, forKey: .uid)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.createdDate = try container.decode(Date.self, forKey: .createdDate)
+        self.photoURL = try container.decode(String.self, forKey: .photoURL)
+        self.members = try container.decode([String].self, forKey: .members)
+        self.createdBy = try container.decode(String.self, forKey: .createdBy)
+    }
+
+    public func encode(to encoder: any Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(uid, forKey: .uid)
+        try container.encode(name, forKey: .name)
+        try container.encode(createdDate, forKey: .createdDate)
+        try container.encode(photoURL, forKey: .photoURL)
+        try container.encode(members, forKey: .members)
+        try container.encode(createdBy, forKey: .createdBy)
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case uid
+        case name
+        case createdDate
+        case photoURL
+        case members
+        case createdBy
     }
 }
+
+// MARK: UIdentifiable
 
 extension PGroup: UIdentifiable {
     public func update(with conversation: Conversation) {
@@ -51,15 +81,7 @@ extension PGroup: UIdentifiable {
         }
     }
 
-    public func update(with properties: ConversationProperties) {
-
-        if theme != properties.theme {
-            theme = properties.theme
-        }
-        if seenMembers != properties.seenMembers {
-            seenMembers = properties.seenMembers
-        }
-    }
+    public func update(with _: ConversationProperties) {}
 
     public func update(from item: Group) {
         if name != item.name {
@@ -68,17 +90,13 @@ extension PGroup: UIdentifiable {
         if photoURL != item.photoURL {
             photoURL = item.photoURL ?? photoURL
         }
-        if members.sorted() != item.members.sorted() {
-            members = item.members
-        }
-        if theme != item.theme {
-            theme = item.theme
-        }
-        if seenMembers != item.seenMembers {
-            seenMembers = item.seenMembers
+        if members.uniqued().sorted() != item.members.uniqued().sorted() {
+            members = item.members.uniqued().sorted()
         }
     }
 }
+
+// MARK: SendableTransformable
 
 extension PGroup: SendableTransformable {
     public typealias SendableType = Group
@@ -87,11 +105,10 @@ extension PGroup: SendableTransformable {
         self.init(
             uid: snapshot.uid,
             name: snapshot.name,
-            createdDate: snapshot.createdDate.value,
+            createdDate: snapshot.createdDate,
             photoURL: snapshot.photoURL ?? "",
             members: snapshot.members,
-            createdBy: snapshot.createdBy,
-            seenMembers: snapshot.seenMembers
+            createdBy: snapshot.createdBy
         )
     }
 
@@ -99,12 +116,10 @@ extension PGroup: SendableTransformable {
         SendableType(
             uid: uid,
             name: name,
-            createdDate: .init(createdDate),
+            createdDate: createdDate,
             photoURL: photoURL,
             members: members,
-            createdBy: createdBy,
-            theme: theme,
-            seenMembers: seenMembers
+            createdBy: createdBy
         )
     }
 }

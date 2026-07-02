@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftUI
 import XUI
@@ -14,25 +12,25 @@ public struct PermissionView: View {
     }
 
     public var body: some View {
-		Label {
-			HStack(spacing: 4) {
-				Text(permission.kind.name)
-				Spacer()
-				Button {
-					handleButtonAction()
-				} label: {
-					Text(permission.ctaText)
-						.font(.footnote)
-				}
-			}
-			Text(permission.kind.description)
-				.italic()
-		} icon: {
-			IconView {
-				Image(systemName: permission.kind.imageName)
-			}
-			.foregroundStyle(RandomShapeStyle.style(for: permission.kind.name))
-		}
+        Label {
+            HStack(spacing: 4) {
+                Text(permission.kind.name)
+                Spacer()
+                Button {
+                    handleButtonAction()
+                } label: {
+                    Text(permission.ctaText)
+                        .font(.footnote)
+                }
+            }
+            Text(permission.kind.description)
+                .italic()
+        } icon: {
+            IconView {
+                Image(systemName: permission.kind.imageName)
+            }
+            .foregroundStyle(RandomShapeStyle.style(for: permission.kind.name))
+        }
         .id(reload)
     }
 

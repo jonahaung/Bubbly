@@ -4,7 +4,9 @@ import PackageDescription
 
 let package = Package(
     name: "Conversation",
-    platforms: [.iOS(.v26)],
+    platforms: [
+        .iOS(.v26)
+    ],
     products: [
         .library(
             name: "Conversation",
@@ -17,12 +19,7 @@ let package = Package(
         .package(name: "Services", path: "../Services"),
         .package(name: "XUI", path: "../XUI"),
         .package(name: "ImageLoader", path: "../ImageLoader"),
-        .package(name: "MediaPicker", path: "../MediaPicker"),
-        .package(
-            url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
-            .upToNextMajor(from: "5.3.0")
-        ),
-		.package(url: "https://github.com/gonzalezreal/textual", from: "0.1.0")
+        .package(name: "MediaPicker", path: "../MediaPicker")
     ],
     targets: [
         .target(
@@ -34,19 +31,13 @@ let package = Package(
                 .product(name: "XUI", package: "XUI"),
                 .product(name: "ImageLoader", package: "ImageLoader"),
                 .product(name: "VideoLoader", package: "ImageLoader"),
-                .product(name: "MediaPicker", package: "MediaPicker"),
-                .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
-				.product(name: "Textual", package: "Textual")
-            ],
-            resources: [
-                .process("Resources")
+                .product(name: "MediaPicker", package: "MediaPicker")
             ]
         ),
         .testTarget(
             name: "ConversationTests",
             dependencies: [
-                "Conversation",
-                .product(name: "Database", package: "Database")
+                "Conversation"
             ]
         )
     ]

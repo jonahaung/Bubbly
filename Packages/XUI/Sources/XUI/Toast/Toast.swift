@@ -1,5 +1,6 @@
+//  Toast.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -20,7 +21,7 @@ public struct Toast: @MainActor Identifiable, @MainActor Hashable {
         allowsBackgroundTap: Bool,
         action: (@MainActor @Sendable () -> Void)? = nil
     ) {
-        id = node.renderID()
+        id = UUID().uuidString
         self.node = node
         self.duration = duration
         self.style = style

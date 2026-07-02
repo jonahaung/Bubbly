@@ -1,9 +1,10 @@
+//  CaseNameReflectable.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import SwiftUI
+import Foundation
 
 public protocol CaseNameReflectable {
     var caseName: String { get }
@@ -19,16 +20,14 @@ public extension CaseNameReflectable {
     }
 
     var localizedName: String {
-        caseName.camelCaseToWords
-    }
-}
-
-public extension String {
-    var camelCaseToWords: String {
-        guard !isEmpty else { return "" }
+        guard !caseName.isEmpty else { return "" }
         let pattern = "([a-z])([A-Z])"
-        let spaced = replacingOccurrences(of: pattern, with: "$1 $2", options: .regularExpression)
+        let spaced = caseName.replacingOccurrences(of: pattern, with: "$1 $2", options: .regularExpression)
         return spaced.capitalized
+    }
+
+    var rawValue: String {
+        caseName
     }
 }
 

@@ -1,12 +1,13 @@
+//  FirestoreRepo.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Core
 
 @NetworkActor
 public enum FirestoreRepo {
-    @NetworkActor private static let client = FirestoreRESTClient()
+    @NetworkActor private static let client: FirestoreRESTClient = .init()
 
     public static func add(
         _ item: some Codable & Sendable,
@@ -32,6 +33,28 @@ public enum FirestoreRepo {
         )
     }
 
+    public static func set(
+        _ item: some Codable & Sendable,
+        collectionPath: FirestoreCollectionPath,
+        documentID: String
+    ) async throws {
+        try await client.setDocument(
+            item,
+            collectionPath: collectionPath.rawValue,
+            documentID: documentID
+        )
+    }
+
+    public static func getDocument<T: Codable & Sendable>(
+        collection: FirestoreCollectionPath,
+        documentID: String
+    ) async throws -> T {
+        try await client.getDocument(
+            at: "\(collection.rawValue)/\(documentID)",
+            as: T.self
+        )
+    }
+
     public static func getModels<T: Codable & Sendable>(
         for uid: String,
         collection: FirestoreCollectionPath,
@@ -39,7 +62,8 @@ public enum FirestoreRepo {
     ) async throws
         -> [
             T
-        ] {
+        ]
+    {
         let filter = FirestoreFilter(
             field: field.rawValue,
             operator: .arrayContains,
@@ -53,13 +77,15 @@ public enum FirestoreRepo {
         collection: FirestoreCollectionPath,
         field: FirestoreDocumentPath
     ) async throws
-        -> T? {
+        -> T?
+    {
         let filter = FirestoreFilter(
             field: field.rawValue,
             operator: .equal,
             value: .string(uid)
         )
         let items: [T] = try await client.query(collection: collection, filter: filter)
+
         return items.first
     }
 

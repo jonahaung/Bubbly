@@ -1,0 +1,39 @@
+//  Debouncer.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import Foundation
+
+public final class Debouncer {
+    private let delay: TimeInterval
+    private let queue: DispatchQueue
+    private var workItem: DispatchWorkItem?
+
+    public init(delay: TimeInterval, queue: DispatchQueue = .main) {
+        self.delay = delay
+        self.queue = queue
+    }
+
+    deinit {
+        cancel()
+    }
+
+    public func debounce(_ block: @escaping @Sendable () -> sending Void) {
+        workItem?.cancel()
+
+        let item = DispatchWorkItem { [weak self] in
+            guard let self else { return }
+            defer { self.workItem = nil }
+            block()
+        }
+
+        workItem = item
+        queue.asyncAfter(deadline: .now() + delay, execute: item)
+    }
+
+    public func cancel() {
+        workItem?.cancel()
+        workItem = nil
+    }
+}

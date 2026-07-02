@@ -1,8 +1,11 @@
+//  FSValue.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
+
+// MARK: - FSValue
 
 //
 //  FSValue.swift
@@ -61,14 +64,16 @@ public enum FSValue: Codable, Sendable {
         if let stringValue = try? container.decode(String.self, forKey: .stringValue) {
             self = .string(stringValue)
         } else if let intString = try? container.decode(String.self, forKey: .integerValue),
-                  let intVal = Int(intString) {
+                  let intVal = Int(intString)
+        {
             self = .int(intVal)
         } else if let doubleValue = try? container.decode(Double.self, forKey: .doubleValue) {
             self = .double(doubleValue)
         } else if let boolValue = try? container.decode(Bool.self, forKey: .booleanValue) {
             self = .bool(boolValue)
         } else if let timestamp = try? container.decode(String.self, forKey: .timestampValue),
-                  let date = formatter.date(from: timestamp) {
+                  let date = formatter.date(from: timestamp)
+        {
             self = .timestamp(date)
         } else if container.contains(.mapValue) {
             let mapContainer = try container.nestedContainer(
@@ -117,6 +122,8 @@ public enum FSValue: Codable, Sendable {
         let values: [FSValue]
     }
 }
+
+// MARK: - FSDocument
 
 public struct FSDocument: Codable, Sendable {
     public let fields: [String: FSValue]

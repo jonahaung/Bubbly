@@ -1,11 +1,13 @@
+//  MsgModelsPerformanceTests.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-@testable import Conversation
-import Database
-import Foundation
 import Testing
+import Foundation
+@testable import ConversationTestingSupport
+
+// MARK: - MsgModelsPerformanceTests
 
 struct MsgModelsPerformanceTests {
     @Test
@@ -32,7 +34,10 @@ struct MsgModelsPerformanceTests {
             startIndex: -200
         )
         let prependStart = clock.now
-        _ = models.prepend(msgs: prependBatch, preserveAnchor: base[2000].uid)
+        let preservedAnchor = models.prepend(
+            msgs: prependBatch,
+            preserveAnchor: base[2000].uid
+        )
         let prependElapsed = prependStart.duration(to: clock.now)
 
         let appendBatch = Self.makeMessages(
@@ -51,6 +56,7 @@ struct MsgModelsPerformanceTests {
         let jumped = models.jump(to: base[5000].uid)
         let jumpElapsed = jumpStart.duration(to: clock.now)
 
+        #expect(preservedAnchor)
         #expect(jumped)
         #expect(models.count == 10400)
         #expect(models.renderedModels.count <= 260)
@@ -74,20 +80,19 @@ private extension MsgModelsPerformanceTests {
         startDate: Date,
         startIndex: Int
     ) -> [Message] {
-        var result: [Message] = []
+        var result = [Message]()
         result.reserveCapacity(count)
-        for offset in 0..<count {
+        for offset in 0 ..< count {
             let index = startIndex + offset
             let date = startDate.addingTimeInterval(TimeInterval(offset))
             result.append(
                 Message(
                     uid: "msg-\(index)",
-                    senderID: index % 2 == 0 ? "u-a" : "u-b",
+                    senderID: index.isMultiple(of: 2) ? "u-a" : "u-b",
                     conID: conversationID,
                     text: "message-\(index)",
                     date: date,
-                    incomingStatus: .none,
-                    outgoingStatus: [:],
+                    deliveryStatus: .delivered,
                     attachments: [],
                     reactions: []
                 )

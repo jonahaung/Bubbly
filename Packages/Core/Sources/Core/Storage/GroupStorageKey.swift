@@ -1,10 +1,12 @@
+//  GroupStorageKey.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
+import XUI
 import Foundation
 
-public enum GroupStorageKey: Hashable, Sendable {
+public enum GroupStorageKey: Hashable, Sendable, CaseNameReflectable {
     case device(Device)
     case auth(GroupStorageKey.Auth)
     case layout(Layout)
@@ -12,27 +14,34 @@ public enum GroupStorageKey: Hashable, Sendable {
     case limit(Limit)
     case custom(String)
     case router(Router)
+    case conversation(GroupStorageKey.Conversation)
 }
 
 public extension GroupStorageKey {
-    enum Router: String, Hashable, Sendable {
+    enum Router: CaseNameReflectable, Sendable {
         case targetedDeepLinkPath
         case tappedConversationID
     }
 
-    enum Device: String, Hashable, Sendable {
-        case deviceToken, anyMsgData
+    enum Device: CaseNameReflectable, Sendable {
+        case deviceToken
+        case anyMsgData
     }
 
-    enum Auth: String, Hashable, Sendable {
-        case currentUserID, authToken
+    enum Auth: CaseNameReflectable, Sendable {
+        case currentUserID
+        case authToken
     }
 
-    enum Layout: String, Hashable, Sendable {
+    enum Conversation: CaseNameReflectable, Sendable {
+        case richTextEnabled
+    }
+
+    enum Layout: CaseNameReflectable, Sendable {
         case chatMsgSpacing
     }
 
-    enum Limit: String, Hashable, Sendable {
+    enum Limit: CaseNameReflectable, Sendable {
         case paginationPageSize
         case minutesForChatMsgGrouping
     }
@@ -70,6 +79,8 @@ public extension GroupStorageKey {
                 limit.rawValue
             case let .router(router):
                 router.rawValue
+            case let .conversation(conversation):
+                conversation.rawValue
             }
         }
         return AppInformation.appID + "." + key

@@ -1,11 +1,14 @@
+//  ChatComposer+Source.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import XUI
+import SwiftUI
 import Database
 import Foundation
-import SwiftUI
-import XUI
+
+// MARK: - ChatComposer.Source
 
 extension ChatComposer {
     enum Source: String, Hashable, Identifiable, Equatable, CaseNameReflectable {
@@ -13,7 +16,10 @@ extension ChatComposer {
             self
         }
 
-        case menu, text, camera, liary, audio, document, machineImag, emoji
+        case camera, liary, audio, document, machineImag, emoji
+
+        static let mediaSources: [Self] = [.camera, .liary, .audio]
+        static let utilitySources: [Self] = [.document, .machineImag, .emoji]
     }
 }
 
@@ -24,8 +30,6 @@ extension ChatComposer.Source {
             "microphone.and.signal.meter.fill"
         case .machineImag:
             "apple.intelligence"
-        case .text:
-            "text.line.2.summary"
         case .liary:
             "photo.stack.fill"
         case .camera:
@@ -34,28 +38,41 @@ extension ChatComposer.Source {
             "text.document"
         case .emoji:
             "heart.fill"
-        case .menu:
-            "plus"
         }
     }
 
-    var foreGroundStyle: AnyShapeStyle {
+    var color: Color {
         switch self {
-        case .camera, .liary, .audio, .text, .menu, .document:
-            AnyShapeStyle(
-                Color.accentColor.gradient
-            )
-        case .machineImag:
-            AnyShapeStyle(AngularGradient(
-                gradient: Gradient(
-                    colors: [.indigo, .blue, .red, .orange, .indigo]
-                ),
-                center: .center
-            ))
         case .emoji:
-            AnyShapeStyle(
-                Color.red.gradient
-            )
+            Color(.systemPink)
+        case .audio:
+            Color(.orange)
+        case .machineImag:
+            Color(.systemPurple)
+        case .liary:
+            Color(.systemBlue)
+        case .camera:
+            Color(.systemBlue)
+        case .document:
+            Color(.systemTeal)
+        }
+    }
+
+    var keepsMenuOpen: Bool {
+        switch self {
+        case .emoji:
+            true
+        case .camera, .liary, .audio, .document, .machineImag:
+            false
+        }
+    }
+
+    var usesInlinePanel: Bool {
+        switch self {
+        case .emoji, .camera, .liary, .document, .machineImag:
+            true
+        case .audio:
+            false
         }
     }
 }

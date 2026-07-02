@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import ImageLoader
@@ -10,9 +8,10 @@ import XUI
 @MainActor
 @Observable
 final class ImageViewManager {
+    
     let item: any ImageViewItem
-    var image: UIImage?
-    var progress: ImageTask.Progress?
+    var image: UIImage? = nil
+    var progress: ImageTask.Progress? = nil
 
     init(item: any ImageViewItem) {
         self.item = item
@@ -22,15 +21,19 @@ final class ImageViewManager {
         item.fileExist()
     }
 
-    @concurrent func loadLocalImage() async {
-        guard await image == nil else {
+    func loadLocalImage(isThumbnil: Bool) {
+        guard image == nil else {
             return
         }
-        guard await isLocallyCached() else { return }
-        if let image = item.thumbnailImage() {
-            await MainActor.run {
-                self.image = image
-            }
+
+        guard isLocallyCached() else {
+            return
+        }
+
+        if isThumbnil {
+            image = item.thumbnailImage()
+        } else {
+            image = item.image()
         }
     }
 
@@ -40,7 +43,7 @@ final class ImageViewManager {
             Task {
                 do {
                     try await self.saveImage(success.image)
-                    await loadLocalImage()
+					loadLocalImage(isThumbnil: true)
                 } catch {
                     log(error)
                 }

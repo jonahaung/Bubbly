@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -10,94 +8,148 @@ import UIKit
 import UserNotifications
 import XUI
 
-public final class PushNotificationService: NSObject {
-    override public init() {
-        super.init()
+// MARK: - PushNotificationService
+
+public final class PushNotificationService: NSObject, Sendable {
+    private let routeParser: PushNotificationRouteParser
+
+    public override init() {
+        routeParser = .init()
     }
 
-    @MainActor
+    @concurrent
     public func registerForPushNotifications() async throws {
         try await UNUserNotificationCenter
             .current()
             .requestAuthorization(
-                options: [.alert, .badge, .sound]
+                options: [
+                    .alert, .badge, .sound,
+                ]
             )
-        UIApplication.shared.registerForRemoteNotifications()
+        await UIApplication.shared.registerForRemoteNotifications()
+        configureDelegates()
+    }
+
+    public func configureDelegates() {
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
     }
 
-    @MainActor
-    public func applicationDidBecomeActive() async throws {
-        let datas = await PushNotificationStore.shared.consumePendingAnyMsgData()
-        if !datas.isEmpty {
-            let currentNavPath = Router.shared.visiblePath()
-            try await AsyncOrderedStream.mapOrdered(inputs: datas) { data in
-                switch currentNavPath {
-                case let .conversation(prefetchData):
-                    if data.conID == prefetchData.configuration.conID {
-                        await Socket.shared.receive(data)
-                    }
-                default:
-                    await PushNotificationStore.shared.postInboxChanges()
-                }
+    public func captureLaunchNotification(_ userInfo: [AnyHashable: Any]) {
+        do {
+            let route = try routeParser.parse(userInfo: userInfo)
+            Task {
+                await enqueuePendingRoute(route)
             }
+        } catch {
+            log(error)
         }
+    }
+
+    @concurrent
+    public func applicationDidBecomeActive() async throws {
+        let currentNavPath = await Router.shared.visiblePath()
+        try await PushNotificationStore.shared.consumePendingAnyMsgData(
+            navPath: currentNavPath
+        )
         UNUserNotificationCenter.current().removeAllDeliveredNotifications()
         try await UNUserNotificationCenter.current().setBadgeCount(0)
     }
 }
 
+// MARK: UNUserNotificationCenterDelegate
+
 extension PushNotificationService: UNUserNotificationCenterDelegate {
     public func userNotificationCenter(
         _: UNUserNotificationCenter,
-        willPresent notification: UNNotification
+        willPresent notification: UNNotification,
     ) async
-        -> UNNotificationPresentationOptions {
+        -> UNNotificationPresentationOptions
+    {
         let userInfo = notification.request.content.userInfo
-        guard let data = try? AnyMsgData.parse(from: userInfo) else {
+        let data: AnyMsgData
+        do {
+            data = try AnyMsgData.parse(from: userInfo)
+        } catch {
+            log(error)
             return [.badge, .banner, .list, .sound]
         }
-        let currentNavPath = await MainActor.run { Router.shared.visiblePath() }
-        switch currentNavPath {
-        case let .conversation(prefetchData):
-            if data.conID == prefetchData.configuration.conID {
-                await Socket.shared.receive(data)
+
+        let currentNavPath = await Router.shared.visiblePath()
+        do {
+            switch currentNavPath {
+            case .conversation(let prefetchData)
+            where data.conID == prefetchData.conversation.uid:
+                try await Socket.shared.notifyMessage(data)
                 return []
-            } else {
+            default:
+                let didAffectInbox = try await process(
+                    data,
+                    for: currentNavPath
+                )
+                if didAffectInbox {
+                    await PushNotificationStore.shared.postInboxChanges()
+                }
                 return [.banner]
             }
-        default:
-            await PushNotificationStore.shared.postInboxChanges()
-            return [.banner]
+        } catch {
+            log(error)
+            return [.badge, .banner, .list, .sound]
         }
     }
 
     public func userNotificationCenter(
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping ()
-            -> Void
+        withCompletionHandler completionHandler:
+            @escaping ()
+            -> Void,
     ) {
-        let userInfo = response.notification.request.content.userInfo
-        guard let data = try? AnyMsgData.parse(from: userInfo) else {
-            completionHandler()
-            return
-        }
-        MainActor.assumeIsolated {
-            if let url = data.deeplinkURL {
-                UIApplication.shared.open(url)
+        do {
+            let route = try routeParser.parse(
+                userInfo: response.notification.request.content.userInfo
+            )
+            Task {
+                await enqueuePendingRoute(route)
             }
+        } catch {
+            log(error)
         }
         completionHandler()
     }
 }
 
+extension PushNotificationService {
+    private func enqueuePendingRoute(_ route: Deeplink) async {
+        await PendingDeeplinkStore.shared.enqueue(route)
+        await PendingDeeplinkStore.shared.drainIfReady()
+    }
+
+    fileprivate func process(
+        _ data: AnyMsgData,
+        for currentNavPath: NavPath?
+    ) async throws -> Bool {
+        switch currentNavPath {
+        case .conversation(let prefetchData)
+        where data.conID == prefetchData.conversation.uid:
+            //            try await Socket.shared.receive(data)
+            return false
+        default:
+            //            try await Socket.shared.receive(data)
+            return true
+        }
+    }
+}
+
+// MARK: MessagingDelegate
+
 extension PushNotificationService: MessagingDelegate {
     public func messaging(
         _: Messaging,
-        didReceiveRegistrationToken fcmToken: String?
+        didReceiveRegistrationToken fcmToken: String?,
     ) {
-        Task { await PushNotificationStore.shared.handleRegistrationToken(fcmToken) }
+        Task {
+            await PushNotificationStore.shared.handleRegistrationToken(fcmToken)
+        }
     }
 }

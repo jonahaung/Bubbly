@@ -1,14 +1,13 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
 import Services
 import XUI
 
-struct InboxItem: Sendable, Identifiable, Equatable {
+// MARK: - InboxItem
 
+struct InboxItem: Sendable, Identifiable, Equatable {
     static func == (lhs: InboxItem, rhs: InboxItem) -> Bool {
         lhs.id == rhs.id
     }
@@ -25,6 +24,8 @@ struct InboxItem: Sendable, Identifiable, Equatable {
         conversation.name
     }
 }
+
+// MARK: ImageViewItem
 
 extension InboxItem: ImageViewItem {
     var imageName: String? {

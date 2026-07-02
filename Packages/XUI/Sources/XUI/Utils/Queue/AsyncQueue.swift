@@ -1,10 +1,11 @@
+//  AsyncQueue.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
 
-private protocol Cancelling {
+private protocol Cancellable {
     func cancel()
 }
 
@@ -12,7 +13,7 @@ private protocol Awaitable: Sendable {
     func waitForCompletion() async
 }
 
-extension Task: Awaitable, Cancelling {
+extension Task: Awaitable, Cancellable {
     fileprivate func waitForCompletion() async {
         _ = try? await value
     }
@@ -20,12 +21,11 @@ extension Task: Awaitable, Cancelling {
 
 public final class AsyncQueue: @unchecked Sendable {
     #if compiler(>=6.0)
-    public typealias ThrowingOperation<Success> = @isolated(any) @Sendable () async throws
-        -> sending Success
-    public typealias Operation<Success> = @isolated(any) @Sendable () async -> sending Success
+        public typealias ThrowingOperation<Success> = @isolated(any) @Sendable () async throws -> sending Success
+        public typealias Operation<Success> = @isolated(any) @Sendable () async -> sending Success
     #else
-    public typealias ThrowingOperation<Success: Sendable> = @Sendable () async throws -> Success
-    public typealias Operation<Success: Sendable> = @Sendable () async -> Success
+        public typealias ThrowingOperation<Success: Sendable> = @Sendable () async throws -> Success
+        public typealias Operation<Success: Sendable> = @Sendable () async -> Success
     #endif
 
     public typealias ErrorSequence = AsyncStream<Error>
@@ -33,8 +33,8 @@ public final class AsyncQueue: @unchecked Sendable {
     public struct Attributes: OptionSet, Sendable {
         public let rawValue: UInt64
 
-        public static let concurrent = Attributes(rawValue: 1 << 0)
-        public static let publishErrors = Attributes(rawValue: 2 << 0)
+        public static let concurrent: Attributes = .init(rawValue: 1 << 0)
+        public static let publishErrors: Attributes = .init(rawValue: 2 << 0)
 
         public init(rawValue: UInt64) {
             self.rawValue = rawValue
@@ -42,7 +42,7 @@ public final class AsyncQueue: @unchecked Sendable {
     }
 
     private struct QueueEntry {
-        let task: any (Awaitable & Cancelling)
+        let task: any (Awaitable & Cancellable)
         let isBarrier: Bool
         let id: UUID
     }
@@ -53,16 +53,15 @@ public final class AsyncQueue: @unchecked Sendable {
         let id: UUID
     }
 
-    private let lock = NSLock()
-    private var pendingTasks = [QueueEntry]()
+    private let lock: NSLock = .init()
+    private var pendingTasks: [QueueEntry] = []
     private let attributes: Attributes
     private let errorContinuation: ErrorSequence.Continuation
 
     /// An AsyncSequence of all errors thrown from operations.
     ///
-    /// Errors are published here even if a reference to the operation task is held and awaited.
-    /// But, it can still very useful for logging and debugging purposes. This sequence will not
-    /// include any `CancellationError`s thrown.
+    /// Errors are published here even if a reference to the operation task is held and awaited. But, it can still very useful for logging and debugging purposes. This sequence will not include any
+    /// `CancellationError`s thrown.
     public let errorSequence: ErrorSequence
 
     public init(attributes: Attributes = []) {
@@ -85,10 +84,7 @@ public final class AsyncQueue: @unchecked Sendable {
 
     private func createTask<Success, Failure>(
         barrier: Bool,
-        _ block: (ExecutionProperties) -> Task<
-            Success,
-            Failure
-        >
+        _ block: (ExecutionProperties) -> Task<Success, Failure>
     ) -> Task<Success, Failure> {
         let id = UUID()
 
@@ -126,9 +122,7 @@ public final class AsyncQueue: @unchecked Sendable {
 
     private func executeOperation<Success>(
         props: ExecutionProperties,
-        @_inheritActorContext operation: @escaping ThrowingOperation<
-            Success
-        >
+        @_inheritActorContext operation: @escaping ThrowingOperation<Success>
     ) async rethrows -> Success {
         defer {
             completePendingTask(with: props)
@@ -144,9 +138,9 @@ public final class AsyncQueue: @unchecked Sendable {
             throw CancellationError()
         } catch {
             #if compiler(>=5.9)
-            if attributes.contains(.publishErrors) {
-                errorContinuation.yield(error)
-            }
+                if attributes.contains(.publishErrors) {
+                    errorContinuation.yield(error)
+                }
             #endif
 
             throw error
@@ -160,14 +154,8 @@ public extension AsyncQueue {
     func addOperation<Success>(
         priority: TaskPriority? = nil,
         barrier: Bool = false,
-        @_inheritActorContext operation: @escaping ThrowingOperation<
-            Success
-        >
-    )
-        -> Task<
-            Success,
-            Error
-        > {
+        @_inheritActorContext operation: @escaping ThrowingOperation<Success>
+    ) -> Task<Success, Error> {
         let asBarrier = barrier || attributes.contains([.concurrent]) == false
 
         return createTask(barrier: asBarrier) { props in
@@ -181,13 +169,9 @@ public extension AsyncQueue {
     @discardableResult
     func addOperation<Success>(
         priority: TaskPriority? = nil,
-        barrier: Bool = false,
+        barrier: Bool = true,
         @_inheritActorContext operation: @escaping Operation<Success>
-    )
-        -> Task<
-            Success,
-            Never
-        > {
+    ) -> Task<Success, Never> {
         let asBarrier = barrier || attributes.contains([.concurrent]) == false
 
         return createTask(barrier: asBarrier) { props in
@@ -203,9 +187,7 @@ public extension AsyncQueue {
     @discardableResult
     func addBarrierOperation<Success: Sendable>(
         priority: TaskPriority? = nil,
-        @_inheritActorContext operation: @escaping ThrowingOperation<
-            Success
-        >
+        @_inheritActorContext operation: @escaping ThrowingOperation<Success>
     ) -> Task<Success, Error> {
         addOperation(priority: priority, barrier: true, operation: operation)
     }
@@ -214,9 +196,7 @@ public extension AsyncQueue {
     @discardableResult
     func addBarrierOperation<Success: Sendable>(
         priority: TaskPriority? = nil,
-        @_inheritActorContext operation: @escaping Operation<
-            Success
-        >
+        @_inheritActorContext operation: @escaping Operation<Success>
     ) -> Task<Success, Never> {
         addOperation(priority: priority, barrier: true, operation: operation)
     }

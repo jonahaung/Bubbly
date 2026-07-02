@@ -1,12 +1,13 @@
+//  PagerScrollView.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Combine
 import SwiftUI
 
 public struct PagerScrollView<Item, Content>: View
-    where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, Item.ID == String {
+where Item: Sendable & Equatable & Hashable & Identifiable, Content: View, Item.ID == String {
     private let items: [Item]
     private let content: (Item) -> Content
     @Binding private var selection: String

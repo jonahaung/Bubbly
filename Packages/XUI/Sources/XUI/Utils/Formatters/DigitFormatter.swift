@@ -1,5 +1,6 @@
+//  DigitFormatter.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -15,7 +16,7 @@ public enum DigitFormatter {
             with: "",
             options: .regularExpression
         )
-        for index in 0..<pattern.count {
+        for index in 0 ..< pattern.count {
             guard index < pureNumber.count else {
                 stringvar = pureNumber
                 return

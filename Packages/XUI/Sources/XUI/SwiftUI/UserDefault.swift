@@ -1,16 +1,17 @@
+//  UserDefault.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Combine
-import Foundation
 import SwiftUI
+import Foundation
 
 @MainActor
 @propertyWrapper
 public struct UserDefault<Value: Equatable>: DynamicProperty {
     @State private var value: Value
-    let cancelBag = CancelBag()
+    let cancelBag: CancelBag = .init()
 
     private let key: String
     private let defaultValue: Value
@@ -25,10 +26,10 @@ public struct UserDefault<Value: Equatable>: DynamicProperty {
         self.defaultValue = defaultValue
         container = suiteName.flatMap { UserDefaults(suiteName: $0) } ?? .standard
 
-        if let stored: Value = Self.loadValue(forKey: self.key, from: container) {
-            _value = State(initialValue: stored)
+        _value = if let stored: Value = Self.loadValue(forKey: self.key, from: container) {
+            State(initialValue: stored)
         } else {
-            _value = State(initialValue: defaultValue)
+            State(initialValue: defaultValue)
         }
 
         observeChanges()

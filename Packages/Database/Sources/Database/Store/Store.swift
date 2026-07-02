@@ -1,13 +1,15 @@
+//  Store.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
-public actor Store {
-    public static let shared = Store()
+public final actor Store {
+    public static let shared: Store = .init()
 
     public var appContainer: AppContainer?
     public var modelContainer: ModelContainer? {
@@ -22,12 +24,9 @@ public actor Store {
     public init() {}
 
     public func hasSetUp(for id: String) -> Bool {
-        guard let appContainer else {
-            return false
-        }
-        return appContainer.modelContainer.configurations.contains(
+        modelContainer?.configurations.contains(
             where: { $0.name == id }
-        )
+        ) == true
     }
 
     public func start(with id: String) {

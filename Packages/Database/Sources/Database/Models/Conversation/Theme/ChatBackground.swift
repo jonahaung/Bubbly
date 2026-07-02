@@ -1,30 +1,48 @@
+//  ChatBackground.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import SwiftUI
 import XUI
+import SwiftUI
+
+// MARK: - ChatBackground
 
 public enum ChatBackground: Int, Codable, CaseIterable, Sendable {
-    case `default`, system, group
+    case bg_1
+    case bg_2
+    case bg_3
+    case bg_4
+    case bg_5
+    case bg_6
+    case bg_7
+    case bg_8
 }
+
+// MARK: Identifiable
 
 extension ChatBackground: Identifiable {
     public var id: Int {
         rawValue
     }
 
-    public var color: Color {
+    public var imageName: String {
         switch self {
-        case .default:
-            .secondarySystemBackground
-        case .group:
-            .systemGroupedBackground
-        case .system:
-            .systemBackground
+        case .bg_1: "bg_1"
+        case .bg_2: "bg_2"
+        case .bg_3: "bg_3"
+        case .bg_4: "bg_4"
+        case .bg_5: "bg_5"
+        case .bg_6: "bg_6"
+        case .bg_7: "bg_7"
+        case .bg_8: "bg_8"
         }
     }
+
+    public var `default`: Self { .bg_6 }
 }
+
+// MARK: XPickable, EmptyRepresentable
 
 extension ChatBackground: XPickable, EmptyRepresentable {
     public var title: String {
@@ -32,6 +50,6 @@ extension ChatBackground: XPickable, EmptyRepresentable {
     }
 
     public static var empty: Database.ChatBackground {
-        .default
+        .bg_6
     }
 }

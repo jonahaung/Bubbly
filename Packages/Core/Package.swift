@@ -5,7 +5,10 @@ import PackageDescription
 
 let package = Package(
     name: "Core",
-    platforms: [.iOS(.v26)],
+    platforms: [
+        .iOS(.v26),
+        .macOS(.v12)
+    ],
     products: [
         .library(
             name: "Core",
@@ -14,6 +17,7 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "XUI", path: "../XUI"),
+        .package(name: "RichText", path: "../RichText"),
         .package(name: "ImageLoader", path: "../ImageLoader"),
         .package(name: "Crypto", path: "../Crypto"),
         .package(name: "MediaPicker", path: "../MediaPicker"),
@@ -27,6 +31,7 @@ let package = Package(
             name: "Core",
             dependencies: [
                 .product(name: "XUI", package: "XUI"),
+                .product(name: "RichText", package: "RichText"),
                 .product(name: "FCM_V1", package: "FCM_V1"),
                 .product(name: "ImageLoader", package: "ImageLoader"),
                 .product(name: "VideoLoader", package: "ImageLoader"),
@@ -37,10 +42,10 @@ let package = Package(
                 .product(name: "FirePhoneOTP", package: "FirePhoneOTP"),
                 .product(name: "Crypto", package: "Crypto")
 
-			],
-			resources: [
-				.process("Resources")
-			],
+            ],
+            resources: [
+                .process("Resources")
+            ],
             swiftSettings: [
                 .enableExperimentalFeature("StrictConcurrency")
             ]

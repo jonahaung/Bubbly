@@ -1,21 +1,18 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 
 public final class MockDependencyContainer: DependencyContainer {
     public let currentUserRepository: CurrentUserRepository
-    public let contactsRepository: any ContactsRepositoryProtocol
 
     public init(
         currentUserRepository: CurrentUserRepository,
-        contactsRepository: any ContactsRepositoryProtocol
     ) {
         self.currentUserRepository = currentUserRepository
-        self.contactsRepository = contactsRepository
     }
 }
+
+// MARK: - XEnvironment
 
 public enum XEnvironment: Sendable {
     case development
@@ -46,9 +43,9 @@ public enum XEnvironment: Sendable {
 
     public static var current: XEnvironment {
         #if DEBUG
-        .development
+            .development
         #else
-        .production
+            .production
         #endif
     }
 }

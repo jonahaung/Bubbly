@@ -1,3 +1,8 @@
+//  VisualizeDimension.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 public extension View {
@@ -5,7 +10,7 @@ public extension View {
         modifier(DimensionVisualizationModifier(content: content, dimensions: [dimension]))
     }
 
-    func visualizeSize(color content: some ShapeStyle = Color.red) -> some View {
+    func visualizeSize(color content: some ShapeStyle = Color.random) -> some View {
         modifier(DimensionVisualizationModifier(content: content, dimensions: [.width, .height]))
     }
 }
@@ -45,7 +50,6 @@ struct DimensionVisualizationModifier<S: ShapeStyle>: ViewModifier {
                                 .overlay(alignment: overlayAlignment) {
                                     DimensionLabel(value: geometry.size)
                                 }
-
                         case [.height]:
                             IBeam(axis: .vertical).overlay(alignment: .dimensionLabel) {
                                 DimensionLabel(
@@ -104,7 +108,6 @@ extension Edge {
             Text("Hello, world!")
                 .background(.blue)
         }
-        .visualizeSize()
 
         HStack {
             Text("Hallo")

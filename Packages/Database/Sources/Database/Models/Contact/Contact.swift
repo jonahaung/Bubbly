@@ -1,11 +1,14 @@
+//  Contact.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
+import XUI
 import Contacts
 import Foundation
 import PhoneNumberKit
-import XUI
+
+// MARK: - Contact
 
 public struct Contact: ContactRepresentableSendable, Codable, Hashable {
     public let uid: String
@@ -16,6 +19,8 @@ public struct Contact: ContactRepresentableSendable, Codable, Hashable {
     public var publicKeyString: String
 }
 
+// MARK: StringMergable
+
 extension Contact: StringMergable {
     public var isChatAvailable: Bool {
         !uid.hasPrefix("+")
@@ -25,21 +30,25 @@ extension Contact: StringMergable {
         let name = cnContact.givenName.isEmpty ? [
             cnContact.middleName,
             cnContact.familyName
-        ].joined(
-            separator: " "
-        ).trimmed : cnContact.givenName.trimmed
+        ]
+            .joined(
+                separator: " "
+            )
+            .trimmed : cnContact.givenName.trimmed
 
         guard !name.isWhitespace,
               let phoneNumberString = cnContact.phoneNumbers
-              .first(where: { $0.value.stringValue.isWhitespace == false })?.value.stringValue
-        else {
+                  .first(where: { $0.value.stringValue.isWhitespace == false })?
+                  .value
+                  .stringValue else
+        {
             return nil
         }
 
         let phoneNumberKit = PhoneNumberKit()
         guard let phoneNumber = try? phoneNumberKit.parse(phoneNumberString),
-              phoneNumber.type == .mobile
-        else {
+              phoneNumber.type == .mobile else
+        {
             return nil
         }
 
@@ -58,6 +67,8 @@ extension Contact: StringMergable {
         )
     }
 }
+
+// MARK: EmptyRepresentable
 
 extension Contact: EmptyRepresentable {
     public static var empty: Contact {

@@ -1,14 +1,13 @@
+//  Sound.swift
 //
-//  SoundEffect 2.swift
-//  Core
-//
-//  Created by Aung Ko Min on 10/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
 
-public enum Sound: String, CaseIterable, Sendable {
+// MARK: - Sound
 
+public enum Sound: String, CaseIterable, Sendable {
     case beep
     case biip
     case boop
@@ -82,8 +81,9 @@ public enum Sound: String, CaseIterable, Sendable {
 
     case zing
 }
+
 public extension Sound {
-	var filename: String {
-		rawValue + ".m4a"
-	}
+    var filename: String {
+        rawValue + ".m4a"
+    }
 }

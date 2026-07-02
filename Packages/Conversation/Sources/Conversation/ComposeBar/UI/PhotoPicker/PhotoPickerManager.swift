@@ -1,20 +1,18 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
-
 import MediaPicker
 import PhotosUI
 import Services
 import SwiftUI
 
 @MainActor protocol PhotoPickerManagerDelegate: AnyObject {
-    func photoPickerManager(_ manager: PhotoPickerManager, didSelectImages images: [SelectedImage])
+    func photoPickerManager(
+        _ manager: PhotoPickerManager,
+        didSelectImages images: [SelectedImage]
+    )
 }
 
 @MainActor
 @Observable
 final class PhotoPickerManager {
-
     private var items: [SelectedPhotoItem] = [] {
         didSet { scheduleDebouncedUpdate() }
     }
@@ -37,25 +35,32 @@ final class PhotoPickerManager {
         let snapshot = items
 
         debounceTask = Task { [weak self] in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
 
             try? await Task.sleep(for: debounceInterval)
-            guard !Task.isCancelled else { return }
+            guard !Task.isCancelled else {
+                return
+            }
 
-            let images = await self.processSelections(snapshot)
-            guard !Task.isCancelled else { return }
+            let images = await processSelections(snapshot)
+            guard !Task.isCancelled else {
+                return
+            }
 
-            guard snapshot.map(\.id) == self.items.map(\.id) else { return }
+            guard snapshot.map(\.id) == items.map(\.id) else {
+                return
+            }
 
-            self.selectedImages = images
-            self.delegate?.photoPickerManager(self, didSelectImages: images)
+            selectedImages = images
+            delegate?.photoPickerManager(self, didSelectImages: images)
         }
     }
 
     private func processSelections(
         _ selections: [SelectedPhotoItem]
     ) async -> [SelectedImage] {
-
         await withTaskGroup(of: SelectedImage?.self) { group in
             for item in selections {
                 group.addTask {
@@ -63,11 +68,13 @@ final class PhotoPickerManager {
                 }
             }
 
-            var results: [SelectedImage] = []
+            var results = [SelectedImage]()
             results.reserveCapacity(selections.count)
 
             for await result in group {
-                if let result { results.append(result) }
+                if let result {
+                    results.append(result)
+                }
             }
 
             return results
@@ -78,7 +85,9 @@ final class PhotoPickerManager {
         from photo: SelectedPhotoItem
     ) async -> SelectedImage? {
         let image = await ImageProcessingActor.shared.process(item: photo)
-        guard let image else { return nil }
+        guard let image else {
+            return nil
+        }
 
         return SelectedImage(id: photo.id, image: image)
     }
@@ -96,7 +105,9 @@ final class PhotoPickerManager {
     }
 
     func removeSelectedImages(withIDs ids: [SelectedPhotoItem.ID]) {
-        guard !ids.isEmpty else { return }
+        guard !ids.isEmpty else {
+            return
+        }
 
         selectedImages.removeAll { ids.contains($0.id) }
         items.removeAll { ids.contains($0.id) }

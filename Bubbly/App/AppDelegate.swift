@@ -1,66 +1,53 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-import Core
-import Database
-import FirebaseAuth
-import FirebaseCore
-import FirebaseMessaging
 import Services
-import SwiftUI
-import XUI
+import UIKit
 
 @MainActor
-class AppDelegate: NSObject, UIApplicationDelegate {
+final class AppDelegate: NSObject, UIApplicationDelegate {
+
+    let runtime = AppRuntime()
+
     func application(
-        _: UIApplication,
-        didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
-    )
-        -> Bool {
-        FirebaseApp.configure()
-        FirebaseKeychainSanitizer.sanitize()
-        FirebaseConfiguration.shared.setLoggerLevel(.error)
-        Auth.auth().shareAuthStateAcrossDevices = true
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]? = nil,
+    ) -> Bool {
+        runtime.configureApplication()
         return true
     }
 
-    func application(
-        _: UIApplication,
-        didFailToRegisterForRemoteNotificationsWithError error: any Error
-    ) {
-        debugPrint(error)
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        runtime.didBecomeActive()
+    }
+
+    func applicationWillResignActive(_ application: UIApplication) {
+        runtime.willResignActive()
+    }
+
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        runtime.didEnterBackground()
     }
 
     func application(
-        _: UIApplication,
-        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: any Error,
     ) {
-        Auth.auth().setAPNSToken(deviceToken, type: .sandbox)
-        Messaging.messaging().apnsToken = deviceToken
+        runtime.didFailToRegisterForRemoteNotifications(error: error)
     }
 
     func application(
-        _: UIApplication,
-        didReceiveRemoteNotification _: [AnyHashable: Any]
-    ) async
-        -> UIBackgroundFetchResult {
-        .noData
-        //		guard let data = AnyMsgData(userInfo: userInfo) else {
-        //			return .noData
-        //		}
-        //		print(data)
-        //		await Socket.shared.receive(data)
-        //		NotificationCenter.default
-        //			.post(name: .inboxChanges, object: nil)
-        //		return .newData
-        // If you intend to reach this code, restructure the returns above.
-        // Keeping it for reference:
-        // if Auth.auth().canHandleNotification(userInfo) {
-        //     return .newData
-        // } else {
-        //     Messaging.messaging().appDidReceiveMessage(userInfo)
-        //     return .newData
-        // }
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data,
+    ) {
+        runtime.didRegisterForRemoteNotifications(deviceToken: deviceToken)
+    }
+
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+    ) async -> UIBackgroundFetchResult {
+        return runtime.didReceiveRemoteNotification(userInfo)
     }
 }

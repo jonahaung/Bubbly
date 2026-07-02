@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
@@ -336,7 +336,7 @@ private final class _DataLoader: NSObject, URLSessionDataDelegate, @unchecked Se
             completionHandler(proposedResponse)
     }
 
-    // MARK: Internal
+    
 
     private final class _Handler: @unchecked Sendable {
         let didReceiveData: (Data, URLResponse) -> Void

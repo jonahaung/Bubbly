@@ -1,11 +1,14 @@
+//  FirestoreRESTClient.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Core
-import FirebaseAuth
-import Foundation
 import XUI
+import Core
+import Foundation
+import FirebaseAuth
+
+// MARK: - FirestoreRESTClient
 
 @NetworkActor
 public final class FirestoreRESTClient {
@@ -35,7 +38,10 @@ public final class FirestoreRESTClient {
         encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         timestampFormatterWithFractional = ISO8601DateFormatter()
-        timestampFormatterWithFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        timestampFormatterWithFractional.formatOptions = [
+            .withInternetDateTime,
+            .withFractionalSeconds
+        ]
         timestampFormatter = ISO8601DateFormatter()
         timestampFormatter.formatOptions = [.withInternetDateTime]
     }
@@ -57,6 +63,7 @@ public final class FirestoreRESTClient {
         guard let json = result as? [String: Any] else {
             throw FirestoreError.invalidResponse
         }
+
         return json
     }
 
@@ -80,17 +87,22 @@ public final class FirestoreRESTClient {
             request.httpBody = try JSONSerialization.data(withJSONObject: body)
         }
 
-        let (data, response): (Data, URLResponse)
+        let data: Data
+        let response: URLResponse
         do {
             (data, response) = try await URLSession.shared.data(for: request)
         } catch {
             throw FirestoreError.networkError(error)
         }
-        guard let http = response as? HTTPURLResponse else { throw FirestoreError.invalidResponse }
+        guard let http = response as? HTTPURLResponse else {
+            throw FirestoreError.invalidResponse
+        }
 
         switch http.statusCode {
-        case 200..<300:
-            if data.isEmpty { return [:] }
+        case 200 ..< 300:
+            if data.isEmpty {
+                return [:]
+            }
             return try JSONSerialization.jsonObject(with: data)
         case 401 where retry:
             let token = try await getValidAuthToken(forceRefresh: true)
@@ -118,6 +130,7 @@ public final class FirestoreRESTClient {
         guard let fields = json["fields"] as? [String: Any] else {
             throw FirestoreError.invalidResponse
         }
+
         return try decodeFirestoreDocument(fields: fields, as: T.self)
     }
 
@@ -152,13 +165,41 @@ public final class FirestoreRESTClient {
         to documentID: String
     ) async throws {
         let token = try await getValidAuthToken()
-        let url = try makeDocumentURL(path: "\(collectionPath)/\(documentID)")
         let payload: [String: Any]
         do {
             payload = try ["fields": makeFirestoreFields(from: value)]
         } catch {
             throw FirestoreError.encodingError(error)
         }
+        let url = try makeUpdateDocumentURL(
+            path: "\(collectionPath)/\(documentID)",
+            fieldPaths: payload.firestoreFieldPaths
+        )
+        _ = try await performRequest(
+            url: url,
+            method: "PATCH",
+            body: payload,
+            retry: true,
+            token: token
+        )
+    }
+
+    public func setDocument(
+        _ data: some Codable,
+        collectionPath: String,
+        documentID: String
+    ) async throws {
+        let token = try await getValidAuthToken()
+        let payload: [String: Any]
+        do {
+            payload = try makeDocumentPayload(from: data)
+        } catch {
+            throw FirestoreError.encodingError(error)
+        }
+        let url = try makeUpdateDocumentURL(
+            path: "\(collectionPath)/\(documentID)",
+            fieldPaths: payload.firestoreFieldPaths
+        )
         _ = try await performRequest(
             url: url,
             method: "PATCH",
@@ -173,7 +214,7 @@ public final class FirestoreRESTClient {
         filters: [[String: Any]] = [],
         orderBy: [String]? = nil,
         limit: Int? = nil,
-        as type: T.Type,
+        as _: T.Type,
         retry: Bool = true,
         token: String? = nil
     ) async throws -> [T] {
@@ -205,12 +246,12 @@ public final class FirestoreRESTClient {
         }
 
         let body = ["structuredQuery": structuredQuery]
-        let authToken: String
-        if let token {
-            authToken = token
-        } else {
-            authToken = try await getValidAuthToken(forceRefresh: false)
-        }
+        let authToken: String =
+            if let token {
+                token
+            } else {
+                try await getValidAuthToken(forceRefresh: false)
+            }
         let raw = try await performRawRequest(
             url: url,
             method: "POST",
@@ -221,16 +262,18 @@ public final class FirestoreRESTClient {
         if let jsonArray = raw as? [[String: Any]] {
             return try jsonArray.compactMap { item -> T? in
                 guard let document = item["document"] as? [String: Any],
-                      let fields = document["fields"] as? [String: Any]
-                else {
+                      let fields = document["fields"] as? [String: Any] else
+                {
                     return nil
                 }
+
                 return try decodeFirestoreDocument(fields: fields, as: T.self)
             }
         }
         if let jsonObject = raw as? [String: Any] {
             if let document = jsonObject["document"] as? [String: Any],
-               let fields = document["fields"] as? [String: Any] {
+               let fields = document["fields"] as? [String: Any]
+            {
                 return try [decodeFirestoreDocument(fields: fields, as: T.self)]
             }
             return []
@@ -246,6 +289,7 @@ public final class FirestoreRESTClient {
         guard let user = Auth.auth().currentUser else {
             throw FirestoreError.notAuthenticated
         }
+
         let token = try await user.getIDTokenResult(forcingRefresh: forceRefresh).token
         GroupStorage.shared.save(token, for: .auth(.authToken))
         return token
@@ -256,17 +300,21 @@ public final class FirestoreRESTClient {
         as _: T.Type
     ) throws -> T {
         func unwrap(_ value: Any) -> Any? {
-            guard let field = value as? [String: Any] else { return nil }
+            guard let field = value as? [String: Any] else {
+                return nil
+            }
 
             if let stringValue = field["stringValue"] as? String {
                 return stringValue
             } else if let intString = field["integerValue"] as? String,
-                      let intVal = Int(intString) {
+                      let intVal = Int(intString)
+            {
                 return intVal
             } else if let doubleValue = field["doubleValue"] as? Double {
                 return doubleValue
             } else if let doubleString = field["doubleValue"] as? String,
-                      let doubleValue = Double(doubleString) {
+                      let doubleValue = Double(doubleString)
+            {
                 return doubleValue
             } else if let boolValue = field["booleanValue"] as? Bool {
                 return boolValue
@@ -275,11 +323,13 @@ public final class FirestoreRESTClient {
             } else if field["nullValue"] != nil {
                 return NSNull()
             } else if let array = field["arrayValue"] as? [String: Any],
-                      let values = array["values"] as? [Any] {
+                      let values = array["values"] as? [Any]
+            {
                 return values.compactMap(unwrap)
             } else if let map = field["mapValue"] as? [String: Any],
-                      let nestedFields = map["fields"] as? [String: Any] {
-                var nested: [String: Any] = [:]
+                      let nestedFields = map["fields"] as? [String: Any]
+            {
+                var nested = [String: Any]()
                 for (nestedKey, nestedValue) in nestedFields {
                     nested[nestedKey] = unwrap(nestedValue)
                 }
@@ -289,7 +339,7 @@ public final class FirestoreRESTClient {
             }
         }
 
-        var json: [String: Any] = [:]
+        var json = [String: Any]()
         for (key, wrapped) in fields {
             json[key] = unwrap(wrapped)
         }
@@ -306,12 +356,15 @@ public final class FirestoreRESTClient {
         let encodedPath = path
             .split(separator: "/", omittingEmptySubsequences: true)
             .map { segment in
-                String(segment).addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? String(segment)
+                String(segment)
+                    .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ??
+                    String(segment)
             }
             .joined(separator: "/")
         guard let url = URL(string: "\(baseURL)/\(encodedPath)") else {
             throw FirestoreError.invalidURL
         }
+
         return url
     }
 
@@ -325,6 +378,7 @@ public final class FirestoreRESTClient {
         guard let collectionID = components.last else {
             throw FirestoreError.invalidURL
         }
+
         let parentPath = components.dropLast().joined(separator: "/")
         let encodedCollectionID = collectionID
             .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? collectionID
@@ -336,7 +390,8 @@ public final class FirestoreRESTClient {
                 .split(separator: "/", omittingEmptySubsequences: true)
                 .map { segment in
                     let value = String(segment)
-                    return value.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? value
+                    return value
+                        .addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? value
                 }
                 .joined(separator: "/")
             basePath = "\(baseURL)/\(encodedParent)"
@@ -344,10 +399,35 @@ public final class FirestoreRESTClient {
         guard var urlComponents = URLComponents(string: "\(basePath)/\(encodedCollectionID)") else {
             throw FirestoreError.invalidURL
         }
+
         urlComponents.queryItems = [URLQueryItem(name: "documentId", value: documentID)]
         guard let url = urlComponents.url else {
             throw FirestoreError.invalidURL
         }
+
+        return url
+    }
+
+    private func makeUpdateDocumentURL(
+        path: String,
+        fieldPaths: [String]
+    ) throws -> URL {
+        let documentURL = try makeDocumentURL(path: path)
+        guard var components = URLComponents(url: documentURL, resolvingAgainstBaseURL: false) else {
+            throw FirestoreError.invalidURL
+        }
+
+        var queryItems = [URLQueryItem(name: "currentDocument.exists", value: "true")]
+        queryItems.append(contentsOf: fieldPaths.map { URLQueryItem(
+            name: "updateMask.fieldPaths",
+            value: $0
+        )
+        })
+        components.queryItems = queryItems
+        guard let url = components.url else {
+            throw FirestoreError.invalidURL
+        }
+
         return url
     }
 
@@ -367,11 +447,12 @@ public final class FirestoreRESTClient {
         guard let dictionary = rawObject as? [String: Any] else {
             throw FirestoreError.invalidResponse
         }
+
         return try ["fields": makeFirestoreFields(from: dictionary)]
     }
 
     private func makeFirestoreFields(from dictionary: [String: Any]) throws -> [String: Any] {
-        var fields: [String: Any] = [:]
+        var fields = [String: Any]()
         fields.reserveCapacity(dictionary.count)
         for (key, value) in dictionary {
             fields[key] = try makeFirestoreValue(value)
@@ -407,6 +488,9 @@ public final class FirestoreRESTClient {
         }
         if let arrayValue = value as? [Any] {
             let values = try arrayValue.map { try makeFirestoreValue($0) }
+            if values.isEmpty {
+                return ["arrayValue": [:]]
+            }
             return ["arrayValue": ["values": values]]
         }
         if let mapValue = value as? [String: Any] {
@@ -424,19 +508,59 @@ public final class FirestoreRESTClient {
         guard let url = URL(string: "\(baseURL):runQuery") else {
             throw FirestoreError.invalidURL
         }
+
         return url
     }
 
     private func errorMessage(from data: Data) -> String {
         if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let error = json["error"] as? [String: Any],
-           let message = error["message"] as? String {
+           let message = error["message"] as? String
+        {
             return message
         }
         if let message = String(data: data, encoding: .utf8), !message.isEmpty {
             return message
         }
         return "Unknown server error"
+    }
+}
+
+private extension [String: Any] {
+    var firestoreFieldPaths: [String] {
+        let fields = self["fields"] as? [String: Any] ?? [:]
+        return fields.keys.sorted()
+    }
+}
+
+// MARK: - FirestoreRESTClient.FirestoreError + LocalizedError
+
+extension FirestoreRESTClient.FirestoreError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            "Firestore request URL is invalid."
+        case .invalidResponse:
+            "Firestore returned a response the client could not interpret."
+        case let .networkError(error):
+            "Firestore network request failed: \(error.localizedDescription)"
+        case let .serverError(message):
+            "Firestore server error: \(message)"
+        case .notAuthenticated:
+            "Firestore request requires an authenticated Firebase user."
+        case let .encodingError(error):
+            "Firestore request encoding failed: \(error.localizedDescription)"
+        case let .decodingError(error):
+            "Firestore response decoding failed: \(error.localizedDescription)"
+        }
+    }
+}
+
+// MARK: - FirestoreRESTClient.FirestoreError + CustomStringConvertible
+
+extension FirestoreRESTClient.FirestoreError: CustomStringConvertible {
+    public var description: String {
+        errorDescription ?? String(describing: self)
     }
 }
 

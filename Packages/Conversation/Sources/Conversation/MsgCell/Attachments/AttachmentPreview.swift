@@ -1,28 +1,34 @@
-import _AVKit_SwiftUI
-import Database
-import ImageLoader
-import QuickLook
-import Services
-import SwiftUI
-import VideoLoader
+//  AttachmentPreview.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
+import Core
+import SwiftUI
+import Database
+import Services
+import QuickLook
+import ImageLoader
+import VideoLoader
 
 struct AttachmentPreview: View {
+    let isVisible: Bool
     let onSelect: (_ item: Attachment) -> Void
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
     @Environment(\.attachmentFetcher) private var attachmentFetcher
-    @Environment(\.isVisible) private var viewIsVisible
     @Environment(\.conversation) private var conversation
-    @Environment(\.msgCellActions) private var sendMsgCellInteraction
-	@LazyState private var model: AttachmentPreviewViewModel
+    @LazyState private var model: AttachmentPreviewViewModel
 
     init(
         attachment: Attachment,
+        isVisible: Bool = true,
         onSelect: @escaping (_: Attachment) -> Void,
         onCompleteUpload: ((_ newValue: Attachment) -> Void)? = nil
     ) {
-		_model = .init(wrappedValue: .init(attachment: attachment))
+        _model = .init(wrappedValue: .init(attachment: attachment))
+        self.isVisible = isVisible
         self.onSelect = onSelect
         self.onCompleteUpload = onCompleteUpload
     }
@@ -34,7 +40,6 @@ struct AttachmentPreview: View {
         case .link:
             VStack(alignment: .center, spacing: 0) {
                 content
-                    .layoutPriority(1)
                 if let title = model.attachment.title, title.isWhitespace == false {
                     VStack(alignment: .center, spacing: 4) {
                         Text(title)
@@ -52,29 +57,35 @@ struct AttachmentPreview: View {
                     .flexible(.horizontal)
                 }
             }
-            .allowsTightening(true)
-            .background()
         }
     }
 
     private var content: some View {
         ZStack {
-            Rectangle().fill(.fill.quinary)
+            RoundedRectangle(cornerRadius: Radius.md)
+                .fill(Color.background)
             if let data = model.attachmentData {
-                attachmentView(for: data)
+                AttachmentDataView(data: data) {
+                    onSelect(model.attachment)
+                }
             } else if let error = model.error {
-                Text(error.localizedDescription)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(8)
+                SystemImage(.exclamationmarkTriangleFill)
+                    .foregroundColor(.red)
+                    .presentSheet {
+                        Text(error.localizedDescription)
+                            .padding()
+                    }
             } else {
-                ProgressView().controlSize(.mini)
+                ProgressView()
+                    .controlSize(.mini)
             }
         }
         .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
-        .task(id: viewIsVisible) {
-            if viewIsVisible, let attachmentFetcher {
+        .task(id: isVisible) {
+            guard let attachmentFetcher else {
+                return
+            }
+            if isVisible {
                 if model.attachmentData == nil {
                     if let cached = await model.cachedAttachmentData() {
                         model.attachmentData = cached
@@ -83,8 +94,20 @@ struct AttachmentPreview: View {
                     }
                 }
             } else {
-                await attachmentFetcher?.cancel(model.attachment)
+                await attachmentFetcher.cancel(model.attachment)
+                model.attachmentData = nil
+                model.error = nil
             }
+        }
+        .onDisappear {
+            guard let attachmentFetcher else {
+                return
+            }
+            Task {
+                await attachmentFetcher.cancel(model.attachment)
+            }
+            model.attachmentData = nil
+            model.error = nil
         }
     }
 
@@ -121,6 +144,7 @@ struct AttachmentPreview: View {
         Image(uiImage: uiImage)
             .resizable()
             .scaledToFit()
+            .clipShape(RoundedRectangle(cornerRadius: Radius.card))
             .onTapGesture {
                 onSelect(model.attachment)
             }

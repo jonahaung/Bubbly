@@ -1,25 +1,30 @@
+//  NetworkManager.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Core
-import Foundation
-import Network
 import XUI
+import Core
+import Network
+import Foundation
+
+// MARK: - NetworkActor
 
 @globalActor
 public struct NetworkActor {
     public actor NetworkActor {}
 
-    public static let shared = NetworkActor()
+    public static let shared: NetworkActor = .init()
 }
 
-@NetworkActor
-public class NetworkManager: NSObject {
-    public static let shared = NetworkManager()
+// MARK: - NetworkManager
 
-    private let monitor = NWPathMonitor()
-    private let monitorQueue = DispatchQueue(
+@NetworkActor
+public final class NetworkManager: NSObject {
+    public static let shared: NetworkManager = .init()
+
+    private let monitor: NWPathMonitor = .init()
+    private let monitorQueue: DispatchQueue = .init(
         label: AppInformation.appID + ".NetworkMonitor"
     )
 
@@ -48,6 +53,7 @@ public class NetworkManager: NSObject {
                 guard let self else {
                     return
                 }
+
                 self.isConnected = (path.status == .satisfied)
                 if path.status != self.lastPathStatus {
                     if self.lastPathStatus != nil {
@@ -132,10 +138,10 @@ public class NetworkManager: NSObject {
                         continue
                     }
                     guard
-                        (200..<300).contains(
+                        (200 ..< 300).contains(
                             http.statusCode
-                        )
-                    else {
+                        ) else
+                    {
                         // Non-transient HTTP error: surface it
                         throw URLError(
                             .badServerResponse
@@ -156,7 +162,7 @@ public class NetworkManager: NSObject {
                     error: error
                 ), attempt < maxRetries {
                     let jitter = Double.random(
-                        in: 0...(baseDelay / 2)
+                        in: 0 ... (baseDelay / 2)
                     )
                     let delay =
                         pow(
@@ -187,12 +193,12 @@ public class NetworkManager: NSObject {
     private func shouldRetry(error: Error) -> Bool {
         if let urlError = error as? URLError {
             switch urlError.code {
-            case .networkConnectionLost, // -1005
-                 .timedOut, // -1001
+            case .cannotConnectToHost, // -1004
                  .cannotFindHost, // -1003
-                 .cannotConnectToHost, // -1004
                  .dnsLookupFailed, // -1006
-                 .notConnectedToInternet: // -1009
+                 .networkConnectionLost, // -1005
+                 .notConnectedToInternet, // -1009
+                 .timedOut: // -1001
                 return true
             case .cancelled:
                 return false
@@ -206,7 +212,11 @@ public class NetworkManager: NSObject {
     private func isTransient(statusCode: Int) -> Bool {
         // Retry on common transient server/client throttle responses
         switch statusCode {
-        case 429, 500, 502, 503, 504:
+        case 429,
+             500,
+             502,
+             503,
+             504:
             true
         default:
             false
@@ -229,7 +239,7 @@ public class NetworkManager: NSObject {
             // Retry-After can also be a HTTP-date; you could parse it if needed.
         }
         let jitter = Double.random(
-            in: 0...(base / 2)
+            in: 0 ... (base / 2)
         )
         return pow(
             2.0,
@@ -239,6 +249,8 @@ public class NetworkManager: NSObject {
         ) * base + jitter
     }
 }
+
+// MARK: URLSessionDelegate, URLSessionTaskDelegate
 
 extension NetworkManager: URLSessionDelegate, URLSessionTaskDelegate {
     public nonisolated func urlSession(

@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 
@@ -12,6 +10,7 @@ public enum DeeplinkAction: Sendable, Equatable {
 
     public enum SideEffect: Sendable, Equatable, Hashable {
         case prepareForConversation(id: String)
+        case prepareForMessage(id: String)
         case prepareForContactDetails(id: String)
         case track(event: String, properties: [String: String])
         case requireAuth(reason: String?)

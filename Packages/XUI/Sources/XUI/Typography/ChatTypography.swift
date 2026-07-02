@@ -1,9 +1,10 @@
+//  ChatTypography.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import SwiftUI
 import UIKit
+import SwiftUI
 
 public struct Typography: Sendable {
     public let body: Font
@@ -34,33 +35,74 @@ public struct Typography: Sendable {
 }
 
 public extension Typography {
-    static let `default` = Typography(
-        body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize),
-        callout: .system(size: UIFont.preferredFont(forTextStyle: .callout).pointSize),
-        subHeadline: .system(size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize),
+    static let system: Typography = .init(
+        body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize).leading(.loose),
+        callout: .system(size: UIFont.preferredFont(forTextStyle: .callout).pointSize).leading(.loose),
+        subHeadline: .system(size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize).leading(.loose),
         headLine:
         .system(
             size: UIFont.preferredFont(forTextStyle: .headline).pointSize,
             weight: .semibold
-        ),
+        ).leading(.loose),
         footnote:
         .system(
             size: UIFont.preferredFont(forTextStyle: .footnote).pointSize,
             design: .rounded
-        ),
+        ).leading(.loose),
         caption1:
         .system(
             size: UIFont.preferredFont(forTextStyle: .caption1).pointSize,
             design: .rounded
-        ),
+        ).leading(.loose),
         caption2:
         .system(
             size: UIFont.preferredFont(forTextStyle: .caption2).pointSize,
             design: .rounded
-        )
+        ).leading(.loose)
     )
 }
+public extension Typography {
 
+    static let helvetica: Typography = .init(
+        body:
+            .custom(
+                "Helvetica",
+                size: UIFont.preferredFont(forTextStyle: .body).pointSize
+            )
+            .leading(.loose),
+        callout:
+            .custom(
+                "Helvetica",
+                size: UIFont.preferredFont(forTextStyle: .callout).pointSize
+            ),
+        subHeadline:
+            .custom(
+                "Helvetica",
+                size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize
+            ),
+        headLine:
+            .custom(
+                "Helvetica-Bold",
+                size: UIFont.preferredFont(forTextStyle: .headline).pointSize
+            ),
+        footnote:
+            .custom(
+                "Helvetica",
+                size: UIFont.preferredFont(forTextStyle: .footnote).pointSize
+            )
+            .leading(.tight),
+        caption1:
+            .custom(
+                "Helvetica",
+                size: UIFont.preferredFont(forTextStyle: .caption1).pointSize
+            ),
+        caption2:
+            .custom(
+                "Helvetica",
+                size: UIFont.preferredFont(forTextStyle: .caption2).pointSize
+            )
+    )
+}
 public extension EnvironmentValues {
-    @Entry var typography = Typography.default
+    @Entry var typography: Typography = .system
 }

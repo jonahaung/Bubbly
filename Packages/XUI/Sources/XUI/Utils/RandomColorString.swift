@@ -1,5 +1,6 @@
+//  RandomColorString.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -25,5 +26,11 @@ public extension String {
         let seed = count
         var generator: RandomNumberGenerator = SeededRandomGenerator(seed: seed)
         return .random(using: &generator)
+    }
+}
+
+public extension Color {
+    @MainActor func readableText(over background: Color) -> some View {
+        apcaForeground(self, over: background, fontSize: 17, weight: .regular)
     }
 }

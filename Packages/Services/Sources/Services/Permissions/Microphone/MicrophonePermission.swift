@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import AVFoundation
 import Foundation
@@ -10,6 +8,8 @@ public extension Permission {
         MicrophonePermission()
     }
 }
+
+// MARK: - MicrophonePermission
 
 public final class MicrophonePermission: Permission {
     public var kind: PermissionKind {

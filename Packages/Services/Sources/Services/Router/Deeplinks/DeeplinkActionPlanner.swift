@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - DeeplinkActionPlanner
 
 public struct DeeplinkActionPlanner: Sendable {
     public var plan: @Sendable (_ link: Deeplink) -> [DeeplinkAction]
@@ -14,7 +14,7 @@ public struct DeeplinkActionPlanner: Sendable {
 public extension DeeplinkActionPlanner {
     static func `default`(
         tabMapping: TabMapping = .default,
-        navMapping: NavMapping = .default
+        navMapping: NavMapping = .default,
     ) -> DeeplinkActionPlanner {
         .init { link in
             var actions = [DeeplinkAction]()
@@ -31,19 +31,25 @@ public extension DeeplinkActionPlanner {
             case .settings:
                 actions.append(.sideEffect(.track(
                     event: "deeplink_open_settings",
-                    properties: [:]
+                    properties: [:],
                 )))
-            case let .profile(id):
-                actions.append(.sideEffect(.prepareForContactDetails(id: id)))
+            case let .profile(route):
+                actions.append(.sideEffect(.prepareForContactDetails(id: route.id)))
                 actions.append(.sideEffect(.track(
                     event: "deeplink_open_profile",
-                    properties: ["id": id]
+                    properties: ["id": route.id],
                 )))
-            case let .conversation(id):
-                actions.append(.sideEffect(.prepareForConversation(id: id)))
+            case let .conversation(route):
+                actions.append(.sideEffect(.prepareForConversation(id: route.conID)))
                 actions.append(.sideEffect(.track(
                     event: "deeplink_open_conversation",
-                    properties: ["id": id]
+                    properties: ["id": route.conID],
+                )))
+            case let .message(route):
+                actions.append(.sideEffect(.prepareForMessage(id: route.msgID)))
+                actions.append(.sideEffect(.track(
+                    event: "deeplink_open_message",
+                    properties: ["id": route.msgID],
                 )))
             }
             return .init(actions)

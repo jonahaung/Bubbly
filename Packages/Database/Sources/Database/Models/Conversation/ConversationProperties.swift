@@ -1,27 +1,26 @@
+//  ConversationProperties.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
+import XUI
 import Core
 import Foundation
-import XUI
 
 public struct ConversationProperties: Codable, Sendable, Hashable, Equatable, UIdentifiable {
     public let uid: String
     public var theme: ConversationTheme
     public var seenMembers: [SeenMember]
+    public var lastPage: LastPage?
 
-    public init(uid: String, theme: ConversationTheme, seenMembers: [SeenMember]) {
+    public init(uid: String, theme: ConversationTheme, seenMembers: [SeenMember], lastPage: LastPage?) {
         self.uid = uid
         self.theme = theme
         self.seenMembers = seenMembers
+        self.lastPage = lastPage
     }
 
     public init(uid: String) {
-        self.init(uid: uid, theme: .default, seenMembers: [])
+        self.init(uid: uid, theme: .default, seenMembers: [], lastPage: nil)
     }
-}
-
-extension ConversationProperties: EmptyRepresentable {
-    public static let empty: ConversationProperties = .init(uid: "")
 }

@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
@@ -21,11 +19,24 @@ public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, 
         case .inbox:
             "message"
         case .contacts:
-            "at"
+            "book.pages.fill"
         case .test:
-            "app.badge"
+            "apple.logo"
         case .settings:
-            "shield"
+            "person.crop.circle.fill"
         }
+    }
+
+    public var name: String {
+        switch self {
+        case .inbox: String(localized: "Inbox", comment: "Tab title")
+        case .contacts: String(localized: "Contact", comment: "Tab title")
+        case .test: String(localized: "Tests", comment: "Tab title")
+        case .settings: String(localized: "Settings", comment: "Tab title")
+        }
+    }
+
+    public var customizationID: String {
+        "com.example.apple-samplecode.DestinationVideo." + name
     }
 }

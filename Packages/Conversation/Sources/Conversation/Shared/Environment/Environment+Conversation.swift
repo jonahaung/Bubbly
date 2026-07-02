@@ -1,16 +1,18 @@
+//  Environment+Conversation.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import XUI
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 public extension EnvironmentValues {
-    @Entry var conversation = Conversation.empty
-    @Entry var seenMembers = [SeenMember]()
-    @Entry var isVisible = false
+    @Entry var conversation: Conversation = .empty
     @Entry var attachmentFetcher: AttachmentFetcher? = nil
-	@Entry var conversationTheme: ChatTheme = .empty
+    @Entry var conversationTheme: ChatTheme = .empty
+    @Entry var msgCellState: MsgCellViewModel.State! = nil
+    @Entry var members: Members = Members(members: [])
+    @Entry var seenMembers: [SeenMember] = []
 }

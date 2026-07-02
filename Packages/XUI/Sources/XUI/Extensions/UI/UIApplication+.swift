@@ -1,19 +1,66 @@
+//  UIApplication+.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
 
-public extension UIApplication {
-    func endEditing() {
-        sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+extension UIApplication {
+    public func endEditing() {
+        sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
     }
 
-    func screenSize() -> CGSize {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+    public var windowScene: UIWindowScene {
+        guard
+            let windowScene = UIApplication.shared.connectedScenes.first
+                as? UIWindowScene
+        else {
             fatalError("explanation")
         }
-        return windowScene.windows.first?.rootViewController?.view.frame.size ?? windowScene.screen
-            .bounds.size
+        return windowScene
+    }
+
+    public var keyWindow: UIWindow? {
+        windowScene.keyWindow
+    }
+
+    public func screenSize() -> CGSize {
+        screenBounds().size
+    }
+    public func screenBounds() -> CGRect {
+        guard let keyWindow else {
+            fatalError()
+        }
+//        if let viewController = keyWindow.rootViewController {
+//            return viewController.view.bounds.inset(
+//                by: viewController.view.safeAreaInsets
+//            )
+//        }
+        return windowScene.screen.bounds.inset(by: keyWindow.safeAreaInsets)
+    }
+    public func screenScale() -> CGFloat {
+        let size = screenSize()
+        return size.width / size.height
+    }
+
+    public var statusBarHeight: CGFloat {
+        windowScene.statusBarManager?.statusBarFrame.height ?? .zero
+    }
+}
+
+extension UIApplication {
+    public static var safeAreInset: UIEdgeInsets {
+        UIApplication.shared.keyWindow?.safeAreaInsets ?? .init()
+    }
+}
+
+extension UIEdgeInsets {
+    fileprivate var swiftUiInsets: EdgeInsets {
+        EdgeInsets(top: top, leading: left, bottom: bottom, trailing: right)
     }
 }

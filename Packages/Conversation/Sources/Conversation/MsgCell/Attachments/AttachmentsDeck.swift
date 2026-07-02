@@ -1,9 +1,14 @@
-import Database
-import SwiftUI
+//  AttachmentsDeck.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
+import SwiftUI
+import Database
 
 struct AttachmentsDeck<Content: View>: View {
-	
+
     let items: [Attachment]
     let alignment: HorizontalAlignment
     let content: (Attachment) -> Content
@@ -12,6 +17,7 @@ struct AttachmentsDeck<Content: View>: View {
         ZStack(alignment: .bottom) {
             ForEach(Array(items.enumerated()), id: \.element) { index, item in
                 content(item)
+                    .scaleEffect(scale(for: index), anchor: .bottom)
                     .offset(x: offsetX(for: index), y: offsetY(for: index))
                     .rotationEffect(
                         .degrees(rotation(for: index)),
@@ -19,8 +25,23 @@ struct AttachmentsDeck<Content: View>: View {
                     )
                     .zIndex(zIndex(for: index))
             }
+            
         }
-		.equatable(by: items)
+    }
+
+    func scale(for index: Int) -> CGFloat {
+        guard items.count > 1 else {
+            return 1.0
+        }
+
+        return 1.0 - (0.08 * index.cgFloat)
+    }
+
+    func shadow(for index: Int) -> Color {
+        let idx = Double(index)
+        let progress = 1.0 - abs(items.count.double - idx)
+        let opacity = 0.5 * progress
+        return .black.opacity(opacity)
     }
 
     private var xSpacing: CGFloat {
@@ -50,17 +71,5 @@ struct AttachmentsDeck<Content: View>: View {
         let degree = items.count > 3 ? 4.0 : 6.0
         let signed = alignment == .trailing ? -degree : degree
         return signed * idx
-    }
-
-    func scale(for index: Int) -> CGFloat {
-        guard items.count > 1 else { return 1.0 }
-        return 1.0 - (0.1 * index.cgFloat)
-    }
-
-    func shadow(for index: Int) -> Color {
-        let idx = Double(index)
-        let progress = 1.0 - abs(items.count.double - idx)
-        let opacity = 0.5 * progress
-        return .black.opacity(opacity)
     }
 }

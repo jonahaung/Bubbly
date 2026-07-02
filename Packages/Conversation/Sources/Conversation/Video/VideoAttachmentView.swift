@@ -1,48 +1,40 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  VideoAttachmentView.swift
+//  Conversation
+//
+//  Created by Aung Ko Min on 15/5/26.
 //
 
-import AVKit
-import Database
-import SwiftUI
+
 import XUI
+    import AVKit
+    import SwiftUI
+    import Database
 
-public struct VideoAttachmentView: View {
-    let attachment: Attachment
-    @State private var player: AVPlayer?
+    public struct VideoAttachmentView: View {
+        let attachment: Attachment
+        @State private var player: AVPlayer?
 
-    init(attachment: Attachment) {
-        self.attachment = attachment
-    }
+        init(attachment: Attachment) {
+            self.attachment = attachment
+        }
 
-    public var body: some View {
-        VideoPlayer(player: player) {
-            if player?.timeControlStatus == .waitingToPlayAtSpecifiedRate {
-                ProgressView().controlSize(.mini)
+        public var body: some View {
+            VideoPlayer(player: player) {
+                if player?.timeControlStatus == .waitingToPlayAtSpecifiedRate {
+                    ProgressView().controlSize(.mini)
+                }
+            }
+            .aspectRatio(attachment.aspectRatio, contentMode: .fit)
+            .onAppear {
+                if let url = URL(string: attachment.url) {
+                    let newPlayer = AVPlayer(url: url)
+                    player = newPlayer
+                    newPlayer.play()
+                }
+            }
+            .onDisappear {
+                player?.pause()
             }
         }
-        .aspectRatio(attachment.aspectRatio, contentMode: .fit)
-        .onAppear {
-            if let url = URL(string: attachment.url) {
-                let newPlayer = AVPlayer(url: url)
-                player = newPlayer
-                newPlayer.play()
-            }
-        }
-        .onDisappear {
-            player?.pause()
-        }
     }
-
-    private func togglePlayback() {
-        guard let player else { return }
-        switch player.timeControlStatus {
-        case .playing:
-            player.pause()
-        case .paused, .waitingToPlayAtSpecifiedRate:
-            player.play()
-        @unknown default:
-            player.play()
-        }
-    }
-}

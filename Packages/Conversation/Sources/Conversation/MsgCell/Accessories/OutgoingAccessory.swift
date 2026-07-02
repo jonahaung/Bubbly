@@ -1,41 +1,67 @@
+//  OutgoingAccessory.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import XUI
+
+// © 2026 Aung Ko Min
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
 
-extension MsgCell {
-    struct OutgoingAccessory: View {
-		
-        @Environment(MsgCellViewModel.self) private var viewModel
-        @Environment(\.seenMembers) private var seenMembers
-        @Environment(\.sharedNamespace) private var namespace
-
-        var body: some View {
-            VStack(alignment: .leading, spacing: 1) {
-				ForEach(members()) { seenMember in
-					if let contact = ContactsRepository.shared.contact(
-						for: seenMember.uid
-					) {
-						ProfilePhoto(
-							contact,
-							size: .custom(ChatLayoutConstants.Cell.defaultSpacing - 6)
-						)
-					}
-				}
+struct OutgoingAccessory: View, @MainActor Equatable {
+    let state: MsgCellViewModel.State
+    @Environment(\.sharedNamespace) private var namespace
+    @Environment(\.conversationTheme) private var theme
+    
+    var body: some View {
+        if let namespace {
+            ZStack(alignment: .bottomLeading) {
+                switch state.outgoingStatus?.aggregateStatus {
+                case .delivered:
+                    Image(systemName: "checkmark.circle.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 10)
+                        .fontWeight(.black)
+                        .foregroundStyle(Color.tertiaryText)
+                case .sent:
+                    ZeroSizeView()
+                case .sending:
+                    Image(systemName: "progress.indicator")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(square: 10)
+                        .symbolEffect(.rotate.clockwise.wholeSymbol, options: .repeat(.continuous).speed(10))
+                case .partiallyFailed:
+                    AsyncButton {
+                        try await Socket.shared.send(.newMsg(rMsg: .init(state.msg)))
+                    } label: {
+                        Image(systemName: "arrow.counterclockwise.circle.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(square: 13)
+                            .foregroundStyle(.red)
+                    }
+                case .read:
+                    Circle().fill(.clear)
+                        .frame(square: 12)
+                        .matchedGeometryEffect(
+                            id: state.id, in: namespace.value, anchor: .bottom, isSource: true
+                        )
+                case .none:
+                    ZeroSizeView()
+                }
             }
-            .frame(width: ChatLayoutConstants.Cell.defaultSpacing - 4)
-			.background(.fill)
-			.equatable(by: viewModel.id)
+            .symbolRenderingMode(.hierarchical)
+            .frame(width: 13)
+            .geometryGroup()
         }
+    }
 
-        private func members() -> [SeenMember] {
-			seenMembers.removeDuplicates(by: { $0.msgId == $1.msgId || $0.uid == $1.uid }).filter {
-                $0.msgId == viewModel.id
-			}.removeDuplicates(by: \.uid)
-        }
+    static func == (lhs: OutgoingAccessory, rhs: OutgoingAccessory) -> Bool {
+        lhs.state.outgoingStatus?.aggregateStatus == rhs.state.outgoingStatus?.aggregateStatus
     }
 }

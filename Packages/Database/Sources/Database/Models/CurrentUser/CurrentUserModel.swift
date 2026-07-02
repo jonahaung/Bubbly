@@ -1,12 +1,15 @@
+//  CurrentUserModel.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
+import XUI
 import Core
+import Foundation
 import FirebaseAuth
 import FirebaseMessaging
-import Foundation
-import XUI
+
+// MARK: - CurrentUserModel
 
 public struct CurrentUserModel: ContactRepresentableSendable, Codable, Hashable, Equatable {
     public let uid: String

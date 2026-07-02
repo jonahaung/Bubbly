@@ -1,5 +1,6 @@
+//  OpaqueValue.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -61,13 +62,13 @@ extension OpaqueValue: Encodable {
 extension OpaqueValue: Decodable {
     public init(from decoder: any Decoder) throws {
         if let container = try? decoder.container(keyedBy: PropertyKey.self) {
-            var values: [PropertyKey: OpaqueValue] = [:]
+            var values = [PropertyKey: OpaqueValue]()
             for key in container.allKeys {
                 values[key] = try container.decode(OpaqueValue.self, forKey: key)
             }
             self = .object(values)
         } else if var container = try? decoder.unkeyedContainer() {
-            var values: [OpaqueValue] = []
+            var values = [OpaqueValue]()
             while !container.isAtEnd {
                 try values.append(container.decode(OpaqueValue.self))
             }

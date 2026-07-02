@@ -1,95 +1,119 @@
+//  ComposeBar.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import XUI
+import Core
+import SwiftUI
 import PhotosUI
 import Services
-import SwiftUI
-import XUI
+import _AVKit_SwiftUI
 
 struct ComposeBar: View {
-
-	@State private var viewModel = ComposeBarViewModel()
-	@Environment(ChatComposer.self) private var composer
-	@Environment(\.sharedFocusState) private var focusState
-
+    
+    @Environment(ChatManager.self) private var manager
+    @Environment(ChatComposer.self) private var composer
+    @Environment(\.conversationTheme) private var theme
+    
     var body: some View {
-        VStack(spacing: 0) {
-            switch composer.source {
-            case .emoji:
-                EmojiPanel()
-            default:
-                if !composer.attachments.isEmpty {
-                    ComposeBarAttachmentView()
+        DispatchingChanges(to: composer.state, id: Self.typeName) { state in
+            VStack(spacing: 0) {
+                sourcePanel
+                HStack(alignment: .bottom, spacing: 4) {
+                    menuButton
+                    sourceButtons
+                    ComposeBarInputTextField(inputText: composer.inputText)
+                    ComposeBarSendButton()
                 }
-            }
-            HStack(alignment: .bottom, spacing: 4) {
-				HamburgerButton(isOpen: $viewModel.isMenuOpened, size: 38)
-					.disabled(focusState?.value != nil)
-					.soundEffect(.tick, trigger: viewModel.isMenuOpened)
-				if viewModel.isMenuOpened {
-					switch composer.source {
-					case .liary:
-						ComposeBarSourceButton(source: .text)
-						photoPickerButton()
-						Text(composer.photoPicker.selectedImages.count.description + " photos")
-							.flexible(.horizontal)
-					default:
-						HStack(alignment: .center, spacing: -8) {
-							ComposeBarSourceButton(source: .camera)
-
-							photoPickerButton()
-							ComposeBarSourceButton(source: .audio)
-						}
-						.frame(height: 44)
-
-						HStack(alignment: .center, spacing: -8) {
-							ComposeBarSourceButton(source: .machineImag)
-							ComposeBarSourceButton(source: .emoji)
-						}
-						.frame(height: 44)
-					}
-				}
-                ComposeBarInputTextField(composer: composer)
-                ComposeBarSendButton()
-            }
-			.animation(.easeInExponential, value: viewModel.isMenuOpened)
-            .padding(.init(top: 0, leading: 8, bottom: 0, trailing: 8))
-        }
-
-		.onChange(of: focusState?.value) { oldValue, newValue in
-			if newValue != nil {
-				viewModel.isMenuOpened = false
-			}
-		}
-    }
-
-    private func photoPickerButton() -> some View {
-        Button {
-            Router.shared
-                .presentModel(
-                    NavPath.view(PhotoPickerView().environment(composer.photoPicker).opaqueView())
+                .soundEffect(.latch4, trigger: state)
+                .padding(.init(top: 0, leading: 8, bottom: 0, trailing: 8))
+                .background(
+                    LinearGradient(
+                        colors: [
+                            .clear,
+                            theme.backgroundColor,
+                            theme.backgroundColor
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ), ignoresSafeAreaEdges: .bottom
                 )
-        } label: {
-            Image(systemName: ChatComposer.Source.liary.systemImageName)
-                .resizable()
-                .frame(square: 20)
-                .foregroundStyle(ChatComposer.Source.liary.foreGroundStyle)
+            }
+            .geometryGroup()
         }
-        .frame(square: 38)
-        .background(.windowBackground, in: .circle)
     }
 }
 
-extension ComposeBar {
-    fileprivate struct EmojiPanel: View {
-        @Environment(ChatComposer.self) private var composer
+private extension ComposeBar {
+    
+    @ViewBuilder
+    var sourcePanel: some View {
+        if let source = composer.state.source, source.usesInlinePanel {
+            switch source {
+            case .emoji:
+                EmojiPanel()
+            case .document:
+                Text(.init(composer.fileContent))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 12)
+            case .camera, .liary, .machineImag:
+                ComposeBarAttachmentView()
+            case .audio:
+                EmptyView()
+            }
+        } else if composer.state.attachments.isEmpty == false {
+            ComposeBarAttachmentView()
+        }
+    }
+
+    var menuButton: some View {
+        HamburgerButton(
+            isOpen: .init(
+                get: { composer.state.menuIsOpened },
+                set: { composer.state.menuIsOpened = $0 }
+            ),
+            size: 38
+        ) { newValue in
+            if newValue {
+                manager.focusState?.defocus()
+            } else {
+                composer.updateSource(nil)
+                
+            }
+        }
+    }
+
+    @ViewBuilder
+    var sourceButtons: some View {
+        if composer.state.menuIsOpened, composer.state.source == nil {
+            SourceButtonRow(sources: ChatComposer.Source.mediaSources)
+            SourceButtonRow(sources: ChatComposer.Source.utilitySources)
+        }
+    }
+
+    struct SourceButtonRow: View {
+        let sources: [ChatComposer.Source]
+
+        var body: some View {
+            HStack(alignment: .center, spacing: -8) {
+                ForEach(sources) { source in
+                    ComposerSourceButton(source: source)
+                }
+            }
+            .frame(height: ChatLayoutConstants.bottomBarHeight)
+        }
+    }
+
+    struct EmojiPanel: View {
 
         var body: some View {
             EmojiPicker { emoji in
-                composer.inputText.text.append(emoji.value)
+                composer.inputText.append(emoji.value)
             }
-            .background(.regularMaterial, ignoresSafeAreaEdges: .bottom)
         }
+
+        @Environment(ChatComposer.self) private var composer
     }
 }

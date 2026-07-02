@@ -1,12 +1,11 @@
-//
 //  Simulative.swift
-//  Core
 //
-//  Created by Aung Ko Min on 10/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
-
 
 import SwiftUI
+
+// MARK: - Simulative
 
 protocol Simulative {
     var impulseCount: Int { get set }
@@ -14,11 +13,13 @@ protocol Simulative {
     var initialVelocity: CGFloat { get set }
 }
 
-internal struct AnySimulativeViewModifier: ViewModifier {
+// MARK: - AnySimulativeViewModifier
+
+struct AnySimulativeViewModifier: ViewModifier {
     private var _body: (AnyView) -> AnyView
 
-    init<Modifier: ViewModifier & Simulative>(_ modifier: Modifier) {
-        self._body = { content in
+    init(_ modifier: some ViewModifier & Simulative) {
+        _body = { content in
             AnyView(content.modifier(modifier))
         }
     }
@@ -28,7 +29,7 @@ internal struct AnySimulativeViewModifier: ViewModifier {
     }
 }
 
-internal extension ViewModifier where Self: Simulative {
+extension ViewModifier where Self: Simulative {
     func eraseToAnySimulativeViewModifier() -> AnySimulativeViewModifier {
         AnySimulativeViewModifier(self)
     }

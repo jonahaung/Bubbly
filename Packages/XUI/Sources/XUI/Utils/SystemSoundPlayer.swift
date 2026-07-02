@@ -1,9 +1,10 @@
+//  SystemSoundPlayer.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import AudioToolbox
 import SwiftUI
+import AudioToolbox
 
 public struct SystemSoundItem: Identifiable, Hashable, Sendable {
     public let id: UInt32
@@ -61,7 +62,9 @@ public final class SystemSoundRegistry: ObservableObject {
     }
 
     public func rename(id: UInt32, name: String) {
-        guard let index = items.firstIndex(where: { $0.id == id }) else { return }
+        guard let index = items.firstIndex(where: { $0.id == id }) else {
+            return
+        }
         items[index].name = name
         storeNames()
     }
@@ -80,8 +83,7 @@ public final class SystemSoundRegistry: ObservableObject {
 
     private static func applyStoredNames(to items: [SystemSoundItem]) -> [SystemSoundItem] {
         guard let stored = UserDefaults.standard
-            .dictionary(forKey: "xui.systemsounds.names") as? [String: String]
-        else {
+            .dictionary(forKey: "xui.systemsounds.names") as? [String: String] else {
             return items
         }
         return items.map { item in

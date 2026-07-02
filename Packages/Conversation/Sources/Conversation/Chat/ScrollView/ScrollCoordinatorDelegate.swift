@@ -1,39 +1,27 @@
-//
 //  ScrollCoordinatorDelegate.swift
-//  Conversation
 //
-//  Created by Aung Ko Min on 11/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import Database
 import SwiftUI
+import XUI
 
-@MainActor
 protocol ScrollCoordinatorDelegate: AnyObject {
-	func scrollCoordinatorShouldRemove(
-		_ coordinator: ScrollCoordinator
-	) -> Bool
-	func scrollCoordinator(
-		_ coordinator: ScrollCoordinator,
-		shouldPaginateAt edge: VerticalEdge
-	) -> Bool
-	func scrollCoordinator(
-		_ coordinator: ScrollCoordinator,
-		paginateAt edge: VerticalEdge
-	)
-	func scrollCoordinator(
-		_ coordinator: ScrollCoordinator,
-		removeAt edge: VerticalEdge
-	)
-	func scrollCoordinator(
-		_ coordinator: ScrollCoordinator,
-		resetAt edge: VerticalEdge
-	)
-	func scrollCoordinatorLayoutIfNeeded(
-		_ coordinator: ScrollCoordinator
-	)
-	func scrollCoordinator(
-		_ coordinator: ScrollCoordinator,
-		finalizeUpdate state: ScrollCoordinator.State,
-		newState: ScrollCoordinator.State
-	)
+    func scrollCoordinator(
+        _ coordinator: ScrollCoordinator,
+        begin update: ScrollCoordinator.DataUpdate
+    )
+    func scrollCoordinator(
+        _ coordinator: ScrollCoordinator,
+        finalizeScrollViewUpdatesWith state: ScrollCoordinator.State
+    )
+    @discardableResult
+    func scrollCoordinator(
+        _ coordinator: ScrollCoordinator,
+        setEditing isEditing: Bool
+    ) -> Bool
+    func getPaginationState() -> PaginatableState?
+    func layoutIfNeeded()
+    var isFirstResponder: Bool { get }
 }

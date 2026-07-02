@@ -1,42 +1,49 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Services
 import SwiftUI
 import XUI
+import Core
 
 struct InboxCell: View {
     let item: InboxItem
+    let onSelect: (InboxItem) -> Void
+
     @Environment(\.typography) private var typography
 
     var body: some View {
         Button {
-            if let url = DeepLinkCoordinator()
-                .url(for: .conversation(id: item.conversation.uid)) {
-                UIApplication.shared.open(url)
-            }
+            onSelect(item)
         } label: {
-            Label {
-                Text(item.title)
-                    .font(typography.headLine)
-                Text(.init(item.msg.displayText))
-                    .font(typography.subHeadline)
-                    .lineLimit(3)
-                    .foregroundStyle(
-                        item.unreadMsgsCount == 0 ? .secondary : .primary
-                    )
-                    .multilineTextAlignment(.leading)
-            } icon: {
-                ProfilePhoto(item, size: .custom(50))
+            HStack(spacing: Spacing.md) {
+                ProfilePhoto(item, size: .custom(55))
+                    .overlay(alignment: .bottomTrailing) {
+                        if item.unreadMsgsCount > 0 {
+                            Text(item.unreadMsgsCount, format: .number)
+                                .padding(.vertical, 2)
+                                .padding(.horizontal, 6)
+                                .background(.blue.gradient, in: .capsule)
+                                .foregroundStyle(Color.container)
+                                .font(.system(size: UIFont.smallSystemFontSize-1, weight: .semibold))
+                                .lineHeight(.multiple(factor: 1.2))
+                        }
+                    }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text(item.title)
+                        .font(typography.headLine)
+                    
+                    Text(item.msg.displayText)
+                        .font(typography.subHeadline)
+                        .lineHeight(.multiple(factor: 1.1))
+                        .lineLimit(5)
+                        .foregroundStyle(
+                            item.unreadMsgsCount == 0 ? Color.quaternaryText : .primaryText,
+                        )
+                        .multilineTextAlignment(.leading)
+                }
             }
-            .badge(item.unreadMsgsCount)
-            .badgeProminence(.increased)
-            .labelReservedIconWidth(45)
         }
-        .buttonStyle(.borderless)
-        .foregroundStyle(.primary)
         .equatable(by: item.msg)
     }
 }

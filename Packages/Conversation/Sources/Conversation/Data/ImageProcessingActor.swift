@@ -1,16 +1,16 @@
+//  ImageProcessingActor.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import MediaPicker
-import PhotosUI
 import UIKit
+import PhotosUI
+import MediaPicker
 
 actor ImageProcessingActor {
+    static let shared: ImageProcessingActor = .init()
 
-    static let shared = ImageProcessingActor()
-
-    private let cache = NSCache<NSString, UIImage>()
+    private let cache: NSCache<NSString, UIImage> = .init()
 
     init() {
         cache.totalCostLimit = 150 * 1024 * 1024 // 150MB
@@ -18,18 +18,18 @@ actor ImageProcessingActor {
 
     func process(
         item: SelectedPhotoItem,
-        thumbnailSize: CGFloat = 300,
-        fullSize: CGFloat = 1600
+        thumbnailSize _: CGFloat = 300,
+        fullSize _: CGFloat = 1600
     ) async -> UIImage? {
-
         let key = item.id as NSString
         if let cached = cache.object(forKey: key) {
             return cached
         }
 
         guard let data = try? await item.loadTransferable(type: Data.self),
-              let original = UIImage(data: data)
-        else { return nil }
+              let original = UIImage(data: data) else {
+            return nil
+        }
 
         return original
     }

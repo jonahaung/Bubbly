@@ -1,33 +1,30 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Foundation
 import XUI
 
 public struct DeepLinkCoordinator: Sendable {
-
+    
     private let codec: DeeplinkCodec
     private let planner: DeeplinkActionPlanner
     private let sideEffects: SideEffectHandler
 
-	@MainActor
     public init(
-		codec: DeeplinkCodec = .standard,
-		planner: DeeplinkActionPlanner = .default(),
-		sideEffects: SideEffectHandler = .default
+        codec: DeeplinkCodec = .standard,
+        planner: DeeplinkActionPlanner = .default(),
+        sideEffects: SideEffectHandler = .default
     ) {
         self.codec = codec
         self.planner = planner
         self.sideEffects = sideEffects
     }
 
-    public func onOpenURL(url: URL) async {
+    public func onOpenURL(url: URL, router: Router) async {
         switch codec.parse(url) {
-        case let .success(link):
-            await handle(link: link)
-        case let .failure(error):
+        case .success(let link):
+            await handle(link: link, router: router)
+        case .failure(let error):
             log(error)
         }
     }
@@ -36,55 +33,37 @@ public struct DeepLinkCoordinator: Sendable {
         planner.plan(link)
     }
 
-    public func handle(link: Deeplink) async {
+    public func handle(link: Deeplink, router: Router) async {
         let actions = planner.plan(link)
 
         do {
-            try await AsyncOrderedStream.mapOrdered(inputs: actions, transform: handleDeepLinkAction)
+            try await AsyncOrderedStream.mapOrdered(inputs: actions) { action in
+                try await handleDeepLinkAction(action, router: router)
+            }
         } catch {
             log(error)
         }
     }
-
-    /// Expose a small URL builder so UI can generate app links without touching codec directly.
-    public func url(for link: Deeplink, style: DeeplinkCodec.URLStyle = .customScheme()) -> URL? {
-        codec.url(for: link, style: style)
-    }
 }
 
-private extension DeepLinkCoordinator {
+extension DeepLinkCoordinator {
     @concurrent
-    func handleDeepLinkAction(_ action: DeeplinkAction) async throws {
-		let router = await Router.shared
+    fileprivate func handleDeepLinkAction(
+        _ action: DeeplinkAction,
+        router: Router
+    ) async throws {
         switch action {
-        case let .selectTab(tab):
+        case .selectTab(let tab):
             await router.selectTab(tab)
-        case let .pushToNav(path):
+        case .pushToNav(let path):
             await router.pushToNav(path)
-        case let .presentModel(path):
+        case .presentModel(let path):
             await router.presentModel(path)
-        case let .sideEffect(effect):
-            // Run off the main actor but preserve ordering by awaiting
+        case .sideEffect(let effect):
             try await Task.detached { [sideEffects] in
                 try await sideEffects.run(effect)
-            }.value
+            }
+            .value
         }
     }
-}
-
-public extension DeepLinkCoordinator {
-//    static let shared: DeepLinkCoordinator = .init(
-//        router: Router.shared,
-//        codec: DeeplinkCodec(
-//            config: .init(
-//                scheme: AppInformation.urlScheme,
-//                supportedVersions: Set(["v1"]),
-//                queryValidation: .strict
-//            ),
-//            aliases: .init(routeAliases: ["conv": "conversation"]),
-//            telemetry: .default
-//        ),
-//        planner: .default(tabMapping: .default, navMapping: .default),
-//        sideEffects: .default
-//    )
 }

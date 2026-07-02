@@ -1,5 +1,6 @@
+//  SwiftLinkPreviewCache.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -10,7 +11,7 @@ public protocol SwiftLinkPreviewCache {
 }
 
 public final class DisabledCache: SwiftLinkPreviewCache {
-    public nonisolated(unsafe) static let instance = DisabledCache()
+    public nonisolated(unsafe) static let instance: DisabledCache = .init()
 
     public func slp_getCachedResponse(url _: String) -> SwiftLinkPreviewResponse? {
         nil
@@ -20,12 +21,12 @@ public final class DisabledCache: SwiftLinkPreviewCache {
 }
 
 public final class LinkPreviewInMemoryCache: SwiftLinkPreviewCache {
-    private var cache = [String: (response: SwiftLinkPreviewResponse, date: Date)]()
+    private var cache: [String: (response: SwiftLinkPreviewResponse, date: Date)] = [:]
     private let invalidationTimeout: TimeInterval
     private let cleanupTimer: DispatchSource?
 
     /// High priority queue for quick responses
-    private static let cacheQueue = DispatchQueue(
+    private static let cacheQueue: DispatchQueue = .init(
         label: "SwiftLinkPreviewInMemoryCacheQueue",
         qos: .userInitiated,
         target: DispatchQueue.global(qos: .userInitiated)
@@ -73,10 +74,10 @@ public final class LinkPreviewInMemoryCache: SwiftLinkPreviewCache {
     public func slp_setCachedResponse(url: String, response: SwiftLinkPreviewResponse?) {
         Self.cacheQueue.sync { [weak self] in
             guard let self else { return }
-            if let response {
-                cache[url] = (response, Date())
+            cache[url] = if let response {
+                (response, Date())
             } else {
-                cache[url] = nil
+                nil
             }
         }
     }

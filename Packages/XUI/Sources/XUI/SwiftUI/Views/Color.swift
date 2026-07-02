@@ -1,5 +1,6 @@
+//  Color.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -30,195 +31,195 @@ public extension Color {
 public extension Color {
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var label: Color {
-        Self(UIColor.label)
+        Self(.label)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var secondaryLabel: Color {
-        Self(UIColor.secondaryLabel)
+        Self(.secondaryLabel)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var tertiaryLabel: Color {
-        Self(UIColor.tertiaryLabel)
+        Self(.tertiaryLabel)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var quaternaryLabel: Color {
-        Self(UIColor.quaternaryLabel)
+        Self(.quaternaryLabel)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var systemFill: Color {
-        Self(UIColor.systemFill)
+        Self(.systemFill)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var secondarySystemFill: Color {
-        Self(UIColor.secondarySystemFill)
+        Self(.secondarySystemFill)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var tertiarySystemFill: Color {
-        Self(UIColor.tertiarySystemFill)
+        Self(.tertiarySystemFill)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var quaternarySystemFill: Color {
-        Self(UIColor.quaternarySystemFill)
+        Self(.quaternarySystemFill)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var placeholderText: Color {
-        Self(UIColor.placeholderText)
+        Self(.placeholderText)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, *)
     static var systemBackground: Color {
-        Self(UIColor.systemBackground)
+        Self(.systemBackground)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, *)
     static var secondarySystemBackground: Color {
-        Self(UIColor.secondarySystemBackground)
+        Self(.secondarySystemBackground)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, *)
     static var tertiarySystemBackground: Color {
-        Self(UIColor.tertiarySystemBackground)
+        Self(.tertiarySystemBackground)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, *)
     static var systemGroupedBackground: Color {
-        Self(UIColor.systemGroupedBackground)
+        Self(.systemGroupedBackground)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, *)
     static var secondarySystemGroupedBackground: Color {
-        Self(UIColor.secondarySystemGroupedBackground)
+        Self(.secondarySystemGroupedBackground)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, *)
     static var tertiarySystemGroupedBackground: Color {
-        Self(UIColor.tertiarySystemGroupedBackground)
+        Self(.tertiarySystemGroupedBackground)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var separator: Color {
-        Self(UIColor.separator)
+        Self(.separator)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var opaqueSeparator: Color {
-        Self(UIColor.opaqueSeparator)
+        Self(.opaqueSeparator)
     }
 
     @available(iOS 13.0, macCatalyst 13.0, tvOS 13.0, *)
     static var link: Color {
-        Self(UIColor.link)
+        Self(.link)
     }
 
     static var darkText: Color {
-        Self(UIColor.darkText)
+        Self(.darkText)
     }
 
     static var lightText: Color {
-        Self(UIColor.lightText)
+        Self(.lightText)
     }
 }
 
 /// SwiftUI Standard Colors
 public extension Color {
     static var systemBlue: Color {
-        Self(UIColor.systemBlue)
+        Self(.systemBlue)
     }
 
     static var systemBrown: Color {
-        Self(UIColor.systemBrown)
+        Self(.systemBrown)
     }
 
     static var systemGreen: Color {
-        Self(UIColor.systemGreen)
+        Self(.systemGreen)
     }
 
     static var systemIndigo: Color {
-        Self(UIColor.systemIndigo)
+        Self(.systemIndigo)
     }
 
     static var systemOrange: Color {
-        Self(UIColor.systemOrange)
+        Self(.systemOrange)
     }
 
     static var systemPink: Color {
-        Self(UIColor.systemPink)
+        Self(.systemPink)
     }
 
     static var systemPurple: Color {
-        Self(UIColor.systemPurple)
+        Self(.systemPurple)
     }
 
     static var systemRed: Color {
-        Self(UIColor.systemRed)
+        Self(.systemRed)
     }
 
     static var systemTeal: Color {
-        Self(UIColor.systemTeal)
+        Self(.systemTeal)
     }
 
     static var systemYellow: Color {
-        Self(UIColor.systemYellow)
+        Self(.systemYellow)
     }
 
     static var systemCyan: Color {
-        Self(UIColor.systemCyan)
+        Self(.systemCyan)
     }
 
     static var systemMint: Color {
-        Self(UIColor.systemMint)
+        Self(.systemMint)
     }
 
     static var tintColor: Color {
-        Self(UIColor.tintColor)
+        Self(.tintColor)
     }
 
     static var systemGray: Color {
-        Self(UIColor.systemGray)
+        Self(.systemGray)
     }
 
     static var systemGray2: Color {
-        Self(UIColor.systemGray2)
+        Self(.systemGray2)
     }
 
     static var systemGray3: Color {
-        Self(UIColor.systemGray3)
+        Self(.systemGray3)
     }
 
     static var systemGray4: Color {
-        Self(UIColor.systemGray4)
+        Self(.systemGray4)
     }
 
     static var systemGray5: Color {
-        Self(UIColor.systemGray5)
+        Self(.systemGray5)
     }
 
     static var systemGray6: Color {
-        Self(UIColor.systemGray5)
+        Self(.systemGray5)
     }
 
     static var cyan: Color {
-        Self(UIColor.cyan)
+        Self(.cyan)
     }
 
     static var darkGray: Color {
-        Self(UIColor.darkGray)
+        Self(.darkGray)
     }
 
     static var lightGray: Color {
-        Self(UIColor.lightGray)
+        Self(.lightGray)
     }
 
     static var magenta: Color {
-        Self(UIColor.magenta)
+        Self(.magenta)
     }
 }
 

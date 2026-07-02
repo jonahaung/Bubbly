@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Combine
 import Database
@@ -18,7 +16,7 @@ public final class InboxViewModel: ErrorPresenter {
     private let observeInbox: ObserveInboxUseCase
     private let refreshInbox: RefreshInboxUseCase
     private let latestSnapshot: LatestInboxSnapshotUseCase
-    private let cancelBag = CancelBag()
+    private let cancelBag: CancelBag = .init()
 
     public init() {
         let manager = InboxManager()
@@ -55,9 +53,11 @@ public final class InboxViewModel: ErrorPresenter {
     }
 
     private func handleRefresh() async {
+        print("refreshing")
         state = updatedState(isLoading: true, error: nil)
         do {
             let snapshot = try await refreshInbox.execute()
+            print(snapshot)
             state = makeState(snapshot: snapshot, isLoading: false, error: nil)
         } catch {
             state = updatedState(isLoading: false, error: error.localizedDescription)
@@ -70,7 +70,6 @@ public final class InboxViewModel: ErrorPresenter {
     }
 
     private func observeInboxChanges() {
-        cancelBag.cancel()
         NotificationCenter.default
             .publisher(for: .inboxChanges)
             .receive(on: RunLoop.main)
@@ -78,6 +77,7 @@ public final class InboxViewModel: ErrorPresenter {
                 guard let self else {
                     return
                 }
+
                 Task { await self.handleRefresh() }
             }
             .store(in: cancelBag)
@@ -90,15 +90,22 @@ public final class InboxViewModel: ErrorPresenter {
             guard let self else {
                 return
             }
+
             Task { @MainActor in
                 let snapshot = await latestSnapshot.execute()
-                state = makeState(snapshot: snapshot, isLoading: state.isLoading, error: state.error)
+                state = makeState(
+                    snapshot: snapshot,
+                    isLoading: state.isLoading,
+                    error: state.error,
+                )
                 observeManagerChanges()
             }
         }
     }
 
-    private func makeState(snapshot: InboxSnapshot, isLoading: Bool, error: String?) -> InboxViewState {
+    private func makeState(snapshot: InboxSnapshot, isLoading: Bool,
+                           error: String?) -> InboxViewState
+    {
         InboxViewState(items: snapshot.items, isLoading: isLoading, error: error)
     }
 

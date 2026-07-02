@@ -1,41 +1,64 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Codable+Extensions.swift
+//
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
 
+public extension Decodable {
+    static func fromDictionary(_ dictionary: [String: Any]) throws -> Self {
+        let data = try JSONSerialization.data(withJSONObject: dictionary)
+        return try JSONDecoder().decode(Self.self, from: data)
+    }
+}
+
 public extension Encodable {
     func asDictionary() throws -> [String: Any] {
         let data = try JSONEncoder().encode(self)
-        let object = try JSONSerialization.jsonObject(with: data, options: [])
-        guard let dict = object as? [String: Any] else {
+        let object = try JSONSerialization.jsonObject(with: data)
+
+        guard let dictionary = object as? [String: Any] else {
             throw NSError(
                 domain: "Encodable+Dictionary",
                 code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Top-level JSON is not a dictionary."]
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Top-level JSON is not a dictionary."
+                ]
             )
         }
-        return dict
+
+        return dictionary
     }
 
     var dictionary: [String: Any] {
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        guard let data = try? encoder.encode(self) else { return [:] }
-        return (try? JSONSerialization.jsonObject(with: data, options: .allowFragments))
-            .flatMap { $0 as? [String: Any] } ?? [:]
+        (try? asDictionary()) ?? [:]
     }
 
     var jsonData: Data? {
         let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+        encoder.outputFormatting = [
+            .prettyPrinted,
+            .sortedKeys,
+            .withoutEscapingSlashes
+        ]
         return try? encoder.encode(self)
     }
 
-    var preetyPrinted: String {
-        if let jsonData {
-            return String(data: jsonData, encoding: .utf8) ?? "Error"
+    var prettyPrinted: String {
+        jsonData.flatMap { String(data: $0, encoding: .utf8) } ?? "Error"
+    }
+}
+
+public extension Encodable where Self: Decodable {
+    func copyMatchingProperties<T: Encodable>(from other: T) throws -> Self {
+        var currentDict = try asDictionary()
+        let otherDict = try other.asDictionary()
+
+        for key in currentDict.keys where otherDict[key] != nil {
+            currentDict[key] = otherDict[key]
         }
-        return "Error"
+
+        return try Self.fromDictionary(currentDict)
     }
 }

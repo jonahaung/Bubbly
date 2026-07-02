@@ -1,5 +1,6 @@
+//  Group.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -7,22 +8,18 @@ import Foundation
 public struct Group: Codable, Sendable, Hashable, UIdentifiable {
     public var uid: String
     public var name: String
-    public var createdDate: ServerTime
+    public var createdDate: Date
     public var photoURL: String?
     public var members: [String]
     public var createdBy: String
-    public var theme: ConversationTheme = .init()
-    public var seenMembers: [SeenMember] = []
 
     public init(
         uid: String,
         name: String,
-        createdDate: ServerTime,
+        createdDate: Date,
         photoURL: String?,
         members: [String],
-        createdBy: String,
-        theme: ConversationTheme,
-        seenMembers: [SeenMember]
+        createdBy: String
     ) {
         self.uid = uid
         self.name = name
@@ -30,8 +27,6 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         self.photoURL = photoURL
         self.members = members
         self.createdBy = createdBy
-        self.theme = theme
-        self.seenMembers = seenMembers
     }
 
     enum CodingKeys: String, CodingKey {
@@ -41,10 +36,9 @@ public struct Group: Codable, Sendable, Hashable, UIdentifiable {
         case photoURL
         case members
         case createdBy
-        case theme
     }
 
-    public var conversationProperties: ConversationProperties {
-        ConversationProperties(uid: uid, theme: theme, seenMembers: seenMembers)
+    public func conversationProperties() async -> ConversationProperties {
+        await ConversationPropertiesRepo.getOrCreateMain(for: uid)
     }
 }

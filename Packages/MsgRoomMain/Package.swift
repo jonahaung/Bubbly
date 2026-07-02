@@ -9,16 +9,16 @@ let package = Package(
     products: [
         .library(
             name: "MsgRoomMain",
-            targets: ["MsgRoomMain"]
-        )
+            targets: ["MsgRoomMain"],
+        ),
     ],
     dependencies: [
         .package(name: "Services", path: "../Services"),
         .package(name: "Database", path: "../Database"),
         .package(name: "Conversation", path: "../Conversation"),
+        .package(name: "BubblyContacts", path: "../BubblyContacts"),
         .package(name: "Inbox", path: "../Inbox"),
         .package(name: "Settings", path: "../Settings"),
-        .package(url: "https://github.com/apple/swift-collections", from: "1.1.0")
     ],
     targets: [
         .target(
@@ -27,9 +27,9 @@ let package = Package(
                 .product(name: "Services", package: "Services"),
                 .product(name: "Database", package: "Database"),
                 .product(name: "Conversation", package: "Conversation"),
+                .product(name: "BubblyContacts", package: "BubblyContacts"),
                 .product(name: "Inbox", package: "Inbox"),
                 .product(name: "Settings", package: "Settings"),
-                .product(name: "Collections", package: "swift-collections")
             ]
         ),
         .testTarget(
@@ -39,10 +39,11 @@ let package = Package(
                 .product(name: "Services", package: "Services"),
                 .product(name: "Database", package: "Database"),
                 .product(name: "Conversation", package: "Conversation"),
+                .product(name: "BubblyContacts", package: "BubblyContacts"),
                 .product(name: "Inbox", package: "Inbox"),
                 .product(name: "Settings", package: "Settings"),
-                .product(name: "Collections", package: "swift-collections")
-            ]
-        )
-    ]
+            ],
+            path: "Tests/MsgRoomMainTests"
+        ),
+    ],
 )

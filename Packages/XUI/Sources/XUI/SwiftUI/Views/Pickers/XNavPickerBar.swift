@@ -1,10 +1,12 @@
+//  XNavPickerBar.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
 
 public struct XNavPickerBar<T: XPickable>: View {
+
     private let title: String
     private let items: [T]
     @Binding private var selection: T
@@ -24,8 +26,7 @@ public struct XNavPickerBar<T: XPickable>: View {
             )
         } label: {
             LabeledContent(title) {
-                Text(.init(selection.title))
-                    .foregroundStyle(.secondary)
+                Text(selection.title)
             }
         }
     }
@@ -58,56 +59,46 @@ public struct XPickerView<T: XPickable>: View {
     }
 
     public var body: some View {
-        ScrollViewReader { proxy in
-            Form {
-                Section {
-                    ForEach(currentItems) { item in
-                        PickerRow(
-                            item: item,
-                            isSelected: item.title == selection.title,
-                            badge: item.badge
-                        ) {
-                            update(item)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                dismiss()
-                            }
-                        }
-                        .id(item.id)
+        Form {
+            Section {
+                ForEach(currentItems) { item in
+                    PickerRow(
+                        item: item,
+                        isSelected: item.title == selection.title,
+                        badge: item.badge
+                    ) {
+                        update(item)
+                    } onFinished: {
+                        dismiss()
                     }
-                    if currentItems.isEmpty {
-                        ContentUnavailableView.search
-                    }
+                    .id(item.id)
+                }
+                if currentItems.isEmpty {
+                    ContentUnavailableView.search
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    AsyncButton {
-                        await MainActor.run {
-                            isPresented = true
-                        }
-                    } label: {
-                        SystemImage(.magnifyingglass)
-                    }
-                }
-            }
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    withAnimation(.smooth(duration: 0.5)) {
-                        proxy.scrollTo(selection.id)
-                    }
-                }
-            }
-            .navigationBarTitle(title)
-            .navigationSubtitle("Pick one from the list")
-            .toolbarTitleDisplayMode(.inlineLarge)
-            .searchable(
-                text: $searchText,
-                isPresented: $isPresented,
-                placement: .automatic,
-                prompt: "Search \(title)"
-            )
-            .sensoryFeedback(.selection, trigger: selection)
         }
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                AsyncButton {
+                    await MainActor.run {
+                        isPresented = true
+                    }
+                } label: {
+                    SystemImage(.magnifyingglass)
+                }
+            }
+        }
+        .navigationBarTitle(title)
+        .navigationSubtitle("Pick one from the list")
+        .toolbarTitleDisplayMode(.inlineLarge)
+        .searchable(
+            text: $searchText,
+            isPresented: $isPresented,
+            placement: .navigationBarDrawer(displayMode: .automatic),
+            prompt: "Search \(title)"
+        )
+        .sensoryFeedback(.selection, trigger: selection)
     }
 
     private func update(_ item: T) {
@@ -124,24 +115,26 @@ private struct PickerRow<T: XPickable>: View {
     let isSelected: Bool
     let badge: RenderNode?
     let action: () -> Void
+    let onFinished: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: 12) {
-                // Badge (if any) – keep concrete type by always returning some View
+        CustomButton(action: action) {
+            Label {
+                LabeledContent {
+                    SystemImage(.circle)
+                        .symbolVariant(isSelected ? .fill : .none)
+                        .foregroundStyle(isSelected ? .secondary : .quinary)
+                } label: {
+                    Text(item.title)
+                }
+            } icon: {
                 if let badge {
                     badge.eraseToNode()
                 }
-
-                Text(item.title)
-
-                Spacer(minLength: 8)
-
-                SystemImage(isSelected ? .checkmarkCircleFill : .circle)
-                    .contentTransition(.symbolEffect(.replace))
-                    .foregroundStyle(isSelected ? Color
-                        .accentColor : Color(uiColor: .quaternaryLabel))
             }
+            .background(Color.systemBackground.opacity(0.001))
+        } onFinished: {
+            onFinished()
         }
     }
 }

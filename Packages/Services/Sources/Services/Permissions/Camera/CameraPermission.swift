@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import AVFoundation
 import Foundation
@@ -11,7 +9,9 @@ public extension Permission {
     }
 }
 
-public class CameraPermission: Permission {
+// MARK: - CameraPermission
+
+public final class CameraPermission: Permission {
     public var kind: PermissionKind {
         .camera
     }

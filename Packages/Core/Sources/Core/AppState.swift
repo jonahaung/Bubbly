@@ -1,8 +1,11 @@
+//  AppState.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
+
+// MARK: - AppLifecycleState
 
 public enum AppLifecycleState: String {
     case active
@@ -10,6 +13,8 @@ public enum AppLifecycleState: String {
     case background
     case unknown
 }
+
+// MARK: - AppStateStore
 
 public enum AppStateStore {
     public static let key = "app_state"
@@ -24,10 +29,11 @@ public enum AppStateStore {
     public static func read() -> AppLifecycleState {
         guard let raw = UserDefaults(suiteName: AppInformation.groupID)?
             .string(forKey: key),
-            let state = AppLifecycleState(rawValue: raw)
-        else {
+            let state = AppLifecycleState(rawValue: raw) else
+        {
             return .unknown
         }
+
         return state
     }
 }

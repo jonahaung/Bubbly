@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -9,22 +7,19 @@ import Foundation
 import SwiftData
 import XUI
 
-public final class ContactsRepository: ContactsRepositoryProtocol, Sendable, ErrorPresenter {
-    @MainActor
-    public static var shared: ContactsRepository {
-        get { sharedLock.value }
-        set { sharedLock.value = newValue }
-    }
+// MARK: - ContactsRepository
 
-    private static let sharedLock = Mutex(ContactsRepository())
+public final class ContactsRepository: ContactsRepositoryProtocol, @unchecked Sendable, ErrorPresenter {
+
     private init() {}
 
-    public var contacts = [Contact]()
-    public var groups = [Group]()
+    public var contacts: [Contact] = []
+    public var groups: [Group] = []
 
     public func delete(uid: String) async throws {
         if let indext = await contacts.firstIndex(where: { $0.uid == uid }) {
-            try await Store.shared.contactStore?
+            try await Store.shared
+                .contactStore?
                 .delete(uid: uid)
 
             Task { @MainActor in
@@ -56,7 +51,7 @@ public extension ContactsRepository {
         let groups: [Group] = try await FirestoreRepo.getModels(
             for: currentUserId,
             collection: .groups,
-            field: .members
+            field: .members,
         )
         let store = await Store.shared.groupStore
 

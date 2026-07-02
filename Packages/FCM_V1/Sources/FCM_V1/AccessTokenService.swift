@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
@@ -8,18 +8,16 @@ import SwiftJWT
 public actor AccessTokenService {
     public enum Constants {
         public static let tokenValidityTime: TimeInterval = 3600
-        public static let authURL = "https://www.googleapis.com/auth/cloud-platform"
-        public static let grantType = "urn:ietf:params:oauth:grant-type:jwt-bearer"
+        public static let authURL =
+            "https://www.googleapis.com/auth/cloud-platform"
+        public static let grantType =
+            "urn:ietf:params:oauth:grant-type:jwt-bearer"
         public static let contentType = "application/x-www-form-urlencoded"
     }
-
-    // MARK: - Properties
 
     public let credentials: ServiceAccountCredentials
     private let tokenCache: TokenCacheProtocol
     private let urlSession = URLSession(configuration: .ephemeral)
-
-    // MARK: - Initialization
 
     public init(
         credentials: ServiceAccountCredentials,
@@ -73,10 +71,12 @@ public actor AccessTokenService {
     }
 
     private func sanitizePrivateKey(_ privateKey: String) throws -> Data {
-        let sanitizedKey = privateKey
+        let sanitizedKey =
+            privateKey
             .replacingOccurrences(of: "-----BEGIN PRIVATE KEY-----", with: "")
             .replacingOccurrences(of: "-----END PRIVATE KEY-----", with: "")
             .replacingOccurrences(of: "\n", with: "")
+            .replacingOccurrences(of: "\r", with: "")
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard let keyData = Data(base64Encoded: sanitizedKey) else {
@@ -92,22 +92,25 @@ public actor AccessTokenService {
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue(Constants.contentType, forHTTPHeaderField: "Content-Type")
+        request.setValue(
+            Constants.contentType,
+            forHTTPHeaderField: "Content-Type"
+        )
 
         let bodyParams = [
             "grant_type": Constants.grantType,
-            "assertion": jwt
+            "assertion": jwt,
         ]
 
-        request.httpBody = bodyParams
-            .map { "\($0.key)=\($0.value)" }
-            .joined(separator: "&")
-            .data(using: .utf8)
+        guard let body = urlEncodedFormBody(bodyParams) else {
+            throw PushNotificationError.tokenGenerationFailed
+        }
+        request.httpBody = body
 
         let (data, response) = try await urlSession.data(for: request)
 
         guard let httpResponse = response as? HTTPURLResponse,
-              httpResponse.statusCode == 200
+            httpResponse.statusCode == 200
         else {
             throw PushNotificationError.tokenGenerationFailed
         }
@@ -115,7 +118,8 @@ public actor AccessTokenService {
         do {
             if let json = try JSONSerialization
                 .jsonObject(with: data, options: []) as? [String: Any],
-                let accessToken = json["access_token"] as? String {
+                let accessToken = json["access_token"] as? String
+            {
                 return accessToken
             } else {
                 throw PushNotificationError.tokenDecodingFailed
@@ -124,5 +128,36 @@ public actor AccessTokenService {
         } catch {
             throw PushNotificationError.tokenDecodingFailed
         }
+    }
+
+    private func urlEncodedFormBody(_ parameters: [String: String]) -> Data? {
+        let allowedCharacters = CharacterSet.alphanumerics.union(
+            CharacterSet(charactersIn: "-._* ")
+        )
+        var parts = [String]()
+        parts.reserveCapacity(parameters.count)
+
+        for (key, value) in parameters {
+            guard
+                let encodedKey =
+                    key
+                    .addingPercentEncoding(
+                        withAllowedCharacters: allowedCharacters
+                    )?
+                    .replacingOccurrences(of: " ", with: "+"),
+                let encodedValue =
+                    value
+                    .addingPercentEncoding(
+                        withAllowedCharacters: allowedCharacters
+                    )?
+                    .replacingOccurrences(of: " ", with: "+")
+            else {
+                return nil
+            }
+            parts.append("\(encodedKey)=\(encodedValue)")
+        }
+
+        let encoded = parts.joined(separator: "&")
+        return encoded.data(using: .utf8)
     }
 }

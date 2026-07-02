@@ -1,12 +1,13 @@
+//  SwiftLinkPreviewResponse+Extensions.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
 
 extension SwiftLinkPreviewResponse {
     var dictionary: [String: Any] {
-        var responseData: [String: Any] = [:]
+        var responseData = [String: Any]()
         responseData["baseURL"] = baseURL
         responseData["url"] = url
         responseData["finalUrl"] = finalUrl

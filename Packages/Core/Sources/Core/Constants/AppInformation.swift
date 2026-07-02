@@ -1,5 +1,6 @@
+//  AppInformation.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -11,4 +12,9 @@ public enum AppInformation {
     public static let iCloudID: String = "iCloud.com.aungkomin.Bubbly"
     public static let keychainGroupID = "keychain.com.aungkomin.Bubbly"
     public static let firebaseProjectID = "bubbly-3c6a9"
+
+    public enum BackgroundTask {
+        public static let appRefresh = "com.aungkomin.Bubbly.bg.appRefresh"
+        public static let processing = "com.aungkomin.Bubbly.bg.processing"
+    }
 }

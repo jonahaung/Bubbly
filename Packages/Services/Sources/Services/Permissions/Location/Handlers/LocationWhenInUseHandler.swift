@@ -1,12 +1,10 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import MapKit
 
-class LocationWhenInUseHandler: NSObject, CLLocationManagerDelegate {
-    lazy var locationManager = CLLocationManager()
+final class LocationWhenInUseHandler: NSObject, CLLocationManagerDelegate {
+    lazy var locationManager: CLLocationManager = .init()
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         if manager.authorizationStatus == .notDetermined {
@@ -20,7 +18,12 @@ class LocationWhenInUseHandler: NSObject, CLLocationManagerDelegate {
     func requestPermission(_ completionHandler: @escaping () -> Void) {
         self.completionHandler = completionHandler
 
-        let status: CLAuthorizationStatus = CLLocationManager.authorizationStatus()
+        let status: CLAuthorizationStatus
+        if #available(iOS 14.0, *) {
+            status = locationManager.authorizationStatus
+        } else {
+            status = type(of: locationManager).authorizationStatus()
+        }
 
         switch status {
         case .notDetermined:
@@ -34,7 +37,7 @@ class LocationWhenInUseHandler: NSObject, CLLocationManagerDelegate {
         }
     }
 
-    nonisolated(unsafe) static var shared: LocationWhenInUseHandler?
+    nonisolated(unsafe) static var shared: LocationWhenInUseHandler? = nil
 
     override init() {
         super.init()

@@ -1,12 +1,17 @@
+//  VisualizeSpacing.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 public extension View {
     func measureSpacing() -> some View {
-        self.modifier(MeasureSpacingModifier())
+        modifier(MeasureSpacingModifier())
     }
 
     func visualizeSpacing(color: some ShapeStyle = Color.red, axis: Axis = .horizontal) -> some View {
-        self.modifier(SpacingVisualizationModifier(shapeStyle: color, axis: axis))
+        modifier(SpacingVisualizationModifier(shapeStyle: color, axis: axis))
     }
 }
 
@@ -161,7 +166,6 @@ struct MeasuredRectKey: PreferenceKey {
             .background(.red)
             .measureSpacing()
             .offset(y: 22)
-
 
         Text("C!")
             .background(.red)

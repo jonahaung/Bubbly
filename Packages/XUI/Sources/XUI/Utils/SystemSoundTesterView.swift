@@ -1,11 +1,12 @@
+//  SystemSoundTesterView.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
 
 public struct SystemSoundTesterView: View {
-    @StateObject private var registry = SystemSoundRegistry()
+    @StateObject private var registry: SystemSoundRegistry = .init()
     @State private var query = ""
 
     public init() {}

@@ -1,15 +1,5 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
-
-//
-//  PhotoPickerView.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 13/2/26.
-//
-import PhotosUI
 import SwiftUI
+import PhotosUI
 
 struct PhotoPickerView: View {
     @Environment(PhotoPickerManager.self) private var manager
@@ -25,5 +15,6 @@ struct PhotoPickerView: View {
         }
         .photosPickerStyle(.inline)
         .photosPickerDisabledCapabilities(.collectionNavigation)
+        .ignoresSafeArea()
     }
 }

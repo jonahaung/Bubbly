@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import SwiftUI
+
+// MARK: - Sticker
 
 public struct Sticker: Sendable {
     public let sticker: UIImage
@@ -13,6 +13,8 @@ public struct Sticker: Sendable {
         self.colorScheme = colorScheme
     }
 }
+
+// MARK: - PhotoColorScheme
 
 public struct PhotoColorScheme: @unchecked Sendable {
     public let colors: [Color]

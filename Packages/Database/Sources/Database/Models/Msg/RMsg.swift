@@ -1,30 +1,31 @@
+//  RMsg.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import XUI
+import Foundation
 
 public struct RMsg: Codable, Sendable, Hashable {
     public let uid: String
     public let conID: String
     public let senderID: String
-    public let date: String
+    public let date: Date
     public let text: String?
-    public let incomingStatus: MsgIncomingStatus
-    public var outgoingStatus = [String: MsgOutgoingStatus]()
-    public let attachments: [Attachment]
+    public var incomingStatus: DeliveryStatus
+    public var outgoingStatus: MsgDeliveryState?
+    public let attachments: [Attachment]?
     public let reactions: [Reaction]
 
     public init(
         uid: String,
         conID: String,
         senderID: String,
-        date: String,
+        date: Date,
         text: String?,
-        incomingStatus: MsgIncomingStatus,
-        outgoingStatus: [String: MsgOutgoingStatus],
-        attachments: [Attachment],
+        incomingStatus: DeliveryStatus,
+        outgoingStatus: MsgDeliveryState?,
+        attachments: [Attachment]?,
         reactions: [Reaction]
     ) {
         self.uid = uid
@@ -43,12 +44,19 @@ public struct RMsg: Codable, Sendable, Hashable {
             uid: msg.uid,
             conID: msg.conID,
             senderID: msg.senderID,
-            date: ServerTime(msg.date).value,
+            date: msg.date,
             text: msg.text,
             incomingStatus: msg.incomingStatus,
             outgoingStatus: msg.outgoingStatus,
             attachments: msg.attachments,
             reactions: msg.reactions
         )
+    }
+    
+    public func outgoing() -> RMsg {
+        var copy = self
+        copy.outgoingStatus = nil
+        copy.incomingStatus = .sending
+        return copy
     }
 }

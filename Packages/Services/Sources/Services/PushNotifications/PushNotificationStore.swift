@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -9,7 +7,8 @@ import Foundation
 import XUI
 
 public actor PushNotificationStore {
-    struct NotificationCenterProxy: @unchecked Sendable {
+    @SocketActor
+    struct NotificationCenterProxy: Sendable {
         let center: NotificationCenter
     }
 
@@ -28,26 +27,44 @@ public actor PushNotificationStore {
                     try await FirestoreRepo.update(
                         value: ["pushToken": token],
                         collectionPath: .users,
-                        to: userID
+                        to: userID,
                     )
-                }
+                },
             )
         }
     }
 
-    public static let shared = PushNotificationStore()
+    public static let shared: PushNotificationStore = .init()
     private let deps: Dependencies
 
     init(dependencies: Dependencies = .live) {
         deps = dependencies
     }
 
-    public func consumePendingAnyMsgData() -> [AnyMsgData] {
-        if let datas = deps.storage.codable([AnyMsgData].self, for: .device(.anyMsgData)) {
-            deps.storage.delete(for: .device(.anyMsgData))
-            return datas
+    public func consumePendingAnyMsgData(navPath: NavPath?) async throws {
+        guard let datas = deps.storage.codable([AnyMsgData].self, for: .device(.anyMsgData)) else {
+            return
         }
-        return []
+        deps.storage.delete(for: .device(.anyMsgData))
+        switch navPath {
+        case .conversation(let prefetchData):
+            let center = deps.notificationCenter
+            try await AsyncOrderedStream.mapOrdered(inputs: datas) { data in
+                if data.conID == prefetchData.conversation.uid {
+                    center.center.post(name: .msgNoti(for: data.conID), object: data)
+                }
+            }
+        default:
+            await postInboxChanges()
+        }
+    }
+
+    public func savePendingAnyMsgData(_ datas: [AnyMsgData]) {
+        guard !datas.isEmpty else {
+            deps.storage.delete(for: .device(.anyMsgData))
+            return
+        }
+        deps.storage.save(datas, for: .device(.anyMsgData))
     }
 
     public func postReceiveDeviceToken(_ fcmToken: String?) async {
@@ -58,6 +75,12 @@ public actor PushNotificationStore {
     }
 
     public func postInboxChanges() async {
+        let center = deps.notificationCenter
+        await MainActor.run {
+            center.center.post(name: .inboxChanges, object: nil)
+        }
+    }
+    public func postReceiveNewMessages(data: [AnyMsgData]) async {
         let center = deps.notificationCenter
         await MainActor.run {
             center.center.post(name: .inboxChanges, object: nil)
@@ -75,15 +98,16 @@ public actor PushNotificationStore {
             let fcmToken,
             !fcmToken.isEmpty,
             storedToken != fcmToken,
-            let user = deps.authProvider()
-        else {
+            let user = deps.authProvider() else
+        {
             return
         }
+
         do {
             deps.storage.save(fcmToken, for: .device(.deviceToken))
             try await deps.updatePushToken(fcmToken, user.uid)
             log(
-                "Updated fcmToken (\(fcmToken)) to Firestore for user: \(user.displayName ?? user.uid)"
+                "Updated fcmToken (\(fcmToken)) to Firestore for user: \(user.displayName ?? user.uid)",
             )
         } catch {
             log(error)

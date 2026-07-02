@@ -8,9 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		47999F772F48286B00FD7DD8 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47999F762F48286B00FD7DD8 /* MsgRoomMain */; };
-		47B167E72E9AB3530020F282 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */; };
-		47CC12A82EE655A600D3BDE8 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 47CC12A72EE655A600D3BDE8 /* Services */; };
+		47B1B2762F9A9FE6008FCD86 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */; };
+		47DE272D2F93637400B6BDF2 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47DE272C2F93637400B6BDF2 /* MsgRoomMain */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +52,7 @@
 
 /* Begin PBXFileReference section */
 		4735A5E12DCEB7F3002854E4 /* FCM_V1 */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FCM_V1; sourceTree = "<group>"; };
+		474719262FDCA4FE00597C61 /* RichText */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RichText; sourceTree = "<group>"; };
 		475BAAB42DBE859D007B0876 /* Bubbly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bubbly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAAC52DBE859E007B0876 /* BubblyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAACF2DBE859E007B0876 /* BubblyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -60,7 +60,6 @@
 		4780E40E2F40E32E00860B99 /* Conversation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Conversation; sourceTree = "<group>"; };
 		4780E40F2F40E36E00860B99 /* Inbox */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Inbox; sourceTree = "<group>"; };
 		4780E4402F40EC6F00860B99 /* Settings */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Settings; sourceTree = "<group>"; };
-		4780E4412F40EC7A00860B99 /* ContactsFeature */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ContactsFeature; sourceTree = "<group>"; };
 		479C830E2DDE71D70019971C /* Crypto */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Crypto; sourceTree = "<group>"; };
 		47A653C52E99B92B005A2E50 /* FirePhoneOTP */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FirePhoneOTP; sourceTree = "<group>"; };
 		47AD343A2DCD650B00C4FA62 /* Core */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Core; sourceTree = "<group>"; };
@@ -68,9 +67,8 @@
 		47AD343C2DCD650B00C4FA62 /* ImageLoader */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ImageLoader; sourceTree = "<group>"; };
 		47AD343D2DCD650B00C4FA62 /* MediaPicker */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MediaPicker; sourceTree = "<group>"; };
 		47AD343F2DCD650B00C4FA62 /* MsgRoomMain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MsgRoomMain; sourceTree = "<group>"; };
-		47AD34402DCD650B00C4FA62 /* Services */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Services; sourceTree = "<group>"; };
 		47AD34442DCD650B00C4FA62 /* XUI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = XUI; sourceTree = "<group>"; };
-		47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		47D43B212F83F1B900A76A42 /* BubblyContacts */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = BubblyContacts; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -132,7 +130,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47999F772F48286B00FD7DD8 /* MsgRoomMain in Frameworks */,
+				47DE272D2F93637400B6BDF2 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,7 +152,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47CC12A82EE655A600D3BDE8 /* Services in Frameworks */,
+				47B1B2762F9A9FE6008FCD86 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,7 +162,6 @@
 		475BAAAB2DBE859D007B0876 = {
 			isa = PBXGroup;
 			children = (
-				47B167E62E9AB3530020F282 /* PrivacyInfo.xcprivacy */,
 				47AD34452DCD650B00C4FA62 /* Packages */,
 				475BAAB62DBE859D007B0876 /* Bubbly */,
 				475BAAC82DBE859E007B0876 /* BubblyTests */,
@@ -196,14 +193,14 @@
 		47AD34452DCD650B00C4FA62 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				4780E4412F40EC7A00860B99 /* ContactsFeature */,
+				474719262FDCA4FE00597C61 /* RichText */,
+				47D43B212F83F1B900A76A42 /* BubblyContacts */,
 				4780E4402F40EC6F00860B99 /* Settings */,
 				4780E40F2F40E36E00860B99 /* Inbox */,
 				4780E40E2F40E32E00860B99 /* Conversation */,
 				47A653C52E99B92B005A2E50 /* FirePhoneOTP */,
 				47AD343A2DCD650B00C4FA62 /* Core */,
 				47AD343B2DCD650B00C4FA62 /* Database */,
-				47AD34402DCD650B00C4FA62 /* Services */,
 				47AD343F2DCD650B00C4FA62 /* MsgRoomMain */,
 				479C830E2DDE71D70019971C /* Crypto */,
 				4735A5E12DCEB7F3002854E4 /* FCM_V1 */,
@@ -236,7 +233,7 @@
 			);
 			name = Bubbly;
 			packageProductDependencies = (
-				47999F762F48286B00FD7DD8 /* MsgRoomMain */,
+				47DE272C2F93637400B6BDF2 /* MsgRoomMain */,
 			);
 			productName = Bubbly;
 			productReference = 475BAAB42DBE859D007B0876 /* Bubbly.app */;
@@ -305,7 +302,7 @@
 			);
 			name = NotificationService;
 			packageProductDependencies = (
-				47CC12A72EE655A600D3BDE8 /* Services */,
+				47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */,
 			);
 			productName = NotificationService;
 			productReference = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */;
@@ -347,7 +344,7 @@
 			mainGroup = 475BAAAB2DBE859D007B0876;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				47999F752F48286B00FD7DD8 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */,
+				47DE272B2F93637400B6BDF2 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 475BAAB52DBE859D007B0876 /* Products */;
@@ -367,7 +364,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47B167E72E9AB3530020F282 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,7 +443,7 @@
 		475BAAD92DBE859E007B0876 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Bubbly/Bubbly.entitlements;
@@ -471,8 +467,9 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -493,7 +490,7 @@
 		475BAADA2DBE859E007B0876 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Bubbly/Bubbly.entitlements;
@@ -517,8 +514,9 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UIStatusBarStyle = "";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -840,20 +838,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		47999F752F48286B00FD7DD8 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */ = {
+		47DE272B2F93637400B6BDF2 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/MsgRoomMain;
 		};
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		47999F762F48286B00FD7DD8 /* MsgRoomMain */ = {
+		47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MsgRoomMain;
 		};
-		47CC12A72EE655A600D3BDE8 /* Services */ = {
+		47DE272C2F93637400B6BDF2 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = Services;
+			productName = MsgRoomMain;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

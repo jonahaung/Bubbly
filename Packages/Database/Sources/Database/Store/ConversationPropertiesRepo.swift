@@ -1,15 +1,18 @@
+//  ConversationPropertiesRepo.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Core
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
 public enum ConversationPropertiesRepo {
     @discardableResult
-    public static func getOrCreate(for conID: String) async throws -> ConversationProperties {
+    public static func getOrCreate(for conID: String,
+                                   refetch _: Bool) async throws -> ConversationProperties
+    {
         let existing = try await Store.shared.conversationPropertiesStore?.fetch(uid: conID)
         if let existing {
             return existing

@@ -1,5 +1,6 @@
+//  ToastPresenter.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -7,8 +8,8 @@ import SwiftUI
 @MainActor
 @Observable
 public final class ToastPresenter {
-    public private(set) var toast: Toast?
-    private var queue: [Toast] = []
+    public var toast: Toast?
+    private var queue: Deque<Toast> = .init()
 
     @ObservationIgnored
     private var displayLink: CADisplayLink?
@@ -19,7 +20,7 @@ public final class ToastPresenter {
 
     public func show(_ value: Toast?) {
         guard let value else { return }
-        queue.append(value)
+        queue.enqueue(value)
         processQueue()
     }
 
@@ -54,21 +55,17 @@ public final class ToastPresenter {
         processQueue()
     }
 
-    public static var shared: ToastPresenter {
-        get { _shared.value }
-        set { _shared.value = newValue }
-    }
-
-    private static var _shared = Mutex(ToastPresenter())
+    public static let shared: ToastPresenter = .init()
 }
 
 private extension ToastPresenter {
     func processQueue() {
-        // If no current toast and queue has items
-        guard toast == nil, !queue.isEmpty else { return }
-        let next = queue.removeFirst()
-        toast = next
-        startTracking()
+        guard !queue.isEmpty else { return }
+        let next = queue.dequeue()
+        withTransaction(\.disablesAnimations, true) {
+            toast = next
+            startTracking()
+        }
     }
 }
 
@@ -87,7 +84,7 @@ private extension ToastPresenter {
         // You only need to check ~1 per 60th of a second at most; higher accuracy is overkill for
         // toast durations.
         link.preferredFrameRateRange = CAFrameRateRange(minimum: 1, maximum: 30, preferred: 10)
-        link.add(to: .main, forMode: .common)
+        link.add(to: .main, forMode: .tracking)
         displayLink = link
     }
 

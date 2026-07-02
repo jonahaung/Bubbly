@@ -1,5 +1,6 @@
+//  DocumentPicker.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -102,7 +103,7 @@ public struct DocumentPicker: UIViewControllerRepresentable {
         self.asCopy = asCopy
     }
 
-    public class Coordinator: NSObject, UIDocumentPickerDelegate {
+    public final class Coordinator: NSObject, UIDocumentPickerDelegate {
         var parent: DocumentPicker
 
         init(_ parent: DocumentPicker) {

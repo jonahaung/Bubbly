@@ -1,24 +1,14 @@
+//  ReactionsView.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-//
-//  ReactionsView.swift
-//  MsgRoomMain
-//
-//  Created by Aung Ko Min on 5/11/25.
-//
 import Database
 import SwiftUI
 
-public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable, CaseIterable {
-    public static var allCases: [ReactionType] {
-        [.heart, .thumbUp, .thumbDown, .smile, .laugh, .sad]
-    }
-
-    public var id: String {
-        rawValue
-    }
+public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable,
+    CaseIterable
+{
 
     case heart
     case thumbUp
@@ -27,6 +17,14 @@ public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable, Ca
     case laugh
     case sad
     case custom(String)
+
+    public static var allCases: [ReactionType] {
+        [.heart, .thumbUp, .thumbDown, .smile, .laugh, .sad]
+    }
+
+    public var id: String {
+        rawValue
+    }
 
     public var rawValue: String {
         switch self {
@@ -42,21 +40,22 @@ public enum ReactionType: RawRepresentable, Sendable, Hashable, Identifiable, Ca
             "😂"
         case .sad:
             "😓"
-        case let .custom(string):
+        case .custom(let string):
             string
         }
     }
 
     public init?(rawValue: String) {
-        switch rawValue {
-        case "❤️": self = .heart
-        case "👍": self = .thumbUp
-        case "👎": self = .thumbDown
-        case "😊": self = .smile
-        case "😂": self = .laugh
-        case "😓": self = .sad
-        default: self = .custom(rawValue)
-        }
+        self =
+            switch rawValue {
+            case "❤️": .heart
+            case "👍": .thumbUp
+            case "👎": .thumbDown
+            case "😊": .smile
+            case "😂": .laugh
+            case "😓": .sad
+            default: .custom(rawValue)
+            }
     }
 }
 
@@ -71,8 +70,16 @@ public struct ReactionsBar: View {
         static let scaleMultiplier: Double = 1.8
         static let floatOffset: CGFloat = -30
         static let rotationAngle: Double = 45
-        static let inboundBubbleColor = Color(red: 0.071, green: 0.078, blue: 0.086)
-        static let reactionsBGColor = Color(red: 0.055, green: 0.090, blue: 0.137)
+        static let inboundBubbleColor: Color = .init(
+            red: 0.071,
+            green: 0.078,
+            blue: 0.086
+        )
+        static let reactionsBGColor: Color = .init(
+            red: 0.055,
+            green: 0.090,
+            blue: 0.137
+        )
     }
 
     struct ReactionState: Sendable, Hashable, Identifiable {
@@ -91,9 +98,12 @@ public struct ReactionsBar: View {
 
         var animationDuration: Double {
             switch reaction {
-            case .heart, .thumbUp:
+            case .heart,
+                .thumbUp:
                 ReactionsBar.Constants.animationDuration
-            case .thumbDown, .laugh, .sad:
+            case .laugh,
+                .sad,
+                .thumbDown:
                 ReactionsBar.Constants.animationDuration
             default:
                 ReactionsBar.Constants.animationDuration
@@ -106,8 +116,6 @@ public struct ReactionsBar: View {
     @State private var allStates: [ReactionState] = ReactionType.allCases.map {
         ReactionState(reaction: $0)
     }
-
-    @State private var isVisible = false
 
     public var body: some View {
         HStack(spacing: Constants.itemSpacing) {
@@ -122,10 +130,12 @@ public struct ReactionsBar: View {
     }
 
     private func animateAppearance() {
-        withAnimation(.interpolatingSpring(
-            stiffness: Constants.springStiffness,
-            damping: Constants.springDamping
-        ).delay(Constants.appearDelayIncrement / 2)) {
+        withAnimation(
+            .interpolatingSpring(
+                stiffness: Constants.springStiffness,
+                damping: Constants.springDamping
+            ).delay(Constants.appearDelayIncrement / 2)
+        ) {
             for each in $allStates {
                 each.wrappedValue.count += 1
             }

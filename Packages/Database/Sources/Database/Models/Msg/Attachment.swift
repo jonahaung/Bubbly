@@ -1,8 +1,11 @@
+//  Attachment.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
+
+// MARK: - Attachment
 
 public struct Attachment: Codable, Sendable, Hashable, Identifiable {
     public var id: String {
@@ -11,7 +14,7 @@ public struct Attachment: Codable, Sendable, Hashable, Identifiable {
 
     public let uid: String
     public var url: String
-    public var thumbnailUrl: String?
+    public var thumbnailURL: String?
     public var attachMentTypeRaw: Int
     public let aspectRatio: Double
     public let title: String?
@@ -28,7 +31,7 @@ public struct Attachment: Codable, Sendable, Hashable, Identifiable {
     ) {
         self.uid = uid
         self.url = url
-        self.thumbnailUrl = thumbnailUrl
+        thumbnailURL = thumbnailUrl
         self.attachMentTypeRaw = attachMentTypeRaw
         self.aspectRatio = aspectRatio
         self.title = title

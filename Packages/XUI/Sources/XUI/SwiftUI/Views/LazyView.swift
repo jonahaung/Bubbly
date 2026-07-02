@@ -1,13 +1,8 @@
+//  LazyView.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-//
-//  LazyView.swift
-//  Msgr
-//
-//  Created by Aung Ko Min on 12/10/22.
-//
 import SwiftUI
 
 public struct LazyView<Content: View>: View {

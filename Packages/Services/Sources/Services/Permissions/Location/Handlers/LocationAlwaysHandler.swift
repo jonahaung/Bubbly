@@ -1,18 +1,16 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
 import MapKit
 
-class LocationAlwaysHandler: NSObject, CLLocationManagerDelegate {
+final class LocationAlwaysHandler: NSObject, CLLocationManagerDelegate {
     // MARK: - Location Manager
 
-    lazy var locationManager = CLLocationManager()
+    lazy var locationManager: CLLocationManager = .init()
 
     func locationManager(
         _: CLLocationManager,
-        didChangeAuthorization status: CLAuthorizationStatus
+        didChangeAuthorization status: CLAuthorizationStatus,
     ) {
         if status == .notDetermined {
             return
@@ -35,11 +33,12 @@ class LocationAlwaysHandler: NSObject, CLLocationManagerDelegate {
     func requestPermission(_ completionHandler: @escaping () -> Void) {
         self.completionHandler = completionHandler
 
-        let status: CLAuthorizationStatus = if #available(iOS 14.0, *) {
-            locationManager.authorizationStatus
-        } else {
-            CLLocationManager.authorizationStatus()
-        }
+        let status: CLAuthorizationStatus =
+            if #available(iOS 14.0, *) {
+                locationManager.authorizationStatus
+            } else {
+                CLLocationManager.authorizationStatus()
+            }
 
         switch status {
         case .notDetermined:
@@ -50,7 +49,9 @@ class LocationAlwaysHandler: NSObject, CLLocationManagerDelegate {
             // Already granted
             completionHandler()
 
-        case .authorizedWhenInUse, .denied, .restricted:
+        case .authorizedWhenInUse,
+             .denied,
+             .restricted:
             // Handle according to your app’s policy (perhaps prompt UI)
             // You might still call requestAlwaysAuthorization() if appropriate
             locationManager.delegate = self
@@ -61,7 +62,7 @@ class LocationAlwaysHandler: NSObject, CLLocationManagerDelegate {
         }
     }
 
-    nonisolated(unsafe) static var shared: LocationAlwaysHandler?
+    nonisolated(unsafe) static var shared: LocationAlwaysHandler? = nil
 
     override init() {
         super.init()

@@ -1,5 +1,6 @@
+//  AsyncFetcher.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -32,8 +33,6 @@ public actor AsyncFetcher<T: Sendable> {
     private var hasCapacity: Bool {
         inFlightCount < maxConcurrent
     }
-
-    // MARK: - Initialization
 
     public init(maxConcurrent: Int = 10, fetch: @escaping Fetch) {
         precondition(maxConcurrent > 0, "maxConcurrent must be > 0")
@@ -176,7 +175,9 @@ public actor AsyncFetcher<T: Sendable> {
 
     private func startTask(for id: ID) {
         // If already started by racing caller, do nothing
-        if tasks[id] != nil { return }
+        if tasks[id] != nil {
+            return
+        }
 
         // Create task and register it
         let task = createTask(for: id)
@@ -292,12 +293,18 @@ public extension AsyncFetcher {
 
     /// Get current state for an ID
     enum FetchState: Sendable {
-        case fetching, pending, idle
+        case fetching
+        case pending
+        case idle
     }
 
     func state(for id: ID) -> FetchState {
-        if isFetching(id) { return .fetching }
-        if isPending(id) { return .pending }
+        if isFetching(id) {
+            return .fetching
+        }
+        if isPending(id) {
+            return .pending
+        }
         return .idle
     }
 }

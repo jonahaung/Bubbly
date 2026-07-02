@@ -1,7 +1,6 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
+import BubblyContacts
 import Core
 import Database
 import Inbox
@@ -10,41 +9,47 @@ import Settings
 import SwiftUI
 import XUI
 
+// MARK: - RootTabView
+
 struct RootTabView: View {
     let coordinator: AppCoordinator
-	private var router: Router { coordinator.router }
+    private var router: Router {
+        coordinator.router
+    }
+
     var body: some View {
         TabView(selection: router.tabPathBinding()) {
             ForEach(TabPath.allCases) { tabPath in
                 Tab(value: tabPath, role: role(for: tabPath)) {
                     MainNavView(tabPath: tabPath, coordinator: coordinator) {
                         coordinator.view(for: tabPath)
+                            .navigationDestination(for: NavPath.self) { navPath in
+                                coordinator.view(for: navPath)
+                            }
                     }
                 } label: {
-                    Image(systemName: tabPath.systemName)
+                    Label(tabPath.name, systemImage: tabPath.systemName)
+                        .labelStyle(.iconOnly)
                 }
             }
         }
+		.tabViewSearchActivation(.automatic)
+		.searchToolbarBehavior(.minimize)
+		.searchPresentationToolbarBehavior(.avoidHidingContent)
         .tabBarMinimizeBehavior(.onScrollDown)
         .toastPresentable()
-        .loadingPresentable()
-        .sheet(item: sheet) { coordinator.view(for: $0) }
-        .onOpenURL { url in
-            Task {
-                await coordinator.handleDeeplink(url)
-            }
-        }
+        .fullScreenCover(item: fullScreenCover) { coordinator.view(for: $0) }
     }
 }
 
-private extension RootTabView {
-    func role(for tabPath: TabPath) -> TabRole? {
+extension RootTabView {
+    private func role(for tabPath: TabPath) -> TabRole? {
 		tabPath == .contacts ? .search : nil
     }
 }
 
 private extension RootTabView {
-    var sheet: Binding<NavPath?> {
+    var fullScreenCover: Binding<NavPath?> {
         .init(
             get: { router.sheet },
             set: { newValue in
@@ -53,7 +58,7 @@ private extension RootTabView {
                 } else {
                     router.dismissModal()
                 }
-            }
+            },
         )
     }
 }
@@ -62,16 +67,13 @@ public extension AppCoordinator {
     @ViewBuilder func view(for tabPath: TabPath) -> some View {
         switch tabPath {
         case .test:
-			PlaygroundView()
+            PlaygroundView()
         case .inbox:
-			InboxScene(coordinator: self)
+            InboxScene(coordinator: self)
         case .contacts:
-			ContactsScene(coordinator: self)
+			ContactList(coordinator: self)
         case .settings:
-            SettingsScene(
-                currentUserRepository: container.currentUserRepository,
-                appLauncher: appLauncher
-            )
+            SettingsScene(coordinator: self)
         }
     }
 }

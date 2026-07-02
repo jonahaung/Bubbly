@@ -1,41 +1,40 @@
+//  ComposeBarInputTextField.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import Core
 import Services
 import SwiftUI
 import XUI
-import Core
 
 extension ComposeBar {
     struct ComposeBarInputTextField: View {
-        @Bindable var composer: ChatComposer
+        let inputText: InputText
         @Environment(\.sharedFocusState) private var focusState
 
         var body: some View {
-            ZStack(alignment: .trailing) {
-                textField()
+            if let focusState {
+                TextField(
+                    "Text ...",
+                    text: .init(get: { inputText.text }, set: { inputText.set(text: $0) }),
+                    axis: .vertical
+                )
+                .lineLimit(1...10)
+                .font(.system(size: UIFont.labelFontSize))
+                .lineHeight(.multiple(factor: 1.3))
+                .focused(focusState.binding, equals: .inputTextField)
+                .padding(.init(top: 8, leading: 12, bottom: 8, trailing: 8))
+                .tint(.link)
+                .background(
+                    Color.appPrimary,
+                    in: RoundedRectangle(
+                        cornerRadius: UIFont.labelFontSize,
+                        style: .continuous
+                    )
+                )
+                .accessibilityElement(children: .contain)
             }
-            .background(.windowBackground, in: .containerRelative)
-			.containerShape(
-				RoundedRectangle(cornerRadius: 18)
-			)
-        }
-
-        private func textField() -> some View {
-            TextField(
-                "\(composer.source.rawValue)",
-                text: composer.inputText
-                    .bindableText, selection: $composer.inputText.selection, axis: .vertical
-            )
-            .lineLimit(0...10)
-            .font(.body)
-            .tint(.link)
-            .padding(.init(top: 8, leading: 16, bottom: 8, trailing: 8))
-            .focused(
-                focusState.unsafelyUnwrapped.binding,
-                equals: composer.source.rawValue
-            )
         }
     }
 }

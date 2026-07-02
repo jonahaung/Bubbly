@@ -1,5 +1,6 @@
+//  Lorem.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -37,7 +38,7 @@ public struct LoremConfiguration {
     public var tone: LoremTone
 
     @MainActor
-    public static let `default` = LoremConfiguration(
+    public static let `default`: LoremConfiguration = .init(
         domain: .generic,
         emoji: .none,
         locale: .current,
@@ -51,7 +52,7 @@ public struct LoremConfiguration {
 public enum Lorem {
     // MARK: Configuration
 
-    public static var configuration = LoremConfiguration.default
+    public static var configuration: LoremConfiguration = .default
 
     // MARK: - Words
 
@@ -103,8 +104,6 @@ public enum Lorem {
             sentence,
             tweet,
             paragraph,
-            title,
-            shortTweet,
             url.absoluteString,
             reply(to: .init(previousMessage: sentence))
         ].random()
@@ -115,7 +114,7 @@ public enum Lorem {
     public static var paragraph: String {
         compose(
             sentence,
-            count: .random(in: minSentencesCountInParagraph...maxSentencesCountInParagraph),
+            count: .random(in: minSentencesCountInParagraph ... maxSentencesCountInParagraph),
             joinBy: .space
         )
     }
@@ -137,7 +136,7 @@ public enum Lorem {
     public static var title: String {
         compose(
             word,
-            count: .random(in: minWordsCountInTitle...maxWordsCountInTitle),
+            count: .random(in: minWordsCountInTitle ... maxWordsCountInTitle),
             joinBy: .space,
             decorate: { $0.capitalized }
         )
@@ -174,7 +173,7 @@ public enum Lorem {
     }
 
     public static var url: URL {
-        URL(string: sentencePack.urls.random())!
+        URL(string: (sentencePack.urls + DemoImages.demoPhotosURLs.shuffled().prefix(5).map(\.absoluteString)).random())!
     }
 }
 
@@ -265,7 +264,7 @@ private struct EnglishSentencePack: LoremSentencePack {
         },
 
         {
-            "The system processes requests efficiently in the background to ensure a responsive and reliable experience for all users."
+            "The system processes requests **efficiently** in the background to ensure a responsive and reliable experience for all users."
         },
 
         {
@@ -400,7 +399,10 @@ private struct EnglishSentencePack: LoremSentencePack {
         "https://apple.com",
         "https://developer.apple.com",
         "https://figma.com",
-        "https://support.apple.com"
+        "https://support.apple.com",
+        "https://randomimageurl.com",
+        "https://www.tinyzone.is/movie/the-super-mario-galaxy-movie-2026/",
+        "https://www.hackingwithswift.com/quick-start/swiftui/how-to-render-markdown-content-in-text"
     ]
 }
 
@@ -409,7 +411,8 @@ private struct EnglishSentencePack: LoremSentencePack {
 extension Lorem {
     fileprivate static var sentencePack: LoremSentencePack {
         switch configuration.locale.language.languageCode?.identifier {
-        case "en", .none:
+        case "en",
+             .none:
             EnglishSentencePack()
         default:
             EnglishSentencePack()
@@ -439,7 +442,7 @@ extension Lorem {
         joinBy separator: Separator,
         decorate: ((String) -> String)? = nil
     ) -> String {
-        let result = (0..<count)
+        let result = (0 ..< count)
             .map { _ in provider() }
             .joined(separator: separator.rawValue)
 
@@ -463,8 +466,7 @@ extension Lorem {
             guard
                 configuration.domain == .chat,
                 let previous = context.previousMessage,
-                configuration.tone == .friendly
-            else {
+                configuration.tone == .friendly else {
                 return sentence
             }
 

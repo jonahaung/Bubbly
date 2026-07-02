@@ -1,5 +1,6 @@
+//  RangedSliderView.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -92,12 +93,12 @@ public struct RangedSliderView: View {
                                 // Calculate the scaled position
                                 let newPos = value.location.x / geometry.size.width
                                 // Set new Position
-                                if newPos < 0 {
-                                    pos1 = 0
+                                pos1 = if newPos < 0 {
+                                    0
                                 } else if newPos >= pos2 {
-                                    pos1 = pos2 - 0.01
+                                    pos2 - 0.01
                                 } else {
-                                    pos1 = newPos
+                                    newPos
                                 }
                                 let scaledValue = (pos1.scaled(by: scale) + offset)
                                 let rounded = ((scaledValue.int / step) * step).cgFloat
@@ -115,12 +116,12 @@ public struct RangedSliderView: View {
                         .gesture(DragGesture()
                             .onChanged { value in
                                 let newPos = value.location.x / geometry.size.width
-                                if newPos > 1.0 {
-                                    pos2 = 1.0
+                                pos2 = if newPos > 1.0 {
+                                    1.0
                                 } else if newPos <= pos1 {
-                                    pos2 = pos1 + 0.01
+                                    pos1 + 0.01
                                 } else {
-                                    pos2 = newPos
+                                    newPos
                                 }
                                 let scaledValue = pos2.scaled(by: scale) + offset
                                 let rounded = ((scaledValue.int / step) * step).cgFloat

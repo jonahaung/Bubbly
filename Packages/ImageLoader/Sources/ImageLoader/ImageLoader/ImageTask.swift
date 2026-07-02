@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 @preconcurrency import Combine
@@ -203,8 +203,6 @@ public final class ImageTask: Hashable {
             pipeline?.imageTask(self, didChangePriority: newValue)
         }
     }
-
-    // MARK: Internals
 
     /// Gets called when the task is cancelled either by the user or by an
     /// external event such as session invalidation.

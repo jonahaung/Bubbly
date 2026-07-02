@@ -1,18 +1,18 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  EmojiRepository.swift
+//  Conversation
+//
+//  Created by Aung Ko Min on 15/5/26.
 //
 
 import Foundation
 
 struct EmojiRepository {
-    // MARK: - Properties
 
     @MainActor
-    static let shared = EmojiRepository()
+    static let shared: EmojiRepository = .init()
     private(set) var categories: [EmojiCategory] = []
     private(set) var emojis: [Emoji] = []
-
-    // MARK: - Initializers
 
     init() {
         do {
@@ -24,10 +24,8 @@ struct EmojiRepository {
         }
     }
 
-    // MARK: - Helpers
-
     private func decodeEmojis() throws -> [Emoji] {
-        let bundle = Bundle.module
+        let bundle = Bundle.main
         let url = bundle.url(
             forResource: "emojis",
             withExtension: "json"
@@ -37,7 +35,7 @@ struct EmojiRepository {
     }
 
     private func sortCategories(for emojis: [Emoji]) -> [EmojiCategory] {
-        var categories: [EmojiCategory] = []
+        var categories = [EmojiCategory]()
 
         for categoryType in EmojiCategoryType.allCases {
             let emojis = emojis.filter {
@@ -56,3 +54,4 @@ struct EmojiRepository {
         return categories
     }
 }
+

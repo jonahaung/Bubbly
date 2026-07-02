@@ -1,5 +1,6 @@
+//  Settings.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -11,7 +12,8 @@ public enum Settings {
                 if let value = GroupStorage.shared
                     .integer(
                         for: .layout(.chatMsgSpacing)
-                    ) {
+                    )
+                {
                     return value == 0 ? 1 : value
                 }
                 return 1
@@ -26,7 +28,8 @@ public enum Settings {
                 if let value = GroupStorage.shared
                     .integer(
                         for: .limit(.minutesForChatMsgGrouping)
-                    ) {
+                    )
+                {
                     return value == 0 ? 15 : value
                 }
                 return 15
@@ -43,7 +46,8 @@ public enum Settings {
                 if let value = GroupStorage.shared
                     .integer(
                         for: .limit(.paginationPageSize)
-                    ) {
+                    )
+                {
                     return value == 0 ? 30 : value
                 }
                 return 30

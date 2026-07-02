@@ -1,12 +1,12 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import FCM_V1
 import FirebaseMessaging
 import Foundation
 import XUI
+
+// MARK: - Socketable
 
 public protocol Socketable {
     func updateToLocal(_ msg: Message) async throws
@@ -15,9 +15,10 @@ public protocol Socketable {
 
 public extension Socketable {
     func updateToLocal(_ msg: Message) async throws {
-        try await Store.shared.msgStore?
+        try await Store.shared
+            .msgStore?
             .updateAndSaveDebounced(
-                uid: msg.uid
+                uid: msg.uid,
             ) { model in
                 model.update(from: msg)
             }

@@ -1,12 +1,11 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
 import MediaPicker
 import UIKit
 import XUI
+import Core
 
 public actor MsgCreator {
     public enum Error: Swift.Error {
@@ -21,34 +20,32 @@ public actor MsgCreator {
     public init(currentUserId: String, mediaManager: MediaManager = .shared) {
         self.mediaManager = mediaManager
         self.currentUserId = currentUserId
-    }
+    } 
 
     public func message(
         text: String,
         attachments: [Attachment],
-        in conversation: Conversation
+        in conversation: Conversation,
     ) async throws -> Message {
-        await Message(
-            uid: IDGenerator.shared.make(),
+        let msgID = await IDGenerator.shared.make()
+        let currentUserID = try CurrentUserID.get()
+        let outgoingStatus = MsgDeliveryState(
+            msgID: msgID,
+            senderID: currentUserID,
+            aggregateStatus: .sending,
+            recipientIDs: conversation.members.filter { $0 != currentUserId },
+            updatedAt: .now
+        )
+        return await Message(
+            uid: msgID,
             senderID: currentUserId,
             conID: conversation.uid,
             text: text,
-            date: .now,
-            incomingStatus: .none,
-            outgoingStatus: makeOutgoingStatus(for: conversation),
+            serverTime: .now,
+            incomingStatus: .sending,
+            outgoingStatus: outgoingStatus,
             attachments: attachments,
-            reactions: []
+            reactions: [],
         )
-    }
-}
-
-private extension MsgCreator {
-    func makeOutgoingStatus(for conversation: Conversation) -> [String: MsgOutgoingStatus] {
-        var dict = [String: MsgOutgoingStatus]()
-        dict.reserveCapacity(conversation.members.count)
-        for member in conversation.members where member != currentUserId {
-            dict[member] = .sending
-        }
-        return dict
     }
 }

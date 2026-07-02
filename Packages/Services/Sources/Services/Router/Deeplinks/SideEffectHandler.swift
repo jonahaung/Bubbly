@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
@@ -15,7 +13,13 @@ public struct SideEffectHandler: Sendable {
     public static let `default` = SideEffectHandler { effect in
         switch effect {
         case let .prepareForConversation(id):
-            try await ConversationInitializer.start(conID: id, refetch: false)
+            do {
+                try await ConversationInitializer.start(conID: id, refetch: false)
+            } catch {
+                try await ConversationInitializer.start(conID: id, refetch: true)
+            }
+        case let .prepareForMessage(id):
+            try await ConversationInitializer.start(msgID: id)
         case let .track(event, props):
             print("Track \(event) \(props)")
         case .requireAuth:

@@ -1,13 +1,15 @@
+//  MsgCreator.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import XUI
+import Core
+import UIKit
 import Database
+import Services
 import Foundation
 import MediaPicker
-import Services
-import UIKit
-import XUI
 
 public actor MsgCreator {
     public enum Error: Swift.Error {
@@ -17,39 +19,27 @@ public actor MsgCreator {
     }
 
     private let mediaManager: MediaManager
-    private let currentUserId: String
 
-    public init(currentUserId: String, mediaManager: MediaManager = .shared) {
+    public init(mediaManager: MediaManager = .shared) {
         self.mediaManager = mediaManager
-        self.currentUserId = currentUserId
     }
 
     public func message(
-        text: String,
+        text: String?,
         attachments: [Attachment],
         in conversation: Conversation
     ) async throws -> Message {
-        await Message(
+        let currentUserId = try CurrentUserID.get()
+        return await Message(
             uid: IDGenerator.shared.make(),
             senderID: currentUserId,
             conID: conversation.uid,
             text: text,
-            date: .now,
-            incomingStatus: .none,
-            outgoingStatus: makeOutgoingStatus(for: conversation),
+            serverTime: .now,
+            incomingStatus: .sending,
+            outgoingStatus: .empty,
             attachments: attachments,
             reactions: []
         )
-    }
-}
-
-private extension MsgCreator {
-    func makeOutgoingStatus(for conversation: Conversation) -> [String: MsgOutgoingStatus] {
-        var dict = [String: MsgOutgoingStatus]()
-        dict.reserveCapacity(conversation.members.count)
-        for member in conversation.members where member != currentUserId {
-            dict[member] = .sending
-        }
-        return dict
     }
 }

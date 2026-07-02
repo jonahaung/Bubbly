@@ -1,3 +1,8 @@
+//  IBeam.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import SwiftUI
 
 struct IBeam: View {
@@ -38,7 +43,7 @@ public struct RedlineStyle: Hashable {
 
     public static var dashed: Self { .init(guts: .dashed) }
 
-    public static var `default`: Self { .init(guts: .`default`)}
+    public static var `default`: Self { .init(guts: .default)}
 
     public static var dotted: Self { .init(guts: .dotted) }
 
@@ -116,7 +121,6 @@ struct IBeamArrows: Shape {
         let d = 5.0
 
         if rect.width <= d || rect.height <= d { return path }
-
 
         if axis == .horizontal {
             path.addLines([

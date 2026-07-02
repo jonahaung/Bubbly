@@ -1,10 +1,10 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 @preconcurrency import Contacts
 import Foundation
 import FoundationModels
+
+// MARK: - ContactsTool
 
 /// A tool for managing contacts using the Contacts framework.
 ///
@@ -72,7 +72,7 @@ public struct ContactsTool: Tool {
             lastName: String? = nil,
             phoneNumber: String? = nil,
             email: String? = nil,
-            organization: String? = nil
+            organization: String? = nil,
         ) {
             self.action = action
             self.name = name
@@ -85,7 +85,7 @@ public struct ContactsTool: Tool {
         }
     }
 
-    private let store = CNContactStore()
+    private let store: CNContactStore = .init()
 
     public init() {}
 
@@ -127,7 +127,7 @@ public struct ContactsTool: Tool {
             CNContactEmailAddressesKey as CNKeyDescriptor,
             CNContactPhoneNumbersKey as CNKeyDescriptor,
             CNContactOrganizationNameKey as CNKeyDescriptor,
-            CNContactIdentifierKey as CNKeyDescriptor
+            CNContactIdentifierKey as CNKeyDescriptor,
         ]
 
         let predicate = CNContact.predicateForContacts(matchingName: searchQuery)
@@ -139,7 +139,7 @@ public struct ContactsTool: Tool {
                 // Try searching by email or phone
                 let allContacts = try store.unifiedContacts(
                     matching: NSPredicate(value: true),
-                    keysToFetch: keysToFetch
+                    keysToFetch: keysToFetch,
                 )
 
                 let filteredContacts = allContacts.filter { contact in
@@ -149,7 +149,8 @@ public struct ContactsTool: Tool {
                     }
                     // Check phone numbers
                     for phone in contact.phoneNumbers
-                        where phone.value.stringValue.contains(searchQuery) {
+                        where phone.value.stringValue.contains(searchQuery)
+                    {
                         return true
                     }
                     return false
@@ -177,13 +178,13 @@ public struct ContactsTool: Tool {
             CNContactOrganizationNameKey as CNKeyDescriptor,
             CNContactPostalAddressesKey as CNKeyDescriptor,
             CNContactBirthdayKey as CNKeyDescriptor,
-            CNContactNoteKey as CNKeyDescriptor
+            CNContactNoteKey as CNKeyDescriptor,
         ]
 
         do {
             let contact = try store.unifiedContact(withIdentifier: id, keysToFetch: keysToFetch)
 
-            var addresses: [String] = []
+            var addresses = [String]()
             for address in contact.postalAddresses {
                 let value = address.value
                 let formatted = "\(value.street), \(value.city), \(value.state) \(value.postalCode)"
@@ -196,14 +197,14 @@ public struct ContactsTool: Tool {
                 "givenName": contact.givenName,
                 "familyName": contact.familyName,
                 "fullName": "\(contact.givenName) \(contact.familyName)".trimmingCharacters(
-                    in: .whitespaces
+                    in: .whitespaces,
                 ),
                 "organization": contact.organizationName,
                 "emails": contact.emailAddresses.map { $0.value as String },
                 "phoneNumbers": contact.phoneNumbers.map(\.value.stringValue),
                 "addresses": addresses,
                 "birthday": contact.birthday?.date?.description ?? "",
-                "note": contact.note
+                "note": contact.note,
             ])
         } catch {
             return createErrorOutput(error: error)
@@ -224,7 +225,7 @@ public struct ContactsTool: Tool {
 
         if let email = arguments.email {
             newContact.emailAddresses = [
-                CNLabeledValue(label: CNLabelHome, value: NSString(string: email))
+                CNLabeledValue(label: CNLabelHome, value: NSString(string: email)),
             ]
         }
 
@@ -232,8 +233,8 @@ public struct ContactsTool: Tool {
             newContact.phoneNumbers = [
                 CNLabeledValue(
                     label: CNLabelPhoneNumberMobile,
-                    value: CNPhoneNumber(stringValue: phone)
-                )
+                    value: CNPhoneNumber(stringValue: phone),
+                ),
             ]
         }
 
@@ -254,11 +255,11 @@ public struct ContactsTool: Tool {
                 "givenName": newContact.givenName,
                 "familyName": newContact.familyName,
                 "fullName": "\(newContact.givenName) \(newContact.familyName)".trimmingCharacters(
-                    in: .whitespaces
+                    in: .whitespaces,
                 ),
                 "email": arguments.email ?? "",
                 "phoneNumber": arguments.phoneNumber ?? "",
-                "organization": arguments.organization ?? ""
+                "organization": arguments.organization ?? "",
             ])
 
         } catch {
@@ -288,7 +289,7 @@ public struct ContactsTool: Tool {
             "query": query,
             "count": contacts.count,
             "results": contactsDescription.trimmingCharacters(in: .whitespacesAndNewlines),
-            "message": "Found \(contacts.count) contact(s) matching '\(query)'"
+            "message": "Found \(contacts.count) contact(s) matching '\(query)'",
         ])
     }
 
@@ -296,10 +297,12 @@ public struct ContactsTool: Tool {
         GeneratedContent(properties: [
             "status": "error",
             "error": error.localizedDescription,
-            "message": "Failed to perform contact operation"
+            "message": "Failed to perform contact operation",
         ])
     }
 }
+
+// MARK: - ContactsError
 
 enum ContactsError: Error, LocalizedError {
     case accessDenied

@@ -1,5 +1,6 @@
+//  ElementOrganizer.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 public final class ElementOrganizer<Element> {

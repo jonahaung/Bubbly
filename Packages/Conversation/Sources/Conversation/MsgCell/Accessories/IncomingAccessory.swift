@@ -1,35 +1,57 @@
+//  IncomingAccessory.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import XUI
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
 
-extension MsgCell {
-    struct IncomingAccessory: View {
-        @Environment(MsgCellViewModel.self) private var viewModel
-        @Environment(\.msgCellActions) private var sendMsgCellInteraction
-        private var layout: MsgCellLayout {
-            viewModel.state.layout
-        }
+struct IncomingAccessory: View, @MainActor Equatable {
 
-        var body: some View {
-            ZStack(alignment: .bottom) {
-                if layout.showAvatar, let sender = viewModel.state.sender {
-                    ProfilePhoto(
-                        sender,
-                        size: .custom(ChatLayoutConstants.Cell.defaultSpacing),
-                        tapAction: .custom {
-                            sendMsgCellInteraction?(.onTapAvatar(viewModel.id))
-                        }
-                    )
-                    .equatable(by: sender.uid)
-                }
+    let state: MsgCellViewModel.State
+    let status: DeliveryStatus
+    @Environment(\.msgCellActions) private var msgCellActions
+    @Environment(\.members) private var members
+
+    var body: some View {
+        ZStack(alignment: .bottom) {
+            switch status {
+            case .delivered:
+                Circle()
+                    .foregroundStyle(.blue)
+                    .frame(width: 8, height: 8)
+            case .sent:
+                Image(systemName: "checkmark.circle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 8, height: 8)
+            case .sending:
+                Image(systemName: "circle")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 8, height: 8)
+            case .partiallyFailed:
+                Circle()
+                    .foregroundStyle(.orange)
+                    .frame(width: 8, height: 8)
+            case .read:
+                ZeroSizeView()
             }
-            .frame(width: ChatLayoutConstants.Cell.defaultSpacing + 4)
-            .equatable(by: layout)
+            if state.layout.showAvatar, let sender = members.contact(for: state.msg.senderID) {
+                ProfilePhoto(
+                    sender, size: .custom(Spacing.md),
+                    tapAction: .custom { msgCellActions?(.onTapAvatar(state.id)) }
+                )
+            }
         }
+        .frame(width: Spacing.md + 4)
+        .geometryGroup()
+    }
+
+    static func == (lhs: IncomingAccessory, rhs: IncomingAccessory) -> Bool {
+        lhs.state.layout.showAvatar == rhs.state.layout.showAvatar && lhs.status == rhs.status
     }
 }

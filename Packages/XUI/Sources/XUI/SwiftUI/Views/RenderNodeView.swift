@@ -1,9 +1,10 @@
+//  RenderNodeView.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Combine
 import Swift
+import Combine
 import SwiftUI
 
 @frozen
@@ -85,7 +86,7 @@ public extension OpaqueRenderableView where Self: View {
 public protocol OpaqueDiffableView: OpaqueRenderableView {
     func isVisuallyEqual(to other: OpaqueDiffableView) -> Bool
 }
-
+ 
 public extension OpaqueDiffableView {
     func isVisuallyEqual(to other: OpaqueDiffableView) -> Bool {
         renderKey() == other.renderKey()

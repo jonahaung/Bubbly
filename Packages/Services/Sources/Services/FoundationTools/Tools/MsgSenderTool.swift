@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -8,6 +6,8 @@ import Foundation
 import FoundationModels
 import SwiftData
 import XUI
+
+// MARK: - MsgSenderTool
 
 public struct MsgSenderTool: Tool {
     public let name = "sendMsg"
@@ -20,7 +20,7 @@ public struct MsgSenderTool: Tool {
         @Guide(description: "The action to perform: 'send'")
         public var action: String
         @Guide(
-            description: "Contact name to search for the contact and send a message (for search action)"
+            description: "Contact name to search for the contact and send a message (for search action)",
         )
         public var name: String?
         @Guide(description: "The text to send as a message to perform: 'send'")
@@ -29,7 +29,7 @@ public struct MsgSenderTool: Tool {
         public init(
             action: String,
             name: String? = nil,
-            text: String
+            text: String,
         ) {
             self.action = action
             self.name = name
@@ -41,12 +41,14 @@ public struct MsgSenderTool: Tool {
         guard let name = arguments.name, !name.isEmpty else {
             return createErrorOutput(error: LocalError.invalidArguments)
         }
+
         guard let currentUserId = GroupStorage.shared.string(for: .auth(.currentUserID)) else {
             return createErrorOutput(error: LocalError.accessDenied)
         }
+
         guard let conversation = try await ConversationRepo.search(
-			from: name,
-            currentUserId: currentUserId
+            from: name,
+            currentUserId: currentUserId,
         ) else {
             return createErrorOutput(error: LocalError.conversationNotFoune)
         }
@@ -54,12 +56,12 @@ public struct MsgSenderTool: Tool {
         let msg = try await MsgCreator(currentUserId: currentUserId).message(
             text: arguments.text,
             attachments: [],
-            in: conversation
+            in: conversation,
         )
-        try await Socket.shared.send(.newMsg(rMsg: .init(msg)), conversation: conversation)
+        try await Socket.shared.send(.newMsg(rMsg: .init(msg)))
         return GeneratedContent(properties: [
             "name": arguments.name,
-            "text": arguments.text
+            "text": arguments.text,
         ])
     }
 
@@ -67,12 +69,13 @@ public struct MsgSenderTool: Tool {
         GeneratedContent(properties: [
             "status": "error",
             "error": error.localizedDescription,
-            "message": "Failed to perform contact operation"
+            "message": "Failed to perform contact operation",
         ])
     }
 
     enum LocalError: Error, LocalizedError, CaseNameReflectable {
-        case accessDenied, invalidArguments
+        case accessDenied
+        case invalidArguments
         case conversationNotFoune
 
         var errorDescription: String? {
@@ -81,12 +84,14 @@ public struct MsgSenderTool: Tool {
     }
 }
 
+// MARK: - MsgSenderToolOutput
+
 @Generable
 public struct MsgSenderToolOutput {
     @Guide(description: "The action to perform: 'send'")
     public var action: String
     @Guide(
-        description: "Contact name to search for the contact and send a message (for search action)"
+        description: "Contact name to search for the contact and send a message (for search action)",
     )
     public var name: String?
     @Guide(description: "The text to send as a message to perform: 'send'")
@@ -95,7 +100,7 @@ public struct MsgSenderToolOutput {
     public init(
         action: String,
         name: String? = nil,
-        text: String
+        text: String,
     ) {
         self.action = action
         self.name = name

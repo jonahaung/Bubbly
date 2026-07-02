@@ -1,5 +1,6 @@
+//  String+Ranges.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
@@ -11,8 +12,8 @@ extension String {
         options: CompareOptions = [],
         locale: Locale? = nil
     ) -> [Range<Index>] {
-        var ranges: [Range<Index>] = []
-        var searchRange = startIndex..<endIndex
+        var ranges = [Range<Index>]()
+        var searchRange = startIndex ..< endIndex
 
         while let range = range(
             of: substring,
@@ -21,7 +22,7 @@ extension String {
             locale: locale
         ) {
             ranges.append(range)
-            searchRange = range.upperBound..<endIndex
+            searchRange = range.upperBound ..< endIndex
         }
 
         return ranges
@@ -30,22 +31,22 @@ extension String {
     /// Returns all ranges not covered by the provided ranges
     func remainingRanges(from ranges: [Range<Index>]) -> [Range<Index>] {
         guard !ranges.isEmpty else {
-            return [startIndex..<endIndex]
+            return [startIndex ..< endIndex]
         }
 
         let sortedRanges = ranges.sorted { $0.lowerBound < $1.lowerBound }
-        var result: [Range<Index>] = []
+        var result = [Range<Index>]()
         var currentIndex = startIndex
 
         for range in sortedRanges {
             if currentIndex < range.lowerBound {
-                result.append(currentIndex..<range.lowerBound)
+                result.append(currentIndex ..< range.lowerBound)
             }
             currentIndex = range.upperBound
         }
 
         if currentIndex < endIndex {
-            result.append(currentIndex..<endIndex)
+            result.append(currentIndex ..< endIndex)
         }
 
         return result

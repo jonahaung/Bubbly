@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
@@ -43,7 +43,7 @@ public enum ImageProcessingOptions: Sendable {
         ///   - color: Border color.
         ///   - width: Border width.
         ///   - unit: Unit of the width.
-        public init(color: UIColor, width: CGFloat = 1, unit: Unit = .points) {
+        public init(color: UIColor, width: CGFloat = 3, unit: Unit = .points) {
             self.color = color
             self.width = width.converted(to: unit)
         }

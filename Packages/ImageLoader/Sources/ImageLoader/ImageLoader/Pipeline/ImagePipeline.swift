@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
@@ -26,7 +26,7 @@ public final class ImagePipeline {
         set { _dataCache.value = newValue }
     }
 
-    private nonisolated static let _shared = Mutex(ImagePipeline(configuration: .withURLCache))
+    private nonisolated static let _shared = Mutex(ImagePipeline(configuration: .withDataCache))
     private nonisolated static let _dataCache = Mutex(
         ImagePipeline {
             $0.dataLoader = DataLoader(configuration: {

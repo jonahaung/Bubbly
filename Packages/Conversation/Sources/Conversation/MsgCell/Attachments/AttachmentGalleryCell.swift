@@ -1,35 +1,26 @@
-import _AVKit_SwiftUI
+//  AttachmentGalleryCell.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import XUI
+import WebKit
+import SwiftUI
 import Database
 import ImageLoader
-import SwiftUI
-import WebKit
-import XUI
 
 public struct AttachmentGalleryCell: View {
     let attachment: Attachment
-    @State private var webPage: WebPage?
     @Environment(\.openURL) private var openURL
 
     public var body: some View {
         switch attachment.attachmentType {
-        case .image, .imageUploading:
-            if let data = attachment.data(), let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-                    .zoomable()
-            } else {
-                content
-            }
+        case .image,
+             .imageUploading:
+            imageContent
         case .link:
             VStack(spacing: 8) {
-                if let data = attachment.data(), let uiImage = UIImage(data: data) {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
-                } else {
-                    content
-                }
+                previewContent(isZoomEnabled: false)
                 if let title = attachment.title {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(title)
@@ -43,7 +34,10 @@ public struct AttachmentGalleryCell: View {
 
                         if let url = URL(string: attachment.url) {
                             Link(destination: url) {
-                                Label(url.host() ?? url.absoluteString, systemImage: "globe.fill")
+                                Label(
+                                    url.host() ?? url.absoluteString,
+                                    systemImage: "globe.fill"
+                                )
                             }
                         }
                     }
@@ -62,19 +56,39 @@ public struct AttachmentGalleryCell: View {
                 .buttonStyle(.roundedButtonStyle)
                 .padding(.horizontal)
             }.padding()
-        case .video, .videoUploading:
+        case .video,
+             .videoUploading:
             VideoAttachmentView(attachment: attachment)
         }
     }
 
-    private var content: some View {
-        AsyncImage(url: attachment.galleryURL) { image in
-            image
-                .resizable()
-                .scaledToFit()
-                .zoomable()
-        } placeholder: {
-            ProgressView().controlSize(.mini)
+    @ViewBuilder
+    private var imageContent: some View {
+        previewContent(isZoomEnabled: true)
+    }
+
+    @ViewBuilder
+    private func previewContent(isZoomEnabled: Bool) -> some View {
+        LazyImage(url: attachment.galleryURL, transaction: .withAnimation()) { state in
+            switch state.result {
+            case let .success(success):
+                let image = Image(uiImage: success.image)
+                    .resizable()
+                    .scaledToFit()
+                if isZoomEnabled {
+                    image.zoomable()
+                } else {
+                    image
+                }
+            case let .failure(failure):
+                ContentUnavailableView {
+                    Text("Error")
+                } description: {
+                    Text(failure.localizedDescription)
+                }
+            case .none:
+                ProgressView().controlSize(.mini)
+            }
         }
     }
 }

@@ -1,99 +1,91 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
 import SwiftUI
 import XUI
 
-public enum ConversationInitializer {
-    public struct Configuration: Sendable {
-        public let conID: String
-        public let pageSize: Int
-        public let lineSpacing: CGFloat
-        public let lastMsgID: String?
-        public let firstMsgID: String?
-        public var totalMsgsCount: Int
-        public let canPaginate: Bool
-        public var maxNumberOfMsgsToDisplay: Int {
-            pageSize * 2
-        }
-
-        public let contentInsets = EdgeInsets(
-            top: ChatLayoutConstants.topBarHeight,
-            leading: 8,
-            bottom: 0,
-            trailing: 8
-        )
-    }
-
-    public struct PrefetchedData: Sendable {
-        public let conversation: Conversation
-        public let properties: ConversationProperties
-        public let msgs: [Message]
-        public let configuration: Configuration
-
-        public init(
-            conversation: Conversation,
-            properties: ConversationProperties,
-            msgs: [Message],
-            configuration: Configuration
-        ) {
-            self.conversation = conversation
-            self.properties = properties
-            self.msgs = msgs
-            self.configuration = configuration
-        }
-    }
-}
-
+public enum ConversationInitializer {}
 public extension ConversationInitializer {
     @concurrent
-    static func createPrefetchedObject(conversation: Conversation) async throws -> PrefetchedData {
-        let conID = conversation.uid
-        let msgsCount = try await ConversationRepo.totalMsgsCount(
-            conID: conID
-        )
-        let pageSize = Settings.Pagination.pageSize
-        let msgs = try await ConversationRepo.fetchMessages(
-            conID: conID,
-            limit: pageSize
-        )
-        let firstMsg = try await ConversationRepo.firstMsg(conID: conID)
-        let properties = try await ConversationPropertiesRepo.getOrCreate(for: conID)
-        return PrefetchedData(
-            conversation: conversation, properties: properties,
-            msgs: msgs,
-            configuration: .init(
-                conID: conversation.uid,
-                pageSize: pageSize,
-                lineSpacing: Settings.Layout.chatMsgSpacing.cgFloat,
-                lastMsgID: msgs.last?.uid,
-                firstMsgID: firstMsg?.uid,
-                totalMsgsCount: msgsCount,
-                canPaginate: msgsCount > msgs.count
-            )
-        )
-    }
-}
-
-public extension ConversationInitializer {
-    static func start(conID: String, refetch: Bool, delay: Double = 0) async throws {
-        let conversation = try await ConversationRepo.getOrCreate(
-            for: conID,
-            refetch: refetch
-        )
-        if delay > 0 {
-            try await Task.sleep(seconds: delay)
+    static func route(msgID: String) async throws {
+        guard let msg = try await Store.shared.msgStore?.fetch(uid: msgID) else {
+            throw fatalError()
         }
-        try await start(conversation: conversation)
-    }
-
-    static func start(conversation: Conversation) async throws {
+        let conversation = try await ConversationRepo.getOrCreate(for: msg.conID, refetch: false)
         let prefetchedData = try await createPrefetchedObject(
-            conversation: conversation
+            conversation: conversation,
+            targetedMsg: msg,
         )
         await Router.shared.pushToNav(NavPath.conversation(prefetchedData))
+    }
+
+    @concurrent
+    static func start(msgID: String) async throws {
+        try await route(msgID: msgID)
+    }
+}
+public extension ConversationInitializer {
+    @concurrent
+    static func start(conID: String, refetch: Bool) async throws {
+        let conversation = try await ConversationRepo.getOrCreate(
+            for: conID,
+            refetch: refetch,
+        )
+        let prefetchedData = try await createPrefetchedObject(
+            conversation: conversation,
+        )
+        await Router.shared.pushToNav(NavPath.conversation(prefetchedData))
+    }
+}
+public extension ConversationInitializer {
+    static func createPrefetchedObject(conversation: Conversation, targetedMsg: Message? = nil) async throws
+        -> ConversationInitializedData
+    {
+        let conID = conversation.uid
+        let msgsCount = try await MsgRepo.totalMsgsCount(
+            conID: conID,
+        )
+        let pageSize = Settings.Pagination.pageSize
+        
+        var properties = try await ConversationPropertiesRepo.getOrCreate(
+            for: conID,
+            refetch: false,
+        )
+        let msgs: [Message]
+        if let targetedMsg {
+            msgs = try await MsgRepo.messages(conID: conID, to: targetedMsg.date, limit: pageSize)
+            properties.lastPage = nil
+        } else {
+            if let lastPage = properties.lastPage, await lastPage.isPotrait == UIApplication.shared.screenSize().isPortrait, let top = try await Store.shared.msgStore?.fetch(uid: lastPage.topMsgID), let bottom = try await Store.shared.msgStore?.fetch(uid: lastPage.bottomMsgID) {
+                msgs = try await MsgRepo.messages(conID: conID, from: top.date, to: bottom.date)
+            } else {
+                msgs = try await MsgRepo.msgs(
+                    conID: conID,
+                    limit: pageSize,
+                )
+            }
+        }
+        
+        let firstMsg = try await MsgRepo.firstMsg(conID: conID)
+        let lastMsg = try await MsgRepo.lastMsg(conID: conID)
+        
+        let pagination = PaginationState(
+            conID: conversation.uid,
+            pageSize: pageSize,
+            lastMsgID: lastMsg?.uid,
+            firstMsgID: firstMsg?.uid,
+            totalMsgsCount: msgsCount
+        )
+        let lineSpacing = Settings.Layout.chatMsgSpacing.cgFloat
+        let members = try await ContactRepo.getOrCreate(for: conversation.members, refatch: false)
+        
+        return ConversationInitializedData(
+            conversation: conversation,
+            properties: properties,
+            msgs: msgs,
+            pagination: pagination,
+            members: .init(members: members.compactMap{ $0 }),
+        )
     }
 }

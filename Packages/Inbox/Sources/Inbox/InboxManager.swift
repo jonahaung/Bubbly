@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Observation
@@ -8,8 +6,8 @@ import Observation
 @MainActor
 @Observable
 final class InboxManager {
-    private(set) var items = [InboxItem]()
-    private(set) var currentUser = CurrentUserModel.empty
+    private(set) var items: [InboxItem] = []
+    private(set) var currentUser: CurrentUserModel = .empty
 
     func setCurrentUser(_ value: CurrentUserModel) {
         currentUser = value

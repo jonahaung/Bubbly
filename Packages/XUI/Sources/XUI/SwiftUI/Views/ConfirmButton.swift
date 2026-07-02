@@ -1,5 +1,6 @@
+//  ConfirmButton.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -18,8 +19,6 @@ public struct ComfirmButton<Content: View>: View {
         self.action = action
         self.label = label
     }
-
-    @State private var isShown = false
 
     public var body: some View {
         label()

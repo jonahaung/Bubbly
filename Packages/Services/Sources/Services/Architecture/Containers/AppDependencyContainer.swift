@@ -1,22 +1,22 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import Foundation
 
+// MARK: - AppDependencyContainer
+
 public final class AppDependencyContainer: DependencyContainer {
+    
     public let currentUserRepository: CurrentUserRepository
-    public let contactsRepository: any ContactsRepositoryProtocol
 
     public init(
         currentUserRepository: CurrentUserRepository,
-        contactsRepository: any ContactsRepositoryProtocol
     ) {
         self.currentUserRepository = currentUserRepository
-        self.contactsRepository = contactsRepository
     }
 }
+
+// MARK: - AppConfiguration
 
 public struct AppConfiguration: Sendable {
     public let environment: XEnvironment
@@ -24,18 +24,18 @@ public struct AppConfiguration: Sendable {
     public let maxRetryAttempts: Int
     public let enableLogging: Bool
 
-    public static let `default` = AppConfiguration(
+    public static let `default`: AppConfiguration = .init(
         environment: .current,
         apiTimeout: 30,
         maxRetryAttempts: 3,
-        enableLogging: true
+        enableLogging: true,
     )
 
     public init(
         environment: XEnvironment,
         apiTimeout: TimeInterval,
         maxRetryAttempts: Int,
-        enableLogging: Bool
+        enableLogging: Bool,
     ) {
         self.environment = environment
         self.apiTimeout = apiTimeout

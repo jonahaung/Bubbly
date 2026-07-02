@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -9,6 +7,8 @@ import FirebaseMessaging
 import Foundation
 import XUI
 
+// MARK: - CurrentUserRepository
+
 public actor CurrentUserRepository {
     public enum XError: Error {
         case notLoggedIn
@@ -16,37 +16,47 @@ public actor CurrentUserRepository {
     }
 
     public var model: CurrentUserModel
-    private let cancelBag = CancelBag()
+    private let cancelBag: CancelBag = .init()
 
     public init(_ model: CurrentUserModel) {
         self.model = model
         Task { [weak self] in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
+
             await observeReloadNotification()
         }
     }
 
-    @concurrent private func updateIfNeeded() async throws {
+    @concurrent public func updateIfNeeded() async throws {
         guard let firUser = Auth.auth().currentUser else {
             throw XError.notLoggedIn
         }
+
         let storage = GroupStorage.shared
 
         let newModel = CurrentUserModel(firUser)
-        storage.save(newModel.pushToken, for: .device(.deviceToken))
-
+        let pushToken = try await Messaging.messaging().token()
+        let publicKeyString = CryptoService.shared.base64PublicKeyString(for: firUser.uid)
+        storage.save(pushToken, for: .device(.deviceToken))
+        storage.save(firUser.uid, for: .auth(.currentUserID))
+        storage.save(publicKeyString, for: .security(.publicKey(id: firUser.uid)))
+        
         if let remoteModel: CurrentUserModel? = try? await FirestoreRepo.getModel(
             for: newModel.uid,
             collection: .users,
-            field: .uid
+            field: .uid,
         ) {
             if newModel != remoteModel {
-                try await FirestoreRepo
-                    .update(
-                        value: newModel.dictionary,
-                        collectionPath: .users,
-                        to: newModel.uid
-                    )
+                try await FirestoreRepo.set(newModel, collectionPath: .users, documentID: newModel.uid)
+                
+//                try await FirestoreRepo
+//                    .update(
+//                        value: newModel.dictionary,
+//                        collectionPath: .users,
+//                        to: newModel.uid,
+//                    )
                 await ToastPresenter.show("Profile Updated", allowsBackgroundTap: false)
             }
         } else {
@@ -68,7 +78,10 @@ public actor CurrentUserRepository {
             .publisher(for: .reloadCurrentUser)
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
+
                 Task {
                     try await self.updateIfNeeded()
                 }

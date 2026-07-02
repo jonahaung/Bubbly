@@ -1,95 +1,113 @@
+//  ScrolledPosition.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import SwiftUI
+import Foundation
 
-public extension ScrollGeometry {
-    static let empty = ScrollGeometry(
-        contentOffset: .zero,
-        contentSize: .zero,
-        contentInsets: .init(),
-        containerSize: .zero
+@frozen
+public struct VScrollGeometry: Hashable {
+    public let contentHeight: CGFloat
+    public let boundsSize: CGSize
+    public var offsetY: CGFloat
+    public let topInset: CGFloat
+    public let bottomInset: CGFloat
+
+    public var boundsHeight: CGFloat { boundsSize.height }
+}
+
+public extension VScrollGeometry {
+    init(_ geometry: ScrollGeometry) {
+        self.init(
+            contentHeight: geometry.contentSize.height,
+            boundsSize: geometry.bounds.size,
+            offsetY: geometry.contentOffset.y + geometry.contentInsets.top,
+            topInset: geometry.contentInsets.top,
+            bottomInset: geometry.contentInsets.bottom
+        )
+    }
+
+    nonisolated static let empty: VScrollGeometry = .init(
+        contentHeight: .zero,
+        boundsSize: .zero,
+        offsetY: .zero,
+        topInset: .zero,
+        bottomInset: .zero
     )
-    var location: ScrollLocation {
-        let edge = centerLocation < 0.45 ? VerticalEdge.top : .bottom
-        switch edge {
-        case .top:
-            return .init(edge: edge, fraction: visibleRect.minY / contentSize.height)
-        case .bottom:
-            return .init(edge: edge, fraction: 1 - (visibleRect.maxY / contentSize.height))
-        }
-    }
-
-    var centerLocation: CGFloat {
-        visibleRect.midY / contentSize.height
-    }
-
-    func adjustedOffsetY(from oldValue: ScrollGeometry) -> CGFloat {
-        guard contentSize.height > 0 else { return contentInsets.top }
-        let diffHeight = contentSize.height - oldValue.contentSize.height
-        guard diffHeight != 0 else {
-            return visibleRect.minY
-        }
-        return oldValue.visibleRect.minY + diffHeight + contentInsets.top
-    }
 }
 
-public struct ScrollLocation: Sendable, Hashable {
-    public let fraction: CGFloat
-    public let edge: VerticalEdge
-    public init(edge: VerticalEdge, fraction: CGFloat) {
-        self.fraction = fraction
-        self.edge = edge
+public extension VScrollGeometry {
+    var bottomMostOffset: CGFloat {
+        if contentHeight == 0 {
+            return 0
+        }
+        return contentHeight - boundsSize.height + topInset
     }
 
-    public var description: String {
+    var scrolledPosition: ScrolledPosition {
+        if offsetY == 0 {
+            return .atTop
+        }
+        let diff = contentHeight - (offsetY + boundsSize.height)
+        if diff > 10 {
+            return .none
+        }
+        return .atBottom
+    }
+
+    func isNear(_ edge: VerticalEdge) -> Bool {
         switch edge {
         case .top:
-            "Top \(fraction)"
+            offsetY < boundsSize.height / 2
         case .bottom:
-            "Bottom \(fraction)"
+            offsetY > (bottomMostOffset - (boundsSize.height / 2))
         }
     }
 }
 
-public indirect enum ScrollPositionValue: Hashable {
+@frozen
+public indirect enum ScrollPositionValue: Sendable, Hashable {
     case y(CGFloat)
-    case id(String?)
-    case layoutID(String?)
-	case edge(VerticalEdge)
+    case id(String?, anchor: UnitPoint)
+    case edge(Edge)
 }
 
-public struct ScrollPositionItem: Hashable, Equatable {
+// MARK: - ScrollPositionItem
+
+@frozen
+public struct ScrollPositionItem: Sendable, Hashable {
     public let position: ScrollPositionValue
     public let properties: Properties
 
-	public enum Properties: Hashable, Equatable {
-		case animated(Animation)
-		case notAnimated
-		case scroll
-	}
+    public enum Properties: Sendable, Hashable {
+        case animated(Animation = .spring)
+        case notAnimated
+        case scroll
+    }
 
     public init(_ position: ScrollPositionValue, properties: Properties) {
         self.position = position
-		self.properties = properties
+        self.properties = properties
     }
 
-	public static func y(_ value: CGFloat, properties: Properties = .notAnimated) -> Self {
-		.init(.y(value), properties: properties)
+    public static func y(_ value: CGFloat, _ properties: Properties = .notAnimated) -> Self {
+        .init(.y(value), properties: properties)
     }
 
-    public static func id(_ value: String?, properties: Properties = .notAnimated) -> Self {
-		.init(.id(value), properties: properties)
+    public static func id(_ value: String?, anchor: UnitPoint = .bottom, _ properties: Properties = .notAnimated) -> Self {
+        .init(.id(value, anchor: anchor), properties: properties)
     }
-    public static func edge(_ value: VerticalEdge, properties: Properties = .notAnimated) -> Self {
-		.init(.edge(value), properties: properties)
+
+    public static func edge(_ value: Edge, _ properties: Properties = .notAnimated) -> Self {
+        .init(.edge(value), properties: properties)
     }
 }
 
+@frozen
 public enum ScrolledPosition: Sendable, Hashable {
     case none
     case atBottom
+    case belowBottom(_ offset: CGFloat)
     case atTop
 }

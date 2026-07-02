@@ -1,5 +1,6 @@
+//  QuakeRenderer.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -16,26 +17,15 @@ public struct QuakeRenderer: TextRenderer {
     }
 
     public func draw(layout: Text.Layout, in context: inout GraphicsContext) {
-        if moveAmount != 0 {
-            for line in layout {
-                for run in line {
-                    for glyph in run {
-                        var copy = context
-                        let yOffset = Double.random(in: -moveAmount...moveAmount)
-                        copy.translateBy(x: 0, y: yOffset)
-                        copy.draw(glyph, options: .disablesSubpixelQuantization)
+        for line in layout {
+            for run in line {
+                for glyph in run {
+                    var copy = context
+                    if -moveAmount <= moveAmount {
+                        let yOffset = Double.random(in: -moveAmount ... moveAmount)
+                        copy.translateBy(x: yOffset, y: 0)
                     }
-                }
-            }
-        } else {
-            for line in layout {
-                for run in line {
-                    for glyph in run {
-                        //						var copy = context
-                        //						let yOffset = Double.random(in: -moveAmount ... moveAmount)
-                        //						copy.translateBy(x: 0, y: yOffset)
-                        context.draw(glyph, options: .disablesSubpixelQuantization)
-                    }
+                    copy.draw(glyph, options: .disablesSubpixelQuantization)
                 }
             }
         }
@@ -45,15 +35,10 @@ public struct QuakeRenderer: TextRenderer {
 public struct ColorfulRender: TextRenderer {
     public init() {}
     public func draw(layout: Text.Layout, in context: inout GraphicsContext) {
-        // Iterate through RunSlice and their indices
         for (index, slice) in layout.flattenedRunSlices.enumerated() {
-            // Calculate the angle of color adjustment based on the index
             let degree = Angle.degrees(360 / Double(index + 1))
-            // Create a copy of GraphicsContext
             var copy = context
-            // Apply hue rotation filter
             copy.addFilter(.hueRotation(degree))
-            // Draw the current Slice in the context
             copy.draw(slice)
         }
     }

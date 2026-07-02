@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import CoreLocation
 import FoundationModels
@@ -15,6 +13,8 @@ extension LocationTool {
     }
 }
 
+// MARK: - AuthorizationResult
+
 struct AuthorizationResult {
     let status: CLAuthorizationStatus
     let isAuthorized: Bool
@@ -23,13 +23,15 @@ struct AuthorizationResult {
     init(
         status: CLAuthorizationStatus,
         isAuthorized: Bool,
-        result: GeneratedContent? = nil
+        result: GeneratedContent? = nil,
     ) {
         self.status = status
         self.isAuthorized = isAuthorized
         self.result = result
     }
 }
+
+// MARK: - LocationResultSource
 
 enum LocationResultSource {
     case live
@@ -72,6 +74,8 @@ extension Double {
         self * 180 / .pi
     }
 }
+
+// MARK: - LocationError
 
 enum LocationError: Error, LocalizedError {
     case invalidAction

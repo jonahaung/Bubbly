@@ -1,5 +1,6 @@
+//  Variadic+Extensions.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -29,7 +30,7 @@ private struct Helper<Result: View>: _VariadicView_MultiViewRoot {
 
 public extension View {
     func variadic(@ViewBuilder process: @escaping (_VariadicView.Children) -> some View)
-        -> some View {
+    -> some View {
         _VariadicView.Tree(Helper(_body: process), content: { self })
     }
 }

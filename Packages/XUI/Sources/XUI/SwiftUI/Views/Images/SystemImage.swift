@@ -1,9 +1,10 @@
+//  SystemImage.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import SFSafeSymbols
 import SwiftUI
+import SFSafeSymbols
 
 public struct SystemImage: View {
     private let systemName: String

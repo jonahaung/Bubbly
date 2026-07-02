@@ -1,5 +1,6 @@
+//  HighlightTextRenderer.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -7,11 +8,8 @@ import SwiftUI
 /// A custom TextRenderer that draws a background highlight
 /// behind text runs marked with `HighlightAttribute`
 public struct HighlightTextRenderer: TextRenderer {
-    // MARK: - Properties
 
     private let style: any ShapeStyle
-
-    // MARK: - Initializer
 
     public init(style: any ShapeStyle = .yellow) {
         self.style = style

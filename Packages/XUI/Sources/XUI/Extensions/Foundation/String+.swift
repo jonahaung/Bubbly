@@ -1,5 +1,6 @@
+//  String+.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -29,17 +30,6 @@ public extension String {
     var withoutSpacesAndNewLines: String {
         trimmed.replace(" ", with: "")
     }
-
-    func toCurrencyFormat() -> String {
-        if let intValue = Int(self) {
-            let numberFormatter = NumberFormatter()
-            numberFormatter.locale = .current
-            numberFormatter.numberStyle = .currency
-            return numberFormatter.string(from: NSNumber(value: intValue)) ?? ""
-        }
-        return ""
-    }
-
     var isWhitespace: Bool {
         trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
     }
@@ -81,7 +71,7 @@ public extension String {
     }
 
     func nsRange() -> NSRange {
-        NSRange(startIndex..<endIndex, in: self)
+        NSRange(startIndex ..< endIndex, in: self)
     }
 
     var localizedKey: LocalizedStringKey {
@@ -104,41 +94,5 @@ public extension String {
 extension String: @retroactive Identifiable {
     public var id: String {
         self
-    }
-}
-
-public extension String {
-    /// Extracts the domain (host) from a URL string.
-    ///
-    /// Examples:
-    /// - "https://www.apple.com/path" → "apple.com"
-    /// - "www.google.com/search" → "google.com"
-    /// - "google.com" → "google.com"
-    var domain: String? {
-        let trimmed = trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // Try as-is
-        if let url = URL(string: trimmed),
-           let host = url.host {
-            return host.removingWWW
-        }
-
-        // Try adding scheme
-        if let url = URL(string: "https://" + trimmed),
-           let host = url.host {
-            return host.removingWWW
-        }
-
-        return nil
-    }
-
-    static func makingMarkdown(to urlString: String, placeholder: String) -> String {
-        "[\(placeholder)](\(urlString))"
-    }
-}
-
-private extension String {
-    var removingWWW: String {
-        hasPrefix("www.") ? String(dropFirst(4)) : self
     }
 }

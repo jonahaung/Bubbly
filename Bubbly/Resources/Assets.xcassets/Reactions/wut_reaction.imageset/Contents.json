@@ -1,11 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "wut_reaction.pdf",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
+      "filename" : "wut_reaction.pdf",
       "idiom" : "universal",
       "scale" : "2x"
     },

@@ -1,25 +1,22 @@
+//  ImageUploadingLayer.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Core
-import Database
-import ImageLoader
-import Services
-import SwiftUI
-import VideoLoader
 import XUI
+import Core
+import SwiftUI
+import Database
+import Services
+import ImageLoader
+import VideoLoader
 
 struct ImageUploadingLayer: View {
+
     let attachment: Attachment
     let url: URL
     let conversationID: String
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
-
-    @Environment(\.isVisible) private var viewIsVisible
-    @State private var progress: ImageTask.Progress?
-    @State private var uploading = false
-    private let uploader = ImageUploadingService()
 
     var body: some View {
         ZStack(alignment: .center) {
@@ -40,10 +37,18 @@ struct ImageUploadingLayer: View {
         }
     }
 
+    @Environment(MsgCellViewModel.self) private var viewModel
+    private var viewIsVisible: Bool { viewModel.isVisible }
+    @State private var progress: ImageTask.Progress?
+    @State private var uploading = false
+
+    private let uploader: ImageUploadingService = .init()
+
     private func startUpload() async {
         guard !uploading else {
             return
         }
+
         uploading = true
         let attachmentID = attachment.uid
         let conID = conversationID
@@ -55,10 +60,10 @@ struct ImageUploadingLayer: View {
             ) { progress in
                 Task { @MainActor in
                     if let progress {
-                        if progress.completedUnitCount == progress.totalUnitCount {
-                            self.progress = nil
+                        self.progress = if progress.completedUnitCount == progress.totalUnitCount {
+                            nil
                         } else {
-                            self.progress = .init(
+                            .init(
                                 completed: progress.completedUnitCount,
                                 total: progress.totalUnitCount
                             )

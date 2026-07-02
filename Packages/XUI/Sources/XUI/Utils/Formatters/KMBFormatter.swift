@@ -1,5 +1,6 @@
+//  KMBFormatter.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -19,8 +20,8 @@ public final class KMBFormatter: Sendable {
         set { _shared.value = newValue }
     }
 
-    private nonisolated(unsafe) static var _shared = Mutex(KMBFormatter())
-    private let numberFormatter = NumberFormatter()
+    private nonisolated(unsafe) static var _shared: Mutex = .init(KMBFormatter())
+    private let numberFormatter: NumberFormatter = .init()
     private let unitSize: [Unit: Double] = [
         .none: 1,
         .thousands: 1000,
@@ -72,7 +73,8 @@ public final class KMBFormatter: Sendable {
 
     private func formatNumberFor(number: Double, unit: Unit) -> String {
         switch unit {
-        case .none, .thousands:
+        case .none,
+             .thousands:
             numberFormatter.minimumFractionDigits = 0
             numberFormatter.maximumFractionDigits = 1
             let result = numberFormatter.string(from: NSNumber(value: number))
@@ -104,17 +106,4 @@ public final class KMBFormatter: Sendable {
         }
     }
 
-    private func lengthOfInt(number: Int) -> Int {
-        guard number != 0 else {
-            return 1
-        }
-        var num = abs(number)
-        var length = 0
-
-        while num > 0 {
-            length += 1
-            num /= 10
-        }
-        return length
-    }
 }

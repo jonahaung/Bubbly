@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 //
 //  DeeplinkAliases.swift
@@ -11,21 +9,19 @@
 import Foundation
 
 public struct DeeplinkAliases: Sendable, Equatable {
-    public var routeAliases: [String: String] // alias -> canonical
+    public var routeAliases: [String: Deeplink.RouteKind]
 
-    public init(routeAliases: [String: String] = [:]) {
-        self.routeAliases = routeAliases
+    public init(routeAliases: [String: Deeplink.RouteKind] = [:]) {
+        self.routeAliases = routeAliases.reduce(into: [:]) { partialResult, element in
+            partialResult[element.key.lowercased()] = element.value
+        }
     }
 
-    public func canonicalRoute(for route: String) -> String {
-        routeAliases[route.lowercased()] ?? route.lowercased()
+    public func route(forNormalizedName name: String) -> Deeplink.RouteKind? {
+        routeAliases[name] ?? .init(name: name)
+    }
+
+    public func route(for name: String) -> Deeplink.RouteKind? {
+        route(forNormalizedName: name.lowercased())
     }
 }
-
-/*
- let aliases = DeeplinkAliases(routeAliases: [
- "conv": "conversation",
- "thread": "conversation",
- "me": "profile"
- ])
- */

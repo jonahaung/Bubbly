@@ -1,16 +1,17 @@
+//  Folder.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
 #if canImport(AppKit) && !targetEnvironment(macCatalyst)
-import AppKit
+    import AppKit
 
-public extension File {
-    func open() {
-        NSWorkspace.shared.openFile(path)
+    public extension File {
+        func open() {
+            NSWorkspace.shared.openFile(path)
+        }
     }
-}
 #endif
 
 public struct Folder: Location {
@@ -62,7 +63,7 @@ public extension Folder {
         private let reverseTopLevelTraversal: Bool
         private lazy var itemNames = loadItemNames()
         private var index = 0
-        private var nestedIterators = [ChildIterator<Child>]()
+        private var nestedIterators: [ChildIterator<Child>] = []
 
         init(
             folder: Folder,

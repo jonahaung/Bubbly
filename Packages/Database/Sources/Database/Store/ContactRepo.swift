@@ -1,11 +1,12 @@
+//  ContactRepo.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Core
-import Foundation
-import SwiftData
 import XUI
+import Core
+import SwiftData
+import Foundation
 
 public enum ContactRepo {
     enum XError: Error {
@@ -32,34 +33,18 @@ public enum ContactRepo {
                 throw XError.noContactFound
             }
         }
-        if localValue != nil {
-            try await Store.shared.contactStore?.updateAndSave(uid: uid) { model in
-                model.merge(from: serverValue)
-            }
-        } else {
-            try await Store.shared.contactStore?.insert(serverValue)
-        }
+
+        try await Store.shared.contactStore?.insert(serverValue)
         return serverValue
     }
 
     @discardableResult
     public static func getOrCreate(for uids: [String], refatch: Bool) async throws -> [Contact] {
-        guard let currentUserId else {
-            throw XError.noCurrentUserID
-        }
-        let memberIDs = uids.filter {
-            !$0.isWhitespace && $0 != currentUserId
-        }
-        return try await withThrowingTaskGroup(of: Contact.self) { group -> [Contact] in
-            for uid in memberIDs {
-                group.addTask {
-                    try await ContactRepo.getOrCreate(
-                        uid: uid,
-                        refetch: refatch
-                    )
-                }
-            }
-            return try await group.map(\.self).reduce(into: []) { $0.append($1) }
+        try await AsyncOrderedStream.mapOrdered(inputs: uids) { uid in
+            try await ContactRepo.getOrCreate(
+                uid: uid,
+                refetch: refatch
+            )
         }
     }
 

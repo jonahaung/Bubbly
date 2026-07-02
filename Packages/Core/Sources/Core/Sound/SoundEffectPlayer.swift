@@ -1,3 +1,8 @@
+//  SoundEffectPlayer.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 //
 //  SoundEffectPlayer.swift
 //  Core
@@ -6,28 +11,33 @@
 //
 import SwiftUI
 import CoreHaptics
-import UniformTypeIdentifiers
 import AVFoundation
+import UniformTypeIdentifiers
+
+// MARK: - SoundEffectPlayer
 
 protocol SoundEffectPlayer: Sendable {
     func register(_ audio: SoundEffect) async throws
     func unregister(_ audio: SoundEffect) async throws
     func play(_ audio: SoundEffect) async throws
 }
-actor AnySoundEffectPlayer: SoundEffectPlayer {
-	@MainActor static var shared = AnySoundEffectPlayer()
+
+// MARK: - AnySoundEffectPlayer
+
+public actor AnySoundEffectPlayer: SoundEffectPlayer {
+    @MainActor public static var shared: AnySoundEffectPlayer = .init()
 
     let player: any SoundEffectPlayer
 
     init() {
         #if targetEnvironment(simulator)
-        self.player = AVSoundEffectPlayer()
+            player = AVSoundEffectPlayer()
         #else
-        if CHHapticEngine.capabilitiesForHardware().supportsAudio {
-            self.player = HapticEngineSoundEffectPlayer()
-        } else {
-            self.player = EmptySoundEffectPlayer()
-        }
+            player = if CHHapticEngine.capabilitiesForHardware().supportsAudio {
+                HapticEngineSoundEffectPlayer()
+            } else {
+                EmptySoundEffectPlayer()
+            }
         #endif
     }
 
@@ -39,24 +49,26 @@ actor AnySoundEffectPlayer: SoundEffectPlayer {
         try await player.unregister(audio)
     }
 
-    func play(_ audio: SoundEffect) async throws {
+    public func play(_ audio: SoundEffect) async throws {
         try await player.play(audio)
     }
+
+    public func play(_ sound: Sound) async throws {
+        try await play(.init(sound: sound))
+    }
 }
+
+// MARK: - EmptySoundEffectPlayer
 
 actor EmptySoundEffectPlayer: SoundEffectPlayer {
-    func register(_ audio: SoundEffect) async throws {
+    func register(_: SoundEffect) {}
 
-    }
+    func unregister(_: SoundEffect) {}
 
-    func unregister(_ audio: SoundEffect) async throws {
-
-    }
-
-    func play(_ audio: SoundEffect) async throws {
-
-    }
+    func play(_: SoundEffect) {}
 }
+
+// MARK: - HapticEngineSoundEffectPlayer
 
 actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
     private var engine: CHHapticEngine?
@@ -71,24 +83,26 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
 
     private var didSetUp = false
 
-    init() {
+    init() {}
 
-    }
-
-    private func setUp() async throws {
-        if didSetUp { return }
+    private func setUp() async {
+        if didSetUp {
+            return
+        }
         defer { didSetUp = true }
 
         let audioSession: AVAudioSession? = await MainActor.run { () -> AVAudioSession? in
             SoundEffect.audioSession
         }
-        if let audioSession {
-            engine = try? CHHapticEngine(audioSession: audioSession)
+        engine = if let audioSession {
+            try? CHHapticEngine(audioSession: audioSession)
         } else {
-            engine = try? CHHapticEngine()
+            try? CHHapticEngine()
         }
 
-        guard let engine else { return }
+        guard let engine else {
+            return
+        }
 
         if #available(iOS 16.0, *) {
             engine.playsAudioOnly = true
@@ -102,7 +116,9 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
     }
 
     private func tearDown() async throws {
-        guard let engine else { return }
+        guard let engine else {
+            return
+        }
 
         do {
             try await engine.stop()
@@ -112,9 +128,11 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
     }
 
     func register(_ audio: SoundEffect) async throws {
-        try await setUp()
+        await setUp()
 
-        guard let engine else { return }
+        guard let engine else {
+            return
+        }
 
         for url in audio.urls {
             if var newRegisteredSound = registeredSounds[url] {
@@ -130,12 +148,14 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
     }
 
     func unregister(_ audio: SoundEffect) async throws {
-        guard let engine else { return }
+        guard let engine else {
+            return
+        }
 
         for url in audio.urls {
             registeredSounds[url]?.count -= 1
 
-            if registeredSounds[url]?.count == 0 {
+            if let registeredSound = registeredSounds[url], registeredSound.count <= 0 {
                 if let resourceID = registeredSounds[url]?.resourceID {
                     try engine.unregisterAudioResource(resourceID)
                 }
@@ -150,14 +170,20 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
     }
 
     func play(_ audio: SoundEffect) async throws {
-        guard let engine else { return }
+        guard let engine else {
+            return
+        }
 
         try await engine.start()
 
         // TODO: Avoid playing the same sound twice if there are more variations.
-        guard let url = audio.urls.randomElement() else { return }
+        guard let url = audio.urls.randomElement() else {
+            return
+        }
 
-        guard let resourceID = registeredSounds[url]?.resourceID else { return }
+        guard let resourceID = registeredSounds[url]?.resourceID else {
+            return
+        }
 
         try await withCheckedThrowingContinuation { continuation in
             let event = CHHapticEvent(
@@ -170,7 +196,7 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
                 let pattern = try CHHapticPattern(events: [event], parameters: [])
                 let player = try engine.makeAdvancedPlayer(with: pattern)
 
-                player.completionHandler = { x in
+                player.completionHandler = { _ in
                     continuation.resume()
                 }
 
@@ -181,6 +207,8 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
         }
     }
 }
+
+// MARK: - AVSoundEffectPlayer
 
 actor AVSoundEffectPlayer: SoundEffectPlayer {
     private struct SoundEffectReference {
@@ -195,20 +223,22 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
 
     private var didSetUp = false
 
-    init() {
-
-    }
+    init() {}
 
     private func setUp() throws {
-        if didSetUp { return }
+        if didSetUp {
+            return
+        }
         defer { didSetUp = true }
-        guard SoundEffect.audioSession == nil else { return }
+        guard SoundEffect.audioSession == nil else {
+            return
+        }
 
         let audioSession = AVAudioSession.sharedInstance()
         #if targetEnvironment(simulator)
-        try audioSession.setCategory(.playback, mode: .default)
+            try audioSession.setCategory(.playback, mode: .default)
         #else
-        try audioSession.setCategory(.ambient, mode: .default)
+            try audioSession.setCategory(.ambient, mode: .default)
         #endif
         try audioSession.setActive(true)
 
@@ -216,14 +246,16 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
     }
 
     private func tearDown() throws {
-        guard shouldDeactivateAudioSession else { return }
+        guard shouldDeactivateAudioSession else {
+            return
+        }
 
         let audioSession = AVAudioSession.sharedInstance()
 
         try audioSession.setActive(false)
     }
 
-    func register(_ audio: SoundEffect) async throws {
+    func register(_ audio: SoundEffect) throws {
         try setUp()
 
         if var updatedSound = registeredSounds[audio] {
@@ -236,18 +268,20 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
         }
     }
 
-    func unregister(_ audio: SoundEffect) async throws {
-        guard var registeredSound = registeredSounds[audio] else { return }
+    func unregister(_ audio: SoundEffect) {
+        guard var registeredSound = registeredSounds[audio] else {
+            return
+        }
 
         registeredSound.count -= 1
 
-        if registeredSound.count == 0 {
-            registeredSounds[audio] = nil
+        registeredSounds[audio] = if registeredSound.count <= 0 {
+            nil
         } else {
-            registeredSounds[audio] = registeredSound
+            registeredSound
         }
 
-        if registeredSounds.count == 0 {
+        if registeredSounds.isEmpty {
             try? tearDown()
         }
     }
@@ -268,7 +302,9 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
     }
 }
 
-private class AVAudioPlayerWithCompletionHandler: NSObject, AVAudioPlayerDelegate {
+// MARK: - AVAudioPlayerWithCompletionHandler
+
+private final class AVAudioPlayerWithCompletionHandler: NSObject, AVAudioPlayerDelegate {
     let url: URL
 
     let volume: Double
@@ -280,8 +316,8 @@ private class AVAudioPlayerWithCompletionHandler: NSObject, AVAudioPlayerDelegat
     init(url: URL, volume: Double) {
         self.url = url
         self.volume = volume
-        self.completion = { _ in }
-        self.player = nil
+        completion = { _ in }
+        player = nil
     }
 
     func play(completion: @escaping (Result<Void, Error>) -> Void) {
@@ -310,7 +346,7 @@ private class AVAudioPlayerWithCompletionHandler: NSObject, AVAudioPlayerDelegat
         completion = { _ in }
     }
 
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+    func audioPlayerDidFinishPlaying(_: AVAudioPlayer, successfully flag: Bool) {
         if flag {
             completion(.success(()))
         } else {
@@ -319,7 +355,7 @@ private class AVAudioPlayerWithCompletionHandler: NSObject, AVAudioPlayerDelegat
         tearDown()
     }
 
-    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+    func audioPlayerDecodeErrorDidOccur(_: AVAudioPlayer, error: Error?) {
         if let error {
             completion(.failure(error))
         } else {

@@ -1,5 +1,6 @@
+//  FontPicker.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -30,7 +31,7 @@ public struct FontPicker: View {
 
     // Families
     private let fontFamilies = UIFont.familyNames.sorted()
-    private let alphabets = Array("abcdefghijklmnopqrstuvwxyz")
+    private let alphabets: Array = .init("abcdefghijklmnopqrstuvwxyz")
 
     /// Init
     public init(selection: Binding<String>) {

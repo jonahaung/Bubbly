@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Core
 import Database
@@ -8,24 +6,29 @@ import FirebaseAuth
 import MediaPicker
 import Services
 import UIKit
+import FirebaseMessaging
 
 @MainActor
 @Observable
 public final class AuthUserProfileViewModel: ErrorPresenter {
-    var editingUser = CurrentUserModel.empty
+    var editingUser: CurrentUserModel = .empty
     var currentUser: CurrentUserModel
 
-    public var pickedPhoto: PickedPhoto?
+    public var pickedPhoto: PickedPhoto? = nil
     public var isLoading = false
+    private let repo: CurrentUserRepository
 
     public init(user: User) {
         editingUser = .init(user)
         currentUser = .init(user)
+        repo = .init(.init(user))
     }
 
     public func shouldUpdateDisplayName(for user: CurrentUserModel) -> Bool {
         Auth
-            .auth().currentUser?.displayName != user.name.trimmed && user.name.isWhitespace == false
+            .auth()
+            .currentUser?
+            .displayName != user.name.trimmed && user.name.isWhitespace == false
     }
 
     public func shouldUpdateProfile(for user: CurrentUserModel) -> Bool {
@@ -45,6 +48,7 @@ public final class AuthUserProfileViewModel: ErrorPresenter {
         guard let user = Auth.auth().currentUser else {
             return
         }
+
         let request = user.createProfileChangeRequest()
         request.displayName = snapshot.name.trimmed
         try await request.commitChanges()
@@ -54,15 +58,16 @@ public final class AuthUserProfileViewModel: ErrorPresenter {
     @concurrent
     public func uploadImage(image: UIImage) async throws -> URL {
         guard
-            let currentUser = Auth.auth().currentUser
-        else {
+            let currentUser = Auth.auth().currentUser else
+        {
             fatalError("explanation")
         }
+
         let imageUploader = ImageUploadingService()
         let url = try await imageUploader.uploadImage(
             image,
             size: .init(width: 100, height: 100),
-            to: .user(uid: currentUser.uid)
+            to: .user(uid: currentUser.uid),
         )
         let request = currentUser.createProfileChangeRequest()
         request.photoURL = url
@@ -86,29 +91,7 @@ public final class AuthUserProfileViewModel: ErrorPresenter {
             pickedPhoto = nil
         }
         try await applyUpdates(for: editingUser)
-        reloadUser()
-    }
-
-    private func reloadUser() {
-        if let user = Auth.auth().currentUser {
-            currentUser = .init(user)
-        }
-    }
-
-    public func updateRemoteUser() async throws {
-        setLoading(true)
-        let storage = GroupStorage.shared
-        storage.save(currentUser.pushToken, for: .device(.deviceToken))
-        storage.save(currentUser.uid, for: .auth(.currentUserID))
-        storage.save(currentUser.publicKeyString, for: .security(.publicKey(id: currentUser.uid)))
-
-        try await FirestoreRepo
-            .update(
-                value: currentUser.dictionary,
-                collectionPath: .users,
-                to: currentUser.uid
-            )
-
+        try await repo.reload()
         setLoading(false)
     }
 }

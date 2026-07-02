@@ -1,16 +1,14 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
 
 public actor PushNotificationSender {
-    // MARK: - Nested Types
-
     public enum Error: Swift.Error {
         case invalidURL
+        case invalidRequest
         case invalidResponse
-        case serializationError
         case fcmError(String)
     }
 
@@ -21,23 +19,30 @@ public actor PushNotificationSender {
         static let contentTypeHeader = "Content-Type"
         static let jsonContentType = "application/json"
         static let bearerTokenPrefix = "Bearer"
+        static let unauthorizedStatusCode = 401
     }
-
-    // MARK: - Properties
 
     private let urlSession = URLSession(configuration: .ephemeral)
     private let accessTokenService: AccessTokenService
-
-    // MARK: - Initialization
 
     public init(suitName: String) {
         accessTokenService = .init(credentials: .shared, suitName: suitName)
     }
 
-    // MARK: - Public Methods
-
     public func send(notification: APNSNotification) async throws -> String {
         let authToken = try await accessTokenService.getAccessToken()
+        return try await send(
+            notification: notification,
+            authToken: authToken,
+            allowsTokenRefresh: true
+        )
+    }
+
+    private func send(
+        notification: APNSNotification,
+        authToken: String,
+        allowsTokenRefresh: Bool
+    ) async throws -> String {
         let request = try createRequest(
             for: notification,
             authToken: authToken
@@ -46,18 +51,38 @@ public actor PushNotificationSender {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw Error.invalidResponse
         }
+
+        if httpResponse.statusCode == Constants.unauthorizedStatusCode, allowsTokenRefresh {
+            let refreshedToken = try await accessTokenService.refreshToken()
+            return try await send(
+                notification: notification,
+                authToken: refreshedToken,
+                allowsTokenRefresh: false
+            )
+        }
+
         return try validate(response: httpResponse, data: data)
     }
-
-    // MARK: - Private Methods
 
     private func createRequest(
         for notification: APNSNotification,
         authToken: String
     ) throws -> URLRequest {
+        let projectID = accessTokenService.credentials.projectID.trimmingCharacters(in: .whitespacesAndNewlines)
+        let deviceToken = notification.message.token.trimmingCharacters(in: .whitespacesAndNewlines)
+        let bearerToken = authToken.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard
+            !projectID.isEmpty,
+            !deviceToken.isEmpty,
+            !bearerToken.isEmpty
+        else {
+            throw Error.invalidRequest
+        }
+
         let urlString = Constants.baseURL + String(
             format: Constants.fcmSendPath,
-            accessTokenService.credentials.projectID
+            projectID
         )
 
         guard let url = URL(string: urlString) else {
@@ -67,7 +92,7 @@ public actor PushNotificationSender {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue(
-            "\(Constants.bearerTokenPrefix) \(authToken)",
+            "\(Constants.bearerTokenPrefix) \(bearerToken)",
             forHTTPHeaderField: Constants.authorizationHeader
         )
         request.setValue(
@@ -81,7 +106,7 @@ public actor PushNotificationSender {
     private func validate(response: HTTPURLResponse, data: Data) throws -> String {
         guard (200...299).contains(response.statusCode) else {
             let errorMessage = extractErrorMessage(from: data)
-            throw Error.fcmError(errorMessage)
+            throw Error.fcmError("HTTP \(response.statusCode): \(errorMessage)")
         }
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw Error.invalidResponse

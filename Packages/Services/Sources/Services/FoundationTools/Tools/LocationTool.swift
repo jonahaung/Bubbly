@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 @preconcurrency import CoreLocation
 import Foundation
@@ -38,7 +36,7 @@ public struct LocationTool: Tool {
     public struct Arguments {
         /// The action to perform: "current", "geocode", "reverse", "search", "distance"
         @Guide(
-            description: "The action to perform: 'current', 'geocode', 'reverse', 'search', 'distance'"
+            description: "The action to perform: 'current', 'geocode', 'reverse', 'search', 'distance'",
         )
         public var action: String
 
@@ -78,7 +76,7 @@ public struct LocationTool: Tool {
             latitude2: Double? = nil,
             longitude2: Double? = nil,
             searchQuery: String? = nil,
-            radius: Double? = nil
+            radius: Double? = nil,
         ) {
             self.action = action
             self.address = address
@@ -91,14 +89,14 @@ public struct LocationTool: Tool {
         }
     }
 
-    let locationManager = CLLocationManager()
+    let locationManager: CLLocationManager = .init()
 
     public init() {
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
         locationManager.distanceFilter = kCLDistanceFilterNone
     }
 
-    public func call(arguments: Arguments) async throws -> GeneratedContent {
+    public func call(arguments: Arguments) async -> GeneratedContent {
         switch arguments.action.lowercased() {
         case "current":
             return await getCurrentLocation()
@@ -112,6 +110,7 @@ public struct LocationTool: Tool {
             guard let lat = arguments.latitude, let lon = arguments.longitude else {
                 return createErrorOutput(error: LocationError.missingCoordinates)
             }
+
             let location = CLLocation(latitude: lat, longitude: lon)
             let mapItem = await reverseGeocode(location: location)
             // Convert MKMapItem? to a user-facing address string and GeneratedContent
@@ -121,7 +120,7 @@ public struct LocationTool: Tool {
                 "latitude": lat,
                 "longitude": lon,
                 "address": address,
-                "message": "Reverse geocoded location"
+                "message": "Reverse geocoded location",
             ])
 
         case "search":

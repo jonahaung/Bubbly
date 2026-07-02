@@ -1,89 +1,127 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Database
 import SwiftUI
 import XUI
 
 @Observable
-public final class MsgCellViewModel: Identifiable {
+public final class MsgCellViewModel: @preconcurrency Identifiable {
+    
+    public var state: State
+    public var isVisible: Bool = false
+    public var layoutValue: MsgLayoutValue
 
-	public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool {
-		lhs.msg == rhs.msg && lhs.state == rhs.state
-	}
+    public init(_ state: State) {
+        self.state = state
+        layoutValue = .init(
+            uid: state.msg.uid,
+            recipient: state.msg.receiptType,
+            hasAttachment: state.msg.attachments?.isEmpty ?? true == false,
+            headerID: state.layout.id,
+            isSelected: state.isSelected
+        )
+    }
 
-	public var msg: Message
-	public var state: State
-
-    public init(_ msg: Message) {
-        state = .init(msg: msg)
-        self.msg = msg
+    public var msg: Message {
+        state.msg
     }
 
     public func update(with msg: Message) {
-        guard self.msg != msg else { return }
-        self.msg = msg
-
+        guard state.msg != msg else {
+            return
+        }
+        var state = state
+        state.msg = msg
+        state.refreshDerivedState()
+        self.state = state
     }
 
-	@MainActor
     public func update(layout: MsgCellLayout) {
-        guard state.layout != layout else { return }
-		var state = self.state
-        if layout.showAvatar, state.sender == nil {
-            state.sender = ContactsRepository.shared.contact(for: msg.senderID)
+        guard state.layout != layout else {
+            return
         }
+        var state = state
         state.layout = layout
-		self.state = state
-
+        state.refreshDerivedState()
+        layoutValue.headerID = layout.id
+        self.state = state
     }
 
     public func setVisibility(_ isVisible: Bool) {
-        guard state.isVisible != isVisible else { return }
-        state.isVisible = isVisible
+        guard self.isVisible != isVisible else {
+            return
+        }
+        self.isVisible = isVisible
     }
 
     public func update(selectedMsg: SelectedMsg?) {
+        guard state.selectedMsg != selectedMsg else {
+            return
+        }
+        var state = state
         state.selectedMsg = selectedMsg
+        state.computeBubbleCorner()
+        self.state = state
+        layoutValue = .init(
+            uid: state.msg.uid,
+            recipient: state.msg.receiptType,
+            hasAttachment: state.msg.attachments?.isEmpty ?? true == false,
+            headerID: state.layout.id,
+            isSelected: state.isSelected
+        )
+    }
 
+    public static func == (lhs: MsgCellViewModel, rhs: MsgCellViewModel) -> Bool
+    {
+        lhs.id == rhs.id
     }
 }
 
-public extension MsgCellViewModel {
-	struct State: Equatable, Sendable {
-        public let id: String
-        public let text: String?
-        public let attachments: [Attachment]
-        public let isSender: Bool
-        public var sender: Contact?
-        public var layout: MsgCellLayout
-        public var isVisible: Bool
-        public var selectedMsg: SelectedMsg?
-        public var reactions: [Reaction]?
-		public var containsMarkdown: Bool
-
-        public init(msg: Message) {
-            id = msg.id
-            text = msg.text
-            attachments = msg.attachments
-            isSender = msg.isSender
-            sender = nil
-            layout = .init()
-            isVisible = false
-            reactions = msg.reactions.isEmpty ? nil : msg.reactions
-            selectedMsg = nil
-			containsMarkdown = msg.text?.containsMarkdown == true
+extension MsgCellViewModel {
+    public struct State: Sendable, Equatable, Hashable, Identifiable {
+        public init(
+            msg: Message,
+            attributedText: AttributedString?,
+            layout: MsgCellLayout
+        ) {
+            self.msg = msg
+            self.attributedText = attributedText
+            self.layout = layout
+            self.bubbleCornor = .none
+            refreshDerivedState()
         }
 
-        public func computeBubbleCorner() -> BubbleCorner {
-            if selectedMsg?.id == id {
-                return .all
-            }
-            var corner = layout.bubbleCorner
-            if selectedMsg?.previous == id { corner.append(.bottom) }
-            if selectedMsg?.next == id { corner.append(.top) }
-            return corner
+        public var msg: Message
+        public var attributedText: AttributedString?
+
+        public var layout: MsgCellLayout
+        public var selectedMsg: SelectedMsg?
+        public var bubbleCornor: BubbleCorner
+        public var dateStString: String?
+
+        public var isSender: Bool { msg.isSender }
+
+        public var id: String {
+            msg.uid
+        }
+
+        public var incomingStatus: DeliveryStatus? { msg.incomingStatus }
+        public var outgoingStatus: MsgDeliveryState? { msg.outgoingStatus }
+
+        public var senderID: String {
+            msg.senderID
+        }
+
+        public var attachments: [Attachment]? {
+            msg.attachments
+        }
+
+        public var reactions: [Reaction] {
+            msg.reactions
+        }
+
+        public var date: Date {
+            msg.date
         }
 
         public var verticalAlignment: VerticalItemAlignment {
@@ -94,42 +132,59 @@ public extension MsgCellViewModel {
             isSender ? .trailing : .leading
         }
 
-        public var foregroundStyle: Color {
-            isSender ? .black : .primary
-        }
         public var isSelected: Bool {
             selectedMsg?.id == id
         }
+
+        public mutating func refreshDerivedState() {
+            computeBubbleCorner()
+            updateDateString()
+        }
+
+        public mutating func computeBubbleCorner() {
+            guard let selectedMsg else {
+                bubbleCornor = layout.bubbleCorner
+                return
+            }
+            if selectedMsg.id == id {
+                bubbleCornor = .all
+                return
+            }
+            var corner = layout.bubbleCorner
+            if selectedMsg.previous == id {
+                corner.append(.bottom)
+            }
+            if selectedMsg.next == id {
+                corner.append(.top)
+            }
+            bubbleCornor = corner
+        }
+
+        private mutating func updateDateString() {
+            if layout.showTimeSeparator {
+                if dateStString == nil {
+                    dateStString = MsgTimeStringFormatter.string(for: date)
+                }
+            } else if dateStString != nil {
+                dateStString = nil
+            }
+        }
     }
 
-    var id: String {
+    public var id: String {
         state.id
     }
 }
 
-public extension HorizontalAlignment {
-    var inverted: HorizontalAlignment {
+extension HorizontalAlignment {
+    public var inverted: HorizontalAlignment {
         self == .leading ? .trailing : .leading
     }
 }
 
-public enum VerticalItemAlignment: Sendable {
+// MARK: - VerticalItemAlignment
+
+public enum VerticalItemAlignment: Sendable, Hashable {
     case leading
     case trailing
-}
-
-extension UIFont {
-    var chatOpticalOffset: CGFloat {
-        let topExtra = ascender - capHeight // space above capital letters
-        let bottom = abs(descender)
-        return (topExtra * 0.18) - (bottom * 0.06)
-    }
-
-    var chatVerticalPadding: CGFloat {
-        max(10, lineHeight * 0.34)
-    }
-
-    var chatHorizontalPadding: CGFloat {
-        max(12, lineHeight * 0.55)
-    }
 }

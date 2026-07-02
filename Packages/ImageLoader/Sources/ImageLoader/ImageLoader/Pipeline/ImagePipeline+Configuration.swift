@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
@@ -153,8 +153,6 @@ public extension ImagePipeline {
 
         /// Image decompressing queue. Default maximum concurrent task count is 2.
         public var imageDecompressingQueue = OperationQueue(maxConcurrentCount: 2)
-
-        // MARK: - Initializer
 
         /// Instantiates a pipeline configuration.
         ///

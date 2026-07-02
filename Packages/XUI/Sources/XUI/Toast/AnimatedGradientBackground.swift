@@ -1,5 +1,6 @@
+//  AnimatedGradientBackground.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI
@@ -18,7 +19,7 @@ public struct AnimatedGradientBackground: View {
 
     private let theme: Theme
 
-    public init(_ theme: Theme = .grey) {
+    public init(_ theme: Theme = .yellow) {
         self.theme = theme
     }
 

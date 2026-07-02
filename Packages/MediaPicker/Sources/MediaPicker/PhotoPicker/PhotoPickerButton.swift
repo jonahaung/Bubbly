@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import PhotosUI
@@ -14,7 +14,7 @@ public struct PhotoPickerButton<Content: View>: View {
     @ViewBuilder private var content: () -> Content
     @Binding private var pickedPhoto: PickedPhoto?
 
-    // MARK: - Init
+    
 
     public init(
         pickedPhoto: Binding<PickedPhoto?>,

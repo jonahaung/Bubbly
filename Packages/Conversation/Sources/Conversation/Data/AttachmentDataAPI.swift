@@ -1,14 +1,26 @@
+//  AttachmentDataAPI.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Database
-import Foundation
-import Services
-import UIKit
 import XUI
+import UIKit
+import Database
+import Services
+import Foundation
 
 actor AttachmentDataAPI {
+
+    init(
+        mediaManager: MediaManager = .shared,
+        urlSession: URLSession = .shared,
+        swiftLinkPreview: SwiftLinkPreview = SwiftLinkPreview()
+    ) {
+        self.mediaManager = mediaManager
+        self.urlSession = urlSession
+        self.swiftLinkPreview = swiftLinkPreview
+    }
+
     enum AttachmentError: LocalizedError {
         case missingFileURL
         case invalidURL(String)
@@ -30,20 +42,6 @@ actor AttachmentDataAPI {
                 "Invalid server response: \(statusCode)"
             }
         }
-    }
-
-    private let mediaManager: MediaManager
-    private let urlSession: URLSession
-    private let swiftLinkPreview: SwiftLinkPreview
-
-    init(
-        mediaManager: MediaManager = .shared,
-        urlSession: URLSession = .shared,
-        swiftLinkPreview: SwiftLinkPreview = SwiftLinkPreview()
-    ) {
-        self.mediaManager = mediaManager
-        self.urlSession = urlSession
-        self.swiftLinkPreview = swiftLinkPreview
     }
 
     func fetchAttachmentData(for attachment: Attachment) async throws -> AttachmentData {
@@ -73,10 +71,15 @@ actor AttachmentDataAPI {
         }
     }
 
+    private let mediaManager: MediaManager
+    private let urlSession: URLSession
+    private let swiftLinkPreview: SwiftLinkPreview
+
     private func cachedImageThumbnail(for attachment: Attachment) -> AttachmentData? {
         guard attachment.fileExist(), let thumbnail = attachment.thumbnailImage() else {
             return nil
         }
+
         return .image(thumbnail: thumbnail)
     }
 
@@ -84,10 +87,10 @@ actor AttachmentDataAPI {
         guard
             attachment.fileExist(),
             let localURL = attachment.file()?.url,
-            let thumbnail = attachment.thumbnailImage()
-        else {
+            let thumbnail = attachment.thumbnailImage() else {
             return nil
         }
+
         return .imageUpload(localURL: localURL, thumbnail: thumbnail)
     }
 
@@ -103,6 +106,7 @@ actor AttachmentDataAPI {
         guard let remoteURL = URL(string: attachment.url) else {
             return nil
         }
+
         return .video(videoURL: remoteURL, thumbnail: thumbnail)
     }
 
@@ -110,12 +114,13 @@ actor AttachmentDataAPI {
         guard attachment.fileExist(), let image = attachment.image() else {
             return nil
         }
+
         return .link(thumbnail: image)
     }
 
     private func processImageAttachment(_ attachment: Attachment) async throws -> AttachmentData {
         let image = try await fetchImage(from: attachment.url)
-        let thumbnail = try await persistImageAndThumbnail(image, for: attachment)
+        let thumbnail = try persistImageAndThumbnail(image, for: attachment)
         return .image(thumbnail: thumbnail)
     }
 
@@ -123,8 +128,9 @@ actor AttachmentDataAPI {
         guard let remoteURL = URL(string: attachment.url) else {
             throw AttachmentError.invalidURL(attachment.url)
         }
+
         let thumbnail = try await VideoFactory.generateVideoThumbnail(from: remoteURL)
-        let persistedThumbnail = try await persistThumbnailOnly(thumbnail, for: attachment)
+        let persistedThumbnail = try persistThumbnailOnly(thumbnail, for: attachment)
         if attachment.fileExist(), let localURL = attachment.localURL() {
             return .video(videoURL: localURL, thumbnail: persistedThumbnail)
         }
@@ -133,17 +139,17 @@ actor AttachmentDataAPI {
 
     private func processLinkAttachment(_ attachment: Attachment) async throws -> AttachmentData {
         let image: UIImage
-        if let thumbnailURLString = attachment.thumbnailUrl {
+        if let thumbnailURLString = attachment.thumbnailURL {
             image = try await fetchImage(from: thumbnailURLString)
         } else {
             let linkData = try await swiftLinkPreview.preview(attachment.url)
-            if let imageURL = linkData.imageURL {
-                image = try await fetchImage(from: imageURL.absoluteString)
+            image = if let imageURL = linkData.imageURL {
+                try await fetchImage(from: imageURL.absoluteString)
             } else {
-                image = UIImage(systemSymbol: .photoOnRectangleAngled)
+                UIImage(systemSymbol: .photoOnRectangleAngled)
             }
         }
-        try await persistImageOnly(image, for: attachment)
+        try persistImageOnly(image, for: attachment)
         return .link(thumbnail: image)
     }
 
@@ -159,9 +165,11 @@ actor AttachmentDataAPI {
         guard let http = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
-        guard (200...299).contains(http.statusCode) else {
+
+        guard (200 ... 299).contains(http.statusCode) else {
             throw AttachmentError.badResponse(http.statusCode)
         }
+
         if let mimeType = http.mimeType, mimeType.hasPrefix("image/") == false {
             throw URLError(.cannotDecodeContentData)
         }
@@ -169,6 +177,7 @@ actor AttachmentDataAPI {
         guard let image = UIImage(data: data) else {
             throw AttachmentError.imageDecodingFailed
         }
+
         return image
     }
 
@@ -176,18 +185,19 @@ actor AttachmentDataAPI {
     private func persistImageAndThumbnail(
         _ image: UIImage,
         for attachment: Attachment
-    ) async throws -> UIImage {
+    ) throws -> UIImage {
         let originalData = try mediaManager.createData(from: image)
-        let thumbnailData = try await mediaManager.createThumbnail(from: image)
+        let thumbnailData = try mediaManager.createThumbnail(from: image)
         guard let thumbnail = UIImage(data: thumbnailData) else {
             throw AttachmentError.imageDecodingFailed
         }
+
         try attachment.file()?.write(originalData)
         try attachment.thumbnailFile()?.write(thumbnailData)
         return thumbnail
     }
 
-    private func persistImageOnly(_ image: UIImage, for attachment: Attachment) async throws {
+    private func persistImageOnly(_ image: UIImage, for attachment: Attachment) throws {
         let originalData = try mediaManager.createData(from: image)
         try attachment.file()?.write(originalData)
     }
@@ -196,11 +206,12 @@ actor AttachmentDataAPI {
     private func persistThumbnailOnly(
         _ image: UIImage,
         for attachment: Attachment
-    ) async throws -> UIImage {
-        let thumbnailData = try await mediaManager.createThumbnail(from: image)
+    ) throws -> UIImage {
+        let thumbnailData = try mediaManager.createThumbnail(from: image)
         guard let thumbnail = UIImage(data: thumbnailData) else {
             throw AttachmentError.imageDecodingFailed
         }
+
         try attachment.thumbnailFile()?.write(thumbnailData)
         return thumbnail
     }

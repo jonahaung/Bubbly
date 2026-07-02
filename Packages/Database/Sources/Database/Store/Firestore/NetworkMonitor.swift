@@ -1,20 +1,24 @@
+//  NetworkMonitor.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import Network
+import Foundation
 
 @MainActor
 final class NetworkMonitor {
-    private let monitor = NWPathMonitor()
+    private let monitor: NWPathMonitor = .init()
 
     private(set) var hasNetworkConnection = false
     private(set) var isUsingMobileConnection = false
 
     init() {
         monitor.pathUpdateHandler = { [weak self] path in
-            guard let self else { return }
+            guard let self else {
+                return
+            }
+
             Task { @MainActor in
                 self.hasNetworkConnection = path.status == .satisfied
                 self.isUsingMobileConnection = path.usesInterfaceType(.cellular)

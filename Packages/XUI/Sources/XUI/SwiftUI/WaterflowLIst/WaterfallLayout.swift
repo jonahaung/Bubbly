@@ -1,5 +1,6 @@
+//  WaterfallLayout.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -93,7 +94,7 @@ public struct WaterfallLayout: Layout {
                     partialResult.append((subview, frame))
                 }
             }
-            let columns = (0..<columnCount).map(column(index:))
+            let columns = (0 ..< columnCount).map(column(index:))
             self.columns = columns
             bounds = columns.compactMap(\.last?.1).reduce(into: .zero) { $0 = $0.union($1) }
         }

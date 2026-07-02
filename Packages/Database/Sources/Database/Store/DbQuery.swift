@@ -1,11 +1,12 @@
+//  DbQuery.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import SwiftData
 import SwiftUI
+import SwiftData
 
-public struct DbQuery<T>: View where T: PersistentModel & SendableTransformable {
+public struct DbQuery<T: PersistentModel & SendableTransformable>: View {
     @Query private var items: [T]
     private let content: (_ items: [T]) -> AnyView
 

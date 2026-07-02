@@ -1,9 +1,10 @@
+//  SystemImageWithShape.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import SFSafeSymbols
 import SwiftUI
+import SFSafeSymbols
 
 public struct SystemImageWithShape: View {
     private let icon: SFSymbol
@@ -23,114 +24,63 @@ public struct SystemImageWithShape: View {
             case .plain:
                 SystemImage(icon, 20 * scale)
                     .padding(2 * scale)
-                    .symbolVariant(.fill)
             case .gray:
                 SystemImage(icon, 20 * scale)
                     .padding(2 * scale)
                     .foregroundStyle(Color.gray.gradient)
-                    .symbolVariant(.fill)
             case let .color(color):
                 SystemImage(icon, 20 * scale)
                     .padding(2 * scale)
                     .foregroundStyle(color.gradient)
-                    .symbolVariant(.fill)
             case .randomColor:
                 SystemImage(icon, 20 * scale)
                     .padding(2 * scale)
                     .foregroundStyle(icon.rawValue.color.gradient)
-                    .symbolVariant(.fill)
             }
         case let .square(bgStyle):
             switch bgStyle {
             case .plain:
                 SystemImage(icon, 15 * scale)
                     .padding(6 * scale)
-                    .background {
-                        Color(uiColor: .systemFill)
-                            .clipShape(.containerRelative)
-                    }
-                    .containerShape(RoundedRectangle(cornerRadius: 8 * scale))
-                    .compositingGroup()
-                    .symbolVariant(.fill)
+                    .background(
+                        Color(uiColor: .systemFill), in: RoundedRectangle(cornerRadius: 8 * scale))
             case .gray:
                 SystemImage(icon, 15 * scale)
-                    .foregroundStyle(Color(uiColor: .systemBackground).gradient)
+                    .foregroundStyle(Color.container.gradient)
                     .padding(6 * scale)
-                    .background {
-                        Color.gray
-                            .clipShape(.containerRelative)
-                    }
-                    .containerShape(RoundedRectangle(cornerRadius: 8 * scale))
-                    .compositingGroup()
-                    .symbolVariant(.fill)
+                    .background(.secondary, in: RoundedRectangle(cornerRadius: 8 * scale))
             case let .color(color):
                 SystemImage(icon, 15 * scale)
-                    .foregroundStyle(Color(uiColor: .systemBackground).gradient)
+                    .foregroundStyle(Color.container.gradient)
                     .padding(6 * scale)
-                    .background {
-                        color
-                            .clipShape(.containerRelative)
-                    }
-                    .containerShape(RoundedRectangle(cornerRadius: 8 * scale))
-                    .compositingGroup()
-                    .symbolVariant(.fill)
+                    .background(color.gradient, in: RoundedRectangle(cornerRadius: 8 * scale))
             case .randomColor:
                 SystemImage(icon, 15 * scale)
-                    .foregroundStyle(Color(uiColor: .systemBackground).gradient)
+                    .foregroundStyle(Color.container.gradient)
                     .padding(6 * scale)
-                    .background {
-                        icon.rawValue.color
-                            .clipShape(.containerRelative)
-                    }
-                    .containerShape(RoundedRectangle(cornerRadius: 8 * scale))
-                    .compositingGroup()
-                    .symbolVariant(.fill)
+                    .background(icon.rawValue.color.gradient, in: RoundedRectangle(cornerRadius: 8 * scale))
             }
         case let .circle(bgStyle):
             switch bgStyle {
             case .plain:
                 SystemImage(icon, 15 * scale)
                     .padding(6 * scale)
-                    .background {
-                        Color(uiColor: .systemFill)
-                            .clipShape(.containerRelative)
-                    }
-                    .containerShape(Circle())
-                    .compositingGroup()
-                    .symbolVariant(.fill)
+                    .background(.fill, in: .circle)
             case .gray:
                 SystemImage(icon, 15 * scale)
-                    .foregroundStyle(Color(uiColor: .systemBackground).gradient)
+                    .foregroundStyle(Color.container.gradient)
                     .padding(6 * scale)
-                    .background {
-                        Color.gray
-                            .clipShape(.containerRelative)
-                    }
-                    .containerShape(Circle())
-                    .compositingGroup()
-                    .symbolVariant(.fill)
+                    .background(.secondary, in: .circle)
             case let .color(color):
                 SystemImage(icon, 15 * scale)
-                    .foregroundStyle(Color(uiColor: .systemBackground).gradient)
+                    .foregroundStyle(Color.container.gradient)
                     .padding(6 * scale)
-                    .background {
-                        color
-                            .clipShape(.containerRelative)
-                    }
-                    .containerShape(Circle())
-                    .compositingGroup()
-                    .symbolVariant(.fill)
+                    .background(color.gradient, in: .circle)
             case .randomColor:
                 SystemImage(icon, 15 * scale)
-                    .foregroundStyle(Color(uiColor: .systemBackground).gradient)
+                    .foregroundStyle(Color.container.gradient)
                     .padding(6 * scale)
-                    .background {
-                        icon.rawValue.color
-                            .clipShape(.containerRelative)
-                    }
-                    .containerShape(Circle())
-                    .compositingGroup()
-                    .symbolVariant(.fill)
+                    .background(icon.rawValue.color.gradient, in: .circle)
             }
         }
     }

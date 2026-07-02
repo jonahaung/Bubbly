@@ -1,8 +1,8 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Foundation
+
+// MARK: - ErrorPresenter
 
 public protocol ErrorPresenter {}
 
@@ -12,7 +12,7 @@ public extension ErrorPresenter {
         await LocalNotificationService
             .sendAlert(
                 title: "Error",
-                body: error.localizedDescription
+                body: error.localizedDescription,
             )
     }
 

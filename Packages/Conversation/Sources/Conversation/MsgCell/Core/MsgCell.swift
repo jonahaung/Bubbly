@@ -1,54 +1,38 @@
+//  MsgCell.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import XUI
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 struct MsgCell: View {
 
-	let viewModel: MsgCellViewModel
-	private var isSelected: Bool {
-		viewModel.state.isSelected
-	}
-
-	var layout: MsgCellLayout { viewModel.state.layout }
-
-	var body: some View {
-		VStack(alignment: viewModel.state.horizontalAlignment, spacing: 0) {
-			if layout.showTimeSeparator {
-				TimeSeparator()
-			}
-			if layout.showTopPadding {
-				CellSpacer()
-			}
-			if isSelected {
-				Header()
-			}
-			HStack(alignment: .lastTextBaseline, spacing: 0) {
-				if viewModel.state.isSender {
-					Spacer(minLength: 50)
-				} else {
-					IncomingAccessory()
-				}
-				GestureAware {
-					Content()
-				}
-				if viewModel.state.isSender {
-					OutgoingAccessory()
-				} else {
-					Spacer(minLength: 50)
-				}
-			}
-
-			if isSelected {
-				Footer()
-			}
-		}
-		.environment(\.isVisible, viewModel.state.isVisible)
-		.onAppear {
-			viewModel.setVisibility(true)
-		}.onDisappear {
-			viewModel.setVisibility(false)
-		}
-	}
+    let viewModel: MsgCellViewModel
+    
+    var body: some View {
+        VStack(alignment: viewModel.state.horizontalAlignment, spacing: 0) {
+            MsgCellHeader(state: viewModel.state)
+            HStack(alignment: .bottom, spacing: 0) {
+                if !viewModel.state.isSender, let status = viewModel.state.incomingStatus {
+                    IncomingAccessory(state: viewModel.state, status: status)
+                        .equatable(by: viewModel.state)
+                }
+                MsgCellGesture(viewModel: viewModel) {
+                    MsgCellContent(viewModel: viewModel)
+                }
+                if viewModel.state.isSender {
+                    OutgoingAccessory(state: viewModel.state)
+                }
+            }
+            MsgCellFooter(state: viewModel.state)
+        }
+        .transition(.invisible())
+        .environment(viewModel)
+        .id(viewModel.id)
+        .layoutValue(key: MsgLayoutValueKey.self, value: viewModel.layoutValue)
+    }
 }

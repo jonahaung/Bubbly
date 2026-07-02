@@ -1,10 +1,11 @@
+//  Reaction.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
+import XUI
 import Core
 import Foundation
-import XUI
 
 public struct Reaction: Codable, Sendable, Hashable, Equatable, Identifiable {
     public var id: String {
@@ -13,9 +14,9 @@ public struct Reaction: Codable, Sendable, Hashable, Equatable, Identifiable {
 
     public let rawValue: String
     public let senderID: String
-    public let date: ServerTime
+    public let date: Date
 
-    public init(rawValue: String, senderID: String, date: ServerTime) {
+    public init(rawValue: String, senderID: String, date: Date) {
         self.rawValue = rawValue
         self.senderID = senderID
         self.date = date

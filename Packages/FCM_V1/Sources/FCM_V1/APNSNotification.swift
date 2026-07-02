@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
@@ -31,6 +31,7 @@ public struct APNSNotification: Codable {
     ) {
         self.validateOnly = validateOnly
         var data = customData
+        data.removeValue(forKey: "message")
         data["message"] = messageContent
         message = .init(
             token: deviceToken,
@@ -45,7 +46,7 @@ public struct APNSNotification: Codable {
         messageContent: String,
         alert: APNSAlert,
         badge: Int? = 1,
-        sound: APNSSoundType? = .normal("paper.wav"),
+        sound: APNSSoundType? = .normal("drip.flat.m4a"),
         hasContentAvailable: Bool? = true,
         hasMutableContent: Bool? = true,
         category: String? = nil,

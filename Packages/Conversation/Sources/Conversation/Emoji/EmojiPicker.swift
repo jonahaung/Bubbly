@@ -1,32 +1,37 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  EmojiPicker.swift
+//  Conversation
+//
+//  Created by Aung Ko Min on 15/5/26.
 //
 
-import SwiftUI
 
-struct EmojiPicker: View {
-    var onSelect: (Emoji) -> Void
-    @State private var emojis = [Emoji]()
-    var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHGrid(rows: rows) {
-                ForEach(emojis) { emoji in
-                    Button {
-                        onSelect(emoji)
-                    } label: {
-                        Text(emoji.value)
-                            .font(.title3)
+ import XUI
+    import SwiftUI
+
+    struct EmojiPicker: View {
+        var onSelect: (Emoji) -> Void
+        private let emojis = EmojiRepository.shared.emojis
+        var body: some View {
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHGrid(rows: rows) {
+                    ForEach(emojis) { emoji in
+                        Button {
+                            onSelect(emoji)
+                        } label: {
+                            Text(emoji.value)
+                                .font(.title3)
+                        }
+                        .id(emoji.id)
                     }
-                }
-            }.padding(.leading, 8)
+                }.padding(.leading, 8)
+            }
+            .contentMargins(.vertical, 8, for: .scrollContent)
+            .scrollContentBackground(.hidden)
+            .background(Color.background)
         }
-        .fixedSize(horizontal: false, vertical: true)
-        .task {
-            emojis = EmojiRepository.shared.emojis
-        }
-    }
 
-    var rows: [GridItem] {
-        Array(repeating: GridItem(.fixed(30)), count: 4)
+        var rows: [GridItem] {
+            Array(repeating: GridItem(.fixed(30)), count: 5)
+        }
     }
-}

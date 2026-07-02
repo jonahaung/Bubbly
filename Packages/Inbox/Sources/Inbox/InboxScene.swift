@@ -1,7 +1,6 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
+import Core
 import Database
 import ImageLoader
 import Services
@@ -10,27 +9,31 @@ import SwiftUI
 import XUI
 
 public struct InboxScene: View {
-
-
-    @Environment(\.currentUser) private var currentUser
+    
+    private let coordinator: AppCoordinator
+    @Environment(\.openURL) private var openURL
     @State private var viewModel: InboxViewModel
 
-	let coordinator: AppCoordinator
     public init(coordinator: AppCoordinator) {
-		self.coordinator = coordinator
-		_viewModel = .init(wrappedValue: .init())
+        self.coordinator = coordinator
+        _viewModel = .init(wrappedValue: .init())
     }
 
     public var body: some View {
-        List {
-            ForEach(viewModel.state.items, id: \.msg) { item in
-                InboxCell(item: item)
-            }
-            .onDelete { _ in
+        ScrollView {
+            LazyVStack(alignment: .leading) {
+                ScrollSection(data: viewModel.state.items) { item in
+                    InboxCell(item: item) {
+                        if let url = DeeplinkCodec.standard.url(for: .conversation(conID: $0.conversation.uid)) {
+                            openURL(url)
+                        }
+                    }
+                }
             }
         }
+        .groupScrollViewStyle()
         .task {
-            await viewModel.send(.appear(currentUser))
+            await viewModel.send(.appear(coordinator.container.currentUserRepository.model))
         }
         .refreshable {
             await viewModel.send(.refresh)
@@ -38,14 +41,13 @@ public struct InboxScene: View {
         .onDisappear {
             Task { await viewModel.send(.disappear) }
         }
-        .navigationTitle("pencil.line")
+        .navigationTitle(TabPath.inbox.name)
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {} label: {
-                    SystemImage(.bellBadge)
+                    AppIcon(30)
                 }
             }.sharedBackgroundVisibility(.hidden)
         }
-		
     }
 }

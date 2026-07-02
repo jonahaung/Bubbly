@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import Observation
 
@@ -10,7 +8,7 @@ final class PlaygroundViewModel {
     private(set) var state: PlaygroundViewState
 
     private let reducer: PlaygroundReducer
-    private let taskRegistry = PlaygroundTaskRegistry()
+    private let taskRegistry: PlaygroundTaskRegistry = .init()
     private let loadUseCase: LoadPlaygroundUseCase
     private let refreshUseCase: RefreshPlaygroundUseCase
     private let submitUseCase: SubmitPlaygroundUseCase
@@ -29,17 +27,26 @@ final class PlaygroundViewModel {
         switch intent {
         case .appear:
             await taskRegistry.run(key: .appear) { [weak self] in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
+
                 await load()
             }
         case .refresh:
             await taskRegistry.run(key: .refresh) { [weak self] in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
+
                 await refresh()
             }
         case .submit:
             await taskRegistry.run(key: .submit) { [weak self] in
-                guard let self else { return }
+                guard let self else {
+                    return
+                }
+
                 await submit()
             }
         }

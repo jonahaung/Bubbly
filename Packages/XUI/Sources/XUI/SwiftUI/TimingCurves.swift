@@ -1,10 +1,7 @@
-//
 //  TimingCurves.swift
-//  XUI
 //
-//  Created by Aung Ko Min on 10/3/26.
+//  Copyright © 2026 Aung Ko Min.
 //
-
 
 import SwiftUI
 
@@ -16,7 +13,7 @@ public extension Animation {
 
     /// A timing curve that anticipates animating to the target.
     static func anticipate(duration: Double) -> Animation {
-        .timingCurve(0.33, 0, 0.66, -0.55, duration: duration)
+        .timingCurve(0.33, 0, 0.66, -0.65, duration: duration)
     }
 
     /// A timing curve that overshoots the target.
@@ -39,6 +36,47 @@ public extension Animation {
     /// it.
     static func anticipateOvershoot(duration: Double) -> Animation {
         .timingCurve(0.66, -0.55, 0.33, 1.6, duration: duration)
+    }
+}
+
+public extension Animation {
+
+    /// Aggressive start → ultra smooth middle → ultra smooth finish
+    static var ultraSmoothPower: Animation {
+        ultraSmoothPower(duration: 0.45)
+    }
+
+    static func ultraSmoothPower(duration: Double) -> Animation {
+        .timingCurve(0.15, 0.9, 0.25, 1.0, duration: duration)
+    }
+
+    static func ultraSmoothAggressive(duration: Double) -> Animation {
+        .timingCurve(0.05, 1.0, 0.2, 1.0, duration: duration)
+    }
+
+    /// Fast start → smooth cruise → soft landing (very natural)
+    static func fluidNatural(duration: Double = 0.4) -> Animation {
+        .timingCurve(0.2, 0.8, 0.2, 1.0, duration: duration)
+    }
+
+    /// Extremely soft and premium feel (Apple-like)
+    static func premiumSmooth(duration: Double = 0.5) -> Animation {
+        .timingCurve(0.25, 0.9, 0.3, 1.0, duration: duration)
+    }
+
+    /// Snappy start → long glide → subtle stop (great for chat)
+    static func chatSnap(duration: Double = 0.35) -> Animation {
+        .timingCurve(0.1, 1.0, 0.2, 1.0, duration: duration)
+    }
+
+    /// Gentle ease with long tail (for fades / opacity)
+    static func softFade(duration: Double = 0.6) -> Animation {
+        .timingCurve(0.3, 0.7, 0.4, 1.0, duration: duration)
+    }
+
+    /// Sharp interaction feedback (tap, press)
+    static func interactionSnap(duration: Double = 0.2) -> Animation {
+        .timingCurve(0.2, 1.2, 0.3, 1.0, duration: duration)
     }
 }
 
@@ -66,44 +104,12 @@ public extension Animation {
     static func easeInOutExponential(duration: Double) -> Animation {
         .timingCurve(1, 0, 0, 1, duration: duration)
     }
-}
 
-struct TimingCurves_Previews: PreviewProvider {
-    struct Preview: View {
-        @State
-        var isOn: Bool = false
-
-        var body: some View {
-            let shape = Rectangle()
-                .fill(.red)
-                .frame(width: 64, height: 64)
-                .frame(maxWidth: .infinity, alignment: isOn ? .trailing : .leading)
-
-            VStack {
-                Toggle(isOn: $isOn) { Text("Toggle Me") }
-
-                shape
-                    .animation(.easeInOut, value: isOn)
-
-                shape
-                    .animation(.easeInExponential, value: isOn)
-
-                shape
-                    .animation(.anticipate, value: isOn)
-
-                shape
-                    .animation(.overshoot, value: isOn)
-
-                shape
-                    .animation(.anticipateOvershoot, value: isOn)
-
-                Spacer()
-            }
-            .padding()
-        }
+    static var linearSmooth: Animation {
+        linearSmooth(duration: 0.5)
     }
 
-    static var previews: some View {
-        Preview()
+    static func linearSmooth(duration: Double) -> Animation {
+        .timingCurve(0, 0, 0, 1.01, duration: duration)
     }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Core
@@ -8,13 +8,18 @@ import ImageLoader
 import MediaPicker
 import SwiftUI
 import XUI
+import Services
 
 public struct UserProfileView: View {
     @LazyState private var viewModel: UserProfileViewModel
     @FocusState private var isFocused: Bool
+    private let appLauncher: AppLauncher
 
-    public init(viewModel: UserProfileViewModel) {
-        _viewModel = .init(wrappedValue: viewModel)
+    public init(coordinator: AppCoordinator) {
+        _viewModel = .init(
+            wrappedValue: .init(currentUserRepository: coordinator.container.currentUserRepository)
+        )
+        appLauncher = coordinator.appLauncher
     }
 
     public var body: some View {
@@ -63,7 +68,13 @@ public struct UserProfileView: View {
 
             Section {
                 Button("Sign Out") {
-                    Task { await viewModel.send(.signOut) }
+                    Task {
+                        do {
+                            try await appLauncher.resetGetStarted(router: Router.shared)
+                        } catch {
+                            await viewModel.showError(error)
+                        }
+                    }
                 }
                 .buttonStyle(.roundedButtonStyle)
 

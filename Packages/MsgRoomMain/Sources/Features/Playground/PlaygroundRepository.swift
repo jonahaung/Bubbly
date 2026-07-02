@@ -1,11 +1,13 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
+
+// MARK: - PlaygroundSnapshot
 
 struct PlaygroundSnapshot {
     let isLoading: Bool
     let error: String?
 }
+
+// MARK: - PlaygroundRepository
 
 @MainActor
 protocol PlaygroundRepository {

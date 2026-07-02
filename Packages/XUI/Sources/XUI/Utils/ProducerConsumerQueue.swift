@@ -1,44 +1,35 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
-
 import Foundation
 
 public final class ProducerConsumerQueue<T> {
     private var buffer: [T?]
     private var head = 0
     private var tail = 0
-    private var count = 0
+    private var _count = 0
     private let lock = NSLock()
-    private let semaphore = DispatchSemaphore(value: 0)
+    private var semaphore = DispatchSemaphore(value: 0)
 
     public init(capacity: Int = 1024) {
-        // Round up capacity to nearest power of 2 for efficient wrapping
         let cap = max(2, capacity.nextPowerOfTwo)
         buffer = [T?](repeating: nil, count: cap)
     }
 
-    /// Adds an item to the end of the queue and signals any waiting consumer.
     public func enqueue(_ item: T) {
         lock.lock()
-        if count == buffer.count { // grow if full
-            grow()
-        }
+        if _count == buffer.count { grow() }
         buffer[tail] = item
         tail = (tail + 1) & (buffer.count - 1)
-        count += 1
+        _count += 1
         lock.unlock()
         semaphore.signal()
     }
 
-    /// Removes and returns the item at the front of the queue, blocking if empty.
     public func dequeue() -> T {
-        semaphore.wait() // block until available
+        semaphore.wait()
         lock.lock()
         let item = buffer[head]!
         buffer[head] = nil
         head = (head + 1) & (buffer.count - 1)
-        count -= 1
+        _count -= 1
         lock.unlock()
         return item
     }
@@ -47,67 +38,70 @@ public final class ProducerConsumerQueue<T> {
     public func tryDequeue() -> T? {
         lock.lock()
         defer { lock.unlock() }
-        guard !isEmpty else { return nil }
+        // ✅ Use _count directly — calling isEmpty would re-acquire the lock (deadlock)
+        guard _count > 0 else { return nil }
         let item = buffer[head]!
         buffer[head] = nil
         head = (head + 1) & (buffer.count - 1)
-        count -= 1
+        _count -= 1
         return item
     }
 
-    /// Removes all items from the queue.
+    /// Removes all items and resets the semaphore to eliminate ghost signals.
     public func removeAll() {
         lock.lock()
         buffer = [T?](repeating: nil, count: buffer.count)
         head = 0
         tail = 0
-        count = 0
+        _count = 0
+        // ✅ Replace semaphore entirely — draining it signal-by-signal would
+        //    block if producers are concurrent; a fresh instance is safe.
+        semaphore = DispatchSemaphore(value: 0)
         lock.unlock()
-        // ⚠️ Note: semaphore may still have pending signals
     }
 
-    /// Whether the queue is empty.
     public var isEmpty: Bool {
         lock.lock()
-        let result = (count == 0)
-        lock.unlock()
-        return result
+        defer { lock.unlock() }
+        return _count == 0
     }
 
-    /// Number of items in the queue.
-    public var countItems: Int {
+    /// Number of items currently in the queue.
+    public var count: Int {
         lock.lock()
-        let result = count
-        lock.unlock()
-        return result
+        defer { lock.unlock() }
+        return _count
     }
 
     private func grow() {
         let newCap = buffer.count * 2
         var newBuffer = [T?](repeating: nil, count: newCap)
-        for i in 0..<count {
+        for i in 0 ..< _count {
             newBuffer[i] = buffer[(head + i) & (buffer.count - 1)]
         }
         buffer = newBuffer
         head = 0
-        tail = count
+        tail = _count
     }
 }
 
 private extension Int {
     var nextPowerOfTwo: Int {
-        var v = self
-        v -= 1
+        guard self > 1 else { return 2 }
+        var v = self - 1
+        // ✅ Cover all 64 bits
         v |= v >> 1
         v |= v >> 2
         v |= v >> 4
         v |= v >> 8
         v |= v >> 16
+        v |= v >> 32
         return v + 1
     }
 }
 
-/// A thread-safe async producer-consumer queue with both `AsyncStream` and `dequeue()` support.
+// MARK: - AsyncProducerConsumerQueue
+
 public actor AsyncProducerConsumerQueue<T: Sendable> {
     private var buffer: [T] = []
     private var waiting: [CheckedContinuation<T?, Never>] = []
@@ -115,8 +109,8 @@ public actor AsyncProducerConsumerQueue<T: Sendable> {
 
     public init() {}
 
-    /// Enqueues an item into the queue.
     public func enqueue(_ item: T) {
+        guard !isFinished else { return }
         if let waiter = waiting.first {
             waiting.removeFirst()
             waiter.resume(returning: item)
@@ -125,31 +119,30 @@ public actor AsyncProducerConsumerQueue<T: Sendable> {
         }
     }
 
-    /// Dequeues the next item, suspending if necessary.
-    /// Returns `nil` if the queue is finished and empty.
     public func dequeue() async -> T? {
-        if !buffer.isEmpty {
-            return buffer.removeFirst()
-        }
-        if isFinished {
-            return nil
-        }
-        return await withCheckedContinuation { (cont: CheckedContinuation<T?, Never>) in
+        if !buffer.isEmpty { return buffer.removeFirst() }
+        if isFinished { return nil }
+        return await withCheckedContinuation { cont in
             waiting.append(cont)
         }
     }
 
-    /// Finishes the queue, signaling no more items will be sent.
-    /// All pending dequeuers will receive `nil`.
     public func finish() {
         isFinished = true
-        for waiter in waiting {
-            waiter.resume(returning: nil)
-        }
+        for waiter in waiting { waiter.resume(returning: nil) }
         waiting.removeAll()
     }
 
-    /// Convenience: An async sequence interface for iterating.
+    /// Removes buffered items and cancels all pending dequeuers with nil.
+    /// The queue remains open for new enqueues unless `finish()` was called.
+    public func removeAll() {
+        buffer.removeAll()
+        for waiter in waiting { waiter.resume(returning: nil) }
+        waiting.removeAll()
+    }
+
+    /// Each call creates an independent consumer stream.
+    /// Only use one stream per queue instance to avoid item loss.
     public nonisolated var stream: AsyncStream<T> {
         AsyncStream { continuation in
             Task {
@@ -159,17 +152,5 @@ public actor AsyncProducerConsumerQueue<T: Sendable> {
                 continuation.finish()
             }
         }
-    }
-}
-
-public extension AsyncProducerConsumerQueue {
-    /// Removes all buffered items and cancels all pending dequeuers.
-    /// Waiting dequeuers will resume with `nil`.
-    func removeAll() {
-        buffer.removeAll()
-        for waiter in waiting {
-            waiter.resume(returning: nil)
-        }
-        waiting.removeAll()
     }
 }

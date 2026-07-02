@@ -1,5 +1,8 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  EmojiCategoryType.swift
+//  Conversation
+//
+//  Created by Aung Ko Min on 15/5/26.
 //
 
 import Foundation
@@ -16,8 +19,6 @@ enum EmojiCategoryType: String, CaseIterable {
     case objects
     case symbols
     case flags
-
-    // MARK: - Properties
 
     var title: String {
         switch self {

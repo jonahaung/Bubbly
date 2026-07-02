@@ -1,11 +1,12 @@
+//  CancelBag.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Combine
 
 public final class CancelBag: @unchecked Sendable {
-    fileprivate(set) var subscriptions = Set<AnyCancellable>()
+    fileprivate(set) var subscriptions: Set<AnyCancellable> = []
     public init(subscriptions: Set<AnyCancellable> = Set<AnyCancellable>()) {
         self.subscriptions = subscriptions
     }

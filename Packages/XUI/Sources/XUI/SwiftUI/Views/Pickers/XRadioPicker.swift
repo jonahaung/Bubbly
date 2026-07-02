@@ -1,5 +1,6 @@
+//  XRadioPicker.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -18,7 +19,7 @@ public struct XRadioPicker<Item: XPickable>: View {
         Group {
             ForEach(items) { item in
                 AsyncButton {
-                    Haptics.play(.rigid, 0.9)
+//                    Haptics.play(.rigid, 0.9)
                     selection.wrappedValue = item
                 } label: {
                     HStack {

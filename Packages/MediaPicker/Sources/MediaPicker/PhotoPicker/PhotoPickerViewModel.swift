@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import AVFoundation
@@ -29,7 +29,7 @@ public final class PhotoPickerViewModel {
         }
     }
 
-    // MARK: - Init
+    
 
     public init(_ pickedPhoto: PickedPhoto?) {
         _pickedPhoto = pickedPhoto

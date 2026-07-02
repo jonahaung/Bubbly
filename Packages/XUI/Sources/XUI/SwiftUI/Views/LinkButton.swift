@@ -1,5 +1,6 @@
+//  LinkButton.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import SwiftUI
@@ -60,8 +61,7 @@ public struct LinkButton<Label: View>: View {
             characterSet.insert(charactersIn: "?&")
             guard let urlString = urlWhats
                 .addingPercentEncoding(withAllowedCharacters: characterSet),
-                let url = URL(string: urlString)
-            else {
+                let url = URL(string: urlString) else {
                 return nil
             }
             return url

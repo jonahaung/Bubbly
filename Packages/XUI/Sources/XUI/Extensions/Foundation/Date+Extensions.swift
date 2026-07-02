@@ -1,5 +1,6 @@
+//  Date+Extensions.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -25,7 +26,7 @@ public extension Date {
         guard let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: now) else {
             return false
         }
-        return (sevenDaysAgo...now).contains(self)
+        return (sevenDaysAgo ... now).contains(self)
     }
 
     var isInThisMonth: Bool {
@@ -33,6 +34,6 @@ public extension Date {
         guard let month = Calendar.current.date(byAdding: .month, value: -1, to: now) else {
             return false
         }
-        return (month...now).contains(self)
+        return (month ... now).contains(self)
     }
 }

@@ -1,6 +1,11 @@
+//  AttachmentPreviewViewModel.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Database
-import Foundation
 import Services
+import Foundation
 
 @MainActor
 @Observable
@@ -19,24 +24,28 @@ public final class AttachmentPreviewViewModel {
         switch attachment.attachmentType {
         case .image:
             if attachment.fileExist(),
-               let thumb = attachment.thumbnailImage() {
+               let thumb = attachment.thumbnailImage()
+            {
                 return .image(thumbnail: thumb)
             }
         case .imageUploading:
             if attachment.fileExist(),
                let url = attachment.file()?.url,
-               let thumb = attachment.thumbnailImage() {
+               let thumb = attachment.thumbnailImage()
+            {
                 return .imageUpload(localURL: url, thumbnail: thumb)
             }
         case .video:
             if attachment.fileExist(),
                let url = attachment.localURL(),
-               let thumb = attachment.thumbnailImage() {
+               let thumb = attachment.thumbnailImage()
+            {
                 return .video(videoURL: url, thumbnail: thumb)
             }
         case .link:
             if attachment.fileExist(),
-               let thumb = attachment.image() {
+               let thumb = attachment.image()
+            {
                 return .link(thumbnail: thumb)
             }
         case .videoUploading:
@@ -49,7 +58,8 @@ public final class AttachmentPreviewViewModel {
     public func loadAttachment(attachmentFetcher: AttachmentFetcher) async {
         do {
             let data = try await attachmentFetcher.fetch(
-                attachment, intent: .visible
+                attachment,
+                intent: .visible
             )
             await MainActor.run {
                 attachmentData = data
@@ -57,7 +67,9 @@ public final class AttachmentPreviewViewModel {
             }
         } catch {
             await MainActor.run {
-                if error is CancellationError { return }
+                if error is CancellationError {
+                    return
+                }
                 self.error = error
             }
         }

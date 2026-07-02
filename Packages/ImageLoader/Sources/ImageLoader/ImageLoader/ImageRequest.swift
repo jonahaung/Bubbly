@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Combine
@@ -419,7 +419,7 @@ public struct ImageRequest: CustomStringConvertible, @unchecked Sendable,
         }
     }
 
-    // MARK: Internal
+    
 
     private var ref: Container
 

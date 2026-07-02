@@ -4,7 +4,10 @@ import PackageDescription
 
 let package = Package(
     name: "XUI",
-    platforms: [.iOS(.v26)],
+    platforms: [
+        .iOS(.v26),
+        .macOS(.v12)
+    ],
     products: [
         .library(
             name: "XUI",
@@ -15,15 +18,20 @@ let package = Package(
         .package(
             url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
             .upToNextMajor(from: "5.3.0")
-        )
+        ),
+        .package(name: "Anima", path: "../Anima"),
+        .package(name: "ImageLoader", path: "../ImageLoader")
     ],
     targets: [
         .target(
             name: "XUI",
             dependencies: [
-                .product(name: "SFSafeSymbols", package: "SFSafeSymbols")
+                .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
+                .product(name: "Anima", package: "Anima"),
+                .product(name: "ImageLoader", package: "ImageLoader")
             ],
             resources: [
+                .process("Resources")
             ]
         ),
         .testTarget(

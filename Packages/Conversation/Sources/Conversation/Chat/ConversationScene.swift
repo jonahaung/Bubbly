@@ -1,5 +1,6 @@
+//  ConversationScene.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Core
@@ -7,123 +8,51 @@ import Database
 import Services
 import SwiftUI
 import XUI
+
 public struct ConversationScene: View {
+    
+    @FocusState private var focusState: ConversationFocusState?
+    @Namespace private var namespace
 
-	let coordinator: AppCoordinator
-    @LazyState private var manager: ChatViewManager
+    @LazyState private var viewModel: ChatManager
     @LazyState private var composer: ChatComposer
-	@FocusState private var focusState: String?
-	@Namespace private var namespace
-
-    public init(_ prefetchedData: ConversationInitializer.PrefetchedData, coordinator: AppCoordinator) {
-        _manager = .init(wrappedValue: .init(prefetchedData))
-        _composer = .init(wrappedValue: .init(id: prefetchedData.conversation.uid))
-        self.coordinator = coordinator
+    
+    public init(
+        coordinator: AppCoordinator,
+        prefretchData: ConversationInitializedData
+    ) {
+        _viewModel = .init(
+            wrappedValue: .init(
+                prefretchData,
+                currentUserRepository: coordinator.container
+                    .currentUserRepository,
+                router: coordinator.router
+            )
+        )
+        _composer = .init(wrappedValue: .init())
     }
 
     public var body: some View {
-		ZStack {
-            ConversationSceneBackground(color: manager.state.properties.theme.background.color)
-				.equatable(by: manager.state.properties.theme.background)
-			ChatScrollView(manager: manager)
-				.contentMargins(
-					.all,
-					.init(
-						top: ChatLayoutConstants.topBarHeight,
-						leading: 8,
-						bottom: manager.layout.bottomBarFrame?.height ?? 0,
-						trailing: 8
-					), for: .scrollContent
-				)
-
-			VStack(alignment: .center, spacing: 4) {
-				ChatTitleBar()
-				FloatingDateView()
-			}
-			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-
-            VStack(alignment: .center, spacing: 8) {
-                ChatAccessoryBar()
-				ComposeBar()
-					.background(
-						LinearGradient(
-							colors: [
-								.clear,
-								manager.state.properties.theme.background.color
-							],
-							startPoint: .top,
-							endPoint: .bottom
-						)
-					)
-					.onGeometryChange(for: CGRect.self) { geometry in
-						geometry.frame(in: .global)
-					} action: { oldValue, newValue in
-						manager.onBottomBarFrameChage(oldValue, newValue)
-					}
-            }
-			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-			.environment(composer)
-
-            if let frame = manager.presentation.state.overlayItem,
-               let overlayViewModel = manager.models.element(withID: frame.id) {
-                ChatOverlayView(item: frame)
-                    .font(.system(size: UIFont.preferredFont(forTextStyle: .body).pointSize))
-                    .environment(overlayViewModel)
-                    .environment(\.conversation, manager.conversation)
-            }
+        ZStack(alignment: .bottomTrailing) {
+            BackgroundView(imageName: viewModel.state.properties.theme.background.imageName)
+            SeenStatusOverlay()
+            ConversationScrollView(manager: viewModel)
+                .layoutPriority(1)
+            ConversationSceneOverlayBar()
         }
-		.toolbarVisibility(.hidden, for: .tabBar)
-		.toolbarVisibility(.hidden, for: .navigationBar)
-        .environment(\.seenMembers, manager.state.properties.seenMembers)
-        .environment(\.conversation, manager.conversation)
-		.environment(\.conversationTheme, manager.state.theme)
-        .environment(\.attachmentFetcher, manager.attachmentFetcher)
-        .environment(\.sharedFocusState, SharedFocusState($focusState))
+        .environment(\.conversation, viewModel.state.conversation)
+        .environment(\.conversationTheme, viewModel.state.theme)
+        .environment(\.attachmentFetcher, viewModel.attachmentFetcher)
+        .environment(\.seenMembers, viewModel.state.properties.seenMembers)
+        .environment(\.sharedFocusState, viewModel.focusState)
+        .environment(\.members, viewModel.members)
         .environment(\.sharedNamespace, SharedNamespace(namespace))
-        .environment(\.msgCellActions, MsgCellAction(action: handleMsgCellInteraction))
-		.environment(manager)
-		.task {
-			await manager.onViewAppear()
-		}
-    }
-}
-
-private extension ConversationScene {
-    func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
-        switch action {
-        case let .onTapMsg(string):
-            manager.setSelectedMsg(string)
-        case .onMarkMsg:
-            break
-        case let .onTapAvatar(string):
-            guard let vieModel = manager.models.element(withID: string) else { return }
-            let msg = vieModel.msg
-            let senderID = msg.senderID
-            if let contact = coordinator.container.contactsRepository.contact(for: senderID) {
-				Router.shared.pushToNav(.contactDetails(contact))
-            }
-        case let .onFocusMsgBubble(frame):
-            manager.presentation.send(.overlayItem(frame))
-        case .onUploadedAttachments:
-            break
-        case let .onReact(message, reactionType):
-            Task {
-                try? await Socket
-                    .send(
-                        .reaction(
-                            reaction: .init(
-                                reaction: .init(
-                                    rawValue: reactionType.rawValue,
-                                    senderID: currentUserId ?? "",
-                                    date: .now
-                                ),
-                                msgID: message.uid,
-                                conID: manager.conversation.uid
-                            )
-                        ),
-                        conversation: manager.conversation
-                    )
-            }
+        .environment(\.msgCellActions, .init(action: { viewModel.send(.cellAction($0)) }))
+        .environment(viewModel)
+        .environment(composer)
+        .onAppear {
+            viewModel.focusState = .init($focusState)
+            viewModel.onViewAppear()
         }
     }
 }

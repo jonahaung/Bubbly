@@ -1,5 +1,6 @@
+//  DisplayLink.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import UIKit
@@ -13,24 +14,24 @@ public final class DisplayLink {
     private var displayLink: CADisplayLink?
     private var startTime: CFTimeInterval = 0
     public private(set) var state: State = .inactive
-	private let fixedInterval: CFTimeInterval
+    private let fixedInterval: CFTimeInterval
     private var targetInterval: CFTimeInterval
 
     public init(_ interval: CFTimeInterval = 1) {
-		fixedInterval = interval
+        fixedInterval = interval
         targetInterval = interval
     }
 
-    public var onUpdate: ((Double) -> Void)?
+//    public var onUpdate: ((Double) -> Void)?
 
     public var onTargetReached: ((Double) -> Void)?
 
     public func start(_ interval: CFTimeInterval? = nil) {
-        if let interval {
-            targetInterval = interval
-		} else {
-			targetInterval = fixedInterval
-		}
+        targetInterval = if let interval {
+            interval
+        } else {
+            fixedInterval
+        }
         if state == .running {
             stop()
         }
@@ -40,7 +41,7 @@ public final class DisplayLink {
 
         let link = CADisplayLink(target: self, selector: #selector(handleFrame))
         link.preferredFrameRateRange = .init(minimum: 60, maximum: 60)
-		link.add(to: .main, forMode: .common)
+        link.add(to: .current, forMode: .common)
         displayLink = link
     }
 
@@ -56,9 +57,9 @@ public final class DisplayLink {
         guard state == .running else { return }
 
         let elapsed = CACurrentMediaTime() - startTime
-        if let onUpdate {
-            onUpdate(elapsed)
-        }
+//        if let onUpdate {
+//            onUpdate(elapsed)
+//        }
         if elapsed >= targetInterval {
             stop()
             onTargetReached?(elapsed)

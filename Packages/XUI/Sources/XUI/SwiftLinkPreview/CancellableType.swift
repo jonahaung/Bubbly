@@ -1,5 +1,6 @@
+//  CancellableType.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -12,7 +13,7 @@ public protocol CancellableType {
 
 public final class CancellableModel: NSObject, CancellableType, @unchecked Sendable {
     // Protect mutable state with a lock to make it concurrency-safe.
-    private let lock = NSLock()
+    private let lock: NSLock = .init()
     private var _isCancelled: Bool = false
 
     public var isCancelled: Bool {

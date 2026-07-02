@@ -1,6 +1,4 @@
-//
-// Copyright © 2026 Stream.io Inc. All rights reserved.
-//
+// © 2026 Aung Ko Min
 
 import UIKit
 
@@ -11,7 +9,7 @@ enum PlaygroundModels {
         struct Response {}
 
         struct ViewModel {
-            var exampleTranslation: String?
+            var exampleTranslation: String? = nil
         }
     }
 
@@ -19,11 +17,11 @@ enum PlaygroundModels {
         struct Request {}
 
         struct Response {
-            var exampleVariable: String?
+            var exampleVariable: String? = nil
         }
 
         struct ViewModel {
-            var exampleVariable: String?
+            var exampleVariable: String? = nil
         }
     }
 
@@ -39,15 +37,15 @@ enum PlaygroundModels {
 
     enum PerformPlayground {
         struct Request {
-            var exampleVariable: String?
+            var exampleVariable: String? = nil
         }
 
         struct Response {
-            var error: PlaygroundError?
+            var error: PlaygroundError? = nil
         }
 
         struct ViewModel {
-            var error: PlaygroundError?
+            var error: PlaygroundError? = nil
         }
     }
 
@@ -65,7 +63,7 @@ enum PlaygroundModels {
 
     struct Error<T> {
         var type: T
-        var message: String?
+        var message: String? = nil
 
         init(type: T) {
             self.type = type

@@ -1,10 +1,12 @@
+//  ConversationTheme.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
-import SwiftUI
 import XUI
+import Core
+import SwiftUI
+import Foundation
 
 public struct ConversationTheme: Codable, Sendable, Hashable {
     public var bubbleColor: BubbleColor
@@ -12,8 +14,8 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
     public var bubbleCornorRadius: CGFloat
 
     public init(
-        bubbleColor: BubbleColor = .default,
-        background: ChatBackground = .default,
+        bubbleColor: BubbleColor = .empty,
+        background: ChatBackground = .bg_6,
         bubbleCornorRadius: CGFloat = 17
     ) {
         self.bubbleColor = bubbleColor
@@ -21,9 +23,9 @@ public struct ConversationTheme: Codable, Sendable, Hashable {
         self.bubbleCornorRadius = bubbleCornorRadius
     }
 
-    public static let `default` = ConversationTheme(
-        bubbleColor: .default,
-        background: .default,
+    public static let `default`: ConversationTheme = .init(
+        bubbleColor: .empty,
+        background: .bg_6,
         bubbleCornorRadius: 17
     )
 }

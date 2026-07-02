@@ -1,7 +1,8 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
+import BubblyContacts
 import Conversation
 import Database
 import Services
@@ -10,41 +11,38 @@ import SwiftUI
 import XUI
 
 struct MainNavView<Content: View>: View {
-    let tabPath: TabPath
-    let coordinator: AppCoordinator
-    @ViewBuilder var content: () -> Content
+	let tabPath: TabPath
+	let coordinator: AppCoordinator
+	let content: () -> Content
 
-    var body: some View {
-        NavigationStack(
-			path: Router.shared.navPathsBinding(for: tabPath) as Binding<[NavPath]>
-        ) {
-            content()
-                .navigationDestination(for: NavPath.self) { navPath in
-                    coordinator.view(for: navPath)
-                }
-        }
-    }
+	var body: some View {
+		NavigationStack(
+			path: coordinator.router.navPathsBinding(for: tabPath),
+		) {
+			content()
+		}
+	}
 }
 
-public extension AppCoordinator {
-    @ViewBuilder func view(for navPath: NavPath) -> some View {
-        switch navPath {
-        case let .conversationDetails(conversation):
-            switch conversation.kind {
-            case let .contact(contact):
-                ContactSettingsScene(contact)
-            case let .group(group):
-                GroupConversationSettingsScene(group)
-            }
-        case let .conversation(prefetchedData):
-            ConversationScene(prefetchedData, coordinator: self)
-        case let .contactDetails(contact):
-            ContactDetailsScene(contact: contact)
-        case .currentUserDetails:
-            UserProfileView(viewModel: .init(currentUserRepository: container
-                    .currentUserRepository))
-        case let .view(_, node):
-            node.eraseToNode()
-        }
-    }
+extension AppCoordinator {
+	@MainActor @ViewBuilder public func view(for navPath: NavPath) -> some View {
+		switch navPath {
+		case .conversationDetails(let conversation):
+			switch conversation.kind {
+			case .contact(let contact):
+				ContactProfile(contact, coordinator: self)
+			case .group(let group):
+				GroupConversationSettingsScene(group, coordinator: self)
+			}
+		case .conversation(let prefetchedData):
+			ConversationScene(coordinator: self, prefretchData: prefetchedData)
+				.toolbarVisibility(.hidden, for: .navigationBar, .tabBar)
+		case .contactDetails(let contact):
+			ContactDetailsScene(contact: contact, coordinator: self)
+		case .currentUserDetails:
+			UserProfileView(coordinator: self)
+		case .view(let node):
+			node.eraseToNode()
+		}
+	}
 }

@@ -1,10 +1,13 @@
+//  UIdentifiable.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
 
-public protocol UIdentifiable: Identifiable {
+// MARK: - UIdentifiable
+
+public protocol UIdentifiable: Identifiable, Hashable {
     associatedtype UID = String
     var uid: UID { get }
 }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+// Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
 import Foundation
@@ -17,23 +17,6 @@ public struct APNSPayload: Codable {
     public let relevanceScore: Float?
     public let filterCriteria: String?
 
-    /// - Parameters:
-    ///   - alert: The information for displaying an alert.
-    ///   - badge: The number to display in a badge on your app’s icon.
-    ///   - sound: The name of a sound file in your app’s main bundle or in the Library/Sounds folder of your app’s container
-    /// directory.
-    ///   - hasContentAvailable: The background notification flag. To perform a silent background update, specify the value 1 and
-    /// don’t include the alert, badge, or sound keys in your payload.
-    ///   - hasMutableContent: The notification service app extension flag. If the value is 1, the system passes the notification to
-    /// your notification service app extension before delivery.
-    ///   - category: The notification’s type. This string must correspond to the identifier of one of the UNNotificationCategory
-    /// objects you register at launch time.
-    ///   - threadID: An app-specific identifier for grouping related notifications.
-    ///   - targetContentId: The identifier of the window brought forward.
-    ///   - interruptionLevel: The importance and delivery timing of a notification. The string values “passive”, “active”,
-    /// “time-sensitive”, or “critical” correspond to the UNNotificationInterruptionLevel enumeration cases.
-    ///   - relevanceScore: The relevance score, a number between 0 and 1, that the system uses to sort the notifications from your
-    /// app.
     public init(
         alert: APNSAlert? = nil,
         badge: Int? = nil,
@@ -50,24 +33,14 @@ public struct APNSPayload: Codable {
         self.alert = alert
         self.badge = badge
         self.sound = sound
-
-        if let hasContentAvailable {
-            contentAvailable = hasContentAvailable ? 1 : 0
-        } else {
-            contentAvailable = nil
-        }
-
-        if let hasMutableContent {
-            mutableContent = hasMutableContent ? 1 : 0
-        } else {
-            mutableContent = nil
-        }
+        contentAvailable = hasContentAvailable == true ? 1 : nil
+        mutableContent = hasMutableContent == true ? 1 : nil
 
         self.category = category
         self.threadID = threadID
         self.targetContentId = targetContentId
         self.interruptionLevel = interruptionLevel
-        self.relevanceScore = relevanceScore
+        self.relevanceScore = relevanceScore.map { min(max($0, 0), 1) }
         self.filterCriteria = filterCriteria
     }
 

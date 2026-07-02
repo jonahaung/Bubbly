@@ -1,9 +1,10 @@
+//  CircleButton.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import SFSafeSymbols
 import SwiftUI
+import SFSafeSymbols
 
 // MARK: - Model
 
@@ -15,7 +16,7 @@ public struct CircleButton: View {
 
     public init(
         _ symbol: SFSymbol,
-        _ size: CGFloat = 35,
+        _ size: CGFloat = 38,
         color: Color = .accentColor,
         action: @escaping () -> Void
     ) {
@@ -30,15 +31,16 @@ public struct CircleButton: View {
             action()
         } label: {
             ZStack {
-                Circle().fill(Color.systemBackground.gradient)
+                Circle().fill(Color.container)
                     .frame(square: size)
                     .layoutPriority(1)
                 SystemImage(symbol, size * 0.4)
-                    .foregroundStyle(color.gradient)
+                    .foregroundStyle(color)
                     .fontWeight(.semibold)
             }
         }
         .buttonRepeatBehavior(.disabled)
         .buttonStyle(.borderless)
+        .equatable(by: symbol)
     }
 }

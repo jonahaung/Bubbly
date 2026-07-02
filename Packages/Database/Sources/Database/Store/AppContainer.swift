@@ -1,9 +1,13 @@
+//  AppContainer.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Core
 import SwiftData
+import Foundation
+
+// MARK: - AppSchemaV1
 
 public enum AppSchemaV1: VersionedSchema {
     public static let versionIdentifier: Schema.Version = .init(1, 0, 0)
@@ -17,6 +21,8 @@ public enum AppSchemaV1: VersionedSchema {
     }
 }
 
+// MARK: - AppSchemaMigrationPlan
+
 public enum AppSchemaMigrationPlan: SchemaMigrationPlan {
     public static var schemas: [any VersionedSchema.Type] {
         [
@@ -29,34 +35,34 @@ public enum AppSchemaMigrationPlan: SchemaMigrationPlan {
     }
 }
 
+// MARK: - AppContainer
+
 public final class AppContainer: Sendable {
     public let modelContainer: ModelContainer
 
     public init(migrationPlan: (any SchemaMigrationPlan.Type)? = nil, id: String?) {
-        let schema = Schema(
-            AppSchemaV1.models
-        )
+        let schema = Schema(AppSchemaV1.models)
         let configuration = ModelConfiguration(
             id,
             schema: schema,
             isStoredInMemoryOnly: false,
             allowsSave: true,
-            groupContainer: .identifier(AppInformation.groupID)
-            // cloudKitDatabase: .private(AppInformation.iCloudID)
+            groupContainer: .identifier(AppInformation.groupID),
+            cloudKitDatabase: .none
         )
         do {
-            let modelContainer = try ModelContainer(
+            modelContainer = try ModelContainer(
                 for: schema,
-                migrationPlan: migrationPlan ?? AppSchemaMigrationPlan.self,
+                migrationPlan: nil,
                 configurations: configuration
             )
-            self.modelContainer = modelContainer
         } catch {
             if migrationPlan == nil,
                let legacyModelContainer = try? ModelContainer(
                    for: schema,
                    configurations: configuration
-               ) {
+               )
+            {
                 modelContainer = legacyModelContainer
                 return
             }

@@ -1,5 +1,6 @@
+//  Log.swift
 //
-// Copyright © 2026 Stream.io Inc. All rights reserved.
+//  Copyright © 2025 Aung Ko Min.
 //
 
 import Foundation
@@ -12,8 +13,8 @@ public func log(
     function _: String = #function
 ) {
     #if DEBUG
-    guard let object else { return }
-    let file = (filename as NSString).lastPathComponent
-    print("\(file), \(line)\t\t\t\t\t\t\t\t\t\t\t\t\t\(object)")
+        guard let object else { return }
+        let file = (filename as NSString).lastPathComponent
+        print("\("✅") \(file)|\(line)\n\(object)")
     #endif
 }
