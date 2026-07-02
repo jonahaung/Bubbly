@@ -27,7 +27,7 @@ struct OverlayMenu: View {
                             handleDismiss()
                         }
                 )
-            MsgCellContent(state: viewModel.state)
+            MsgCellContent(viewModel: viewModel)
                 .frame(size: item.frame.size)
                 .offset(x: item.frame.minX, y: item.frame.minY)
             

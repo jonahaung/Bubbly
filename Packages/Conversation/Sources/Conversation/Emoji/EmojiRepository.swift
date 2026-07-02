@@ -25,7 +25,7 @@ struct EmojiRepository {
     }
 
     private func decodeEmojis() throws -> [Emoji] {
-        let bundle = Bundle.module
+        let bundle = Bundle.main
         let url = bundle.url(
             forResource: "emojis",
             withExtension: "json"
@@ -54,3 +54,4 @@ struct EmojiRepository {
         return categories
     }
 }
+

@@ -9,8 +9,13 @@ import Database
 import Services
 
 struct MsgCellContent: View {
-    let state: MsgCellViewModel.State
+    let viewModel: MsgCellViewModel
     @Environment(\.conversationTheme) private var theme
+
+    private var state: MsgCellViewModel.State {
+        viewModel.state
+    }
+
     var body: some View {
         ZStack(
             alignment: .init(
@@ -20,7 +25,11 @@ struct MsgCellContent: View {
         ) {
             if state.attachments?.isEmpty == false {
                 DispatchingChanges(to: state, id: state.id) { state in
-                    MsgCellAttachmentBubble(state: state, theme: theme)
+                    MsgCellAttachmentBubble(
+                        state: state,
+                        isVisible: viewModel.isVisible,
+                        theme: theme
+                    )
                 }
             } else {
                 MsgCellTextBubble(state: state, theme: theme)

@@ -17,25 +17,10 @@ public struct AttachmentGalleryCell: View {
         switch attachment.attachmentType {
         case .image,
              .imageUploading:
-            if let data = attachment.data(), let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .scaledToFit()
-                    .zoomable()
-            } else {
-                content
-            }
+            imageContent
         case .link:
             VStack(spacing: 8) {
-                if let data = attachment.data(),
-                   let uiImage = UIImage(data: data)
-                {
-                    Image(uiImage: uiImage)
-                        .resizable()
-                        .scaledToFit()
-                } else {
-                    content
-                }
+                previewContent(isZoomEnabled: false)
                 if let title = attachment.title {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(title)
@@ -77,14 +62,33 @@ public struct AttachmentGalleryCell: View {
         }
     }
 
-    private var content: some View {
-        AsyncImage(url: attachment.galleryURL) { image in
-            image
-                .resizable()
-                .scaledToFit()
-                .zoomable()
-        } placeholder: {
-            ProgressView().controlSize(.mini)
+    @ViewBuilder
+    private var imageContent: some View {
+        previewContent(isZoomEnabled: true)
+    }
+
+    @ViewBuilder
+    private func previewContent(isZoomEnabled: Bool) -> some View {
+        LazyImage(url: attachment.galleryURL, transaction: .withAnimation()) { state in
+            switch state.result {
+            case let .success(success):
+                let image = Image(uiImage: success.image)
+                    .resizable()
+                    .scaledToFit()
+                if isZoomEnabled {
+                    image.zoomable()
+                } else {
+                    image
+                }
+            case let .failure(failure):
+                ContentUnavailableView {
+                    Text("Error")
+                } description: {
+                    Text(failure.localizedDescription)
+                }
+            case .none:
+                ProgressView().controlSize(.mini)
+            }
         }
     }
 }

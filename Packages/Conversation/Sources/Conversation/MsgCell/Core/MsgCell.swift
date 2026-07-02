@@ -22,7 +22,7 @@ struct MsgCell: View {
                         .equatable(by: viewModel.state)
                 }
                 MsgCellGesture(viewModel: viewModel) {
-                    MsgCellContent(state: viewModel.state)
+                    MsgCellContent(viewModel: viewModel)
                 }
                 if viewModel.state.isSender {
                     OutgoingAccessory(state: viewModel.state)

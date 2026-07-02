@@ -64,14 +64,11 @@ public struct AttachmentGalleryView: View {
         let currentItem = attachments.first(where: { $0.id == selection })
         if let item = currentItem,
            item.attachmentType == .image,
-           let url = item.galleryURL,
-           let data = try? Data(contentsOf: url),
-           let uIImage = UIImage(data: data)
+           let url = item.galleryURL
         {
-            let image = Image(uiImage: uIImage)
             ShareLink(
-                item: image,
-                preview: SharePreview(item.galleryTitle ?? "", image: image)
+                item: url,
+                preview: SharePreview(item.galleryTitle ?? "")
             )
             .labelStyle(.iconOnly)
         }

@@ -32,9 +32,6 @@ let package = Package(
                 .product(name: "ImageLoader", package: "ImageLoader"),
                 .product(name: "VideoLoader", package: "ImageLoader"),
                 .product(name: "MediaPicker", package: "MediaPicker")
-            ],
-            resources: [
-                .process("Resources")
             ]
         ),
         .testTarget(

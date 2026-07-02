@@ -13,6 +13,7 @@ import ImageLoader
 import VideoLoader
 
 struct AttachmentPreview: View {
+    let isVisible: Bool
     let onSelect: (_ item: Attachment) -> Void
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
@@ -22,10 +23,12 @@ struct AttachmentPreview: View {
 
     init(
         attachment: Attachment,
+        isVisible: Bool = true,
         onSelect: @escaping (_: Attachment) -> Void,
         onCompleteUpload: ((_ newValue: Attachment) -> Void)? = nil
     ) {
         _model = .init(wrappedValue: .init(attachment: attachment))
+        self.isVisible = isVisible
         self.onSelect = onSelect
         self.onCompleteUpload = onCompleteUpload
     }
@@ -78,28 +81,34 @@ struct AttachmentPreview: View {
             }
         }
         .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
-        .onTask {
-            if model.attachmentData == nil, let attachmentFetcher {
-                if let cached = await model.cachedAttachmentData() {
-                    model.attachmentData = cached
-                } else {
-                    await model.loadAttachment(attachmentFetcher: attachmentFetcher)
+        .task(id: isVisible) {
+            guard let attachmentFetcher else {
+                return
+            }
+            if isVisible {
+                if model.attachmentData == nil {
+                    if let cached = await model.cachedAttachmentData() {
+                        model.attachmentData = cached
+                    } else {
+                        await model.loadAttachment(attachmentFetcher: attachmentFetcher)
+                    }
                 }
+            } else {
+                await attachmentFetcher.cancel(model.attachment)
+                model.attachmentData = nil
+                model.error = nil
             }
         }
-//        .task(id: viewIsVisible) {
-//            if viewIsVisible, let attachmentFetcher {
-//                if model.attachmentData == nil {
-//                    if let cached = await model.cachedAttachmentData() {
-//                        model.attachmentData = cached
-//                    } else {
-//                        await model.loadAttachment(attachmentFetcher: attachmentFetcher)
-//                    }
-//                }
-//            } else {
-//                await attachmentFetcher?.cancel(model.attachment)
-//            }
-//        }
+        .onDisappear {
+            guard let attachmentFetcher else {
+                return
+            }
+            Task {
+                await attachmentFetcher.cancel(model.attachment)
+            }
+            model.attachmentData = nil
+            model.error = nil
+        }
     }
 
     @ViewBuilder
@@ -137,7 +146,6 @@ struct AttachmentPreview: View {
             .scaledToFit()
             .clipShape(RoundedRectangle(cornerRadius: Radius.card))
             .onTapGesture {
-                print("tapped")
                 onSelect(model.attachment)
             }
     }
