@@ -3,7 +3,6 @@
 import Services
 import SwiftUI
 import XUI
-import RichText
 
 // MARK: - PlaygroundView
 
@@ -61,39 +60,41 @@ struct PlaygroundView: View {
                 }
             }
             
-            ForEach(MarkdownParser.parse(markdownTestData), id: \.self) { item in
-                switch item {
-                case let .heading(level, text):
-                    Text(text)
-                        .font(.system(size: 18 + CGFloat((6 - min(level,6)) * 2), weight: .bold))
-                        .padding(.vertical, 4)
-                case let .paragraph(text):
-                    Text(text)
-                case let .codeBlock(_, content):
-                    Text(content)
-                        .font(.system(.body, design: .monospaced))
-                        .padding(6)
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(5)
-                case let .listItem(_, text):
-                    Text("• " + text)
-                case let .orderedListItem(_, idx, text):
-                    Text("\(idx). " + text)
-                case let .blockquote(text):
-                    Text(text)
-                        .italic()
-                        .padding(.leading, 16)
-                        .border(.gray.opacity(0.4))
-                case .horizontalRule:
-                    Divider()
-                case let .mention(username):
-                    Text("@" + username)
-                        .foregroundColor(.red)
-                case let .hashtag(topic):
-                    Text("#" + topic)
-                        .foregroundColor(.blue)
-                case let .unknown(text):
-                    Text(text)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(MarkdownParser.parse(markdownTestData), id: \.self) { item in
+                    switch item {
+                    case let .heading(level, text):
+                        Text(text)
+                            .font(.system(size: 18 + CGFloat((6 - min(level,6)) * 2), weight: .bold))
+                            .padding(.vertical, 4)
+                    case let .paragraph(text):
+                        Text(.init(text))
+                    case let .codeBlock(_, content):
+                        Text(content)
+                            .font(.system(.body, design: .monospaced))
+                            .padding(6)
+                            .background(Color(.secondarySystemBackground))
+                            .cornerRadius(5)
+                    case let .listItem(_, text):
+                        Text(.init("• " + text))
+                    case let .orderedListItem(_, idx, text):
+                        Text(.init("\(idx). " + text))
+                    case let .blockquote(text):
+                        Text(text)
+                            .italic()
+                            .padding(.leading, 16)
+                            .border(.gray.opacity(0.4))
+                    case .horizontalRule:
+                        Divider()
+                    case let .mention(username):
+                        Text("@" + username)
+                            .foregroundColor(.red)
+                    case let .hashtag(topic):
+                        Text("#" + topic)
+                            .foregroundColor(.blue)
+                    case let .unknown(text):
+                        Text(text)
+                    }
                 }
             }
             

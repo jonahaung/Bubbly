@@ -17,7 +17,6 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "XUI", path: "../XUI"),
-        .package(name: "RichText", path: "../RichText"),
         .package(name: "ImageLoader", path: "../ImageLoader"),
         .package(name: "Crypto", path: "../Crypto"),
         .package(name: "MediaPicker", path: "../MediaPicker"),
@@ -31,7 +30,6 @@ let package = Package(
             name: "Core",
             dependencies: [
                 .product(name: "XUI", package: "XUI"),
-                .product(name: "RichText", package: "RichText"),
                 .product(name: "FCM_V1", package: "FCM_V1"),
                 .product(name: "ImageLoader", package: "ImageLoader"),
                 .product(name: "VideoLoader", package: "ImageLoader"),
