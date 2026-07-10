@@ -3,223 +3,176 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import Contacts
 import SwiftUI
 
-public struct MarkdownFormatter {
+public struct MarkdownFormatter: Sendable {
+    private let style: GitHubMarkdownStyle
 
-    private let style: GitHubMarkdownStyle = .init()
-    public init() {}
-
-    // MARK: Public
-    public func markDownText(for string: String) -> AttributedString {
-        guard string.containsMarkdown else {
-            return .init(string, attributes: style.base)
-        }
-        if let markdown = try? AttributedString(
-            markdown: string,
-            options: .init(
-                allowsExtendedAttributes: true,
-                interpretedSyntax: .full,
-                failurePolicy: .returnPartiallyParsedIfPossible
-            )
-        ) {
-            return markdown.mergingAttributes(style.block(.paragraph))
-        }
-        return AttributedString(string, attributes: style.block(.paragraph))
+    public init(style: GitHubMarkdownStyle = .init()) {
+        self.style = style
     }
 
-    public func richText(
-        for string: String
-    ) -> AttributedString {
-        guard string.containsMarkdown else {
-            return .init(string, attributes: style.base)
+    public func markdownText(for string: String) -> AttributedString {
+        parseMarkdown(string, base: style.block(.paragraph))
+    }
+
+    @available(*, deprecated, renamed: "markdownText(for:)")
+    public func markDownText(for string: String) -> AttributedString {
+        markdownText(for: string)
+    }
+
+    public func richText(for string: String) -> AttributedString {
+        guard MarkdownParser.requiresRichTextParsing(string) else {
+            return AttributedString(string, attributes: style.base)
         }
-        let blocks = MarkdownParser.parse(string)
 
-        var result = AttributedString()
-
-        for block in blocks {
-            appendSpacingIfNeeded(&result)
-
-            switch block {
-            case .heading(let level, let text):
-                result += renderHeading(level: level, text: text, style: style)
-            case .paragraph(let text):
-                result += parseInline(text, base: style.base)
-            case .codeBlock(let lang, let content):
-                result += renderCodeBlock(
-                    lang: lang,
-                    content: content,
-                    style: style
-                )
-            case .listItem(let level, let text):
-                result += renderUnorderedListItem(
-                    level: level,
-                    text: text,
-                    style: style
-                )
-            case .orderedListItem(let level, let index, let text):
-                result += renderOrderedListItem(
-                    level: level,
-                    index: index,
-                    text: text,
-                    style: style
-                )
-            case .blockquote(let text):
-                result += renderBlockquote(text: text, style: style)
-            case .horizontalRule:
-                result += renderDivider(style: style)
-            case .mention(let username):
-                var attr = style.base
-                attr.font = .system(.body, design: .serif).weight(.medium)
-                attr.foregroundColor = .red
-                result += AttributedString("@\(username)", attributes: attr)
-            case .hashtag(let topic):
-                var attr = style.base
-                attr.foregroundColor = .blue
-                result += AttributedString("#\(topic)", attributes: attr)
-            case .unknown(let text):
-                result += parseInline(text, base: style.base)
-            }
+        return MarkdownParser.parse(string).reduce(into: AttributedString()) {
+            result,
+                item in
+            appendBlockSpacing(to: &result)
+            result += render(item)
         }
-        return result
     }
 }
 
-// MARK: - Helpers
-
 extension MarkdownFormatter {
-    // MARK: Inline Parsing
-
-    func parseInline(_ text: String, base: AttributeContainer)
-        -> AttributedString
-    {
-        if text.containsMarkdown {
-            if let result = try? AttributedString(
-                markdown: text,
-                options: .init(
-                    allowsExtendedAttributes: true,
-                    interpretedSyntax: .full,
-                    failurePolicy: .returnPartiallyParsedIfPossible
-                )
-            ) {
-                return result.mergingAttributes(base)
-            }
-        }
-        return .init(text, attributes: base)
-    }
-
-    // MARK: Block Spacing
-
-    func appendSpacingIfNeeded(
-        _ attr: inout AttributedString,
-        tight _: Bool = true
-    ) {
-        guard !attr.characters.isEmpty, attr.characters.last != "\n" else {
-            return
-        }
-        var spacerAttributes = self.style.block(.paragraph)
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.paragraphSpacing = 6
-        spacerAttributes.paragraphStyle = paragraph
-        attr += AttributedString("\n", attributes: spacerAttributes)
-    }
-    // MARK: Headings
-
-    func renderHeading(level: Int, text: String, style: GitHubMarkdownStyle)
-        -> AttributedString
-    {
-        .init(text, attributes: style.block(.header(level: level)))
-    }
-
-    // MARK: Code Blocks
-
-    func renderCodeBlock(
-        lang: String?,
-        content: String,
-        style: GitHubMarkdownStyle
+    func parseInline(
+        _ text: String,
+        base: AttributeContainer
     ) -> AttributedString {
-        let attributes = style.block(.codeBlock(languageHint: lang))
-        return .init(content, attributes: attributes)
-    }
-
-    // MARK: Blockquote
-
-    func renderBlockquote(text: String, style: GitHubMarkdownStyle)
-        -> AttributedString
-    {
-        let base = style.block(.blockQuote)
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.firstLineHeadIndent = 12
-        paragraph.headIndent = 12
-        paragraph.paragraphSpacing = 4
-        var attributes = base
-        attributes.paragraphStyle = paragraph
-        let lines = text.split(
-            separator: "\n",
-            omittingEmptySubsequences: false
-        )
-        var result = AttributedString()
-        for (i, line) in lines.enumerated() {
-            result += parseInline(String(line), base: attributes)
-            if i < lines.count - 1 { result += "\n" }
-        }
+        var result = parseMarkdown(text, base: base)
+        applyInlineTokenStyles(to: &result)
         return result
     }
 
-    // MARK: Dividers
-
-    func renderDivider(style: GitHubMarkdownStyle) -> AttributedString {
-        var attributes = style.block(.paragraph)
-        attributes.foregroundColor = .secondary
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.paragraphSpacing = 6
-        attributes.paragraphStyle = paragraph
-        return AttributedString("–––––––", attributes: attributes)
-    }
-
-    // MARK: Unordered List Items
-
-    func renderUnorderedListItem(
-        level: Int,
-        text: String,
-        style: GitHubMarkdownStyle
+    private func parseMarkdown(
+        _ text: String,
+        base: AttributeContainer
     ) -> AttributedString {
-        var attributes = style.block(.unorderedList)
-        let indentPerLevel: CGFloat = 12
-        let bulletWidth: CGFloat = 14
-        let baseIndent = CGFloat(level) * indentPerLevel
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.firstLineHeadIndent = baseIndent
-        paragraph.headIndent = baseIndent + bulletWidth
-        paragraph.paragraphSpacing = 2
-        attributes.paragraphStyle = paragraph
-        let bullets = ["-", "•", "‣", "◦"]
-        let bullet = bullets[level % bullets.count]
-        let bulletAttr = AttributedString("\(bullet) ", attributes: attributes)
-        return bulletAttr + parseInline(text, base: attributes)
+        guard MarkdownParser.containsMarkdownSyntax(text),
+              let result = try? AttributedString(
+                  markdown: text,
+                  options: .init(
+                      allowsExtendedAttributes: true,
+                      interpretedSyntax: .full,
+                      failurePolicy: .returnPartiallyParsedIfPossible
+                  )
+              ) else {
+            return AttributedString(text, attributes: base)
+        }
+
+        return result.mergingAttributes(base)
     }
 
-    // MARK: Ordered List Items
+    private func render(_ item: MarkdownItem) -> AttributedString {
+        switch item {
+        case let .heading(level, text):
+            parseInline(text, base: style.block(.header(level: level)))
+        case let .paragraph(text):
+            parseInline(text, base: style.base)
+        case let .codeBlock(language, content):
+            AttributedString(
+                " \n\(content.lines().map{ " \($0)"}.joined(separator: "\n"))\n\n",
+                attributes: style.block(.codeBlock(languageHint: language))
+            )
+        case let .listItem(level, text):
+            renderUnorderedListItem(level: level, text: text)
+        case let .orderedListItem(level, index, text):
+            renderOrderedListItem(level: level, index: index, text: text)
+        case let .blockquote(text):
+            renderBlockquote(text)
+        case .horizontalRule:
+            AttributedString("–––––––", attributes: style.divider)
+        case let .mention(username):
+            parseInline("@\(username)", base: style.base)
+        case let .hashtag(topic):
+            parseInline("#\(topic)", base: style.base)
+        case let .unknown(text):
+            parseInline(text, base: style.base)
+        }
+    }
 
-    func renderOrderedListItem(
+    private func appendBlockSpacing(to result: inout AttributedString) {
+        guard !result.characters.isEmpty, result.characters.last != "\n" else {
+            return
+        }
+        result += AttributedString("\n", attributes: style.blockSpacing)
+    }
+
+    private func renderBlockquote(_ text: String) -> AttributedString {
+        let attributes = style.blockquote
+        let lines = text.split(separator: "\n", omittingEmptySubsequences: false)
+
+        return lines.enumerated().reduce(into: AttributedString()) {
+            result,
+                element in
+            result += parseInline(String(element.element), base: attributes)
+            if element.offset < lines.count - 1 {
+                result += AttributedString("\n", attributes: attributes)
+            }
+        }
+    }
+
+    private func renderUnorderedListItem(
+        level: Int,
+        text: String
+    ) -> AttributedString {
+        let attributes = style.list(level: level, markerWidth: 14, ordered: false)
+        let marker = String(repeating: "  ", count: level) + "• "
+        return AttributedString(marker, attributes: attributes)
+            + parseInline(text, base: attributes)
+    }
+
+    private func renderOrderedListItem(
         level: Int,
         index: Int,
-        text: String,
-        style: GitHubMarkdownStyle
+        text: String
     ) -> AttributedString {
-        var attributes = style.block(.listItem(ordinal: index))
-        let indentPerLevel: CGFloat = 12
-        let numberString = "\(index). "
-        let numberWidth: CGFloat = 18
-        let baseIndent = CGFloat(level) * indentPerLevel
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.firstLineHeadIndent = baseIndent
-        paragraph.headIndent = baseIndent + numberWidth
-        paragraph.paragraphSpacing = 2
-        attributes.paragraphStyle = paragraph
-        let numberAttr = AttributedString(numberString, attributes: attributes)
-        return numberAttr + parseInline(text, base: attributes)
+        let marker = "\(index). "
+        let markerWidth = max(18, CGFloat(marker.count) * 7)
+        let attributes = style.list(
+            level: level,
+            markerWidth: markerWidth,
+            ordered: true,
+            ordinal: index
+        )
+        return AttributedString(marker, attributes: attributes)
+            + parseInline(text, base: attributes)
+    }
+
+    private func applyInlineTokenStyles(to result: inout AttributedString) {
+        var index = result.startIndex
+
+        while index < result.endIndex {
+            let character = result.characters[index]
+            guard character == "@" || character == "#" else {
+                index = result.characters.index(after: index)
+                continue
+            }
+
+            let tokenStart = index
+            var tokenEnd = result.characters.index(after: index)
+            let wordStart = tokenEnd
+
+            while tokenEnd < result.endIndex,
+                  result.characters[tokenEnd].isMarkdownTokenCharacter {
+                tokenEnd = result.characters.index(after: tokenEnd)
+            }
+
+            guard tokenEnd > wordStart else {
+                index = tokenEnd
+                continue
+            }
+
+            let attributes = character == "@" ? style.mention : style.hashtag
+            result[tokenStart ..< tokenEnd].mergeAttributes(attributes)
+            index = tokenEnd
+        }
+    }
+}
+
+private extension Character {
+    var isMarkdownTokenCharacter: Bool {
+        isLetter || isNumber || self == "_"
     }
 }

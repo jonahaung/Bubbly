@@ -363,7 +363,7 @@ extension Messages {
         guard let text = msg.text else { return nil }
         return richTextEnabled
             ? markdownFormatter.richText(for: text)
-            : markdownFormatter.markDownText(for: text)
+            : markdownFormatter.markdownText(for: text)
     }
 
     fileprivate func makeLayout(

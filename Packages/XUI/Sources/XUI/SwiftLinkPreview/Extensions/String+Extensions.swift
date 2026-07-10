@@ -110,9 +110,4 @@ public extension String {
 
         return results.map { String($0) }
     }
-
-    var containsMarkdown: Bool {
-        let tokens = ["**", "__", "`", "```", "[", "](", "#", "> ", "- ", "* ", "@", "://", "]("]
-        return tokens.contains { contains($0) }
-    }
 }
