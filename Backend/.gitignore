@@ -1,0 +1,11 @@
+.build/
+*.profraw
+.swiftpm/
+!.swiftpm/
+!.swiftpm/xcode/
+!.swiftpm/xcode/xcshareddata/
+!.swiftpm/xcode/xcshareddata/xcschemes/
+!.swiftpm/xcode/xcshareddata/xcschemes/BubblyBackend.xcscheme
+.env
+.env.*
+!.env.example

@@ -45,22 +45,13 @@ public actor CurrentUserRepository {
         storage.save(firUser.uid, for: .auth(.currentUserID))
         storage.save(publicKeyString, for: .security(.publicKey(id: firUser.uid)))
         
-        if let remoteModel: CurrentUserModel? = try? await FirestoreRepo.getModel(
-            for: newModel.uid,
-            collection: .users,
-            field: .uid,
-        ) {
+        if let remoteModel = try await BackendAPIClient.shared.currentProfile() {
             if newModel != remoteModel {
-                try await FirestoreRepo
-                    .update(
-                        value: newModel.dictionary,
-                        collectionPath: .users,
-                        to: newModel.uid,
-                    )
+                try await BackendAPIClient.shared.updateProfile(newModel)
                 await ToastPresenter.show("Profile Updated", allowsBackgroundTap: false)
             }
         } else {
-            try await FirestoreRepo.add(newModel, collectionPath: .users, documentID: newModel.uid)
+            try await BackendAPIClient.shared.updateProfile(newModel)
         }
         await update(newModel)
     }

@@ -23,12 +23,8 @@ public actor PushNotificationStore {
                 storage: .shared,
                 notificationCenter: .init(center: .default),
                 authProvider: { Auth.auth().currentUser },
-                updatePushToken: { token, userID in
-                    try await FirestoreRepo.update(
-                        value: ["pushToken": token],
-                        collectionPath: .users,
-                        to: userID,
-                    )
+                updatePushToken: { token, _ in
+                    try await BackendAPIClient.shared.updatePushToken(token)
                 },
             )
         }
@@ -104,11 +100,8 @@ public actor PushNotificationStore {
         }
 
         do {
-            deps.storage.save(fcmToken, for: .device(.deviceToken))
             try await deps.updatePushToken(fcmToken, user.uid)
-            log(
-                "Updated fcmToken (\(fcmToken)) to Firestore for user: \(user.displayName ?? user.uid)",
-            )
+            deps.storage.save(fcmToken, for: .device(.deviceToken))
         } catch {
             log(error)
         }

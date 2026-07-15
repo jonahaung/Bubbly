@@ -21,11 +21,7 @@ public enum ContactRepo {
         if let localValue, !refetch {
             return localValue
         }
-        let serverValue: Contact? = try? await FirestoreRepo.getModel(
-            for: uid,
-            collection: .users,
-            field: .uid
-        )
+        let serverValue = try await BackendAPIClient.shared.contact(userID: uid)
         guard let serverValue else {
             if let localValue {
                 return localValue

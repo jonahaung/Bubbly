@@ -1,5 +1,6 @@
 // © 2026 Aung Ko Min
 
+import Database
 import FirebaseStorage
 import SwiftUI
 import UIKit
@@ -55,6 +56,13 @@ public struct ImageUploadingService: Sendable {
             }
         let data = try mediaManager.createData(from: uploadingImage)
 
+        if case .user = path {
+            return try await BackendAPIClient.shared.uploadProfilePhoto(
+                data: data,
+                contentType: "image/png"
+            )
+        }
+
         let reference = Storage.storage()
             .reference(withPath: path.path)
             .child(path.childPath)
@@ -75,6 +83,12 @@ public struct ImageUploadingService: Sendable {
         to path: Path,
         onProgress: (@Sendable (Progress?) -> Void)? = nil,
     ) async throws -> URL {
+        if case .user = path {
+            return try await BackendAPIClient.shared.uploadProfilePhoto(
+                fileURL: url,
+                contentType: "image/jpeg"
+            )
+        }
         let reference = Storage.storage()
             .reference(withPath: path.path)
             .child(path.childPath)

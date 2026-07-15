@@ -92,6 +92,7 @@ public final class AuthUserProfileViewModel: ErrorPresenter {
         }
         try await applyUpdates(for: editingUser)
         try await repo.reload()
+        currentUser = editingUser
         setLoading(false)
     }
 }

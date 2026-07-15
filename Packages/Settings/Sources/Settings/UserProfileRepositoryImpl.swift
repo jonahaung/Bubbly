@@ -19,11 +19,7 @@ struct UserProfileRepositoryImpl: UserProfileRepository {
     }
 
     func refreshRemote() async throws -> UserProfileSnapshot {
-        if let remote: CurrentUserModel = try await FirestoreRepo.getModel(
-            for: manager.currentUser.uid,
-            collection: .users,
-            field: .uid
-        ) {
+        if let remote = try await BackendAPIClient.shared.currentProfile() {
             manager.applyRemote(remote)
         }
         return snapshot()

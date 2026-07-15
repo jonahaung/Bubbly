@@ -63,23 +63,25 @@ public actor PhoneContactsService {
 		let phoneContacts = try await fetchContacts()
         let phoneNumberKit = PhoneNumberKit()
         let dbContact = await Store.shared.contactStore
-        let contacts: [Contact?] = try await AsyncOrderedStream
-            .mapOrdered(inputs: phoneContacts) { phoneContact in
-                let parsedNumber = try phoneNumberKit.parse(phoneContact.mobile)
-                let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
-                let remoteContact: Contact? = try await FirestoreRepo.getModel(
-                    for: formattedNumber,
-                    collection: .users,
-                    field: .mobile,
-                )
-                if var remoteContact {
-                    remoteContact.name = phoneContact.name
-                    try await dbContact?.insert(remoteContact)
-                    return remoteContact
-                } else {
-                    return nil
-                }
+        let normalizedContacts = try phoneContacts.map { phoneContact in
+            let parsedNumber = try phoneNumberKit.parse(phoneContact.mobile)
+            let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
+            return (phoneContact, formattedNumber)
+        }
+        let remoteContacts = try await BackendAPIClient.shared.lookupContacts(
+            mobileNumbers: normalizedContacts.map(\.1)
+        )
+        let contactsByMobile = Dictionary(uniqueKeysWithValues: remoteContacts.map { ($0.mobile, $0) })
+        var contacts: [Contact] = []
+        contacts.reserveCapacity(normalizedContacts.count)
+        for (phoneContact, mobile) in normalizedContacts {
+            guard var remoteContact = contactsByMobile[mobile] else {
+                continue
             }
-        return contacts.compactMap(\.self)
+            remoteContact.name = phoneContact.name
+            try await dbContact?.insert(remoteContact)
+            contacts.append(remoteContact)
+        }
+        return contacts
     }
 }
