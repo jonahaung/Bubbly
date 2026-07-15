@@ -52,7 +52,6 @@
 
 /* Begin PBXFileReference section */
 		4735A5E12DCEB7F3002854E4 /* FCM_V1 */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FCM_V1; sourceTree = "<group>"; };
-		474719262FDCA4FE00597C61 /* RichText */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = RichText; sourceTree = "<group>"; };
 		475BAAB42DBE859D007B0876 /* Bubbly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bubbly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAAC52DBE859E007B0876 /* BubblyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAACF2DBE859E007B0876 /* BubblyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -193,7 +192,6 @@
 		47AD34452DCD650B00C4FA62 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
-				474719262FDCA4FE00597C61 /* RichText */,
 				47D43B212F83F1B900A76A42 /* BubblyContacts */,
 				4780E4402F40EC6F00860B99 /* Settings */,
 				4780E40F2F40E36E00860B99 /* Inbox */,
