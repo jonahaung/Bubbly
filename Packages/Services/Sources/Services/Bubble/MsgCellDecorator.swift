@@ -34,7 +34,7 @@ public struct MsgCellDecorator: Sendable {
         for msg: Message,
         previous: Message?,
         next: Message?,
-    ) -> MsgCellLayout {
+    ) -> MsgCellDecoration {
         let cangroupWithPrevious = if let previous { msg.cangroup(with: previous, timeGap: minutesForChatMsgGrouping) } else { false }
         let canGroupWithNext = if let next { msg.cangroup(with: next, timeGap: minutesForChatMsgGrouping) } else { false }
         let bubbleCorner = resolveCorner(isSent: msg.isSender, canGroupWithPrevious: cangroupWithPrevious, canGroupWithNext: canGroupWithNext)

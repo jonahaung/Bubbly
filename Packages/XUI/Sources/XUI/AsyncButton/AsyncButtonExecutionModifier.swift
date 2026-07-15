@@ -16,12 +16,12 @@ struct AsyncButtonExecutionModifier: ViewModifier {
     @StateObject private var execution = AsyncButtonExecution()
     
     func body(content: Content) -> some View {
-        content.onChange(of: executionID) { newValue in
+        content.onChange(of: executionID) { _, newValue in
             if newValue != nil {
                 performAction()
             }
         }
-        .onChange(of: execution.task) { newTask in
+        .onChange(of: execution.task) { _, newTask in
             if newTask != nil, !options.contains(.enabledDuringExecution) {
                 isDisabled = true
             } else {

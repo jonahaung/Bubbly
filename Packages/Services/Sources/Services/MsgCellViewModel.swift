@@ -36,7 +36,7 @@ public final class MsgCellViewModel: @preconcurrency Identifiable {
         self.state = state
     }
 
-    public func update(layout: MsgCellLayout) {
+    public func update(layout: MsgCellDecoration) {
         guard state.layout != layout else {
             return
         }
@@ -82,7 +82,7 @@ extension MsgCellViewModel {
         public init(
             msg: Message,
             attributedText: AttributedString?,
-            layout: MsgCellLayout
+            layout: MsgCellDecoration
         ) {
             self.msg = msg
             self.attributedText = attributedText
@@ -94,7 +94,7 @@ extension MsgCellViewModel {
         public var msg: Message
         public var attributedText: AttributedString?
 
-        public var layout: MsgCellLayout
+        public var layout: MsgCellDecoration
         public var selectedMsg: SelectedMsg?
         public var bubbleCornor: BubbleCorner
         public var dateStString: String?

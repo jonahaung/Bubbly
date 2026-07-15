@@ -30,8 +30,12 @@ final class AppRuntime {
     }
 
     func openURL(_ url: URL) {
-        Task {
-            await deeplinkCoordinator.onOpenURL(url: url, router: router)
+        if Auth.auth().canHandle(url) {
+            
+        } else {
+            Task {
+                await deeplinkCoordinator.onOpenURL(url: url, router: router)
+            }
         }
     }
 

@@ -35,7 +35,6 @@ import ImageLoader
     weak var router: Router?
     @ObservationIgnored
     var members: Members
-    
     var state: State
     var reloadID = true
     var focusState: SharedFocusState<ConversationFocusState>?

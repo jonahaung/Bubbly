@@ -10,9 +10,11 @@ private struct ToastPresentableodifier: ViewModifier {
     @State private var loadingPresenter: LoadingPresenter = .shared
     func body(content: Content) -> some View {
         content
-            .fullScreenCover(item: $toastPresenter.toast) { toast in
-                ToastHolderView(toast: toast)
-                    .presentationBackground(.clear)
+            .overlay {
+                if let toast = toastPresenter.toast {
+                    ToastHolderView(toast: toast)
+                        .transition(.move(edge: toast.style.edge))
+                }
             }
     }
 }

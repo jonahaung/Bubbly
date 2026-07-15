@@ -8,7 +8,7 @@
 import Core
 import XUI
 
-public struct MsgCellLayout: Hashable, Conformable {
+public struct MsgCellDecoration: Hashable, Conformable {
 
     public var id: Int {
         var hasher = Hasher()

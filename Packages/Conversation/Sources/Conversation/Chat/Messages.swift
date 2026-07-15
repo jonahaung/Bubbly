@@ -269,13 +269,11 @@ extension Messages {
         previous: Message? = nil,
         next: Message? = nil
     ) -> MsgCellViewModel {
-        let attributedText = makeAttributedText(for: msg)
-        let layout = makeLayout(for: msg, previous: previous, next: next)
-
         if let cached = modelCache.get(msg.uid) {
             return cached
         }
-
+        let layout = makeLayout(for: msg, previous: previous, next: next)
+        let attributedText = makeAttributedText(for: msg)
         let model = MsgCellViewModel(
             .init(msg: msg, attributedText: attributedText, layout: layout)
         )
@@ -370,7 +368,7 @@ extension Messages {
         for msg: Message,
         previous: Message?,
         next: Message?
-    ) -> MsgCellLayout {
+    ) -> MsgCellDecoration {
         cellDecorator.style(for: msg, previous: previous, next: next)
     }
     fileprivate func rebuildIndexMap() {
