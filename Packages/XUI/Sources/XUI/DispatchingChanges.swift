@@ -23,7 +23,7 @@ public struct DispatchingChanges<
     
     public init(
         to input: Input,
-        for duration: Duration = .seconds(1),
+        for duration: Duration = .seconds(0.3),
         id: ID,
         @ViewBuilder _ content: @escaping (Input) -> Content
     ) {

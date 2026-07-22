@@ -19,10 +19,10 @@ struct ComposeBar: View {
     var body: some View {
         DispatchingChanges(to: composer.state, id: Self.typeName) { state in
             VStack(spacing: 0) {
-                sourcePanel
+                sourcePanel(state)
                 HStack(alignment: .bottom, spacing: 4) {
-                    menuButton
-                    sourceButtons
+                    menuButton(state)
+                    sourceButtons(state)
                     ComposeBarInputTextField(inputText: composer.inputText)
                     ComposeBarSendButton()
                 }
@@ -48,8 +48,8 @@ struct ComposeBar: View {
 private extension ComposeBar {
     
     @ViewBuilder
-    var sourcePanel: some View {
-        if let source = composer.state.source, source.usesInlinePanel {
+    func sourcePanel(_ state: ChatComposer.State) -> some View {
+        if let source = state.source, source.usesInlinePanel {
             switch source {
             case .emoji:
                 EmojiPanel()
@@ -63,15 +63,15 @@ private extension ComposeBar {
             case .audio:
                 EmptyView()
             }
-        } else if composer.state.attachments.isEmpty == false {
+        } else if state.attachments.isEmpty == false {
             ComposeBarAttachmentView()
         }
     }
 
-    var menuButton: some View {
+    func menuButton(_ state: ChatComposer.State) -> some View {
         HamburgerButton(
             isOpen: .init(
-                get: { composer.state.menuIsOpened },
+                get: { state.menuIsOpened },
                 set: { composer.state.menuIsOpened = $0 }
             ),
             size: 38
@@ -80,14 +80,13 @@ private extension ComposeBar {
                 manager.focusState?.defocus()
             } else {
                 composer.updateSource(nil)
-                
             }
         }
     }
 
     @ViewBuilder
-    var sourceButtons: some View {
-        if composer.state.menuIsOpened, composer.state.source == nil {
+    func sourceButtons(_ state: ChatComposer.State) -> some View {
+        if state.menuIsOpened, state.source == nil {
             SourceButtonRow(sources: ChatComposer.Source.mediaSources)
             SourceButtonRow(sources: ChatComposer.Source.utilitySources)
         }

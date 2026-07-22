@@ -57,7 +57,7 @@ public struct MsgCellDecorator: Sendable {
 
 private extension Message {
     func cangroup(with other: Message, timeGap: Int) -> Bool {
-        self.senderID == other.senderID && isSimilarDateTime(with: other, timeGap: timeGap)
+        self.senderID == other.senderID && isSimilarDateTime(with: other, timeGap: timeGap) && self.attachments?.isEmpty == other.attachments?.isEmpty
     }
     func isSimilarDateTime(with msg: Message, timeGap: Int) -> Bool {
         let difference = date.getDifference(from: msg.date, unit: .minute)
