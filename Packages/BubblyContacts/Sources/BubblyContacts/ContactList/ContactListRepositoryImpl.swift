@@ -74,6 +74,6 @@ struct ContactListRepositoryImpl: ContactListRepository {
     private func reloadLocalData() async throws {
         manager.setContacts(try await Store.shared.contactStore?.fetchAll() ?? [])
         manager.setGroups(try await Store.shared.groupStore?.fetchAll() ?? [])
-        manager.setPhoneContacts([])
+        manager.setPhoneContacts(try await PhoneContactsService.shared.fetchContacts())
     }
 }

@@ -37,9 +37,11 @@ public struct ConversationScene: View {
             BackgroundView(imageName: viewModel.state.properties.theme.background.imageName)
             SeenStatusOverlay()
             ConversationScrollView(manager: viewModel)
+                .scrollEdgeEffectStyle(.none, for: .all)
                 .layoutPriority(1)
             ConversationSceneOverlayBar()
         }
+        .ignoresSafeArea(.keyboard, edges: .top)
         .environment(\.conversation, viewModel.state.conversation)
         .environment(\.conversationTheme, viewModel.state.theme)
         .environment(\.attachmentFetcher, viewModel.attachmentFetcher)

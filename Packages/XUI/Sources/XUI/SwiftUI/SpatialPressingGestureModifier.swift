@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct SpatialPressingGestureModifier: ViewModifier {
-    // UI callbacks should be main-actor isolated; do not require @Sendable.
+
     let onPressingChanged: @MainActor (CGPoint?) -> Void
     let coordinateSpace: CoordinateSpaceProtocol
     let minimumPressDuration: TimeInterval
@@ -41,7 +41,6 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
     public typealias UIGestureRecognizerType = UILongPressGestureRecognizer
 
     public final class Coordinator: NSObject, UIGestureRecognizerDelegate {
-        // Main-actor UI callback; no @Sendable required.
         var onChange: ((CGPoint?) -> Void)?
         var coordinateSpace: CoordinateSpaceProtocol?
         var converter: CoordinateSpaceConverter?
@@ -53,8 +52,8 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
                     onChange?(converter.location(in: coordinateSpace))
                 }
             case .cancelled,
-                 .ended,
-                 .failed:
+                .ended,
+                .failed:
                 onChange?(nil)
             case .recognized:
                 break
@@ -69,7 +68,8 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
             _: UIGestureRecognizer,
             shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer
         )
-        -> Bool {
+            -> Bool
+        {
             false
         }
 
@@ -91,7 +91,7 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
     let coordinateSpace: CoordinateSpaceProtocol
     let minimumPressDuration: TimeInterval
     let allowableMovement: CGFloat
-    /// Main-actor UI callback; no @Sendable required.
+
     let onChange: (CGPoint?) -> Void
 
     public init(
@@ -106,13 +106,17 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
         self.onChange = onChange
     }
 
-    public func makeCoordinator(converter: CoordinateSpaceConverter) -> Coordinator {
+    public func makeCoordinator(converter: CoordinateSpaceConverter)
+        -> Coordinator
+    {
         let coordinator = Coordinator()
         coordinator.converter = converter
         return coordinator
     }
 
-    public func makeUIGestureRecognizer(context: Context) -> UILongPressGestureRecognizer {
+    public func makeUIGestureRecognizer(context: Context)
+        -> UILongPressGestureRecognizer
+    {
         let recognizer = UILongPressGestureRecognizer(
             target: context.coordinator,
             action: #selector(Coordinator.handle(_:))
@@ -134,11 +138,11 @@ public struct SpatialPressingGesture: UIGestureRecognizerRepresentable {
     }
 }
 
-public extension View {
-    func onPressingChanged(
+extension View {
+    public func onPressingChanged(
         in coordinateSpace: CoordinateSpaceProtocol,
         minimumPressDuration: TimeInterval = 0.5,
-        allowableMovement: CGFloat = 10,
+        allowableMovement: CGFloat = 0,
         _ action: @escaping @MainActor (CGPoint?) -> Void
     ) -> some View {
         modifier(

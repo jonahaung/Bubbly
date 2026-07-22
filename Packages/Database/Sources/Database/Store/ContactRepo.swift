@@ -33,6 +33,13 @@ public enum ContactRepo {
                 throw XError.noContactFound
             }
         }
+        
+        if let localValue, localValue != serverValue  {
+            try await Store.shared.contactStore?.updateAndSave(uid: uid) { model in
+                model.update(from: serverValue)
+            }
+            return serverValue
+        }
 
         try await Store.shared.contactStore?.insert(serverValue)
         return serverValue

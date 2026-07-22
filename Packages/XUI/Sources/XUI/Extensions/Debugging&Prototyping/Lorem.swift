@@ -84,7 +84,7 @@ public enum Lorem {
             pack.genericTemplates.random()()
         }
 
-        return decorateWithEmoji(base) + "."
+        return decorateWithEmoji(base)
     }
 
     public static func sentences(_ count: Int) -> String {

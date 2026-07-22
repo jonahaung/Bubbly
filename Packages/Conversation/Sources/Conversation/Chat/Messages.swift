@@ -269,6 +269,7 @@ extension Messages {
         previous: Message? = nil,
         next: Message? = nil
     ) -> MsgCellViewModel {
+       
         if let cached = modelCache.get(msg.uid) {
             return cached
         }

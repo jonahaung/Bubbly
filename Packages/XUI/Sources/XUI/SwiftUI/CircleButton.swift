@@ -30,16 +30,12 @@ public struct CircleButton: View {
         Button {
             action()
         } label: {
-            ZStack {
-                Circle().fill(Color.container)
-                    .frame(square: size)
-                    .layoutPriority(1)
-                SystemImage(symbol, size * 0.4)
-                    .foregroundStyle(color)
-                    .fontWeight(.semibold)
-            }
+            SystemImage(symbol, size * 0.4)
+                .foregroundStyle(color).frame(square: size)
+                .background(.windowBackground, in: .circle)
         }
         .buttonRepeatBehavior(.disabled)
+        .buttonSizing(.fitted)
         .buttonStyle(.borderless)
         .equatable(by: symbol)
     }

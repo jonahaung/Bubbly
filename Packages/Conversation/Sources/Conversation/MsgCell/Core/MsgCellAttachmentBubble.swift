@@ -23,9 +23,7 @@ struct MsgCellAttachmentBubble: View, @MainActor Equatable {
         VStack(alignment: alignment, spacing: .zero) {
             MsgAttachmentsView(state: state, isVisible: isVisible)
             if let attributedText = state.attributedText, !attributedText.string.isWhitespace {
-                Color.background.frame(height: 2)
                 TextContent(attributedText: attributedText)
-                    .multilineTextAlignment(.leading)
                     .padding(theme.bubblePading)
             }
         }

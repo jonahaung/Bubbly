@@ -49,6 +49,7 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
 struct TextContent: View {
     var body: some View {
         Text(attributedText)
+            .fixedSize(horizontal: false, vertical: true)
             .equatable(by: attributedText)
     }
     let attributedText: AttributedString

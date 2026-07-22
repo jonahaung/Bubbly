@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
+    
     case all
     case receivingTop
     case receivingCenter
@@ -17,9 +18,7 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
     case sendingCenter
     case sendingBottom
     case none
-
-    // MARK: Public
-
+    
     public var id: Int {
         rawValue
     }
@@ -99,13 +98,13 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
     }
 
     @MainActor
-    public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle
-    {
-        UnevenRoundedRectangle(
-            topLeadingRadius: topLeading ? cornerRadius : 0,
-            bottomLeadingRadius: bottomLeading ? cornerRadius : 0,
-            bottomTrailingRadius: bottomTrailing ? cornerRadius : 0,
-            topTrailingRadius: topTrailing ? cornerRadius : 0,
+    public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle {
+        let smallerRadius: CGFloat = cornerRadius / 3
+        return UnevenRoundedRectangle(
+            topLeadingRadius: topLeading ? cornerRadius : smallerRadius,
+            bottomLeadingRadius: bottomLeading ? cornerRadius : smallerRadius,
+            bottomTrailingRadius: bottomTrailing ? cornerRadius : smallerRadius,
+            topTrailingRadius: topTrailing ? cornerRadius : smallerRadius,
             style: .continuous
         )
     }

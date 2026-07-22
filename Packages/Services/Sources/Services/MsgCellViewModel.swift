@@ -27,13 +27,30 @@ public final class MsgCellViewModel: @preconcurrency Identifiable {
     }
 
     public func update(with msg: Message) {
-        guard state.msg != msg else {
+        update(
+            with: msg,
+            attributedText: state.attributedText,
+            layout: state.layout
+        )
+    }
+
+    public func update(
+        with msg: Message,
+        attributedText: AttributedString?,
+        layout: MsgCellDecoration
+    ) {
+        var nextState = state
+        nextState.msg = msg
+        nextState.attributedText = attributedText
+        nextState.layout = layout
+        nextState.refreshDerivedState()
+
+        guard nextState != state else {
             return
         }
-        var state = state
-        state.msg = msg
-        state.refreshDerivedState()
-        self.state = state
+
+        state = nextState
+        refreshLayoutValue()
     }
 
     public func update(layout: MsgCellDecoration) {
@@ -62,6 +79,10 @@ public final class MsgCellViewModel: @preconcurrency Identifiable {
         state.selectedMsg = selectedMsg
         state.computeBubbleCorner()
         self.state = state
+        refreshLayoutValue()
+    }
+
+    private func refreshLayoutValue() {
         layoutValue = .init(
             uid: state.msg.uid,
             recipient: state.msg.receiptType,

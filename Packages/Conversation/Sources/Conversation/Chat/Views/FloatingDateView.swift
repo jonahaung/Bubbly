@@ -18,7 +18,7 @@ struct FloatingDateView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(Color.background, in: RoundedRectangle(cornerRadius: Radius.md))
+            .background(.regularMaterial, in: RoundedRectangle(cornerRadius: Radius.md))
             .geometryGroup()
             .equatable(by: dateString)
         }

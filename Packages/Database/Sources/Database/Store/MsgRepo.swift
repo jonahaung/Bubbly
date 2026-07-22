@@ -10,6 +10,12 @@ import Foundation
 
 public enum MsgRepo {
 
+    public struct PaginationSnapshot: Sendable, Equatable {
+        public let firstMsgID: String?
+        public let lastMsgID: String?
+        public let totalMsgsCount: Int
+    }
+
     public enum MsgRepoError: Error {
         case noCurrentUserID
         case unknownError
@@ -23,7 +29,7 @@ public enum MsgRepo {
         return try await block(store)
     }
 
-    private static func descriptor(
+    fileprivate static func descriptor(
         for conID: String,
         order: SortOrder,
         limit: Int? = nil,
@@ -57,6 +63,12 @@ public enum MsgRepo {
     public static func totalMsgsCount(conID: String) async throws -> Int {
         try await withMsgStore { try await $0.fetchCount(FetchDescriptor(predicate: PMsgPredicates.conID(conID))) }
     }
+
+    public static func paginationSnapshot(conID: String) async throws -> PaginationSnapshot {
+        try await withMsgStore {
+            try await $0.paginationSnapshot(conID: conID)
+        }
+    }
     
     public static func messages(conID: String, from: Date, to: Date) async throws -> [Message] {
         var descriptor = FetchDescriptor<PMsg>(
@@ -81,6 +93,20 @@ public enum MsgRepo {
         return try await withMsgStore {
             try await $0.fetch(descriptor).reversed()
         }
+    }
+}
+
+private extension StoreModelActor where T == PMsg {
+    func paginationSnapshot(conID: String) throws -> MsgRepo.PaginationSnapshot {
+        let first = try fetch(MsgRepo.descriptor(for: conID, order: .forward, limit: 1)).first
+        let last = try fetch(MsgRepo.descriptor(for: conID, order: .reverse, limit: 1)).first
+        let count = try fetchCount(FetchDescriptor(predicate: PMsgPredicates.conID(conID)))
+
+        return .init(
+            firstMsgID: first?.uid,
+            lastMsgID: last?.uid,
+            totalMsgsCount: count
+        )
     }
 }
 

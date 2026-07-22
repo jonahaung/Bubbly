@@ -20,7 +20,11 @@ public struct ContentView: View {
         case .getStarted:
             AuthFlow(appLauncher: appLauncher)
         case .main(let currentUser):
-            ArchitecturalView(launcher: appLauncher, currentUser: currentUser, router: router)
+            let currentUserRepository = CurrentUserRepository(currentUser)
+            let container = AppDependencyContainer(
+                currentUserRepository: currentUserRepository
+            )
+            RootTabView(coordinator: .init(appLauncher: appLauncher, container: container, router: router))
         }
     }
 

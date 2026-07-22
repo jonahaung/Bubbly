@@ -18,8 +18,8 @@ struct BubblyApp: App {
                 appLauncher: appDelegate.runtime.appLauncher,
                 router: appDelegate.runtime.router
             )
-            .tint(Color.accent)
-            .allowsTightening(true)
+//            .tint(Color.accent)
+//            .allowsTightening(true)
             .onOpenURL { url in
                 appDelegate.runtime.openURL(url)
             }

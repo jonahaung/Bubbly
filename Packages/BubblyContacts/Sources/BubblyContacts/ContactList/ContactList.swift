@@ -42,30 +42,23 @@ public struct ContactList: View {
                         ConversationGroupCell(group: group)
                     }
                 case .chat:
-                    ScrollSection(data: viewModel.state.chatContacts) { contact in
-                        ContactCell(contact) {
-                            await openConversation(for: contact)
+                    ForEach(viewModel.state.chatContactSections) { section in
+                        ScrollSection(data: section.items) { contact in
+                            ContactCell(contact) {
+                                await openConversation(for: contact)
+                            }
+                            .id(contact.uid)
+                        } header: {
+                            HStack(alignment: .bottom) {
+                                Text(section.title)
+                                    .foregroundStyle(Color.secondaryText)
+                                    .font(.footnote)
+
+                                Spacer()
+                            }
                         }
-                        .id(contact.uid)
-                        
+                        .id(section.id)
                     }
-//                    ForEach(viewModel.state.chatContactSections) { section in
-//                        ScrollSection(data: section.items) { contact in
-//                            ContactCell(contact) {
-//                                await openConversation(for: contact)
-//                            }
-//                            .id(contact.uid)
-//                        } header: {
-//                            HStack(alignment: .bottom) {
-//                                Text(section.title)
-//                                    .foregroundStyle(Color.secondaryText)
-//                                    .font(.footnote)
-//
-//                                Spacer()
-//                            }
-//                        }
-//                        .id(section.id)
-//                    }
                 case .phone:
                     ForEach(viewModel.state.phoneContactSections) { section in
                         ScrollSection(data: section.items) { contact in

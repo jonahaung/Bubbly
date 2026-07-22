@@ -15,6 +15,7 @@ struct ContactListReducerImpl: ContactListReducer {
         case .setSearchText(let value):
             state.searchText = value
             state.chatContactSections = buildSections(from: filteredContacts(for: state.chatContacts, searchText: value))
+            state.phoneContactSections = buildSections(from: filteredContacts(for: state.phoneContacts, searchText: value))
         case .applySnapshot(let snapshot):
             state = .init(
                 searchText: state.searchText,
