@@ -72,7 +72,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
             data = try AnyMsgData.parse(from: userInfo)
         } catch {
             log(error)
-            return [.badge, .banner, .list, .sound]
+            return [.banner, .sound]
         }
 
         let currentNavPath = await Router.shared.visiblePath()

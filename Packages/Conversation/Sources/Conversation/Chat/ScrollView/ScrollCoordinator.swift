@@ -23,13 +23,8 @@ import XUI
     private var state: State = .init()
     @ObservationIgnored
     private var scrollDirection: ScrollDirection = .none
-
-    private var scrollPosition: ScrollPosition
-    @ObservationIgnored
-    var scrollPositionBindable: Binding<ScrollPosition> {
-        .init(get: { self.scrollPosition }, set: { _ in })
-    }
-
+    var scrollPosition: ScrollPosition
+    
     init(_ lastPage: LastPage?) {
         scrollPosition = {
             if let lastPage {

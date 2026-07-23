@@ -11,7 +11,7 @@ public extension BackendAPIClient {
             method: "GET",
             path: ["v1", "contacts", userID],
             allowsNotFound: true
-        ) else {
+        ), !data.isEmpty else {
             return nil
         }
         return try executor.decode(Contact.self, from: data)

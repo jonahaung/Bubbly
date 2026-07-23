@@ -37,8 +37,6 @@ public struct ConversationScene: View {
             BackgroundView(imageName: viewModel.state.properties.theme.background.imageName)
             SeenStatusOverlay()
             ConversationScrollView(manager: viewModel)
-                .scrollEdgeEffectStyle(.none, for: .all)
-                .layoutPriority(1)
             ConversationSceneOverlayBar()
         }
         .ignoresSafeArea(.keyboard, edges: .top)
@@ -46,7 +44,7 @@ public struct ConversationScene: View {
         .environment(\.conversationTheme, viewModel.state.theme)
         .environment(\.attachmentFetcher, viewModel.attachmentFetcher)
         .environment(\.seenMembers, viewModel.state.properties.seenMembers)
-        .environment(\.sharedFocusState, viewModel.focusState)
+        .environment(\.sharedFocusState, .init($focusState))
         .environment(\.members, viewModel.members)
         .environment(\.sharedNamespace, SharedNamespace(namespace))
         .environment(\.msgCellActions, .init(action: { viewModel.send(.cellAction($0)) }))

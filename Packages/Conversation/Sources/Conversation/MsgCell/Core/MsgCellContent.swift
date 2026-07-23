@@ -24,13 +24,11 @@ struct MsgCellContent: View {
             )
         ) {
             if state.attachments?.isEmpty == false {
-                DispatchingChanges(to: state, id: state.id) { state in
-                    MsgCellAttachmentBubble(
-                        state: state,
-                        isVisible: viewModel.isVisible,
-                        theme: theme
-                    )
-                }
+                MsgCellAttachmentBubble(
+                    state: state,
+                    isVisible: viewModel.isVisible,
+                    theme: theme
+                )
             } else {
                 MsgCellTextBubble(state: state, theme: theme)
             }

@@ -59,7 +59,7 @@ struct BackendAPIClientTests {
     @Test("Returns nil for an allowed missing resource")
     func missingContact() async throws {
         let transport = MockBackendHTTPTransport(outcomes: [
-            .response(.init(statusCode: 404, headers: [:], data: Data()))
+            .response(.init(statusCode: 204, headers: [:], data: Data()))
         ])
         let client = try makeClient(transport: transport)
 

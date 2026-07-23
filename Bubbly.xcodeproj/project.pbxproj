@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		479D9AC93011EDD2000D181E /* NetCheckerTraffic in Frameworks */ = {isa = PBXBuildFile; productRef = 479D9AC83011EDD2000D181E /* NetCheckerTraffic */; };
 		47B1B2762F9A9FE6008FCD86 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */; };
 		47DE272D2F93637400B6BDF2 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47DE272C2F93637400B6BDF2 /* MsgRoomMain */; };
 /* End PBXBuildFile section */
@@ -51,7 +52,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4735A5E12DCEB7F3002854E4 /* FCM_V1 */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = FCM_V1; sourceTree = "<group>"; };
 		475BAAB42DBE859D007B0876 /* Bubbly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Bubbly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAAC52DBE859E007B0876 /* BubblyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		475BAACF2DBE859E007B0876 /* BubblyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BubblyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -129,6 +129,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				479D9AC93011EDD2000D181E /* NetCheckerTraffic in Frameworks */,
 				47DE272D2F93637400B6BDF2 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -201,7 +202,6 @@
 				47AD343B2DCD650B00C4FA62 /* Database */,
 				47AD343F2DCD650B00C4FA62 /* MsgRoomMain */,
 				479C830E2DDE71D70019971C /* Crypto */,
-				4735A5E12DCEB7F3002854E4 /* FCM_V1 */,
 				47AD343C2DCD650B00C4FA62 /* ImageLoader */,
 				47AD343D2DCD650B00C4FA62 /* MediaPicker */,
 				47AD34442DCD650B00C4FA62 /* XUI */,
@@ -232,6 +232,7 @@
 			name = Bubbly;
 			packageProductDependencies = (
 				47DE272C2F93637400B6BDF2 /* MsgRoomMain */,
+				479D9AC83011EDD2000D181E /* NetCheckerTraffic */,
 			);
 			productName = Bubbly;
 			productReference = 475BAAB42DBE859D007B0876 /* Bubbly.app */;
@@ -343,6 +344,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				47DE272B2F93637400B6BDF2 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */,
+				479D9AC73011EDD1000D181E /* XCRemoteSwiftPackageReference "NetChecker" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 475BAAB52DBE859D007B0876 /* Products */;
@@ -441,10 +443,10 @@
 		475BAAD92DBE859E007B0876 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUBBLY_API_BASE_URL = "http://192.168.80.114:8080";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				BUBBLY_API_BASE_URL = "http://192.168.80.114:8080";
 				CODE_SIGN_ENTITLEMENTS = Bubbly/Bubbly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -489,10 +491,10 @@
 		475BAADA2DBE859E007B0876 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUBBLY_API_BASE_URL = "";
 				ASSETCATALOG_COMPILER_APPICON_NAME = "App Icon";
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				BUBBLY_API_BASE_URL = "";
 				CODE_SIGN_ENTITLEMENTS = Bubbly/Bubbly.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
@@ -844,7 +846,23 @@
 		};
 /* End XCLocalSwiftPackageReference section */
 
+/* Begin XCRemoteSwiftPackageReference section */
+		479D9AC73011EDD1000D181E /* XCRemoteSwiftPackageReference "NetChecker" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/shakhzodsunnatov/NetChecker.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
 /* Begin XCSwiftPackageProductDependency section */
+		479D9AC83011EDD2000D181E /* NetCheckerTraffic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 479D9AC73011EDD1000D181E /* XCRemoteSwiftPackageReference "NetChecker" */;
+			productName = NetCheckerTraffic;
+		};
 		47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MsgRoomMain;

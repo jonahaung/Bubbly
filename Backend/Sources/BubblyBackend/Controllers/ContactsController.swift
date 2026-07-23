@@ -8,19 +8,21 @@ struct ContactsController: RouteCollection {
         contacts.post("lookup", use: lookup)
     }
 
-    private func show(request: Request) async throws -> ContactResponse {
+    private func show(request: Request) async throws -> Response {
         guard let userID = request.parameters.get("userID"),
               !userID.isEmpty,
-              userID.count <= 128,
-              let contact = try await ContactModel.query(on: request.db)
-                .filter(\.$firebaseUID == userID)
-                .first() else {
-            throw Abort(.notFound)
+              userID.count <= 128 else {
+            throw Abort(.badRequest)
         }
-        return ContactResponse(
+        guard let contact = try await ContactModel.query(on: request.db)
+            .filter(\.$firebaseUID == userID)
+            .first() else {
+            return Response(status: .noContent)
+        }
+        return try await ContactResponse(
             model: contact,
             publicBaseURL: request.application.bubblyConfiguration.publicBaseURL
-        )
+        ).encodeResponse(for: request)
     }
 
     private func lookup(request: Request) async throws -> [ContactResponse] {

@@ -51,7 +51,7 @@ struct ConversationScrollView: View {
         .defaultScrollAnchor(.bottom, for: .initialOffset)
         .defaultScrollAnchor(defaultScrollAnchor, for: .sizeChanges)
         .scrollPosition(
-            manager.scrollController.scrollPositionBindable,
+            .constant(manager.scrollController.scrollPosition),
             anchor: .bottom
         )
     }
