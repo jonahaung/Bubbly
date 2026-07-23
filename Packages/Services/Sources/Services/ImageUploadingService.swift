@@ -1,7 +1,6 @@
 // © 2026 Aung Ko Min
 
 import Database
-import FirebaseStorage
 import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
@@ -13,25 +12,14 @@ public struct ImageUploadingService: Sendable {
         case group(groupID: String)
         case conversation(conID: String, attachmentID: String)
 
-        var path: String {
+        var backendPath: BackendAPIClient.MediaPath? {
             switch self {
             case .user:
-                "users"
-            case .group:
-                "groups"
-            case .conversation:
-                "conversations"
-            }
-        }
-
-        var childPath: String {
-            switch self {
-            case let .user(uid):
-                uid.storagePathComponent
+                nil
             case let .group(groupID):
-                groupID.storagePathComponent
+                .group(groupID: groupID)
             case let .conversation(conID, attachmentID):
-                conID.storagePathComponent + "/" + attachmentID.storagePathComponent
+                .conversation(conversationID: conID, attachmentID: attachmentID)
             }
         }
     }
@@ -63,19 +51,19 @@ public struct ImageUploadingService: Sendable {
             )
         }
 
-        let reference = Storage.storage()
-            .reference(withPath: path.path)
-            .child(path.childPath)
-
-        let metadata = StorageMetadata()
-        metadata.contentType = "image/png"
-        let put = try await reference.putDataAsync(
-            data,
-            metadata: metadata,
-            onProgress: onProgress,
+        guard let backendPath = path.backendPath else {
+            throw ImageUploadingError.invalidPath
+        }
+        let progress = Progress(totalUnitCount: Int64(data.count))
+        onProgress?(progress)
+        let url = try await BackendAPIClient.shared.uploadMedia(
+            data: data,
+            contentType: "image/png",
+            to: backendPath
         )
-        log(put)
-        return try await reference.downloadURL()
+        progress.completedUnitCount = progress.totalUnitCount
+        onProgress?(progress)
+        return url
     }
 
     public func uploadFile(
@@ -89,25 +77,25 @@ public struct ImageUploadingService: Sendable {
                 contentType: "image/jpeg"
             )
         }
-        let reference = Storage.storage()
-            .reference(withPath: path.path)
-            .child(path.childPath)
-        let metadata = StorageMetadata()
-        metadata.contentType = "image/jpg"
-        _ = try await reference.putFileAsync(from: url, metadata: metadata, onProgress: onProgress)
-        return try await reference.downloadURL()
+        guard let backendPath = path.backendPath else {
+            throw ImageUploadingError.invalidPath
+        }
+        let fileSize = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
+        let progress = Progress(totalUnitCount: Int64(fileSize))
+        onProgress?(progress)
+        let uploadedURL = try await BackendAPIClient.shared.uploadMedia(
+            fileURL: url,
+            contentType: "image/jpeg",
+            to: backendPath
+        )
+        progress.completedUnitCount = progress.totalUnitCount
+        onProgress?(progress)
+        return uploadedURL
     }
 }
 
-private extension String {
-    var storagePathComponent: String {
-        let allowed =
-            CharacterSet(
-                charactersIn: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.",
-            )
-        let scalars = unicodeScalars.map { allowed.contains($0) ? Character($0) : "_" }
-        return String(scalars)
-    }
+private enum ImageUploadingError: Error {
+    case invalidPath
 }
 
 public extension UIImage {

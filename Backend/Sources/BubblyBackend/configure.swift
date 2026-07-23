@@ -10,12 +10,13 @@ func configure(_ app: Application) async throws {
     app.pushNotificationSender = FirebasePushNotificationSender(
         credentials: configuration.firebaseServiceAccount
     )
-    app.routes.defaultMaxBodySize = "2mb"
+    app.routes.defaultMaxBodySize = "10mb"
 
     let databaseConfiguration = try makeDatabaseConfiguration(environment: app.environment)
     app.databases.use(.postgres(configuration: databaseConfiguration), as: .psql)
     app.migrations.add(CreateContact())
     app.migrations.add(CreateGroup())
+    app.migrations.add(CreateMediaAsset())
 
     if Environment.get("AUTO_MIGRATE")?.lowercased() == "true" {
         try await app.autoMigrate()

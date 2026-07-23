@@ -36,7 +36,6 @@ let package = Package(
                 .product(name: "MediaPicker", package: "MediaPicker"),
                 .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseMessaging", package: "firebase-ios-sdk"),
-                .product(name: "FirebaseStorage", package: "firebase-ios-sdk"),
                 .product(name: "FirePhoneOTP", package: "FirePhoneOTP"),
                 .product(name: "Crypto", package: "Crypto")
 
