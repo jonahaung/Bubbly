@@ -2,26 +2,30 @@ import Foundation
 
 public extension BackendAPIClient {
     @discardableResult
-    func sendPushNotification(
-        recipientUserID: String,
-        messageContent: String,
+    func sendPushNotifications(
+        messagesByRecipientUserID: [String: String],
         title: String?,
         body: String?,
         conversationID: String,
         deepLink: String?
-    ) async throws -> String {
-        let recipientUserID = try validatedIdentifier(recipientUserID, name: "recipient user")
+    ) async throws -> Set<String> {
         let conversationID = try validatedIdentifier(conversationID, name: "conversation")
-        let messageContent = messageContent.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !messageContent.isEmpty, messageContent.utf8.count <= 32_768,
+        guard !messagesByRecipientUserID.isEmpty, messagesByRecipientUserID.count <= 256,
               title?.count ?? 0 <= 100,
               body?.count ?? 0 <= 4_096,
               deepLink?.count ?? 0 <= 2_048 else {
             throw BackendAPIError.invalidRequest("The push notification contains invalid values.")
         }
+        let recipients = try messagesByRecipientUserID.map { userID, messageContent in
+            let userID = try validatedIdentifier(userID, name: "recipient user")
+            let messageContent = messageContent.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !messageContent.isEmpty, messageContent.utf8.count <= 32_768 else {
+                throw BackendAPIError.invalidRequest("The push notification contains invalid values.")
+            }
+            return PushNotificationRequest.Recipient(userID: userID, messageContent: messageContent)
+        }.sorted { $0.userID < $1.userID }
         let request = PushNotificationRequest(
-            recipientUserID: recipientUserID,
-            messageContent: messageContent,
+            recipients: recipients,
             title: title,
             body: body,
             conversationID: conversationID,
@@ -33,7 +37,8 @@ public extension BackendAPIClient {
             body: .data(try executor.encode(request)),
             contentType: "application/json"
         )
-        return try executor.decode(PushNotificationResponse.self, from: data).messageID
+        let response = try executor.decode(PushNotificationResponse.self, from: data)
+        return Set(response.results.compactMap { $0.messageID == nil ? nil : $0.recipientUserID })
     }
 
     private func validatedIdentifier(_ value: String, name: String) throws -> String {

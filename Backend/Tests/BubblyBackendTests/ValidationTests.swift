@@ -62,16 +62,19 @@ struct ValidationTests {
     @Test
     func validatesPushNotificationInput() throws {
         let request = PushNotificationRequest(
-            recipientUserID: " recipient ",
-            messageContent: " encrypted ",
+            recipients: [
+                .init(userID: " recipient ", messageContent: " encrypted "),
+                .init(userID: " recipient ", messageContent: " duplicate "),
+                .init(userID: " other ", messageContent: " other-encrypted ")
+            ],
             title: " New message ",
             body: " Hello ",
             conversationID: " conversation ",
             deepLink: "bubbly://conversation/one"
         )
         let validated = try request.validated(senderUserID: "sender")
-        #expect(validated.recipientUserID == "recipient")
-        #expect(validated.messageContent == "encrypted")
+        #expect(validated.recipients.map(\.userID) == ["recipient", "other"])
+        #expect(validated.recipients.map(\.messageContent) == ["encrypted", "other-encrypted"])
         #expect(validated.conversationID == "conversation")
     }
 
@@ -79,8 +82,7 @@ struct ValidationTests {
     func rejectsInvalidPushNotificationInput() {
         #expect(throws: (any Error).self) {
             try PushNotificationRequest(
-                recipientUserID: "sender",
-                messageContent: "encrypted",
+                recipients: [.init(userID: "sender", messageContent: "encrypted")],
                 title: nil,
                 body: nil,
                 conversationID: "conversation",
@@ -89,8 +91,7 @@ struct ValidationTests {
         }
         #expect(throws: (any Error).self) {
             try PushNotificationRequest(
-                recipientUserID: "recipient",
-                messageContent: "encrypted",
+                recipients: [.init(userID: "recipient", messageContent: "encrypted")],
                 title: nil,
                 body: nil,
                 conversationID: "conversation",

@@ -118,42 +118,41 @@ public extension Socket {
             throw SocketError.encodingFailed
         }
 
-        return try await AsyncOrderedStream.mapOrdered(
+        let encryptedMessages = try await AsyncOrderedStream.mapOrdered(
             inputs: contacts,
         ) { contact in
             let encrypted = try await self.encrypt(
                 encodedString,
                 publicKeyString: contact.publicKeyString,
             )
-            let deepLink = DeeplinkCodec.standard
-                .url(for: .conversation(conID: data.conID))?
-                .absoluteString
-
-            do {
-                _ = try await BackendAPIClient.shared.sendPushNotification(
-                    recipientUserID: contact.uid,
-                    messageContent: encrypted,
-                    title: alert.title,
-                    body: alert.body,
-                    conversationID: data.conID,
-                    deepLink: deepLink
-                )
-                return MsgRecipientReceipt(
-                    memberID: contact.uid,
-                    state: .delivered,
-                    updatedAt: .now,
-                    failure: nil
-                )
-            } catch is CancellationError {
-                throw CancellationError()
-            } catch {
-                return MsgRecipientReceipt(
-                    memberID: contact.uid,
-                    state: .partiallyFailed,
-                    updatedAt: .now,
-                    failure: .init(code: "push_failed", isRetryable: true)
-                )
-            }
+            return (contact.uid, encrypted)
+        }
+        let messagesByRecipientUserID = Dictionary(uniqueKeysWithValues: encryptedMessages)
+        let deepLink = DeeplinkCodec.standard
+            .url(for: .conversation(conID: data.conID))?
+            .absoluteString
+        let successfulRecipientIDs: Set<String>
+        do {
+            successfulRecipientIDs = try await BackendAPIClient.shared.sendPushNotifications(
+                messagesByRecipientUserID: messagesByRecipientUserID,
+                title: alert.title,
+                body: alert.body,
+                conversationID: data.conID,
+                deepLink: deepLink
+            )
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            successfulRecipientIDs = []
+        }
+        return contacts.map { contact in
+            let isSuccessful = successfulRecipientIDs.contains(contact.uid)
+            return MsgRecipientReceipt(
+                memberID: contact.uid,
+                state: isSuccessful ? .delivered : .partiallyFailed,
+                updatedAt: .now,
+                failure: isSuccessful ? nil : .init(code: "push_failed", isRetryable: true)
+            )
         }
     }
 

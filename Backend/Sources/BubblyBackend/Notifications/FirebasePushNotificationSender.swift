@@ -80,6 +80,7 @@ actor FirebasePushNotificationSender {
 
     func send(
         _ notification: PushNotificationRequest,
+        recipient: PushNotificationRequest.Recipient,
         deviceToken: String,
         client: any Client
     ) async throws -> String {
@@ -91,7 +92,7 @@ actor FirebasePushNotificationSender {
             message: .init(
                 token: deviceToken,
                 data: [
-                    "message": notification.messageContent,
+                    "message": recipient.messageContent,
                     "con_id": notification.conversationID,
                     "deep_link": notification.deepLink ?? ""
                 ],

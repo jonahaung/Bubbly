@@ -179,15 +179,19 @@ struct BackendAPIClientTests {
 
     @Test("Sends an encrypted push notification through the backend")
     func pushNotification() async throws {
-        let response = Data(#"{"messageID":"message-one"}"#.utf8)
+        let response = Data(
+            #"{"results":[{"recipientUserID":"recipient-one","messageID":"message-one","failureCode":null},{"recipientUserID":"recipient-two","messageID":null,"failureCode":"fcm_send_failed"}]}"#.utf8
+        )
         let transport = MockBackendHTTPTransport(outcomes: [
             .response(.init(statusCode: 200, headers: [:], data: response))
         ])
         let client = try makeClient(transport: transport)
 
-        let messageID = try await client.sendPushNotification(
-            recipientUserID: "recipient",
-            messageContent: "encrypted",
+        let successfulRecipientIDs = try await client.sendPushNotifications(
+            messagesByRecipientUserID: [
+                "recipient-one": "encrypted-one",
+                "recipient-two": "encrypted-two"
+            ],
             title: "New message",
             body: "Hello",
             conversationID: "conversation",
@@ -197,11 +201,13 @@ struct BackendAPIClientTests {
         let body = try #require(request.httpBody)
         let object = try #require(JSONSerialization.jsonObject(with: body) as? [String: Any])
 
-        #expect(messageID == "message-one")
+        #expect(successfulRecipientIDs == Set(["recipient-one"]))
         #expect(request.httpMethod == "POST")
         #expect(request.url?.absoluteString == "http://localhost:8080/v1/push-notifications")
-        #expect(object["recipientUserID"] as? String == "recipient")
-        #expect(object["messageContent"] as? String == "encrypted")
+        let recipients = try #require(object["recipients"] as? [[String: Any]])
+        #expect(recipients.count == 2)
+        #expect(recipients[0]["userID"] as? String == "recipient-one")
+        #expect(recipients[0]["messageContent"] as? String == "encrypted-one")
         #expect(object["conversationID"] as? String == "conversation")
     }
 
