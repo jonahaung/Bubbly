@@ -1,5 +1,6 @@
 // © 2026 Aung Ko Min
 
+import Foundation
 import Core
 import Database
 import MediaPicker
@@ -31,10 +32,11 @@ final class CreateGroupViewModel {
     func createGroup() async throws {
         let currentUserID = try CurrentUserID.get()
         guard let image = pickedPhoto?.uiImage else {
-            fatalError("explanation")
+            throw CreateGroupError.missingPhoto
         }
 
         setLoading(true)
+        defer { setLoading(false) }
         let groupID = await IDGenerator.shared.make()
         let imageUploader = ImageUploadingService()
         let url = try await imageUploader.uploadImage(
@@ -52,10 +54,7 @@ final class CreateGroupViewModel {
             createdBy: currentUserID,
 //            theme: .init()
         )
-        try await FirestoreRepo.add(group, collectionPath: .groups, documentID: group.uid)
-        try await Store.shared.groupStore?.insert(group)
-        try await Task.sleep(seconds: 2)
-        setLoading(false)
+        try await GroupRepo.save(group)
     }
 
     @MainActor func setLoading(_ loading: Bool) {

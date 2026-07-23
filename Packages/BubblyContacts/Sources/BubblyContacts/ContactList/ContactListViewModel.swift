@@ -14,16 +14,10 @@ final class ContactListViewModel {
     private let syncContactsUseCase: SyncContactListContactsUseCase
     private let syncGroupsUseCase: SyncContactListGroupsUseCase
 
-    init(
-        currentUserRepository: CurrentUserRepository,
-        reducer: ContactListReducer = ContactListReducerImpl(),
-    ) {
+    init(reducer: ContactListReducer = ContactListReducerImpl()) {
         self.reducer = reducer
         let manager = ContactListManager()
-        let repository = ContactListRepositoryImpl(
-            manager: manager,
-            currentUserRepository: currentUserRepository,
-        )
+        let repository = ContactListRepositoryImpl(manager: manager)
         loadUseCase = LoadContactListUseCaseImpl(repository: repository)
         refreshUseCase = RefreshContactListUseCaseImpl(repository: repository)
         syncContactsUseCase = SyncContactListContactsUseCaseImpl(repository: repository)

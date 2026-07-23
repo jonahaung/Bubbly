@@ -74,9 +74,7 @@ public extension Conversation {
                 value.update(from: contact)
             }
         case let .group(group):
-            try await Store.shared.groupStore?.updateAndSave(uid: group.uid) { value in
-                value.update(from: group)
-            }
+            try await GroupRepo.save(group)
         }
     }
 }

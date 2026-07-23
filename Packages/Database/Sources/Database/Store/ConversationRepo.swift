@@ -43,19 +43,10 @@ public enum ConversationRepo {
 
         let group: Database.Group
         do {
-            group = try await FirestoreRepo.getDocument(collection: .groups, documentID: conID)
-        } catch {
-            guard let fetched: Database.Group = try await FirestoreRepo.getModel(
-                for: conID,
-                collection: .groups,
-                field: .uid
-            ) else {
-                throw XError.noConversationGroupFound
-            }
-
-            group = fetched
+            group = try await GroupRepo.getOrCreate(groupID: conID, refetch: true)
+        } catch GroupRepo.GroupError.notFound {
+            throw XError.noConversationGroupFound
         }
-        try await Store.shared.groupStore?.insert(group)
         try await ContactRepo.getOrCreate(for: group.members, refatch: refetch)
         return .group(group)
     }

@@ -45,13 +45,11 @@ public struct FirestoreFilter {
 
 public enum FirestoreCollectionPath: String, Sendable {
     case users
-    case groups
 }
 
 // MARK: - FirestoreDocumentPath
 
 public enum FirestoreDocumentPath: String, Sendable {
     case uid
-    case members
     case mobile
 }

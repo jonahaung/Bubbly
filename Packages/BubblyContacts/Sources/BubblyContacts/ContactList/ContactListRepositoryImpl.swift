@@ -5,11 +5,9 @@ import XUI
 @MainActor
 struct ContactListRepositoryImpl: ContactListRepository {
     private let manager: ContactListManager
-    private let currentUserRepository: CurrentUserRepository
 
-    init(manager: ContactListManager, currentUserRepository: CurrentUserRepository) {
+    init(manager: ContactListManager) {
         self.manager = manager
-        self.currentUserRepository = currentUserRepository
     }
 
     func loadInitial() async throws -> ContactListSnapshot {
@@ -36,17 +34,7 @@ struct ContactListRepositoryImpl: ContactListRepository {
     }
 
     func syncGroups() async throws -> ContactListSnapshot {
-        let currentUser = await currentUserRepository.model
-        let currentUserId = currentUser.uid
-        let groups: [Group] = try await FirestoreRepo.getModels(
-            for: currentUserId,
-            collection: .groups,
-            field: .members
-        )
-        let store = await Store.shared.groupStore
-        try await AsyncOrderedStream.mapOrdered(inputs: groups) { group in
-            try await store?.insert(group)
-        }
+        let groups = try await GroupRepo.sync()
         let ids = groups.flatMap(\.members).removeDuplicates()
         try await AsyncOrderedStream.mapOrdered(inputs: ids) { uid in
             try await ContactRepo.getOrCreate(uid: uid, refetch: false)

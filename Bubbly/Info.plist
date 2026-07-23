@@ -38,6 +38,8 @@
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
 		<key>NSExceptionDomains</key>
 		<dict>
 			<key>commondatastorage.googleapis.com</key>
@@ -53,6 +55,8 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Bubbly connects to the development server on your local network.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

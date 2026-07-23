@@ -10,10 +10,7 @@ public struct ContactList: View {
     public init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
         _viewModel = .init(
-            wrappedValue: .init(
-                currentUserRepository: coordinator.container
-                    .currentUserRepository,
-            ),
+            wrappedValue: .init(),
         )
     }
 

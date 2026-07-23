@@ -10,4 +10,5 @@ func routes(_ app: Application) throws {
     let authenticated = app.grouped(FirebaseAuthenticationMiddleware())
     try authenticated.register(collection: ContactsController())
     try authenticated.register(collection: ProfileController())
+    try authenticated.register(collection: GroupsController())
 }

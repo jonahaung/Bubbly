@@ -28,4 +28,34 @@ struct ValidationTests {
         #expect(ImagePayloadValidator.isValid(data: webp, contentType: "image/webp"))
         #expect(!ImagePayloadValidator.isValid(data: png, contentType: "image/jpeg"))
     }
+
+    @Test
+    func validatesGroupInput() throws {
+        let request = GroupUpsertRequest(
+            name: "  Friends  ",
+            photoURL: "https://example.com/group.png",
+            members: ["owner", "member", "member"]
+        )
+        let validated = try request.validated(currentUserID: "owner")
+        #expect(validated.name == "Friends")
+        #expect(validated.members == ["member", "owner"])
+    }
+
+    @Test
+    func rejectsInvalidGroupInput() {
+        #expect(throws: (any Error).self) {
+            try GroupUpsertRequest(
+                name: "Friends",
+                photoURL: "http://example.com/group.png",
+                members: ["owner", "member"]
+            ).validated(currentUserID: "owner")
+        }
+        #expect(throws: (any Error).self) {
+            try GroupUpsertRequest(
+                name: "Friends",
+                photoURL: nil,
+                members: ["member-one", "member-two"]
+            ).validated(currentUserID: "owner")
+        }
+    }
 }

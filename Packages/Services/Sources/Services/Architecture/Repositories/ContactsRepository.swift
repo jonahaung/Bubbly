@@ -47,29 +47,10 @@ public final class ContactsRepository: ContactsRepositoryProtocol, @unchecked Se
 }
 
 public extension ContactsRepository {
-    @concurrent func syncGroups(currentUserId: String) async throws {
-        let groups: [Group] = try await FirestoreRepo.getModels(
-            for: currentUserId,
-            collection: .groups,
-            field: .members,
-        )
-        let store = await Store.shared.groupStore
-
-        try await withThrowingTaskGroup(of: Void.self) { taskGroup in
-            for group in groups {
-                taskGroup.addTask {
-                    if try await store?.exists(uid: group.uid) == false {
-                        try await store?.insert(group)
-                    } else {
-                        try await store?.updateAndSave(uid: group.uid) { model in
-                            model.update(from: group)
-                        }
-                    }
-                    try await ContactRepo.getOrCreate(for: group.members, refatch: false)
-                }
-            }
-            try await taskGroup.waitForAll()
-        }
+    @concurrent func syncGroups(currentUserId _: String) async throws {
+        let groups = try await GroupRepo.sync()
+        let memberIDs = groups.flatMap(\.members).removeDuplicates()
+        try await ContactRepo.getOrCreate(for: memberIDs, refatch: false)
         try await fetchData()
     }
 

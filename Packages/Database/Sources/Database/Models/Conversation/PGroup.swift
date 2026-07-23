@@ -88,7 +88,7 @@ extension PGroup: UIdentifiable {
             name = item.name
         }
         if photoURL != item.photoURL {
-            photoURL = item.photoURL ?? photoURL
+            photoURL = item.photoURL ?? ""
         }
         if members.uniqued().sorted() != item.members.uniqued().sorted() {
             members = item.members.uniqued().sorted()

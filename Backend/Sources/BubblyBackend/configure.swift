@@ -12,6 +12,7 @@ func configure(_ app: Application) async throws {
     let databaseConfiguration = try makeDatabaseConfiguration(environment: app.environment)
     app.databases.use(.postgres(configuration: databaseConfiguration), as: .psql)
     app.migrations.add(CreateContact())
+    app.migrations.add(CreateGroup())
 
     if Environment.get("AUTO_MIGRATE")?.lowercased() == "true" {
         try await app.autoMigrate()

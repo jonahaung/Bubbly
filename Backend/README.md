@@ -34,3 +34,7 @@ The iOS Debug build defaults to `http://127.0.0.1:8080`. Set `BUBBLY_API_BASE_UR
 - `PUT /v1/profile/photo`
 - `DELETE /v1/profile/photo`
 - `GET /v1/profile-photos/:userID`
+- `GET /v1/groups?limit=100&after=:cursor`
+- `GET /v1/groups/:groupID`
+- `PUT /v1/groups/:groupID`
+- `DELETE /v1/groups/:groupID`

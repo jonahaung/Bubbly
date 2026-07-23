@@ -57,6 +57,11 @@
       </BuildableProductRunnable>
       <EnvironmentVariables>
          <EnvironmentVariable
+            key = "BUBBLY_API_BASE_URL"
+            value = "http://192.168.80.114:8080"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
             key = "CHAT_PERF_OVERLAY"
             value = "1"
             isEnabled = "YES">

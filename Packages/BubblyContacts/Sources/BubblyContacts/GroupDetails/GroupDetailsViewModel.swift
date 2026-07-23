@@ -43,6 +43,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
 
     func uploadImage(image: UIImage) async throws -> URL {
         setLoading(true)
+        defer { setLoading(false) }
         UIApplication.shared.endEditing()
         let uid = originalGroup.uid
         let imageUploader = ImageUploadingService()
@@ -55,24 +56,11 @@ public final class GroupDetailsViewModel: ErrorPresenter {
 
     func applyUpdate() async throws {
         setLoading(true)
+        defer { setLoading(false) }
         UIApplication.shared.endEditing()
 
-        let updatedGroup = group
-        let originalUID = originalGroup.uid
-
-        try await Task.sleep(seconds: 1)
-
-        try await Store.shared
-            .groupStore?
-            .updateAndSave(uid: originalUID) { model in
-                model.update(from: updatedGroup)
-            }
-
-        try await FirestoreRepo.set(
-            updatedGroup,
-            collectionPath: .groups,
-            documentID: updatedGroup.uid,
-        )
-        setLoading(false)
+        let updatedGroup = try await GroupRepo.save(group)
+        group = updatedGroup
+        originalGroup = updatedGroup
     }
 }
