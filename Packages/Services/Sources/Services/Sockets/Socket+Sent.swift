@@ -86,9 +86,6 @@ public extension Socket {
             from: conversation,
         ).filter {
             $0.uid != currentUserID
-                && isValidDeviceToken(
-                    $0.pushToken,
-                )
         }
         let title = data.pushNotificationTitle(for: conversation)
         return try await sendToRemote(
@@ -132,23 +129,31 @@ public extension Socket {
                 .url(for: .conversation(conID: data.conID))?
                 .absoluteString
 
-            let notification = APNSNotification(
-                deviceToken: contact.pushToken,
-                messageContent: encrypted,
-                alert: alert,
-                interruptionLevel: .timeSensitive,
-                customData: [
-                    "con_id": data.conID,
-                    "deep_link": deepLink ?? "",
-                ]
-            )
-            let success = try? await self.pushNotificationSender.send(notification: notification)
-            return MsgRecipientReceipt(
-                memberID: contact.uid,
-                state: success == nil ? .partiallyFailed : .delivered,
-                updatedAt: .now,
-                failure: success == nil ? .init(code: "push_failed", isRetryable: true) : nil
-            )
+            do {
+                _ = try await BackendAPIClient.shared.sendPushNotification(
+                    recipientUserID: contact.uid,
+                    messageContent: encrypted,
+                    title: alert.title,
+                    body: alert.body,
+                    conversationID: data.conID,
+                    deepLink: deepLink
+                )
+                return MsgRecipientReceipt(
+                    memberID: contact.uid,
+                    state: .delivered,
+                    updatedAt: .now,
+                    failure: nil
+                )
+            } catch is CancellationError {
+                throw CancellationError()
+            } catch {
+                return MsgRecipientReceipt(
+                    memberID: contact.uid,
+                    state: .partiallyFailed,
+                    updatedAt: .now,
+                    failure: .init(code: "push_failed", isRetryable: true)
+                )
+            }
         }
     }
 
@@ -168,7 +173,4 @@ public extension Socket {
             .post(name: .msgNoti(for: data.conID), object: data)
     }
 
-    private func isValidDeviceToken(_ token: String) -> Bool {
-        !token.isWhitespace
-    }
 }

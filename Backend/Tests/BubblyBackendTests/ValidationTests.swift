@@ -58,4 +58,44 @@ struct ValidationTests {
             ).validated(currentUserID: "owner")
         }
     }
+
+    @Test
+    func validatesPushNotificationInput() throws {
+        let request = PushNotificationRequest(
+            recipientUserID: " recipient ",
+            messageContent: " encrypted ",
+            title: " New message ",
+            body: " Hello ",
+            conversationID: " conversation ",
+            deepLink: "bubbly://conversation/one"
+        )
+        let validated = try request.validated(senderUserID: "sender")
+        #expect(validated.recipientUserID == "recipient")
+        #expect(validated.messageContent == "encrypted")
+        #expect(validated.conversationID == "conversation")
+    }
+
+    @Test
+    func rejectsInvalidPushNotificationInput() {
+        #expect(throws: (any Error).self) {
+            try PushNotificationRequest(
+                recipientUserID: "sender",
+                messageContent: "encrypted",
+                title: nil,
+                body: nil,
+                conversationID: "conversation",
+                deepLink: nil
+            ).validated(senderUserID: "sender")
+        }
+        #expect(throws: (any Error).self) {
+            try PushNotificationRequest(
+                recipientUserID: "recipient",
+                messageContent: "encrypted",
+                title: nil,
+                body: nil,
+                conversationID: "conversation",
+                deepLink: "javascript:alert(1)"
+            ).validated(senderUserID: "sender")
+        }
+    }
 }

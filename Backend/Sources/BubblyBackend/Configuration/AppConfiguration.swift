@@ -3,11 +3,16 @@ import Vapor
 
 struct AppConfiguration: Sendable {
     let firebaseProjectID: String
+    let firebaseServiceAccount: FirebaseServiceAccount
     let publicBaseURL: URL
 
     static func load(environment: Environment) throws -> AppConfiguration {
         guard let firebaseProjectID = Environment.get("FIREBASE_PROJECT_ID")?.trimmedNonempty else {
             throw ConfigurationError.missing("FIREBASE_PROJECT_ID")
+        }
+        let firebaseServiceAccount = try FirebaseServiceAccount.load()
+        guard firebaseServiceAccount.projectID == firebaseProjectID else {
+            throw ConfigurationError.invalid("Firebase service-account project_id")
         }
         guard let publicBaseURLString = Environment.get("PUBLIC_BASE_URL")?.trimmedNonempty,
               let publicBaseURL = URL(string: publicBaseURLString),
@@ -21,6 +26,7 @@ struct AppConfiguration: Sendable {
         }
         return AppConfiguration(
             firebaseProjectID: firebaseProjectID,
+            firebaseServiceAccount: firebaseServiceAccount,
             publicBaseURL: publicBaseURL
         )
     }

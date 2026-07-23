@@ -11,4 +11,5 @@ func routes(_ app: Application) throws {
     try authenticated.register(collection: ContactsController())
     try authenticated.register(collection: ProfileController())
     try authenticated.register(collection: GroupsController())
+    try authenticated.register(collection: PushNotificationsController())
 }

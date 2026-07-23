@@ -22,6 +22,19 @@ struct PushTokenUpdateRequest: Encodable, Sendable {
     let pushToken: String
 }
 
+struct PushNotificationRequest: Encodable, Sendable {
+    let recipientUserID: String
+    let messageContent: String
+    let title: String?
+    let body: String?
+    let conversationID: String
+    let deepLink: String?
+}
+
+struct PushNotificationResponse: Decodable, Sendable {
+    let messageID: String
+}
+
 struct BackendErrorResponse: Decodable, Sendable {
     let reason: String?
     let error: Bool?

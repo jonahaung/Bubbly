@@ -14,7 +14,7 @@ The health endpoint is available at `GET /health`.
 
 ## Production
 
-Set `FIREBASE_PROJECT_ID`, `PUBLIC_BASE_URL`, and either `DATABASE_URL` or the individual `DATABASE_*` variables. `PUBLIC_BASE_URL` must use HTTPS when the Vapor environment is production. Run database migrations as a release step with:
+Set `FIREBASE_PROJECT_ID`, `PUBLIC_BASE_URL`, and either `DATABASE_URL` or the individual `DATABASE_*` variables. Provide the Firebase service account through `FIREBASE_SERVICE_ACCOUNT_JSON_BASE64`, or mount it as a secret and set `FIREBASE_SERVICE_ACCOUNT_FILE` to its absolute path. `PUBLIC_BASE_URL` must use HTTPS when the Vapor environment is production. Run database migrations as a release step with:
 
 ```sh
 ./BubblyBackend migrate --yes --env production
@@ -38,3 +38,4 @@ The iOS Debug build defaults to `http://127.0.0.1:8080`. Set `BUBBLY_API_BASE_UR
 - `GET /v1/groups/:groupID`
 - `PUT /v1/groups/:groupID`
 - `DELETE /v1/groups/:groupID`
+- `POST /v1/push-notifications`

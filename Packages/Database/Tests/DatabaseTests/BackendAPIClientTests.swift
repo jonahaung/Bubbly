@@ -177,6 +177,34 @@ struct BackendAPIClientTests {
         #expect(object["name"] as? String == "Friends")
     }
 
+    @Test("Sends an encrypted push notification through the backend")
+    func pushNotification() async throws {
+        let response = Data(#"{"messageID":"message-one"}"#.utf8)
+        let transport = MockBackendHTTPTransport(outcomes: [
+            .response(.init(statusCode: 200, headers: [:], data: response))
+        ])
+        let client = try makeClient(transport: transport)
+
+        let messageID = try await client.sendPushNotification(
+            recipientUserID: "recipient",
+            messageContent: "encrypted",
+            title: "New message",
+            body: "Hello",
+            conversationID: "conversation",
+            deepLink: "bubbly://conversation/one"
+        )
+        let request = try #require(await transport.requests.first)
+        let body = try #require(request.httpBody)
+        let object = try #require(JSONSerialization.jsonObject(with: body) as? [String: Any])
+
+        #expect(messageID == "message-one")
+        #expect(request.httpMethod == "POST")
+        #expect(request.url?.absoluteString == "http://localhost:8080/v1/push-notifications")
+        #expect(object["recipientUserID"] as? String == "recipient")
+        #expect(object["messageContent"] as? String == "encrypted")
+        #expect(object["conversationID"] as? String == "conversation")
+    }
+
     private var contactData: Data {
         Data(
             #"{"uid":"user-one","name":"Taylor","mobile":"+6591234567","photoURL":"","pushToken":"push","publicKeyString":"key"}"#.utf8

@@ -22,7 +22,7 @@ extension ChatComposer {
             return
         }
 
-        let text = inputText.text.string.trimmed
+        let text = inputText.text.trimmed
         let attachments = state.attachments
         resetDraft()
 

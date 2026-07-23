@@ -7,6 +7,9 @@ func configure(_ app: Application) async throws {
     let configuration = try AppConfiguration.load(environment: app.environment)
     app.bubblyConfiguration = configuration
     app.firebaseTokenVerifier = FirebaseTokenVerifier(projectID: configuration.firebaseProjectID)
+    app.pushNotificationSender = FirebasePushNotificationSender(
+        credentials: configuration.firebaseServiceAccount
+    )
     app.routes.defaultMaxBodySize = "2mb"
 
     let databaseConfiguration = try makeDatabaseConfiguration(environment: app.environment)

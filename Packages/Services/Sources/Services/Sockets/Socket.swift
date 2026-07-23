@@ -2,7 +2,6 @@
 
 import Core
 import Database
-import FCM_V1
 import Foundation
 import XUI
 
@@ -17,7 +16,6 @@ public final class Socket: Sendable {
     @SocketActor public static let shared: Socket = .init()
 
     let cryptoService: CryptoService = .shared
-    let pushNotificationSender: PushNotificationSender = .init(suitName: AppInformation.groupID)
 
     private init() {}
 

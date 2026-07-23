@@ -36,7 +36,7 @@ final class InputText {
     }
 
     var hasText: Bool {
-        !text.string.isWhitespace
+        !text.isWhitespace
     }
 
     @ObservationIgnored weak var delegate: InputTextDelegate?

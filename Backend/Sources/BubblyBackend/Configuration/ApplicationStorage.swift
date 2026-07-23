@@ -9,6 +9,10 @@ extension Application {
         typealias Value = FirebaseTokenVerifier
     }
 
+    private struct PushNotificationSenderKey: StorageKey {
+        typealias Value = FirebasePushNotificationSender
+    }
+
     var bubblyConfiguration: AppConfiguration {
         get {
             guard let value = storage[ConfigurationKey.self] else {
@@ -30,6 +34,18 @@ extension Application {
         }
         set {
             storage[TokenVerifierKey.self] = newValue
+        }
+    }
+
+    var pushNotificationSender: FirebasePushNotificationSender {
+        get {
+            guard let value = storage[PushNotificationSenderKey.self] else {
+                preconditionFailure("FirebasePushNotificationSender has not been registered")
+            }
+            return value
+        }
+        set {
+            storage[PushNotificationSenderKey.self] = newValue
         }
     }
 }
