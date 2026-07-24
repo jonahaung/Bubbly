@@ -9,12 +9,10 @@ public struct SeededRandomGenerator: RandomNumberGenerator {
     private var state: UInt64
 
     public init(seed: Int) {
-        // Mix the Int seed into a 64-bit state; avoid zero state
         var x = UInt64(bitPattern: Int64(seed))
         if x == 0 {
             x = 0x9E37_79B9_7F4A_7C15
-        } // non-zero default
-        // Scramble a bit on init
+        }
         state = SeededRandomGenerator.splitmix64(&x)
     }
 

@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  AttachmentDataView.swift
 //  Conversation
 //
 //  Created by Aung Ko Min on 25/5/26.

@@ -7,6 +7,7 @@ import Core
 import MsgRoomMain
 import SwiftUI
 import NetCheckerTraffic
+import XUI
 
 @main
 struct BubblyApp: App {
@@ -19,6 +20,7 @@ struct BubblyApp: App {
                 appLauncher: appDelegate.runtime.appLauncher,
                 router: appDelegate.runtime.router
             )
+            .font(Typography.helvetica.body)
             .netChecker()
             .onOpenURL { url in
                 appDelegate.runtime.openURL(url)

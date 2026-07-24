@@ -136,9 +136,9 @@ extension GitHubMarkdownStyle {
     ) -> NSParagraphStyle {
         let style = NSMutableParagraphStyle()
         style.lineBreakMode = .byWordWrapping
-        style.lineBreakStrategy = .standard
+        style.lineBreakStrategy = .hangulWordPriority
         style.allowsDefaultTighteningForTruncation = false
-        style.alignment = .left
+        style.alignment = .natural
         style.lineSpacing = 1
         style.lineHeightMultiple = 1.4
         style.firstLineHeadIndent = firstLineHeadIndent

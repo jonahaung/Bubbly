@@ -1,5 +1,7 @@
 # Bubbly Backend
 
+// swift run BubblyBackend serve --env development --hostname 192.168.80.114 --port 8080
+
 The service stores contact profiles and profile images in PostgreSQL. Firebase Authentication remains the identity provider; every private endpoint verifies a Firebase ID token.
 
 ## Local development
@@ -9,7 +11,6 @@ Copy `.env.example` to `.env`, replace the database password, then run:
 ```sh
 docker compose --env-file .env up --build
 ```
-// swift run BubblyBackend serve --env development --hostname 0.0.0.0 --port 8080
 The health endpoint is available at `GET /health`.
 
 ## Production

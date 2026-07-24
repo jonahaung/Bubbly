@@ -36,29 +36,13 @@ public struct Typography: Sendable {
 
 public extension Typography {
     static let system: Typography = .init(
-        body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize).leading(.loose),
-        callout: .system(size: UIFont.preferredFont(forTextStyle: .callout).pointSize).leading(.loose),
-        subHeadline: .system(size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize).leading(.loose),
-        headLine:
-        .system(
-            size: UIFont.preferredFont(forTextStyle: .headline).pointSize,
-            weight: .semibold
-        ).leading(.loose),
-        footnote:
-        .system(
-            size: UIFont.preferredFont(forTextStyle: .footnote).pointSize,
-            design: .rounded
-        ).leading(.loose),
-        caption1:
-        .system(
-            size: UIFont.preferredFont(forTextStyle: .caption1).pointSize,
-            design: .rounded
-        ).leading(.loose),
-        caption2:
-        .system(
-            size: UIFont.preferredFont(forTextStyle: .caption2).pointSize,
-            design: .rounded
-        ).leading(.loose)
+        body: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .body).pointSize, relativeTo: .body),
+        callout: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .callout).pointSize, relativeTo: .callout),
+        subHeadline: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize, relativeTo: .subheadline),
+        headLine: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .headline).pointSize, relativeTo: .headline),
+        footnote: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .footnote).pointSize, relativeTo: .footnote),
+        caption1: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .caption1).pointSize, relativeTo: .caption),
+        caption2: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .caption2).pointSize, relativeTo: .caption2)
     )
 }
 public extension Typography {

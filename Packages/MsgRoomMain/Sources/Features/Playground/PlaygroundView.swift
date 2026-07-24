@@ -4,8 +4,6 @@ import Services
 import SwiftUI
 import XUI
 
-// MARK: - PlaygroundView
-
 struct PlaygroundView: View {
     @State private var viewModel: PlaygroundViewModel = .init()
 
@@ -19,13 +17,6 @@ struct PlaygroundView: View {
             if viewModel.state.isLoading {
                 ProgressView()
             }
-
-            if let error = viewModel.state.error {
-                Text(error)
-                    .foregroundStyle(.red)
-            }
-
-
             Button("Show modal") {
                 text = Lorem.random()
                 withTransaction(\.disablesAnimations, true) {
@@ -36,10 +27,6 @@ struct PlaygroundView: View {
             Button("Font Picker") {
                 Router.shared.presentModel(.view(node: NavigationStack{ FontPicker(selection:$fontName) }.opaqueView()))
             }
-    
-            Button("System Sounds") {
-                Router.shared.presentModel(.view(node: SystemSoundTesterView().opaqueView()))
-            }
             Button("Show Toast") {
                 ToastPresenter.show(allowsBackgroundTap: true) {
                     Text(Lorem.random())
@@ -47,19 +34,7 @@ struct PlaygroundView: View {
                     print("tapped")
                 }
             }
-            Text("Reduction").tapToPush {
-                RedactionExamples()
-            }
-            Text("Example View").tapToPush {
-                ExampleView1()
-            }
-            Spacer()
-            Button("Submit") {
-                Task {
-                    await viewModel.send(.submit)
-                }
-            }
-            
+           
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(MarkdownParser.parse(markdownTestData), id: \.self) { item in
                     switch item {
@@ -96,6 +71,9 @@ struct PlaygroundView: View {
                         Text(text)
                     }
                 }
+                let rich = MarkdownFormatter().richText(for: markdownTestData)
+                
+                Text(rich)
             }
             
             Text(Lorem.paragraphs(8))
@@ -106,7 +84,7 @@ struct PlaygroundView: View {
             ModalOverlay(.bottom, from: .bottom, allowsBackgroundTap: true) {
                 Text(text)
                     .padding()
-                    .background(.regularMaterial, in: .rect)
+                    .background(.bar, in: .rect)
                     .overlay {
                         Rectangle().strokeBorder(.primary, lineWidth: 1)
                     }
@@ -126,74 +104,6 @@ struct PlaygroundView: View {
         }
     }
 }
-
-// MARK: - ExpandingTextEditor
-
-struct ExpandingTextEditor: View {
-    @Binding var text: String
-
-    let maxLines: Int
-    let font: Font
-
-    @State private var measuredHeight: CGFloat = 0
-
-    init(
-        text: Binding<String>,
-        maxLines: Int = 5,
-        font: Font = .body,
-    ) {
-        _text = text
-        self.maxLines = maxLines
-        self.font = font
-    }
-
-    var body: some View {
-        ZStack(alignment: .topLeading) {
-            TextEditor(text: $text)
-                .font(font)
-                .frame(height: clampedHeight)
-                .background(.fill)
-                .clipShape(RoundedRectangle(cornerRadius: 18))
-
-            //			// Invisible measuring text
-            //			Text(text.isEmpty ? " " : text)
-            //				.font(font)
-            //				.lineLimit(maxLines)
-            //				.padding(.vertical, 4)
-            //				.background(
-            //					GeometryReader { proxy in
-            //						Color.clear
-            //							.onAppear {
-            //								measuredHeight = proxy.size.height
-            //							}
-            //							.onChange(of: text) { _ in
-            //								measuredHeight = proxy.size.height
-            //							}
-            //					}
-            //				)
-            //				.hidden()
-        }
-        .padding(.bottom)
-    }
-
-    private var lineHeight: CGFloat {
-        UIFont.preferredFont(forTextStyle: .body).lineHeight
-    }
-
-    private var minHeight: CGFloat {
-        lineHeight + 12
-    }
-
-    private var maxHeight: CGFloat {
-        lineHeight * CGFloat(maxLines) + 24
-    }
-
-    private var clampedHeight: CGFloat {
-        min(max(measuredHeight, minHeight), maxHeight)
-    }
-}
-
-let name = "Aung Ko Min"
 
 let markdownTestData = """
 # Welcome to the Markdown Test
@@ -236,65 +146,228 @@ struct User {
     let name: String
 
     func greeting() -> String {
-        "Hello, \(name)"
+        "Hello, Aung Ko Min"
     }
 }
 """
-struct RedactionExamples: View {
-    @State private var isLoading = true
-    
-    var body: some View {
-        VStack(spacing: 20) {
-            VStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 8)
-                    .frame(height: 200)
-                Text("Title Placeholder")
-                    .font(.title)
-                Text("Description text that will be replaced with shimmer effect")
-                    .font(.body)
-            }
-            .customRedaction()
-            .redacted(reason: isLoading ? .shimmer : [])
-            
-            Text("Profile Name")
-                .font(.headline)
-                .customRedaction(.init(shape: .roundedRectangle(4)))
-                .redactedWithShimmer(when: isLoading)
-            
-            AvatarView()
-                .customRedaction(.init(
-                    shape: .circle,
-                    animationDuration: 2.0,
-                    shimmerColors: [.blue.opacity(0.2), .blue.opacity(0.5), .blue.opacity(0.2)]
-                ))
-                .redacted(reason: isLoading ? .shimmer : [])
-            
-            SensitiveDataView()
-                .customRedaction()
-                .redactedWithBlur(when: isLoading)
-            
-            Button("Toggle Loading") {
-                isLoading.toggle()
-            }
-            .buttonStyle(.borderedProminent)
-        }
-        .padding()
-    }
-}
 
-struct AvatarView: View {
-    var body: some View {
-        Circle()
-            .fill(Color.blue)
-            .frame(width: 60, height: 60)
-    }
-}
+//#Preview("Over") {
+//    @Previewable @State var a = Color.Resolved(red: 0.6, green: 0.3, blue: 0.4, opacity: 0.5)
+//    @Previewable @State var b = Color.Resolved(red: 0.2, green: 0.2, blue: 1.0, opacity: 0.2)
+//
+//    HStack(spacing: 0) {
+//        Color(a.over(b).over(.init(red: 1, green: 1, blue: 1)))
+//
+//        Color(a).background(Color(b), in: .rect).background(.white)
+//    }
+//}
+//
+//#Preview("Test Values") {
+//    let rgb2color: (UInt) -> Color.Resolved = { rgb in
+//        Color.Resolved(
+//            red: Float((rgb >> 16) & 0xFF) / 255,
+//            green: Float((rgb >> 8) & 0xFF) / 255,
+//            blue: Float((rgb >> 0) & 0xFF) / 255
+//        )
+//    }
+//
+//    let example: (Color.Resolved, Color.Resolved) -> some View = { a, b in
+//        HStack {
+//            Group {
+//                Color(a)
+//                Color(b)
+//                VStack(alignment: .trailing) {
+//                    Text(Color.Resolved.APCAContrast(text: a, background: b), format: .number)
+//                    Text(Color.Resolved.APCAContrast(text: b, background: a), format: .number)
+//                }
+//                .frame(maxWidth: .infinity)
+//            }
+//            .aspectRatio(1, contentMode: .fit)
+//        }
+//        .monospacedDigit()
+//    }
+//
+//    example(rgb2color(0x888888), rgb2color(0xFFFFFF))
+//
+//    example(rgb2color(0x000000), rgb2color(0xAAAAAA))
+//
+//    example(rgb2color(0x112233), rgb2color(0xDDEEFF))
+//
+//    example(rgb2color(0x112233), rgb2color(0x444444))
+//}
 
-struct SensitiveDataView: View {
-    var body: some View {
-        Text("Sensitive Information")
-            .padding()
-            .background(Color.yellow.opacity(0.3))
-            .cornerRadius(8)
-    }
-}
+//#Preview("Modifier") {
+//    @Previewable @State var fontSize: CGFloat = 16
+//    @Previewable @State var fontWeightIndex = 3
+//
+//    @Previewable @State var text = Color.yellow
+//    @Previewable @State var background = Color.orange
+//
+//    let weights: [Font.Weight] = [.ultraLight, .thin, .light, .regular, .medium, .semibold, .bold, .heavy, .black]
+//
+//    let fontWeight = weights[fontWeightIndex % weights.count]
+//
+//    ScrollView {
+//        let sample = HStack {
+//            Image(systemName: "circle.fill").fontWeight(.regular)
+//
+//            ZStack {
+//                Text("Hi!").fontWeight(.black).hidden()
+//                Text("Hi!")
+//            }
+//        }
+//        .animation(.default, value: fontWeight)
+//
+//        ForEach([Color.white, .orange, .black], id: \.self) { background in
+//            HStack {
+//                let colors = [Color.green, .yellow, .orange, .pink, .purple, .blue]
+//                ForEach(colors, id: \.self) { text in
+//                    Text("Hi")
+//                        .modifier(APCADerivedForegroundColor(foregroundColor: text, backgroundColor: background, fontSize: fontSize, weight: fontWeight))
+//                        .fixedSize()
+//                }
+//            }
+//            .padding()
+//            .background(background, in: .rect(cornerRadius: 8))
+//            .font(.system(size: fontSize, weight: fontWeight))
+//        }
+//
+//        if #available(iOS 26.0, *) {
+//            ForEach([Color.white, .orange, .black], id: \.self) { background in
+//                HStack {
+//                    let colors = [Color.green, .yellow, .orange, .pink, .purple, .blue]
+//                    ForEach(colors, id: \.self) { text in
+//                        Text("Hi")
+//                            .foregroundStyle(text.minimumContrast(over: background))
+//                    }
+//                }
+//                .padding()
+//                .background(background, in: .rect(cornerRadius: 8))
+//                .font(.system(size: fontSize, weight: fontWeight))
+//            }
+//        }
+//
+//        VStack {
+//            sample
+//                .modifier(APCADerivedForegroundColor(foregroundColor: text, backgroundColor: .white, fontSize: fontSize, weight: fontWeight))
+//                .foregroundStyle(text)
+//                .padding(32)
+//                .background(.white)
+//
+//            sample
+//                .modifier(APCADerivedForegroundColor(foregroundColor: text, backgroundColor: background, fontSize: fontSize, weight: fontWeight))
+//                .foregroundStyle(text)
+//                .padding(32)
+//                .background(background)
+//
+//            sample
+//                .modifier(APCADerivedForegroundColor(foregroundColor: text, backgroundColor: .black, fontSize: fontSize, weight: fontWeight))
+//                .foregroundStyle(text)
+//                .padding(32)
+//                .background(.black)
+//        }
+//        .font(.system(size: fontSize, weight: fontWeight))
+//
+//        Spacer()
+//    }
+//    .safeAreaInset(edge: .top) {
+//        GroupBox {
+//            Grid {
+//                GridRow {
+//                    Label("Size", systemImage: "textformat.size")
+//                    Slider(value: $fontSize, in: 9 ... 160)
+//                        .padding(.leading)
+//                }
+//
+//                GridRow {
+//                    Label("Weight", systemImage: "bold")
+//
+//                    HStack {
+//                        Button("Previous", systemImage: "minus") {
+//                            fontWeightIndex -= 1
+//                        }
+//
+//                        Group {
+//                            switch fontWeight {
+//                            case .ultraLight: Text("Ultra Light")
+//                            case .thin: Text("Thin")
+//                            case .light: Text("Light")
+//                            case .regular: Text("Regular")
+//                            case .medium: Text("Medium")
+//                            case .semibold: Text("Semibold")
+//                            case .bold: Text("Bold")
+//                            case .heavy: Text("Heavy")
+//                            case .black: Text("Black")
+//                            default: EmptyView()
+//                            }
+//                        }
+//                        .frame(maxWidth: 80)
+//
+//                        Button("Next", systemImage: "plus") {
+//                            fontWeightIndex += 1
+//                        }
+//                    }
+//                    .padding(8)
+//                    .background(.ultraThickMaterial, in: .rect(cornerRadius: 4))
+//                    .labelStyle(.iconOnly)
+//                }
+//
+//                GridRow {
+//                    HStack {}
+//                }
+//            }
+//        }
+//        .padding(.horizontal)
+//
+//        Spacer().frame(height: 44)
+//
+//    }
+//}
+//
+//@available(iOS 18.0, *)
+//#Preview("ShapeStyle") {
+//    @Previewable @State var foreground = Color.red
+//    @Previewable @State var background = Color.blue
+//    @Previewable @State var contrast: Float = 90
+//
+//    GroupBox {
+//        Slider(value: $contrast, in: 0 ... 100)
+//
+//        HStack {
+//            ColorPicker("Foreground", selection: $foreground)
+//            ColorPicker("Background", selection: $background)
+//        }
+//    }
+//    .padding()
+//
+//    Circle()
+//        .fill(foreground.minimumContrast(contrast, over: background))
+//        .frame(width: 44, height: 44)
+//        .frame(maxWidth: .infinity, maxHeight: .infinity)
+//        .background(background)
+//}
+
+//#Preview("Interpolating Font.Weight") {
+//    @Previewable @State var weight: CGFloat = 0
+//
+//    GroupBox {
+//        Slider(value: $weight, in: -1 ... 1)
+//
+//        Text("A")
+//            .font(.system(size: 100, weight: .init(value: weight)))
+//    }
+//    .padding()
+//}
+//
+//@available(iOS 26.0, *)
+//#Preview("Readme") {
+//    HStack {
+//        Text("Hello World")
+//
+//        Text("What's Up?!")
+//            .fontWeight(.black)
+//    }
+//    .foregroundStyle(Color.pink.minimumContrast(over: Color.primary))
+//    .padding()
+//    .background(.primary)
+//}

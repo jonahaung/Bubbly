@@ -17,31 +17,30 @@ struct ComposeBar: View {
     @Environment(\.conversationTheme) private var theme
     
     var body: some View {
-        DispatchingChanges(to: composer.state, id: Self.typeName) { state in
-            VStack(spacing: 0) {
-                sourcePanel(state)
-                HStack(alignment: .bottom, spacing: 4) {
-                    menuButton(state)
-                    sourceButtons(state)
-                    ComposeBarInputTextField(inputText: composer.inputText)
-                    ComposeBarSendButton()
-                }
-                .soundEffect(.latch4, trigger: state)
-                .padding(.init(top: 0, leading: 8, bottom: 0, trailing: 8))
-                .background(
-                    LinearGradient(
-                        colors: [
-                            .clear,
-                            theme.backgroundColor,
-                            theme.backgroundColor
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ), ignoresSafeAreaEdges: .bottom
-                )
+        let state = composer.state
+        VStack(spacing: 0) {
+            sourcePanel(state)
+            HStack(alignment: .bottom, spacing: 4) {
+                menuButton(state)
+                sourceButtons(state)
+                ComposeBarInputTextField(inputText: composer.inputText)
+                ComposeBarSendButton()
             }
-            .geometryGroup()
+            .soundEffect(.latch4, trigger: state)
+            .padding(.init(top: 0, leading: 8, bottom: 0, trailing: 8))
+            .background(
+                LinearGradient(
+                    colors: [
+                        .clear,
+                        theme.backgroundColor,
+                        theme.backgroundColor
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ), ignoresSafeAreaEdges: .bottom
+            )
         }
+        .geometryGroup()
     }
 }
 
