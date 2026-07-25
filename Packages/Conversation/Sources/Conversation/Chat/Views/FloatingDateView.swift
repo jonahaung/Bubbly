@@ -14,7 +14,8 @@ struct FloatingDateView: View {
         if let dateString {
             VStack {
                 Text(dateString)
-                    .font(.system(size: UIFont.smallSystemFontSize, weight: .bold))
+                    .font(.caption)
+                    .bold()
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)

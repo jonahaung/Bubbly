@@ -5,6 +5,7 @@
 
 import SwiftUI
 
+@MainActor
 @Observable
 public final class SharedNamespace {
     public var value: Namespace.ID

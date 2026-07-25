@@ -25,7 +25,8 @@ struct InboxCell: View {
                                 .padding(.horizontal, 6)
                                 .background(.blue.gradient, in: .capsule)
                                 .foregroundStyle(Color.container)
-                                .font(.system(size: UIFont.smallSystemFontSize-1, weight: .semibold))
+                                .font(.caption)
+                                .bold()
                                 .lineHeight(.multiple(factor: 1.2))
                         }
                     }

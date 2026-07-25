@@ -4,8 +4,9 @@ import Database
 import SwiftUI
 import XUI
 
+@MainActor
 @Observable
-public final class MsgCellViewModel: @preconcurrency Identifiable {
+public final class MsgCellViewModel: @MainActor Identifiable {
     
     public var state: State
     public var isVisible: Bool = false

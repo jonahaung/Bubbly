@@ -52,10 +52,10 @@ public struct FirePhoneOTPLoginView: View {
                 if viewModel.isLoading {
                     ProgressView()
                         .padding()
-                        .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                focused = nil
-                            }
+                        .task {
+                            try? await Task.sleep(for: .milliseconds(500))
+                            guard !Task.isCancelled else { return }
+                            focused = nil
                         }
                 }
             }

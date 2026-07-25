@@ -16,7 +16,7 @@ struct AccessoryBar: View {
             Spacer()
             switch item {
             case .scrollDownButton:
-                CircleButton(.chevronDown) {
+                CircleButton("Scroll to latest message", symbol: .chevronDown) {
                     manager.send(.scrollDownButtonTapped)
                 }
                 .transition(
@@ -25,7 +25,7 @@ struct AccessoryBar: View {
                         .animation(.easeOut)
                 )
             case .keyboardButton:
-                CircleButton(.keyboardChevronCompactDown) {
+                CircleButton("Dismiss keyboard", symbol: .keyboardChevronCompactDown) {
                     UIApplication.shared.endEditing()
                 }
                 .transition(

@@ -36,7 +36,8 @@ private struct Header: View, Equatable {
     let headerText: String
     var body: some View {
         Text(headerText)
-            .font(.system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded))
+            .font(.caption)
+            .fontDesign(.rounded)
             .foregroundStyle(Color.tertiaryText)
             .padding(.horizontal, 35)
             .allowsHitTesting(false)

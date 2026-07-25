@@ -13,7 +13,7 @@ private enum MsgCellGestureThresholds {
     static let markTrigger: CGFloat = 170
 }
 
-@Observable final class GestureViewModel {
+@MainActor @Observable final class GestureViewModel {
     var draggedOffset: CGFloat = 0
     var isLongPressActive = false
     @ObservationIgnored private(set) var draggedLimitReached = false
@@ -142,6 +142,8 @@ extension MsgCellGesture {
 
     private func activateLongPressIfNeeded() {
         guard !model.isLongPressActive else { return }
-        DispatchQueue.main.async { model.isLongPressActive = true }
+        Task { @MainActor in
+            model.isLongPressActive = true
+        }
     }
 }

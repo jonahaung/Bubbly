@@ -43,10 +43,11 @@ struct AttachmentPreview: View {
                 if let title = model.attachment.title, title.isWhitespace == false {
                     VStack(alignment: .center, spacing: 4) {
                         Text(title)
-                            .font(.system(size: 12, weight: .semibold))
+                            .font(.footnote)
+                            .bold()
                         if let description = model.attachment.subTitle {
                             Text(description)
-                                .font(.system(size: 11, weight: .regular))
+                                .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -70,7 +71,7 @@ struct AttachmentPreview: View {
                 }
             } else if let error = model.error {
                 SystemImage(.exclamationmarkTriangleFill)
-                    .foregroundColor(.red)
+                    .foregroundStyle(.red)
                     .presentSheet {
                         Text(error.localizedDescription)
                             .padding()
@@ -141,12 +142,16 @@ struct AttachmentPreview: View {
     }
 
     private func imageView(for uiImage: UIImage) -> some View {
-        Image(uiImage: uiImage)
-            .resizable()
-            .scaledToFit()
-            .clipShape(RoundedRectangle(cornerRadius: Radius.card))
-            .onTapGesture {
-                onSelect(model.attachment)
-            }
+        Button {
+            onSelect(model.attachment)
+        } label: {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+                .clipShape(.rect(cornerRadius: Radius.card))
+        }
+        .accessibilityLabel("Open attachment")
+        .buttonStyle(.plain)
+        .frame(minWidth: 44, minHeight: 44)
     }
 }

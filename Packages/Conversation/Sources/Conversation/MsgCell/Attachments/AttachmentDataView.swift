@@ -28,11 +28,13 @@ struct AttachmentDataView: View {
     }
     
     private func imageView(for uiImage: UIImage) -> some View {
-        Image(uiImage: uiImage)
-            .resizable()
-            .scaledToFit()
-            .onTapGesture {
-                onTap()
-            }
+        Button(action: onTap) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFit()
+        }
+        .accessibilityLabel("Open attachment")
+        .buttonStyle(.plain)
+        .frame(minWidth: 44, minHeight: 44)
     }
 }

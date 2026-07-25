@@ -9,17 +9,20 @@ import SFSafeSymbols
 // MARK: - Model
 
 public struct CircleButton: View {
+    public let label: LocalizedStringKey
     public let symbol: SFSymbol
     private let size: CGFloat
     public let color: Color
     public let action: () -> Void
 
     public init(
-        _ symbol: SFSymbol,
+        _ label: LocalizedStringKey,
+        symbol: SFSymbol,
         _ size: CGFloat = 38,
         color: Color = .accentColor,
         action: @escaping () -> Void
     ) {
+        self.label = label
         self.symbol = symbol
         self.size = size
         self.color = color
@@ -34,6 +37,7 @@ public struct CircleButton: View {
                 .foregroundStyle(color).frame(square: size)
                 .background(.windowBackground, in: .circle)
         }
+        .accessibilityLabel(Text(label))
         .buttonRepeatBehavior(.disabled)
         .buttonSizing(.fitted)
         .buttonStyle(.borderless)
