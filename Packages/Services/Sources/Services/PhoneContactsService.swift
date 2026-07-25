@@ -31,12 +31,12 @@ public actor PhoneContactsService {
 
 		let request = CNContactFetchRequest(keysToFetch: keys)
 
-		try store.enumerateContacts(with: request) { cn, _ in
-			guard let c = Contact(cnContact: cn),
-				  seen.insert(c.mobile).inserted
+		try store.enumerateContacts(with: request) { phoneContact, _ in
+			guard let contact = Contact(cnContact: phoneContact),
+				  seen.insert(contact.mobile).inserted
 			else { return }
 
-			results.append(c)
+			results.append(contact)
 		}
 
 		return results

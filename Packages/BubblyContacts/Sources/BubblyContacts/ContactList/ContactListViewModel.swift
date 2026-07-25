@@ -1,127 +1,136 @@
+//  ContactListViewModel.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Database
+import Foundation
 import Observation
-import Services
 
 @MainActor
 @Observable
 final class ContactListViewModel {
-    private(set) var state: ContactListViewState
+    enum Operation: Sendable {
+        case load
+        case refresh
+        case syncContacts
+        case syncGroups
+    }
 
-    private let reducer: ContactListReducer
-    private let taskRegistry: ContactListTaskRegistry = .init()
-    private let loadUseCase: LoadContactListUseCase
-    private let refreshUseCase: RefreshContactListUseCase
-    private let syncContactsUseCase: SyncContactListContactsUseCase
-    private let syncGroupsUseCase: SyncContactListGroupsUseCase
+    var searchText = "" {
+        didSet {
+            guard searchText != oldValue else {
+                return
+            }
+            rebuildSections()
+        }
+    }
 
-    init(reducer: ContactListReducer = ContactListReducerImpl()) {
-        self.reducer = reducer
-        let manager = ContactListManager()
-        let repository = ContactListRepositoryImpl(manager: manager)
-        loadUseCase = LoadContactListUseCaseImpl(repository: repository)
-        refreshUseCase = RefreshContactListUseCaseImpl(repository: repository)
-        syncContactsUseCase = SyncContactListContactsUseCaseImpl(repository: repository)
-        syncGroupsUseCase = SyncContactListGroupsUseCaseImpl(repository: repository)
-        state = .init(
-            searchText: "",
-            chatContacts: [],
-            phoneContacts: [],
-            groups: [],
-            chatContactSections: [],
-            phoneContactSections: [],
-            isLoading: false,
-            error: nil,
+    private(set) var chatSections: [ContactListSection] = []
+    private(set) var phoneSections: [ContactListSection] = []
+    private(set) var groups: [Group] = []
+    private(set) var activeOperation: Operation?
+    private(set) var errorMessage: String?
+
+    var isLoading: Bool {
+        activeOperation != nil
+    }
+
+    @ObservationIgnored private let client: ContactListClient
+    @ObservationIgnored private var content: ContactListContent = .empty
+    @ObservationIgnored private var operationTask: Task<Void, Never>?
+    @ObservationIgnored private var operationID: UUID?
+
+    init(client: ContactListClient = .live) {
+        self.client = client
+    }
+
+    func perform(_ operation: Operation) async {
+        operationTask?.cancel()
+        let id = UUID()
+        operationID = id
+        activeOperation = operation
+        errorMessage = nil
+
+        let task = Task { [weak self, client] in
+            do {
+                switch operation {
+                case .load,
+                     .refresh:
+                    break
+                case .syncContacts:
+                    try await client.syncContacts()
+                case .syncGroups:
+                    try await client.syncGroups()
+                }
+                try Task.checkCancellation()
+                let content = try await client.load()
+                try Task.checkCancellation()
+                self?.finish(id: id, result: .success(content))
+            } catch is CancellationError {
+                self?.finishCancellation(id: id)
+            } catch {
+                self?.finish(id: id, result: .failure(error))
+            }
+        }
+        operationTask = task
+        await task.value
+    }
+
+    func retry() async {
+        await perform(.refresh)
+    }
+
+    func cancel() {
+        operationTask?.cancel()
+        operationTask = nil
+        operationID = nil
+        activeOperation = nil
+    }
+
+    private func finish(
+        id: UUID,
+        result: Result<ContactListContent, any Error>
+    ) {
+        guard operationID == id else {
+            return
+        }
+        operationTask = nil
+        operationID = nil
+        activeOperation = nil
+
+        switch result {
+        case let .success(content):
+            self.content = content
+            rebuildSections()
+        case let .failure(error):
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func finishCancellation(id: UUID) {
+        guard operationID == id else {
+            return
+        }
+        operationTask = nil
+        operationID = nil
+        activeOperation = nil
+    }
+
+    private func rebuildSections() {
+        chatSections = ContactListSectionBuilder.sections(
+            from: content.chatContacts,
+            matching: searchText
         )
-    }
-
-    func send(_ intent: ContactListIntent) async {
-        switch intent {
-        case .appear:
-            await taskRegistry.run(key: .appear) { [weak self] in
-                guard let self else {
-                    return
-                }
-                await load()
+        phoneSections = ContactListSectionBuilder.sections(
+            from: content.phoneContacts,
+            matching: searchText
+        )
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        groups = query.isEmpty
+            ? content.groups
+            : content.groups.filter {
+                $0.name.localizedStandardContains(query)
             }
-        case .refresh:
-            await taskRegistry.run(key: .refresh) { [weak self] in
-                guard let self else {
-                    return
-                }
-                await refresh()
-            }
-        case let .setSearchText(value):
-            dispatch(.setSearchText(value))
-        case .syncContacts:
-            await taskRegistry.run(key: .syncContacts) { [weak self] in
-                guard let self else {
-                    return
-                }
-                await syncContacts()
-            }
-        case .syncGroups:
-            await taskRegistry.run(key: .syncGroups) { [weak self] in
-                guard let self else {
-                    return
-                }
-                await syncGroups()
-            }
-        }
-    }
-
-    private func load() async {
-        dispatch(.setLoading(true))
-        dispatch(.setError(nil))
-        do {
-            let snapshot = try await loadUseCase.execute()
-            dispatch(.applySnapshot(snapshot))
-        }
-        catch {
-            dispatch(.setLoading(false))
-            dispatch(.setError(error.localizedDescription))
-        }
-    }
-
-    private func refresh() async {
-        dispatch(.setLoading(true))
-        dispatch(.setError(nil))
-        do {
-            let snapshot = try await refreshUseCase.execute()
-            dispatch(.applySnapshot(snapshot))
-        }
-        catch {
-            dispatch(.setLoading(false))
-            dispatch(.setError(error.localizedDescription))
-        }
-    }
-
-    private func syncContacts() async {
-        dispatch(.setLoading(true))
-        dispatch(.setError(nil))
-        do {
-            let snapshot = try await syncContactsUseCase.execute()
-            dispatch(.applySnapshot(snapshot))
-        }
-        catch {
-            dispatch(.setLoading(false))
-            dispatch(.setError(error.localizedDescription))
-        }
-    }
-
-    private func syncGroups() async {
-        dispatch(.setLoading(true))
-        dispatch(.setError(nil))
-        do {
-            let snapshot = try await syncGroupsUseCase.execute()
-            dispatch(.applySnapshot(snapshot))
-        }
-        catch {
-            dispatch(.setLoading(false))
-            dispatch(.setError(error.localizedDescription))
-        }
-    }
-
-    private func dispatch(_ action: ContactListAction) {
-        reducer.reduce(state: &state, action: action)
     }
 }

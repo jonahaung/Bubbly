@@ -10,8 +10,9 @@ public struct TextAvatarView: View {
     private let color: Color
     @Environment(\.colorScheme) private var colorScheme
     public init(text: String) {
-        self.text = text.words().compactMap(\.first).prefix(2).map { String($0).uppercased() }
+        let prefix = text.words().compactMap(\.first).prefix(2).map { String($0).uppercased() }
             .joined()
+        self.text = prefix
         color = text.color
     }
 
@@ -24,7 +25,6 @@ public struct TextAvatarView: View {
         GeometryReader { geo in
             ZStack {
                 Circle().fill(color.gradient)
-                    .brightness(colorScheme == .dark ? -0.2 : -0.03)
                 Text(text)
                     .font(
                         .system(size: geo.size.height * 0.5, weight: .medium)

@@ -1,15 +1,3 @@
-//
-//  APNSAlert.swift
-//  Services
-//
-//  Created by Aung Ko Min on 23/7/26.
-//
-
-
-//
-// Copyright © 2026 Aung Ko Min. All rights reserved.
-//
-
 import Foundation
 
 public struct APNSAlert: Codable, Sendable {
@@ -23,16 +11,6 @@ public struct APNSAlert: Codable, Sendable {
     public let locArgs: [String]?
     public let launchImage: String?
 
-    /// - Parameters:
-    ///   - title: The title to be displayed to the user.
-    ///   - subtitle: The subtitle to be displayed to the user.
-    ///   - body: The body of the push notification.
-    ///   - titleLocKey: The key to a title string in the Localizable.strings file for the current localization.
-    ///   - titleLocArgs: Variable string values to appear in place of the format specifiers in `titleLocKey`.
-    ///   - actionLocKey: A localized string key used for the action button title instead of “View”.
-    ///   - locKey: A key to an alert-message string in a Localizable.strings file for the current localization.
-    ///   - locArgs: Variable string values to appear in place of the format specifiers in `locKey`.
-    ///   - launchImage: The filename of an image file in the app bundle.
     public init(
         title: String? = nil,
         subtitle: String? = nil,

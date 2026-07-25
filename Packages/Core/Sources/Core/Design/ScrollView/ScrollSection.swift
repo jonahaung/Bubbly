@@ -55,7 +55,7 @@ public struct ScrollSection<
                     )
                 }
                 .padding(Padding.md)
-                .background(Color.container, in: RoundedRectangle(cornerRadius: Radius.sm))
+                .background(Color.container, in: RoundedRectangle(cornerRadius: Radius.md))
 
                 if let footer {
                     footer

@@ -32,7 +32,10 @@ let package = Package(
         ),
         .testTarget(
             name: "BubblyContactsTests",
-            dependencies: ["BubblyContacts"],
+            dependencies: [
+                "BubblyContacts",
+                .product(name: "Database", package: "Database"),
+            ],
         ),
     ],
 )

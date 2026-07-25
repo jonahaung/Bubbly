@@ -1,175 +1,70 @@
+//  ContactList.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import XUI
 import Core
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 public struct ContactList: View {
-    
-
     public init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
-        _viewModel = .init(
-            wrappedValue: .init(),
-        )
+        _viewModel = .init(wrappedValue: .init())
     }
 
-    // MARK: Public
-
     public var body: some View {
+        @Bindable var viewModel = viewModel
+
         ScrollView {
             LazyVStack(alignment: .leading, spacing: Spacing.md) {
-                Picker("Contact Display", selection: $defaultContactDisplay) {
-                    ForEach(DefaultContactDisplayType.allCases, id: \.self) {
-                        Text($0.rawValue)
-                    }
-                }
-                .pickerStyle(.segmented)
-
-                if let error = viewModel.state.error {
-                
-                    Text(error)
-                        .foregroundStyle(.red)
-                        .padding(.horizontal, Padding.sm)
-                }
-
-                switch defaultContactDisplay {
-                case .group:
-                    ScrollSection(data: viewModel.state.groups) { group in
-                        ConversationGroupCell(group: group)
-                    }
-                case .chat:
-                    ForEach(viewModel.state.chatContactSections) { section in
-                        ScrollSection(data: section.items) { contact in
-                            ContactCell(contact) {
-                                await openConversation(for: contact)
-                            }
-                            .id(contact.uid)
-                        } header: {
-                            HStack(alignment: .bottom) {
-                                Text(section.title)
-                                    .foregroundStyle(Color.secondaryText)
-                                    .font(.footnote)
-
-                                Spacer()
-                            }
-                        }
-                        .id(section.id)
-                    }
-                case .phone:
-                    ForEach(viewModel.state.phoneContactSections) { section in
-                        ScrollSection(data: section.items) { contact in
-                            ContactCell(contact) {
-//                                await openConversation(for: contact)
-                            }
-                            .id(contact.uid)
-                        } header: {
-                            HStack(alignment: .bottom) {
-                                Text(section.title)
-                                    .foregroundStyle(Color.secondaryText)
-                                    .font(.footnote)
-
-                                Spacer()
-                            }
-                        }
-                        .id(section.id)
-                    }
-                }
+                ContactListModePicker(selection: $displayMode)
+                ContactListContentView(
+                    mode: displayMode,
+                    searchText: viewModel.searchText,
+                    chatSections: viewModel.chatSections,
+                    phoneSections: viewModel.phoneSections,
+                    groups: viewModel.groups,
+                    isLoading: viewModel.isLoading,
+                    errorMessage: viewModel.errorMessage,
+                    openConversation: openConversation,
+                    retry: viewModel.retry
+                )
             }
         }
         .groupScrollViewStyle()
         .navigationTitle(TabPath.contacts.name)
         .navigationSubtitle(TabPath.contacts.systemName)
         .searchable(
-            text: $searchText,
+            text: $viewModel.searchText,
             placement: .toolbarPrincipal,
-            prompt: "Search Contacts",
+            prompt: "Search Contacts"
         )
         .toolbar {
-            ToolbarItemGroup {
-                switch defaultContactDisplay {
-                case .chat, .phone:
-                    AsyncButton {
-                        await viewModel.send(.syncContacts)
-                    } label: {
-                        Label(
-                            "Sync",
-                            systemImage:
-                            "arrow.trianglehead.2.clockwise.rotate.90",
-                        )
-                        .labelStyle(.iconOnly)
-                    }
-                    .disabled(viewModel.state.isLoading)
-                case .group:
-                    AsyncButton {
-                        await viewModel.send(.syncGroups)
-                    } label: {
-                        Label(
-                            "Sync Groups",
-                            systemImage:
-                            "person.2.arrow.trianglehead.counterclockwise",
-                        )
-                        .labelStyle(.iconOnly)
-                    }
-                    .disabled(viewModel.state.isLoading)
-                    Button {
-                        coordinator.router.presentModel(
-                            .view(
-                                node: NavigationView { CreateGroupScene() }
-                                    .interactiveDismissDisabled()
-                                    .opaqueView(),
-                            ),
-                        )
-                    } label: {
-                        Label("New Group", systemImage: "plus")
-                            .labelStyle(.iconOnly)
-                    }
-                    .disabled(viewModel.state.isLoading)
-                }
-            }
+            ContactListToolbar(
+                mode: displayMode,
+                isLoading: viewModel.isLoading,
+                syncContacts: syncContacts,
+                syncGroups: syncGroups,
+                createGroup: presentCreateGroup
+            )
         }
-        .onTask {
-            await viewModel.send(.appear)
+        .task {
+            await viewModel.perform(.load)
         }
         .refreshable {
-            await viewModel.send(.refresh)
+            await viewModel.perform(.refresh)
         }
-        .onSubmit(of: .search) {
-            executeContactsSearch()
-        }
-        .onChange(of: searchText) { _, newValue in
-            Task {
-                await viewModel.send(.setSearchText(newValue))
-            }
-        }
-        .onChange(of: viewModel.state.searchText) { _, newValue in
-            guard searchText != newValue else {
-                return
-            }
-
-            searchText = newValue
-        }
-        .onChange(of: viewModel.state.isLoading) { _, newValue in
-            Loading.show(newValue)
+        .onDisappear {
+            viewModel.cancel()
         }
     }
-
-    
-
-    enum DefaultContactDisplayType: String, CaseIterable {
-        case chat = "Chat Contacts"
-        case phone = "Phone Contacts"
-        case group = "Groups"
-    }
-
-    
 
     @State private var viewModel: ContactListViewModel
-    @State private var executor: ToolExecutor = .init()
-    @State private var searchText = ""
-
     @AppStorage("DefaultContactDisplayType", store: GroupStorage.shared.store)
-    private var defaultContactDisplay: DefaultContactDisplayType = .chat
+    private var displayMode: ContactListDisplayMode = .chat
 
     private let coordinator: AppCoordinator
 
@@ -178,29 +73,29 @@ public struct ContactList: View {
             .model
         let currentUserId = currentUser.uid
         let id = ConversationIDGenerator.generate(contact.uid, currentUserId)
-
-        guard
-            let url = DeeplinkCodec.standard.url(
-                for: .conversation(conID: id)
-            )
-        else {
+        guard let url = DeeplinkCodec.standard.url(for: .conversation(conID: id)) else {
             return
         }
-
-        await MainActor.run {
-            UIApplication.shared.open(url)
-        }
+        await UIApplication.shared.open(url)
     }
 
-    private func executeContactsSearch() {
-        Task {
-            await executor.execute(
-                tool: ContactsTool(),
-                prompt: "search contacts that has the name: \(searchText)",
-                type: [ContactsTool.Arguments].self,
-            ) {
-                $0.map(\.generatedContent.jsonString).joined(separator: "\n - ")
-            } clearForm: {}
-        }
+    private func syncContacts() async {
+        await viewModel.perform(.syncContacts)
+    }
+
+    private func syncGroups() async {
+        await viewModel.perform(.syncGroups)
+    }
+
+    private func presentCreateGroup() {
+        coordinator.router.presentModel(
+            .view(
+                node: NavigationStack {
+                    CreateGroupScene()
+                }
+                .interactiveDismissDisabled()
+                .opaqueView()
+            )
+        )
     }
 }

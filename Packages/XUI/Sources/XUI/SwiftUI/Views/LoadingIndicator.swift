@@ -45,6 +45,7 @@ public struct LoadingIndicator: View {
                     lineCap: .round
                 )
             )
+            .frame(square: size)
             .rotationEffect(.degrees(isAnimating ? 360 : 0))
             .animation(
                 .linear(duration: 1)
