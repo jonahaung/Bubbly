@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import Services
+import XUI
 
 struct MsgCellHeader: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
@@ -36,13 +37,12 @@ private struct Header: View, Equatable {
     let headerText: String
     var body: some View {
         Text(headerText)
-            .font(.caption)
+            .font(Typography.system.caption2)
             .fontDesign(.rounded)
             .foregroundStyle(Color.tertiaryText)
             .padding(.horizontal, 35)
             .allowsHitTesting(false)
             .transition(.invisible())
-            .geometryGroup()
             .equatable(by: headerText)
     }
 }

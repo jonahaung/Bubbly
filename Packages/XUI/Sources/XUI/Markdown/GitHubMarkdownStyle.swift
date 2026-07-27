@@ -42,10 +42,9 @@ public struct GitHubMarkdownStyle: Sendable {
              .orderedList,
              .unorderedList:
             return AttributeContainer()
-                .font(.system(size: UIFont.labelFontSize - 1))
+                .font(Typography.system.callout)
                 .foregroundColor(.primaryText)
                 .lineHeight(.multiple(factor: 1.4))
-                .paragraphStyle(Self.paragraphStyle())
         case .codeBlock:
             return AttributeContainer()
                 .font(
@@ -58,12 +57,13 @@ public struct GitHubMarkdownStyle: Sendable {
                 )
                 .foregroundColor(.white)
                 .backgroundColor(.secondaryText)
+                .paragraphStyle(Self.paragraphStyle())
         case .blockQuote:
             return AttributeContainer()
                 .font(
                     Typography.system.callout.italic()
                 )
-                .foregroundColor(.secondaryText)
+                .foregroundColor(Color.quinaryText)
                 .paragraphStyle(Self.paragraphStyle())
         case .paragraph:
             return base
@@ -139,18 +139,18 @@ extension GitHubMarkdownStyle {
         style.lineBreakStrategy = .hangulWordPriority
         style.allowsDefaultTighteningForTruncation = false
         style.alignment = .natural
-        style.lineSpacing = 1
+        style.lineSpacing = 0
         style.lineHeightMultiple = 1.4
         style.firstLineHeadIndent = firstLineHeadIndent
         style.headIndent = headIndent
         style.paragraphSpacing = paragraphSpacing
-        return style.copy() as? NSParagraphStyle ?? style
+        return style
     }
 }
 
 extension AttributeContainer {
     static var markdownParagraph: AttributeContainer {
-        AttributeContainer()
+        AttributeContainer.init([.font: Typography.system.body])
             .font(Typography.system.body)
             .paragraphStyle(GitHubMarkdownStyle.defaultParagraphStyle)
     }

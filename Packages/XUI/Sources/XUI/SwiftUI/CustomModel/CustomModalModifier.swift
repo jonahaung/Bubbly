@@ -5,10 +5,6 @@
 
 import SwiftUI
 
-public extension EnvironmentValues {
-    @Entry var transitionProgress: CGFloat = 0
-}
-
 extension AnyTransition {
     struct CustomModalModifier: @MainActor AnimatableModifier {
         let edge: Edge
@@ -23,7 +19,6 @@ extension AnyTransition {
             GeometryReader { proxy in
                 content
                     .transformEffect(transform(for: proxy.size))
-                    .environment(\.transitionProgress, progress)
             }
         }
 

@@ -33,6 +33,7 @@ struct InboxCell: View {
                 VStack(alignment: .leading, spacing: 0) {
                     Text(item.title)
                         .font(typography.headLine)
+                        .foregroundStyle(Color.primaryText)
                     
                     Text(item.msg.displayText)
                         .font(typography.subHeadline)

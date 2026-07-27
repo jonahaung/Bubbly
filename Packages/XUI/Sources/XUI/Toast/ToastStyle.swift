@@ -7,23 +7,23 @@ import SwiftUI
 import Foundation
 
 public enum ToastStyle: Sendable, Hashable, CaseIterable {
-    case `default`, top, bottom
+    case notification, alert
 
     var alignment: Alignment {
         switch self {
-        case .default:
+        case .notification:
             .top
-        case .top:
-            .top
-        case .bottom:
+        case .alert:
             .bottom
         }
     }
 
     var edge: Edge {
-        if alignment == .top {
-            return .top
+        switch self {
+        case .notification:
+            .top
+        case .alert:
+            .bottom
         }
-        return .bottom
     }
 }

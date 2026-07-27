@@ -48,7 +48,7 @@ public actor CurrentUserRepository {
         if let remoteModel = try await BackendAPIClient.shared.currentProfile() {
             if newModel != remoteModel {
                 try await BackendAPIClient.shared.updateProfile(newModel)
-                await ToastPresenter.show("Profile Updated", allowsBackgroundTap: false)
+                await ToastPresenter.show("Profile Updated")
             }
         } else {
             try await BackendAPIClient.shared.updateProfile(newModel)

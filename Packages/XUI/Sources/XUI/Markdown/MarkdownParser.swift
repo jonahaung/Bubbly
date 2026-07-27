@@ -14,7 +14,7 @@ public enum MarkdownParser {
         var isInsideCodeBlock = false
 
         for line in markdown.split(separator: "\n", omittingEmptySubsequences: false) {
-            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            let trimmed = line.trimmingCharacters(in: .newlines)
 
             if trimmed.hasPrefix("```") {
                 if isInsideCodeBlock {
