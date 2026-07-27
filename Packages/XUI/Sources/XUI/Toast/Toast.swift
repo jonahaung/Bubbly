@@ -7,6 +7,7 @@ import SwiftUI
 
 @MainActor
 public struct Toast: @MainActor Identifiable, @MainActor Hashable {
+    
     public let id: AnyHashable
     public let node: any RenderNode
     public let duration: Double
@@ -16,9 +17,9 @@ public struct Toast: @MainActor Identifiable, @MainActor Hashable {
 
     public init(
         node: any RenderNode,
-        duration: Double = 5,
-        style: ToastStyle = .top,
-        allowsBackgroundTap: Bool,
+        duration: Double = 3,
+        style: ToastStyle,
+        allowsBackgroundTap: Bool = true,
         action: (@MainActor @Sendable () -> Void)? = nil
     ) {
         id = UUID().uuidString
@@ -28,20 +29,7 @@ public struct Toast: @MainActor Identifiable, @MainActor Hashable {
         self.allowsBackgroundTap = allowsBackgroundTap
         self.action = action
     }
-
-    public init(
-        message: String,
-        duration: Double = 5,
-        style: ToastStyle = .top,
-        allowsBackgroundTap: Bool
-    ) {
-        self.init(
-            node: Text(.init(message)).opaqueView(),
-            duration: duration,
-            style: style, allowsBackgroundTap: allowsBackgroundTap
-        )
-    }
-
+    
     public static func == (lhs: Toast, rhs: Toast) -> Bool {
         lhs.id == rhs.id &&
             lhs.node.renderID() == rhs.node.renderID() &&

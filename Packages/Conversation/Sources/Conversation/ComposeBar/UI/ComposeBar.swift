@@ -23,6 +23,7 @@ struct ComposeBar: View {
             HStack(alignment: .bottom, spacing: 4) {
                 menuButton(state)
                 sourceButtons(state)
+                DocumentPickerButton()
                 ComposeBarInputTextField(inputText: composer.inputText)
                 ComposeBarSendButton()
             }

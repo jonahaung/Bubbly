@@ -25,13 +25,15 @@ struct InboxCell: View {
                                 .padding(.horizontal, 6)
                                 .background(.blue.gradient, in: .capsule)
                                 .foregroundStyle(Color.container)
-                                .font(.system(size: UIFont.smallSystemFontSize-1, weight: .semibold))
+                                .font(.caption)
+                                .bold()
                                 .lineHeight(.multiple(factor: 1.2))
                         }
                     }
                 VStack(alignment: .leading, spacing: 0) {
                     Text(item.title)
                         .font(typography.headLine)
+                        .foregroundStyle(Color.primaryText)
                     
                     Text(item.msg.displayText)
                         .font(typography.subHeadline)

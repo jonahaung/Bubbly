@@ -12,14 +12,16 @@ public struct CountryCodePickerView: View {
         if searchText.isEmpty {
             CountryCode.allCodes
         } else {
-            CountryCode.allCodes.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            CountryCode.allCodes.filter {
+                $0.name.localizedStandardContains(searchText)
+            }
         }
     }
 
     @Environment(\.dismiss) private var dismiss
 
     public var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 ForEach(displayedCodes) { code in
                     Button {
@@ -30,7 +32,7 @@ public struct CountryCodePickerView: View {
                             Text(code.flag)
                             HStack {
                                 Text(code.name)
-                                    .foregroundColor(.primary)
+                                    .foregroundStyle(.primary)
                                 Spacer()
                                 Text(code.phoneCode)
                                     .foregroundStyle(code == countryCode.wrappedValue ? Color

@@ -77,8 +77,7 @@ struct MsgSenderInputSheet: View {
 
     private func copyToClipboard() {
         UIPasteboard.general.string = executor.result
-        ToastPresenter.shared
-            .show(.init(message: "Copied to clipboard", allowsBackgroundTap: false))
+        ToastPresenter.show("Copied to clipboard")
     }
 
     private func clear() {

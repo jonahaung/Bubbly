@@ -36,13 +36,13 @@ public struct Typography: Sendable {
 
 public extension Typography {
     static let system: Typography = .init(
-        body: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .body).pointSize, relativeTo: .body),
-        callout: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .callout).pointSize, relativeTo: .callout),
-        subHeadline: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize, relativeTo: .subheadline),
-        headLine: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .headline).pointSize, relativeTo: .headline),
-        footnote: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .footnote).pointSize, relativeTo: .footnote),
-        caption1: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .caption1).pointSize, relativeTo: .caption),
-        caption2: .custom(UIFont.systemFontFamilyName, size: UIFont.preferredFont(forTextStyle: .caption2).pointSize, relativeTo: .caption2)
+        body: .system(size: UIFont.preferredFont(forTextStyle: .body).pointSize).leading(.loose),
+        callout: .system(size: UIFont.preferredFont(forTextStyle: .callout).pointSize).leading(.tight),
+        subHeadline: .system(size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize),
+        headLine: .system(size: UIFont.preferredFont(forTextStyle: .headline).pointSize),
+        footnote: .system(size: UIFont.preferredFont(forTextStyle: .footnote).pointSize).leading(.tight),
+        caption1: .system(size: UIFont.preferredFont(forTextStyle: .caption1).pointSize).leading(.tight),
+        caption2: .system(size: UIFont.preferredFont(forTextStyle: .caption2).pointSize).leading(.tight)
     )
 }
 public extension Typography {
@@ -50,43 +50,43 @@ public extension Typography {
     static let helvetica: Typography = .init(
         body:
             .custom(
-                "Helvetica",
+                "HelveticaNeue",
                 size: UIFont.preferredFont(forTextStyle: .body).pointSize
             )
             .leading(.loose),
         callout:
             .custom(
-                "Helvetica",
+                "HelveticaNeue",
                 size: UIFont.preferredFont(forTextStyle: .callout).pointSize
             ),
         subHeadline:
             .custom(
-                "Helvetica",
+                "HelveticaNeue",
                 size: UIFont.preferredFont(forTextStyle: .subheadline).pointSize
             ),
         headLine:
             .custom(
-                "Helvetica-Bold",
+                "HelveticaNeue-Bold",
                 size: UIFont.preferredFont(forTextStyle: .headline).pointSize
             ),
         footnote:
             .custom(
-                "Helvetica",
+                "HelveticaNeue",
                 size: UIFont.preferredFont(forTextStyle: .footnote).pointSize
             )
             .leading(.tight),
         caption1:
             .custom(
-                "Helvetica",
+                "HelveticaNeue",
                 size: UIFont.preferredFont(forTextStyle: .caption1).pointSize
             ),
         caption2:
             .custom(
-                "Helvetica",
+                "HelveticaNeue",
                 size: UIFont.preferredFont(forTextStyle: .caption2).pointSize
             )
     )
 }
 public extension EnvironmentValues {
-    @Entry var typography: Typography = .system
+    @Entry var typography: Typography = .helvetica
 }

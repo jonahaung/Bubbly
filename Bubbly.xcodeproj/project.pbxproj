@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		472BA35730163C2E00770821 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 472BA35630163C2E00770821 /* MsgRoomMain */; };
 		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		479D9AC93011EDD2000D181E /* NetCheckerTraffic in Frameworks */ = {isa = PBXBuildFile; productRef = 479D9AC83011EDD2000D181E /* NetCheckerTraffic */; };
 		47B1B2762F9A9FE6008FCD86 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */; };
-		47DE272D2F93637400B6BDF2 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47DE272C2F93637400B6BDF2 /* MsgRoomMain */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -129,8 +129,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				472BA35730163C2E00770821 /* MsgRoomMain in Frameworks */,
 				479D9AC93011EDD2000D181E /* NetCheckerTraffic in Frameworks */,
-				47DE272D2F93637400B6BDF2 /* MsgRoomMain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -231,8 +231,8 @@
 			);
 			name = Bubbly;
 			packageProductDependencies = (
-				47DE272C2F93637400B6BDF2 /* MsgRoomMain */,
 				479D9AC83011EDD2000D181E /* NetCheckerTraffic */,
+				472BA35630163C2E00770821 /* MsgRoomMain */,
 			);
 			productName = Bubbly;
 			productReference = 475BAAB42DBE859D007B0876 /* Bubbly.app */;
@@ -343,7 +343,6 @@
 			mainGroup = 475BAAAB2DBE859D007B0876;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				47DE272B2F93637400B6BDF2 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */,
 				479D9AC73011EDD1000D181E /* XCRemoteSwiftPackageReference "NetChecker" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -839,13 +838,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		47DE272B2F93637400B6BDF2 /* XCLocalSwiftPackageReference "Packages/MsgRoomMain" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/MsgRoomMain;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		479D9AC73011EDD1000D181E /* XCRemoteSwiftPackageReference "NetChecker" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -858,16 +850,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		472BA35630163C2E00770821 /* MsgRoomMain */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MsgRoomMain;
+		};
 		479D9AC83011EDD2000D181E /* NetCheckerTraffic */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 479D9AC73011EDD1000D181E /* XCRemoteSwiftPackageReference "NetChecker" */;
 			productName = NetCheckerTraffic;
 		};
 		47B1B2752F9A9FE6008FCD86 /* MsgRoomMain */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = MsgRoomMain;
-		};
-		47DE272C2F93637400B6BDF2 /* MsgRoomMain */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = MsgRoomMain;
 		};

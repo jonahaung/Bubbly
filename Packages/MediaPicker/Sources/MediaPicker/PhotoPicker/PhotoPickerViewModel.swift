@@ -15,6 +15,7 @@ public final class PhotoPickerViewModel {
 
     private(set) var imageState: MediaPickerLoadingState<UIImage> = .empty
     public var pickedPhoto: PickedPhoto?
+    @ObservationIgnored private var loadingTask: Task<Void, Never>?
 
     // MARK: - Selection
 
@@ -38,16 +39,19 @@ public final class PhotoPickerViewModel {
     // MARK: - Private
 
     private func loadTransferable(from imageSelection: PhotosPickerItem) {
-        Task.detached(priority: .background) { [weak self] in
+        loadingTask?.cancel()
+        loadingTask = Task { [weak self] in
             guard let self else { return }
             do {
                 if let item = try await imageSelection.loadTransferable(type: PickedPhoto.self) {
-                    await updateState(.success(item.uiImage), pickedPhoto: item)
+                    guard !Task.isCancelled else { return }
+                    updateState(.success(item.uiImage), pickedPhoto: item)
                 } else {
-                    await updateState(.empty, pickedPhoto: nil)
+                    updateState(.empty, pickedPhoto: nil)
                 }
+            } catch is CancellationError {
             } catch {
-                await updateState(.failure(error), pickedPhoto: nil)
+                updateState(.failure(error), pickedPhoto: nil)
             }
         }
     }

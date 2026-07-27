@@ -5,6 +5,7 @@
 import Foundation
 import PhoneNumberKit
 
+@MainActor
 @Observable
 public class PhNumber {
     public var id: String {
@@ -37,7 +38,7 @@ public class PhNumber {
         }
     }
 
-    @MainActor public static let locale = PhNumber(countryCode: .current)
+    public static let locale = PhNumber(countryCode: .current)
 
     public init(countryCode: CountryCode) {
         self.countryCode = countryCode
@@ -48,13 +49,11 @@ public class PhNumber {
         guard isValid else {
             return
         }
-        do {
-            let phoneNumber = try phoneNumberKit.parse(rawString)
-            if let regionID = phoneNumber.regionID {
-                countryCode = .init(code: regionID)
-            }
-        } catch {
-            print(error)
+        guard let phoneNumber = try? phoneNumberKit.parse(rawString) else {
+            return
+        }
+        if let regionID = phoneNumber.regionID {
+            countryCode = .init(code: regionID)
         }
     }
 }

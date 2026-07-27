@@ -49,7 +49,7 @@ extension MarkdownFormatter {
         _ text: String,
         base: AttributeContainer
     ) -> AttributedString {
-        guard MarkdownParser.containsMarkdownSyntax(text),
+        guard
               let result = try? AttributedString(
                   markdown: text,
                   options: .init(

@@ -19,7 +19,7 @@ struct TimeSeparator: View, @MainActor Equatable {
         .frame(
             height: ChatLayoutConstants.Cell.timeSeparatorHeight, alignment: .bottom
         )
-        .font(.system(size: UIFont.systemFontSize, weight: .medium))
+        .font(Typography.system.footnote)
         .padding(.horizontal, Padding.lg)
         .padding(.bottom, Padding.xs)
         .background(Color.background)

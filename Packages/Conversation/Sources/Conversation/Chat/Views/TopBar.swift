@@ -19,13 +19,14 @@ struct TopBar: View {
                 UIApplication.shared.endEditing()
             } label: {
                 Text(manager.state.conversation.name)
-                    .font(.system(size: UIFont.systemFontSize + 1, weight: .semibold))
+                    .font(.headline)
                     .badgeView(
                         Text(
                             manager.messages.pagination.totalMsgsCount,
                             format: .number
                         )
-                        .font(.system(size: UIFont.smallSystemFontSize, weight: .medium).width(.compressed))
+                        .font(.caption)
+                        .fontWidth(.compressed)
                         .lineHeight(.multiple(factor: 1.2))
                         .textScale(.secondary)
                     )
@@ -44,6 +45,7 @@ struct TopBar: View {
                         .frame(square: 44)
                         .background(Color.appPrimary, in: .circle)
                 }
+                .accessibilityLabel("Close conversation")
                 Spacer()
                 AsyncButton {
                     var msg = try await MsgCreator().message(text: Lorem.random(), attachments: [], in: manager.state.conversation)
@@ -54,6 +56,7 @@ struct TopBar: View {
                         .frame(square: 44)
                         .background(Color.appPrimary, in: .circle)
                 }
+                .accessibilityLabel("Send sample message")
             }
             .padding(.horizontal, Padding.sm)
         }

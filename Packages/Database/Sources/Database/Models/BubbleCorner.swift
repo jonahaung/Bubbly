@@ -99,7 +99,7 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
 
     @MainActor
     public func roundedRectange(cornerRadius: CGFloat) -> UnevenRoundedRectangle {
-        let smallerRadius: CGFloat = cornerRadius / 3
+        let smallerRadius: CGFloat = 0
         return UnevenRoundedRectangle(
             topLeadingRadius: topLeading ? cornerRadius : smallerRadius,
             bottomLeadingRadius: bottomLeading ? cornerRadius : smallerRadius,

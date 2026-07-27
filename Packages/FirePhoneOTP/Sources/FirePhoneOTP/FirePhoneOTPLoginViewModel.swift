@@ -14,6 +14,7 @@ class FirePhoneOTPLoginViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var otp = ""
     private var cancellables = Set<AnyCancellable>()
+    private var verificationID: String?
 
     init() {
         $phoneNumber
@@ -30,59 +31,48 @@ class FirePhoneOTPLoginViewModel: ObservableObject {
             .filter { $0.count == 6 }
             .debounce(for: 1, scheduler: RunLoop.main)
             .sink { [weak self] value in
-                self?.verifyCode(code: value)
+                Task {
+                    await self?.verifyCode(code: value)
+                }
             }
             .store(in: &cancellables)
     }
 }
 
 extension FirePhoneOTPLoginViewModel {
-    func sendCode(phoneNumber: String) {
+    func sendCode(phoneNumber: String) async {
         guard !isLoading else { return }
         isLoading = true
-        PhoneAuthProvider.provider()
-            .verifyPhoneNumber(phoneNumber, uiDelegate: nil) { [weak self] verificationId, error in
-                guard let self else { return }
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                    if let error {
-                        debugPrint(error)
-                        self.viewState = .error(error.localizedDescription)
-                        return
-                    }
-                    UserDefaults.standard.set(verificationId, forKey: "verificationId")
-                    self.viewState = .verifyOTP
-                }
-            }
+        defer { isLoading = false }
+        do {
+            verificationID = try await PhoneAuthProvider.provider()
+                .verifyPhoneNumber(phoneNumber, uiDelegate: nil)
+            viewState = .verifyOTP
+        } catch {
+            viewState = .error(error.localizedDescription)
+        }
     }
 
-    func verifyCode(code: String) {
+    func verifyCode(code: String) async {
         guard !isLoading else { return }
+        guard let verificationID else {
+            viewState = .error("Request a new verification code.")
+            return
+        }
         isLoading = true
-        let verificationId = UserDefaults.standard.string(forKey: "verificationId") ?? ""
+        defer { isLoading = false }
         let credentials = PhoneAuthProvider.provider().credential(
-            withVerificationID: verificationId,
+            withVerificationID: verificationID,
             verificationCode: code
         )
-
-        Auth.auth().signIn(with: credentials) { [weak self] authResult, error in
-            guard let self else { return }
-            DispatchQueue.main.async {
-                self.isLoading = false
-                if let error {
-                    self.viewState = .error(error.localizedDescription)
-                    return
-                }
-                guard let authResult else {
-                    self.viewState = .error("Unknown Error")
-                    return
-                }
-                let user = authResult.user
-                self.viewState = .loggedIn(
-                    user: user,
-                    isNewUser: authResult.additionalUserInfo?.isNewUser == true
-                )
-            }
+        do {
+            let authResult = try await Auth.auth().signIn(with: credentials)
+            viewState = .loggedIn(
+                user: authResult.user,
+                isNewUser: authResult.additionalUserInfo?.isNewUser == true
+            )
+        } catch {
+            viewState = .error(error.localizedDescription)
         }
     }
 
@@ -90,6 +80,7 @@ extension FirePhoneOTPLoginViewModel {
         isLoading = false
         otp = ""
         phoneNumber.rawString = ""
+        verificationID = nil
         viewState = .enterPhoneNumber
     }
 }
@@ -103,7 +94,9 @@ extension FirePhoneOTPLoginViewModel {
             replacementCharacter: "#"
         )
         if let number = phoneNumber.formattedNumber, !isLoading {
-            sendCode(phoneNumber: number)
+            Task {
+                await sendCode(phoneNumber: number)
+            }
         }
     }
 

@@ -87,6 +87,7 @@ public struct PhotoPickerButton<Content: View>: View {
                     Image(systemName: "pencil.circle.fill")
                         .resizable()
                 }
+                .accessibilityLabel("Choose photo")
             } else {
                 Button {
                     viewModel.imageSelection = nil
@@ -94,6 +95,7 @@ public struct PhotoPickerButton<Content: View>: View {
                     Image(systemName: "minus.circle.fill")
                         .resizable()
                 }
+                .accessibilityLabel("Remove photo")
             }
         }
         .fontWeight(.light)

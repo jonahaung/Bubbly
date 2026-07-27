@@ -2,15 +2,10 @@
 // Copyright © 2026 Aung Ko Min. All rights reserved.
 //
 
-import Combine
 import SwiftUI
 
 struct OTPView: View {
-    enum FocusField: Hashable {
-        case field
-    }
-
-    @FocusState private var focusedField: FocusField?
+    @FocusState private var focusedField: OTPFocusField?
     @Binding var otpCode: String
     var otpCodeLength: Int
 
@@ -29,7 +24,7 @@ struct OTPView: View {
                             .scaledToFit()
                             .foregroundStyle(.secondary)
                         if otpCode.count > index {
-                            Image(systemName: "\(getPin(at: index)).circle.fill")
+                            Image(systemName: "\(pin(at: index)).circle.fill")
                                 .resizable()
                         }
                     }
@@ -37,44 +32,39 @@ struct OTPView: View {
                 }
             }
             .frame(height: 50)
-            .background {
-                TextField("", text: $otpCode)
-                    .frame(width: 0, height: 0, alignment: .center)
-                    .font(Font.system(size: 0))
-                    .accentColor(.clear)
-                    .foregroundColor(.clear)
+            .accessibilityHidden(true)
+            .overlay {
+                TextField("Verification code", text: $otpCode)
+                    .opacity(0.01)
                     .textContentType(.oneTimeCode)
-                    .multilineTextAlignment(.center)
                     .keyboardType(.numberPad)
-                    .onReceive(Just(otpCode)) { _ in limitText(otpCodeLength) }
                     .focused($focusedField, equals: .field)
-                    .task {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                            focusedField = .field
-                        }
+                    .accessibilityLabel("Verification code")
+                    .onChange(of: otpCode) {
+                        limitText(otpCodeLength)
                     }
+            }
+            .task {
+                try? await Task.sleep(for: .milliseconds(500))
+                guard !Task.isCancelled else { return }
+                focusedField = .field
             }
         }
         .fontDesign(.monospaced)
     }
 
-    private func getPin(at index: Int) -> String {
-        guard otpCode.count > index else {
+    private func pin(at offset: Int) -> String {
+        guard offset < otpCode.count else {
             return ""
         }
-        return otpCode[index]
+        let index = otpCode.index(otpCode.startIndex, offsetBy: offset)
+        return String(otpCode[index])
     }
 
     private func limitText(_ upper: Int) {
         if otpCode.count > upper {
             otpCode = String(otpCode.prefix(upper))
         }
-    }
-}
-
-public extension String {
-    subscript(idx: Int) -> String {
-        String(self[index(startIndex, offsetBy: idx)])
     }
 }
 

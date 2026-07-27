@@ -28,28 +28,24 @@ extension ChatManager: ChatDataReceiverDelegate {
         case messages.isAbsoluteScrolled(at: .bottom):
             scrollController.send(.begin(.append(msg: msg)))
         case messages.shouldPaginate(at: .bottom):
-            ToastPresenter.shared.dismiss()
             let toast = Toast(
                 node: Text(msg.displayText).opaqueView(),
-                allowsBackgroundTap: true
+                style: .notification
             ) { [weak self] in
                 guard let self else { return }
                 serialQueue.addOperation { [weak self] in
                     guard let self else { return }
                     try await scrollTo(msg: msg)
-                    ToastPresenter.shared.dismiss()
                 }
             }
             ToastPresenter.show(toast)
         case !messages.shouldPaginate(at: .bottom):
-            ToastPresenter.shared.dismiss()
             let toast = Toast(
-                node: Text(msg.displayText).opaqueView(),
-                allowsBackgroundTap: true
+                node: Text(.init(msg.displayText)).opaqueView(),
+                style: .notification
             ) { [weak self] in
                 guard let self else { return }
-                scrollController.performScroll(to: .id(msg.uid, anchor: .bottom, .animated()))
-                ToastPresenter.shared.dismiss()
+                scrollController.performScroll(to: .id(msg.uid, anchor: .bottom, .animated(.interpolatingSpring)))
             }
             ToastPresenter.show(toast)
             messages.insert(msg: msg)
