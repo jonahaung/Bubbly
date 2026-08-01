@@ -27,7 +27,6 @@ struct MsgCellContent: View {
             if state.attachments?.isEmpty == false {
                 MsgCellAttachmentBubble(
                     state: state,
-                    isVisible: viewModel.isVisible,
                     theme: theme
                 )
             } else {

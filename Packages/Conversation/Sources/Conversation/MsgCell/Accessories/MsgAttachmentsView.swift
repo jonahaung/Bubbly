@@ -9,7 +9,6 @@ import SwiftUI
 
 struct MsgAttachmentsView: View {
     let state: MsgCellViewModel.State
-    let isVisible: Bool
 
     @Namespace private var namespace
     @State private var selection: Attachment?
@@ -21,7 +20,7 @@ struct MsgAttachmentsView: View {
 
     var body: some View {
         AttachmentsDeck(items: attachments, alignment: alignment) { attachment in
-            AttachmentPreview(attachment: attachment, isVisible: isVisible) { item in
+            AttachmentPreview(attachment: attachment) { item in
                 selection = item
             } onCompleteUpload: {
                 onUploaded(attachment: $0)

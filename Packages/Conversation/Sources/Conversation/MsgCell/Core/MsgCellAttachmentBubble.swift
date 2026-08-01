@@ -12,16 +12,14 @@ struct MsgCellAttachmentBubble: View, @MainActor Equatable {
     
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.state.attachments == rhs.state.attachments
-            && lhs.isVisible == rhs.isVisible
     }
 
     let state: MsgCellViewModel.State
-    let isVisible: Bool
     let theme: ChatTheme
     
     var body: some View {
         VStack(alignment: alignment, spacing: .zero) {
-            MsgAttachmentsView(state: state, isVisible: isVisible)
+            MsgAttachmentsView(state: state)
             if let attributedText = state.attributedText {
                 Text(attributedText)
                     .fixedSize(horizontal: false, vertical: true)

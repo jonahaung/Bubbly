@@ -13,7 +13,7 @@ import ImageLoader
 import VideoLoader
 
 struct AttachmentPreview: View {
-    let isVisible: Bool
+   
     let onSelect: (_ item: Attachment) -> Void
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
@@ -23,12 +23,10 @@ struct AttachmentPreview: View {
 
     init(
         attachment: Attachment,
-        isVisible: Bool = true,
         onSelect: @escaping (_: Attachment) -> Void,
         onCompleteUpload: ((_ newValue: Attachment) -> Void)? = nil
     ) {
         _model = .init(wrappedValue: .init(attachment: attachment))
-        self.isVisible = isVisible
         self.onSelect = onSelect
         self.onCompleteUpload = onCompleteUpload
     }
@@ -63,23 +61,19 @@ struct AttachmentPreview: View {
 
     private var content: some View {
         ZStack {
-            if isVisible {
-                if let data = model.attachmentData {
-                    attachmentView(for: data)
-                } else if let error = model.error {
-                    SystemImage(.exclamationmarkTriangleFill)
-                        .foregroundStyle(.red)
-                        .presentSheet {
-                            Text(error.localizedDescription)
-                                .padding()
-                        }
-                } else {
-                    Color.background
-                    ProgressView()
-                        .controlSize(.mini)
-                }
+            if let data = model.attachmentData {
+                attachmentView(for: data)
+            } else if let error = model.error {
+                SystemImage(.exclamationmarkTriangleFill)
+                    .foregroundStyle(.red)
+                    .presentSheet {
+                        Text(error.localizedDescription)
+                            .padding()
+                    }
             } else {
                 Color.background
+                ProgressView()
+                    .controlSize(.mini)
             }
         }
         .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)

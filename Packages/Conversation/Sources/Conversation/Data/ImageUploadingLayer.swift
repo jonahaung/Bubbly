@@ -39,15 +39,13 @@ struct ImageUploadingLayer: View {
                 .animation(.default, value: progress.completed)
             }
         }
-        .task(id: viewIsVisible) {
-            if viewIsVisible {
-                await startUpload()
-            }
+        .task {
+            await startUpload()
         }
     }
 
     @Environment(MsgCellViewModel.self) private var viewModel
-    private var viewIsVisible: Bool { viewModel.isVisible }
+    
     @State private var progress: ImageTask.Progress?
     @State private var uploading = false
     @State private var error: Error?
