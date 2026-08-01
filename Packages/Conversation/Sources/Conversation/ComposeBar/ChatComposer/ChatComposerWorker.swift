@@ -1,8 +1,8 @@
 import Database
 import ImagePlayground
-import MediaPicker
 import Services
 import SwiftUI
+import XUI
 
 actor ChatComposerWorker {
     func makeLinkAttachments(from links: [ExtractedLink]) async -> [Attachment] {

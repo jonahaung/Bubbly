@@ -7,6 +7,7 @@ import SwiftUI
 import Database
 import Services
 import Core
+import XUI
 
 extension ChatManager {
     func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
@@ -24,32 +25,36 @@ extension ChatManager {
             presentation.send(.overlayItem(frame))
             layoutIfNeeded()
         case let .onUploadedAttachments(msg):
-            serialQueue.addOperation { [weak self] in
+            serialQueue.async { [weak self] in
                 guard let self else { return }
-                try await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
+                try? await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
                     model.attachments = msg.attachments
                 }
-                try await messages.refreshMsg(uid: msg.uid)
+                try? await messages.refreshMsg(uid: msg.uid)
             }
         case let .onReact(message, reactionType):
-            serialQueue.addOperation {
-                let currentUserID = try CurrentUserID.get()
-                try? await Socket.shared.send(
-                    .reaction(
-                        payload: .init(
-                            reaction: .init(
-                                rawValue: reactionType.rawValue, senderID: currentUserID,
-                                date: .now
-                            ),
-                            msgID: message.uid,
-                            conID: message.conID
+            serialQueue.async {
+                do {
+                    let currentUserID = try CurrentUserID.get()
+                    try? await Socket.shared.send(
+                        .reaction(
+                            payload: .init(
+                                reaction: .init(
+                                    rawValue: reactionType.rawValue, senderID: currentUserID,
+                                    date: .now
+                                ),
+                                msgID: message.uid,
+                                conID: message.conID
+                            )
                         )
                     )
-                )
+                } catch {
+                    log(error)
+                }
             }
         case let .performSend(data):
-            serialQueue.addOperation {
-                try await Socket.shared.performSend(data)
+            serialQueue.async {
+                try? await Socket.shared.performSend(data)
             }
         }
     }

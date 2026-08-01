@@ -20,7 +20,16 @@ struct ImageUploadingLayer: View {
 
     var body: some View {
         ZStack(alignment: .center) {
-            if let progress {
+            if let error {
+                Button(action: retryUpload) {
+                    Image(systemName: "arrow.clockwise.circle.fill")
+                        .font(.system(size: 30))
+                        .foregroundStyle(.red)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Retry photo upload")
+                .accessibilityHint(error.localizedDescription)
+            } else if let progress {
                 Gauge(value: progress.fraction) {
                     Text("\(progress.fraction)")
                 }
@@ -41,6 +50,7 @@ struct ImageUploadingLayer: View {
     private var viewIsVisible: Bool { viewModel.isVisible }
     @State private var progress: ImageTask.Progress?
     @State private var uploading = false
+    @State private var error: Error?
 
     private let uploader: ImageUploadingService = .init()
 
@@ -50,6 +60,8 @@ struct ImageUploadingLayer: View {
         }
 
         uploading = true
+        error = nil
+        defer { uploading = false }
         let attachmentID = attachment.uid
         let conID = conversationID
 
@@ -77,8 +89,16 @@ struct ImageUploadingLayer: View {
                 newValue.attachMentTypeRaw = AttachMentType.image.rawValue
                 onCompleteUpload?(newValue)
             }
+        } catch is CancellationError {
         } catch {
-            log(error)
+            self.error = error
+        }
+    }
+
+    private func retryUpload() {
+        error = nil
+        Task {
+            await startUpload()
         }
     }
 }

@@ -28,7 +28,7 @@ import ImageLoader
     @ObservationIgnored
     let conversationDataUpdater: ConversationDataUpdater = .init()
     @ObservationIgnored
-    let serialQueue: AsyncQueue = .init(attributes: [])
+    let serialQueue: AsyncSerialQueue = AsyncSerialQueue(label: "ChatManager")
     @ObservationIgnored
     weak var currentUserRepository: CurrentUserRepository?
     @ObservationIgnored
@@ -59,7 +59,7 @@ import ImageLoader
     }
 
     deinit {
-        serialQueue.cancelAllPendingTasks()
+        serialQueue.cancel()
         log("Deinit")
     }
 
@@ -72,9 +72,9 @@ extension ChatManager {
         switch intent {
         case let .scrollViewIntent(newValue): scrollController.send(newValue)
         case .scrollDownButtonTapped:
-            serialQueue.addOperation { [weak self] in
+            serialQueue.async { [weak self] in
                 guard let self else { return }
-                try await handleScrollDownButtonTap()
+                try? await handleScrollDownButtonTap()
             }
         case let .cellAction(newValue):
             handleMsgCellInteraction(action: newValue)
@@ -106,16 +106,16 @@ extension ChatManager {
         }
         
         if !hasViewLoaded {
-            serialQueue.addOperation { [weak self] in
+            serialQueue.async { [weak self] in
                 guard let self else { return }
-                try await setIncomingMsgsAsRead(before: .now)
+                try? await setIncomingMsgsAsRead(before: .now)
             }
         }
-        serialQueue.addOperation { [weak self] in
+        serialQueue.async { [weak self] in
             guard let self else { return }
-            try await reloadConversation(refetch: !hasViewLoaded)
+            try? await reloadConversation(refetch: !hasViewLoaded)
             if !hasViewLoaded {
-                try await Store.shared.conversationPropertiesStore?.updateAndSave(uid: messages.pagination.conID) { model in
+                try? await Store.shared.conversationPropertiesStore?.updateAndSave(uid: messages.pagination.conID) { model in
                     model.lastPage = nil
                 }
             }
@@ -123,7 +123,7 @@ extension ChatManager {
     }
 
     func prepareToExit() async throws {
-        serialQueue.cancelAllPendingTasks()
+        await serialQueue.cancel()
         guard scrollController.geometry != .empty, scrollController.geometry.scrolledPosition != .atBottom else {
             router?.pop()
             return

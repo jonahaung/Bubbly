@@ -19,7 +19,7 @@ import XUI
     private let markdownFormatter: MarkdownFormatter = .init()
     private let richTextEnabled: Bool
     private var visibleIDs: [String] = []
-    private var visibleIDSet = Set<String>()
+   
     var paginatableState: PaginatableState?
     var pagination: PaginationState
     private let debouncer = Debouncer(delay: 0.2, queue: .global())
@@ -63,10 +63,10 @@ extension Messages {
         switch edge {
         case .top:
             guard let first else { return false }
-            return visibleIDSet.contains(first.id)
+            return visibleIDs.contains(first.id)
         case .bottom:
             guard let last else { return false }
-            return visibleIDSet.contains(last.id)
+            return visibleIDs.contains(last.id)
         }
     }
 
@@ -106,7 +106,7 @@ extension Messages {
 
 extension Messages {
     func onScrollTargetVisibilityChange(_ ids: [String]) {
-        displayVisibleMsgsIfNeeded(currentVisibleIDs: ids)
+        displayVisibleMsgsIfNeeded(newValue: ids)
     }
 
     func refreshMsg(uid: String) async throws {
@@ -249,19 +249,17 @@ extension Messages {
         )
     }
 
-    fileprivate func displayVisibleMsgsIfNeeded(currentVisibleIDs: [String]) {
-        let currentSet = Set(currentVisibleIDs)
-
-        for id in currentSet where !visibleIDSet.contains(id) {
-            element(withID: id)?.setVisibility(true)
+    fileprivate func displayVisibleMsgsIfNeeded(newValue: [String]) {
+        let differences = newValue.difference(from: visibleIDs)
+        visibleIDs = newValue
+        for change in differences {
+            switch change {
+            case .insert(_, let id, _):
+                element(withID: id)?.setVisibility(true)
+            case .remove(_, let id, _):
+                element(withID: id)?.setVisibility(false)
+            }
         }
-
-        for id in visibleIDSet where !currentSet.contains(id) {
-            element(withID: id)?.setVisibility(false)
-        }
-
-        visibleIDs = currentVisibleIDs
-        visibleIDSet = currentSet
     }
 
     fileprivate func model(
@@ -389,11 +387,9 @@ extension Messages {
     fileprivate func pruneVisibleIDs() {
         guard !visibleIDs.isEmpty else { return }
         visibleIDs.removeAll { indexMap[$0] == nil }
-        visibleIDSet = Set(visibleIDs)
     }
 
     fileprivate func removeVisibleID(_ id: String) {
-        guard visibleIDSet.remove(id) != nil else { return }
         visibleIDs.removeAll { $0 == id }
     }
 

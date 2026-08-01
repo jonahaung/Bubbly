@@ -2,7 +2,6 @@
 
 import Database
 import Foundation
-import MediaPicker
 import UIKit
 import XUI
 import Core

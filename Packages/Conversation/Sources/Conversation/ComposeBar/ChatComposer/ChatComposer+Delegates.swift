@@ -1,4 +1,4 @@
-import MediaPicker
+import XUI
 
 extension ChatComposer: InputTextDelegate {
     func inputText(_: InputText, didInsertLinks links: [ExtractedLink]) {

@@ -15,7 +15,8 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
 
     var body: some View {
         if let attributedText = state.attributedText {
-            TextContent(attributedText: attributedText)
+            Text(attributedText)
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(theme.bubblePading)
                 .background(theme.bubbleColor(for: state.isSender))
                 .padding(
@@ -27,10 +28,7 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
                     )
                 )
                 .background(Color.shadow)
-                .padding(0.5)
-                .background(Color.background)
                 .containerShape(bubbleShape)
-                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -41,16 +39,7 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
     static func == (lhs: MsgCellTextBubble, rhs: MsgCellTextBubble) -> Bool {
         lhs.state.bubbleCornor == rhs.state.bubbleCornor &&
         lhs.theme == rhs.theme &&
-        lhs.state.attributedText == rhs.state.attributedText
+        lhs.state.id == rhs.state.id
     }
 
-}
-
-struct TextContent: View {
-    var body: some View {
-        Text(attributedText)
-            .fixedSize(horizontal: false, vertical: true)
-            .equatable(by: attributedText)
-    }
-    let attributedText: AttributedString
 }

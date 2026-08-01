@@ -22,14 +22,14 @@ struct MsgCellAttachmentBubble: View, @MainActor Equatable {
     var body: some View {
         VStack(alignment: alignment, spacing: .zero) {
             MsgAttachmentsView(state: state, isVisible: isVisible)
-            if let attributedText = state.attributedText, !attributedText.string.isWhitespace {
-                TextContent(attributedText: attributedText)
+            if let attributedText = state.attributedText {
+                Text(attributedText)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(theme.bubblePading)
             }
         }
         .background(theme.bubbleColor(for: state.isSender))
         .clipShape(bubbleShape)
-        .geometryGroup()
     }
     private var alignment: HorizontalAlignment {
         state.isSender ? state.horizontalAlignment.inverted : state.horizontalAlignment

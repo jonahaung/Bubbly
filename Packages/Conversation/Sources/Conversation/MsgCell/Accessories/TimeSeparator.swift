@@ -15,14 +15,13 @@ struct TimeSeparator: View, @MainActor Equatable {
     
     var body: some View {
         Text(dateString ?? "")
-            .foregroundStyle(Color.tertiaryText)
+            .foregroundStyle(Color.secondaryText)
         .frame(
             height: ChatLayoutConstants.Cell.timeSeparatorHeight, alignment: .bottom
         )
         .font(Typography.system.footnote)
         .padding(.horizontal, Padding.lg)
         .padding(.bottom, Padding.xs)
-        .background(Color.background)
         .allowsHitTesting(false)
     }
 

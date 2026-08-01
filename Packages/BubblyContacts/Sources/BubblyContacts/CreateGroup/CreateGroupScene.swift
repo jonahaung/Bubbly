@@ -3,7 +3,6 @@
 import Core
 import Database
 import ImageLoader
-import MediaPicker
 import Services
 import SwiftUI
 import XUI

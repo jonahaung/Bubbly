@@ -3,7 +3,7 @@
 //
 
 import Database
-import MediaPicker
+import XUI
 
 enum UserProfileIntent {
     case appear

@@ -3,7 +3,7 @@
 //
 
 import Database
-import MediaPicker
+import XUI
 
 @MainActor
 protocol ObserveUserProfileUseCase {

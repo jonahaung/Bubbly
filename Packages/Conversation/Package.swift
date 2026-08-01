@@ -19,7 +19,7 @@ let package = Package(
         .package(name: "Services", path: "../Services"),
         .package(name: "XUI", path: "../XUI"),
         .package(name: "ImageLoader", path: "../ImageLoader"),
-        .package(name: "MediaPicker", path: "../MediaPicker")
+//        .package(name: "MediaPicker", path: "../MediaPicker")
     ],
     targets: [
         .target(
@@ -31,7 +31,7 @@ let package = Package(
                 .product(name: "XUI", package: "XUI"),
                 .product(name: "ImageLoader", package: "ImageLoader"),
                 .product(name: "VideoLoader", package: "ImageLoader"),
-                .product(name: "MediaPicker", package: "MediaPicker")
+//                .product(name: "MediaPicker", package: "MediaPicker")
             ]
         ),
         .testTarget(

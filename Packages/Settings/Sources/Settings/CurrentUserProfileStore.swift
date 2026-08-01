@@ -7,9 +7,9 @@
 //
 
 import Database
-import MediaPicker
 import Observation
 import Services
+import XUI
 
 @MainActor
 @Observable

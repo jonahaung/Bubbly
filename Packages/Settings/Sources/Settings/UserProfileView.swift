@@ -5,7 +5,6 @@
 import Core
 import Database
 import ImageLoader
-import MediaPicker
 import SwiftUI
 import XUI
 import Services

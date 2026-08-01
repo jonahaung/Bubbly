@@ -9,8 +9,6 @@ import Settings
 import SwiftUI
 import XUI
 
-// MARK: - RootTabView
-
 struct RootTabView: View {
     let coordinator: AppCoordinator
     private var router: Router {

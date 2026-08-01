@@ -43,62 +43,51 @@ struct AttachmentPreview: View {
                 if let title = model.attachment.title, title.isWhitespace == false {
                     VStack(alignment: .center, spacing: 4) {
                         Text(title)
-                            .font(.footnote)
+                            .font(Typography.system.footnote)
                             .bold()
                         if let description = model.attachment.subTitle {
                             Text(description)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .font(Typography.system.caption2)
+                                .foregroundStyle(Color.secondaryText)
                         }
                     }
                     .lineHeight(.multiple(factor: 1.2))
                     .lineSpacing(0)
                     .multilineTextAlignment(.leading)
                     .padding(8)
-                    .flexible(.horizontal)
                 }
             }
+            .background(Color.background)
         }
     }
 
     private var content: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: Radius.md)
-                .fill(Color.background)
-            if let data = model.attachmentData {
-                AttachmentDataView(data: data) {
-                    onSelect(model.attachment)
+            if isVisible {
+                if let data = model.attachmentData {
+                    attachmentView(for: data)
+                } else if let error = model.error {
+                    SystemImage(.exclamationmarkTriangleFill)
+                        .foregroundStyle(.red)
+                        .presentSheet {
+                            Text(error.localizedDescription)
+                                .padding()
+                        }
+                } else {
+                    Color.background
+                    ProgressView()
+                        .controlSize(.mini)
                 }
-            } else if let error = model.error {
-                SystemImage(.exclamationmarkTriangleFill)
-                    .foregroundStyle(.red)
-                    .presentSheet {
-                        Text(error.localizedDescription)
-                            .padding()
-                    }
             } else {
-                ProgressView()
-                    .controlSize(.mini)
+                Color.background
             }
         }
         .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
-        .task(id: isVisible) {
+        .task {
             guard let attachmentFetcher else {
                 return
             }
-            if isVisible {
-                if model.attachmentData == nil {
-                    if let cached = await model.cachedAttachmentData() {
-                        model.attachmentData = cached
-                    } else {
-                        await model.loadAttachment(attachmentFetcher: attachmentFetcher)
-                    }
-                }
-            } else {
-                await attachmentFetcher.cancel(model.attachment)
-                model.attachmentData = nil
-                model.error = nil
-            }
+            await model.loadAttachment(attachmentFetcher: attachmentFetcher)
         }
         .onDisappear {
             guard let attachmentFetcher else {
