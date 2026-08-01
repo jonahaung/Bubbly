@@ -1,6 +1,5 @@
 import Database
-import MediaPicker
-
+import XUI
 extension ChatComposer {
     func parseLinks(links: [ExtractedLink]) async {
         let currentURLs = Set(links.map { $0.url.absoluteString })
@@ -52,7 +51,7 @@ extension ChatComposer {
     }
 
     func removeAttachment(id: String) {
-        photoPicker.remove(for: id)
+//        photoPicker.remove(for: id)
         state.attachments.removeAll { $0.uid == id }
     }
 }

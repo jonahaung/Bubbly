@@ -42,7 +42,7 @@ extension ChatComposer {
 
     func resetDraft() {
         inputText.clear()
-        photoPicker.removeAll()
+
         state.attachments.removeAll()
         state.source = nil
         state.isProcessing = false

@@ -5,16 +5,14 @@ import SwiftUI
 import XUI
 
 struct PlaygroundView: View {
-    @State private var viewModel: PlaygroundViewModel = .init()
+    
     @State private var searchText = ""
     @State private var text = ""
     @State private var fontName = ""
 
     var body: some View {
         List {
-            if viewModel.state.isLoading {
-                ProgressView()
-            }
+            
             Section {
                 Button("Font Picker : \(fontName)") {
                     Router.shared.presentModel(.view(node: NavigationStack{ FontPicker(selection:$fontName) }.opaqueView()))
@@ -75,12 +73,6 @@ struct PlaygroundView: View {
         .navigationTitle(Self.defaultTitle)
         .searchable(text: $searchText)
         .font(.custom(fontName, size: UIFont.labelFontSize))
-        .task {
-            await viewModel.send(.appear)
-        }
-        .refreshable {
-            await viewModel.send(.refresh)
-        }
     }
 }
 

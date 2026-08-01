@@ -44,15 +44,19 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                     return
                 }
                 let query = message.date
-                serialQueue.addOperation { [weak self] in
+                serialQueue.async { [weak self] in
                     guard let self else { return }
-                    let msgs = try await datasource.previous(before: query, conID: message.conID )
-                    messages.prepend(msgs)
+                    do {
+                        let msgs = try await datasource.previous(before: query, conID: message.conID )
+                        await messages.prepend(msgs)
+                    } catch {
+                        log(error)
+                    }
                 }
-                serialQueue.addOperation { [weak self] in
+                serialQueue.async { [weak self] in
                     guard let self else { return }
-                    coordinator.updateState(.dataUpdate(update) )
-                    layoutIfNeeded()
+                    await coordinator.updateState(.dataUpdate(update) )
+                    await layoutIfNeeded()
                 }
             case .bottom:
                 let message = messages.last?.msg
@@ -61,15 +65,19 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                     return
                 }
                 let query = message.date
-                serialQueue.addOperation { [weak self] in
+                serialQueue.async { [weak self] in
                     guard let self else { return }
-                    let msgs = try await datasource.more(after: query, conID: message.conID )
-                    messages.append(msgs)
+                    do {
+                        let msgs = try await datasource.previous(before: query, conID: message.conID )
+                        await messages.prepend(msgs)
+                    } catch {
+                        log(error)
+                    }
                 }
-                serialQueue.addOperation { [weak self] in
+                serialQueue.async { [weak self] in
                     guard let self else { return }
-                    coordinator.updateState(.dataUpdate(update) )
-                    layoutIfNeeded()
+                    await coordinator.updateState(.dataUpdate(update) )
+                    await layoutIfNeeded()
                 }
             }
         case let .remove(edge):
@@ -85,16 +93,16 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                 withAnimation(.linear) { layoutIfNeeded() }
             }
         case let .append(msg):
-            serialQueue.addOperation { [weak self] in
+            serialQueue.async { [weak self] in
                 guard let self else { return }
-                coordinator.updateState(.dataUpdate(.append(msg: msg)))
-                messages.insert(msg: msg)
-                layoutIfNeeded()
+                await coordinator.updateState(.dataUpdate(.append(msg: msg)))
+                await messages.insert(msg: msg)
+                await layoutIfNeeded()
             }
         case let .focus(msg):
-            serialQueue.addOperation { [weak self] in
+            serialQueue.async { [weak self] in
                 guard let self else { return }
-                try await scrollTo(msg: msg)
+                try? await scrollTo(msg: msg)
             }
         }
 

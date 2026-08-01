@@ -10,6 +10,7 @@ public final class MsgCellViewModel: @MainActor Identifiable {
     
     public var state: State
     public var isVisible: Bool = false
+    @ObservationIgnored
     public var layoutValue: MsgLayoutValue
 
     public init(_ state: State) {

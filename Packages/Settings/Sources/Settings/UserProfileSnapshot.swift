@@ -3,8 +3,8 @@
 //
 
 import Database
-import MediaPicker
 import Services
+import XUI
 
 struct UserProfileSnapshot: Equatable {
     let currentUser: CurrentUserModel

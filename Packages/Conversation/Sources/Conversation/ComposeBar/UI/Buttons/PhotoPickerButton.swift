@@ -9,7 +9,7 @@ import SwiftUI
 import Services
 
 struct PhotoPickerButton: View {
-
+    var photoPicker = PhotoPickerManager()
     var body: some View {
         CustomButton {
             composer.updateSource(.liary)
@@ -25,7 +25,7 @@ struct PhotoPickerButton: View {
                 .presentModel(
                     NavPath
                         .view(
-                            node: PhotoPickerView().environment(composer.photoPicker).opaqueView()
+                            node: PhotoPickerView().environment(photoPicker).opaqueView()
                         )
                 )
         }

@@ -5,7 +5,7 @@
 
 import UIKit
 import PhotosUI
-import MediaPicker
+import XUI
 
 actor ImageProcessingActor {
     static let shared: ImageProcessingActor = .init()

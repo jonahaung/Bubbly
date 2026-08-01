@@ -3,13 +3,9 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import XUI
-import WebKit
-import SwiftUI
-
-// © 2026 Aung Ko Min
 import Database
 import Services
+import SwiftUI
 
 struct MsgAttachmentsView: View {
     let state: MsgCellViewModel.State
@@ -17,15 +13,14 @@ struct MsgAttachmentsView: View {
 
     @Namespace private var namespace
     @State private var selection: Attachment?
+    @State private var uploadAccumulator = AttachmentUploadAccumulator()
     @Environment(\.msgCellActions) private var msgCellActions
-    @Environment(\.conversation) private var conversation
-    @State private var uploadedAttachments: [Attachment] = []
 
     private var attachments: [Attachment] { state.attachments ?? [] }
     private var alignment: HorizontalAlignment { state.horizontalAlignment }
 
     var body: some View {
-        AttachmentsDeck(items: attachments, alignment: alignment ) { attachment in
+        AttachmentsDeck(items: attachments, alignment: alignment) { attachment in
             AttachmentPreview(attachment: attachment, isVisible: isVisible) { item in
                 selection = item
             } onCompleteUpload: {
@@ -41,17 +36,21 @@ struct MsgAttachmentsView: View {
                     .zoom(sourceID: attachment.uid, in: namespace)
                 )
         }
+        .onChange(of: state.msg.uid) {
+            uploadAccumulator.reset()
+        }
     }
 
     private func onUploaded(attachment: Attachment) {
-        uploadedAttachments.append(attachment)
-        if attachments.count == uploadedAttachments.count {
-            Task {
-                let newValues = uploadedAttachments
-                var msg = state.msg
-                msg.attachments = newValues
-                msgCellActions?(.onUploadedAttachments(msg))
-            }
+        guard let completedAttachments = uploadAccumulator.complete(
+            attachment,
+            in: attachments
+        ) else {
+            return
         }
+
+        var msg = state.msg
+        msg.attachments = completedAttachments
+        msgCellActions?(.onUploadedAttachments(msg))
     }
 }

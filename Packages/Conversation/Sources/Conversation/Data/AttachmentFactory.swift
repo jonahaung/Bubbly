@@ -7,7 +7,6 @@ import XUI
 import UIKit
 import Database
 import Services
-import MediaPicker
 import AVFoundation
 
 // MARK: - AttachmentFactory

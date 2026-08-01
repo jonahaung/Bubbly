@@ -56,21 +56,28 @@ public final class AttachmentPreviewViewModel {
 
     @concurrent
     public func loadAttachment(attachmentFetcher: AttachmentFetcher) async {
-        do {
-            let data = try await attachmentFetcher.fetch(
-                attachment,
-                intent: .visible
-            )
-            await MainActor.run {
-                attachmentData = data
-                error = nil
+        async let cached = cachedAttachmentData()
+        if let cached = await cached {
+            Task { @MainActor in
+                attachmentData = cached
             }
-        } catch {
-            await MainActor.run {
-                if error is CancellationError {
-                    return
+        } else {
+            do {
+                let data = try await attachmentFetcher.fetch(
+                    attachment,
+                    intent: .prefetch
+                )
+                await MainActor.run {
+                    attachmentData = data
+                    error = nil
                 }
-                self.error = error
+            } catch {
+                await MainActor.run {
+                    if error is CancellationError {
+                        return
+                    }
+                    self.error = error
+                }
             }
         }
     }

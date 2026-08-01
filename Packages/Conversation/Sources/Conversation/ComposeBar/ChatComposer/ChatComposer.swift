@@ -1,5 +1,5 @@
 import Database
-import MediaPicker
+import Foundation
 import Observation
 import Services
 import XUI
@@ -7,11 +7,11 @@ import XUI
 @MainActor
 @Observable
 final class ChatComposer: ErrorPresenter {
-    var fileContent = ""
+   
     var state = State()
-
+    var selection = [URL]()
+    var lookUp: URL?
     @ObservationIgnored var inputText = InputText()
-    @ObservationIgnored var photoPicker = PhotoPickerManager()
     @ObservationIgnored let msgCreator: MsgCreator
     @ObservationIgnored let worker: ChatComposerWorker
     @ObservationIgnored let queue: AsyncQueue
@@ -25,7 +25,6 @@ final class ChatComposer: ErrorPresenter {
         self.worker = worker
         self.queue = queue
         inputText.delegate = self
-        photoPicker.delegate = self
     }
 
     var hasContent: Bool {

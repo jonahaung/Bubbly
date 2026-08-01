@@ -11,7 +11,7 @@ import Database
 extension ChatManager: ChatDataReceiverDelegate {
 
     func chatDataReceiver(didRecieveError error: any Error) {
-        serialQueue.addOperation { [weak self] in
+        serialQueue.async { [weak self] in
             guard let self else { return }
             await showError(error)
         }
@@ -33,9 +33,9 @@ extension ChatManager: ChatDataReceiverDelegate {
                 style: .notification
             ) { [weak self] in
                 guard let self else { return }
-                serialQueue.addOperation { [weak self] in
+                serialQueue.async { [weak self] in
                     guard let self else { return }
-                    try await scrollTo(msg: msg)
+                    try? await scrollTo(msg: msg)
                 }
             }
             ToastPresenter.show(toast)
@@ -62,9 +62,9 @@ extension ChatManager: ChatDataReceiverDelegate {
     }
 
     func chatDataReceiver(didUpdate msg: Message, animated _: Bool) {
-        serialQueue.addOperation { [weak self] in
+        serialQueue.async { [weak self] in
             guard let self else { return }
-            try await messages.refreshMsg(uid: msg.uid)
+            try? await messages.refreshMsg(uid: msg.uid)
         }
     }
 

@@ -9,7 +9,6 @@ import UIKit
 import Database
 import Services
 import Foundation
-import MediaPicker
 
 public actor MsgCreator {
     public enum Error: Swift.Error {

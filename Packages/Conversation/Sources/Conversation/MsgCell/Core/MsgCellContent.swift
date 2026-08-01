@@ -9,6 +9,7 @@ import Database
 import Services
 
 struct MsgCellContent: View {
+    
     let viewModel: MsgCellViewModel
     @Environment(\.conversationTheme) private var theme
 

@@ -3,10 +3,10 @@
 import Core
 import Database
 import FirebaseAuth
-import MediaPicker
 import Services
 import UIKit
 import FirebaseMessaging
+import XUI
 
 @MainActor
 @Observable

@@ -1,9 +1,9 @@
 // © 2026 Aung Ko Min
 
 import Database
-import MediaPicker
 import Services
 import UIKit
+import XUI
 
 @MainActor
 @Observable

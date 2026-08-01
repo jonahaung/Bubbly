@@ -5,9 +5,9 @@
 import Core
 import Database
 import FirebaseAuth
-import MediaPicker
 import Services
 import UIKit
+import XUI
 
 @MainActor
 struct UserProfileRepositoryImpl: UserProfileRepository {

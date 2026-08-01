@@ -8,16 +8,12 @@ import SwiftUI
 
 public protocol HashIdentifiable: Hashable, Identifiable where Self.ID == Int {}
 
-// MARK: - Implementation
-
 public extension HashIdentifiable {
     @inlinable
     var id: Int {
         hashValue
     }
 }
-
-// MARK: - API
 
 package extension Hashable {
     @inlinable
