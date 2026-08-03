@@ -120,6 +120,14 @@ excluded:
   - Pods
   - Carthage
   - .build
+  - Packages/Anima/.build
+  - Packages/BubblyContacts/.build
+  - Packages/Conversation/.build
+  - Packages/Database/.build
+  - Packages/FirePhoneOTP/.build
+  - Packages/MsgRoomMain/.build
+  - Packages/Services/.build
+  - Packages/XUI/.build
   - DerivedData
   - SourcePackages
   - fastlane
