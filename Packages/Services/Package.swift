@@ -13,14 +13,14 @@ let package = Package(
         .library(
             name: "Services",
             targets: ["Services"],
-        ),
+        )
     ],
     dependencies: [
         .package(name: "Core", path: "../Core"),
         .package(name: "Database", path: "../Database"),
         .package(name: "ImageLoader", path: "../ImageLoader"),
         .package(name: "XUI", path: "../XUI"),
-        .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.4.0"),
+        .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.17.0"),
     ],
     targets: [
         .target(

@@ -6,7 +6,7 @@ let package = Package(
     name: "XUI",
     platforms: [
         .iOS(.v26),
-        .macOS(.v12)
+        .macOS(.v12),
     ],
     products: [
         .library(
@@ -17,10 +17,10 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/SFSafeSymbols/SFSafeSymbols.git",
-            .upToNextMajor(from: "5.3.0")
+            .upToNextMajor(from: "7.0.0")
         ),
         .package(name: "Anima", path: "../Anima"),
-        .package(name: "ImageLoader", path: "../ImageLoader")
+        .package(name: "ImageLoader", path: "../ImageLoader"),
     ],
     targets: [
         .target(
@@ -28,7 +28,7 @@ let package = Package(
             dependencies: [
                 .product(name: "SFSafeSymbols", package: "SFSafeSymbols"),
                 .product(name: "Anima", package: "Anima"),
-                .product(name: "ImageLoader", package: "ImageLoader")
+                .product(name: "ImageLoader", package: "ImageLoader"),
             ],
             resources: [
                 .process("Resources")
@@ -37,6 +37,6 @@ let package = Package(
         .testTarget(
             name: "XUITests",
             dependencies: ["XUI"]
-        )
+        ),
     ]
 )

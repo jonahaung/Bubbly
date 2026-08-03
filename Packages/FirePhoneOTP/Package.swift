@@ -7,7 +7,7 @@ let package = Package(
     name: "FirePhoneOTP",
     platforms: [
         .iOS(.v18),
-        .macOS(.v12)
+        .macOS(.v12),
     ],
     products: [
         .library(
@@ -16,20 +16,20 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.4.0"),
-        .package(url: "https://github.com/marmelroy/PhoneNumberKit", from: "3.7.0")
+        .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.17.0"),
+        .package(url: "https://github.com/marmelroy/PhoneNumberKit", from: "4.3.0"),
     ],
     targets: [
         .target(
             name: "FirePhoneOTP",
             dependencies: [
                 .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
-                .product(name: "PhoneNumberKit", package: "PhoneNumberKit")
+                .product(name: "PhoneNumberKit", package: "PhoneNumberKit"),
             ]
         ),
         .testTarget(
             name: "FirePhoneOTPTests",
             dependencies: ["FirePhoneOTP"]
-        )
+        ),
     ]
 )

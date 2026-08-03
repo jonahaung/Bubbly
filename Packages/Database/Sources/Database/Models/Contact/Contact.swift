@@ -27,35 +27,37 @@ extension Contact: StringMergable {
     }
 
     public init?(cnContact: CNContact) {
-        let name = cnContact.givenName.isEmpty ? [
-            cnContact.middleName,
-            cnContact.familyName
-        ]
+        let name =
+            cnContact.givenName.isEmpty
+            ? [
+                cnContact.middleName,
+                cnContact.familyName,
+            ]
             .joined(
                 separator: " "
             )
             .trimmed : cnContact.givenName.trimmed
 
         guard !name.isWhitespace,
-              let phoneNumberString = cnContact.phoneNumbers
-                  .first(where: { $0.value.stringValue.isWhitespace == false })?
-                  .value
-                  .stringValue else
-        {
+            let phoneNumberString = cnContact.phoneNumbers
+                .first(where: { $0.value.stringValue.isWhitespace == false })?
+                .value
+                .stringValue
+        else {
             return nil
         }
 
-        let phoneNumberKit = PhoneNumberKit()
+        let phoneNumberKit = PhoneNumberUtility()
         guard let phoneNumber = try? phoneNumberKit.parse(phoneNumberString),
-              phoneNumber.type == .mobile else
-        {
+            phoneNumber.type == .mobile
+        else {
             return nil
         }
 
         let formattedPhoneNumber =
             phoneNumberKit
-                .format(phoneNumber, toType: .e164)
-                .withoutSpacesAndNewLines
+            .format(phoneNumber, toType: .e164)
+            .withoutSpacesAndNewLines
 
         self.init(
             uid: formattedPhoneNumber,

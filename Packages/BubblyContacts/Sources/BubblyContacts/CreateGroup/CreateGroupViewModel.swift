@@ -51,7 +51,6 @@ final class CreateGroupViewModel {
             photoURL: url.absoluteString,
             members: memberIDs,
             createdBy: currentUserID,
-//            theme: .init()
         )
         try await GroupRepo.save(group)
     }

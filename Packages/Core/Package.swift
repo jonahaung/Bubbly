@@ -7,7 +7,7 @@ let package = Package(
     name: "Core",
     platforms: [
         .iOS(.v26),
-        .macOS(.v12)
+        .macOS(.v12),
     ],
     products: [
         .library(
@@ -19,7 +19,7 @@ let package = Package(
         .package(name: "XUI", path: "../XUI"),
         .package(name: "ImageLoader", path: "../ImageLoader"),
         .package(name: "Crypto", path: "../Crypto"),
-        .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.4.0"),
+        .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.17.0"),
         .package(name: "FirePhoneOTP", path: "../FirePhoneOTP"),
     ],
 
@@ -45,7 +45,6 @@ let package = Package(
         .testTarget(
             name: "CoreTests",
             dependencies: ["Core"]
-        )
+        ),
     ]
 )
-
