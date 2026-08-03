@@ -39,7 +39,7 @@ private struct Header: View, Equatable {
         Text(headerText)
             .font(Typography.system.caption2)
             .fontDesign(.rounded)
-            .foregroundStyle(Color.tertiaryText)
+            .foregroundStyle(Color.secondaryText)
             .padding(.horizontal, 35)
             .allowsHitTesting(false)
             .transition(.invisible())

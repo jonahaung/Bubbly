@@ -5,6 +5,7 @@
 
 import XUI
 import Database
+import Foundation
 import Services
 
 struct ContactListContent: Sendable {
@@ -21,8 +22,20 @@ struct ContactListContent: Sendable {
 
 struct ContactListClient: Sendable {
     let load: @Sendable () async throws -> ContactListContent
+    let resolveContact: @Sendable (Contact) async throws -> Contact
     let syncContacts: @Sendable () async throws -> Void
     let syncGroups: @Sendable () async throws -> Void
+}
+
+enum ContactListClientError: LocalizedError {
+    case contactIsNotRegistered
+
+    var errorDescription: String? {
+        switch self {
+        case .contactIsNotRegistered:
+            "This contact is not registered with Bubbly."
+        }
+    }
 }
 
 extension ContactListClient {
@@ -40,6 +53,19 @@ extension ContactListClient {
                     $0.name.localizedStandardCompare($1.name) == .orderedAscending
                 }
             )
+        },
+        resolveContact: { contact in
+            guard !contact.isChatAvailable else {
+                return contact
+            }
+            guard var resolvedContact = try await BackendAPIClient.shared.lookupContacts(
+                mobileNumbers: [contact.mobile]
+            ).first(where: { $0.mobile == contact.mobile }) else {
+                throw ContactListClientError.contactIsNotRegistered
+            }
+            resolvedContact.name = contact.name
+            try await Store.shared.contactStore?.insert(resolvedContact)
+            return resolvedContact
         },
         syncContacts: {
             try await PhoneContactsService.shared.syncContacts()

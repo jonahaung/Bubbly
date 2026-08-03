@@ -7,8 +7,6 @@ import XUI
 import Foundation
 import FirebaseAuth
 
-// MARK: - AnyMsgData
-
 public enum AnyMsgData: Codable, Sendable, Hashable {
     case newMsg(rMsg: RMsg)
     case updatedMsg(rMsg: RMsg)
@@ -24,7 +22,6 @@ public enum AnyMsgData: Codable, Sendable, Hashable {
         case reaction
         case typingStatus
         case msgRecipientReceipt
-//        case seenStatus
     }
 }
 
@@ -52,20 +49,6 @@ public extension AnyMsgData {
             self.conID = conID
         }
     }
-
-//    struct SeenStatusPayload: Sendable, Codable, Hashable {
-//        public let msgID: String
-//        public let userID: String
-//        public let conID: String
-//        public let date: String
-//
-//        public init(msgID: String, userID: String, conID: String, date: String) {
-//            self.msgID = msgID
-//            self.userID = userID
-//            self.conID = conID
-//            self.date = date
-//        }
-//    }
     struct MsgRecipientReceiptPayload: Sendable, Codable, Hashable {
         public let msgID: String
         public let conID: String

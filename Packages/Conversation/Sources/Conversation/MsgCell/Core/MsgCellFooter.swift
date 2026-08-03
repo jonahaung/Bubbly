@@ -13,6 +13,7 @@
 import Core
 import SwiftUI
 import Services
+import XUI
 
 struct MsgCellFooter: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
@@ -32,9 +33,9 @@ private struct Footer: View, @MainActor Equatable {
             if let receipts = state.outgoingStatus?.receipts, receipts.count > 1 {
                 MessageReceiptDetails(state: state)
             } else {
-                Text(footerText).font(
-                    .system(size: UIFont.smallSystemFontSize, weight: .medium, design: .rounded)
-                )
+                Text(footerText)
+                    .font(Typography.system.caption2)
+                    .foregroundStyle(Color.secondaryText)
             }
         }
         .foregroundStyle(Color.tertiaryText)

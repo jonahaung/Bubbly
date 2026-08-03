@@ -22,6 +22,7 @@ func loadsAndFiltersContacts() async {
                     groups: []
                 )
             },
+            resolveContact: { $0 },
             syncContacts: {},
             syncGroups: {}
         )
@@ -48,6 +49,7 @@ func syncsBeforeReloadingContent() async {
                 await recorder.record("load")
                 return .empty
             },
+            resolveContact: { $0 },
             syncContacts: {
                 await recorder.record("sync")
             },
@@ -69,6 +71,7 @@ func retainsContentWhenRefreshFails() async {
             load: {
                 try await source.load()
             },
+            resolveContact: { $0 },
             syncContacts: {},
             syncGroups: {}
         )

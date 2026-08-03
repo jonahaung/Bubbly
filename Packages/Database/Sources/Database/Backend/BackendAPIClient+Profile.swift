@@ -14,15 +14,8 @@ public extension BackendAPIClient {
     }
 
     @discardableResult
-    func updateProfile(_ model: CurrentUserModel) async throws -> CurrentUserModel {
-        let body = ProfileUpdateRequest(model)
-        try validate(body)
-        let data = try await executor.requiredResponse(
-            method: "PUT",
-            path: ["v1", "profile"],
-            body: .data(try executor.encode(body)),
-            contentType: "application/json"
-        )
+    func updateProfile(_ model: any ContactRepresentableSendable) async throws -> any ContactRepresentableSendable {
+        let data = try await upsertContactResponse(for: model)
         return try executor.decode(CurrentUserModel.self, from: data)
     }
 
@@ -75,15 +68,6 @@ public extension BackendAPIClient {
         return url
     }
 
-    private func validate(_ profile: ProfileUpdateRequest) throws {
-        guard profile.name.trimmingCharacters(in: .whitespacesAndNewlines).count <= 100,
-              profile.mobile.isEmpty || Self.isE164ProfileMobile(profile.mobile),
-              profile.pushToken.count <= 4_096,
-              profile.publicKeyString.count <= 8_192 else {
-            throw BackendAPIError.invalidRequest("The profile contains invalid values.")
-        }
-    }
-
     private func validatePhoto(data: Data, contentType: String) throws {
         guard !data.isEmpty, data.count <= 1_048_576 else {
             throw BackendAPIError.invalidRequest("The profile photo must be between 1 byte and 1 MB.")
@@ -110,15 +94,6 @@ public extension BackendAPIClient {
         guard Self.isSupportedImage(data: prefix, contentType: contentType) else {
             throw BackendAPIError.invalidRequest("The profile photo format is unsupported.")
         }
-    }
-
-    private static func isE164ProfileMobile(_ value: String) -> Bool {
-        guard value.count >= 9, value.count <= 16, value.first == "+" else {
-            return false
-        }
-        let digits = value.dropFirst()
-        return digits.first != "0"
-            && digits.unicodeScalars.allSatisfy { (48 ... 57).contains($0.value) }
     }
 
     private static func isSupportedImage(data: Data, contentType: String) -> Bool {

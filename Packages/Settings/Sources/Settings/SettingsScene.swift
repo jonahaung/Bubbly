@@ -19,6 +19,7 @@ public struct SettingsScene: View {
 		let currentUser = viewModel.state.currentUser
 		Form {
 			profilePhotoSection
+			BackendBaseURLSettingsView()
 			Section(header: Text("Sign Out")) {
 				Button {
 					Task { @MainActor in

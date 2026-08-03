@@ -186,26 +186,26 @@ extension Messages {
 
     func append(_ msgs: [Message]) {
         guard !msgs.isEmpty else { return }
-
-        var newMessages: [Message] = []
-        newMessages.reserveCapacity(msgs.count)
-
-        for msg in msgs {
-            if let index = indexMap[msg.uid] {
-                layout(at: index)
-            } else {
-                newMessages.append(msg)
-            }
-        }
-
-        guard !newMessages.isEmpty else {
-            updatePaginatableState()
-            return
-        }
+//
+//        var newMessages: [Message] = []
+//        newMessages.reserveCapacity(msgs.count)
+//
+//        for msg in msgs {
+//            if let index = indexMap[msg.uid] {
+//                layout(at: index)
+//            } else {
+//                newMessages.append(msg)
+//            }
+//        }
+//
+//        guard !newMessages.isEmpty else {
+//            updatePaginatableState()
+//            return
+//        }
 
         let start = wrappedValue.count
         let models = makeModels(
-            from: newMessages,
+            from: msgs.removeDuplicates(by: \.uid),
             previousBoundary: wrappedValue.last?.msg
         )
         wrappedValue.append(contentsOf: models)
@@ -269,6 +269,8 @@ extension Messages {
     ) -> MsgCellViewModel {
        
         if let cached = modelCache.get(msg.uid) {
+            let layout = makeLayout(for: msg, previous: previous, next: next)
+            cached.update(layout: layout)
             return cached
         }
         let layout = makeLayout(for: msg, previous: previous, next: next)

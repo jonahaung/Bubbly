@@ -2,6 +2,12 @@ import Core
 import Foundation
 
 public extension BackendAPIClient {
+    @discardableResult
+    func upsertContact(_ model: any ContactRepresentableSendable) async throws -> Contact {
+        let data = try await upsertContactResponse(for: model)
+        return try executor.decode(Contact.self, from: data)
+    }
+
     func contact(userID: String) async throws -> Contact? {
         let userID = userID.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !userID.isEmpty, userID.count <= 128 else {
@@ -50,5 +56,23 @@ public extension BackendAPIClient {
         let digits = value.dropFirst()
         return digits.first != "0"
             && digits.unicodeScalars.allSatisfy { (48 ... 57).contains($0.value) }
+    }
+
+    internal func upsertContactResponse(
+        for model: any ContactRepresentableSendable
+    ) async throws -> Data {
+        let body = ProfileUpdateRequest(model)
+        guard body.name.trimmingCharacters(in: .whitespacesAndNewlines).count <= 100,
+              body.mobile.isEmpty || Self.isE164(body.mobile),
+              body.pushToken.count <= 4_096,
+              body.publicKeyString.count <= 8_192 else {
+            throw BackendAPIError.invalidRequest("The contact contains invalid values.")
+        }
+        return try await executor.requiredResponse(
+            method: "PUT",
+            path: ["v1", "profile"],
+            body: .data(try executor.encode(body)),
+            contentType: "application/json"
+        )
     }
 }

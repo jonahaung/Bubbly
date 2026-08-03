@@ -30,7 +30,6 @@ struct MsgCell: View {
             }
             MsgCellFooter(state: viewModel.state)
         }
-        .transition(.invisible())
         .environment(viewModel)
         .id(viewModel.id)
         .layoutValue(key: MsgLayoutValueKey.self, value: viewModel.layoutValue)

@@ -49,16 +49,14 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                     do {
                         let msgs = try await datasource.previous(before: query, conID: message.conID )
                         await messages.prepend(msgs)
+                        await coordinator.updateState(.dataUpdate(update) )
+//                        await layoutIfNeeded()
                     } catch {
                         log(error)
                     }
                 }
-                serialQueue.async { [weak self] in
-                    guard let self else { return }
-                    await coordinator.updateState(.dataUpdate(update) )
-                    await layoutIfNeeded()
-                }
             case .bottom:
+                
                 let message = messages.last?.msg
                 guard let message else {
                     scrollController.updateState(.didEndUpdates)
@@ -69,15 +67,12 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                     guard let self else { return }
                     do {
                         let msgs = try await datasource.previous(before: query, conID: message.conID )
-                        await messages.prepend(msgs)
+                        await messages.append(msgs)
+                        await coordinator.updateState(.dataUpdate(update) )
+//                        await layoutIfNeeded()
                     } catch {
                         log(error)
                     }
-                }
-                serialQueue.async { [weak self] in
-                    guard let self else { return }
-                    await coordinator.updateState(.dataUpdate(update) )
-                    await layoutIfNeeded()
                 }
             }
         case let .remove(edge):

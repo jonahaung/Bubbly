@@ -81,6 +81,16 @@ final class ContactListViewModel {
         await perform(.refresh)
     }
 
+    func resolveContact(_ contact: Contact) async -> Contact? {
+        errorMessage = nil
+        do {
+            return try await client.resolveContact(contact)
+        } catch {
+            errorMessage = error.localizedDescription
+            return nil
+        }
+    }
+
     func cancel() {
         operationTask?.cancel()
         operationTask = nil

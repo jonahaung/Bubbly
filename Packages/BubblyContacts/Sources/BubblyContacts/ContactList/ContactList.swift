@@ -69,14 +69,20 @@ public struct ContactList: View {
     private let coordinator: AppCoordinator
 
     private func openConversation(for contact: Contact) async {
-        let currentUser = await coordinator.container.currentUserRepository
-            .model
-        let currentUserId = currentUser.uid
-        let id = ConversationIDGenerator.generate(contact.uid, currentUserId)
-        guard let url = DeeplinkCodec.standard.url(for: .conversation(conID: id)) else {
-            return
+        if contact.isChatAvailable {
+            guard let contact = await viewModel.resolveContact(contact) else {
+                return
+            }
+            let currentUser = await coordinator.container.currentUserRepository.model
+            let id = ConversationIDGenerator.generate(contact.uid, currentUser.uid)
+            guard let url = DeeplinkCodec.standard.url(for: .conversation(conID: id)) else {
+                return
+            }
+            await UIApplication.shared.open(url)
+        } else {
+           
         }
-        await UIApplication.shared.open(url)
+        
     }
 
     private func syncContacts() async {

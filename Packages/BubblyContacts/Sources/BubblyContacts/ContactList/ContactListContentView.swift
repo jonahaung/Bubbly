@@ -53,7 +53,10 @@ struct ContactListContentView: View {
                     selection: openConversation
                 )
             case .phone:
-                ContactListPhoneSections(sections: phoneSections)
+                ContactListContactSections(
+                    sections: phoneSections,
+                    selection: openConversation
+                )
             case .group:
                 ContactListGroups(groups: groups)
             }

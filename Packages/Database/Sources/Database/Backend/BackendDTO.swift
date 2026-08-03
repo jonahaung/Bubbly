@@ -10,7 +10,7 @@ struct ProfileUpdateRequest: Encodable, Sendable {
     let pushToken: String
     let publicKeyString: String
 
-    init(_ model: CurrentUserModel) {
+    init(_ model: any ContactRepresentableSendable) {
         name = model.name
         mobile = model.mobile
         pushToken = model.pushToken

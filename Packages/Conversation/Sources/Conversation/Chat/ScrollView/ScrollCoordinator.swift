@@ -70,9 +70,7 @@ extension ScrollCoordinator {
                 if state.isFirstResponder {
                     handleFirstResponder(oldValue, newValue)
                 }
-                if newValue.offsetY < 0, (oldValue.offsetY > newValue.offsetY && oldValue.offsetY < newValue.offsetY) {
-                    paginateIfNeeded(newValue, state: state, direction: .down)
-                }
+                
             }
         case .onScrollPhaseChange(let oldValue, let newValue, let context):
             guard oldValue != newValue else { return }
@@ -80,53 +78,42 @@ extension ScrollCoordinator {
             let geometry = VScrollGeometry(context.geometry)
             switch newValue {
             case .idle:
-                let position = geometry.scrolledPosition
-                if position == .atTop || position == .atBottom {
-                    paginateIfNeeded(geometry, state: state, direction: .none)
-                }
                 state.geometry = geometry
+                if state.updateState.isUpdating {
+                    delegate?.layoutIfNeeded()
+                } else {
+                    paginateIfNeeded(
+                        geometry,
+                        state: state,
+                        direction: scrollDirection
+                    )
+                }
                 debouncer.debounce { [weak self] in
                     guard let self else { return }
-                    Task { @MainActor [weak self] in
-                        guard let self else { return }
+                    Task { @MainActor in
                         finalizeScrollUpdates()
                     }
                 }
             case .interacting:
+                if state.updateState.isUpdating {
+                    delegate?.layoutIfNeeded()
+                }
                 debouncer.cancel()
             case .decelerating:
-               
                 if let dy = context.velocity?.dy, abs(dy) != 0 {
                     let direction = dy < 0 ? ScrollDirection.down : .up
                     if scrollDirection != direction {
                         scrollDirection = direction
                     }
                 } else {
-                    scrollDirection = .none
+//                    scrollDirection = .none
                 }
                 
-                if scrollDirection == .up {
-                    paginateIfNeeded(
-                        geometry,
-                        state: state,
-                        direction: .up
-                    )
-                    
-//                    let bottomSpace = geometry.offsetY+geometry.boundsHeight - geometry.contentHeight
-//                    if bottomSpace > 0 {
-//                        if !state.isFirstResponder {
-//                            state.isFirstResponder = delegate?.scrollCoordinator(self, setEditing: true) == true
-//                        }
-//                    } else {
-//                        
-//                    }
-                } else {
-                    paginateIfNeeded(
-                        geometry,
-                        state: state,
-                        direction: .down
-                    )
-                }
+                paginateIfNeeded(
+                    geometry,
+                    state: state,
+                    direction: scrollDirection
+                )
                 
             default:
                 break

@@ -21,6 +21,34 @@ struct BackendAPIClientTests {
         #expect(requests[0].timeoutInterval == 5)
     }
 
+    @Test("Upserts the authenticated contact profile")
+    func contactUpsert() async throws {
+        let transport = MockBackendHTTPTransport(outcomes: [
+            .response(.init(statusCode: 200, headers: [:], data: contactData))
+        ])
+        let client = try makeClient(transport: transport)
+        let contact = Contact(
+            uid: "untrusted-user-id",
+            name: "Taylor",
+            mobile: "+6591234567",
+            photoURL: "https://example.com/untrusted.png",
+            pushToken: "push",
+            publicKeyString: "key"
+        )
+
+        let saved = try await client.upsertContact(contact)
+        let request = try #require(await transport.requests.first)
+        let body = try #require(request.httpBody)
+        let object = try #require(JSONSerialization.jsonObject(with: body) as? [String: Any])
+
+        #expect(saved.uid == "user-one")
+        #expect(request.httpMethod == "PUT")
+        #expect(request.url?.absoluteString == "http://localhost:8080/v1/profile")
+        #expect(object["uid"] == nil)
+        #expect(object["photoURL"] == nil)
+        #expect(object["mobile"] as? String == "+6591234567")
+    }
+
     @Test("Refreshes the access token once after an unauthorized response")
     func refreshesToken() async throws {
         let transport = MockBackendHTTPTransport(outcomes: [

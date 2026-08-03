@@ -46,11 +46,13 @@ extension ScrollCoordinator {
         case initial
         case didEndUpdates
         case willBeginUpdates
+        case willEndUpdates
         case dataUpdate(DataUpdate)
 
         var hasViewLoaded: Bool { self != .initial }
         var isUpdating: Bool { self != .didEndUpdates }
         var isNotUpdating: Bool { !isUpdating }
+        var shouldEndUpdates: Bool { self == .willEndUpdates }
 
         mutating func update(to newValue: Self) {
             guard self != newValue else { return }

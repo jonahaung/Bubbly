@@ -11,7 +11,7 @@ import PhoneNumberKit
 // MARK: - Contact
 
 public struct Contact: ContactRepresentableSendable, Codable, Hashable {
-    public let uid: String
+    public var uid: String
     public var name: String
     public let mobile: String
     public var photoURL: String
