@@ -43,12 +43,11 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                     return
                 }
                 let query = message.date
-                serialQueue.async { [weak self] in
-                    guard let self else { return }
+                Task {
                     do {
                         let msgs = try await datasource.previous(before: query, conID: message.conID)
-                        await messages.prepend(msgs)
-                        await coordinator.updateState(.dataUpdate(update))
+                        messages.prepend(msgs)
+                        coordinator.updateState(.dataUpdate(update))
                         //                        await layoutIfNeeded()
                     } catch {
                         log(error)
@@ -62,13 +61,12 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                     return
                 }
                 let query = message.date
-                serialQueue.async { [weak self] in
-                    guard let self else { return }
+                Task {
                     do {
                         let msgs = try await datasource.more(after: query, conID: message.conID)
-                        await messages.append(msgs)
-                        await coordinator.updateState(.dataUpdate(update))
-                        await layoutIfNeeded()
+                        messages.append(msgs)
+                        coordinator.updateState(.dataUpdate(update))
+                        layoutIfNeeded()
                     } catch {
                         log(error)
                     }
@@ -91,8 +89,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
             messages.insert(msg: msg)
             layoutIfNeeded()
         case let .focus(msg):
-            serialQueue.async { [weak self] in
-                guard let self else { return }
+            Task {
                 try? await scrollTo(msg: msg)
             }
         }

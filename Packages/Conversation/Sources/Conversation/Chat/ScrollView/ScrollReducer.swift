@@ -47,22 +47,6 @@ extension ScrollReducer {
                 return .begingUpdate(.remove(edge: .bottom))
             }
         }
-        //        switch direction {
-        //        case .up:
-        //
-        //        case .down:
-        //
-        //        case .none:
-        //            if newValue.offsetY == 0, paginationState.canLoadOlder {
-        //                return .begingUpdate(.insert(edge: .top))
-        //            }
-        //            if newValue.scrolledPosition == .atBottom {
-        //                if paginationState.canLoadNewer {
-        //                    return .begingUpdate(.insert(edge: .bottom))
-        //                }
-        //            }
-        //            return nil
-        //        }
         return nil
     }
 
@@ -108,7 +92,7 @@ extension ScrollReducer {
             case .append(let msg):
                 return .endUpdate(
                     .append(msg: msg),
-                    scrollItem: .edge(.bottom, .animated(.snappy(duration: 0.25)))
+                    scrollItem: .y(newValue.bottomMostOffset, .animated(.snappy(duration: 0.3)))
                 )
             case .focus(let msg):
                 return .endUpdate(

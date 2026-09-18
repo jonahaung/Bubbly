@@ -42,7 +42,7 @@ public extension Socket {
         }
     }
 
-    public func performSend(_ data: AnyMsgData) async throws {
+    func performSend(_ data: AnyMsgData) async throws {
         let conversation = try await ConversationRepo.getOrCreate(
             for: data.conID,
             refetch: false,
@@ -76,7 +76,7 @@ public extension Socket {
         }
     }
 
-    @discardableResult public func sendToRemote(
+    @discardableResult func sendToRemote(
         _ data: AnyMsgData,
         conversation: Conversation,
     ) async throws -> [MsgRecipientReceipt] {
@@ -107,7 +107,7 @@ public extension Socket {
         }
     }
 
-    @discardableResult public func sendToRemote(
+    @discardableResult func sendToRemote(
         _ data: AnyMsgData,
         alert: APNSAlert,
         contacts: [Contact],
@@ -166,7 +166,7 @@ public extension Socket {
         )
     }
 
-    public func notifyMessage(_ data: AnyMsgData) {
+    func notifyMessage(_ data: AnyMsgData) {
         NotificationCenter.default
             .post(name: .msgNoti(for: data.conID), object: data)
     }

@@ -7,7 +7,7 @@ import XUI
 public extension Socket {
 
     func handleReceiveBackground(_ data: AnyMsgData) async throws {
-        try await queue.addOperation { [weak self] in
+        queue.addOperation { [weak self] in
             guard let self else { return }
             try await applyToLocalStore(data)
         }
@@ -80,7 +80,7 @@ private extension Socket {
                 $0.date < payload.recipientReceipt.date
             }
             AsyncOrderedStream.streamOrdered(inputs: msgs) { [weak self] msg in
-                guard let self else { return }
+                guard self != nil else { return }
                 var msg = msg
                 msg.outgoingStatus?.updatingReceipt(
                     memberID: payload.recipientReceipt.userID,

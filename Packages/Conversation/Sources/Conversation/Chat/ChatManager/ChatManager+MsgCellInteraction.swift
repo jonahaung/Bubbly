@@ -25,15 +25,14 @@ extension ChatManager {
             presentation.send(.overlayItem(frame))
             layoutIfNeeded()
         case let .onUploadedAttachments(msg):
-            serialQueue.async { [weak self] in
-                guard let self else { return }
+            Task {
                 try? await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
                     model.attachments = msg.attachments
                 }
                 try? await messages.refreshMsg(uid: msg.uid)
             }
         case let .onReact(message, reactionType):
-            serialQueue.async {
+            Task {
                 do {
                     let currentUserID = try CurrentUserID.get()
                     try? await Socket.shared.send(
@@ -53,7 +52,7 @@ extension ChatManager {
                 }
             }
         case let .performSend(data):
-            serialQueue.async {
+            Task {
                 try? await Socket.shared.performSend(data)
             }
         }
@@ -68,7 +67,7 @@ private extension ChatManager {
         let previousMsg = messages[index - 1]?.msg
         let newValue: SelectedMsg? =
             oldValue?.id == uid
-                ? nil : SelectedMsg(id: uid, previous: previousMsg?.uid, next: nextMsg?.uid )
+            ? nil : SelectedMsg(id: uid, previous: previousMsg?.uid, next: nextMsg?.uid)
         let transaction = Transaction.withAnimation(.interactiveSpring)
         withTransaction(transaction) {
             if let oldValue {

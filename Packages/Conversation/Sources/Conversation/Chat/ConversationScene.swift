@@ -49,9 +49,9 @@ public struct ConversationScene: View {
         .environment(\.msgCellActions, .init(action: { viewModel.send(.cellAction($0)) }))
         .environment(viewModel)
         .environment(composer)
-        .onAppear {
+        .task {
             viewModel.focusState = .init($focusState)
-            viewModel.onViewAppear()
+            await viewModel.onViewAppear()
         }
     }
 }

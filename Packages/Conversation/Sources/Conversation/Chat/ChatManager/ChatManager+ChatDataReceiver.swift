@@ -11,8 +11,7 @@ import Database
 extension ChatManager: ChatDataReceiverDelegate {
 
     func chatDataReceiver(didRecieveError error: any Error) {
-        serialQueue.async { [weak self] in
-            guard let self else { return }
+        Task {
             await showError(error)
         }
     }
@@ -33,8 +32,7 @@ extension ChatManager: ChatDataReceiverDelegate {
                 style: .notification
             ) { [weak self] in
                 guard let self else { return }
-                serialQueue.async { [weak self] in
-                    guard let self else { return }
+                Task {
                     try? await scrollTo(msg: msg)
                 }
             }
@@ -62,8 +60,7 @@ extension ChatManager: ChatDataReceiverDelegate {
     }
 
     func chatDataReceiver(didUpdate msg: Message, animated _: Bool) {
-        serialQueue.async { [weak self] in
-            guard let self else { return }
+        Task {
             try? await messages.refreshMsg(uid: msg.uid)
         }
     }

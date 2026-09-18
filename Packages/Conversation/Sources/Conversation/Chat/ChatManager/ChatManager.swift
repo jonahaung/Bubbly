@@ -27,8 +27,8 @@ import ImageLoader
     private let dataObserver: ChatDataReceiver
     @ObservationIgnored
     let conversationDataUpdater: ConversationDataUpdater = .init()
-    @ObservationIgnored
-    let serialQueue: AsyncSerialQueue = AsyncSerialQueue(label: "ChatManager")
+    //    @ObservationIgnored
+    //    let serialQueue: AsyncSerialQueue = AsyncSerialQueue(label: "ChatManager")
     @ObservationIgnored
     weak var currentUserRepository: CurrentUserRepository?
     @ObservationIgnored
@@ -59,7 +59,7 @@ import ImageLoader
     }
 
     deinit {
-        serialQueue.cancel()
+        //        serialQueue.cancel()
         log("Deinit")
     }
 
@@ -72,8 +72,7 @@ extension ChatManager {
         switch intent {
         case let .scrollViewIntent(newValue): scrollController.send(newValue)
         case .scrollDownButtonTapped:
-            serialQueue.async { [weak self] in
-                guard let self else { return }
+            Task {
                 try? await handleScrollDownButtonTap()
             }
         case let .cellAction(newValue):
@@ -97,38 +96,35 @@ extension ChatManager {
         }
     }
 
-    func onViewAppear() {
+    func onViewAppear() async {
         let hasViewLoaded = dataObserver.delegate !== nil && scrollController.delegate !== nil
         if !hasViewLoaded {
             layoutIfNeeded()
             dataObserver.delegate = self
             scrollController.delegate = self
         }
-        
+
         if !hasViewLoaded {
-            serialQueue.async { [weak self] in
-                guard let self else { return }
-                try? await setIncomingMsgsAsRead(before: .now)
-            }
+            try? await setIncomingMsgsAsRead(before: .now)
         }
-        serialQueue.async { [weak self] in
-            guard let self else { return }
-            try? await reloadConversation(refetch: !hasViewLoaded)
-            if !hasViewLoaded {
-                try? await Store.shared.conversationPropertiesStore?.updateAndSave(uid: messages.pagination.conID) { model in
-                    model.lastPage = nil
-                }
+        try? await reloadConversation(refetch: !hasViewLoaded)
+        if !hasViewLoaded {
+            try? await Store.shared.conversationPropertiesStore?.updateAndSave(uid: messages.pagination.conID) {
+                model in
+                model.lastPage = nil
             }
         }
     }
 
     func prepareToExit() async throws {
-        await serialQueue.cancel()
+
         guard scrollController.geometry != .empty, scrollController.geometry.scrolledPosition != .atBottom else {
             router?.pop()
             return
         }
-        let lastPage = LastPage(topMsgID: messages.first?.id, bottomMsgID: messages.last?.id, scrollOffsetY: scrollController.geometry.offsetY, isPotrait: UIApplication.shared.screenSize().isPortrait)
+        let lastPage = LastPage(
+            topMsgID: messages.first?.id, bottomMsgID: messages.last?.id,
+            scrollOffsetY: scrollController.geometry.offsetY, isPotrait: UIApplication.shared.screenSize().isPortrait)
         try await Store.shared.conversationPropertiesStore?.updateAndSave(uid: state.properties.uid) { model in
             model.lastPage = lastPage
         }

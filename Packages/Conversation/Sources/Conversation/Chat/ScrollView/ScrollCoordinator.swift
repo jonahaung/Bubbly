@@ -18,13 +18,11 @@ import XUI
     @ObservationIgnored
     private let reducer: ScrollReducer = .init()
     @ObservationIgnored
-    private let debouncer: Debouncer = .init(delay: 0.5)
+    private let debouncer: Debouncer = .init(delay: 0.3)
     @ObservationIgnored
     private var state: State = .init()
-    //    @ObservationIgnored
-    //    private var scrollDirection: ScrollDirection = .none
     var scrollPosition: ScrollPosition
-
+    
     init(_ lastPage: LastPage?) {
         scrollPosition = {
             if let lastPage {
