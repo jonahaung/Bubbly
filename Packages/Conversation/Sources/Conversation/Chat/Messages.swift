@@ -11,7 +11,7 @@ import SwiftUI
 import XUI
 
 @MainActor final class Messages: Sendable {
-    
+
     var wrappedValue: [MsgCellViewModel] = []
     private var indexMap: [String: Int] = [:]
     private let cellDecorator: MsgCellDecorator = .init()
@@ -19,13 +19,13 @@ import XUI
     private let markdownFormatter: MarkdownFormatter = .init()
     private let richTextEnabled: Bool
     private var visibleIDs: [String] = []
-   
+
     var paginatableState: PaginatableState?
     var pagination: PaginationState
     private let debouncer = Debouncer(delay: 0.2, queue: .global())
     let layout = MsgsScrollViewLayoutManager()
     var selectedMsg: SelectedMsg?
-    
+
     init(_ msgs: [Message], pagination: PaginationState) {
         self.pagination = pagination
         richTextEnabled = UserDefaults.group.bool(
@@ -35,12 +35,12 @@ import XUI
         rebuildIndexMap()
         updatePaginatableState()
     }
-    
+
     deinit { log("deinit") }
 }
 
 extension Messages {
-    
+
     var count: Int { wrappedValue.count }
     var first: MsgCellViewModel? { wrappedValue.first }
     var last: MsgCellViewModel? { wrappedValue.last }
@@ -156,24 +156,24 @@ extension Messages {
     func prepend(_ msgs: [Message]) {
         guard !msgs.isEmpty else { return }
 
-        var newMessages: [Message] = []
-        newMessages.reserveCapacity(msgs.count)
-
-        for msg in msgs {
-            if let index = indexMap[msg.uid] {
-                layout(at: index)
-            } else {
-                newMessages.append(msg)
-            }
-        }
-
-        guard !newMessages.isEmpty else {
-            updatePaginatableState()
-            return
-        }
+        //        var newMessages: [Message] = []
+        //        newMessages.reserveCapacity(msgs.count)
+        //
+        //        for msg in msgs {
+        //            if let index = indexMap[msg.uid] {
+        //                layout(at: index)
+        //            } else {
+        //                newMessages.append(msg)
+        //            }
+        //        }
+        //
+        //        guard !newMessages.isEmpty else {
+        //            updatePaginatableState()
+        //            return
+        //        }
 
         let models = makeModels(
-            from: newMessages,
+            from: msgs,
             nextBoundary: wrappedValue.first?.msg
         )
         wrappedValue.insert(contentsOf: models, at: 0)
@@ -186,26 +186,26 @@ extension Messages {
 
     func append(_ msgs: [Message]) {
         guard !msgs.isEmpty else { return }
-//
-//        var newMessages: [Message] = []
-//        newMessages.reserveCapacity(msgs.count)
-//
-//        for msg in msgs {
-//            if let index = indexMap[msg.uid] {
-//                layout(at: index)
-//            } else {
-//                newMessages.append(msg)
-//            }
-//        }
-//
-//        guard !newMessages.isEmpty else {
-//            updatePaginatableState()
-//            return
-//        }
+        //
+        //        var newMessages: [Message] = []
+        //        newMessages.reserveCapacity(msgs.count)
+        //
+        //        for msg in msgs {
+        //            if let index = indexMap[msg.uid] {
+        //                layout(at: index)
+        //            } else {
+        //                newMessages.append(msg)
+        //            }
+        //        }
+        //
+        //        guard !newMessages.isEmpty else {
+        //            updatePaginatableState()
+        //            return
+        //        }
 
         let start = wrappedValue.count
         let models = makeModels(
-            from: msgs.removeDuplicates(by: \.uid),
+            from: msgs,
             previousBoundary: wrappedValue.last?.msg
         )
         wrappedValue.append(contentsOf: models)
@@ -267,7 +267,7 @@ extension Messages {
         previous: Message? = nil,
         next: Message? = nil
     ) -> MsgCellViewModel {
-       
+
         if let cached = modelCache.get(msg.uid) {
             let layout = makeLayout(for: msg, previous: previous, next: next)
             cached.update(layout: layout)
@@ -319,7 +319,7 @@ extension Messages {
         }
         updatePagination()
     }
-    
+
     fileprivate func relayoutNeighbors(aroundInsertionAt index: Int) {
         if index > 0 {
             layout(at: index - 1)
@@ -432,11 +432,14 @@ extension Messages {
     private func updatePagination() {
         Task {
             do {
-               guard let firstMsgID = try await MsgRepo.firstMsg(conID: pagination.conID),
-                        let lasMsgID = try await MsgRepo.lastMsg(conID: pagination.conID) else { return }
+                guard let firstMsgID = try await MsgRepo.firstMsg(conID: pagination.conID),
+                    let lasMsgID = try await MsgRepo.lastMsg(conID: pagination.conID)
+                else { return }
                 let totalMsgCount = try await MsgRepo.totalMsgsCount(conID: pagination.conID)
                 print(totalMsgCount)
-                pagination = .init(conID: pagination.conID, pageSize: pagination.pageSize, lastMsgID: lasMsgID.uid, firstMsgID: firstMsgID.uid, totalMsgsCount: totalMsgCount)
+                pagination = .init(
+                    conID: pagination.conID, pageSize: pagination.pageSize, lastMsgID: lasMsgID.uid,
+                    firstMsgID: firstMsgID.uid, totalMsgsCount: totalMsgCount)
                 print(pagination)
                 updatePaginatableState()
             } catch {

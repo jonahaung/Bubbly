@@ -38,13 +38,14 @@ public struct BackendAPIConfiguration: Sendable, Equatable {
         allowsInsecureHTTP: Bool = false
     ) throws {
         guard let scheme = baseURL.scheme?.lowercased(),
-              ["http", "https"].contains(scheme),
-              baseURL.host != nil,
-              baseURL.user == nil,
-              baseURL.password == nil,
-              baseURL.query == nil,
-              baseURL.fragment == nil,
-              requestTimeout > 0 else {
+            ["http", "https"].contains(scheme),
+            baseURL.host != nil,
+            baseURL.user == nil,
+            baseURL.password == nil,
+            baseURL.query == nil,
+            baseURL.fragment == nil,
+            requestTimeout > 0
+        else {
             throw BackendAPIError.invalidConfiguration
         }
         guard scheme == "https" || allowsInsecureHTTP else {
@@ -83,7 +84,7 @@ public struct BackendAPIConfiguration: Sendable, Equatable {
     ) throws -> BackendAPIConfiguration {
         let overrideValue = userDefaults.string(forKey: applicationBaseURLOverrideKey)
         let environmentValue = environment["BUBBLY_API_BASE_URL"]
-        let rawValue = [overrideValue, environmentValue, infoDictionaryValue]
+        let rawValue = [environmentValue, overrideValue, infoDictionaryValue]
             .compactMap(normalized)
             .first
 
@@ -95,8 +96,9 @@ public struct BackendAPIConfiguration: Sendable, Equatable {
 
     private static func normalized(_ value: String?) -> String? {
         guard let value = value?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !value.isEmpty,
-              !value.contains("$(") else {
+            !value.isEmpty,
+            !value.contains("$(")
+        else {
             return nil
         }
         return value
@@ -108,9 +110,9 @@ public struct BackendAPIConfiguration: Sendable, Equatable {
         }
 
         #if DEBUG
-        return try BackendAPIConfiguration(baseURL: baseURL, allowsInsecureHTTP: true)
+            return try BackendAPIConfiguration(baseURL: baseURL, allowsInsecureHTTP: true)
         #else
-        return try BackendAPIConfiguration(baseURL: baseURL)
+            return try BackendAPIConfiguration(baseURL: baseURL)
         #endif
     }
 }

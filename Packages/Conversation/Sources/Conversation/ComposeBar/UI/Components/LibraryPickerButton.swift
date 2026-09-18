@@ -11,7 +11,7 @@ struct LibraryPickerButton: View {
     @State private var pickerSelection: [PhotosPickerItem] = []
     @State private var isLoading = false
     @State private var loadingTask: Task<Void, Never>?
-    private let fileWriter = LibraryPickerFileWriter()
+    private let fileWriter = TemporaryFileWriter()
 
     @Environment(ChatComposer.self) private var composer
     var selection: [URL] { composer.selection }
@@ -52,41 +52,43 @@ struct LibraryPickerButton: View {
             composer.selection = []
             return
         }
-        
+
         loadingTask?.cancel()
         isLoading = true
         loadingTask = Task {
-            var loadedURLs: [URL] = []
             do {
-                loadedURLs.reserveCapacity(items.count)
+
                 for item in items {
                     try Task.checkCancellation()
                     guard
                         let data = try await item.loadTransferable(
                             type: Data.self
-                        )
+                        ), let image = UIImage(data: data)
                     else {
                         throw CocoaError(.fileReadUnknown)
                     }
-                    let contentType = item.supportedContentTypes.first {
-                        $0.conforms(to: .image)
-                    }
-                    let url = try await fileWriter.write(
-                        data,
-                        pathExtension: contentType?.preferredFilenameExtension
-                            ?? "jpg"
-                    )
-                    loadedURLs.append(url)
+                    let attachment = try await AttachmentFactory.createImageAttachment(from: image)
+                    composer.state.attachments.append(attachment)
+                    //                    guard let contentType = (item.supportedContentTypes.first {
+                    //                        $0.conforms(to: .image)
+                    //                    }), let pathExtension = contentType.preferredFilenameExtension else {
+                    //                        throw CocoaError(.fileReadUnknown)
+                    //                    }
+                    //                    let url = try await fileWriter.write(
+                    //                        data,
+                    //                        pathExtension: pathExtension
+                    //                    )
+                    //                    loadedURLs.append(url)
                 }
 
-                try Task.checkCancellation()
-                let previousURLs = selection
-                composer.selection = loadedURLs
-                await fileWriter.removeFiles(at: previousURLs)
+                //                try Task.checkCancellation()
+                //                let previousURLs = selection
+                //                composer.selection = loadedURLs
+                //                await fileWriter.removeFiles(at: previousURLs)
             } catch is CancellationError {
-                await fileWriter.removeFiles(at: loadedURLs)
+
             } catch {
-                await fileWriter.removeFiles(at: loadedURLs)
+                log(error)
             }
             isLoading = false
             loadingTask = nil

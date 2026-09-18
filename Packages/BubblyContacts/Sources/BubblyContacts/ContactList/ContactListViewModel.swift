@@ -41,6 +41,8 @@ final class ContactListViewModel {
     @ObservationIgnored private var operationTask: Task<Void, Never>?
     @ObservationIgnored private var operationID: UUID?
 
+    var displayMode: ContactListDisplayMode = .chat
+
     init(client: ContactListClient = .live) {
         self.client = client
     }
@@ -56,7 +58,7 @@ final class ContactListViewModel {
             do {
                 switch operation {
                 case .load,
-                     .refresh:
+                    .refresh:
                     break
                 case .syncContacts:
                     try await client.syncContacts()
@@ -137,7 +139,8 @@ final class ContactListViewModel {
             matching: searchText
         )
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        groups = query.isEmpty
+        groups =
+            query.isEmpty
             ? content.groups
             : content.groups.filter {
                 $0.name.localizedStandardContains(query)

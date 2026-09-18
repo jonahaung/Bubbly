@@ -1,10 +1,11 @@
 import Foundation
+import XUI
 
-actor LibraryPickerFileWriter {
+actor TemporaryFileWriter {
     func write(_ data: Data, pathExtension: String) throws -> URL {
         try Task.checkCancellation()
         let url = URL.temporaryDirectory
-            .appending(path: UUID().uuidString)
+            .appending(path: UUID().uuidString.lowercased())
             .appendingPathExtension(pathExtension)
         do {
             try data.write(to: url, options: [.atomic, .completeFileProtection])

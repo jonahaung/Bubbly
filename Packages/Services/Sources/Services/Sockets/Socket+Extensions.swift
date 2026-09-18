@@ -5,7 +5,7 @@ import Database
 import XUI
 
 public extension Socket {
-    
+
     func handleReceiveBackground(_ data: AnyMsgData) async throws {
         try await queue.addOperation { [weak self] in
             guard let self else { return }
@@ -39,10 +39,13 @@ private extension Socket {
             try await Store.shared.msgStore?.delete(uid: rMsg.uid)
         case let .reaction(payload):
             try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in
-                let isSame = model.reactions.contains(where: {
-                    $0.senderID == payload.reaction.senderID && $0.rawValue == payload.reaction
-                        .rawValue
-                }) == true
+                let isSame =
+                    model.reactions.contains(where: {
+                        $0.senderID == payload.reaction.senderID
+                            && $0.rawValue
+                                == payload.reaction
+                                .rawValue
+                    }) == true
                 model.reactions.removeAll(where: { $0.senderID == payload.reaction.senderID })
                 if !isSame {
                     model.reactions.append(payload.reaction)
@@ -52,23 +55,30 @@ private extension Socket {
             break
         case .msgRecipientReceipt(payload: let payload):
             if payload.recipientReceipt.status == .read {
-                var properties = try await ConversationPropertiesRepo.getOrCreate(
+                let current = try await ConversationPropertiesRepo.getOrCreate(
                     for: payload.conID,
-                    refetch: false,
+                    refetch: false
                 )
-                properties.seenMembers.removeAll(where: { $0.uid == payload.recipientReceipt.userID })
-                properties.seenMembers.append(.init(uid: payload.recipientReceipt.userID, msgId: payload.msgID, date: payload.recipientReceipt.date))
-                try await Store.shared
+                var updatedSeen = current.seenMembers
+                updatedSeen.removeAll(where: { $0.uid == payload.recipientReceipt.userID })
+                updatedSeen.append(
+                    .init(
+                        uid: payload.recipientReceipt.userID, msgId: payload.msgID, date: payload.recipientReceipt.date)
+                )
+                _ = try await Store.shared
                     .conversationPropertiesStore?
                     .updateAndSave(uid: payload.conID) { model in
-                        try model.update(from: properties)
+                        model.seenMembers = updatedSeen
                     }
             }
-            try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in
-                model.outgoingStatus?.updatingReceipt(memberID: payload.recipientReceipt.userID, state: payload.recipientReceipt.status)
+            _ = try await Store.shared.msgStore?.updateAndSave(uid: payload.msgID) { model in
+                model.outgoingStatus?.updatingReceipt(
+                    memberID: payload.recipientReceipt.userID, state: payload.recipientReceipt.status)
             }
-            
-            let msgs = try await MsgRepo.outgoingUnreadMsgs(conID: payload.conID).filter { $0.date < payload.recipientReceipt.date }
+
+            let msgs = try await MsgRepo.outgoingUnreadMsgs(conID: payload.conID).filter {
+                $0.date < payload.recipientReceipt.date
+            }
             AsyncOrderedStream.streamOrdered(inputs: msgs) { [weak self] msg in
                 guard let self else { return }
                 var msg = msg
@@ -76,7 +86,7 @@ private extension Socket {
                     memberID: payload.recipientReceipt.userID,
                     state: payload.recipientReceipt.status
                 )
-                try await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
+                _ = try await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
                     model.update(from: msg)
                 }
             }
@@ -84,10 +94,11 @@ private extension Socket {
 
         let appState = AppStateStore.read()
         if appState == .background {
-            var dataArray = GroupStorage.shared.codable(
-                [AnyMsgData].self,
-                for: .device(.anyMsgData),
-            ) ?? []
+            var dataArray =
+                GroupStorage.shared.codable(
+                    [AnyMsgData].self,
+                    for: .device(.anyMsgData),
+                ) ?? []
             dataArray.append(data)
             GroupStorage.shared.save(dataArray, for: .device(.anyMsgData))
         }

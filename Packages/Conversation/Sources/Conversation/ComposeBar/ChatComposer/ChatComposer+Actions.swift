@@ -1,9 +1,6 @@
 import Database
 
 extension ChatComposer {
-    func handlePrimaryAction(_ conversation: Conversation) {
-        send(conversation: conversation)
-    }
 
     func handleSecondaryAction(_ conversation: Conversation) {
         if hasContent {

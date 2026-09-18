@@ -8,14 +8,14 @@ import Core
 import SwiftUI
 import PhotosUI
 import Services
-import _AVKit_SwiftUI
+import AVKit
 
 struct ComposeBar: View {
-    
+
     @Environment(ChatManager.self) private var manager
     @Environment(ChatComposer.self) private var composer
     @Environment(\.conversationTheme) private var theme
-    
+
     var body: some View {
         let state = composer.state
         VStack(spacing: 0) {
@@ -33,7 +33,7 @@ struct ComposeBar: View {
             HStack(alignment: .bottom, spacing: 4) {
                 menuButton(state)
                 sourceButtons(state)
-                
+
                 ComposeBarInputTextField(inputText: composer.inputText)
                 ComposeBarSendButton()
             }
@@ -44,7 +44,7 @@ struct ComposeBar: View {
                     colors: [
                         .clear,
                         theme.backgroundColor,
-                        theme.backgroundColor
+                        theme.backgroundColor,
                     ],
                     startPoint: .top,
                     endPoint: .bottom

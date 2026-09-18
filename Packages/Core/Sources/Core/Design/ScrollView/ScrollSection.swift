@@ -28,8 +28,6 @@ public struct ScrollSection<
         self.cell = cell
     }
 
-    // MARK: Public
-
     public var body: some View {
         if !data.isEmpty {
             VStack(alignment: .leading, spacing: Spacing.sm) {
@@ -62,8 +60,6 @@ public struct ScrollSection<
                         .padding(.horizontal, Padding.md)
                 }
             }
-            .animation(.anticipateOvershoot, value: data.map(\.id))
-            .geometryGroup()
         }
     }
 

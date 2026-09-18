@@ -21,41 +21,48 @@ struct ScrollReducer {
 extension ScrollReducer {
     func reduceGeometry(
         newValue: VScrollGeometry,
-        paginationState: PaginatableState?,
-        phase: ScrollPhase,
-        direction: ScrollDirection
+        paginationState: PaginatableState?
     ) -> Effect? {
         guard let paginationState else { return nil }
-        switch direction {
-        case .up:
-            let ratio =
-                (newValue.offsetY + newValue.boundsHeight)
-                / newValue.contentHeight
-            if ratio > 0.85 {
-                if paginationState.canLoadNewer {
-                    return .begingUpdate(
-                        paginationState.canAdjustSize && phase.isScrolling
-                            ? .remove(edge: .top)
-                            : .insert(edge: .bottom)
-                    )
-                }
-            }
-        case .down:
-            let ratio = (newValue.offsetY) / newValue.contentHeight
-            if ratio < 0.3, paginationState.canLoadOlder {
-                return .begingUpdate(.insert(edge: .top))
-            }
-        case .none:
-            if newValue.offsetY == 0, paginationState.canLoadOlder {
-                return .begingUpdate(.insert(edge: .top))
-            }
-            if newValue.scrolledPosition == .atBottom {
-                if paginationState.canLoadNewer {
-                    return .begingUpdate(.insert(edge: .bottom))
-                }
+        let bottomRatio =
+            (newValue.offsetY + newValue.boundsHeight)
+            / newValue.contentHeight
+        if bottomRatio > 0.85 {
+            if paginationState.canLoadNewer {
+                return .begingUpdate(
+                    paginationState.canAdjustSize
+                        ? .remove(edge: .top)
+                        : .insert(edge: .bottom)
+                )
+            } else if paginationState.canAdjustSize {
+                return .begingUpdate(.remove(edge: .top))
             }
             return nil
         }
+        let topRatio = (newValue.offsetY) / newValue.contentHeight
+        if topRatio < 0.3 {
+            if paginationState.canLoadOlder {
+                return .begingUpdate(.insert(edge: .top))
+            } else if paginationState.canAdjustSize {
+                return .begingUpdate(.remove(edge: .bottom))
+            }
+        }
+        //        switch direction {
+        //        case .up:
+        //
+        //        case .down:
+        //
+        //        case .none:
+        //            if newValue.offsetY == 0, paginationState.canLoadOlder {
+        //                return .begingUpdate(.insert(edge: .top))
+        //            }
+        //            if newValue.scrolledPosition == .atBottom {
+        //                if paginationState.canLoadNewer {
+        //                    return .begingUpdate(.insert(edge: .bottom))
+        //                }
+        //            }
+        //            return nil
+        //        }
         return nil
     }
 
@@ -101,7 +108,7 @@ extension ScrollReducer {
             case .append(let msg):
                 return .endUpdate(
                     .append(msg: msg),
-                    scrollItem: .edge(.bottom, .animated(.easeInExponential))
+                    scrollItem: .edge(.bottom, .animated(.snappy(duration: 0.25)))
                 )
             case .focus(let msg):
                 return .endUpdate(

@@ -15,7 +15,6 @@ public struct FolderListView: View {
 
     public var body: some View {
         List {
-            // MARK: - Subfolders
 
             if folder.subfolders.count() > 0 {
                 Section("Folders") {
@@ -25,8 +24,6 @@ public struct FolderListView: View {
                     .onDelete(perform: deleteFolders)
                 }
             }
-
-            // MARK: - Files
 
             if folder.files.count() > 0 {
                 Section("Files") {
@@ -39,8 +36,6 @@ public struct FolderListView: View {
         }
         .navigationTitle(folder.name)
     }
-
-    // MARK: - Delete handlers
 
     private func deleteFolders(at offsets: IndexSet) {
         for index in offsets {
@@ -57,8 +52,6 @@ public struct FolderListView: View {
     }
 }
 
-// MARK: - Folder Row
-
 private struct FolderListRow: View {
     let folder: Folder
 
@@ -72,8 +65,6 @@ private struct FolderListRow: View {
     }
 }
 
-// MARK: - File Row
-
 private struct FileRow: View {
     let file: File
 
@@ -81,12 +72,10 @@ private struct FileRow: View {
         NavigationLink {
             FilePreviewView(file: file)
         } label: {
-            Label(file.nameExcludingExtension, systemSymbol: .docText)
+            Label(file.nameExcludingExtension, systemSymbol: .textDocument)
         }
     }
 }
-
-// MARK: - File Preview
 
 private struct FilePreviewView: View {
     let file: File
@@ -115,7 +104,8 @@ private struct FilePreviewView: View {
 
     private func loadImage() -> Image? {
         guard let data = try? file.read(),
-              let ui = UIImage(data: data) else { return nil }
+            let ui = UIImage(data: data)
+        else { return nil }
         return Image(uiImage: ui)
     }
 }

@@ -10,7 +10,7 @@ import XUI
 import Services
 
 public struct UserProfileView: View {
-    @LazyState private var viewModel: UserProfileViewModel
+    @State private var viewModel: UserProfileViewModel
     @FocusState private var isFocused: Bool
     private let appLauncher: AppLauncher
 
@@ -55,12 +55,14 @@ public struct UserProfileView: View {
                 Text("Phone").badge(viewModel.state.currentUser.mobile)
 
                 if let privateKey = GroupStorage.shared
-                    .string(for: .security(.privateKey(id: viewModel.state.currentUser.uid))) {
+                    .string(for: .security(.privateKey(id: viewModel.state.currentUser.uid)))
+                {
                     Text(privateKey)
                 }
 
                 if let publicKey = GroupStorage.shared
-                    .string(for: .security(.publicKey(id: viewModel.state.currentUser.uid))) {
+                    .string(for: .security(.publicKey(id: viewModel.state.currentUser.uid)))
+                {
                     Text(publicKey)
                 }
             }

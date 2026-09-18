@@ -8,7 +8,7 @@
 import Foundation
 
 struct PaginatableState: Sendable, Hashable {
-    let canLoadOlder: Bool
-    let canLoadNewer: Bool
-    let canAdjustSize: Bool
+    var canLoadOlder: Bool
+    var canLoadNewer: Bool
+    var canAdjustSize: Bool
 }

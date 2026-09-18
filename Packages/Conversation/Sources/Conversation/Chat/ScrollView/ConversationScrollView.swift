@@ -12,7 +12,7 @@ import XUI
 struct ConversationScrollView: View {
 
     let manager: ChatManager
-    
+
     var body: some View {
         ScrollView(.vertical, showsIndicators: true) {
             MsgsScrollViewLayout(
@@ -30,7 +30,6 @@ struct ConversationScrollView: View {
             .geometryGroup()
             .scrollTargetLayout()
         }
-        .tint(Color.tint)
         .scrollDismissesKeyboard(.never)
         .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
         .onScrollPhaseChange { oldPhase, newPhase, context in

@@ -50,8 +50,8 @@ extension ScrollCoordinator {
         case dataUpdate(DataUpdate)
 
         var hasViewLoaded: Bool { self != .initial }
-        var isUpdating: Bool { self != .didEndUpdates }
-        var isNotUpdating: Bool { !isUpdating }
+        var isUpdating: Bool { self != .didEndUpdates && self != .willBeginUpdates }
+        var isNotUpdating: Bool { self == .didEndUpdates }
         var shouldEndUpdates: Bool { self == .willEndUpdates }
 
         mutating func update(to newValue: Self) {

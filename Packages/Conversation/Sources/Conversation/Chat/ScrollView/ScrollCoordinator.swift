@@ -21,10 +21,10 @@ import XUI
     private let debouncer: Debouncer = .init(delay: 0.5)
     @ObservationIgnored
     private var state: State = .init()
-    @ObservationIgnored
-    private var scrollDirection: ScrollDirection = .none
+    //    @ObservationIgnored
+    //    private var scrollDirection: ScrollDirection = .none
     var scrollPosition: ScrollPosition
-    
+
     init(_ lastPage: LastPage?) {
         scrollPosition = {
             if let lastPage {
@@ -70,7 +70,7 @@ extension ScrollCoordinator {
                 if state.isFirstResponder {
                     handleFirstResponder(oldValue, newValue)
                 }
-                
+
             }
         case .onScrollPhaseChange(let oldValue, let newValue, let context):
             guard oldValue != newValue else { return }
@@ -79,14 +79,13 @@ extension ScrollCoordinator {
             switch newValue {
             case .idle:
                 state.geometry = geometry
-                if state.updateState.isUpdating {
-                    delegate?.layoutIfNeeded()
-                } else {
-                    paginateIfNeeded(
-                        geometry,
-                        state: state,
-                        direction: scrollDirection
-                    )
+                if state.updateState == .dataUpdate(.insert(edge: .top)) {
+                    switch geometry.scrolledPosition {
+                    case .atTop, .atBottom:
+                        delegate?.layoutIfNeeded()
+                    default:
+                        break
+                    }
                 }
                 debouncer.debounce { [weak self] in
                     guard let self else { return }
@@ -95,26 +94,19 @@ extension ScrollCoordinator {
                     }
                 }
             case .interacting:
-                if state.updateState.isUpdating {
-                    delegate?.layoutIfNeeded()
+                if state.updateState == .dataUpdate(.insert(edge: .top)) {
+                    switch geometry.scrolledPosition {
+                    case .atTop, .atBottom:
+                        break
+                    default:
+                        delegate?.layoutIfNeeded()
+                    }
                 }
                 debouncer.cancel()
             case .decelerating:
-                if let dy = context.velocity?.dy, abs(dy) != 0 {
-                    let direction = dy < 0 ? ScrollDirection.down : .up
-                    if scrollDirection != direction {
-                        scrollDirection = direction
-                    }
-                } else {
-//                    scrollDirection = .none
+                if state.updateState.isNotUpdating {
+                    paginateIfNeeded(geometry)
                 }
-                
-                paginateIfNeeded(
-                    geometry,
-                    state: state,
-                    direction: scrollDirection
-                )
-                
             default:
                 break
             }
@@ -124,19 +116,13 @@ extension ScrollCoordinator {
     }
 
     private func paginateIfNeeded(
-        _ geometry: VScrollGeometry,
-        state: State,
-        direction: ScrollDirection
+        _ geometry: VScrollGeometry
     ) {
-        if state.updateState.isNotUpdating {
-            if let effect = reducer.reduceGeometry(
-                newValue: geometry,
-                paginationState: paginatedState(),
-                phase: state.phase,
-                direction: direction
-            ) {
-                handleEffect(effect)
-            }
+        if let effect = reducer.reduceGeometry(
+            newValue: geometry,
+            paginationState: paginatedState()
+        ) {
+            handleEffect(effect)
         }
     }
 
@@ -184,7 +170,7 @@ extension ScrollCoordinator {
         }
         let isFirstResponder =
             newValue.boundsHeight < oldValue.boundsHeight
-        && delegate?.isFirstResponder == true
+            && delegate?.isFirstResponder == true
         guard state.isFirstResponder != isFirstResponder else { return }
         state.isFirstResponder = isFirstResponder
         let diff = oldValue.boundsHeight - newValue.boundsHeight
@@ -217,7 +203,7 @@ extension ScrollCoordinator {
     }
 
     fileprivate func end(updates: DataUpdate) {
-        scrollDirection = .none
+        //        scrollDirection = .none
         switch updates {
         case .append, .remove:
             updateState(.didEndUpdates)

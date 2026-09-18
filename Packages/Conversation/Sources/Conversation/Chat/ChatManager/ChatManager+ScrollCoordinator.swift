@@ -12,8 +12,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
     var isFirstResponder: Bool {
         focusState?.value != nil
     }
-    
-    
+
     func scrollCoordinator(_ coordinator: ScrollCoordinator, setEditing isEditing: Bool) -> Bool {
         if isEditing && focusState?.value == nil && messages.shouldPaginate(at: .bottom) == false {
             UIImpactFeedbackGenerator().impactOccurred(intensity: 0.7)
@@ -21,7 +20,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
             focusState?.value = .inputTextField
             return true
         } else if !isEditing && focusState?.value != nil {
-            focusState?.value =  nil
+            focusState?.value = nil
             return true
         }
         return false
@@ -47,16 +46,16 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                 serialQueue.async { [weak self] in
                     guard let self else { return }
                     do {
-                        let msgs = try await datasource.previous(before: query, conID: message.conID )
+                        let msgs = try await datasource.previous(before: query, conID: message.conID)
                         await messages.prepend(msgs)
-                        await coordinator.updateState(.dataUpdate(update) )
-//                        await layoutIfNeeded()
+                        await coordinator.updateState(.dataUpdate(update))
+                        //                        await layoutIfNeeded()
                     } catch {
                         log(error)
                     }
                 }
             case .bottom:
-                
+
                 let message = messages.last?.msg
                 guard let message else {
                     scrollController.updateState(.didEndUpdates)
@@ -66,10 +65,10 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                 serialQueue.async { [weak self] in
                     guard let self else { return }
                     do {
-                        let msgs = try await datasource.previous(before: query, conID: message.conID )
+                        let msgs = try await datasource.more(after: query, conID: message.conID)
                         await messages.append(msgs)
-                        await coordinator.updateState(.dataUpdate(update) )
-//                        await layoutIfNeeded()
+                        await coordinator.updateState(.dataUpdate(update))
+                        await layoutIfNeeded()
                     } catch {
                         log(error)
                     }
@@ -85,15 +84,12 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
             case .bottom:
                 messages.retainOldest(limit)
                 coordinator.updateState(.dataUpdate(update))
-                withAnimation(.linear) { layoutIfNeeded() }
+                layoutIfNeeded()
             }
         case let .append(msg):
-            serialQueue.async { [weak self] in
-                guard let self else { return }
-                await coordinator.updateState(.dataUpdate(.append(msg: msg)))
-                await messages.insert(msg: msg)
-                await layoutIfNeeded()
-            }
+            coordinator.updateState(.dataUpdate(.append(msg: msg)))
+            messages.insert(msg: msg)
+            layoutIfNeeded()
         case let .focus(msg):
             serialQueue.async { [weak self] in
                 guard let self else { return }

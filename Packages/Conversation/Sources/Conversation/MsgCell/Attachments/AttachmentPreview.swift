@@ -13,13 +13,13 @@ import ImageLoader
 import VideoLoader
 
 struct AttachmentPreview: View {
-   
+
     let onSelect: (_ item: Attachment) -> Void
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
     @Environment(\.attachmentFetcher) private var attachmentFetcher
     @Environment(\.conversation) private var conversation
-    @LazyState private var model: AttachmentPreviewViewModel
+    @State private var model: AttachmentPreviewViewModel
 
     init(
         attachment: Attachment,

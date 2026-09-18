@@ -10,13 +10,12 @@ import SwiftUI
 import XUI
 
 public struct ConversationScene: View {
-    
+
     @FocusState private var focusState: ConversationFocusState?
     @Namespace private var namespace
+    @State private var viewModel: ChatManager
+    @State private var composer: ChatComposer
 
-    @LazyState private var viewModel: ChatManager
-    @LazyState private var composer: ChatComposer
-    
     public init(
         coordinator: AppCoordinator,
         prefretchData: ConversationInitializedData

@@ -9,18 +9,16 @@ import Anima
 import Services
 import SwiftUI
 import XUI
+import Database
 
 struct CameraPickerButton: View {
 
     private let source = ChatComposer.Source.camera
     @State private var isPresented = false
-    @State private var capturedImage: UIImage?
-    @State private var isSaving = false
     @State private var saveTask: Task<Void, Never>?
-    private let imageWriter = CameraImageWriter()
+    private let imageWriter = TemporaryFileWriter()
     @Environment(ChatComposer.self) private var composer
-    var selection: [URL] { composer.selection }
-    
+
     var body: some View {
         CustomButton(action: handleAction) {
             Image(systemName: source.systemImageName)
@@ -44,28 +42,19 @@ struct CameraPickerButton: View {
                 }
             }
         }
-        .disabled(isSaving)
-        .accessibilityLabel(source.localizedName)
-        .accessibilityValue(isSaving ? "Saving" : "")
         .onDisappear(perform: cleanUp)
     }
 
     private func handleAction() {
-        if selection.isEmpty == false {
-            composer.lookUp = selection.first
-        } else if let capturedImage {
-            save(capturedImage)
-        } else if UIImagePickerController.isSourceTypeAvailable(.camera) {
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
             isPresented = true
-        } else {
-            
         }
     }
 
     private func handleSelection(_ image: UIImage) {
         saveTask?.cancel()
-        let previousURLs = selection
-        capturedImage = image
+        let previousURLs = composer.selection
+        save(image)
         Task {
             await imageWriter.removeFiles(at: previousURLs)
         }
@@ -73,34 +62,36 @@ struct CameraPickerButton: View {
 
     private func save(_ image: UIImage) {
         saveTask?.cancel()
-        isSaving = true
         saveTask = Task {
-            var generatedURLs: [URL] = []
             do {
-                let url = try await imageWriter.write(image)
-                generatedURLs = [url]
-                try Task.checkCancellation()
-                capturedImage = nil
-                composer.selection = [url]
-                composer.lookUp = url
-            } catch is CancellationError {
-                await imageWriter.removeFiles(at: generatedURLs)
+                let attachment = try await AttachmentFactory.createImageAttachment(from: image)
+                composer.state.attachments = [attachment]
             } catch {
-                await imageWriter.removeFiles(at: generatedURLs)
-               
+                log(error)
             }
-            isSaving = false
+            //            var generatedURLs: [URL] = []
+            //            guard let data = image.pngData() else { return }
+            //            do {
+            //                let url = try await imageWriter.write(data, pathExtension: "png")
+            //                generatedURLs = [url]
+            //                try Task.checkCancellation()
+            //                composer.selection.append(url)
+            //                let attachment = Attachment.init(uid: url.lastPathComponent, url: url.absoluteString, attachMentTypeRaw: Database.AttachMentType.imageUploading.rawValue, aspectRatio: image.aspectRatio)
+            //                composer.state.attachments = [attachment]
+            //            } catch is CancellationError {
+            //                await imageWriter.removeFiles(at: generatedURLs)
+            //            } catch {
+            //                await imageWriter.removeFiles(at: generatedURLs)
+            //
+            //            }
             saveTask = nil
         }
     }
     private func cleanUp() {
         saveTask?.cancel()
         saveTask = nil
-        capturedImage = nil
-        let urls = selection
-        
         Task {
-            await imageWriter.removeFiles(at: urls)
+            await imageWriter.removeFiles(at: composer.selection)
         }
     }
 }

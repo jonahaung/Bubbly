@@ -10,14 +10,18 @@ import Database
 import Services
 
 public struct ContactList: View {
+
+    @State private var viewModel: ContactListViewModel
+    @AppStorage("DefaultContactDisplayType", store: GroupStorage.shared.store)
+    private var displayMode: ContactListDisplayMode = .chat
+    private let coordinator: AppCoordinator
+
     public init(coordinator: AppCoordinator) {
         self.coordinator = coordinator
         _viewModel = .init(wrappedValue: .init())
     }
 
     public var body: some View {
-        @Bindable var viewModel = viewModel
-
         ScrollView {
             LazyVStack(alignment: .leading, spacing: Spacing.md) {
                 ContactListModePicker(selection: $displayMode)
@@ -62,12 +66,6 @@ public struct ContactList: View {
         }
     }
 
-    @State private var viewModel: ContactListViewModel
-    @AppStorage("DefaultContactDisplayType", store: GroupStorage.shared.store)
-    private var displayMode: ContactListDisplayMode = .chat
-
-    private let coordinator: AppCoordinator
-
     private func openConversation(for contact: Contact) async {
         if contact.isChatAvailable {
             guard let contact = await viewModel.resolveContact(contact) else {
@@ -80,9 +78,9 @@ public struct ContactList: View {
             }
             await UIApplication.shared.open(url)
         } else {
-           
+
         }
-        
+
     }
 
     private func syncContacts() async {

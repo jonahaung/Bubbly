@@ -54,11 +54,15 @@
         ///   - type: The type of the sound resource to lookup. Defaults to `.audio`.
         ///   - bundle: The bundle to search for the sound resource. Defaults to the main `Bundle`.
         public init(_ names: String..., type: UTType = .audio, bundle: Bundle = .main) {
-            let types: [UTType] = if type == .audio {
-                [type, .aiff, .wav, UTType(filenameExtension: "caf")!, .mpeg4Audio, UTType(filenameExtension: "m4a")!]
-            } else {
-                [type]
-            }
+            let types: [UTType] =
+                if type == .audio {
+                    [
+                        type, .aiff, .wav, UTType(filenameExtension: "caf")!, .mpeg4Audio,
+                        UTType(filenameExtension: "m4a")!,
+                    ]
+                } else {
+                    [type]
+                }
 
             urls = []
 
@@ -76,7 +80,9 @@
                 }
             }
 
-            print("No sound resource named \(names.map { "'\($0)'" }.formatted(.list(type: .and))) with type '\(type)' found in bundle \(bundle)")
+            print(
+                "No sound resource named \(names.map { "'\($0)'" }.formatted(.list(type: .and))) with type '\(type)' found in bundle \(bundle)"
+            )
         }
 
         /// Create a sound effect from the specified URL.
@@ -156,11 +162,12 @@
             #if targetEnvironment(simulator)
                 player = AVSoundEffectPlayer()
             #else
-                player = if CHHapticEngine.capabilitiesForHardware().supportsAudio {
-                    HapticEngineSoundEffectPlayer()
-                } else {
-                    EmptySoundEffectPlayer()
-                }
+                player =
+                    if CHHapticEngine.capabilitiesForHardware().supportsAudio {
+                        HapticEngineSoundEffectPlayer()
+                    } else {
+                        EmptySoundEffectPlayer()
+                    }
             #endif
         }
 
@@ -205,11 +212,12 @@
             defer { didSetUp = true }
 
             let session: AVAudioSession? = await MainActor.run { SoundEffect.audioSession }
-            engine = if let audioSession = session {
-                try? CHHapticEngine(audioSession: audioSession)
-            } else {
-                try? CHHapticEngine()
-            }
+            engine =
+                if let audioSession = session {
+                    try? CHHapticEngine(audioSession: audioSession)
+                } else {
+                    try? CHHapticEngine()
+                }
 
             guard let engine else { return }
 
@@ -402,7 +410,7 @@
                 return
             }
 
-            let player = AVAudioPlayerWithCompletionHandler(url: url, volume: audio.volume)
+            let player = await AVAudioPlayerWithCompletionHandler(url: url, volume: audio.volume)
 
             try await withCheckedThrowingContinuation { continuation in
                 player.play { result in

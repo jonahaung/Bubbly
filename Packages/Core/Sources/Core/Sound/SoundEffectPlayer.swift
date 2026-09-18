@@ -33,11 +33,12 @@ public actor AnySoundEffectPlayer: SoundEffectPlayer {
         #if targetEnvironment(simulator)
             player = AVSoundEffectPlayer()
         #else
-            player = if CHHapticEngine.capabilitiesForHardware().supportsAudio {
-                HapticEngineSoundEffectPlayer()
-            } else {
-                EmptySoundEffectPlayer()
-            }
+            player =
+                if CHHapticEngine.capabilitiesForHardware().supportsAudio {
+                    HapticEngineSoundEffectPlayer()
+                } else {
+                    EmptySoundEffectPlayer()
+                }
         #endif
     }
 
@@ -94,11 +95,12 @@ actor HapticEngineSoundEffectPlayer: SoundEffectPlayer {
         let audioSession: AVAudioSession? = await MainActor.run { () -> AVAudioSession? in
             SoundEffect.audioSession
         }
-        engine = if let audioSession {
-            try? CHHapticEngine(audioSession: audioSession)
-        } else {
-            try? CHHapticEngine()
-        }
+        engine =
+            if let audioSession {
+                try? CHHapticEngine(audioSession: audioSession)
+            } else {
+                try? CHHapticEngine()
+            }
 
         guard let engine else {
             return
@@ -275,11 +277,12 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
 
         registeredSound.count -= 1
 
-        registeredSounds[audio] = if registeredSound.count <= 0 {
-            nil
-        } else {
-            registeredSound
-        }
+        registeredSounds[audio] =
+            if registeredSound.count <= 0 {
+                nil
+            } else {
+                registeredSound
+            }
 
         if registeredSounds.isEmpty {
             try? tearDown()
@@ -292,7 +295,7 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
             return
         }
 
-        let player = AVAudioPlayerWithCompletionHandler(url: url, volume: audio.volume)
+        let player = await AVAudioPlayerWithCompletionHandler(url: url, volume: audio.volume)
 
         try await withCheckedThrowingContinuation { continuation in
             player.play { result in
