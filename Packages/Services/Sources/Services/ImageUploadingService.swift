@@ -12,7 +12,7 @@ public struct ImageUploadingService: Sendable {
         case group(groupID: String)
         case conversation(conID: String, attachmentID: String)
 
-        var backendPath: BackendAPIClient.MediaPath? {
+        var backendPath: APIClient.MediaPath? {
             switch self {
             case .user:
                 nil
@@ -45,7 +45,7 @@ public struct ImageUploadingService: Sendable {
         let data = try mediaManager.createData(from: uploadingImage)
 
         if case .user = path {
-            return try await BackendAPIClient.shared.uploadProfilePhoto(
+            return try await APIClient.shared.uploadProfilePhoto(
                 data: data,
                 contentType: "image/png"
             )
@@ -56,7 +56,7 @@ public struct ImageUploadingService: Sendable {
         }
         let progress = Progress(totalUnitCount: Int64(data.count))
         onProgress?(progress)
-        let url = try await BackendAPIClient.shared.uploadMedia(
+        let url = try await APIClient.shared.uploadMedia(
             data: data,
             contentType: "image/png",
             to: backendPath
@@ -72,7 +72,7 @@ public struct ImageUploadingService: Sendable {
         onProgress: (@Sendable (Progress?) -> Void)? = nil,
     ) async throws -> URL {
         if case .user = path {
-            return try await BackendAPIClient.shared.uploadProfilePhoto(
+            return try await APIClient.shared.uploadProfilePhoto(
                 fileURL: url,
                 contentType: "image/jpeg"
             )
@@ -83,7 +83,7 @@ public struct ImageUploadingService: Sendable {
         let fileSize = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
         let progress = Progress(totalUnitCount: Int64(fileSize))
         onProgress?(progress)
-        let uploadedURL = try await BackendAPIClient.shared.uploadMedia(
+        let uploadedURL = try await APIClient.shared.uploadMedia(
             fileURL: url,
             contentType: "image/jpeg",
             to: backendPath

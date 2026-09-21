@@ -31,9 +31,9 @@ struct RootTabView: View {
                 }
             }
         }
-		.tabViewSearchActivation(.automatic)
-		.searchToolbarBehavior(.minimize)
-		.searchPresentationToolbarBehavior(.avoidHidingContent)
+        .tabViewSearchActivation(.automatic)
+        .searchToolbarBehavior(.minimize)
+        .searchPresentationToolbarBehavior(.avoidHidingContent)
         .tabBarMinimizeBehavior(.onScrollDown)
         .toastPresentable()
         .fullScreenCover(item: fullScreenCover) { coordinator.view(for: $0) }
@@ -42,7 +42,7 @@ struct RootTabView: View {
 
 extension RootTabView {
     private func role(for tabPath: TabPath) -> TabRole? {
-		tabPath == .contacts ? .search : nil
+        tabPath == .contacts ? .search : nil
     }
 }
 
@@ -51,11 +51,11 @@ private extension RootTabView {
         .init(
             get: { router.sheet },
             set: { newValue in
-                if let newValue {
-                    router.presentModel(newValue)
-                } else {
-                    router.dismissModal()
+                guard router.sheet != newValue else {
+                    return
                 }
+
+                router.sheet = newValue
             },
         )
     }
@@ -69,7 +69,7 @@ public extension AppCoordinator {
         case .inbox:
             InboxScene(coordinator: self)
         case .contacts:
-			ContactList(coordinator: self)
+            ContactList(coordinator: self)
         case .settings:
             SettingsScene(coordinator: self)
         }

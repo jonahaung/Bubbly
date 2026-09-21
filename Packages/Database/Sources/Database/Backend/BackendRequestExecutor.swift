@@ -7,12 +7,12 @@ struct BackendRequestExecutor: Sendable {
     }
 
     private let configurationProvider: @Sendable () throws -> BackendAPIConfiguration
-    private let accessTokenProvider: BackendAccessTokenProvider
+    private let accessTokenProvider: APIAccessTokenProvider
     private let transport: any BackendHTTPTransport
 
     init(
         configurationProvider: @escaping @Sendable () throws -> BackendAPIConfiguration,
-        accessTokenProvider: @escaping BackendAccessTokenProvider,
+        accessTokenProvider: @escaping APIAccessTokenProvider,
         transport: any BackendHTTPTransport
     ) {
         self.configurationProvider = configurationProvider
@@ -27,13 +27,15 @@ struct BackendRequestExecutor: Sendable {
         body: Body? = nil,
         contentType: String? = nil
     ) async throws -> Data {
-        guard let data = try await send(
-            method: method,
-            path: path,
-            queryItems: queryItems,
-            body: body,
-            contentType: contentType
-        ) else {
+        guard
+            let data = try await send(
+                method: method,
+                path: path,
+                queryItems: queryItems,
+                body: body,
+                contentType: contentType
+            )
+        else {
             throw BackendAPIError.invalidResponse
         }
         return data
@@ -73,7 +75,8 @@ struct BackendRequestExecutor: Sendable {
                     throw CancellationError()
                 }
                 guard retry < configuration.retryPolicy.maximumRetryCount,
-                      Self.isRetryable(error.code) else {
+                    Self.isRetryable(error.code)
+                else {
                     throw BackendAPIError.network(error.code)
                 }
                 try await sleepBeforeRetry(retry, policy: configuration.retryPolicy)
@@ -86,7 +89,7 @@ struct BackendRequestExecutor: Sendable {
             }
 
             switch response.statusCode {
-            case 200 ..< 300:
+            case 200..<300:
                 return response.data
             case 401 where !forceTokenRefresh:
                 forceTokenRefresh = true
@@ -94,8 +97,8 @@ struct BackendRequestExecutor: Sendable {
             case 404 where allowsNotFound:
                 return nil
             case let statusCode
-                where Self.isRetryable(statusCode)
-                    && retry < configuration.retryPolicy.maximumRetryCount:
+            where Self.isRetryable(statusCode)
+                && retry < configuration.retryPolicy.maximumRetryCount:
                 let retryAfter = Self.retryAfter(from: response.headers)
                 try await sleepBeforeRetry(retry, policy: configuration.retryPolicy, retryAfter: retryAfter)
                 retry += 1
@@ -177,7 +180,9 @@ struct BackendRequestExecutor: Sendable {
             return encoded
         }
         let basePath = components.percentEncodedPath.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        components.percentEncodedPath = "/" + ([basePath] + encodedPath)
+        components.percentEncodedPath =
+            "/"
+            + ([basePath] + encodedPath)
             .filter { !$0.isEmpty }
             .joined(separator: "/")
         components.queryItems = queryItems.isEmpty ? nil : queryItems
@@ -201,8 +206,8 @@ struct BackendRequestExecutor: Sendable {
     private static func isRetryable(_ code: URLError.Code) -> Bool {
         switch code {
         case .timedOut, .cannotFindHost, .cannotConnectToHost, .networkConnectionLost,
-             .dnsLookupFailed, .notConnectedToInternet, .internationalRoamingOff,
-             .callIsActive, .dataNotAllowed, .secureConnectionFailed:
+            .dnsLookupFailed, .notConnectedToInternet, .internationalRoamingOff,
+            .callIsActive, .dataNotAllowed, .secureConnectionFailed:
             true
         default:
             false

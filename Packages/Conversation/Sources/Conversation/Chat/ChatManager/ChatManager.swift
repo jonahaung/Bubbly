@@ -27,8 +27,6 @@ import ImageLoader
     private let dataObserver: ChatDataReceiver
     @ObservationIgnored
     let conversationDataUpdater: ConversationDataUpdater = .init()
-    //    @ObservationIgnored
-    //    let serialQueue: AsyncSerialQueue = AsyncSerialQueue(label: "ChatManager")
     @ObservationIgnored
     weak var currentUserRepository: CurrentUserRepository?
     @ObservationIgnored
@@ -59,7 +57,6 @@ import ImageLoader
     }
 
     deinit {
-        //        serialQueue.cancel()
         log("Deinit")
     }
 
@@ -70,7 +67,8 @@ extension ChatManager {
     func send(_ intent: Intent) {
         guard scrollController.delegate != nil else { return }
         switch intent {
-        case let .scrollViewIntent(newValue): scrollController.send(newValue)
+        case let .scrollViewIntent(newValue):
+            scrollController.send(newValue)
         case .scrollDownButtonTapped:
             Task {
                 try? await handleScrollDownButtonTap()

@@ -16,12 +16,15 @@ struct OverlayMenu: View {
         ZStack(alignment: .topLeading) {
             Rectangle()
                 .fill(
-                    LinearGradient(colors: [Color.background.opacity(0.7), Color.background.opacity(0.9), Color.background.opacity(0.7)], startPoint: .top, endPoint: .bottom)
+                    LinearGradient(
+                        colors: [
+                            Color.background.opacity(0.7), Color.background.opacity(0.9), Color.background.opacity(0.7),
+                        ], startPoint: .top, endPoint: .bottom)
                 )
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { _ in
-                            
+
                         }
                         .onEnded { _ in
                             handleDismiss()
@@ -30,12 +33,12 @@ struct OverlayMenu: View {
             MsgCellContent(viewModel: viewModel)
                 .frame(size: item.frame.size)
                 .offset(x: item.frame.minX, y: item.frame.minY)
-            
+
             ReactionsBar { reaction in
                 msgCellActions?(.onReact(viewModel.msg, reaction))
                 handleDismiss()
             }
-            .offset(x: item.frame.minX, y: item.frame.minY-20)
+            .offset(x: item.frame.minX, y: item.frame.minY - 20)
 
             RoomFocesedOverlayBar()
                 .offset(x: item.frame.minX, y: item.frame.maxY)
@@ -52,7 +55,7 @@ struct OverlayMenu: View {
 
     private func handleDismiss() {
         withTransaction(\.disablesAnimations, true) {
-           dismiss()
+            dismiss()
         }
     }
 }
@@ -66,16 +69,18 @@ struct RoomFocesedOverlayBar: View {
                 try await Socket.shared.send(
                     .deleteMsg(rMsg: .init(msg))
                 )
-                await Task.delay(1)
-                msgCellActions?(.onFocusMsgBubble(nil))
+                //                await Task.delay(1)
+                //                msgCellActions?(.onFocusMsgBubble(nil))
             } label: {
                 SystemImageWithShape(.trashFill, iconStyle)
             }
-            Button {} label: {
+            Button {
+            } label: {
                 SystemImageWithShape(.arrowshapeTurnUpLeftFill, iconStyle)
             }
 
-            Button {} label: {
+            Button {
+            } label: {
                 SystemImageWithShape(.arrowshapeTurnUpRightFill, iconStyle)
             }
             Button {

@@ -46,15 +46,15 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                 Task {
                     do {
                         let msgs = try await datasource.previous(before: query, conID: message.conID)
-                        messages.prepend(msgs)
-                        coordinator.updateState(.dataUpdate(update))
-                        //                        await layoutIfNeeded()
+                        Task { @MainActor in
+                            messages.prepend(msgs)
+                            coordinator.updateState(.dataUpdate(update))
+                        }
                     } catch {
                         log(error)
                     }
                 }
             case .bottom:
-
                 let message = messages.last?.msg
                 guard let message else {
                     scrollController.updateState(.didEndUpdates)
@@ -64,9 +64,11 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                 Task {
                     do {
                         let msgs = try await datasource.more(after: query, conID: message.conID)
-                        messages.append(msgs)
-                        coordinator.updateState(.dataUpdate(update))
-                        layoutIfNeeded()
+                        Task { @MainActor in
+                            messages.append(msgs)
+                            coordinator.updateState(.dataUpdate(update))
+                            //                            layoutIfNeeded()
+                        }
                     } catch {
                         log(error)
                     }
@@ -84,10 +86,6 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
                 coordinator.updateState(.dataUpdate(update))
                 layoutIfNeeded()
             }
-        case let .append(msg):
-            coordinator.updateState(.dataUpdate(.append(msg: msg)))
-            messages.insert(msg: msg)
-            layoutIfNeeded()
         case let .focus(msg):
             Task {
                 try? await scrollTo(msg: msg)

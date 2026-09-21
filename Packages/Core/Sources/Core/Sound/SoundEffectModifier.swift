@@ -56,12 +56,20 @@ private struct SoundEffectModifier<Trigger: Equatable>: ViewModifier {
         content
             .onChange(of: trigger) { _, _ in
                 Task(priority: .userInitiated) {
-                    try await engine.play(audio)
+                    do {
+                        try await engine.play(audio)
+                    } catch {
+                        debugPrint(error)
+                    }
                 }
             }
             .onAppear {
                 Task {
-                    try await engine.register(audio)
+                    do {
+                        try await engine.register(audio)
+                    } catch {
+                        debugPrint(error)
+                    }
                 }
             }
             .onChange(of: audio) { oldValue, newValue in
@@ -70,13 +78,21 @@ private struct SoundEffectModifier<Trigger: Equatable>: ViewModifier {
                 }
 
                 Task {
-                    try await engine.unregister(oldValue)
-                    try await engine.register(newValue)
+                    do {
+                        try await engine.unregister(oldValue)
+                        try await engine.register(newValue)
+                    } catch {
+                        debugPrint(error)
+                    }
                 }
             }
             .onDisappear {
                 Task {
-                    try await engine.unregister(audio)
+                    do {
+                        try await engine.unregister(audio)
+                    } catch {
+                        debugPrint(error)
+                    }
                 }
             }
     }

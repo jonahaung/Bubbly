@@ -26,7 +26,7 @@ struct ConversationScrollView: View {
                     MsgCell(viewModel: model)
                 }
             }
-            .equatable(by: manager.reloadID)
+
             .geometryGroup()
             .scrollTargetLayout()
         }
@@ -48,6 +48,7 @@ struct ConversationScrollView: View {
             manager.onScrollTargetVisibilityChange($0)
         }
         .defaultScrollAnchor(.bottom, for: .initialOffset)
+        .equatable(by: manager.reloadID)
         .defaultScrollAnchor(defaultScrollAnchor, for: .sizeChanges)
         .scrollPosition(
             .constant(manager.scrollController.scrollPosition),

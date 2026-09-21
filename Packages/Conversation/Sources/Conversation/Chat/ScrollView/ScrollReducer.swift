@@ -89,11 +89,6 @@ extension ScrollReducer {
                 case .bottom:
                     return .endUpdate(.remove(edge: .bottom), scrollItem: nil)
                 }
-            case .append(let msg):
-                return .endUpdate(
-                    .append(msg: msg),
-                    scrollItem: .y(newValue.bottomMostOffset, .animated(.snappy(duration: 0.3)))
-                )
             case .focus(let msg):
                 return .endUpdate(
                     .focus(msg: msg),

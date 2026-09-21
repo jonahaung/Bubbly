@@ -20,15 +20,11 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
                 .padding(theme.bubblePading)
                 .background(theme.bubbleColor(for: state.isSender))
                 .padding(
-                    .init(
-                        top: 0.2,
-                        leading: state.isSender ? 0.7 : 0.2,
-                        bottom: 0.7,
-                        trailing: state.isSender ? 0.2 : 0.7
-                    )
+                    theme.shadowPadding(for: state.isSender)
                 )
                 .background(Color.shadow)
                 .containerShape(bubbleShape)
+                .foregroundStyle(state.isSender ? Color.black : .primary)
         }
     }
 
@@ -37,9 +33,7 @@ struct MsgCellTextBubble: View, @MainActor Equatable {
     }
 
     static func == (lhs: MsgCellTextBubble, rhs: MsgCellTextBubble) -> Bool {
-        lhs.state.bubbleCornor == rhs.state.bubbleCornor &&
-        lhs.theme == rhs.theme &&
-        lhs.state.id == rhs.state.id
+        lhs.state.bubbleCornor == rhs.state.bubbleCornor && lhs.theme == rhs.theme && lhs.state.id == rhs.state.id
     }
 
 }

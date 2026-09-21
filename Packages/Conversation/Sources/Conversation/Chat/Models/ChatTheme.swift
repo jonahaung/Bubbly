@@ -54,10 +54,10 @@ public struct ChatTheme: Sendable, Equatable, EmptyRepresentable {
 
     public func shadowPadding(for isSender: Bool) -> EdgeInsets {
         .init(
-            top: 0.2,
-            leading: isSender ? 1 : 0.2,
-            bottom: 1,
-            trailing: isSender ? 0.2 : 1
+            top: 0.3,
+            leading: isSender ? 0.7 : 0.2,
+            bottom: 0.7,
+            trailing: isSender ? 0.2 : 0.7
         )
     }
 

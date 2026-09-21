@@ -17,7 +17,7 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.17.0"),
-        .package(url: "https://github.com/marmelroy/PhoneNumberKit", from: "4.3.0"),
+        .package(url: "https://github.com/PhoneNumberKit/PhoneNumberKit", from: "5.0.0"),
     ],
     targets: [
         .target(

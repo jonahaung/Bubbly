@@ -1,7 +1,7 @@
 import Core
 import Foundation
 
-public extension BackendAPIClient {
+public extension APIClient {
     @discardableResult
     func upsertContact(_ model: any ContactRepresentableSendable) async throws -> Contact {
         let data = try await upsertContactResponse(for: model)
@@ -13,11 +13,13 @@ public extension BackendAPIClient {
         guard !userID.isEmpty, userID.count <= 128 else {
             throw BackendAPIError.invalidRequest("The user identifier is invalid.")
         }
-        guard let data = try await executor.send(
-            method: "GET",
-            path: ["v1", "contacts", userID],
-            allowsNotFound: true
-        ), !data.isEmpty else {
+        guard
+            let data = try await executor.send(
+                method: "GET",
+                path: ["v1", "contacts", userID],
+                allowsNotFound: true
+            ), !data.isEmpty
+        else {
             return nil
         }
         return try executor.decode(Contact.self, from: data)
@@ -37,7 +39,7 @@ public extension BackendAPIClient {
         contacts.reserveCapacity(uniqueNumbers.count)
         for startIndex in stride(from: 0, to: uniqueNumbers.count, by: 500) {
             let endIndex = min(startIndex + 500, uniqueNumbers.count)
-            let request = ContactLookupRequest(mobileNumbers: Array(uniqueNumbers[startIndex ..< endIndex]))
+            let request = ContactLookupRequest(mobileNumbers: Array(uniqueNumbers[startIndex..<endIndex]))
             let data = try await executor.requiredResponse(
                 method: "POST",
                 path: ["v1", "contacts", "lookup"],
@@ -55,7 +57,7 @@ public extension BackendAPIClient {
         }
         let digits = value.dropFirst()
         return digits.first != "0"
-            && digits.unicodeScalars.allSatisfy { (48 ... 57).contains($0.value) }
+            && digits.unicodeScalars.allSatisfy { (48...57).contains($0.value) }
     }
 
     internal func upsertContactResponse(
@@ -63,9 +65,10 @@ public extension BackendAPIClient {
     ) async throws -> Data {
         let body = ProfileUpdateRequest(model)
         guard body.name.trimmingCharacters(in: .whitespacesAndNewlines).count <= 100,
-              body.mobile.isEmpty || Self.isE164(body.mobile),
-              body.pushToken.count <= 4_096,
-              body.publicKeyString.count <= 8_192 else {
+            body.mobile.isEmpty || Self.isE164(body.mobile),
+            body.pushToken.count <= 4_096,
+            body.publicKeyString.count <= 8_192
+        else {
             throw BackendAPIError.invalidRequest("The contact contains invalid values.")
         }
         return try await executor.requiredResponse(

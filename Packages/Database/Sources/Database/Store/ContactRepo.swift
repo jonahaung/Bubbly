@@ -21,7 +21,7 @@ public enum ContactRepo {
         if let localValue, !refetch {
             return localValue
         }
-        let serverValue = try await BackendAPIClient.shared.contact(userID: uid)
+        let serverValue = try await APIClient.shared.contact(userID: uid)
         guard let serverValue else {
             if let localValue {
                 return localValue
@@ -29,8 +29,8 @@ public enum ContactRepo {
                 throw XError.noContactFound
             }
         }
-        
-        if let localValue, localValue != serverValue  {
+
+        if let localValue, localValue != serverValue {
             try await Store.shared.contactStore?.updateAndSave(uid: uid) { model in
                 model.update(from: serverValue)
             }

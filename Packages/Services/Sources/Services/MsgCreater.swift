@@ -19,7 +19,7 @@ public actor MsgCreator {
     public init(currentUserId: String, mediaManager: MediaManager = .shared) {
         self.mediaManager = mediaManager
         self.currentUserId = currentUserId
-    } 
+    }
 
     public func message(
         text: String,
@@ -35,7 +35,7 @@ public actor MsgCreator {
             recipientIDs: conversation.members.filter { $0 != currentUserId },
             updatedAt: .now
         )
-        return await Message(
+        return Message(
             uid: msgID,
             senderID: currentUserId,
             conID: conversation.uid,

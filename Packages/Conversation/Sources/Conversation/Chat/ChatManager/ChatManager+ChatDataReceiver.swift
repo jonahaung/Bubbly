@@ -25,7 +25,10 @@ extension ChatManager: ChatDataReceiverDelegate {
     func chatDataReceiver(didInsert msg: Message) {
         switch true {
         case messages.isAbsoluteScrolled(at: .bottom):
-            scrollController.send(.begin(.append(msg: msg)))
+            messages.insert(msg: msg)
+            withTransaction(Transaction.withAnimation()) {
+                layoutIfNeeded()
+            }
         case messages.shouldPaginate(at: .bottom):
             let toast = Toast(
                 node: Text(msg.displayText).opaqueView(),
@@ -67,8 +70,9 @@ extension ChatManager: ChatDataReceiverDelegate {
 
     func chatDataReceiver(didRemove msg: Message, animated _: Bool) {
         messages.remove(msg: msg)
-        let transition = Transaction.withAnimation(.snappy)
-        withTransaction(transition) { layoutIfNeeded() }
+        withTransaction(Transaction.withAnimation()) {
+            layoutIfNeeded()
+        }
     }
 
     func chatDataReceiver(

@@ -19,7 +19,7 @@ struct UserProfileRepositoryImpl: UserProfileRepository {
     }
 
     func refreshRemote() async throws -> UserProfileSnapshot {
-        if let remote = try await BackendAPIClient.shared.currentProfile() {
+        if let remote = try await APIClient.shared.currentProfile() {
             manager.applyRemote(remote)
         }
         return snapshot()

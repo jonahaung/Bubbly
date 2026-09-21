@@ -24,7 +24,7 @@ public actor PushNotificationStore {
                 notificationCenter: .init(center: .default),
                 authProvider: { Auth.auth().currentUser },
                 updatePushToken: { token, _ in
-                    try await BackendAPIClient.shared.updatePushToken(token)
+                    try await APIClient.shared.updatePushToken(token)
                 },
             )
         }
@@ -94,8 +94,8 @@ public actor PushNotificationStore {
             let fcmToken,
             !fcmToken.isEmpty,
             storedToken != fcmToken,
-            let user = deps.authProvider() else
-        {
+            let user = deps.authProvider()
+        else {
             return
         }
 

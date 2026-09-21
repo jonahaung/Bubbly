@@ -1,13 +1,15 @@
 import Core
 import Foundation
 
-public extension BackendAPIClient {
+public extension APIClient {
     func currentProfile() async throws -> CurrentUserModel? {
-        guard let data = try await executor.send(
-            method: "GET",
-            path: ["v1", "profile"],
-            allowsNotFound: true
-        ) else {
+        guard
+            let data = try await executor.send(
+                method: "GET",
+                path: ["v1", "profile"],
+                allowsNotFound: true
+            )
+        else {
             return nil
         }
         return try executor.decode(CurrentUserModel.self, from: data)
@@ -60,9 +62,10 @@ public extension BackendAPIClient {
     private func profilePhotoURL(from data: Data) throws -> URL {
         let model = try executor.decode(CurrentUserModel.self, from: data)
         guard let url = URL(string: model.photoURL),
-              let scheme = url.scheme?.lowercased(),
-              ["http", "https"].contains(scheme),
-              url.host != nil else {
+            let scheme = url.scheme?.lowercased(),
+            ["http", "https"].contains(scheme),
+            url.host != nil
+        else {
             throw BackendAPIError.invalidResponse
         }
         return url
@@ -83,9 +86,10 @@ public extension BackendAPIClient {
         }
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
         guard values.isRegularFile == true,
-              let size = values.fileSize,
-              size > 0,
-              size <= 1_048_576 else {
+            let size = values.fileSize,
+            size > 0,
+            size <= 1_048_576
+        else {
             throw BackendAPIError.invalidRequest("The profile photo must be between 1 byte and 1 MB.")
         }
         let handle = try FileHandle(forReadingFrom: fileURL)

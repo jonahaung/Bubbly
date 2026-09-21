@@ -2,8 +2,8 @@
 import Foundation
 import Testing
 
-@Suite("Backend API Client")
-struct BackendAPIClientTests {
+@Suite("API Client")
+struct APIClientTests {
     @Test("Builds an authenticated contact request and decodes the response")
     func contactRequest() async throws {
         let transport = MockBackendHTTPTransport(outcomes: [
@@ -53,11 +53,11 @@ struct BackendAPIClientTests {
     func refreshesToken() async throws {
         let transport = MockBackendHTTPTransport(outcomes: [
             .response(.init(statusCode: 401, headers: [:], data: Data())),
-            .response(.init(statusCode: 200, headers: [:], data: contactData))
+            .response(.init(statusCode: 200, headers: [:], data: contactData)),
         ])
         let tokenProvider = TokenProvider()
         let configuration = try configuration()
-        let client = BackendAPIClient(
+        let client = APIClient(
             configuration: configuration,
             transport: transport,
             accessTokenProvider: { forceRefresh in
@@ -75,7 +75,7 @@ struct BackendAPIClientTests {
     func retriesTransientFailure() async throws {
         let transport = MockBackendHTTPTransport(outcomes: [
             .response(.init(statusCode: 503, headers: ["retry-after": "0"], data: Data())),
-            .response(.init(statusCode: 200, headers: [:], data: contactData))
+            .response(.init(statusCode: 200, headers: [:], data: contactData)),
         ])
         let client = try makeClient(transport: transport, retryCount: 1)
 
@@ -97,11 +97,12 @@ struct BackendAPIClientTests {
     @Test("Preserves a structured server rejection")
     func serverRejection() async throws {
         let transport = MockBackendHTTPTransport(outcomes: [
-            .response(.init(
-                statusCode: 400,
-                headers: [:],
-                data: Data(#"{"reason":"Invalid profile","error":true}"#.utf8)
-            ))
+            .response(
+                .init(
+                    statusCode: 400,
+                    headers: [:],
+                    data: Data(#"{"reason":"Invalid profile","error":true}"#.utf8)
+                ))
         ])
         let client = try makeClient(transport: transport)
 
@@ -141,12 +142,13 @@ struct BackendAPIClientTests {
     @Test("Fetches every group page using an encoded cursor")
     func groupPagination() async throws {
         let firstPage = Data(
-            #"{"items":[{"uid":"group-one","name":"Friends","createdDate":"2026-07-23T00:00:00Z","photoURL":null,"members":["owner","member"],"createdBy":"owner"}],"nextCursor":"group/one"}"#.utf8
+            #"{"items":[{"uid":"group-one","name":"Friends","createdDate":"2026-07-23T00:00:00Z","photoURL":null,"members":["owner","member"],"createdBy":"owner"}],"nextCursor":"group/one"}"#
+                .utf8
         )
         let secondPage = Data(#"{"items":[],"nextCursor":null}"#.utf8)
         let transport = MockBackendHTTPTransport(outcomes: [
             .response(.init(statusCode: 200, headers: [:], data: firstPage)),
-            .response(.init(statusCode: 200, headers: [:], data: secondPage))
+            .response(.init(statusCode: 200, headers: [:], data: secondPage)),
         ])
         let client = try makeClient(transport: transport)
 
@@ -164,7 +166,7 @@ struct BackendAPIClientTests {
         let page = Data(#"{"items":[],"nextCursor":"same"}"#.utf8)
         let transport = MockBackendHTTPTransport(outcomes: [
             .response(.init(statusCode: 200, headers: [:], data: page)),
-            .response(.init(statusCode: 200, headers: [:], data: page))
+            .response(.init(statusCode: 200, headers: [:], data: page)),
         ])
         let client = try makeClient(transport: transport)
 
@@ -177,7 +179,8 @@ struct BackendAPIClientTests {
     @Test("Upserts a group without trusting client-owned creation metadata")
     func groupUpsert() async throws {
         let response = Data(
-            #"{"uid":"group-one","name":"Friends","createdDate":"2026-07-23T00:00:00Z","photoURL":"https://example.com/group.png","members":["member","owner"],"createdBy":"owner"}"#.utf8
+            #"{"uid":"group-one","name":"Friends","createdDate":"2026-07-23T00:00:00Z","photoURL":"https://example.com/group.png","members":["member","owner"],"createdBy":"owner"}"#
+                .utf8
         )
         let transport = MockBackendHTTPTransport(outcomes: [
             .response(.init(statusCode: 200, headers: [:], data: response))
@@ -208,7 +211,8 @@ struct BackendAPIClientTests {
     @Test("Sends an encrypted push notification through the backend")
     func pushNotification() async throws {
         let response = Data(
-            #"{"results":[{"recipientUserID":"recipient-one","messageID":"message-one","failureCode":null},{"recipientUserID":"recipient-two","messageID":null,"failureCode":"fcm_send_failed"}]}"#.utf8
+            #"{"results":[{"recipientUserID":"recipient-one","messageID":"message-one","failureCode":null},{"recipientUserID":"recipient-two","messageID":null,"failureCode":"fcm_send_failed"}]}"#
+                .utf8
         )
         let transport = MockBackendHTTPTransport(outcomes: [
             .response(.init(statusCode: 200, headers: [:], data: response))
@@ -218,7 +222,7 @@ struct BackendAPIClientTests {
         let successfulRecipientIDs = try await client.sendPushNotifications(
             messagesByRecipientUserID: [
                 "recipient-one": "encrypted-one",
-                "recipient-two": "encrypted-two"
+                "recipient-two": "encrypted-two",
             ],
             title: "New message",
             body: "Hello",
@@ -241,7 +245,8 @@ struct BackendAPIClientTests {
 
     private var contactData: Data {
         Data(
-            #"{"uid":"user-one","name":"Taylor","mobile":"+6591234567","photoURL":"","pushToken":"push","publicKeyString":"key"}"#.utf8
+            #"{"uid":"user-one","name":"Taylor","mobile":"+6591234567","photoURL":"","pushToken":"push","publicKeyString":"key"}"#
+                .utf8
         )
     }
 
@@ -261,8 +266,8 @@ struct BackendAPIClientTests {
     private func makeClient(
         transport: MockBackendHTTPTransport,
         retryCount: Int = 0
-    ) throws -> BackendAPIClient {
-        BackendAPIClient(
+    ) throws -> APIClient {
+        APIClient(
             configuration: try configuration(retryCount: retryCount),
             transport: transport,
             accessTokenProvider: { _ in "token" }

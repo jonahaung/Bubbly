@@ -44,14 +44,14 @@ public actor CurrentUserRepository {
         storage.save(pushToken, for: .device(.deviceToken))
         storage.save(firUser.uid, for: .auth(.currentUserID))
         storage.save(publicKeyString, for: .security(.publicKey(id: firUser.uid)))
-        
-        if let remoteModel = try await BackendAPIClient.shared.currentProfile() {
+
+        if let remoteModel = try await APIClient.shared.currentProfile() {
             if newModel != remoteModel {
-                try await BackendAPIClient.shared.updateProfile(newModel)
+                try await APIClient.shared.updateProfile(newModel)
                 await ToastPresenter.show("Profile Updated")
             }
         } else {
-            try await BackendAPIClient.shared.updateProfile(newModel)
+            try await APIClient.shared.updateProfile(newModel)
         }
         await update(newModel)
     }
@@ -74,7 +74,11 @@ public actor CurrentUserRepository {
                 }
 
                 Task {
-                    try await self.updateIfNeeded()
+                    do {
+                        try await self.updateIfNeeded()
+                    } catch {
+                        // Reload notifications are best-effort; a later notification can retry.
+                    }
                 }
             }
             .store(in: cancelBag)

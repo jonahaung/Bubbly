@@ -6,7 +6,6 @@
 import Core
 import Database
 import ImageLoader
-import OSLog
 import Services
 import SwiftUI
 import XUI
@@ -18,11 +17,10 @@ import XUI
     @ObservationIgnored
     private let reducer: ScrollReducer = .init()
     @ObservationIgnored
-    private let debouncer: Debouncer = .init(delay: 0.3)
-    @ObservationIgnored
     private var state: State = .init()
+
     var scrollPosition: ScrollPosition
-    
+
     init(_ lastPage: LastPage?) {
         scrollPosition = {
             if let lastPage {
@@ -68,7 +66,6 @@ extension ScrollCoordinator {
                 if state.isFirstResponder {
                     handleFirstResponder(oldValue, newValue)
                 }
-
             }
         case .onScrollPhaseChange(let oldValue, let newValue, let context):
             guard oldValue != newValue else { return }
@@ -77,22 +74,19 @@ extension ScrollCoordinator {
             switch newValue {
             case .idle:
                 state.geometry = geometry
-                if state.updateState == .dataUpdate(.insert(edge: .top)) {
+                if state.updateState.isUpdating {
                     switch geometry.scrolledPosition {
                     case .atTop, .atBottom:
                         delegate?.layoutIfNeeded()
                     default:
                         break
                     }
+                } else if state.updateState.isNotUpdating && oldValue != .interacting {
+                    paginateIfNeeded(geometry)
                 }
-                debouncer.debounce { [weak self] in
-                    guard let self else { return }
-                    Task { @MainActor in
-                        finalizeScrollUpdates()
-                    }
-                }
+                finalizeScrollUpdates()
             case .interacting:
-                if state.updateState == .dataUpdate(.insert(edge: .top)) {
+                if state.updateState.isUpdating {
                     switch geometry.scrolledPosition {
                     case .atTop, .atBottom:
                         break
@@ -100,7 +94,6 @@ extension ScrollCoordinator {
                         delegate?.layoutIfNeeded()
                     }
                 }
-                debouncer.cancel()
             case .decelerating:
                 if state.updateState.isNotUpdating {
                     paginateIfNeeded(geometry)
@@ -131,18 +124,12 @@ extension ScrollCoordinator {
 
 extension ScrollCoordinator {
 
-    fileprivate func handleHasViewLoaded(_ geometry: VScrollGeometry) {
-        if scrollPosition.y == nil {
-            scrollPosition.scrollTo(y: geometry.bottomMostOffset)
-        }
+    private func handleHasViewLoaded(_ geometry: VScrollGeometry) {
         state.updateState.update(to: .didEndUpdates)
-        debouncer.debounce { [weak self] in
-            guard let self else { return }
-            Task { @MainActor [weak self] in
-                guard let self else { return }
-                finalizeScrollUpdates()
-            }
+        if scrollPosition.y == nil {
+            scrollPosition.scrollTo(edge: .bottom)
         }
+        finalizeScrollUpdates()
     }
 
     private func handleFirstResponder(
@@ -201,9 +188,8 @@ extension ScrollCoordinator {
     }
 
     fileprivate func end(updates: DataUpdate) {
-        //        scrollDirection = .none
         switch updates {
-        case .append, .remove:
+        case .remove:
             updateState(.didEndUpdates)
         case .insert(let edge):
             switch edge {

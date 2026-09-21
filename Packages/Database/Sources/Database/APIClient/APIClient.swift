@@ -1,25 +1,25 @@
 import FirebaseAuth
 import Foundation
 
-public typealias BackendAccessTokenProvider = @Sendable (_ forceRefresh: Bool) async throws -> String
+public typealias APIAccessTokenProvider = @Sendable (_ forceRefresh: Bool) async throws -> String
 
-public struct BackendAPIClient: Sendable {
-    public static let shared = BackendAPIClient()
+public struct APIClient: Sendable {
+    public static let shared = APIClient()
 
     let executor: BackendRequestExecutor
 
-    public init(session: URLSession = BackendAPIClient.makeSession()) {
+    public init(session: URLSession = APIClient.makeSession()) {
         executor = BackendRequestExecutor(
             configurationProvider: BackendAPIConfiguration.application,
-            accessTokenProvider: BackendAPIClient.firebaseAccessToken,
+            accessTokenProvider: APIClient.firebaseAccessToken,
             transport: URLSessionBackendHTTPTransport(session: session)
         )
     }
 
     public init(
         configuration: BackendAPIConfiguration,
-        session: URLSession = BackendAPIClient.makeSession(),
-        accessTokenProvider: @escaping BackendAccessTokenProvider
+        session: URLSession = APIClient.makeSession(),
+        accessTokenProvider: @escaping APIAccessTokenProvider
     ) {
         executor = BackendRequestExecutor(
             configurationProvider: { configuration },
@@ -31,7 +31,7 @@ public struct BackendAPIClient: Sendable {
     init(
         configuration: BackendAPIConfiguration,
         transport: any BackendHTTPTransport,
-        accessTokenProvider: @escaping BackendAccessTokenProvider
+        accessTokenProvider: @escaping APIAccessTokenProvider
     ) {
         executor = BackendRequestExecutor(
             configurationProvider: { configuration },
@@ -42,7 +42,7 @@ public struct BackendAPIClient: Sendable {
 
     public static func makeSession() -> URLSession {
         let configuration = URLSessionConfiguration.default
-        configuration.waitsForConnectivity = true
+        configuration.waitsForConnectivity = false
         configuration.timeoutIntervalForRequest = 30
         configuration.timeoutIntervalForResource = 60
         configuration.httpMaximumConnectionsPerHost = 8

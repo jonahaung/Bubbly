@@ -38,7 +38,6 @@ extension ScrollCoordinator {
     enum DataUpdate: Sendable, Hashable {
         case insert(edge: VerticalEdge)
         case remove(edge: VerticalEdge)
-        case append(msg: Message)
         case focus(msg: Message)
     }
 

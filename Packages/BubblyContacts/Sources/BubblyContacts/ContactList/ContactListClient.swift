@@ -58,9 +58,11 @@ extension ContactListClient {
             guard !contact.isChatAvailable else {
                 return contact
             }
-            guard var resolvedContact = try await BackendAPIClient.shared.lookupContacts(
-                mobileNumbers: [contact.mobile]
-            ).first(where: { $0.mobile == contact.mobile }) else {
+            guard
+                var resolvedContact = try await APIClient.shared.lookupContacts(
+                    mobileNumbers: [contact.mobile]
+                ).first(where: { $0.mobile == contact.mobile })
+            else {
                 throw ContactListClientError.contactIsNotRegistered
             }
             resolvedContact.name = contact.name

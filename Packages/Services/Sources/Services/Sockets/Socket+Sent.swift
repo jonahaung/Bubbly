@@ -6,21 +6,20 @@ import Foundation
 import XUI
 
 public extension Socket {
-    
+
     func send(_ data: AnyMsgData) async throws {
         switch data {
         case let .newMsg(rMsg):
             let msg = Message(rMsg)
             notifyMessage(data)
             try await Store.shared.msgStore?.insert(msg)
-            try await Task.sleep(seconds: 0.5)
             if msg.isSender {
                 addToQueue()
             }
         case let .deleteMsg(rMsg: rMsg):
             let currentUserID = try CurrentUserID.get()
             try await Store.shared.msgStore?.delete(uid: rMsg.uid)
-            notifyMessage(.newMsg(rMsg: rMsg))
+            notifyMessage(.deleteMsg(rMsg: rMsg))
             if rMsg.senderID == currentUserID {
                 addToQueue()
             }
@@ -71,7 +70,7 @@ public extension Socket {
             try await sendToRemote(data, conversation: conversation)
         case .deleteMsg:
             try await sendToRemote(data, conversation: conversation)
-        case .msgRecipientReceipt(let payload):
+        case .msgRecipientReceipt(_):
             try await sendToRemote(data, conversation: conversation)
         }
     }
@@ -132,7 +131,7 @@ public extension Socket {
             .absoluteString
         let successfulRecipientIDs: Set<String>
         do {
-            successfulRecipientIDs = try await BackendAPIClient.shared.sendPushNotifications(
+            successfulRecipientIDs = try await APIClient.shared.sendPushNotifications(
                 messagesByRecipientUserID: messagesByRecipientUserID,
                 title: alert.title,
                 body: alert.body,

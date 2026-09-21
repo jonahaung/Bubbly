@@ -296,10 +296,11 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
         }
 
         let player = await AVAudioPlayerWithCompletionHandler(url: url, volume: audio.volume)
-
         try await withCheckedThrowingContinuation { continuation in
-            player.play { result in
-                continuation.resume(with: result)
+            Task { @MainActor in
+                player.play { result in
+                    continuation.resume(with: result)
+                }
             }
         }
     }

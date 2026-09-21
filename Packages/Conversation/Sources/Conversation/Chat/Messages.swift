@@ -155,23 +155,6 @@ extension Messages {
 
     func prepend(_ msgs: [Message]) {
         guard !msgs.isEmpty else { return }
-
-        //        var newMessages: [Message] = []
-        //        newMessages.reserveCapacity(msgs.count)
-        //
-        //        for msg in msgs {
-        //            if let index = indexMap[msg.uid] {
-        //                layout(at: index)
-        //            } else {
-        //                newMessages.append(msg)
-        //            }
-        //        }
-        //
-        //        guard !newMessages.isEmpty else {
-        //            updatePaginatableState()
-        //            return
-        //        }
-
         let models = makeModels(
             from: msgs,
             nextBoundary: wrappedValue.first?.msg
@@ -186,23 +169,6 @@ extension Messages {
 
     func append(_ msgs: [Message]) {
         guard !msgs.isEmpty else { return }
-        //
-        //        var newMessages: [Message] = []
-        //        newMessages.reserveCapacity(msgs.count)
-        //
-        //        for msg in msgs {
-        //            if let index = indexMap[msg.uid] {
-        //                layout(at: index)
-        //            } else {
-        //                newMessages.append(msg)
-        //            }
-        //        }
-        //
-        //        guard !newMessages.isEmpty else {
-        //            updatePaginatableState()
-        //            return
-        //        }
-
         let start = wrappedValue.count
         let models = makeModels(
             from: msgs,

@@ -1,6 +1,6 @@
 import Foundation
 
-public extension BackendAPIClient {
+public extension APIClient {
     @discardableResult
     func sendPushNotifications(
         messagesByRecipientUserID: [String: String],
@@ -11,9 +11,10 @@ public extension BackendAPIClient {
     ) async throws -> Set<String> {
         let conversationID = try validatedIdentifier(conversationID, name: "conversation")
         guard !messagesByRecipientUserID.isEmpty, messagesByRecipientUserID.count <= 256,
-              title?.count ?? 0 <= 100,
-              body?.count ?? 0 <= 4_096,
-              deepLink?.count ?? 0 <= 2_048 else {
+            title?.count ?? 0 <= 100,
+            body?.count ?? 0 <= 4_096,
+            deepLink?.count ?? 0 <= 2_048
+        else {
             throw BackendAPIError.invalidRequest("The push notification contains invalid values.")
         }
         let recipients = try messagesByRecipientUserID.map { userID, messageContent in

@@ -68,7 +68,7 @@ public actor PhoneContactsService {
             let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
             return (phoneContact, formattedNumber)
         }
-        let remoteContacts = try await BackendAPIClient.shared.lookupContacts(
+        let remoteContacts = try await APIClient.shared.lookupContacts(
             mobileNumbers: normalizedContacts.map(\.1)
         )
         let contactsByMobile = Dictionary(uniqueKeysWithValues: remoteContacts.map { ($0.mobile, $0) })

@@ -119,28 +119,28 @@
 
         func body(content: Content) -> some View {
             content
-                .onChange(of: impulseCount) { _ in
-                    Task(priority: .userInitiated) {
+                .onChange(of: impulseCount) { _, _ in
+                    _ = Task(priority: .userInitiated) {
                         try await engine.register(audio)
                         try await engine.play(audio)
                         try await engine.unregister(audio)
                     }
                 }
                 .onAppear {
-                    Task {
+                    _ = Task {
                         try await engine.register(audio)
                     }
                 }
-                .onChange(of: audio) { [oldValue = audio] newValue in
+                .onChange(of: audio) { oldValue, newValue in
                     guard oldValue != newValue else { return }
 
-                    Task {
+                    _ = Task {
                         try await engine.unregister(oldValue)
                         try await engine.register(newValue)
                     }
                 }
                 .onDisappear {
-                    Task {
+                    _ = Task {
                         try await engine.unregister(audio)
                     }
                 }
@@ -247,7 +247,7 @@
         }
 
         func register(_ audio: SoundEffect) async throws {
-            try await setUp()
+            await setUp()
 
             guard let engine else { return }
 
@@ -412,11 +412,7 @@
 
             let player = await AVAudioPlayerWithCompletionHandler(url: url, volume: audio.volume)
 
-            try await withCheckedThrowingContinuation { continuation in
-                player.play { result in
-                    continuation.resume(with: result)
-                }
-            }
+            try await player.play()
         }
     }
 
@@ -434,6 +430,14 @@
             self.volume = volume
             completion = { _ in }
             player = nil
+        }
+
+        func play() async throws {
+            try await withCheckedThrowingContinuation { continuation in
+                play { result in
+                    continuation.resume(with: result)
+                }
+            }
         }
 
         func play(completion: @escaping (Result<Void, Error>) -> Void) {

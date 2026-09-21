@@ -80,7 +80,7 @@ extension PushNotificationService: UNUserNotificationCenterDelegate {
             switch currentNavPath {
             case .conversation(let prefetchData)
             where data.conID == prefetchData.conversation.uid:
-                try await Socket.shared.notifyMessage(data)
+                await Socket.shared.notifyMessage(data)
                 return []
             default:
                 let didAffectInbox = try await process(

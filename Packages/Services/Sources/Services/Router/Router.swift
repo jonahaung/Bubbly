@@ -40,6 +40,10 @@ public final class Router {
         Binding(
             get: { self.navPaths(for: tab) },
             set: { newValue in
+                guard self.routes[tab] != newValue else {
+                    return
+                }
+
                 self.routes[tab] = newValue
             },
         )
@@ -48,7 +52,13 @@ public final class Router {
     public func tabPathBinding() -> Binding<TabPath> {
         Binding(
             get: { self.selectedTab },
-            set: { self.selectedTab = $0 },
+            set: { newValue in
+                guard self.selectedTab != newValue else {
+                    return
+                }
+
+                self.selectedTab = newValue
+            },
         )
     }
 

@@ -10,23 +10,23 @@ import Services
 import Core
 
 struct AttachmentDataView: View {
-    
+
     let data: AttachmentData
     let onTap: () -> Void
-    
+
     var body: some View {
         switch data {
         case let .image(thumbnail):
             imageView(for: thumbnail)
         case let .link(thumbnail):
             imageView(for: thumbnail)
-        case let .imageUpload(url, thumbnail):
+        case let .imageUpload(_, thumbnail):
             imageView(for: thumbnail)
         case .video(videoURL: _, thumbnail: let thumbnail):
             imageView(for: thumbnail)
         }
     }
-    
+
     private func imageView(for uiImage: UIImage) -> some View {
         Button(action: onTap) {
             Image(uiImage: uiImage)

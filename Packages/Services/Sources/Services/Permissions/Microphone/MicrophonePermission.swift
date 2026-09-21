@@ -17,16 +17,28 @@ public final class MicrophonePermission: Permission {
     }
 
     public var status: PermissionStatus {
-        let permission = AVAudioSession.sharedInstance().recordPermission
-        switch permission {
-        case AVAudioSession.RecordPermission.granted:
-            return .authorized
-        case AVAudioSession.RecordPermission.denied:
-            return .denied
-        case AVAudioSession.RecordPermission.undetermined:
-            return .notDetermined
-        @unknown default:
-            return .denied
+        if #available(iOS 17.0, *) {
+            switch AVAudioApplication.shared.recordPermission {
+            case .granted:
+                return .authorized
+            case .denied:
+                return .denied
+            case .undetermined:
+                return .notDetermined
+            @unknown default:
+                return .denied
+            }
+        } else {
+            switch AVAudioSession.sharedInstance().recordPermission {
+            case .granted:
+                return .authorized
+            case .denied:
+                return .denied
+            case .undetermined:
+                return .notDetermined
+            @unknown default:
+                return .denied
+            }
         }
     }
 

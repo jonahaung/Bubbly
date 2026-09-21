@@ -7,12 +7,11 @@ import SwiftUI
 import Foundation
 
 @frozen
-public struct VScrollGeometry: Hashable {
+public struct VScrollGeometry: Hashable, Sendable, Equatable {
     public let contentHeight: CGFloat
     public let boundsSize: CGSize
     public var offsetY: CGFloat
     public let topInset: CGFloat
-    public let bottomInset: CGFloat
 
     public var boundsHeight: CGFloat { boundsSize.height }
 }
@@ -23,8 +22,7 @@ public extension VScrollGeometry {
             contentHeight: geometry.contentSize.height,
             boundsSize: geometry.bounds.size,
             offsetY: geometry.contentOffset.y + geometry.contentInsets.top,
-            topInset: geometry.contentInsets.top,
-            bottomInset: geometry.contentInsets.bottom
+            topInset: geometry.contentInsets.top
         )
     }
 
@@ -32,8 +30,7 @@ public extension VScrollGeometry {
         contentHeight: .zero,
         boundsSize: .zero,
         offsetY: .zero,
-        topInset: .zero,
-        bottomInset: .zero
+        topInset: .zero
     )
 }
 
@@ -95,7 +92,9 @@ public struct ScrollPositionItem: Sendable, Hashable {
         .init(.y(value), properties: properties)
     }
 
-    public static func id(_ value: String?, anchor: UnitPoint = .bottom, _ properties: Properties = .notAnimated) -> Self {
+    public static func id(_ value: String?, anchor: UnitPoint = .bottom, _ properties: Properties = .notAnimated)
+        -> Self
+    {
         .init(.id(value, anchor: anchor), properties: properties)
     }
 

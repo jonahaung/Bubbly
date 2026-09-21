@@ -7,6 +7,7 @@
 import SwiftUI
 import Services
 import XUI
+import Database
 
 struct MsgCellHeader: View, @MainActor Equatable {
     let state: MsgCellViewModel.State

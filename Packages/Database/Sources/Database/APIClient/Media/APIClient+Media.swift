@@ -1,6 +1,6 @@
 import Foundation
 
-public extension BackendAPIClient {
+public extension APIClient {
     enum MediaPath: Sendable {
         case group(groupID: String)
         case conversation(conversationID: String, attachmentID: String)
@@ -44,9 +44,10 @@ public extension BackendAPIClient {
     private func mediaURL(from data: Data) throws -> URL {
         let response = try executor.decode(MediaUploadResponse.self, from: data)
         guard let url = URL(string: response.url),
-              let scheme = url.scheme?.lowercased(),
-              ["http", "https"].contains(scheme),
-              url.host != nil else {
+            let scheme = url.scheme?.lowercased(),
+            ["http", "https"].contains(scheme),
+            url.host != nil
+        else {
             throw BackendAPIError.invalidResponse
         }
         return url
@@ -67,9 +68,10 @@ public extension BackendAPIClient {
         }
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
         guard values.isRegularFile == true,
-              let size = values.fileSize,
-              size > 0,
-              size <= 10 * 1_024 * 1_024 else {
+            let size = values.fileSize,
+            size > 0,
+            size <= 10 * 1_024 * 1_024
+        else {
             throw BackendAPIError.invalidRequest("The image must be between 1 byte and 10 MB.")
         }
         let handle = try FileHandle(forReadingFrom: fileURL)

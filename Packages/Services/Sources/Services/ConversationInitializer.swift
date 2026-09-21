@@ -10,7 +10,7 @@ public extension ConversationInitializer {
     @concurrent
     static func route(msgID: String) async throws {
         guard let msg = try await Store.shared.msgStore?.fetch(uid: msgID) else {
-            throw fatalError()
+            fatalError()
         }
         let conversation = try await ConversationRepo.getOrCreate(for: msg.conID, refetch: false)
         let prefetchedData = try await createPrefetchedObject(
@@ -47,7 +47,7 @@ public extension ConversationInitializer {
             conID: conID,
         )
         let pageSize = Settings.Pagination.pageSize
-        
+
         var properties = try await ConversationPropertiesRepo.getOrCreate(
             for: conID,
             refetch: false,
@@ -57,7 +57,11 @@ public extension ConversationInitializer {
             msgs = try await MsgRepo.messages(conID: conID, to: targetedMsg.date, limit: pageSize)
             properties.lastPage = nil
         } else {
-            if let lastPage = properties.lastPage, await lastPage.isPotrait == UIApplication.shared.screenSize().isPortrait, let top = try await Store.shared.msgStore?.fetch(uid: lastPage.topMsgID), let bottom = try await Store.shared.msgStore?.fetch(uid: lastPage.bottomMsgID) {
+            if let lastPage = properties.lastPage,
+                await lastPage.isPotrait == UIApplication.shared.screenSize().isPortrait,
+                let top = try await Store.shared.msgStore?.fetch(uid: lastPage.topMsgID),
+                let bottom = try await Store.shared.msgStore?.fetch(uid: lastPage.bottomMsgID)
+            {
                 msgs = try await MsgRepo.messages(conID: conID, from: top.date, to: bottom.date)
             } else {
                 msgs = try await MsgRepo.msgs(
@@ -66,10 +70,10 @@ public extension ConversationInitializer {
                 )
             }
         }
-        
+
         let firstMsg = try await MsgRepo.firstMsg(conID: conID)
         let lastMsg = try await MsgRepo.lastMsg(conID: conID)
-        
+
         let pagination = PaginationState(
             conID: conversation.uid,
             pageSize: pageSize,
@@ -77,15 +81,14 @@ public extension ConversationInitializer {
             firstMsgID: firstMsg?.uid,
             totalMsgsCount: msgsCount
         )
-        let lineSpacing = Settings.Layout.chatMsgSpacing.cgFloat
         let members = try await ContactRepo.getOrCreate(for: conversation.members, refatch: false)
-        
+
         return ConversationInitializedData(
             conversation: conversation,
             properties: properties,
             msgs: msgs,
             pagination: pagination,
-            members: .init(members: members.compactMap{ $0 }),
+            members: .init(members: members.compactMap { $0 }),
         )
     }
 }
