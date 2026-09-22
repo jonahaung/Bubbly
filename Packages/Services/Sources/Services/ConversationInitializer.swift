@@ -10,7 +10,7 @@ public extension ConversationInitializer {
     @concurrent
     static func route(msgID: String) async throws {
         guard let msg = try await Store.shared.msgStore?.fetch(uid: msgID) else {
-            fatalError()
+            fatalError("Message with ID \(msgID) was not found")
         }
         let conversation = try await ConversationRepo.getOrCreate(for: msg.conID, refetch: false)
         let prefetchedData = try await createPrefetchedObject(

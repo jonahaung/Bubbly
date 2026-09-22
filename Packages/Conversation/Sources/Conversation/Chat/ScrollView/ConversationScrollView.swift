@@ -19,16 +19,15 @@ struct ConversationScrollView: View {
                 manager: manager.messages.layout,
                 config: layoutConfiguration
             ) {
-                if manager.messages.shouldShowHeader {
-                    HeaderProfileView(conversation: manager.state.conversation)
-                }
+                HeaderProfileView(
+                    conversation: manager.state.conversation, showHeader: manager.messages.shouldShowHeader)
                 ForEach(manager.messages.wrappedValue) { model in
                     MsgCell(viewModel: model)
                 }
             }
-
             .geometryGroup()
             .scrollTargetLayout()
+            .equatable(by: manager.reloadID)
         }
         .scrollDismissesKeyboard(.never)
         .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
@@ -48,7 +47,6 @@ struct ConversationScrollView: View {
             manager.onScrollTargetVisibilityChange($0)
         }
         .defaultScrollAnchor(.bottom, for: .initialOffset)
-        .equatable(by: manager.reloadID)
         .defaultScrollAnchor(defaultScrollAnchor, for: .sizeChanges)
         .scrollPosition(
             .constant(manager.scrollController.scrollPosition),
@@ -60,7 +58,7 @@ struct ConversationScrollView: View {
         MsgsScrollViewLayoutConfiguration(
             spacing: 0,
             contentInsets: .init(
-                top: ChatLayoutConstants.topBarHeight,
+                top: 0,
                 leading: Padding.sm,
                 bottom: 0,
                 trailing: Padding.sm

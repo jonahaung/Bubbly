@@ -21,7 +21,7 @@ protocol ScrollCoordinatorDelegate: AnyObject {
         _ coordinator: ScrollCoordinator,
         setEditing isEditing: Bool
     ) -> Bool
-    func getPaginationState() -> PaginatableState?
+    func paginatableState() -> PaginatableState
     func layoutIfNeeded()
     var isFirstResponder: Bool { get }
 }

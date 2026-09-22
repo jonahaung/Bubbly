@@ -43,7 +43,7 @@ public extension CurrentUserModel {
             name: user.displayName.str,
             mobile: user.phoneNumber.str,
             photoURL: user.photoURL?.absoluteString ?? "",
-            pushToken: Messaging.messaging().fcmToken ?? "",
+            pushToken: String(deviceToken: Messaging.messaging().apnsToken) ?? "",
             publicKeyString: CryptoService.shared.base64PublicKeyString(for: user.uid)
         )
     }
@@ -56,4 +56,10 @@ public extension CurrentUserModel {
         pushToken: "",
         publicKeyString: ""
     )
+}
+extension String {
+    public init?(deviceToken: Data?) {
+        guard let deviceToken else { return nil }
+        self = deviceToken.map { String(format: "%.2hhx", $0) }.joined()
+    }
 }

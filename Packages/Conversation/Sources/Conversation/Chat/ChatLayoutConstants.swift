@@ -15,7 +15,7 @@ public enum ChatLayoutConstants {
         public static let bubbleMinSpacerWidth: CGFloat = 20
     }
 
-    public static let topBarHeight: CGFloat = 44
+    public static let topBarHeight: CGFloat = 1000
     public static let bottomBarHeight: CGFloat = 44
     public static let paginationTrashold: CGFloat = 100
 }

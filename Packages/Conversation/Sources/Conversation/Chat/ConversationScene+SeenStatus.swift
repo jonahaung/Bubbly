@@ -10,11 +10,11 @@ import SwiftUI
 import XUI
 
 struct SeenStatusOverlay: View {
-    
+
     @Environment(\.sharedNamespace) private var namespace
     @Environment(\.seenMembers) private var seenMembers
     @Environment(\.members) private var members
-    
+
     var body: some View {
         if let namespace {
             ZStack {
@@ -36,7 +36,7 @@ struct SeenStatusOverlay: View {
                         )
                         .matchedGeometryEffect(
                             id: member.msgId,
-                            in: namespace.value,
+                            in: namespace,
                             properties: .position,
                             anchor: .bottom,
                             isSource: false

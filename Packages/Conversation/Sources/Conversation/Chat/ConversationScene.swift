@@ -13,8 +13,9 @@ public struct ConversationScene: View {
 
     @FocusState private var focusState: ConversationFocusState?
     @Namespace private var namespace
-    @State private var viewModel: ChatManager
-    @State private var composer: ChatComposer
+    @State private var sharedFocusState: SharedFocusState<ConversationFocusState>?
+    @LazilyState private var viewModel: ChatManager
+    @LazilyState private var composer: ChatComposer
 
     public init(
         coordinator: AppCoordinator,
@@ -43,14 +44,18 @@ public struct ConversationScene: View {
         .environment(\.conversationTheme, viewModel.state.theme)
         .environment(\.attachmentFetcher, viewModel.attachmentFetcher)
         .environment(\.seenMembers, viewModel.state.properties.seenMembers)
-        .environment(\.sharedFocusState, .init($focusState))
+        .environment(\.sharedFocusState, sharedFocusState)
         .environment(\.members, viewModel.members)
-        .environment(\.sharedNamespace, SharedNamespace(namespace))
+        .environment(\.sharedNamespace, namespace)
         .environment(\.msgCellActions, .init(action: { viewModel.send(.cellAction($0)) }))
         .environment(viewModel)
         .environment(composer)
         .task {
-            viewModel.focusState = .init($focusState)
+            if sharedFocusState == nil {
+                let sharedFocusState = SharedFocusState($focusState)
+                self.sharedFocusState = sharedFocusState
+                viewModel.focusState = sharedFocusState
+            }
             await viewModel.onViewAppear()
         }
     }

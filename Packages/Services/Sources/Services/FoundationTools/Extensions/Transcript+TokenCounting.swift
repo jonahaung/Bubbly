@@ -77,7 +77,7 @@ public extension Transcript.Entry {
         case let .toolOutput(output):
             return output.segments.totalEstimatedTokenCount + toolOutputOverheadTokens
 
-        case .reasoning(_):
+        case .reasoning:
             return 0
         @unknown default:
             // Return 0 for unknown entry types to avoid crashes
@@ -102,7 +102,7 @@ public extension Transcript.Segment {
         case let .structure(structuredSegment):
             return estimateTokens(from: structuredSegment.content)
 
-        case .attachment(_):
+        case .attachment:
             return 0
         @unknown default:
             // Return 0 for unknown segment types to avoid crashes

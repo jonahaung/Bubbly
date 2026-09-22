@@ -9,22 +9,30 @@ import SwiftUI
 import XUI
 
 struct HeaderProfileView: View {
+
     let conversation: Conversation
+    let showHeader: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Spacing.md) {
-            Text(conversation.name)
-                .bold()
-            Text(conversation.prettyPrinted)
-                .font(.system(.footnote, design: .serif))
+        VStack(spacing: 0) {
+            Spacer()
+            if showHeader {
+                VStack(alignment: .leading, spacing: Spacing.md) {
+                    Text(conversation.name)
+                        .bold()
+                    Text(conversation.prettyPrinted)
+                        .font(.system(.footnote, design: .serif))
+                }
+                .frame(maxWidth: .infinity)
+                .padding(Padding.md)
+                .background(.windowBackground)
+                .containerShape(RoundedRectangle(cornerRadius: Radius.card))
+                .padding(.vertical, Padding.md)
+            }
         }
-        .frame(maxWidth: .infinity, minHeight: UIApplication.shared.screenSize().height)
-        .padding(Padding.md)
-        .background(.windowBackground)
-        .containerShape(RoundedRectangle(cornerRadius: Radius.card))
-        .padding(.vertical, Padding.md)
+        .frame(height: ChatLayoutConstants.topBarHeight)
+        .frame(maxWidth: .infinity)
         .id(conversation.uid)
-        .equatable(by: conversation.uid)
         .layoutValue(
             key: MsgLayoutValueKey.self,
             value: .init(

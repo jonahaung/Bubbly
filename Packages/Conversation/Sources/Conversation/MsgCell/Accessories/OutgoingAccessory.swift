@@ -15,7 +15,7 @@ struct OutgoingAccessory: View, @MainActor Equatable {
     let state: MsgCellViewModel.State
     @Environment(\.sharedNamespace) private var namespace
     @Environment(\.conversationTheme) private var theme
-    
+
     var body: some View {
         if let namespace {
             ZStack(alignment: .bottomLeading) {
@@ -49,7 +49,7 @@ struct OutgoingAccessory: View, @MainActor Equatable {
                     Circle().fill(.clear)
                         .frame(square: 12)
                         .matchedGeometryEffect(
-                            id: state.id, in: namespace.value, anchor: .bottom, isSource: true
+                            id: state.id, in: namespace, anchor: .bottom, isSource: true
                         )
                 case .none:
                     ZeroSizeView()

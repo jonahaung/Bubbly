@@ -3,84 +3,134 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import SwiftUI
+import Core
 import Database
 import Services
-import Core
+import SwiftUI
 import XUI
 
+// MARK: - Interaction Handling
+
 extension ChatManager {
+
     func handleMsgCellInteraction(action: MsgCellAction.ActionType) {
         switch action {
-        case let .onTapMsg(string):
-            setSelectedMsg(string)
+        case .onTapMsg(let id):
+            setSelectedMsg(id)
+
         case .onMarkMsg:
             break
-        case let .onTapAvatar(string):
-            guard let vieModel = messages.element(withID: string) else { return }
-            if let contact = members.contact(for: vieModel.msg.senderID) {
-                router?.pushToNav(.contactDetails(contact))
-            }
-        case let .onFocusMsgBubble(frame):
+
+        case .onTapAvatar(let id):
+            handleTapAvatar(id: id)
+
+        case .onFocusMsgBubble(let frame):
             presentation.send(.overlayItem(frame))
             layoutIfNeeded()
-        case let .onUploadedAttachments(msg):
-            Task {
-                try? await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
-                    model.attachments = msg.attachments
-                }
-                try? await messages.refreshMsg(uid: msg.uid)
-            }
-        case let .onReact(message, reactionType):
-            Task {
-                do {
-                    let currentUserID = try CurrentUserID.get()
-                    try? await Socket.shared.send(
-                        .reaction(
-                            payload: .init(
-                                reaction: .init(
-                                    rawValue: reactionType.rawValue, senderID: currentUserID,
-                                    date: .now
-                                ),
-                                msgID: message.uid,
-                                conID: message.conID
-                            )
-                        )
-                    )
-                } catch {
-                    log(error)
-                }
-            }
-        case let .performSend(data):
-            Task {
-                try? await Socket.shared.performSend(data)
-            }
+
+        case .onUploadedAttachments(let msg):
+            handleUploadedAttachments(msg: msg)
+
+        case .onReact(let message, let reactionType):
+            handleReaction(message: message, reactionType: reactionType)
+
+        case .performSend(let data):
+            handleSend(data: data)
         }
     }
 }
 
+// MARK: - Action Handlers
+
+extension ChatManager {
+
+    private func handleTapAvatar(id: String) {
+        guard let viewModel = messages.element(withID: id) else { return }
+        guard let contact = members.contact(for: viewModel.msg.senderID) else { return }
+        router?.pushToNav(.contactDetails(contact))
+    }
+
+    private func handleUploadedAttachments(msg: Message) {
+        Task {
+            try? await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
+                model.attachments = msg.attachments
+            }
+            try? await messages.refreshMsg(uid: msg.uid)
+        }
+    }
+
+    private func handleReaction(message: Message, reactionType: ReactionType) {
+        Task {
+            do {
+                let currentUserID = try CurrentUserID.get()
+                let reaction = Reaction(rawValue: reactionType.rawValue, senderID: currentUserID, date: .now)
+                let payload = AnyMsgData.ReactionPayload(reaction: reaction, msgID: message.uid, conID: message.conID)
+                try? await Socket.shared.send(.reaction(payload: payload))
+            } catch {
+                log(error)
+            }
+        }
+    }
+
+    private func handleSend(data: AnyMsgData) {
+        Task {
+            try? await Socket.shared.performSend(data)
+        }
+    }
+}
+
+// MARK: - Selection
+
 private extension ChatManager {
+
     func setSelectedMsg(_ uid: String) {
         guard let index = messages.index(of: uid) else { return }
+
         let oldValue = messages.selectedMsg
-        let nextMsg = messages[index + 1]?.msg
-        let previousMsg = messages[index - 1]?.msg
-        let newValue: SelectedMsg? =
-            oldValue?.id == uid
-            ? nil : SelectedMsg(id: uid, previous: previousMsg?.uid, next: nextMsg?.uid)
-        let transaction = Transaction.withAnimation(.interactiveSpring)
-        withTransaction(transaction) {
-            if let oldValue {
-                messages.didChangeSelection(newValue, for: oldValue.id)
-                if let id = oldValue.next { messages.didChangeSelection(newValue, for: id) }
-                if let id = oldValue.previous { messages.didChangeSelection(newValue, for: id) }
-            }
-            if let newValue {
-                messages.didChangeSelection(newValue, for: newValue.id)
-                if let id = newValue.next { messages.didChangeSelection(newValue, for: id) }
-                if let id = newValue.previous { messages.didChangeSelection(newValue, for: id) }
-            }
+        let newValue = makeSelection(uid: uid, index: index, oldValue: oldValue)
+
+        withTransaction(.withAnimation(.interactiveSpring)) {
+            updateSelection(from: oldValue, to: newValue)
             messages.selectedMsg = newValue
         }
+    }
+
+    func makeSelection(uid: String, index: Int, oldValue: SelectedMsg?) -> SelectedMsg? {
+        guard oldValue?.id != uid else { return nil }
+
+        let nextMessage = messages[index + 1]?.msg
+        let previousMessage = messages[index - 1]?.msg
+
+        return SelectedMsg(
+            id: uid,
+            previous: previousMessage?.uid,
+            next: nextMessage?.uid
+        )
+    }
+
+    func updateSelection(from oldValue: SelectedMsg?, to newValue: SelectedMsg?) {
+        if let oldValue {
+            applySelectionChange(newValue, around: oldValue.id)
+            if let id = oldValue.next {
+                applySelectionChange(newValue, around: id)
+            }
+            if let id = oldValue.previous {
+                applySelectionChange(newValue, around: id)
+            }
+        }
+
+        if let newValue {
+            applySelectionChange(newValue, around: newValue.id)
+            if let id = newValue.next {
+                applySelectionChange(newValue, around: id)
+            }
+            if let id = newValue.previous {
+                applySelectionChange(newValue, around: id)
+            }
+        }
+    }
+
+    func applySelectionChange(_ selection: SelectedMsg?, around id: String) {
+        messages.didChangeSelection(selection, for: id)
     }
 }

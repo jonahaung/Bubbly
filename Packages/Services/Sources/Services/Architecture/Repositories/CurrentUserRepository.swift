@@ -7,8 +7,6 @@ import FirebaseMessaging
 import Foundation
 import XUI
 
-// MARK: - CurrentUserRepository
-
 public actor CurrentUserRepository {
     public enum XError: Error {
         case notLoggedIn
@@ -37,7 +35,7 @@ public actor CurrentUserRepository {
         let storage = GroupStorage.shared
 
         var newModel = CurrentUserModel(firUser)
-        let pushToken = try await Messaging.messaging().token()
+        let pushToken = String(deviceToken: Messaging.messaging().apnsToken) ?? ""
         let publicKeyString = CryptoService.shared.base64PublicKeyString(for: firUser.uid)
         newModel.pushToken = pushToken
         newModel.publicKeyString = publicKeyString

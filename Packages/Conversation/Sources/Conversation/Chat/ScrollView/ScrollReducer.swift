@@ -7,97 +7,122 @@ import Core
 import Foundation
 import SwiftUI
 import XUI
+import Database
 
 struct ScrollReducer {
+
     enum Effect: Equatable {
         case begingUpdate(ScrollCoordinator.DataUpdate)
-        case endUpdate(
-            ScrollCoordinator.DataUpdate,
-            scrollItem: ScrollPositionItem?
-        )
+        case endUpdate(ScrollCoordinator.DataUpdate, scrollItem: ScrollPositionItem?)
     }
 }
 
+// MARK: - Geometry Reduction
+
 extension ScrollReducer {
-    func reduceGeometry(
-        newValue: VScrollGeometry,
-        paginationState: PaginatableState?
-    ) -> Effect? {
-        guard let paginationState else { return nil }
-        let bottomRatio =
-            (newValue.offsetY + newValue.boundsHeight)
-            / newValue.contentHeight
-        if bottomRatio > 0.85 {
-            if paginationState.canLoadNewer {
-                return .begingUpdate(
-                    paginationState.canAdjustSize
-                        ? .remove(edge: .top)
-                        : .insert(edge: .bottom)
-                )
-            } else if paginationState.canAdjustSize {
-                return .begingUpdate(.remove(edge: .top))
-            }
-            return nil
+
+    func reduceGeometry(newValue: VScrollGeometry, paginationState: PaginatableState) -> Effect? {
+        if let effect = reduceBottomEdge(newValue: newValue, paginationState: paginationState) {
+            return effect
         }
-        let topRatio = (newValue.offsetY) / newValue.contentHeight
-        if topRatio < 0.3 {
-            if paginationState.canLoadOlder {
-                return .begingUpdate(.insert(edge: .top))
-            } else if paginationState.canAdjustSize {
-                return .begingUpdate(.remove(edge: .bottom))
-            }
-        }
-        return nil
+        return reduceTopEdge(newValue: newValue, paginationState: paginationState)
     }
+
+    private func reduceBottomEdge(newValue: VScrollGeometry, paginationState: PaginatableState) -> Effect? {
+        let bottomRatio = (newValue.offsetY + newValue.boundsHeight) / newValue.contentHeight
+        guard bottomRatio > 0.9 else { return nil }
+        guard paginationState.canLoadNewer else { return nil }
+        return .begingUpdate(.insert(edge: .bottom))
+    }
+
+    private func reduceTopEdge(newValue: VScrollGeometry, paginationState: PaginatableState) -> Effect? {
+        let topRatio = (newValue.offsetY - ChatLayoutConstants.topBarHeight) / newValue.contentHeight
+        guard topRatio < 0.05 else { return nil }
+        guard paginationState.canLoadOlder else { return nil }
+        return .begingUpdate(.insert(edge: .top))
+    }
+}
+
+// MARK: - Updating
+
+extension ScrollReducer {
 
     func handleUpdating(
         state: ScrollCoordinator.ScrollViewUpdate,
         oldValue: VScrollGeometry,
         newValue: VScrollGeometry
     ) -> Effect? {
-        switch state {
-        case .dataUpdate(let dataUpdate):
-            switch dataUpdate {
-            case .insert(let edge):
-                let diff = newValue.contentHeight - oldValue.contentHeight
-                guard diff != 0 else { return nil }
-                if edge == .top {
-                    let y =
-                        diff + max(0, newValue.offsetY)
-                    return .endUpdate(
-                        .insert(edge: edge),
-                        scrollItem: .y(y, .scroll)
-                    )
-                }
-                return .endUpdate(
-                    .insert(edge: edge),
-                    scrollItem: nil
-                )
-            case .remove(let edge):
-                switch edge {
-                case .top:
-                    let diff =
-                        newValue.contentHeight - oldValue.contentHeight
-                        - (newValue.offsetY - oldValue.offsetY)
-                    guard diff != 0 else { return nil }
-                    let y =
-                        min(newValue.bottomMostOffset, newValue.offsetY) + diff
-                    return .endUpdate(
-                        .remove(edge: edge),
-                        scrollItem: .y(y, .scroll)
-                    )
-                case .bottom:
-                    return .endUpdate(.remove(edge: .bottom), scrollItem: nil)
-                }
-            case .focus(let msg):
-                return .endUpdate(
-                    .focus(msg: msg),
-                    scrollItem: .y(
-                        newValue.bottomMostOffset - (newValue.boundsHeight)
-                    )
-                )
-            }
-        default: return nil
+        guard case .dataUpdate(let dataUpdate) = state else { return nil }
+
+        switch dataUpdate {
+        case .insert(let edge):
+            return handleInsert(edge: edge, dataUpdate: dataUpdate, oldValue: oldValue, newValue: newValue)
+
+        case .remove(let edge):
+            return handleRemove(edge: edge, dataUpdate: dataUpdate, oldValue: oldValue, newValue: newValue)
+
+        case .focus(let message):
+            return handleFocus(message: message, newValue: newValue)
         }
+    }
+
+    private func handleInsert(
+        edge: VerticalEdge,
+        dataUpdate: ScrollCoordinator.DataUpdate,
+        oldValue: VScrollGeometry,
+        newValue: VScrollGeometry
+    ) -> Effect? {
+        switch edge {
+        case .top:
+            guard let y = scrollOffsetAfterInsertion(oldValue: oldValue, newValue: newValue) else { return nil }
+            return .endUpdate(dataUpdate, scrollItem: .y(y, .scroll))
+
+        case .bottom:
+            return .endUpdate(dataUpdate, scrollItem: nil)
+        }
+    }
+
+    private func handleRemove(
+        edge: VerticalEdge,
+        dataUpdate: ScrollCoordinator.DataUpdate,
+        oldValue: VScrollGeometry,
+        newValue: VScrollGeometry
+    ) -> Effect? {
+        switch edge {
+        case .top:
+            guard let y = scrollOffsetAfterRemoval(oldValue: oldValue, newValue: newValue) else { return nil }
+            return .endUpdate(dataUpdate, scrollItem: .y(y, .scroll))
+
+        case .bottom:
+            return .endUpdate(dataUpdate, scrollItem: nil)
+        }
+    }
+
+    private func handleFocus(message: Message, newValue: VScrollGeometry) -> Effect {
+        .endUpdate(
+            .focus(msg: message),
+            scrollItem: .y(newValue.bottomMostOffset - newValue.boundsHeight)
+        )
+    }
+}
+
+// MARK: - Offset Calculations
+
+extension ScrollReducer {
+
+    private func contentOffsetDelta(oldValue: VScrollGeometry, newValue: VScrollGeometry) -> CGFloat {
+        newValue.contentHeight - oldValue.contentHeight - (newValue.offsetY - oldValue.offsetY)
+    }
+
+    private func scrollOffsetAfterInsertion(oldValue: VScrollGeometry, newValue: VScrollGeometry) -> CGFloat? {
+        let diff = contentOffsetDelta(oldValue: oldValue, newValue: newValue)
+        guard diff != 0 else { return nil }
+        return diff + newValue.offsetY
+    }
+
+    private func scrollOffsetAfterRemoval(oldValue: VScrollGeometry, newValue: VScrollGeometry) -> CGFloat? {
+        let diff = contentOffsetDelta(oldValue: oldValue, newValue: newValue)
+        guard diff != 0 else { return nil }
+        return newValue.offsetY + diff
     }
 }

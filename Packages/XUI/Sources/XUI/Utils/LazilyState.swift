@@ -7,7 +7,7 @@ import SwiftUI
 
 @MainActor
 @propertyWrapper
-public struct LazyState<T: Observable>: @MainActor DynamicProperty {
+public struct LazilyState<T: Observable>: @MainActor DynamicProperty {
     @State private var holder: Holder
 
     public var wrappedValue: T {
@@ -28,7 +28,7 @@ public struct LazyState<T: Observable>: @MainActor DynamicProperty {
     }
 }
 
-extension LazyState {
+extension LazilyState {
     final class Holder {
         private var object: T!
         private let thunk: () -> T

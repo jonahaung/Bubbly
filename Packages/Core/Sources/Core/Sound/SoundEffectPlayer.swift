@@ -217,6 +217,10 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
         let id: UUID
 
         var count: Int
+
+        var isEmpty: Bool {
+            count < 1
+        }
     }
 
     private var registeredSounds: [SoundEffect: SoundEffectReference] = [:]
@@ -278,7 +282,7 @@ actor AVSoundEffectPlayer: SoundEffectPlayer {
         registeredSound.count -= 1
 
         registeredSounds[audio] =
-            if registeredSound.count <= 0 {
+            if registeredSound.isEmpty {
                 nil
             } else {
                 registeredSound

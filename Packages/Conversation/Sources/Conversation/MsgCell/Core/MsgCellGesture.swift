@@ -17,7 +17,7 @@ private enum MsgCellGestureThresholds {
     var draggedOffset: CGFloat = 0
     var isLongPressActive = false
     @ObservationIgnored private(set) var draggedLimitReached = false
-    
+
     func applyDrag(translation: CGFloat, isSender: Bool, onMark: () -> Void) {
         guard isValidDirection(translation, isSender: isSender) else {
             resetOffsetIfNeeded()
@@ -25,7 +25,7 @@ private enum MsgCellGestureThresholds {
         }
         let magnitude = abs(translation)
         if !draggedLimitReached,
-           magnitude > MsgCellGestureThresholds.markTrigger
+            magnitude > MsgCellGestureThresholds.markTrigger
         {
             draggedLimitReached = true
             onMark()
@@ -75,7 +75,7 @@ struct MsgCellGesture<Content: View>: View, @MainActor Equatable {
     var body: some View {
         content()
             .offset(x: round(model.draggedOffset))
-            .highPriorityGesture(dragGesture, including: .gesture)
+            .gesture(dragGesture, including: .gesture)
             .simultaneousGesture(doubleTapGesture)
             .onPressingChanged(in: .local) { _ in
                 activateLongPressIfNeeded()
@@ -128,9 +128,12 @@ extension MsgCellGesture {
                         overlayItem = .init(id: viewModel.id, frame: frame)
                     }
                 }
-                .fullScreenCover(item: $overlayItem, onDismiss: {
-                    model.isLongPressActive = false
-                }) { item in
+                .fullScreenCover(
+                    item: $overlayItem,
+                    onDismiss: {
+                        model.isLongPressActive = false
+                    }
+                ) { item in
                     OverlayMenu(item: item)
                         .environment(viewModel)
                         .id(viewModel.id)

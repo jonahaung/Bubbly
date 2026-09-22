@@ -7,7 +7,7 @@ import SwiftUI
 
 public extension Transaction {
     static func withAnimation(
-        _ animation: Animation = .timingCurve(0.0, 1.0, 0.4, 1.0, duration: 0.55),
+        _ animation: Animation = .linear(duration: 0.25),
         completion: (() -> Void)? = nil
     )
         -> Transaction

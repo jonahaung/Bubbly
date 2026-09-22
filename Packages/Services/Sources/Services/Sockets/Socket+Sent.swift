@@ -70,7 +70,7 @@ public extension Socket {
             try await sendToRemote(data, conversation: conversation)
         case .deleteMsg:
             try await sendToRemote(data, conversation: conversation)
-        case .msgRecipientReceipt(_):
+        case .msgRecipientReceipt:
             try await sendToRemote(data, conversation: conversation)
         }
     }

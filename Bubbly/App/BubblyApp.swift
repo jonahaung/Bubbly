@@ -20,7 +20,6 @@ struct BubblyApp: App {
                 appLauncher: appDelegate.runtime.appLauncher,
                 router: appDelegate.runtime.router
             )
-            .font(Typography.helvetica.body)
             .netChecker()
             .onOpenURL { url in
                 appDelegate.runtime.openURL(url)
