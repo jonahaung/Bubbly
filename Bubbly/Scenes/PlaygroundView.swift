@@ -5,17 +5,18 @@ import SwiftUI
 import XUI
 
 struct PlaygroundView: View {
-    
+
     @State private var searchText = ""
     @State private var text = ""
     @State private var fontName = ""
 
     var body: some View {
         List {
-            
+
             Section {
                 Button("Font Picker : \(fontName)") {
-                    Router.shared.presentModel(.view(node: NavigationStack{ FontPicker(selection:$fontName) }.opaqueView()))
+                    Router.shared.presentModel(
+                        .view(node: NavigationStack { FontPicker(selection: $fontName) }.opaqueView()))
                 }
                 Button("Show Toast") {
                     ToastPresenter.show(Lorem.random())
@@ -35,7 +36,7 @@ struct PlaygroundView: View {
                         switch item {
                         case let .heading(level, text):
                             Text(text)
-                                .font(.system(size: 18 + CGFloat((6 - min(level,6)) * 2), weight: .bold))
+                                .font(.system(size: 18 + CGFloat((6 - min(level, 6)) * 2), weight: .bold))
                                 .padding(.vertical, 4)
                         case let .paragraph(text):
                             Text(.init(text))
@@ -66,7 +67,7 @@ struct PlaygroundView: View {
                             Text(text)
                         }
                     }
-                    
+
                 }
             }
         }
@@ -77,107 +78,107 @@ struct PlaygroundView: View {
 }
 
 let markdownTestData = """
-# Exploring SwiftUI
+    # Exploring SwiftUI
 
-SwiftUI helps you build modern interfaces using **declarative syntax**, *reusable views*, and `@State`-driven updates. Learn more at https://developer.apple.com/xcode/swiftui/.
+    SwiftUI helps you build modern interfaces using **declarative syntax**, *reusable views*, and `@State`-driven updates. Learn more at https://developer.apple.com.
 
----
+    ---
 
-## Text Styles
+    ## Text Styles
 
-This paragraph combines **bold**, *italic*, ***bold italic***, ~~strikethrough~~, and `monospaced text`.
+    This paragraph combines **bold**, *italic*, ***bold italic***, ~~strikethrough~~, and `monospaced text`.
 
-You can also include special characters:
+    You can also include special characters:
 
-- Ampersand: &
-- Less than: <
-- Greater than: >
-- Quotation marks: "Hello"
-- Emoji: 🚀 🎨 📱
+    - Ampersand: &
+    - Less than: <
+    - Greater than: >
+    - Quotation marks: "Hello"
+    - Emoji: 🚀 🎨 📱
 
----
+    ---
 
-## Development Checklist
+    ## Development Checklist
 
-- [x] Create the project
-- [x] Define the data model
-- [ ] Build the user interface
-- [ ] Add accessibility labels
-- [ ] Write unit tests
+    - [x] Create the project
+    - [x] Define the data model
+    - [ ] Build the user interface
+    - [ ] Add accessibility labels
+    - [ ] Write unit tests
 
-### Priorities
+    ### Priorities
 
-1. Correctness
-2. Accessibility
-3. Performance
-4. Maintainability
+    1. Correctness
+    2. Accessibility
+    3. Performance
+    4. Maintainability
 
----
+    ---
 
-## Nested Content
+    ## Nested Content
 
-- Apple Platforms
-  - iOS
-  - iPadOS
-  - macOS
-    - AppKit
-    - SwiftUI
-  - watchOS
-  - visionOS
-- Development Tools
-  - Xcode
-  - Instruments
-  - Swift Package Manager
+    - Apple Platforms
+      - iOS
+      - iPadOS
+      - macOS
+        - AppKit
+        - SwiftUI
+      - watchOS
+      - visionOS
+    - Development Tools
+      - Xcode
+      - Instruments
+      - Swift Package Manager
 
----
+    ---
 
-## Quotation
+    ## Quotation
 
-> Simplicity is achieved by removing everything that does not contribute to the experience.
->
-> A good interface should remain clear, predictable, and accessible.
+    > Simplicity is achieved by removing everything that does not contribute to the experience.
+    >
+    > A good interface should remain clear, predictable, and accessible.
 
----
+    ---
 
-## Sample Table
+    ## Sample Table
 
-| Feature | Framework | Status |
-| --- | --- | --- |
-| User interface | SwiftUI | Ready |
-| Persistence | SwiftData | In progress |
-| Networking | URLSession | Ready |
-| Testing | Swift Testing | Planned |
+    | Feature | Framework | Status |
+    | --- | --- | --- |
+    | User interface | SwiftUI | Ready |
+    | Persistence | SwiftData | In progress |
+    | Networking | URLSession | Ready |
+    | Testing | Swift Testing | Planned |
 
----
+    ---
 
-## Swift Example
+    ## Swift Example
 
-```swift
-import SwiftUI
+    ```swift
+    import SwiftUI
 
-struct ProfileView: View {
-    let name: String
-    let isOnline: Bool
+    struct ProfileView: View {
+        let name: String
+        let isOnline: Bool
 
-    var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "person.crop.circle.fill")
-                .font(.largeTitle)
+        var body: some View {
+            HStack(spacing: 12) {
+                Image(systemName: "person.crop.circle.fill")
+                    .font(.largeTitle)
 
-            VStack(alignment: .leading) {
-                Text(name)
-                    .font(.headline)
+                VStack(alignment: .leading) {
+                    Text(name)
+                        .font(.headline)
 
-                Text(isOnline ? "Online" : "Offline")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    Text(isOnline ? "Online" : "Offline")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
+            .accessibilityElement(children: .combine)
         }
-        .accessibilityElement(children: .combine)
     }
-}
 
-"""
+    """
 
 //#Preview("Over") {
 //    @Previewable @State var a = Color.Resolved(red: 0.6, green: 0.3, blue: 0.4, opacity: 0.5)
@@ -251,7 +252,11 @@ struct ProfileView: View {
                 let colors = [Color.green, .yellow, .orange, .pink, .purple, .blue, .gray]
                 ForEach(colors, id: \.self) { text in
                     Text("Hi")
-                        .modifier(APCADerivedForegroundColor(foregroundColor: text, backgroundColor: background, fontSize: fontSize, weight: fontWeight))
+                        .modifier(
+                            APCADerivedForegroundColor(
+                                foregroundColor: text, backgroundColor: background, fontSize: fontSize,
+                                weight: fontWeight)
+                        )
                         .fixedSize()
                 }
             }
@@ -277,19 +282,28 @@ struct ProfileView: View {
 
         VStack {
             sample
-                .modifier(APCADerivedForegroundColor(foregroundColor: text, backgroundColor: .white, fontSize: fontSize, weight: fontWeight))
+                .modifier(
+                    APCADerivedForegroundColor(
+                        foregroundColor: text, backgroundColor: .white, fontSize: fontSize, weight: fontWeight)
+                )
                 .foregroundStyle(text)
                 .padding(32)
                 .background(.white)
 
             sample
-                .modifier(APCADerivedForegroundColor(foregroundColor: text, backgroundColor: background, fontSize: fontSize, weight: fontWeight))
+                .modifier(
+                    APCADerivedForegroundColor(
+                        foregroundColor: text, backgroundColor: background, fontSize: fontSize, weight: fontWeight)
+                )
                 .foregroundStyle(text)
                 .padding(32)
                 .background(background)
 
             sample
-                .modifier(APCADerivedForegroundColor(foregroundColor: text, backgroundColor: .black, fontSize: fontSize, weight: fontWeight))
+                .modifier(
+                    APCADerivedForegroundColor(
+                        foregroundColor: text, backgroundColor: .black, fontSize: fontSize, weight: fontWeight)
+                )
                 .foregroundStyle(text)
                 .padding(32)
                 .background(.black)
@@ -303,7 +317,7 @@ struct ProfileView: View {
             Grid {
                 GridRow {
                     Label("Size", systemImage: "textformat.size")
-                    Slider(value: $fontSize, in: 9 ... 160)
+                    Slider(value: $fontSize, in: 9...160)
                         .padding(.leading)
                 }
 

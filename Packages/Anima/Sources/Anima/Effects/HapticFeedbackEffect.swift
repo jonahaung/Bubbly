@@ -63,7 +63,7 @@
 
         func body(content: Content) -> some View {
             content
-                .onChange(of: impulseCount) { _ in
+                .onChange(of: impulseCount) { _, _ in
                     switch feedbackType {
                     case let .notification(type):
                         let generator = UINotificationFeedbackGenerator()

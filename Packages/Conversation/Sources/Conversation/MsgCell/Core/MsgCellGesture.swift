@@ -111,7 +111,7 @@ extension MsgCellGesture {
             model.applyDrag(
                 translation: value.translation.width,
                 isSender: viewModel.state.isSender
-            ) { msgCellActions?(.onMarkMsg(viewModel.msg)) }
+            ) { msgCellActions?(.onMarkMsg(viewModel.msg.uid)) }
         }.onEnded { _ in model.reset(animated: true) }
     }
 

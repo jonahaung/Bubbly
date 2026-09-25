@@ -60,33 +60,33 @@ struct JumpSimulationModifier: ViewModifier, Simulative {
         TimelineView(.animation(paused: isSimulationPaused)) { context in
             content
                 .modifier(SquishOffset(displacement: displacement))
-                .onChange(of: context.date) { (newValue: Date) in
-                    let duration = Double(newValue.timeIntervalSince(context.date))
+                .onChange(of: context.date) { previousDate, newDate in
+                    let duration = newDate.timeIntervalSince(previousDate)
                     withAnimation(nil) {
                         update(max(0, min(duration, 1 / 30)))
                     }
                 }
         }
         #if os(iOS)
-        .onChange(of: isSimulationPaused) { isPaused in
-            if isPaused {
-                feedbackGenerator = nil
-            } else {
-                feedbackGenerator = UIImpactFeedbackGenerator(style: .soft)
-                feedbackGenerator?.prepare()
-            }
-        }
-        #endif
-        .onChange(of: impulseCount) { newValue in
-                withAnimation(nil) {
-                    if displacement > -10 {
-                        velocity = -initialVelocity
-                        velocity = clamp(-2 * initialVelocity, velocity, 2 * initialVelocity)
-                    } else if velocity < 0 {
-                        jumpBuffered = true
-                    }
+            .onChange(of: isSimulationPaused) { _, isPaused in
+                if isPaused {
+                    feedbackGenerator = nil
+                } else {
+                    feedbackGenerator = UIImpactFeedbackGenerator(style: .soft)
+                    feedbackGenerator?.prepare()
                 }
             }
+        #endif
+        .onChange(of: impulseCount) { _, newValue in
+            withAnimation(nil) {
+                if displacement > -10 {
+                    velocity = -initialVelocity
+                    velocity = clamp(-2 * initialVelocity, velocity, 2 * initialVelocity)
+                } else if velocity < 0 {
+                    jumpBuffered = true
+                }
+            }
+        }
     }
 
     private func update(_ step: Double) {
@@ -98,11 +98,12 @@ struct JumpSimulationModifier: ViewModifier, Simulative {
             // additional hangtime.
             //
             // TODO: Does this mean a `Spring` is just a bad way to model this?
-            let speed: Double = if targetHeight > 32 {
-                1 - 0.8 * clamp(0, -displacement / targetHeight, 1.0)
-            } else {
-                1
-            }
+            let speed: Double =
+                if targetHeight > 32 {
+                    1 - 0.8 * clamp(0, -displacement / targetHeight, 1.0)
+                } else {
+                    1
+                }
 
             (newValue, newVelocity) = spring.value(
                 from: displacement,
@@ -187,7 +188,10 @@ private struct SquishOffset: GeometryEffect {
                 ZStack {
                     Color.clear
                         .background {
-                            AsyncImage(url: URL(string: "https://picsum.photos/1200")!, transaction: Transaction(animation: .default)) { phase in
+                            AsyncImage(
+                                url: URL(string: "https://picsum.photos/1200")!,
+                                transaction: Transaction(animation: .default)
+                            ) { phase in
                                 switch phase {
                                 case let .success(image):
                                     image
@@ -207,9 +211,9 @@ private struct SquishOffset: GeometryEffect {
 
                     VStack {
                         VStack {
-                            Stepper("^[\(emailCount) Email](inflect: true)", value: $emailCount, in: 0 ... 999)
+                            Stepper("^[\(emailCount) Email](inflect: true)", value: $emailCount, in: 0...999)
 
-                            Slider(value: $height, in: 10 ... 500)
+                            Slider(value: $height, in: 10...500)
                         }
                         .monospacedDigit()
                         .padding(12)
@@ -319,7 +323,7 @@ private struct SquishOffset: GeometryEffect {
                             Toggle("Enabled", isOn: $isEnabled)
 
                             LabeledContent {
-                                Slider(value: $cadence, in: -1 ... 6)
+                                Slider(value: $cadence, in: -1...6)
                             } label: {
                                 Text("Cadence")
                             }
@@ -328,7 +332,8 @@ private struct SquishOffset: GeometryEffect {
 
                     Spacer()
 
-                    let button = Button {} label: {
+                    let button = Button {
+                    } label: {
                         Label("Upwards!", systemImage: "arrow.up")
                     }
                     .tint(.green)
@@ -340,7 +345,8 @@ private struct SquishOffset: GeometryEffect {
                             .conditionalEffect(.repeat(.jump(height: 100), every: cadence), condition: isEnabled)
 
                         button
-                            .conditionalEffect(.repeat(.jump(height: 100).delay(2), every: cadence), condition: isEnabled)
+                            .conditionalEffect(
+                                .repeat(.jump(height: 100).delay(2), every: cadence), condition: isEnabled)
                     }
 
                     Spacer()

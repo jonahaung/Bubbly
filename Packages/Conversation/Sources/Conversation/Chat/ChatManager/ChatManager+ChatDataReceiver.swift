@@ -11,10 +11,13 @@ import XUI
 // MARK: - ChatDataReceiverDelegate
 
 extension ChatManager: ChatDataReceiverDelegate {
-
+    func chatDataReceiverApplicationWillResignActive() async throws {
+        try await saveLastPageIfNeeded()
+    }
     func chatDataReceiverApplicationDidBecomeActive() async throws {
         try await messages.updatePagination()
         scrollController.applicationDidBecomeActive()
+        try await setIncomingMsgsAsRead(before: .now)
     }
 
     func chatDataReceiver(didRecieveError error: any Error) async {
@@ -34,7 +37,7 @@ extension ChatManager: ChatDataReceiverDelegate {
             showScrollToMessageToast(msg: msg)
 
         case .shouldNotPaginate:
-            showNotificationToastAndInsert(msg: msg)
+            try await showNotificationToastAndInsert(msg: msg)
         }
     }
 
@@ -46,8 +49,8 @@ extension ChatManager: ChatDataReceiverDelegate {
         try await messages.refreshMsg(uid: msg.uid)
     }
 
-    func chatDataReceiver(didRemove msg: Message, animated _: Bool) {
-        messages.remove(msg: msg)
+    func chatDataReceiver(didRemove msg: Message, animated _: Bool) async throws {
+        try await messages.remove(msg: msg)
         withTransaction(Transaction.withAnimation()) {
             layoutIfNeeded()
         }
@@ -82,7 +85,6 @@ extension ChatManager {
 
     private func insertAtBottom(msg: Message) {
         scrollController.send(.begin(.append(msg: msg)))
-
     }
 
     private func showScrollToMessageToast(msg: Message) {
@@ -99,16 +101,16 @@ extension ChatManager {
         ToastPresenter.show(toast)
     }
 
-    private func showNotificationToastAndInsert(msg: Message) {
+    private func showNotificationToastAndInsert(msg: Message) async throws {
         let toast = Toast(
             node: Text(msg.displayText).opaqueView(),
             style: .notification
         ) { [weak self] in
             guard let self else { return }
-            scrollController.performScroll(to: .id(msg.uid, anchor: .bottom, .animated(.interpolatingSpring)))
+            scrollController.performScroll(to: .id(msg.uid, anchor: .bottom, .animated()))
         }
         ToastPresenter.show(toast)
-        messages.insert(msg: msg)
+        try await messages.insert(msg: msg)
         layoutIfNeeded()
     }
 }

@@ -28,7 +28,7 @@ public struct MarkdownFormatter: Sendable {
 
         return MarkdownParser.parse(string).reduce(into: AttributedString()) {
             result,
-                item in
+            item in
             appendBlockSpacing(to: &result)
             result += render(item)
         }
@@ -50,14 +50,15 @@ extension MarkdownFormatter {
         base: AttributeContainer
     ) -> AttributedString {
         guard
-              let result = try? AttributedString(
-                  markdown: text,
-                  options: .init(
-                      allowsExtendedAttributes: true,
-                      interpretedSyntax: .full,
-                      failurePolicy: .returnPartiallyParsedIfPossible
-                  )
-              ) else {
+            let result = try? AttributedString(
+                markdown: text,
+                options: .init(
+                    allowsExtendedAttributes: false,
+                    interpretedSyntax: .full,
+                    failurePolicy: .returnPartiallyParsedIfPossible
+                )
+            )
+        else {
             return AttributedString(text, attributes: base)
         }
 
@@ -105,7 +106,7 @@ extension MarkdownFormatter {
 
         return lines.enumerated().reduce(into: AttributedString()) {
             result,
-                element in
+            element in
             result += parseInline(String(element.element), base: attributes)
             if element.offset < lines.count - 1 {
                 result += AttributedString("\n", attributes: attributes)
@@ -155,7 +156,8 @@ extension MarkdownFormatter {
             let wordStart = tokenEnd
 
             while tokenEnd < result.endIndex,
-                  result.characters[tokenEnd].isMarkdownTokenCharacter {
+                result.characters[tokenEnd].isMarkdownTokenCharacter
+            {
                 tokenEnd = result.characters.index(after: tokenEnd)
             }
 
@@ -165,7 +167,7 @@ extension MarkdownFormatter {
             }
 
             let attributes = character == "@" ? style.mention : style.hashtag
-            result[tokenStart ..< tokenEnd].mergeAttributes(attributes)
+            result[tokenStart..<tokenEnd].mergeAttributes(attributes)
             index = tokenEnd
         }
     }

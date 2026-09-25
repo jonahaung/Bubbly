@@ -22,6 +22,7 @@ protocol ChatDataReceiverDelegate: AnyObject {
     func chatDataReceiver(didReceive typingStatus: AnyMsgData.TypingStatusPayload) async throws
     func chatDataReceiver(didRecieveError error: Error) async
     func chatDataReceiverApplicationDidBecomeActive() async throws
+    func chatDataReceiverApplicationWillResignActive() async throws
 }
 
 // MARK: - Receiver
@@ -37,6 +38,7 @@ final class ChatDataReceiver {
     init(_ conversationID: String) {
         observeMessages(for: conversationID)
         observeApplicationDidBecomeActive()
+        observeApplicationWillResignActive()
     }
 
     deinit {
@@ -68,6 +70,16 @@ extension ChatDataReceiver {
             .sink { [weak self] _ in
                 self?.enqueue { receiver in
                     try await receiver.delegate?.chatDataReceiverApplicationDidBecomeActive()
+                }
+            }
+            .store(in: cancelBag)
+    }
+    private func observeApplicationWillResignActive() {
+        NotificationCenter.default
+            .publisher(for: UIApplication.willResignActiveNotification)
+            .sink { [weak self] _ in
+                self?.enqueue { receiver in
+                    try await receiver.delegate?.chatDataReceiverApplicationWillResignActive()
                 }
             }
             .store(in: cancelBag)

@@ -30,7 +30,7 @@ public struct ImageUploadingService: Sendable {
         _ image: UIImage,
         size: CGSize?,
         to path: Path,
-        onProgress: (@Sendable (Progress?) -> Void)? = nil,
+        onProgress: (@Sendable (Progress?) -> Void)? = nil
     ) async throws
         -> URL
     {

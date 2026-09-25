@@ -18,10 +18,34 @@ struct ImageUploadingLayer: View {
     let conversationID: String
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
+    private enum UploadState {
+        case uploading
+        case failed(Error)
+        case completed
+    }
+
     var body: some View {
         ZStack(alignment: .center) {
-            if let error {
-                Button(action: retryUpload) {
+            switch state {
+            case .uploading:
+                if let progress {
+                    ProgressView(value: progress)
+                        .tint(.white)
+                        .frame(width: 44, height: 44)
+                        .background(.black.opacity(0.45), in: .circle)
+                        .accessibilityLabel("Uploading photo")
+                        .accessibilityValue("\(Int(progress * 100)) percent")
+                } else {
+                    ProgressView()
+                        .tint(.white)
+                        .frame(width: 44, height: 44)
+                        .background(.black.opacity(0.45), in: .circle)
+                        .accessibilityLabel("Uploading photo")
+                }
+            case .failed(let error):
+                Button {
+                    retryCount += 1
+                } label: {
                     Image(systemName: "arrow.clockwise.circle.fill")
                         .font(.system(size: 30))
                         .foregroundStyle(.red)
@@ -29,74 +53,73 @@ struct ImageUploadingLayer: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Retry photo upload")
                 .accessibilityHint(error.localizedDescription)
-            } else if let progress {
-                Gauge(value: progress.fraction) {
-                    Text("\(progress.fraction)")
-                }
-                .gaugeStyle(.accessoryCircularCapacity)
-                .tint(Color.white.gradient)
-                .frame(square: 150)
-                .animation(.default, value: progress.completed)
+            case .completed:
+                EmptyView()
             }
         }
-        .task {
-            await startUpload()
+        .task(id: uploadID) {
+            await upload()
+        }
+        .onChange(of: inputID) {
+            syncInput()
         }
     }
 
-    @Environment(MsgCellViewModel.self) private var viewModel
-    
-    @State private var progress: ImageTask.Progress?
-    @State private var uploading = false
-    @State private var error: Error?
+    @State private var state: UploadState = .uploading
+    @State private var progress: Double?
+    @State private var retryCount = 0
+    @State private var uploadTaskID: String?
 
     private let uploader: ImageUploadingService = .init()
 
-    private func startUpload() async {
-        guard !uploading else {
-            return
-        }
+    private var inputID: String {
+        "\(conversationID):\(attachment.uid):\(url.absoluteString)"
+    }
 
-        uploading = true
-        error = nil
-        defer { uploading = false }
-        let attachmentID = attachment.uid
-        let conID = conversationID
+    private var uploadID: String {
+        "\(inputID):\(retryCount)"
+    }
 
+    private func upload() async {
+        guard uploadTaskID != uploadID else { return }
+        uploadTaskID = uploadID
+        state = .uploading
+        progress = nil
         do {
-            let url = try await uploader.uploadFile(
+            let uploadedURL = try await uploader.uploadFile(
                 url,
-                to: .conversation(conID: conID, attachmentID: attachmentID)
+                to: .conversation(conID: conversationID, attachmentID: attachment.uid)
             ) { progress in
+                let fraction = progress.flatMap { value -> Double? in
+                    guard value.totalUnitCount > 0 else { return nil }
+                    return min(max(Double(value.completedUnitCount) / Double(value.totalUnitCount), 0), 1)
+                }
                 Task { @MainActor in
-                    if let progress {
-                        self.progress = if progress.completedUnitCount == progress.totalUnitCount {
-                            nil
-                        } else {
-                            .init(
-                                completed: progress.completedUnitCount,
-                                total: progress.totalUnitCount
-                            )
-                        }
-                    }
+                    guard !Task.isCancelled else { return }
+                    self.progress = fraction
                 }
             }
-            await MainActor.run {
-                var newValue = attachment
-                newValue.url = url.absoluteString
-                newValue.attachMentTypeRaw = AttachMentType.image.rawValue
-                onCompleteUpload?(newValue)
-            }
+            try Task.checkCancellation()
+            var newValue = attachment
+            newValue.url = uploadedURL.absoluteString
+            newValue.attachMentTypeRaw = AttachMentType.image.rawValue
+            onCompleteUpload?(newValue)
+            state = .completed
         } catch is CancellationError {
+            if uploadTaskID == uploadID {
+                uploadTaskID = nil
+            }
         } catch {
-            self.error = error
+            guard !Task.isCancelled else { return }
+            state = .failed(error)
         }
     }
 
-    private func retryUpload() {
-        error = nil
-        Task {
-            await startUpload()
-        }
+    private func syncInput() {
+        guard let uploadTaskID, !uploadTaskID.hasPrefix(inputID) else { return }
+        self.uploadTaskID = nil
+        retryCount = 0
+        state = .uploading
+        progress = nil
     }
 }

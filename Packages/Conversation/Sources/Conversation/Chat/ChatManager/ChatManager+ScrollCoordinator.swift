@@ -66,6 +66,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
     func scrollCoordinator(
         _ coordinator: ScrollCoordinator, finalizeScrollViewUpdatesWith state: ScrollCoordinator.State
     ) {
+        messages.displayVisibleMsgsIfNeeded()
         let accessoryItem: AccessoryBarItem? = messages.isAbsoluteScrolled(at: .bottom) ? nil : .scrollDownButton
 
         if accessoryItem == nil {
@@ -78,9 +79,10 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
         presentation.send(.bottomAccessory(accessoryItem))
 
         if accessoryItem == nil, messages.shouldAdjustWindow {
-            messages.retainNewest(messages.pagination.pageSize * 2)
+            messages.retainNewest(messages.pagination.pageSize * 3)
             layoutIfNeeded()
         }
+
     }
 
     func onScrollTargetVisibilityChange(_ newValue: [String]) {
@@ -106,7 +108,7 @@ extension ChatManager {
     }
 
     private func insertPreviousMessages(update: ScrollCoordinator.DataUpdate, coordinator: ScrollCoordinator) {
-        Task {
+        queue.addBarrierOperation { [self] in
             guard let message = messages.first?.msg else {
                 coordinator.updateState(.didEndUpdates)
                 return
@@ -123,15 +125,16 @@ extension ChatManager {
     }
 
     private func insertNextMessages(update: ScrollCoordinator.DataUpdate, coordinator: ScrollCoordinator) {
-        Task {
+        queue.addBarrierOperation { [self] in
             guard let message = messages.last?.msg else {
                 coordinator.updateState(.didEndUpdates)
                 return
             }
             do {
                 let nextMessages = try await datasource.more(after: message.date, conID: message.conID)
-                messages.append(nextMessages)
                 coordinator.updateState(.dataUpdate(update))
+
+                messages.append(nextMessages)
                 layoutIfNeeded()
             } catch {
                 log(error)
@@ -149,15 +152,17 @@ extension ChatManager {
         update: ScrollCoordinator.DataUpdate,
         coordinator: ScrollCoordinator
     ) {
-        let limit = messages.pagination.pageSize * 3
-        switch edge {
-        case .top:
-            messages.retainNewest(limit)
-        case .bottom:
-            messages.retainOldest(limit)
+        queue.addBarrierOperation { [self] in
+            let limit = messages.pagination.pageSize * 3
+            switch edge {
+            case .top:
+                messages.retainNewest(limit)
+            case .bottom:
+                messages.retainOldest(limit)
+            }
+            coordinator.updateState(.dataUpdate(update))
+            layoutIfNeeded()
         }
-        coordinator.updateState(.dataUpdate(update))
-        layoutIfNeeded()
     }
 }
 
@@ -166,9 +171,15 @@ extension ChatManager {
 extension ChatManager {
 
     private func handleAppend(message: Message) {
-        messages.insert(msg: message)
-        scrollController.updateState(.dataUpdate(.append(msg: message)))
-        layoutIfNeeded()
+        queue.addBarrierOperation { [self] in
+            do {
+                try await messages.insert(msg: message)
+                scrollController.updateState(.dataUpdate(.append(msg: message)))
+                layoutIfNeeded()
+            } catch {
+                await showError(error)
+            }
+        }
     }
 }
 
@@ -177,7 +188,7 @@ extension ChatManager {
 extension ChatManager {
 
     private func handleFocus(message: Message) {
-        Task {
+        queue.addBarrierOperation { [self] in
             try? await scrollTo(msg: message)
         }
     }

@@ -50,19 +50,15 @@ public extension ConversationInitializer {
 
         var properties = try await ConversationPropertiesRepo.getOrCreate(
             for: conID,
-            refetch: false,
+            refetch: false
         )
         let msgs: [Message]
         if let targetedMsg {
             msgs = try await MsgRepo.messages(conID: conID, to: targetedMsg.date, limit: pageSize)
             properties.lastPage = nil
         } else {
-            if let lastPage = properties.lastPage,
-                await lastPage.isPotrait == UIApplication.shared.screenSize().isPortrait,
-                let top = try await Store.shared.msgStore?.fetch(uid: lastPage.topMsgID),
-                let bottom = try await Store.shared.msgStore?.fetch(uid: lastPage.bottomMsgID)
-            {
-                msgs = try await MsgRepo.messages(conID: conID, from: top.date, to: bottom.date)
+            if let lastPage = properties.lastPage {
+                msgs = try await MsgRepo.messages(for: conID, lastPage: lastPage)
             } else {
                 msgs = try await MsgRepo.msgs(
                     conID: conID,
@@ -75,7 +71,7 @@ public extension ConversationInitializer {
         let lastMsg = try await MsgRepo.lastMsg(conID: conID)
 
         let pagination = PaginationState(
-            conID: conversation.uid,
+            conID: conID,
             pageSize: pageSize,
             lastMsgID: lastMsg?.uid,
             firstMsgID: firstMsg?.uid,

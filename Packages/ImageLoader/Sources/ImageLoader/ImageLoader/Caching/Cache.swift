@@ -5,7 +5,7 @@
 import Foundation
 
 #if os(iOS) || os(tvOS) || os(visionOS)
-import UIKit.UIApplication
+    import UIKit.UIApplication
 #endif
 
 public final class Cache<Key: Hashable, Value>: @unchecked Sendable {
@@ -66,9 +66,9 @@ public final class Cache<Key: Hashable, Value>: @unchecked Sendable {
         memoryPressure.resume()
 
         #if os(iOS) || os(tvOS) || os(visionOS)
-        Task {
-            await registerForEnterBackground()
-        }
+            Task { @MainActor [weak self] in
+                self?.registerForEnterBackground()
+            }
         #endif
     }
 
@@ -79,15 +79,15 @@ public final class Cache<Key: Hashable, Value>: @unchecked Sendable {
     }
 
     #if os(iOS) || os(tvOS) || os(visionOS)
-    @MainActor private func registerForEnterBackground() {
-        notificationObserver = NotificationCenter.default.addObserver(
-            forName: UIApplication.didEnterBackgroundNotification,
-            object: nil,
-            queue: nil
-        ) { [weak self] _ in
-            self?.clearCacheOnEnterBackground()
+        @MainActor private func registerForEnterBackground() {
+            notificationObserver = NotificationCenter.default.addObserver(
+                forName: UIApplication.didEnterBackgroundNotification,
+                object: nil,
+                queue: nil
+            ) { [weak self] _ in
+                self?.clearCacheOnEnterBackground()
+            }
         }
-    }
     #endif
 
     public func value(forKey key: Key) -> Value? {
@@ -113,8 +113,9 @@ public final class Cache<Key: Hashable, Value>: @unchecked Sendable {
         defer { os_unfair_lock_unlock(lock) }
 
         let sanitizedEntryLimit = max(0, min(_conf.entryCostLimit, 1))
-        guard _conf
-            .costLimit > 2_147_483_647 || cost < Int(sanitizedEntryLimit * Double(_conf.costLimit))
+        guard
+            _conf
+                .costLimit > 2_147_483_647 || cost < Int(sanitizedEntryLimit * Double(_conf.costLimit))
         else {
             return
         }

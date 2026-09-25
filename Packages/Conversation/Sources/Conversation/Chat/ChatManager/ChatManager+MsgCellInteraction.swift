@@ -18,8 +18,8 @@ extension ChatManager {
         case .onTapMsg(let id):
             setSelectedMsg(id)
 
-        case .onMarkMsg:
-            break
+        case .onMarkMsg(let id):
+            markMsg(id)
 
         case .onTapAvatar(let id):
             handleTapAvatar(id: id)
@@ -52,10 +52,16 @@ extension ChatManager {
 
     private func handleUploadedAttachments(msg: Message) {
         Task {
-            try? await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
-                model.attachments = msg.attachments
+            do {
+                guard let attachments = msg.attachments else { return }
+                try await Store.shared.msgStore?.updateAndSave(uid: msg.uid) { model in
+                    model.attachments = attachments
+                }
+                try await messages.refreshMsg(uid: msg.uid)
+                try await Socket.shared.send(.updatedMsg(rMsg: .init(msg)))
+            } catch {
+                log(error)
             }
-            try? await messages.refreshMsg(uid: msg.uid)
         }
     }
 
@@ -93,6 +99,10 @@ private extension ChatManager {
             updateSelection(from: oldValue, to: newValue)
             messages.selectedMsg = newValue
         }
+    }
+
+    func markMsg(_ uid: String) {
+        print(uid)
     }
 
     func makeSelection(uid: String, index: Int, oldValue: SelectedMsg?) -> SelectedMsg? {

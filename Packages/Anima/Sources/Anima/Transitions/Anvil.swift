@@ -45,7 +45,8 @@ struct Anvil: ViewModifier, ProgressableAnimation, AnimatableModifier {
         let fallT = map(value: min(progress, fall), inMin: 0, inMax: fall, outMin: 0, outMax: 1)
 
         /// Progress of the shake.
-        let shakeT = map(value: clamp(fall, progress - 0.01, 2 * fall) - fall, inMin: 0, inMax: fall, outMin: 0, outMax: 1)
+        let shakeT = map(
+            value: clamp(fall, progress - 0.01, 2 * fall) - fall, inMin: 0, inMax: fall, outMin: 0, outMax: 1)
 
         let padding = EdgeInsets(top: 150, leading: 130, bottom: 100, trailing: 130)
 
@@ -53,18 +54,18 @@ struct Anvil: ViewModifier, ProgressableAnimation, AnimatableModifier {
         let whiteImage = Image("anvil_smoke_white", bundle: .module)
 
         content
-        #if os(iOS)
-        .onChange(of: fallT) { newFallT in
-            if fallT < 1, newFallT >= 1 {
-                feedbackGenerator?.impactOccurred()
-                feedbackGenerator = nil
-            } else if newFallT > 0, feedbackGenerator == nil {
-                feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
-                feedbackGenerator?.prepare()
-            }
-        }
-        #endif
-        .offset(x: 0, y: -400 * (1 - fallT))
+            #if os(iOS)
+                .onChange(of: fallT) { _, newFallT in
+                    if fallT < 1, newFallT >= 1 {
+                        feedbackGenerator?.impactOccurred()
+                        feedbackGenerator = nil
+                    } else if newFallT > 0, feedbackGenerator == nil {
+                        feedbackGenerator = UIImpactFeedbackGenerator(style: .heavy)
+                        feedbackGenerator?.prepare()
+                    }
+                }
+            #endif
+            .offset(x: 0, y: -400 * (1 - fallT))
             .animation(nil, value: progress)
             .offset(
                 x: 2 * sin(shakeT * 3 * .pi) * (1 - shakeT),
@@ -97,14 +98,14 @@ struct Anvil: ViewModifier, ProgressableAnimation, AnimatableModifier {
                             return
                         }
 
-                        for x in 0 ..< rows {
-                            for _ in 0 ..< cols {
+                        for x in 0..<rows {
+                            for _ in 0..<cols {
                                 let x = CGFloat(x)
                                 let relativeX = (x / CGFloat(rows - 1))
 
                                 let center = CGPoint(
-                                    x: bounds.minX + x * particleDistance + .random(in: -15 ... 15, using: &rng),
-                                    y: bounds.maxY + .random(in: -5 ... 5, using: &rng)
+                                    x: bounds.minX + x * particleDistance + .random(in: -15...15, using: &rng),
+                                    y: bounds.maxY + .random(in: -5...5, using: &rng)
                                 )
 
                                 let maxOffsetX: CGFloat = particleDistance * 4
@@ -112,16 +113,21 @@ struct Anvil: ViewModifier, ProgressableAnimation, AnimatableModifier {
 
                                 let t = easeOut(dustT)
 
-                                let offsetX = maxOffsetX * (relativeX - 0.5) * 2 * .random(in: 0.8 ... 1.2, using: &rng)
-                                let offsetY = CGFloat.random(in: -maxOffsetY / 2 ... maxOffsetY / 2, using: &rng) + (t * t) * -50
+                                let offsetX = maxOffsetX * (relativeX - 0.5) * 2 * .random(in: 0.8...1.2, using: &rng)
+                                let offsetY =
+                                    CGFloat.random(in: -maxOffsetY / 2...maxOffsetY / 2, using: &rng) + (t * t) * -50
 
-                                var scale = 1 + 0.6 * (1 - pow(sin(relativeX * CGFloat.pi), 0.4)) + .random(in: 0 ... 0.2, using: &rng)
+                                var scale =
+                                    1 + 0.6 * (1 - pow(sin(relativeX * CGFloat.pi), 0.4))
+                                    + .random(in: 0...0.2, using: &rng)
                                 scale *= 0.8 + (dustT * 0.2)
                                 scale /= 3
                                 scale *= 1 - pow(2, -50 * dustT)
 
-                                var rotation = Angle.degrees(180) * .random(in: -1 ... 1, using: &rng)
-                                rotation += .degrees(125) * -(relativeX - 0.5) * CGFloat.random(in: 0.5 ... 1, using: &rng) * t * 1.5
+                                var rotation = Angle.degrees(180) * .random(in: -1...1, using: &rng)
+                                rotation +=
+                                    .degrees(125) * -(relativeX - 0.5) * CGFloat.random(in: 0.5...1, using: &rng) * t
+                                    * 1.5
 
                                 ctx.drawLayer { ctx in
                                     ctx.translateBy(x: 0, y: -(particleSize.height * scale * 0.9) / 2)
@@ -140,9 +146,13 @@ struct Anvil: ViewModifier, ProgressableAnimation, AnimatableModifier {
 
                                     if progress >= fall {
                                         if Double(x).truncatingRemainder(dividingBy: 2.0).isZero {
-                                            ctx.draw(resolvedWhiteImage, in: CGRect(center: .zero, size: resolvedWhiteImage.size))
+                                            ctx.draw(
+                                                resolvedWhiteImage,
+                                                in: CGRect(center: .zero, size: resolvedWhiteImage.size))
                                         } else {
-                                            ctx.draw(resolvedGrayImage, in: CGRect(center: .zero, size: resolvedGrayImage.size))
+                                            ctx.draw(
+                                                resolvedGrayImage,
+                                                in: CGRect(center: .zero, size: resolvedGrayImage.size))
                                         }
                                     }
                                 }
@@ -152,7 +162,8 @@ struct Anvil: ViewModifier, ProgressableAnimation, AnimatableModifier {
 
                     do {
                         // Progress of the specks animating.
-                        let speckT = clamp(map(value: progress, inMin: fall + 0.02, inMax: 1 - 0.2, outMin: 0, outMax: 1))
+                        let speckT = clamp(
+                            map(value: progress, inMin: fall + 0.02, inMax: 1 - 0.2, outMin: 0, outMax: 1))
 
                         let specks = 20
 
@@ -163,19 +174,19 @@ struct Anvil: ViewModifier, ProgressableAnimation, AnimatableModifier {
                         let maxOffsetY = bounds.height * 0.9
                         let maxOffsetX = bounds.width * 0.6
 
-                        for s in 0 ..< specks {
+                        for s in 0..<specks {
                             let s = CGFloat(s)
 
                             let xFrac = (s / CGFloat(specks))
 
-                            var dX = CGFloat.random(in: -maxOffsetX ... maxOffsetX, using: &rng)
+                            var dX = CGFloat.random(in: -maxOffsetX...maxOffsetX, using: &rng)
                             dX += 60 * (xFrac - 0.5) * 2
 
-                            let dY = CGFloat.random(in: -maxOffsetY ... 0, using: &rng)
+                            let dY = CGFloat.random(in: -maxOffsetY...0, using: &rng)
 
                             ctx.drawLayer { ctx in
                                 var center = CGPoint(
-                                    x: .random(in: bounds.minX ... bounds.maxX, using: &rng),
+                                    x: .random(in: bounds.minX...bounds.maxX, using: &rng),
                                     y: bounds.maxY
                                 )
 
@@ -189,13 +200,13 @@ struct Anvil: ViewModifier, ProgressableAnimation, AnimatableModifier {
 
                                 let speck = Circle().path(in: speckBounds)
 
-                                let scale = CGFloat.random(in: 2 ... 3, using: &rng) * (0.5 + (1 - speckT) / 2)
+                                let scale = CGFloat.random(in: 2...3, using: &rng) * (0.5 + (1 - speckT) / 2)
 
                                 ctx.translateBy(x: center.x, y: center.y)
                                 ctx.scaleBy(x: scale, y: scale)
 
                                 ctx.opacity = Double(pow(sin(speckT * CGFloat.pi), 0.2))
-                                ctx.fill(speck, with: .color(Color(white: .random(in: 0.75 ... 0.9, using: &rng))))
+                                ctx.fill(speck, with: .color(Color(white: .random(in: 0.75...0.9, using: &rng))))
                             }
                         }
                     }

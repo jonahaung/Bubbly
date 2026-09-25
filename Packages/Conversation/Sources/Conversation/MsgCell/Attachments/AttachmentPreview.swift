@@ -19,6 +19,7 @@ struct AttachmentPreview: View {
 
     @Environment(\.attachmentFetcher) private var attachmentFetcher
     @Environment(\.conversation) private var conversation
+    @Environment(MsgCellViewModel.self) private var viewModel
     @State private var model: AttachmentPreviewViewModel
 
     init(
@@ -61,6 +62,7 @@ struct AttachmentPreview: View {
 
     private var content: some View {
         ZStack {
+            Color.clear
             if let data = model.attachmentData {
                 attachmentView(for: data)
             } else if let error = model.error {
@@ -71,27 +73,27 @@ struct AttachmentPreview: View {
                             .padding()
                     }
             } else {
-                Color.background
+
                 ProgressView()
                     .controlSize(.mini)
             }
         }
         .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
-        .task {
-            guard let attachmentFetcher else {
-                return
+        .task(id: viewModel.isVisible) {
+            if viewModel.isVisible {
+                guard let attachmentFetcher else {
+                    return
+                }
+                await model.loadAttachment(attachmentFetcher: attachmentFetcher)
+            } else {
+                guard let attachmentFetcher else {
+                    return
+                }
+                Task {
+                    await attachmentFetcher.cancel(model.attachment)
+                }
+                model.error = nil
             }
-            await model.loadAttachment(attachmentFetcher: attachmentFetcher)
-        }
-        .onDisappear {
-            guard let attachmentFetcher else {
-                return
-            }
-            Task {
-                await attachmentFetcher.cancel(model.attachment)
-            }
-            model.attachmentData = nil
-            model.error = nil
         }
     }
 

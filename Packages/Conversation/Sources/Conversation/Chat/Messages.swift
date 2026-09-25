@@ -15,21 +15,21 @@ final class Messages {
 
     private let cellDecorator: MsgCellDecorator = .init()
     private let markdownFormatter: MarkdownFormatter = .init()
-    private let richTextEnabled: Bool
 
     private var indexMap: [String: Int] = [:]
     private var modelCache = LRUCache<MsgCellViewModel.ID, MsgCellViewModel>()
+
     private var visibleIDs: [String] = []
-    private let debouncer = Debouncer(delay: 0.2, queue: .global())
+    private var newVisibleIDs: [String] = []
 
     var wrappedValue: [MsgCellViewModel] = []
     var selectedMsg: SelectedMsg?
     var pagination: PaginationState
     let layout = MsgsScrollViewLayoutManager()
+    var shouldShowHeader: Bool = false
 
     init(_ messages: [Message], pagination: PaginationState) {
         self.pagination = pagination
-        richTextEnabled = UserDefaults.group.bool(forKey: GroupStorageKey.conversation(.richTextEnabled).value)
         wrappedValue = makeModels(from: messages)
         rebuildIndexMap()
     }
@@ -46,7 +46,6 @@ extension Messages {
     var count: Int { wrappedValue.count }
     var first: MsgCellViewModel? { wrappedValue.first }
     var last: MsgCellViewModel? { wrappedValue.last }
-    var shouldShowHeader: Bool { !shouldPaginate(at: .top) }
     var shouldAdjustWindow: Bool { count > pagination.pageSize * 3 }
 
     subscript(position: Int) -> MsgCellViewModel? {
@@ -111,7 +110,7 @@ extension Messages {
 extension Messages {
 
     func onScrollTargetVisibilityChange(_ ids: [String]) {
-        displayVisibleMsgsIfNeeded(newValue: ids)
+        newVisibleIDs = ids
     }
 
     func refreshMsg(uid: String) async throws {
@@ -137,25 +136,33 @@ extension Messages {
 extension Messages {
 
     func set(msgs messages: [Message]) {
+        modelCache.clear()
         wrappedValue = makeModels(from: messages)
         rebuildIndexMap()
         pruneVisibleIDs()
     }
 
-    func insert(msg: Message) {
-        upsert(msg)
+    func insert(msg: Message) async throws {
+        let index = insertionIndex(for: msg)
+        let previous = index > 0 ? wrappedValue[index - 1].msg : nil
+        let next = index < wrappedValue.count ? wrappedValue[index].msg : nil
+        let model = model(for: msg, previous: previous, next: next)
+
+        wrappedValue.insert(model, at: index)
+        updateIndexMap(from: index)
+        relayoutNeighbors(aroundInsertionAt: index)
+
+        try await updatePagination()
     }
 
-    func remove(msg: Message) {
+    func remove(msg: Message) async throws {
         guard let index = indexMap[msg.uid] else { return }
         wrappedValue.remove(at: index)
         modelCache.remove(msg.uid)
         updateIndexMap(from: index)
         relayoutNeighbors(aroundRemovalAt: index)
         removeVisibleID(msg.uid)
-        Task {
-            try? await updatePagination()
-        }
+        try await updatePagination()
     }
 
     func prepend(_ messages: [Message]) {
@@ -224,21 +231,17 @@ extension Messages {
     }
 
     func paginatableState() -> PaginatableState {
-        PaginatableState(
+        let state = PaginatableState(
             canLoadOlder: shouldPaginate(at: .top),
             canLoadNewer: shouldPaginate(at: .bottom),
             canAdjustSize: shouldAdjustWindow
         )
+        shouldShowHeader = state.canLoadOlder == false
+        return state
     }
-}
-
-// MARK: - Private Helpers
-
-private extension Messages {
-
-    func displayVisibleMsgsIfNeeded(newValue: [String]) {
-        let differences = newValue.difference(from: visibleIDs)
-        visibleIDs = newValue
+    func displayVisibleMsgsIfNeeded() {
+        let differences = newVisibleIDs.difference(from: visibleIDs)
+        visibleIDs = newVisibleIDs
 
         for change in differences {
             switch change {
@@ -249,6 +252,11 @@ private extension Messages {
             }
         }
     }
+}
+
+// MARK: - Private Helpers
+
+private extension Messages {
 
     func model(for msg: Message, previous: Message? = nil, next: Message? = nil) -> MsgCellViewModel {
         let layout = makeLayout(for: msg, previous: previous, next: next)
@@ -279,30 +287,6 @@ private extension Messages {
         }
 
         return models
-    }
-
-    func upsert(_ msg: Message) {
-        if let index = indexMap[msg.uid] {
-            layout(at: index)
-            return
-        }
-
-        let index = insertionIndex(for: msg)
-        let previous = index > 0 ? wrappedValue[index - 1].msg : nil
-        let next = index < wrappedValue.count ? wrappedValue[index].msg : nil
-        let model = model(for: msg, previous: previous, next: next)
-
-        wrappedValue.insert(model, at: index)
-        updateIndexMap(from: index)
-        relayoutNeighbors(aroundInsertionAt: index)
-
-        if index == wrappedValue.count - 1 {
-            pagination.lastMsgID = msg.uid
-        }
-
-        Task {
-            try? await updatePagination()
-        }
     }
 }
 
@@ -347,9 +331,7 @@ private extension Messages {
 
     func makeAttributedText(for msg: Message) -> AttributedString? {
         guard let text = msg.text else { return nil }
-        return richTextEnabled
-            ? markdownFormatter.richText(for: text)
-            : markdownFormatter.markdownText(for: text)
+        return markdownFormatter.richText(for: text)
     }
 
     func makeLayout(for msg: Message, previous: Message?, next: Message?) -> MsgCellDecoration {

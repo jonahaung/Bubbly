@@ -87,7 +87,7 @@ struct ShakeSimulationModifier: ViewModifier, Simulative {
                     }
                 }
         }
-        .onChange(of: impulseCount) { newValue in
+        .onChange(of: impulseCount) { _, newValue in
             withAnimation(nil) {
                 shakeCount += 2
 
@@ -120,7 +120,10 @@ struct ShakeSimulationModifier: ViewModifier, Simulative {
                 ZStack {
                     Color.clear
                         .background {
-                            AsyncImage(url: URL(string: "https://picsum.photos/1200")!, transaction: Transaction(animation: .default)) { phase in
+                            AsyncImage(
+                                url: URL(string: "https://picsum.photos/1200")!,
+                                transaction: Transaction(animation: .default)
+                            ) { phase in
                                 switch phase {
                                 case let .success(image):
                                     image
@@ -139,7 +142,7 @@ struct ShakeSimulationModifier: ViewModifier, Simulative {
                         }
 
                     VStack {
-                        Stepper("^[\(emailCount) Email](inflect: true)", value: $emailCount, in: 0 ... 999)
+                        Stepper("^[\(emailCount) Email](inflect: true)", value: $emailCount, in: 0...999)
                             .monospacedDigit()
                             .padding(12)
                             .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))

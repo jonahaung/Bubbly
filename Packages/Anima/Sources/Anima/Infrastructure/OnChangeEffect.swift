@@ -16,7 +16,9 @@ public extension View {
     ///   - isEnabled: A Boolean value that indicates whether the effect should be applied when the value changes.  Defaults to `true`.
     ///
     /// - Returns: A view that applies the effect to this view whenever value changes.
-    func changeEffect(_ effect: AnyChangeEffect, value: some Equatable, isEnabled: @autoclosure @escaping () -> Bool = true) -> some View {
+    func changeEffect(
+        _ effect: AnyChangeEffect, value: some Equatable, isEnabled: @autoclosure @escaping () -> Bool = true
+    ) -> some View {
         modifier(HighlightChangeModifier(value, effect: effect, predicate: { _ in isEnabled() }))
     }
 }
@@ -54,8 +56,9 @@ struct HighlightChangeModifier<Value: Equatable>: ViewModifier {
             changeCount += 1
         }
 
-        return content
-            .onChange(of: value) { newValue in
+        return
+            content
+            .onChange(of: value) { _, newValue in
                 if delay == 0 {
                     update(newValue)
                 } else {
@@ -90,7 +93,7 @@ struct HighlightChangeModifier<Value: Equatable>: ViewModifier {
                             Text("Value (animated) ") + Text("(\(value.formatted()))").foregroundColor(.secondary)
                         }
 
-                        Slider(value: $delay, in: -2 ... 2)
+                        Slider(value: $delay, in: -2...2)
                     }
 
                     VStack(spacing: 32) {
@@ -104,7 +107,10 @@ struct HighlightChangeModifier<Value: Equatable>: ViewModifier {
                             .foregroundColor(.white)
                             .padding()
                             .background(.green, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                            .changeEffect(.pulse(shape: RoundedRectangle(cornerRadius: 16, style: .continuous), count: 3), value: value)
+                            .changeEffect(
+                                .pulse(shape: RoundedRectangle(cornerRadius: 16, style: .continuous), count: 3),
+                                value: value
+                            )
                             .tint(.green)
 
                         Label("Jump", systemImage: "arrow.forward.square")

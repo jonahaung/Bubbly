@@ -85,7 +85,7 @@ struct WiggleSimulationModifier: ViewModifier, Simulative {
                     }
                 }
         }
-        .onChange(of: impulseCount) { newValue in
+        .onChange(of: impulseCount) { _, newValue in
             withAnimation(nil) {
                 wiggleCount += 2
 

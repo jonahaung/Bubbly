@@ -61,7 +61,9 @@ public extension AnyChangeEffect {
         rate: SpinRate = .default
     ) -> AnyChangeEffect {
         .simulation { change in
-            SpinSimulationModifier(impulseCount: change, axis: axis, anchor: anchor, anchorZ: anchorZ, perspective: perspective, additionalSpeed: speedBoost, rate: rate)
+            SpinSimulationModifier(
+                impulseCount: change, axis: axis, anchor: anchor, anchorZ: anchorZ, perspective: perspective,
+                additionalSpeed: speedBoost, rate: rate)
         }
     }
 }
@@ -121,7 +123,7 @@ struct SpinSimulationModifier: ViewModifier, Simulative {
                     }
                 }
         }
-        .onChange(of: impulseCount) { newValue in
+        .onChange(of: impulseCount) { _, newValue in
             withAnimation(nil) {
                 if angleVelocity <= .degrees(10) {
                     angleVelocity = rate.initialVelocity
@@ -281,9 +283,9 @@ struct SpinSimulationModifier: ViewModifier, Simulative {
 
                     Button("Send") {}
                         .buttonStyle(.borderedProminent)
-                    #if os(iOS)
-                        .buttonBorderShape(.capsule)
-                    #endif
+                        #if os(iOS)
+                            .buttonBorderShape(.capsule)
+                        #endif
                         .tint(.green)
                 }
                 .padding()

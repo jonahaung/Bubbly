@@ -139,14 +139,14 @@ struct PulseGlowModifier: ViewModifier, Simulative {
         TimelineView(.animation(paused: isSimulationPaused)) { context in
             content
                 .modifier(GlowModifier(glow: glow, color: color, radius: radius))
-                .onChange(of: context.date) { (newValue: Date) in
-                    let duration = Double(newValue.timeIntervalSince(context.date))
+                .onChange(of: context.date) { oldValue, newValue in
+                    let duration = Double(newValue.timeIntervalSince(oldValue))
                     withAnimation(nil) {
                         update(clamp(0, duration, 1 / 30))
                     }
                 }
         }
-        .onChange(of: impulseCount) { newValue in
+        .onChange(of: impulseCount) { _, newValue in
             withAnimation(nil) {
                 if glowVelocity <= 0.05 {
                     glowVelocity = 5

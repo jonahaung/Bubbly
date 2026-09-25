@@ -145,14 +145,14 @@ private struct RepeatingChangeEffectModifier: ViewModifier {
                     timer.resume(interval: interval, delay: effect.delay)
                 }
             }
-            .onChange(of: isEnabled) { isEnabled in
+            .onChange(of: isEnabled) { _, isEnabled in
                 if isEnabled {
                     timer.resume(interval: interval, delay: effect.delay)
                 } else {
                     timer.pause()
                 }
             }
-            .onChange(of: interval) { interval in
+            .onChange(of: interval) { _, interval in
                 if isEnabled {
                     timer.resume(interval: interval, delay: effect.delay)
                 }

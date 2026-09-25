@@ -24,27 +24,27 @@ public final class AttachmentPreviewViewModel {
         switch attachment.attachmentType {
         case .image:
             if attachment.fileExist(),
-               let thumb = attachment.thumbnailImage()
+                let thumb = attachment.thumbnailImage()
             {
                 return .image(thumbnail: thumb)
             }
         case .imageUploading:
             if attachment.fileExist(),
-               let url = attachment.file()?.url,
-               let thumb = attachment.thumbnailImage()
+                let url = attachment.file()?.url,
+                let thumb = attachment.thumbnailImage()
             {
                 return .imageUpload(localURL: url, thumbnail: thumb)
             }
         case .video:
             if attachment.fileExist(),
-               let url = attachment.localURL(),
-               let thumb = attachment.thumbnailImage()
+                let url = attachment.localURL(),
+                let thumb = attachment.thumbnailImage()
             {
                 return .video(videoURL: url, thumbnail: thumb)
             }
         case .link:
             if attachment.fileExist(),
-               let thumb = attachment.image()
+                let thumb = attachment.image()
             {
                 return .link(thumbnail: thumb)
             }
@@ -65,7 +65,7 @@ public final class AttachmentPreviewViewModel {
             do {
                 let data = try await attachmentFetcher.fetch(
                     attachment,
-                    intent: .prefetch
+                    intent: .visible
                 )
                 await MainActor.run {
                     attachmentData = data

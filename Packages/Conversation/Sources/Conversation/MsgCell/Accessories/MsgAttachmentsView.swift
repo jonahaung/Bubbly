@@ -12,7 +12,6 @@ struct MsgAttachmentsView: View {
 
     @Environment(\.sharedNamespace) private var namespace
     @State private var selection: Attachment?
-    @State private var uploadAccumulator = AttachmentUploadAccumulator()
     @Environment(\.msgCellActions) private var msgCellActions
 
     private var attachments: [Attachment] { state.attachments ?? [] }
@@ -36,24 +35,19 @@ struct MsgAttachmentsView: View {
                         .zoom(sourceID: attachment.uid, in: namespace)
                     )
             }
-            .onChange(of: state.msg.uid) {
-                uploadAccumulator.reset()
-            }
         }
     }
 
     private func onUploaded(attachment: Attachment) {
-        guard
-            let completedAttachments = uploadAccumulator.complete(
-                attachment,
-                in: attachments
-            )
+        guard var updatedAttachments = state.attachments,
+            let index = updatedAttachments.firstIndex(where: { $0.uid == attachment.uid })
         else {
             return
         }
 
+        updatedAttachments[index] = attachment
         var msg = state.msg
-        msg.attachments = completedAttachments
+        msg.attachments = updatedAttachments
         msgCellActions?(.onUploadedAttachments(msg))
     }
 }

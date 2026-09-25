@@ -24,7 +24,7 @@ final class ScrollCoordinator {
     private var state: State = .init()
 
     @ObservationIgnored
-    private var paginationState: PaginatableState?
+    var paginationState: PaginatableState?
 
     var scrollPosition: ScrollPosition
 
@@ -64,10 +64,8 @@ extension ScrollCoordinator {
         switch intent {
         case .onScrollGeometryChange(let oldValue, let newValue):
             handleScrollGeometryChange(from: oldValue, to: newValue)
-
         case .onScrollPhaseChange(let oldValue, let newValue, let context):
             handleScrollPhaseChange(from: oldValue, to: newValue, context: context)
-
         case .begin(let update):
             begin(updates: update)
         }
@@ -217,7 +215,6 @@ extension ScrollCoordinator {
         }
 
         let strategy: ScrollPositionItem.Properties = state.phase.isScrolling ? .notAnimated : .scroll
-
         performScroll(to: .y(y, strategy))
     }
 }

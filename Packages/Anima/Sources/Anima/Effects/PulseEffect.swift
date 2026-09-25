@@ -24,18 +24,23 @@ public extension AnyChangeEffect {
     ///   - drawingMode: The mode used to render the shape. Defaults to `fill`.
     ///   - count: The number of shapes to emit. Defaults to `1`.
     ///   - layer: The `ParticleLayer` on which to render the effect. Defaults to `local`.
-    static func pulse(shape: some InsettableShape, style: some ShapeStyle = .tint, drawingMode: PulseDrawingMode = .fill, count: Int = 1, layer: ParticleLayer = .local) -> AnyChangeEffect {
+    static func pulse(
+        shape: some InsettableShape, style: some ShapeStyle = .tint, drawingMode: PulseDrawingMode = .fill,
+        count: Int = 1, layer: ParticleLayer = .local
+    ) -> AnyChangeEffect {
         let clampedCount = max(1, count)
         let cooldown = Double(clampedCount - 1) * 0.2
         switch drawingMode {
         case .stroke:
-            return .animation({ change in
-                PulseStrokeModifier(shape: shape, style: style, layer: layer, count: clampedCount, change: change)
-            }, animation: .linear(duration: 2), cooldown: cooldown)
+            return .animation(
+                { change in
+                    PulseStrokeModifier(shape: shape, style: style, layer: layer, count: clampedCount, change: change)
+                }, animation: .linear(duration: 2), cooldown: cooldown)
         case .fill:
-            return .animation({ change in
-                PulseFillModifier(shape: shape, style: style, layer: layer, count: clampedCount, change: change)
-            }, animation: .linear(duration: 4), cooldown: cooldown)
+            return .animation(
+                { change in
+                    PulseFillModifier(shape: shape, style: style, layer: layer, count: clampedCount, change: change)
+                }, animation: .linear(duration: 4), cooldown: cooldown)
         }
     }
 }
@@ -99,7 +104,9 @@ private final class ItemTimer: ObservableObject {
     }
 }
 
-private struct PulseStrokeModifier<EffectShape: InsettableShape, EffectShapeStyle: ShapeStyle>: ViewModifier, Animatable, AnimatableModifier {
+private struct PulseStrokeModifier<EffectShape: InsettableShape, EffectShapeStyle: ShapeStyle>: ViewModifier,
+    Animatable, AnimatableModifier
+{
     var shape: EffectShape
 
     var style: EffectShapeStyle
@@ -128,7 +135,10 @@ private struct PulseStrokeModifier<EffectShape: InsettableShape, EffectShapeStyl
                                 .fill(.clear)
                                 .transition(
                                     AnyTransition.asymmetric(
-                                        insertion: .movingParts.pulseStroke(shape: shape, style: style, lineWidth: lineWidth, layer: layer, insetAmount: insetAmount, count: count) {
+                                        insertion: .movingParts.pulseStroke(
+                                            shape: shape, style: style, lineWidth: lineWidth, layer: layer,
+                                            insetAmount: insetAmount, count: count
+                                        ) {
                                             timer.remove(item)
                                         },
                                         removal: .identity
@@ -140,13 +150,15 @@ private struct PulseStrokeModifier<EffectShape: InsettableShape, EffectShapeStyl
                 }
                 .allowsHitTesting(false)
             }
-            .onChange(of: change) { c in
+            .onChange(of: change) { _, c in
                 timer.queue(pulses: max(0, count))
             }
     }
 }
 
-private struct PulseFillModifier<EffectShape: InsettableShape, EffectShapeStyle: ShapeStyle>: ViewModifier, Animatable, AnimatableModifier {
+private struct PulseFillModifier<EffectShape: InsettableShape, EffectShapeStyle: ShapeStyle>: ViewModifier, Animatable,
+    AnimatableModifier
+{
     var shape: EffectShape
 
     var style: EffectShapeStyle
@@ -174,7 +186,10 @@ private struct PulseFillModifier<EffectShape: InsettableShape, EffectShapeStyle:
                                 .fill(.clear)
                                 .transition(
                                     AnyTransition.asymmetric(
-                                        insertion: .movingParts.pulseFill(shape: shape, style: style, layer: layer, insetAmount: insetAmount, count: count) {
+                                        insertion: .movingParts.pulseFill(
+                                            shape: shape, style: style, layer: layer, insetAmount: insetAmount,
+                                            count: count
+                                        ) {
                                             timer.remove(item)
                                         },
                                         removal: .identity
@@ -185,7 +200,7 @@ private struct PulseFillModifier<EffectShape: InsettableShape, EffectShapeStyle:
                     .compositingGroup()
                 }
             }
-            .onChange(of: change) { _ in
+            .onChange(of: change) { _, _ in
                 timer.queue(pulses: max(0, count))
             }
     }
@@ -193,8 +208,11 @@ private struct PulseFillModifier<EffectShape: InsettableShape, EffectShapeStyle:
 
 @MainActor
 private extension AnyTransition.MovingParts {
-    static func pulseStroke(shape: some InsettableShape, style: some ShapeStyle, lineWidth: CGFloat, layer: ParticleLayer, insetAmount: CGFloat, count: Int,
-                            onCompletion: @escaping () -> Void) -> AnyTransition {
+    static func pulseStroke(
+        shape: some InsettableShape, style: some ShapeStyle, lineWidth: CGFloat, layer: ParticleLayer,
+        insetAmount: CGFloat, count: Int,
+        onCompletion: @escaping () -> Void
+    ) -> AnyTransition {
         .modifier(
             active: PulseStrokeAnimationModifier(
                 animatableData: 0.0,
@@ -216,7 +234,10 @@ private extension AnyTransition.MovingParts {
         )
     }
 
-    static func pulseFill(shape: some InsettableShape, style: some ShapeStyle, layer: ParticleLayer, insetAmount: CGFloat, count: Int, onCompletion: @escaping () -> Void) -> AnyTransition {
+    static func pulseFill(
+        shape: some InsettableShape, style: some ShapeStyle, layer: ParticleLayer, insetAmount: CGFloat, count: Int,
+        onCompletion: @escaping () -> Void
+    ) -> AnyTransition {
         .modifier(
             active: PulseFillAnimationModifier(
                 animatableData: 0.0,
@@ -237,7 +258,9 @@ private extension AnyTransition.MovingParts {
     }
 }
 
-private struct PulseStrokeAnimationModifier<EffectShape: InsettableShape, EffectShapeStyle: ShapeStyle>: ViewModifier, Animatable, AnimatableModifier {
+private struct PulseStrokeAnimationModifier<EffectShape: InsettableShape, EffectShapeStyle: ShapeStyle>: ViewModifier,
+    Animatable, AnimatableModifier
+{
     var animatableData: CGFloat
 
     var shape: EffectShape
@@ -271,7 +294,7 @@ private struct PulseStrokeAnimationModifier<EffectShape: InsettableShape, Effect
                     .brightness(colorScheme == .dark ? Double(v) * 0.75 : 0.0)
             }
             .animation(nil, value: animatableData)
-            .onChange(of: animatableData == 1.0) { newValue in
+            .onChange(of: animatableData == 1.0) { _, newValue in
                 if newValue {
                     onCompletion()
                 }
@@ -279,7 +302,9 @@ private struct PulseStrokeAnimationModifier<EffectShape: InsettableShape, Effect
     }
 }
 
-private struct PulseFillAnimationModifier<EffectShape: InsettableShape, EffectShapeStyle: ShapeStyle>: ViewModifier, Animatable, AnimatableModifier {
+private struct PulseFillAnimationModifier<EffectShape: InsettableShape, EffectShapeStyle: ShapeStyle>: ViewModifier,
+    Animatable, AnimatableModifier
+{
     var animatableData: CGFloat
 
     var shape: EffectShape
@@ -309,7 +334,7 @@ private struct PulseFillAnimationModifier<EffectShape: InsettableShape, EffectSh
                     .opacity(0.33 - asin(.pi * Double(progress) / 2.0))
             }
             .animation(nil, value: animatableData)
-            .onChange(of: animatableData == 1.0) { newValue in
+            .onChange(of: animatableData == 1.0) { _, newValue in
                 if newValue {
                     onCompletion()
                 }
@@ -350,7 +375,10 @@ private extension CGFloat {
                         .foregroundColor(.white)
                         .padding()
                         .background(.green, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                        .changeEffect(.pulse(shape: RoundedRectangle(cornerRadius: 16, style: .continuous), count: 3), value: pingCount)
+                        .changeEffect(
+                            .pulse(shape: RoundedRectangle(cornerRadius: 16, style: .continuous), count: 3),
+                            value: pingCount
+                        )
                         .tint(.green)
                         .onTapGesture {
                             pingCount += 1
@@ -366,17 +394,29 @@ private extension CGFloat {
                             .background(.mint, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                             .brightness(isPressingPulse ? -0.15 : 0)
                             .scaleEffect(x: scale, y: scale)
-                            .animation(.spring(response: isPressingPulse ? 0.1 : 0.4, dampingFraction: isPressingPulse ? 1 : 0.5), value: isPressingPulse)
+                            .animation(
+                                .spring(
+                                    response: isPressingPulse ? 0.1 : 0.4, dampingFraction: isPressingPulse ? 1 : 0.5),
+                                value: isPressingPulse
+                            )
                             .changeEffect(.shine(duration: 0.5), value: pulseCount)
-                            .changeEffect(.pulse(shape: RoundedRectangle(cornerRadius: 16, style: .continuous), drawingMode: .stroke, count: 3, layer: .named("root")).delay(0.1), value: pulseCount)
+                            .changeEffect(
+                                .pulse(
+                                    shape: RoundedRectangle(cornerRadius: 16, style: .continuous), drawingMode: .stroke,
+                                    count: 3, layer: .named("root")
+                                ).delay(0.1), value: pulseCount
+                            )
                             .tint(.mint)
                             .font(.system(.title, design: .rounded).bold())
                     }
-                    ._onButtonGesture(pressing: { pressing in
-                        isPressingPulse = pressing
-                    }, perform: {
-                        pulseCount += 1
-                    })
+                    ._onButtonGesture(
+                        pressing: { pressing in
+                            isPressingPulse = pressing
+                        },
+                        perform: {
+                            pulseCount += 1
+                        }
+                    )
                     .padding()
                     .clipped()
 
@@ -389,16 +429,26 @@ private extension CGFloat {
                                 .foregroundStyle(.red, .red.opacity(0.5))
                                 .brightness(isPressingHeartbeat ? -0.15 : 0)
                                 .scaleEffect(x: scale, y: scale)
-                                .animation(.spring(response: isPressingHeartbeat ? 0.1 : 0.4, dampingFraction: isPressingHeartbeat ? 1 : 0.5), value: isPressingHeartbeat)
+                                .animation(
+                                    .spring(
+                                        response: isPressingHeartbeat ? 0.1 : 0.4,
+                                        dampingFraction: isPressingHeartbeat ? 1 : 0.5), value: isPressingHeartbeat
+                                )
                                 .changeEffect(.shine(duration: 0.5), value: hearbeatCount)
-                                .changeEffect(.pulse(shape: Circle().inset(by: 6.5), style: .red, drawingMode: .stroke, count: 50).delay(0.1), value: hearbeatCount)
+                                .changeEffect(
+                                    .pulse(shape: Circle().inset(by: 6.5), style: .red, drawingMode: .stroke, count: 50)
+                                        .delay(0.1), value: hearbeatCount
+                                )
                                 .font(.system(size: 72, design: .rounded))
                         }
-                        ._onButtonGesture(pressing: { pressing in
-                            isPressingHeartbeat = pressing
-                        }, perform: {
-                            hearbeatCount += 1
-                        })
+                        ._onButtonGesture(
+                            pressing: { pressing in
+                                isPressingHeartbeat = pressing
+                            },
+                            perform: {
+                                hearbeatCount += 1
+                            }
+                        )
                         .labelStyle(.iconOnly)
 
                         VStack(spacing: 32) {
@@ -407,15 +457,24 @@ private extension CGFloat {
                                 .foregroundStyle(.red, .red.opacity(0.5))
                                 .brightness(isPressingHeartbeat ? -0.15 : 0)
                                 .scaleEffect(x: scale, y: scale)
-                                .animation(.spring(response: isPressingHeartbeat ? 0.1 : 0.4, dampingFraction: isPressingHeartbeat ? 1 : 0.5), value: isPressingHeartbeat)
+                                .animation(
+                                    .spring(
+                                        response: isPressingHeartbeat ? 0.1 : 0.4,
+                                        dampingFraction: isPressingHeartbeat ? 1 : 0.5), value: isPressingHeartbeat
+                                )
                                 .changeEffect(.shine(duration: 0.5), value: hearbeatCount)
-                                .changeEffect(.pulse(shape: Circle().inset(by: 6.5), style: .red, drawingMode: .stroke).delay(0.1), value: hearbeatCount)
+                                .changeEffect(
+                                    .pulse(shape: Circle().inset(by: 6.5), style: .red, drawingMode: .stroke).delay(
+                                        0.1), value: hearbeatCount)
                         }
-                        ._onButtonGesture(pressing: { pressing in
-                            isPressingHeartbeat = pressing
-                        }, perform: {
-                            hearbeatCount += 1
-                        })
+                        ._onButtonGesture(
+                            pressing: { pressing in
+                                isPressingHeartbeat = pressing
+                            },
+                            perform: {
+                                hearbeatCount += 1
+                            }
+                        )
                         .labelStyle(.iconOnly)
                     }
 

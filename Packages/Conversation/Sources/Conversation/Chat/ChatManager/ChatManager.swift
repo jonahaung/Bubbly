@@ -48,6 +48,8 @@ final class ChatManager: ErrorPresenter {
     @ObservationIgnored
     var focusState: SharedFocusState<ConversationFocusState>?
 
+    @ObservationIgnored
+    var queue = AsyncQueue(attributes: [])
     var state: State
 
     var reloadID = true
@@ -58,19 +60,17 @@ final class ChatManager: ErrorPresenter {
 
         datasource = PaginatedDatasource(pageSize: data.pagination.pageSize)
         scrollController = ScrollCoordinator(lastPage: data.properties.lastPage)
-
+        messages = Messages(data.msgs, pagination: data.pagination)
+        members = data.members
         let conversationID = data.pagination.conID
         presentation = Presenter(conversationID)
         dataObserver = ChatDataReceiver(conversationID)
         attachmentFetcher = AttachmentFetcher()
-
         state = State(
             conversation: data.conversation,
             theme: .init(data.properties.theme),
             properties: data.properties
         )
-        messages = Messages(data.msgs, pagination: data.pagination)
-        members = data.members
     }
 
     deinit {
@@ -90,9 +90,7 @@ extension ChatManager {
             scrollController.send(newValue)
 
         case .scrollDownButtonTapped:
-            Task {
-                try? await handleScrollDownButtonTap()
-            }
+            handleScrollDownButtonTap()
 
         case .cellAction(let newValue):
             handleMsgCellInteraction(action: newValue)
@@ -109,41 +107,39 @@ extension ChatManager {
 extension ChatManager {
 
     func onViewAppear() async {
-        let hasViewLoaded = dataObserver.delegate !== nil && scrollController.delegate !== nil
+        do {
+            let hasViewLoaded = dataObserver.delegate !== nil && scrollController.delegate !== nil
 
-        if !hasViewLoaded {
-            layoutIfNeeded()
-            dataObserver.delegate = self
-            scrollController.delegate = self
-            try? await setIncomingMsgsAsRead(before: .now)
-        }
+            if !hasViewLoaded {
+                dataObserver.delegate = self
+                scrollController.delegate = self
 
-        try? await reloadConversation(refetch: !hasViewLoaded)
-
-        if !hasViewLoaded {
-            try? await Store.shared.conversationPropertiesStore?.updateAndSave(uid: messages.pagination.conID) {
-                model in
-                model.lastPage = nil
             }
+            try await reloadConversation(refetch: !hasViewLoaded)
+
+            try await setIncomingMsgsAsRead(before: .now)
+        } catch {
+            await showError(error)
         }
     }
 
     func prepareToExit() async throws {
+        try await saveLastPageIfNeeded()
+        router?.pop()
+    }
+
+    func saveLastPageIfNeeded() async throws {
         guard shouldSaveLastPage else {
-            router?.pop()
             return
         }
-
         let lastPage = makeLastPage()
         try await Store.shared.conversationPropertiesStore?.updateAndSave(uid: state.properties.uid) { model in
             model.lastPage = lastPage
         }
-        router?.pop()
     }
 
     private var shouldSaveLastPage: Bool {
-        guard scrollController.geometry != .empty else { return false }
-        return scrollController.geometry.scrolledPosition != .atBottom
+        scrollController.geometry != .empty
     }
 
     private func makeLastPage() -> LastPage? {
@@ -160,13 +156,18 @@ extension ChatManager {
 
 extension ChatManager {
 
-    private func handleScrollDownButtonTap() async throws {
-        guard let lastMessage = try await MsgRepo.lastMsg(conID: state.conversation.uid) else { return }
-
-        if messages.shouldPaginate(at: .bottom) {
-            scrollController.send(.begin(.focus(msg: lastMessage)))
-        } else {
-            scrollController.performScroll(to: .edge(.bottom, .animated()))
+    private func handleScrollDownButtonTap() {
+        queue.addOperation { [self] in
+            do {
+                if messages.shouldPaginate(at: .bottom) {
+                    guard let lastMessage = try await MsgRepo.lastMsg(conID: state.conversation.uid) else { return }
+                    scrollController.send(.begin(.focus(msg: lastMessage)))
+                } else {
+                    scrollController.performScroll(to: .edge(.bottom, .animated()))
+                }
+            } catch {
+                await showError(error)
+            }
         }
     }
 }

@@ -18,7 +18,9 @@ public extension AnyChangeEffect {
     ///   - origin: The origin of the particles.
     ///   - layer: The `ParticleLayer` on which to render the effect, default is `local`.
     ///   - particles: The particles to emit.
-    static func spray(origin: UnitPoint = .center, layer: ParticleLayer = .local, @ViewBuilder _ particles: () -> some View) -> AnyChangeEffect {
+    static func spray(
+        origin: UnitPoint = .center, layer: ParticleLayer = .local, @ViewBuilder _ particles: () -> some View
+    ) -> AnyChangeEffect {
         let particles = particles()
         return .simulation { change in
             SpraySimulation(view: particles, impulseCount: change, origin: origin, layer: layer)
@@ -52,7 +54,10 @@ struct SpraySimulation<ParticleView: View>: ViewModifier, Simulative {
     @Environment(\.particleLayerNames)
     var particleLayerNames
 
-    init(view: ParticleView, impulseCount: Int, initialVelocity: CGFloat = 0.0, origin: UnitPoint = .center, layer: ParticleLayer) {
+    init(
+        view: ParticleView, impulseCount: Int, initialVelocity: CGFloat = 0.0, origin: UnitPoint = .center,
+        layer: ParticleLayer
+    ) {
         particle = view
         self.impulseCount = impulseCount
         self.initialVelocity = initialVelocity
@@ -73,11 +78,12 @@ struct SpraySimulation<ParticleView: View>: ViewModifier, Simulative {
     }
 
     func body(content: Content) -> some View {
-        let hasParticleLayer = if let name = layer.name, particleLayerNames.contains(name) {
-            true
-        } else {
-            false
-        }
+        let hasParticleLayer =
+            if let name = layer.name, particleLayerNames.contains(name) {
+                true
+            } else {
+                false
+            }
 
         let overlay = TimelineView(.animation(paused: isSimulationPaused)) { context in
             let insets = EdgeInsets(top: 320, leading: 160, bottom: 40, trailing: 160)
@@ -101,9 +107,10 @@ struct SpraySimulation<ParticleView: View>: ViewModifier, Simulative {
                 context.translateBy(x: size.width / 2, y: insets.top + (size.height - insets.top - insets.bottom) / 2)
 
                 let indices = SIMD16<Float>(stride(from: 0.0, to: 16, by: 1))
-                let scaleFactors = SIMD16<Float>(stride(from: 0.0, to: 16, by: 1).map { (f: Float) in
-                    f.truncatingRemainder(dividingBy: 5.0) / 5.0
-                })
+                let scaleFactors = SIMD16<Float>(
+                    stride(from: 0.0, to: 16, by: 1).map { (f: Float) in
+                        f.truncatingRemainder(dividingBy: 5.0) / 5.0
+                    })
                 let value: SIMD16<Float> = indices / 10
 
                 /// To simply the expression :rolleyes:
@@ -115,9 +122,9 @@ struct SpraySimulation<ParticleView: View>: ViewModifier, Simulative {
                 for ping in pings {
                     var rng = SeededRandomNumberGenerator(seed: ping.id)
 
-                    let symbolOffset = (0 ... 10).randomElement(using: &rng) ?? 0
+                    let symbolOffset = (0...10).randomElement(using: &rng) ?? 0
 
-                    let value2 = SIMD16<Float>.random(in: 0.0 ... 1.0, using: &rng) + scaleFactors
+                    let value2 = SIMD16<Float>.random(in: 0.0...1.0, using: &rng) + scaleFactors
 
                     let insetAmount: Float = cos(ping.progress) * pow(ping.progress, 1) * -Float(symbolHeight) * 2.5
 
@@ -125,12 +132,12 @@ struct SpraySimulation<ParticleView: View>: ViewModifier, Simulative {
                     let sineScales: SIMD16<Float> = simd_abs(sin(phases * SIMD16(repeating: .pi)))
                     let scales: SIMD16<Float> = sineScales * (1.0 - pow(ping.progress, 8.0)) * pow(ping.progress, 0.25)
 
-                    let brightness = SIMD16<Float>.random(in: -0.1 ... 0.1, using: &rng)
+                    let brightness = SIMD16<Float>.random(in: -0.1...0.1, using: &rng)
 
                     let x: SIMD16<Float> = adjustedValue * (sin(ping.progress * Float.pi) * Float(symbolWidth) * -2)
                     let y: SIMD16<Float> = insetAmount - (value2 * ping.progress) * Float(symbolHeight) * 2.5
 
-                    for i in 0 ... 10 {
+                    for i in 0...10 {
                         let point = CGPoint(x: x[i], y: y[i])
 
                         let angle = Angle(degrees: angles[i])
@@ -151,7 +158,8 @@ struct SpraySimulation<ParticleView: View>: ViewModifier, Simulative {
                             context.rotate(by: .degrees(Double(ping.progress) * -angle.degrees + -angle.degrees * 0.25))
                             context.translateBy(x: point.x, y: point.y)
                             context.scaleBy(x: scale, y: scale)
-                            context.rotate(by: .degrees(sqrt(Double(ping.progress) * 2) * angle.degrees - angle.degrees * 0.25))
+                            context.rotate(
+                                by: .degrees(sqrt(Double(ping.progress) * 2) * angle.degrees - angle.degrees * 0.25))
                             context.draw(symbol, at: .zero)
                         }
                     }
@@ -177,7 +185,7 @@ struct SpraySimulation<ParticleView: View>: ViewModifier, Simulative {
                 overlay
             }
             .usesCustomHaptics()
-            .onChange(of: impulseCount) { newValue in
+            .onChange(of: impulseCount) { _, newValue in
                 let ping = Ping(
                     id: UUID(),
                     progress: 0,
@@ -228,20 +236,23 @@ struct SpraySimulation<ParticleView: View>: ViewModifier, Simulative {
             var rng = SeededRandomNumberGenerator(seed: 123)
 
             return try? CHHapticPattern(
-                events: (0 ..< 5).map { i in
+                events: (0..<5).map { i in
                     let i = Float(i)
 
-                    let relativeTime: TimeInterval = if i == 0 {
-                        0
-                    } else {
-                        Double(i * 0.03) + .random(in: -0.005 ... 0.005, using: &rng)
-                    }
+                    let relativeTime: TimeInterval =
+                        if i == 0 {
+                            0
+                        } else {
+                            Double(i * 0.03) + .random(in: -0.005...0.005, using: &rng)
+                        }
 
                     return CHHapticEvent(
                         eventType: .hapticContinuous,
                         parameters: [
-                            CHHapticEventParameter(parameterID: .hapticIntensity, value: 0.6 * (i / 5) + .random(in: -0.2 ... 0.2, using: &rng)),
-                            CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.2)
+                            CHHapticEventParameter(
+                                parameterID: .hapticIntensity,
+                                value: 0.6 * (i / 5) + .random(in: -0.2...0.2, using: &rng)),
+                            CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.2),
                         ],
                         relativeTime: relativeTime,
                         duration: 0.05
@@ -310,15 +321,17 @@ private extension Angle {
                             .font(.largeTitle)
                         }
                         .buttonStyle(.bordered)
-                        .changeEffect(.spray(origin: UnitPoint(x: 0.25, y: 0.25)) {
-                            Group {
-                                Image(systemName: "suit.heart.fill").foregroundColor(.red)
-                                Image(systemName: "suit.club.fill").foregroundColor(.black)
-                                Image(systemName: "suit.spade.fill").foregroundColor(.black)
-                                Image(systemName: "suit.diamond.fill").foregroundColor(.red)
-                            }
-                            .font(.largeTitle)
-                        }, value: likesLarge)
+                        .changeEffect(
+                            .spray(origin: UnitPoint(x: 0.25, y: 0.25)) {
+                                Group {
+                                    Image(systemName: "suit.heart.fill").foregroundColor(.red)
+                                    Image(systemName: "suit.club.fill").foregroundColor(.black)
+                                    Image(systemName: "suit.spade.fill").foregroundColor(.black)
+                                    Image(systemName: "suit.diamond.fill").foregroundColor(.red)
+                                }
+                                .font(.largeTitle)
+                            }, value: likesLarge
+                        )
                         .tint(.green)
                         .frame(maxWidth: .infinity, maxHeight: 240, alignment: .bottom)
                     }
@@ -400,7 +413,7 @@ private extension Angle {
                 NavigationView {
                     List {
                         Section("Unclipped") {
-                            ForEach(0 ..< 5) { i in
+                            ForEach(0..<5) { i in
                                 HStack {
                                     Text("Cell #\(i)")
                                     Spacer()
@@ -413,16 +426,17 @@ private extension Angle {
                                     .monospacedDigit()
                                     .controlSize(.small)
                                     .buttonBorderShape(.capsule)
-                                    .changeEffect(.spray(layer: .named("root")) {
-                                        Image(systemName: "heart.fill").foregroundStyle(.tint)
-                                            .tint(.pink)
-                                    }, value: claps[i, default: 0])
+                                    .changeEffect(
+                                        .spray(layer: .named("root")) {
+                                            Image(systemName: "heart.fill").foregroundStyle(.tint)
+                                                .tint(.pink)
+                                        }, value: claps[i, default: 0])
                                 }
                             }
                         }
 
                         Section("Clipped") {
-                            ForEach(0 ..< 5) { i in
+                            ForEach(0..<5) { i in
                                 HStack {
                                     Text("Cell #\(i)")
                                     Spacer()
@@ -435,10 +449,11 @@ private extension Angle {
                                     .monospacedDigit()
                                     .controlSize(.small)
                                     .buttonBorderShape(.capsule)
-                                    .changeEffect(.spray {
-                                        Image(systemName: "heart.fill").foregroundStyle(.tint)
-                                            .tint(.pink)
-                                    }, value: claps[i, default: 0])
+                                    .changeEffect(
+                                        .spray {
+                                            Image(systemName: "heart.fill").foregroundStyle(.tint)
+                                                .tint(.pink)
+                                        }, value: claps[i, default: 0])
                                 }
                             }
                         }

@@ -152,7 +152,7 @@ public extension AsyncQueue {
     /// Submit a throwing operation to the queue.
     @discardableResult
     func addOperation<Success>(
-        priority: TaskPriority? = .background,
+        priority: TaskPriority? = .userInitiated,
         barrier: Bool = true,
         @_inheritActorContext operation: @escaping ThrowingOperation<Success>
     ) -> Task<Success, Error> {
@@ -168,7 +168,7 @@ public extension AsyncQueue {
     /// Submit an operation to the queue.
     @discardableResult
     func addOperation<Success>(
-        priority: TaskPriority? = .background,
+        priority: TaskPriority? = .userInitiated,
         barrier: Bool = true,
         @_inheritActorContext operation: @escaping Operation<Success>
     ) -> Task<Success, Never> {

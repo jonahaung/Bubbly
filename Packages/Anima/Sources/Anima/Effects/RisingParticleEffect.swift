@@ -15,7 +15,9 @@ public extension AnyChangeEffect {
     ///   - origin: The origin of the particle.
     ///   - layer: The `ParticleLayer` on which to render the effect, default is `local`.
     ///   - particles: The particles to emit.
-    static func rise(origin: UnitPoint = .center, layer: ParticleLayer = .local, @ViewBuilder _ particles: () -> some View) -> AnyChangeEffect {
+    static func rise(
+        origin: UnitPoint = .center, layer: ParticleLayer = .local, @ViewBuilder _ particles: () -> some View
+    ) -> AnyChangeEffect {
         let particles = particles()
         return .simulation { change in
             RisingParticleSimulation(origin: origin, particles: particles, impulseCount: change, layer: layer)
@@ -28,7 +30,8 @@ public extension AnyChangeEffect {
     ///   - origin: The origin of the particle.
     ///   - particle: The particle to emit.
     @available(*, deprecated, renamed: "rise(origin:_:)")
-    static func risingParticle(origin: UnitPoint = .center, @ViewBuilder _ particle: () -> some View) -> AnyChangeEffect {
+    static func risingParticle(origin: UnitPoint = .center, @ViewBuilder _ particle: () -> some View) -> AnyChangeEffect
+    {
         rise(origin: origin, particle)
     }
 }
@@ -103,7 +106,7 @@ struct RisingParticleSimulation<ParticlesView: View>: ViewModifier, Simulative {
 
                     let progress = item.progress
 
-                    let angle = Angle.degrees(.random(in: -10 ... 10, using: &rng))
+                    let angle = Angle.degrees(.random(in: -10...10, using: &rng))
 
                     let scale = 1 + 0.2 * progress
 
@@ -111,8 +114,8 @@ struct RisingParticleSimulation<ParticlesView: View>: ViewModifier, Simulative {
                     context.drawLayer { context in
                         context.rotate(by: .degrees(-angle.degrees * Double(1 - progress)))
                         context.translateBy(
-                            x: progress * sin(progress * 1.4 * .pi) * .random(in: -20 ... 20, using: &rng),
-                            y: progress * -50 - .random(in: 0 ... 10, using: &rng)
+                            x: progress * sin(progress * 1.4 * .pi) * .random(in: -20...20, using: &rng),
+                            y: progress * -50 - .random(in: 0...10, using: &rng)
                         )
                         context.rotate(by: angle)
                         context.scaleBy(x: scale, y: scale)
@@ -142,7 +145,7 @@ struct RisingParticleSimulation<ParticlesView: View>: ViewModifier, Simulative {
             .particleLayerOverlay(alignment: .top, layer: layer, isEnabled: !isSimulationPaused) {
                 overlay
             }
-            .onChange(of: impulseCount) { newValue in
+            .onChange(of: impulseCount) { _, newValue in
                 let item = Item(
                     id: UUID(),
                     progress: 0,
@@ -217,17 +220,18 @@ private struct RelativeOffsetModifier: GeometryEffect {
                             Text(claps.formatted())
                         }
                     }
-                    .changeEffect(.rise(origin: UnitPoint(x: 0.7, y: 0.5)) {
-                        Group {
-                            Text("+1")
-                            Image(systemName: "hands.clap")
-                            Image(systemName: "sparkle")
-                            Image(systemName: "hand.thumbsup")
-                        }
-                        .font(.caption.bold())
-                        .foregroundStyle(.tint)
-                        .tint(.blue)
-                    }, value: claps)
+                    .changeEffect(
+                        .rise(origin: UnitPoint(x: 0.7, y: 0.5)) {
+                            Group {
+                                Text("+1")
+                                Image(systemName: "hands.clap")
+                                Image(systemName: "sparkle")
+                                Image(systemName: "hand.thumbsup")
+                            }
+                            .font(.caption.bold())
+                            .foregroundStyle(.tint)
+                            .tint(.blue)
+                        }, value: claps)
 
                     Button {
                         stars += 1
@@ -237,12 +241,14 @@ private struct RelativeOffsetModifier: GeometryEffect {
                             Text("\(stars, format: .number)")
                         }
                     }
-                    .changeEffect(.rise(origin: UnitPoint(x: 0.7, y: 0.5)) {
-                        Text("\(1, format: .number.sign(strategy: .always()))")
-                            .font(.caption)
-                            .bold()
-                            .foregroundStyle(.tint)
-                    }, value: stars)
+                    .changeEffect(
+                        .rise(origin: UnitPoint(x: 0.7, y: 0.5)) {
+                            Text("\(1, format: .number.sign(strategy: .always()))")
+                                .font(.caption)
+                                .bold()
+                                .foregroundStyle(.tint)
+                        }, value: stars
+                    )
                     .tint(.yellow)
                     .environment(\.layoutDirection, .rightToLeft)
                     .environment(\.locale, .init(identifier: "ar_EG"))
@@ -255,10 +261,12 @@ private struct RelativeOffsetModifier: GeometryEffect {
                             Text(likes.formatted())
                         }
                     }
-                    .changeEffect(.rise(origin: UnitPoint(x: 0.3, y: 0.5)) {
-                        Image(systemName: "heart.fill")
-                            .foregroundStyle(.tint)
-                    }, value: likes)
+                    .changeEffect(
+                        .rise(origin: UnitPoint(x: 0.3, y: 0.5)) {
+                            Image(systemName: "heart.fill")
+                                .foregroundStyle(.tint)
+                        }, value: likes
+                    )
                     .clipped()
                     .tint(.red)
                 }
@@ -276,7 +284,7 @@ private struct RelativeOffsetModifier: GeometryEffect {
             var body: some View {
                 NavigationView {
                     List {
-                        ForEach(0 ..< 30) { i in
+                        ForEach(0..<30) { i in
                             HStack {
                                 Text("Cell #\(i)")
                                 Spacer()
@@ -289,9 +297,11 @@ private struct RelativeOffsetModifier: GeometryEffect {
                                 .monospacedDigit()
                                 .controlSize(.small)
                                 .buttonBorderShape(.capsule)
-                                .changeEffect(.rise(layer: .named("root")) {
-                                    Image(systemName: "heart.fill").foregroundStyle(.tint)
-                                }, value: claps[i, default: 0])
+                                .changeEffect(
+                                    .rise(layer: .named("root")) {
+                                        Image(systemName: "heart.fill").foregroundStyle(.tint)
+                                    }, value: claps[i, default: 0]
+                                )
                                 .tint(.red)
                             }
                         }

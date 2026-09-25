@@ -43,7 +43,8 @@ public enum MsgRepo {
     }
 
     public static func msgs(conID: String, offset: Int? = nil, limit: Int? = nil) async throws
-    -> [Message] {
+        -> [Message]
+    {
         let descriptor = descriptor(for: conID, order: .reverse, limit: limit, offset: offset)
         return try await withMsgStore { try await $0.fetch(descriptor).reversed() }
     }
@@ -69,19 +70,28 @@ public enum MsgRepo {
             try await $0.paginationSnapshot(conID: conID)
         }
     }
-    
-    public static func messages(conID: String, from: Date, to: Date) async throws -> [Message] {
-        var descriptor = FetchDescriptor<PMsg>(
+
+    public static func messages(conID: String, top: Date, bottom: Date) async throws -> [Message] {
+        let descriptor = FetchDescriptor<PMsg>(
             predicate: #Predicate {
-                $0.conID == conID && $0.date >= from && $0.date <= to
+                $0.conID == conID && $0.date >= top && $0.date <= bottom
             },
             sortBy: [.init(\.date, order: .forward)]
         )
-        descriptor.sortBy = [.init(\.date, order: .forward)]
         return try await withMsgStore {
             try await $0.fetch(descriptor)
         }
     }
+
+    public static func messages(for conID: String, lastPage: LastPage) async throws -> [Message] {
+        guard let top = try await Store.shared.msgStore?.fetch(uid: lastPage.topMsgID),
+            let bottom = try await Store.shared.msgStore?.fetch(uid: lastPage.bottomMsgID)
+        else {
+            return []
+        }
+        return try await messages(conID: conID, top: top.date, bottom: bottom.date)
+    }
+
     public static func messages(conID: String, to: Date, limit: Int) async throws -> [Message] {
         var descriptor = FetchDescriptor<PMsg>(
             predicate: #Predicate {
@@ -116,8 +126,11 @@ public extension MsgRepo {
         return try await withMsgStore {
             try await $0.fetchCount(
                 FetchDescriptor(
-                    predicate: PMsgPredicates
-                        .deliveryStatus(conID: conID, currentUserID: currentUserID, recipient: .incoming, deliveryStatus: .delivered, comparison: .lessThanOrEqual)
+                    predicate:
+                        PMsgPredicates
+                        .deliveryStatus(
+                            conID: conID, currentUserID: currentUserID, recipient: .incoming,
+                            deliveryStatus: .delivered, comparison: .lessThanOrEqual)
                 )
             )
         }
@@ -126,7 +139,8 @@ public extension MsgRepo {
     static func incomingUnreadMsgs(conID: String) async throws -> [Message] {
         let currentUserID = try CurrentUserID.get()
         var descriptor = FetchDescriptor(
-            predicate: PMsgPredicates
+            predicate:
+                PMsgPredicates
                 .deliveryStatus(
                     conID: conID,
                     currentUserID: currentUserID,
@@ -150,22 +164,23 @@ public extension MsgRepo {
 
         let currentUserID = try CurrentUserID.get()
 
-        let predicate: Predicate<PMsg> = if let comparison {
-            PMsgPredicates.deliveryStatus(
-                conID: conID,
-                currentUserID: currentUserID,
-                recipient: recipient,
-                deliveryStatus: deliveryStatus,
-                comparison: comparison
-            )
-        } else {
-            PMsgPredicates.deliveryStatusEqual(
-                conID: conID,
-                currentUserID: currentUserID,
-                recipient: recipient,
-                incomingStatus: deliveryStatus
-            )
-        }
+        let predicate: Predicate<PMsg> =
+            if let comparison {
+                PMsgPredicates.deliveryStatus(
+                    conID: conID,
+                    currentUserID: currentUserID,
+                    recipient: recipient,
+                    deliveryStatus: deliveryStatus,
+                    comparison: comparison
+                )
+            } else {
+                PMsgPredicates.deliveryStatusEqual(
+                    conID: conID,
+                    currentUserID: currentUserID,
+                    recipient: recipient,
+                    incomingStatus: deliveryStatus
+                )
+            }
 
         return try await withMsgStore {
             var descriptor = FetchDescriptor<PMsg>(predicate: predicate)
@@ -175,12 +190,14 @@ public extension MsgRepo {
     }
 
     static func outgoingUnreadMsgs(conID: String)
-        async throws -> [Message] {
+        async throws -> [Message]
+    {
         let currentUserID = try CurrentUserID.get()
         return try await withMsgStore(
             { store in
                 var descriptor = FetchDescriptor<PMsg>(
-                    predicate: PMsgPredicates
+                    predicate:
+                        PMsgPredicates
                         .deliveryStatus(
                             conID: conID,
                             currentUserID: currentUserID,

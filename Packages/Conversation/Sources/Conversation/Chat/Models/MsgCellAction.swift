@@ -9,7 +9,7 @@ import SwiftUI
 struct MsgCellAction {
     enum ActionType: Sendable {
         case onTapMsg(String)
-        case onMarkMsg(Message)
+        case onMarkMsg(String)
         case onTapAvatar(String)
         case onFocusMsgBubble(_ item: OverlayMenuItem?)
         case onUploadedAttachments(Message)
