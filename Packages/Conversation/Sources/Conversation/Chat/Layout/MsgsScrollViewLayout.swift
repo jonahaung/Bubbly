@@ -140,13 +140,6 @@ private extension MsgsScrollViewLayout {
         }
     }
 
-//    func sanitize(_ size: CGSize) -> CGSize {
-//        .init(
-//            width: sanitize(size.width),
-//            height: sanitize(size.height)
-//        )
-//    }
-
     func sanitize(_ value: CGFloat) -> CGFloat {
         guard value.isFinite else {
             return 0

@@ -16,6 +16,7 @@ public struct ConversationScene: View {
     @State private var sharedFocusState: SharedFocusState<ConversationFocusState>?
     @LazilyState private var viewModel: ChatManager
     @LazilyState private var composer: ChatComposer
+    @Environment(\.colorScheme) private var colorScheme
 
     public init(
         coordinator: AppCoordinator,
@@ -39,7 +40,10 @@ public struct ConversationScene: View {
             ConversationScrollView(manager: viewModel)
             ConversationSceneOverlayBar()
         }
-        .ignoresSafeArea(.keyboard, edges: .top)
+        .safeAreaBar(edge: .top) {
+            TopBar()
+        }
+        .scrollEdgeEffectHidden(true, for: .all)
         .environment(\.conversation, viewModel.state.conversation)
         .environment(\.conversationTheme, viewModel.state.theme)
         .environment(\.attachmentFetcher, viewModel.attachmentFetcher)

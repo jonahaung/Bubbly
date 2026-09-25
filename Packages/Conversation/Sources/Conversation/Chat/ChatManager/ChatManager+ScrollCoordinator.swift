@@ -58,6 +58,8 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
 
         case .focus(let message):
             handleFocus(message: message)
+        case .append(msg: let msg):
+            handleAppend(message: msg)
         }
     }
 
@@ -155,6 +157,17 @@ extension ChatManager {
             messages.retainOldest(limit)
         }
         coordinator.updateState(.dataUpdate(update))
+        layoutIfNeeded()
+    }
+}
+
+// MARK: - Append Handling
+
+extension ChatManager {
+
+    private func handleAppend(message: Message) {
+        messages.insert(msg: message)
+        scrollController.updateState(.dataUpdate(.append(msg: message)))
         layoutIfNeeded()
     }
 }

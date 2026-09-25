@@ -81,10 +81,8 @@ extension ChatManager {
     }
 
     private func insertAtBottom(msg: Message) {
-        messages.insert(msg: msg)
-        withTransaction(Transaction.withAnimation()) {
-            layoutIfNeeded()
-        }
+        scrollController.send(.begin(.append(msg: msg)))
+
     }
 
     private func showScrollToMessageToast(msg: Message) {
@@ -93,6 +91,7 @@ extension ChatManager {
             style: .notification
         ) { [weak self] in
             guard let self else { return }
+
             Task {
                 try? await scrollTo(msg: msg)
             }

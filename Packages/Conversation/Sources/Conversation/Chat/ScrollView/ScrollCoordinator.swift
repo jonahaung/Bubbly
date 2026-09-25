@@ -203,13 +203,12 @@ extension ScrollCoordinator {
             return
         }
 
-        let isFirstResponder = newValue.boundsHeight < oldValue.boundsHeight && delegate?.isFirstResponder == true
+        let isFirstResponder = newValue.boundsHeight < oldValue.boundsHeight
         guard state.isFirstResponder != isFirstResponder else { return }
         state.isFirstResponder = isFirstResponder
 
         let diff = oldValue.boundsHeight - newValue.boundsHeight
         let y = newValue.offsetY + diff
-
         guard newValue.scrolledPosition != .atBottom else {
             if state.phase.isScrolling {
                 performScroll(to: .y(y, .scroll))
@@ -218,6 +217,7 @@ extension ScrollCoordinator {
         }
 
         let strategy: ScrollPositionItem.Properties = state.phase.isScrolling ? .notAnimated : .scroll
+
         performScroll(to: .y(y, strategy))
     }
 }
@@ -260,6 +260,8 @@ extension ScrollCoordinator {
 
         case .focus(let message):
             handleFocus(message: message)
+        case .append(msg: let msg):
+            handleAppend(message: msg)
         }
     }
 
@@ -285,6 +287,11 @@ extension ScrollCoordinator {
         case .bottom:
             updateState(.didEndUpdates)
         }
+    }
+
+    private func handleAppend(message: Message) {
+        updateState(.didEndUpdates)
+        updatePaginationState()
     }
 
     private func handleFocus(message: Message) {

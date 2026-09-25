@@ -27,7 +27,7 @@ struct ConversationScrollView: View {
             }
             .geometryGroup()
             .scrollTargetLayout()
-            .equatable(by: manager.reloadID)
+
         }
         .scrollDismissesKeyboard(.never)
         .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
@@ -47,6 +47,7 @@ struct ConversationScrollView: View {
             manager.onScrollTargetVisibilityChange($0)
         }
         .defaultScrollAnchor(.bottom, for: .initialOffset)
+        .equatable(by: manager.reloadID)
         .defaultScrollAnchor(defaultScrollAnchor, for: .sizeChanges)
         .scrollPosition(
             .constant(manager.scrollController.scrollPosition),

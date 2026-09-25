@@ -46,11 +46,14 @@ public extension VScrollGeometry {
         if offsetY == 0 {
             return .atTop
         }
-        let diff = contentHeight - (offsetY + boundsSize.height)
-        if diff > 10 {
-            return .none
+        if offsetY == bottomMostOffset {
+            return .atBottom
         }
-        return .atBottom
+        //        let diff = contentHeight - (offsetY + boundsSize.height)
+        //        if diff > 10 {
+        //            return .none
+        //        }
+        return .none
     }
 
     func isNear(_ edge: VerticalEdge) -> Bool {
@@ -78,7 +81,7 @@ public struct ScrollPositionItem: Sendable, Hashable {
     public let properties: Properties
 
     public enum Properties: Sendable, Hashable {
-        case animated(Animation = .spring)
+        case animated(Animation = .interactiveSpring(duration: 0.3, blendDuration: 0.5))
         case notAnimated
         case scroll
     }

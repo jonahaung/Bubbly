@@ -63,6 +63,9 @@ extension ScrollReducer {
 
         case .focus(let message):
             return handleFocus(message: message, newValue: newValue)
+
+        case .append(msg: let message):
+            return handleAppend(message: message, oldValue: oldValue, newValue: newValue)
         }
     }
 
@@ -96,6 +99,13 @@ extension ScrollReducer {
         case .bottom:
             return .endUpdate(dataUpdate, scrollItem: nil)
         }
+    }
+
+    private func handleAppend(message: Message, oldValue: VScrollGeometry, newValue: VScrollGeometry) -> Effect {
+        .endUpdate(
+            .append(msg: message),
+            scrollItem: .y(newValue.offsetY + contentOffsetDelta(oldValue: oldValue, newValue: newValue), .animated())
+        )
     }
 
     private func handleFocus(message: Message, newValue: VScrollGeometry) -> Effect {
