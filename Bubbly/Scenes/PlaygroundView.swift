@@ -25,6 +25,9 @@ struct PlaygroundView: View {
             Section("Rich Text") {
                 let rich = MarkdownFormatter().richText(for: markdownTestData)
                 Text(rich)
+                    .onTapGesture {
+                        print("tap")
+                    }
             }
             Section("Markdown Text") {
                 let rich = MarkdownFormatter().markdownText(for: markdownTestData)
@@ -71,6 +74,7 @@ struct PlaygroundView: View {
                 }
             }
         }
+        .textSelection(.enabled)
         .navigationTitle(Self.defaultTitle)
         .searchable(text: $searchText)
         .font(.custom(fontName, size: UIFont.labelFontSize))

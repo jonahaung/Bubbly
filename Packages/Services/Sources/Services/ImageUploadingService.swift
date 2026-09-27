@@ -8,13 +8,13 @@ import XUI
 
 public struct ImageUploadingService: Sendable {
     public enum Path {
-        case user(uid: String)
+        case contact(uid: String)
         case group(groupID: String)
         case conversation(conID: String, attachmentID: String)
 
-        var backendPath: APIClient.MediaPath? {
+        var backendPath: HTTPClient.MediaPath? {
             switch self {
-            case .user:
+            case .contact:
                 nil
             case let .group(groupID):
                 .group(groupID: groupID)
@@ -44,8 +44,8 @@ public struct ImageUploadingService: Sendable {
             }
         let data = try mediaManager.createData(from: uploadingImage)
 
-        if case .user = path {
-            return try await APIClient.shared.uploadProfilePhoto(
+        if case .contact = path {
+            return try await HTTPClient.shared.uploadProfilePhoto(
                 data: data,
                 contentType: "image/png"
             )
@@ -56,7 +56,7 @@ public struct ImageUploadingService: Sendable {
         }
         let progress = Progress(totalUnitCount: Int64(data.count))
         onProgress?(progress)
-        let url = try await APIClient.shared.uploadMedia(
+        let url = try await HTTPClient.shared.uploadMedia(
             data: data,
             contentType: "image/png",
             to: backendPath
@@ -71,10 +71,10 @@ public struct ImageUploadingService: Sendable {
         to path: Path,
         onProgress: (@Sendable (Progress?) -> Void)? = nil,
     ) async throws -> URL {
-        if case .user = path {
-            return try await APIClient.shared.uploadProfilePhoto(
+        if case .contact = path {
+            return try await HTTPClient.shared.uploadProfilePhoto(
                 fileURL: url,
-                contentType: "image/jpeg"
+                contentType: "image/png"
             )
         }
         guard let backendPath = path.backendPath else {
@@ -83,9 +83,9 @@ public struct ImageUploadingService: Sendable {
         let fileSize = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0
         let progress = Progress(totalUnitCount: Int64(fileSize))
         onProgress?(progress)
-        let uploadedURL = try await APIClient.shared.uploadMedia(
+        let uploadedURL = try await HTTPClient.shared.uploadMedia(
             fileURL: url,
-            contentType: "image/jpeg",
+            contentType: "image/png",
             to: backendPath
         )
         progress.completedUnitCount = progress.totalUnitCount

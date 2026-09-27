@@ -5,6 +5,7 @@ import Foundation
 import ImageLoader
 import SwiftUI
 import XUI
+import Shared
 
 // MARK: - Contact + @retroactive ImageViewItem
 
@@ -27,6 +28,14 @@ extension Contact: @retroactive ImageViewItem {
 
     public var galleryTitle: String? {
         name
+    }
+
+    public var galleryURL: URL? {
+        remoteURL
+    }
+
+    public var id: String {
+        uid
     }
 }
 

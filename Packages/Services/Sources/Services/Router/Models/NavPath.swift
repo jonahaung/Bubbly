@@ -4,6 +4,7 @@ import Database
 import Foundation
 import SwiftUI
 import XUI
+import Shared
 
 public enum NavPath: Sendable, Hashable, Identifiable, CaseNameReflectable {
     case conversationDetails(_ conversation: Conversation)

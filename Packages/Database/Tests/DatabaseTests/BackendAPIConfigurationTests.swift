@@ -7,9 +7,9 @@ struct BackendAPIConfigurationTests {
     @Test("Prefers the launch environment over a persisted app override")
     func prefersLaunchEnvironment() throws {
         let defaults = try #require(UserDefaults(suiteName: #function))
-        defaults.set("http://192.168.80.126:8080", forKey: BackendAPIConfiguration.applicationBaseURLOverrideKey)
+        defaults.set("http://192.168.80.126:8080", forKey: HTTPClientConfiguration.applicationBaseURLOverrideKey)
 
-        let configuration = try BackendAPIConfiguration.application(
+        let configuration = try HTTPClientConfiguration.application(
             userDefaults: defaults,
             environment: ["BUBBLY_API_BASE_URL": "http://127.0.0.1:8080"],
             infoDictionaryValue: "http://localhost:8080"
@@ -23,7 +23,7 @@ struct BackendAPIConfigurationTests {
     func usesLaunchEnvironment() throws {
         let defaults = try #require(UserDefaults(suiteName: #function))
 
-        let configuration = try BackendAPIConfiguration.application(
+        let configuration = try HTTPClientConfiguration.application(
             userDefaults: defaults,
             environment: ["BUBBLY_API_BASE_URL": "http://192.168.80.126:8080"],
             infoDictionaryValue: "http://localhost:8080"
@@ -36,10 +36,10 @@ struct BackendAPIConfigurationTests {
     @Test("Rejects an override containing credentials")
     func rejectsCredentials() throws {
         let defaults = try #require(UserDefaults(suiteName: #function))
-        defaults.set("http://user:password@example.com", forKey: BackendAPIConfiguration.applicationBaseURLOverrideKey)
+        defaults.set("http://user:password@example.com", forKey: HTTPClientConfiguration.applicationBaseURLOverrideKey)
 
-        #expect(throws: BackendAPIError.invalidConfiguration) {
-            try BackendAPIConfiguration.application(
+        #expect(throws: HTTPError.invalidConfiguration) {
+            try HTTPClientConfiguration.application(
                 userDefaults: defaults,
                 environment: [:],
                 infoDictionaryValue: nil

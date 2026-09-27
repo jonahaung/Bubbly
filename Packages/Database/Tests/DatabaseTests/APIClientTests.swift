@@ -57,7 +57,7 @@ struct APIClientTests {
         ])
         let tokenProvider = TokenProvider()
         let configuration = try configuration()
-        let client = APIClient(
+        let client = HTTPClient(
             configuration: configuration,
             transport: transport,
             accessTokenProvider: { forceRefresh in
@@ -106,7 +106,7 @@ struct APIClientTests {
         ])
         let client = try makeClient(transport: transport)
 
-        await #expect(throws: BackendAPIError.rejected(statusCode: 400, message: "Invalid profile")) {
+        await #expect(throws: HTTPError.rejected(statusCode: 400, message: "Invalid profile")) {
             try await client.currentProfile()
         }
     }
@@ -126,7 +126,7 @@ struct APIClientTests {
         let transport = MockBackendHTTPTransport(outcomes: [])
         let client = try makeClient(transport: transport)
 
-        await #expect(throws: BackendAPIError.invalidRequest("Every mobile number must use E.164 format.")) {
+        await #expect(throws: HTTPError.invalidRequest("Every mobile number must use E.164 format.")) {
             try await client.lookupContacts(mobileNumbers: ["5551234"])
         }
         #expect(await transport.requests.isEmpty)
@@ -134,8 +134,8 @@ struct APIClientTests {
 
     @Test("Rejects insecure production configuration")
     func insecureConfiguration() throws {
-        #expect(throws: BackendAPIError.insecureConfiguration) {
-            try BackendAPIConfiguration(baseURL: #require(URL(string: "http://example.com")))
+        #expect(throws: HTTPError.insecureConfiguration) {
+            try HTTPClientConfiguration(baseURL: #require(URL(string: "http://example.com")))
         }
     }
 
@@ -170,7 +170,7 @@ struct APIClientTests {
         ])
         let client = try makeClient(transport: transport)
 
-        await #expect(throws: BackendAPIError.invalidResponse) {
+        await #expect(throws: HTTPError.invalidResponse) {
             try await client.groups()
         }
         #expect(await transport.requests.count == 2)
@@ -250,8 +250,8 @@ struct APIClientTests {
         )
     }
 
-    private func configuration(retryCount: Int = 0) throws -> BackendAPIConfiguration {
-        try BackendAPIConfiguration(
+    private func configuration(retryCount: Int = 0) throws -> HTTPClientConfiguration {
+        try HTTPClientConfiguration(
             baseURL: #require(URL(string: "http://localhost:8080")),
             requestTimeout: 5,
             retryPolicy: .init(
@@ -266,8 +266,8 @@ struct APIClientTests {
     private func makeClient(
         transport: MockBackendHTTPTransport,
         retryCount: Int = 0
-    ) throws -> APIClient {
-        APIClient(
+    ) throws -> HTTPClient {
+        HTTPClient(
             configuration: try configuration(retryCount: retryCount),
             transport: transport,
             accessTokenProvider: { _ in "token" }
@@ -275,7 +275,7 @@ struct APIClientTests {
     }
 }
 
-private actor MockBackendHTTPTransport: BackendHTTPTransport {
+private actor MockBackendHTTPTransport: APIHTTPTransport {
     enum Outcome: Sendable {
         case response(BackendHTTPResponse)
         case urlError(URLError.Code)

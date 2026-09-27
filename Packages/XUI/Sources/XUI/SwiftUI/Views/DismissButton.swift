@@ -37,11 +37,15 @@ public struct DismissButton: View {
 }
 
 public struct CancelButton: View {
-    @Environment(\.presentationMode) var presentationMode
-    public init() {}
+    private let dismiss: DismissAction
+    public init(
+        dismiss: DismissAction
+    ) {
+        self.dismiss = dismiss
+    }
     public var body: some View {
         Button(role: .cancel) {
-            presentationMode.wrappedValue.dismiss()
+            dismiss()
         }
     }
 }

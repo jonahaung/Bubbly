@@ -17,7 +17,7 @@ struct ConversationScrollView: View {
         ScrollView(.vertical, showsIndicators: true) {
             MsgsScrollViewLayout(
                 manager: manager.messages.layout,
-                config: layoutConfiguration
+                config: layoutConfiguration()
             ) {
                 HeaderProfileView(
                     conversation: manager.state.conversation, showHeader: manager.messages.shouldShowHeader)
@@ -25,12 +25,12 @@ struct ConversationScrollView: View {
                     MsgCell(viewModel: model)
                 }
             }
-            .geometryGroup()
+            .equatable(by: manager.reloadID)
             .scrollTargetLayout()
-
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         .scrollDismissesKeyboard(.never)
-        .safeAreaPadding(.bottom, ChatLayoutConstants.bottomBarHeight)
+        .safeAreaPadding(.vertical, ChatLayoutConstants.bottomBarHeight)
         .onScrollPhaseChange { oldPhase, newPhase, context in
             manager.send(
                 .scrollViewIntent(
@@ -47,7 +47,7 @@ struct ConversationScrollView: View {
             manager.onScrollTargetVisibilityChange($0)
         }
         .defaultScrollAnchor(.bottom, for: .initialOffset)
-        .equatable(by: manager.reloadID)
+
         .defaultScrollAnchor(defaultScrollAnchor, for: .sizeChanges)
         .scrollPosition(
             .constant(manager.scrollController.scrollPosition),
@@ -55,21 +55,21 @@ struct ConversationScrollView: View {
         )
     }
 
-    private var layoutConfiguration: MsgsScrollViewLayoutConfiguration {
+    private func layoutConfiguration() -> MsgsScrollViewLayoutConfiguration {
         MsgsScrollViewLayoutConfiguration(
             spacing: 0,
             contentInsets: .init(
                 top: 0,
-                leading: Padding.sm,
+                leading: Padding.md,
                 bottom: 0,
-                trailing: Padding.sm
+                trailing: Padding.md
             ),
-            screenBounds: UIApplication.shared.screenBounds()
+            screenSize: UIApplication.shared.screenBounds().size
         )
     }
 
     private var defaultScrollAnchor: UnitPoint? {
         manager.presentation.state.bottomAccessory == .scrollDownButton
-            ? .none : .bottom
+            ? .zero : .bottom
     }
 }

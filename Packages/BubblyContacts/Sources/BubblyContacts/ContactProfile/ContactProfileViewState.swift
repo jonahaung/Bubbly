@@ -1,5 +1,5 @@
 import Database
-
+import Shared
 struct ContactProfileViewState {
     var contact: Contact
     var properties: ConversationProperties

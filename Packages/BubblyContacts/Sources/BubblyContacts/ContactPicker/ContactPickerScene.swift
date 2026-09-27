@@ -5,7 +5,7 @@ import Services
 import SwiftUI
 import XUI
 import Core
-
+import Shared
 public struct ContactPickerScene: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selection: [Contact]
@@ -70,7 +70,7 @@ public struct ContactPickerScene: View {
             $0.name.lowercased().contains(searchText.lowercased())
         }
     }
-    
+
     @State private var allContacts = [Contact]()
 
     private func toggleSelection(for contact: Contact) {
@@ -80,7 +80,7 @@ public struct ContactPickerScene: View {
             selection.append(contact)
         }
     }
-    
+
     private func fetchContacts() async {
         do {
             allContacts = try await Store.shared.contactStore?.fetchAll() ?? []

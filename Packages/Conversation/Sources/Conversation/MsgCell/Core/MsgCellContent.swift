@@ -9,7 +9,7 @@ import Database
 import Services
 
 struct MsgCellContent: View {
-    
+
     let viewModel: MsgCellViewModel
     @Environment(\.conversationTheme) private var theme
 
@@ -34,5 +34,6 @@ struct MsgCellContent: View {
             }
             MsgCellReactionOverlay(reactions: state.reactions)
         }
+
     }
 }

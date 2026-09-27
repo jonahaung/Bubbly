@@ -7,7 +7,7 @@ import XUI
 import Database
 import Foundation
 import Services
-
+import Shared
 struct ContactListContent: Sendable {
     let chatContacts: [Contact]
     let phoneContacts: [Contact]
@@ -59,7 +59,7 @@ extension ContactListClient {
                 return contact
             }
             guard
-                var resolvedContact = try await APIClient.shared.lookupContacts(
+                var resolvedContact = try await HTTPClient.shared.lookupContacts(
                     mobileNumbers: [contact.mobile]
                 ).first(where: { $0.mobile == contact.mobile })
             else {

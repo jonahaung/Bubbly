@@ -8,6 +8,7 @@ import FirebaseAuth
 import Services
 import UIKit
 import XUI
+import Shared
 
 @MainActor
 struct UserProfileRepositoryImpl: UserProfileRepository {
@@ -19,7 +20,10 @@ struct UserProfileRepositoryImpl: UserProfileRepository {
     }
 
     func refreshRemote() async throws -> UserProfileSnapshot {
-        if let remote = try await APIClient.shared.currentProfile() {
+        if let remote: CurrentUserModel = try await HTTPClient.shared.contact(
+            uid: manager.currentUserRepository
+                .model.uid)
+        {
             manager.applyRemote(remote)
         }
         return snapshot()
@@ -89,7 +93,7 @@ struct UserProfileRepositoryImpl: UserProfileRepository {
         let url = try await imageUploader.uploadImage(
             image,
             size: .init(width: 100, height: 100),
-            to: .user(uid: authUser.uid)
+            to: .contact(uid: authUser.uid)
         )
         let request = authUser.createProfileChangeRequest()
         request.photoURL = url

@@ -34,16 +34,14 @@ public struct ConversationScene: View {
     }
 
     public var body: some View {
-        ZStack(alignment: .bottomTrailing) {
+        ZStack {
             BackgroundView(imageName: viewModel.state.properties.theme.background.imageName)
             SeenStatusOverlay()
+                .ignoresSafeArea(.all, edges: .top)
             ConversationScrollView(manager: viewModel)
+                .ignoresSafeArea(.all, edges: .top)
             ConversationSceneOverlayBar()
         }
-        .safeAreaBar(edge: .top) {
-            TopBar()
-        }
-        .scrollEdgeEffectHidden(true, for: .all)
         .environment(\.conversation, viewModel.state.conversation)
         .environment(\.conversationTheme, viewModel.state.theme)
         .environment(\.attachmentFetcher, viewModel.attachmentFetcher)

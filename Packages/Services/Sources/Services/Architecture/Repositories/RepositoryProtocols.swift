@@ -3,6 +3,7 @@
 import Database
 import Foundation
 import SwiftUI
+import Shared
 
 @MainActor
 public protocol ContactsRepositoryProtocol: Observable, Sendable, AnyObject {

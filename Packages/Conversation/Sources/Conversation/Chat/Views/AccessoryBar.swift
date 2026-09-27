@@ -35,6 +35,8 @@ struct AccessoryBar: View {
                 )
             case .contactAvator:
                 ZeroSizeView()
+            case .none:
+                EmptyView()
             }
         }
         .frame(height: 40)

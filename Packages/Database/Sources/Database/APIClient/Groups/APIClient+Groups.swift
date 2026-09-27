@@ -1,7 +1,7 @@
 import Core
 import Foundation
 
-public extension APIClient {
+public extension HTTPClient {
     func group(groupID: String) async throws -> Group? {
         let groupID = try validatedGroupIdentifier(groupID)
         guard
@@ -37,7 +37,7 @@ public extension APIClient {
             if let nextCursor = page.nextCursor,
                 !seenCursors.insert(nextCursor).inserted
             {
-                throw BackendAPIError.invalidResponse
+                throw HTTPError.invalidResponse
             }
             cursor = page.nextCursor
         } while cursor != nil
@@ -71,7 +71,7 @@ public extension APIClient {
             members.count >= 2, members.count <= 256,
             members.allSatisfy({ !$0.isEmpty && $0.count <= 128 })
         else {
-            throw BackendAPIError.invalidRequest("The group contains invalid values.")
+            throw HTTPError.invalidRequest("The group contains invalid values.")
         }
         if let photoURL = group.photoURL, !photoURL.isEmpty {
             guard photoURL.count <= 2_048,
@@ -79,7 +79,7 @@ public extension APIClient {
                 url.scheme?.lowercased() == "https",
                 url.host != nil
             else {
-                throw BackendAPIError.invalidRequest("The group photo URL is invalid.")
+                throw HTTPError.invalidRequest("The group photo URL is invalid.")
             }
         }
     }
@@ -87,7 +87,7 @@ public extension APIClient {
     private func validatedGroupIdentifier(_ value: String) throws -> String {
         let value = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty, value.count <= 128 else {
-            throw BackendAPIError.invalidRequest("The group identifier is invalid.")
+            throw HTTPError.invalidRequest("The group identifier is invalid.")
         }
         return value
     }

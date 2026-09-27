@@ -14,6 +14,7 @@ struct ConversationSceneOverlayBar: View {
 
     var body: some View {
         VStack(alignment: .center, spacing: 0) {
+            TopBar()
             FloatingDateView()
             Spacer()
             AccessoryBar(item: manager.presentation.state.bottomAccessory)

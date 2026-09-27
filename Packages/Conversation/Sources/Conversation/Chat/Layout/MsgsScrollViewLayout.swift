@@ -152,7 +152,7 @@ extension MsgsScrollViewLayout {
     private func makeSignature(subviews: Subviews) -> Int {
         var hasher = Hasher()
         hasher.combine(subviews.count)
-        hasher.combine(config.screenBounds)
+        hasher.combine(config.screenSize)
         hasher.combine(config.spacing)
         for subview in subviews {
             let value = subview[MsgLayoutValueKey.self]

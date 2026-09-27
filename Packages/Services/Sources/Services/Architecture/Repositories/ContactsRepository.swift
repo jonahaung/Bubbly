@@ -6,6 +6,7 @@ import FirebaseAuth
 import Foundation
 import SwiftData
 import XUI
+import Shared
 
 // MARK: - ContactsRepository
 

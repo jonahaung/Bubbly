@@ -4,6 +4,7 @@ import Core
 import Database
 import Foundation
 import XUI
+import Shared
 
 public extension Socket {
 
@@ -131,7 +132,7 @@ public extension Socket {
             .absoluteString
         let successfulRecipientIDs: Set<String>
         do {
-            successfulRecipientIDs = try await APIClient.shared.sendPushNotifications(
+            successfulRecipientIDs = try await HTTPClient.shared.sendPushNotifications(
                 messagesByRecipientUserID: messagesByRecipientUserID,
                 title: alert.title,
                 body: alert.body,

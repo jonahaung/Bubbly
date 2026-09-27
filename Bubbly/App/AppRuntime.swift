@@ -1,4 +1,5 @@
 import Core
+import SwiftUI
 import Database
 import FirebaseAuth
 import FirebaseCore
@@ -31,7 +32,7 @@ final class AppRuntime {
 
     func openURL(_ url: URL) {
         if Auth.auth().canHandle(url) {
-            
+
         } else {
             Task {
                 await deeplinkCoordinator.onOpenURL(url: url, router: router)
@@ -39,20 +40,21 @@ final class AppRuntime {
         }
     }
 
-    func didBecomeActive() {
-        AppStateStore.set(.active)
-        Task {
-            await handleDidBecomeActive()
+    func scenePhaseChange(_ newValue: ScenePhase) {
+        switch newValue {
+        case .background:
+            AppStateStore.set(.background)
+            backgroundTaskHandler.scheduleAppRefresh()
+        case .inactive:
+            AppStateStore.set(.inactive)
+        case .active:
+            AppStateStore.set(.active)
+            Task {
+                await handleDidBecomeActive()
+            }
+        @unknown default:
+            break
         }
-    }
-
-    func willResignActive() {
-        AppStateStore.set(.inactive)
-    }
-
-    func didEnterBackground() {
-        AppStateStore.set(.background)
-        backgroundTaskHandler.scheduleAppRefresh()
     }
 
     func didFailToRegisterForRemoteNotifications(error: any Error) {
@@ -61,9 +63,9 @@ final class AppRuntime {
 
     func didRegisterForRemoteNotifications(deviceToken: Data) {
         #if DEBUG
-        Auth.auth().setAPNSToken(deviceToken, type: .sandbox)
+            Auth.auth().setAPNSToken(deviceToken, type: .sandbox)
         #else
-        Auth.auth().setAPNSToken(deviceToken, type: .prod)
+            Auth.auth().setAPNSToken(deviceToken, type: .prod)
         #endif
         Messaging.messaging().apnsToken = deviceToken
     }

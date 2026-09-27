@@ -35,21 +35,18 @@ public actor CurrentUserRepository {
         let storage = GroupStorage.shared
 
         var newModel = CurrentUserModel(firUser)
-        let pushToken = String(deviceToken: Messaging.messaging().apnsToken) ?? ""
         let publicKeyString = CryptoService.shared.base64PublicKeyString(for: firUser.uid)
-        newModel.pushToken = pushToken
         newModel.publicKeyString = publicKeyString
-        storage.save(pushToken, for: .device(.deviceToken))
         storage.save(firUser.uid, for: .auth(.currentUserID))
         storage.save(publicKeyString, for: .security(.publicKey(id: firUser.uid)))
 
-        if let remoteModel = try await APIClient.shared.currentProfile() {
+        if let remoteModel: CurrentUserModel = try await HTTPClient.shared.contact(uid: firUser.uid) {
             if newModel != remoteModel {
-                try await APIClient.shared.updateProfile(newModel)
+                try await HTTPClient.shared.updateContact(newModel)
                 await ToastPresenter.show("Profile Updated")
             }
         } else {
-            try await APIClient.shared.updateProfile(newModel)
+            try await HTTPClient.shared.updateContact(newModel)
         }
         await update(newModel)
     }

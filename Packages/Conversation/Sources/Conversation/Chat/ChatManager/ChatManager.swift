@@ -49,12 +49,13 @@ final class ChatManager: ErrorPresenter {
     var focusState: SharedFocusState<ConversationFocusState>?
 
     @ObservationIgnored
-    var queue = AsyncQueue(attributes: [])
+    let throttler = Throttler(interval: 0.5, edge: .trailing)
     var state: State
 
-    var reloadID = true
+    var reloadID = 0
 
     init(_ data: ConversationInitializedData, currentUserRepository: CurrentUserRepository, router: Router) {
+        print("init")
         self.currentUserRepository = currentUserRepository
         self.router = router
 
@@ -88,7 +89,6 @@ extension ChatManager {
         switch intent {
         case .scrollViewIntent(let newValue):
             scrollController.send(newValue)
-
         case .scrollDownButtonTapped:
             handleScrollDownButtonTap()
 
@@ -98,7 +98,9 @@ extension ChatManager {
     }
 
     func layoutIfNeeded() {
-        reloadID.toggle()
+        withTransaction(.scrollView()) {
+            reloadID += 1
+        }
     }
 }
 
@@ -109,11 +111,12 @@ extension ChatManager {
     func onViewAppear() async {
         do {
             let hasViewLoaded = dataObserver.delegate !== nil && scrollController.delegate !== nil
-
             if !hasViewLoaded {
                 dataObserver.delegate = self
                 scrollController.delegate = self
-
+                try await Store.shared.conversationPropertiesStore?.updateAndSave(uid: state.properties.uid) { model in
+                    model.lastPage = nil
+                }
             }
             try await reloadConversation(refetch: !hasViewLoaded)
 
@@ -140,6 +143,8 @@ extension ChatManager {
 
     private var shouldSaveLastPage: Bool {
         scrollController.geometry != .empty
+            && !messages
+                .isAbsoluteScrolled(at: .bottom)
     }
 
     private func makeLastPage() -> LastPage? {
@@ -157,7 +162,7 @@ extension ChatManager {
 extension ChatManager {
 
     private func handleScrollDownButtonTap() {
-        queue.addOperation { [self] in
+        Task {
             do {
                 if messages.shouldPaginate(at: .bottom) {
                     guard let lastMessage = try await MsgRepo.lastMsg(conID: state.conversation.uid) else { return }

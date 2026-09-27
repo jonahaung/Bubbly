@@ -7,7 +7,7 @@ let package = Package(
     name: "Database",
     platforms: [
         .iOS(.v26),
-        .macOS(.v12)
+        .macOS(.v12),
     ],
     products: [
         .library(
@@ -16,18 +16,20 @@ let package = Package(
         )
     ],
     dependencies: [
+
         .package(name: "Core", path: "../Core")
     ],
     targets: [
         .target(
             name: "Database",
             dependencies: [
+
                 .product(name: "Core", package: "Core")
             ]
         ),
         .testTarget(
             name: "DatabaseTests",
             dependencies: ["Database"]
-        )
+        ),
     ]
 )

@@ -58,8 +58,8 @@ public final class AuthUserProfileViewModel: ErrorPresenter {
     @concurrent
     public func uploadImage(image: UIImage) async throws -> URL {
         guard
-            let currentUser = Auth.auth().currentUser else
-        {
+            let currentUser = Auth.auth().currentUser
+        else {
             fatalError("explanation")
         }
 
@@ -67,7 +67,7 @@ public final class AuthUserProfileViewModel: ErrorPresenter {
         let url = try await imageUploader.uploadImage(
             image,
             size: .init(width: 100, height: 100),
-            to: .user(uid: currentUser.uid),
+            to: .contact(uid: currentUser.uid),
         )
         let request = currentUser.createProfileChangeRequest()
         request.photoURL = url

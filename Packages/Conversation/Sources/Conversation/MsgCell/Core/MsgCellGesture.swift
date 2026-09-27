@@ -14,9 +14,11 @@ private enum MsgCellGestureThresholds {
 }
 
 @MainActor @Observable final class GestureViewModel {
+
     var draggedOffset: CGFloat = 0
     var isLongPressActive = false
     @ObservationIgnored private(set) var draggedLimitReached = false
+    @ObservationIgnored private var lastAppliedOffset: CGFloat = 0
 
     func applyDrag(translation: CGFloat, isSender: Bool, onMark: () -> Void) {
         guard isValidDirection(translation, isSender: isSender) else {
@@ -52,7 +54,6 @@ private enum MsgCellGestureThresholds {
         }
     }
 
-    @ObservationIgnored private var lastAppliedOffset: CGFloat = 0
     private func isValidDirection(_ translation: CGFloat, isSender: Bool)
         -> Bool
     {
@@ -69,30 +70,33 @@ private enum MsgCellGestureThresholds {
 }
 
 struct MsgCellGesture<Content: View>: View, @MainActor Equatable {
+
     let viewModel: MsgCellViewModel
     let content: () -> Content
+
+    private let gestureModel: GestureViewModel = .init()
     @State private var overlayItem: OverlayMenuItem?
+    @Environment(\.msgCellActions) private var msgCellActions
+
     var body: some View {
         content()
-            .offset(x: round(model.draggedOffset))
-            .gesture(dragGesture, including: .gesture)
-            .simultaneousGesture(doubleTapGesture)
-            .onPressingChanged(in: .local) { _ in
-                activateLongPressIfNeeded()
-            }
+            .offset(x: round(gestureModel.draggedOffset))
+            .gesture(
+                doubleTapGesture
+                    .exclusively(
+                        before:
+                            longPressGesture
+                            .exclusively(before: dragGesture)
+                    ),
+                including: .gesture
+            )
             .background(longPressOverlay)
     }
-
-    @Environment(\.msgCellActions) private var msgCellActions
-    @State private var model: GestureViewModel = .init()
 
     static func == (lhs: MsgCellGesture<Content>, rhs: MsgCellGesture<Content>)
         -> Bool
     {
-        lhs.viewModel.state == rhs.viewModel.state
-            && lhs.model.isLongPressActive == rhs.model.isLongPressActive
-            && lhs.model.draggedLimitReached == rhs.model.draggedLimitReached
-            && lhs.model.draggedOffset == rhs.model.draggedOffset
+        lhs.viewModel.id == rhs.viewModel.id
     }
 }
 
@@ -103,20 +107,29 @@ extension MsgCellGesture {
         }
     }
 
+    private var longPressGesture: some Gesture {
+        LongPressGesture(minimumDuration: 0.5)
+            .onEnded { value in
+                if value {
+                    activateLongPressIfNeeded()
+                }
+            }
+    }
+
     private var dragGesture: some Gesture {
         DragGesture(
             minimumDistance: MsgCellGestureThresholds.dragMinDistance,
             coordinateSpace: .local
         ).onChanged { value in
-            model.applyDrag(
+            gestureModel.applyDrag(
                 translation: value.translation.width,
                 isSender: viewModel.state.isSender
             ) { msgCellActions?(.onMarkMsg(viewModel.msg.uid)) }
-        }.onEnded { _ in model.reset(animated: true) }
+        }.onEnded { _ in gestureModel.reset(animated: true) }
     }
 
     @ViewBuilder private var longPressOverlay: some View {
-        if model.isLongPressActive {
+        if gestureModel.isLongPressActive {
             Color.clear
                 .hidden()
                 .allowsHitTesting(false)
@@ -131,7 +144,7 @@ extension MsgCellGesture {
                 .fullScreenCover(
                     item: $overlayItem,
                     onDismiss: {
-                        model.isLongPressActive = false
+                        gestureModel.isLongPressActive = false
                     }
                 ) { item in
                     OverlayMenu(item: item)
@@ -144,9 +157,9 @@ extension MsgCellGesture {
     }
 
     private func activateLongPressIfNeeded() {
-        guard !model.isLongPressActive else { return }
+        guard !gestureModel.isLongPressActive else { return }
         Task { @MainActor in
-            model.isLongPressActive = true
+            gestureModel.isLongPressActive = true
         }
     }
 }

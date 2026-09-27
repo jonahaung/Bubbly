@@ -1,7 +1,8 @@
 import Foundation
 
-public extension APIClient {
+public extension HTTPClient {
     enum MediaPath: Sendable {
+        case contact(uid: String)
         case group(groupID: String)
         case conversation(conversationID: String, attachmentID: String)
 
@@ -11,6 +12,8 @@ public extension APIClient {
                 ["groups", groupID, "photo"]
             case let .conversation(conversationID, attachmentID):
                 ["conversations", conversationID, attachmentID]
+            case .contact(uid: let uid):
+                ["contacts", uid, "photo"]
             }
         }
     }
@@ -48,23 +51,23 @@ public extension APIClient {
             ["http", "https"].contains(scheme),
             url.host != nil
         else {
-            throw BackendAPIError.invalidResponse
+            throw HTTPError.invalidResponse
         }
         return url
     }
 
     private func validateMedia(data: Data, contentType: String) throws {
         guard !data.isEmpty, data.count <= 10 * 1_024 * 1_024 else {
-            throw BackendAPIError.invalidRequest("The image must be between 1 byte and 10 MB.")
+            throw HTTPError.invalidRequest("The image must be between 1 byte and 10 MB.")
         }
         guard Self.isSupportedMediaImage(data: data, contentType: contentType) else {
-            throw BackendAPIError.invalidRequest("The image format is unsupported.")
+            throw HTTPError.invalidRequest("The image format is unsupported.")
         }
     }
 
     private func validateMedia(fileURL: URL, contentType: String) throws {
         guard fileURL.isFileURL else {
-            throw BackendAPIError.invalidRequest("The image URL must reference a local file.")
+            throw HTTPError.invalidRequest("The image URL must reference a local file.")
         }
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
         guard values.isRegularFile == true,
@@ -72,13 +75,13 @@ public extension APIClient {
             size > 0,
             size <= 10 * 1_024 * 1_024
         else {
-            throw BackendAPIError.invalidRequest("The image must be between 1 byte and 10 MB.")
+            throw HTTPError.invalidRequest("The image must be between 1 byte and 10 MB.")
         }
         let handle = try FileHandle(forReadingFrom: fileURL)
         defer { try? handle.close() }
         let prefix = try handle.read(upToCount: 12) ?? Data()
         guard Self.isSupportedMediaImage(data: prefix, contentType: contentType) else {
-            throw BackendAPIError.invalidRequest("The image format is unsupported.")
+            throw HTTPError.invalidRequest("The image format is unsupported.")
         }
     }
 

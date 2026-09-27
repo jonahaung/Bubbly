@@ -7,21 +7,10 @@ import XUI
 import Contacts
 import Foundation
 import PhoneNumberKit
+import Core
+import Shared
 
-// MARK: - Contact
-
-public struct Contact: ContactRepresentableSendable, Codable, Hashable {
-    public var uid: String
-    public var name: String
-    public let mobile: String
-    public var photoURL: String
-    public var pushToken: String
-    public var publicKeyString: String
-}
-
-// MARK: StringMergable
-
-extension Contact: StringMergable {
+extension Contact {
     public var isChatAvailable: Bool {
         !uid.hasPrefix("+")
     }
@@ -72,7 +61,7 @@ extension Contact: StringMergable {
 
 // MARK: EmptyRepresentable
 
-extension Contact: EmptyRepresentable {
+extension Contact: @retroactive EmptyRepresentable {
     public static var empty: Contact {
         .init(uid: "", name: "", mobile: "", photoURL: "", pushToken: "", publicKeyString: "")
     }

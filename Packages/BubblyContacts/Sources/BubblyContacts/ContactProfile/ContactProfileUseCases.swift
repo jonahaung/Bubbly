@@ -1,5 +1,5 @@
 import Database
-
+import Shared
 @MainActor
 protocol LoadContactProfileUseCase {
     func execute() async throws -> ContactProfileSnapshot

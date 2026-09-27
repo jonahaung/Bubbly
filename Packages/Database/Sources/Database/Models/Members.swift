@@ -5,6 +5,8 @@
 //  Created by Aung Ko Min on 20/5/26.
 //
 
+import Core
+import Shared
 
 public struct Members: Sendable, Hashable {
     public let members: [Contact]

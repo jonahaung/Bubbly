@@ -1,43 +1,13 @@
 import Core
 import Foundation
 
-public extension APIClient {
-    func currentProfile() async throws -> CurrentUserModel? {
-        guard
-            let data = try await executor.send(
-                method: "GET",
-                path: ["v1", "profile"],
-                allowsNotFound: true
-            )
-        else {
-            return nil
-        }
-        return try executor.decode(CurrentUserModel.self, from: data)
-    }
-
-    @discardableResult
-    func updateProfile(_ model: any ContactRepresentableSendable) async throws -> any ContactRepresentableSendable {
-        let data = try await upsertContactResponse(for: model)
-        return try executor.decode(CurrentUserModel.self, from: data)
-    }
-
-    func updatePushToken(_ pushToken: String) async throws {
-        guard !pushToken.isEmpty, pushToken.count <= 4_096 else {
-            throw BackendAPIError.invalidRequest("The push token is invalid.")
-        }
-        _ = try await executor.send(
-            method: "PATCH",
-            path: ["v1", "profile", "push-token"],
-            body: .data(try executor.encode(PushTokenUpdateRequest(pushToken: pushToken))),
-            contentType: "application/json"
-        )
-    }
+public extension HTTPClient {
 
     func uploadProfilePhoto(data: Data, contentType: String) async throws -> URL {
         try validatePhoto(data: data, contentType: contentType)
         let response = try await executor.requiredResponse(
             method: "PUT",
-            path: ["v1", "profile", "photo"],
+            path: ["v1", "contacts", "photo"],
             body: .data(data),
             contentType: contentType
         )
@@ -48,7 +18,7 @@ public extension APIClient {
         try validatePhoto(fileURL: fileURL, contentType: contentType)
         let response = try await executor.requiredResponse(
             method: "PUT",
-            path: ["v1", "profile", "photo"],
+            path: ["v1", "contacts", "photo"],
             body: .file(fileURL),
             contentType: contentType
         )
@@ -56,7 +26,7 @@ public extension APIClient {
     }
 
     func deleteProfilePhoto() async throws {
-        _ = try await executor.send(method: "DELETE", path: ["v1", "profile", "photo"])
+        _ = try await executor.send(method: "DELETE", path: ["v1", "contacts", "photo"])
     }
 
     private func profilePhotoURL(from data: Data) throws -> URL {
@@ -66,23 +36,23 @@ public extension APIClient {
             ["http", "https"].contains(scheme),
             url.host != nil
         else {
-            throw BackendAPIError.invalidResponse
+            throw HTTPError.invalidResponse
         }
         return url
     }
 
     private func validatePhoto(data: Data, contentType: String) throws {
         guard !data.isEmpty, data.count <= 1_048_576 else {
-            throw BackendAPIError.invalidRequest("The profile photo must be between 1 byte and 1 MB.")
+            throw HTTPError.invalidRequest("The profile photo must be between 1 byte and 1 MB.")
         }
         guard Self.isSupportedImage(data: data, contentType: contentType) else {
-            throw BackendAPIError.invalidRequest("The profile photo format is unsupported.")
+            throw HTTPError.invalidRequest("The profile photo format is unsupported.")
         }
     }
 
     private func validatePhoto(fileURL: URL, contentType: String) throws {
         guard fileURL.isFileURL else {
-            throw BackendAPIError.invalidRequest("The profile photo URL must reference a local file.")
+            throw HTTPError.invalidRequest("The profile photo URL must reference a local file.")
         }
         let values = try fileURL.resourceValues(forKeys: [.fileSizeKey, .isRegularFileKey])
         guard values.isRegularFile == true,
@@ -90,13 +60,13 @@ public extension APIClient {
             size > 0,
             size <= 1_048_576
         else {
-            throw BackendAPIError.invalidRequest("The profile photo must be between 1 byte and 1 MB.")
+            throw HTTPError.invalidRequest("The profile photo must be between 1 byte and 1 MB.")
         }
         let handle = try FileHandle(forReadingFrom: fileURL)
         defer { try? handle.close() }
         let prefix = try handle.read(upToCount: 12) ?? Data()
         guard Self.isSupportedImage(data: prefix, contentType: contentType) else {
-            throw BackendAPIError.invalidRequest("The profile photo format is unsupported.")
+            throw HTTPError.invalidRequest("The profile photo format is unsupported.")
         }
     }
 

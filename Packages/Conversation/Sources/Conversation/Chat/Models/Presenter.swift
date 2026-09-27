@@ -21,7 +21,7 @@ final class Presenter {
         case toast(_ newValue: ChatToastItem?)
         case date(_ newValue: String?)
         case overlayItem(_ newValue: OverlayMenuItem?)
-        case bottomAccessory(_ newValue: AccessoryBarItem?)
+        case bottomAccessory(_ newValue: AccessoryBarItem)
         case typing(_ newValue: AnyMsgData.TypingStatusPayload?)
     }
 
@@ -47,11 +47,7 @@ extension Presenter {
         case .overlayItem(let newValue):
             state.overlayItem = newValue
         case .bottomAccessory(let newValue):
-            if let newValue {
-                state.bottomAccessory = newValue
-            } else {
-                state.bottomAccessory = .contactAvator
-            }
+            state.bottomAccessory = newValue
         case .typing(let newValue):
             state.typingStatus = newValue
         }

@@ -23,7 +23,7 @@ public struct MarkdownFormatter: Sendable {
 
     public func richText(for string: String) -> AttributedString {
         guard MarkdownParser.requiresRichTextParsing(string) else {
-            return AttributedString(string, attributes: style.base)
+            return parseInline(string, base: style.base)
         }
 
         return MarkdownParser.parse(string).reduce(into: AttributedString()) {

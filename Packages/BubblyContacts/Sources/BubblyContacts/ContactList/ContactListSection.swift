@@ -4,7 +4,7 @@
 //
 
 import Database
-
+import Shared
 struct ContactListSection: Identifiable, Sendable {
     let id: String
     let contacts: [Contact]

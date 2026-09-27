@@ -6,8 +6,9 @@
 import SwiftData
 import Foundation
 import XUI
+import Shared
 
-public protocol SendableTransformable: PersistentModel, UIdentifiable, Codable{
+public protocol SendableTransformable: PersistentModel, UIdentifiable, Codable {
     associatedtype SendableType: Sendable & Hashable & UIdentifiable & Encodable
 
     init(from sendable: SendableType)

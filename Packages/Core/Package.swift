@@ -16,8 +16,8 @@ let package = Package(
         )
     ],
     dependencies: [
+        .package(name: "Shared", path: "../../../Shared"),
         .package(name: "XUI", path: "../XUI"),
-        .package(name: "ImageLoader", path: "../ImageLoader"),
         .package(name: "Crypto", path: "../Crypto"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk", from: "12.17.0"),
         .package(name: "FirePhoneOTP", path: "../FirePhoneOTP"),
@@ -27,9 +27,8 @@ let package = Package(
         .target(
             name: "Core",
             dependencies: [
+                .product(name: "Shared", package: "Shared"),
                 .product(name: "XUI", package: "XUI"),
-                .product(name: "ImageLoader", package: "ImageLoader"),
-                .product(name: "VideoLoader", package: "ImageLoader"),
                 .product(name: "FirebaseAuth", package: "firebase-ios-sdk"),
                 .product(name: "FirebaseMessaging", package: "firebase-ios-sdk"),
                 .product(name: "FirePhoneOTP", package: "FirePhoneOTP"),

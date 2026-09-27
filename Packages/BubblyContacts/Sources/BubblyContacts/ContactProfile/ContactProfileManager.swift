@@ -1,6 +1,6 @@
 import Database
 import Observation
-
+import Shared
 @MainActor
 @Observable
 final class ContactProfileManager {

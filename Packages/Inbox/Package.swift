@@ -9,20 +9,16 @@ let package = Package(
         .library(
             name: "Inbox",
             targets: ["Inbox"],
-        ),
+        )
     ],
     dependencies: [
-        .package(name: "Core", path: "../Core"),
-        .package(name: "Database", path: "../Database"),
-        .package(name: "Services", path: "../Services"),
+        .package(name: "Services", path: "../Services")
     ],
     targets: [
         .target(
             name: "Inbox",
             dependencies: [
-                .product(name: "Core", package: "Core"),
-                .product(name: "Database", package: "Database"),
-                .product(name: "Services", package: "Services"),
+                .product(name: "Services", package: "Services")
             ],
         ),
         .testTarget(

@@ -8,7 +8,7 @@ import Core
 import Foundation
 import FirebaseAuth
 import FirebaseMessaging
-
+import Shared
 // MARK: - CurrentUserModel
 
 public struct CurrentUserModel: ContactRepresentableSendable, Codable, Hashable, Equatable {
@@ -43,7 +43,7 @@ public extension CurrentUserModel {
             name: user.displayName.str,
             mobile: user.phoneNumber.str,
             photoURL: user.photoURL?.absoluteString ?? "",
-            pushToken: String(deviceToken: Messaging.messaging().apnsToken) ?? "",
+            pushToken: GroupStorage.shared.string(for: .device(.deviceToken)) ?? "",
             publicKeyString: CryptoService.shared.base64PublicKeyString(for: user.uid)
         )
     }

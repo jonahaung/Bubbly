@@ -8,6 +8,7 @@ import WebKit
 import SwiftUI
 import Database
 import ImageLoader
+import Core
 
 public struct AttachmentGalleryCell: View {
     let attachment: Attachment
@@ -16,8 +17,8 @@ public struct AttachmentGalleryCell: View {
     public var body: some View {
         switch attachment.attachmentType {
         case .image,
-             .imageUploading:
-            imageContent
+            .imageUploading:
+            previewContent(isZoomEnabled: true)
         case .link:
             VStack(spacing: 8) {
                 previewContent(isZoomEnabled: false)
@@ -57,16 +58,10 @@ public struct AttachmentGalleryCell: View {
                 .padding(.horizontal)
             }.padding()
         case .video,
-             .videoUploading:
+            .videoUploading:
             VideoAttachmentView(attachment: attachment)
         }
     }
-
-    @ViewBuilder
-    private var imageContent: some View {
-        previewContent(isZoomEnabled: true)
-    }
-
     @ViewBuilder
     private func previewContent(isZoomEnabled: Bool) -> some View {
         LazyImage(url: attachment.galleryURL, transaction: .withAnimation()) { state in
@@ -90,5 +85,6 @@ public struct AttachmentGalleryCell: View {
                 ProgressView().controlSize(.mini)
             }
         }
+        .padding(Padding.sm)
     }
 }

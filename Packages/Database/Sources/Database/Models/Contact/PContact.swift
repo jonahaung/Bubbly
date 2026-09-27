@@ -5,10 +5,13 @@
 
 import SwiftData
 import Foundation
+import Shared
+
+extension Contact: UIdentifiable {}
 
 @Model
 public final class PContact: ContactRepresentable, SendableTransformable, Codable {
-    
+
     @Attribute(.unique)
     public var uid: String
     public var name: String
@@ -32,7 +35,7 @@ public final class PContact: ContactRepresentable, SendableTransformable, Codabl
         self.pushToken = pushToken
         self.publicKeyString = publicKeyString
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case uid
         case name
@@ -42,7 +45,6 @@ public final class PContact: ContactRepresentable, SendableTransformable, Codabl
         case publicKeyString
     }
 
-    
     public required convenience init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let uid = try container.decode(String.self, forKey: .uid)
@@ -91,9 +93,11 @@ public extension PContact {
 }
 
 public extension PContact {
+    typealias SendableType = Contact
+
     convenience init(from item: Contact) {
         self.init(
-            uid: item.id,
+            uid: item.uid,
             name: item.name,
             mobile: item.mobile,
             photoURL: item.photoURL,

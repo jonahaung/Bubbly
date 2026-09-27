@@ -7,11 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		472BA35730163C2E00770821 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 472BA35630163C2E00770821 /* MsgRoomMain */; };
+		474ECE063066CDC2005C3656 /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 474ECE053066CDC2005C3656 /* Services */; };
+		474ECE083066CDCF005C3656 /* Conversation in Frameworks */ = {isa = PBXBuildFile; productRef = 474ECE073066CDCF005C3656 /* Conversation */; };
+		474ECE0A3066CDD7005C3656 /* Inbox in Frameworks */ = {isa = PBXBuildFile; productRef = 474ECE093066CDD7005C3656 /* Inbox */; };
+		474ECE0C3066CDDD005C3656 /* Settings in Frameworks */ = {isa = PBXBuildFile; productRef = 474ECE0B3066CDDD005C3656 /* Settings */; };
+		474ECE0E3066CDE2005C3656 /* BubblyContacts in Frameworks */ = {isa = PBXBuildFile; productRef = 474ECE0D3066CDE2005C3656 /* BubblyContacts */; };
 		475BAAEE2DBE88CA007B0876 /* NotificationService.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		479D9AC93011EDD2000D181E /* NetCheckerTraffic in Frameworks */ = {isa = PBXBuildFile; productRef = 479D9AC83011EDD2000D181E /* NetCheckerTraffic */; };
-		47A372FC30613CE800C6369C /* Services in Frameworks */ = {isa = PBXBuildFile; productRef = 47A372FB30613CE800C6369C /* Services */; };
-		47C2C796301D134100690B96 /* MsgRoomMain in Frameworks */ = {isa = PBXBuildFile; productRef = 47C2C795301D134100690B96 /* MsgRoomMain */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,7 +68,6 @@
 		47AD343A2DCD650B00C4FA62 /* Core */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Core; sourceTree = "<group>"; };
 		47AD343B2DCD650B00C4FA62 /* Database */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = Database; sourceTree = "<group>"; };
 		47AD343C2DCD650B00C4FA62 /* ImageLoader */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = ImageLoader; sourceTree = "<group>"; };
-		47AD343F2DCD650B00C4FA62 /* MsgRoomMain */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = MsgRoomMain; sourceTree = "<group>"; };
 		47AD34442DCD650B00C4FA62 /* XUI */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = XUI; sourceTree = "<group>"; };
 		47D43B212F83F1B900A76A42 /* BubblyContacts */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = BubblyContacts; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -130,9 +131,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47A372FC30613CE800C6369C /* Services in Frameworks */,
-				472BA35730163C2E00770821 /* MsgRoomMain in Frameworks */,
+				474ECE0C3066CDDD005C3656 /* Settings in Frameworks */,
+				474ECE0A3066CDD7005C3656 /* Inbox in Frameworks */,
+				474ECE0E3066CDE2005C3656 /* BubblyContacts in Frameworks */,
 				479D9AC93011EDD2000D181E /* NetCheckerTraffic in Frameworks */,
+				474ECE083066CDCF005C3656 /* Conversation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,7 +157,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47C2C796301D134100690B96 /* MsgRoomMain in Frameworks */,
+				474ECE063066CDC2005C3656 /* Services in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,18 +198,17 @@
 		47AD34452DCD650B00C4FA62 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
+				47A653C52E99B92B005A2E50 /* FirePhoneOTP */,
+				479C830E2DDE71D70019971C /* Crypto */,
+				47AD343C2DCD650B00C4FA62 /* ImageLoader */,
+				47AD34442DCD650B00C4FA62 /* XUI */,
+				47AD343A2DCD650B00C4FA62 /* Core */,
+				47AD343B2DCD650B00C4FA62 /* Database */,
 				47A372FD30613D9800C6369C /* Services */,
 				47D43B212F83F1B900A76A42 /* BubblyContacts */,
 				4780E4402F40EC6F00860B99 /* Settings */,
 				4780E40F2F40E36E00860B99 /* Inbox */,
 				4780E40E2F40E32E00860B99 /* Conversation */,
-				47A653C52E99B92B005A2E50 /* FirePhoneOTP */,
-				47AD343A2DCD650B00C4FA62 /* Core */,
-				47AD343B2DCD650B00C4FA62 /* Database */,
-				47AD343F2DCD650B00C4FA62 /* MsgRoomMain */,
-				479C830E2DDE71D70019971C /* Crypto */,
-				47AD343C2DCD650B00C4FA62 /* ImageLoader */,
-				47AD34442DCD650B00C4FA62 /* XUI */,
 			);
 			path = Packages;
 			sourceTree = "<group>";
@@ -234,8 +236,10 @@
 			name = Bubbly;
 			packageProductDependencies = (
 				479D9AC83011EDD2000D181E /* NetCheckerTraffic */,
-				472BA35630163C2E00770821 /* MsgRoomMain */,
-				47A372FB30613CE800C6369C /* Services */,
+				474ECE073066CDCF005C3656 /* Conversation */,
+				474ECE093066CDD7005C3656 /* Inbox */,
+				474ECE0B3066CDDD005C3656 /* Settings */,
+				474ECE0D3066CDE2005C3656 /* BubblyContacts */,
 			);
 			productName = Bubbly;
 			productReference = 475BAAB42DBE859D007B0876 /* Bubbly.app */;
@@ -304,7 +308,7 @@
 			);
 			name = NotificationService;
 			packageProductDependencies = (
-				47C2C795301D134100690B96 /* MsgRoomMain */,
+				474ECE053066CDC2005C3656 /* Services */,
 			);
 			productName = NotificationService;
 			productReference = 475BAAE72DBE88CA007B0876 /* NotificationService.appex */;
@@ -473,7 +477,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -522,7 +526,7 @@
 				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -855,22 +859,30 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		472BA35630163C2E00770821 /* MsgRoomMain */ = {
+		474ECE053066CDC2005C3656 /* Services */ = {
 			isa = XCSwiftPackageProductDependency;
-			productName = MsgRoomMain;
+			productName = Services;
+		};
+		474ECE073066CDCF005C3656 /* Conversation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Conversation;
+		};
+		474ECE093066CDD7005C3656 /* Inbox */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Inbox;
+		};
+		474ECE0B3066CDDD005C3656 /* Settings */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Settings;
+		};
+		474ECE0D3066CDE2005C3656 /* BubblyContacts */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BubblyContacts;
 		};
 		479D9AC83011EDD2000D181E /* NetCheckerTraffic */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 479D9AC73011EDD1000D181E /* XCRemoteSwiftPackageReference "NetChecker" */;
 			productName = NetCheckerTraffic;
-		};
-		47A372FB30613CE800C6369C /* Services */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = Services;
-		};
-		47C2C795301D134100690B96 /* MsgRoomMain */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = MsgRoomMain;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -1,40 +1,16 @@
 import Foundation
 
-public struct BackendRetryPolicy: Sendable, Equatable {
-    public let maximumRetryCount: Int
-    public let initialDelay: Duration
-    public let maximumDelay: Duration
-
-    public init(
-        maximumRetryCount: Int = 2,
-        initialDelay: Duration = .milliseconds(250),
-        maximumDelay: Duration = .seconds(2)
-    ) {
-        let initialDelay = max(.zero, initialDelay)
-        self.maximumRetryCount = max(0, maximumRetryCount)
-        self.initialDelay = initialDelay
-        self.maximumDelay = max(initialDelay, maximumDelay, .zero)
-    }
-
-    public static let `default` = BackendRetryPolicy()
-    public static let disabled = BackendRetryPolicy(maximumRetryCount: 0)
-
-    func delay(forRetry retry: Int) -> Duration {
-        min(initialDelay * (1 << min(retry, 20)), maximumDelay)
-    }
-}
-
-public struct BackendAPIConfiguration: Sendable, Equatable {
+public struct HTTPClientConfiguration: Sendable, Equatable {
     public static let applicationBaseURLOverrideKey = "BubblyAPIBaseURLOverride"
 
     public let baseURL: URL
     public let requestTimeout: TimeInterval
-    public let retryPolicy: BackendRetryPolicy
+    public let retryPolicy: HTTPRetryPolicy
 
     public init(
         baseURL: URL,
         requestTimeout: TimeInterval = 30,
-        retryPolicy: BackendRetryPolicy = .default,
+        retryPolicy: HTTPRetryPolicy = .default,
         allowsInsecureHTTP: Bool = false
     ) throws {
         guard let scheme = baseURL.scheme?.lowercased(),
@@ -46,17 +22,19 @@ public struct BackendAPIConfiguration: Sendable, Equatable {
             baseURL.fragment == nil,
             requestTimeout > 0
         else {
-            throw BackendAPIError.invalidConfiguration
+            throw HTTPError.invalidConfiguration
         }
         guard scheme == "https" || allowsInsecureHTTP else {
-            throw BackendAPIError.insecureConfiguration
+            throw HTTPError.insecureConfiguration
         }
         self.baseURL = baseURL
         self.requestTimeout = requestTimeout
         self.retryPolicy = retryPolicy
     }
+}
 
-    public static func application() throws -> BackendAPIConfiguration {
+extension HTTPClientConfiguration {
+    public static func application() throws -> Self {
         try application(
             userDefaults: .standard,
             environment: ProcessInfo.processInfo.environment,
@@ -81,7 +59,7 @@ public struct BackendAPIConfiguration: Sendable, Equatable {
         userDefaults: UserDefaults,
         environment: [String: String],
         infoDictionaryValue: String?
-    ) throws -> BackendAPIConfiguration {
+    ) throws -> Self {
         let overrideValue = userDefaults.string(forKey: applicationBaseURLOverrideKey)
         let environmentValue = environment["BUBBLY_API_BASE_URL"]
         let rawValue = [environmentValue, overrideValue, infoDictionaryValue]
@@ -89,7 +67,7 @@ public struct BackendAPIConfiguration: Sendable, Equatable {
             .first
 
         guard let rawValue else {
-            throw BackendAPIError.missingConfiguration
+            throw HTTPError.missingConfiguration
         }
         return try configuration(baseURLString: rawValue)
     }
@@ -104,15 +82,15 @@ public struct BackendAPIConfiguration: Sendable, Equatable {
         return value
     }
 
-    private static func configuration(baseURLString: String) throws -> BackendAPIConfiguration {
+    private static func configuration(baseURLString: String) throws -> Self {
         guard let baseURL = URL(string: baseURLString) else {
-            throw BackendAPIError.invalidConfiguration
+            throw HTTPError.invalidConfiguration
         }
 
         #if DEBUG
-            return try BackendAPIConfiguration(baseURL: baseURL, allowsInsecureHTTP: true)
+            return try Self(baseURL: baseURL, allowsInsecureHTTP: true)
         #else
-            return try BackendAPIConfiguration(baseURL: baseURL)
+            return try Self(baseURL: baseURL)
         #endif
     }
 }

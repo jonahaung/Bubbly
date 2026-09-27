@@ -1,5 +1,5 @@
 import Database
-
+import Shared
 struct ContactProfileSnapshot {
     let contact: Contact
     let properties: ConversationProperties

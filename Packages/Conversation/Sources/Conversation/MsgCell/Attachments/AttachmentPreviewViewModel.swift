@@ -10,17 +10,20 @@ import Foundation
 @MainActor
 @Observable
 public final class AttachmentPreviewViewModel {
+    public enum State: Hashable {
+        case initial
+        case attachMentData(AttachmentData)
+        case error(String)
+    }
+
+    public var state = State.initial
     public var attachment: Attachment
-    public var attachmentData: AttachmentData?
-    public var error: Error?
 
     public init(attachment: Attachment) {
         self.attachment = attachment
     }
 
-    @concurrent
-    public func cachedAttachmentData() async -> AttachmentData? {
-        let attachment = await attachment
+    public func cachedAttachmentData() -> AttachmentData? {
         switch attachment.attachmentType {
         case .image:
             if attachment.fileExist(),
@@ -58,27 +61,24 @@ public final class AttachmentPreviewViewModel {
     public func loadAttachment(attachmentFetcher: AttachmentFetcher) async {
         async let cached = cachedAttachmentData()
         if let cached = await cached {
-            Task { @MainActor in
-                attachmentData = cached
-            }
+            await set(.attachMentData(cached))
         } else {
             do {
                 let data = try await attachmentFetcher.fetch(
                     attachment,
                     intent: .visible
                 )
-                await MainActor.run {
-                    attachmentData = data
-                    error = nil
-                }
+                await set(.attachMentData(data))
             } catch {
-                await MainActor.run {
-                    if error is CancellationError {
-                        return
-                    }
-                    self.error = error
+                if error is CancellationError {
+                    return
                 }
+                await set(.error(error.localizedDescription))
             }
         }
+    }
+
+    private func set(_ state: State) {
+        self.state = state
     }
 }

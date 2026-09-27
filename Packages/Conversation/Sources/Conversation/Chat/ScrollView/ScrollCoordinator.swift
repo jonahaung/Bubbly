@@ -54,6 +54,9 @@ extension ScrollCoordinator {
     var geometry: VScrollGeometry {
         state.geometry
     }
+    var phase: ScrollPhase {
+        state.phase
+    }
 }
 
 // MARK: - Intent Handling
@@ -123,6 +126,9 @@ extension ScrollCoordinator {
             handleDeceleratingPhase(geometry: geometry)
         default:
             break
+        }
+        if oldValue.isScrolling != newValue.isScrolling {
+            delegate?.scrollCoordinator(self, isScrolling: newValue.isScrolling)
         }
     }
 
@@ -301,7 +307,6 @@ extension ScrollCoordinator {
     }
 
     private func finalizeScrollUpdates() {
-        delegate?.scrollCoordinator(self, finalizeScrollViewUpdatesWith: state)
         state.isFirstResponder = delegate?.isFirstResponder == true
     }
 

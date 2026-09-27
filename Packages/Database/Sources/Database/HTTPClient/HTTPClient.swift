@@ -1,27 +1,27 @@
 import FirebaseAuth
 import Foundation
 
-public typealias APIAccessTokenProvider = @Sendable (_ forceRefresh: Bool) async throws -> String
+public typealias HTTPAccessTokenProvider = @Sendable (_ forceRefresh: Bool) async throws -> String
 
-public struct APIClient: Sendable {
-    public static let shared = APIClient()
+public struct HTTPClient: Sendable {
+    public static let shared = HTTPClient()
 
-    let executor: BackendRequestExecutor
+    let executor: HTTPRequestExecutor
 
-    public init(session: URLSession = APIClient.makeSession()) {
-        executor = BackendRequestExecutor(
-            configurationProvider: BackendAPIConfiguration.application,
-            accessTokenProvider: APIClient.firebaseAccessToken,
+    public init(session: URLSession = HTTPClient.makeSession()) {
+        executor = HTTPRequestExecutor(
+            configurationProvider: HTTPClientConfiguration.application,
+            accessTokenProvider: HTTPClient.firebaseAccessToken,
             transport: URLSessionBackendHTTPTransport(session: session)
         )
     }
 
     public init(
-        configuration: BackendAPIConfiguration,
-        session: URLSession = APIClient.makeSession(),
-        accessTokenProvider: @escaping APIAccessTokenProvider
+        configuration: HTTPClientConfiguration,
+        session: URLSession = HTTPClient.makeSession(),
+        accessTokenProvider: @escaping HTTPAccessTokenProvider
     ) {
-        executor = BackendRequestExecutor(
+        executor = HTTPRequestExecutor(
             configurationProvider: { configuration },
             accessTokenProvider: accessTokenProvider,
             transport: URLSessionBackendHTTPTransport(session: session)
@@ -29,11 +29,11 @@ public struct APIClient: Sendable {
     }
 
     init(
-        configuration: BackendAPIConfiguration,
-        transport: any BackendHTTPTransport,
-        accessTokenProvider: @escaping APIAccessTokenProvider
+        configuration: HTTPClientConfiguration,
+        transport: any HTTPTransport,
+        accessTokenProvider: @escaping HTTPAccessTokenProvider
     ) {
-        executor = BackendRequestExecutor(
+        executor = HTTPRequestExecutor(
             configurationProvider: { configuration },
             accessTokenProvider: accessTokenProvider,
             transport: transport
@@ -53,7 +53,7 @@ public struct APIClient: Sendable {
 
     private static func firebaseAccessToken(forceRefresh: Bool) async throws -> String {
         guard let user = Auth.auth().currentUser else {
-            throw BackendAPIError.notAuthenticated
+            throw HTTPError.notAuthenticated
         }
         return try await user.getIDTokenResult(forcingRefresh: forceRefresh).token
     }

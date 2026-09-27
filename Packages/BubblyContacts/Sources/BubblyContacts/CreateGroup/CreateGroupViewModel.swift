@@ -6,7 +6,7 @@ import Database
 import Services
 import SwiftUI
 import XUI
-
+import Shared
 @MainActor
 @Observable
 final class CreateGroupViewModel {

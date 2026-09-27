@@ -17,6 +17,7 @@ struct BackgroundView: View {
                     .foregroundStyle(Color.container)
                     .clipped()
             }
+            .ignoresSafeArea(.all)
             .backgroundExtensionEffect()
             .allowsHitTesting(false)
             .geometryGroup()

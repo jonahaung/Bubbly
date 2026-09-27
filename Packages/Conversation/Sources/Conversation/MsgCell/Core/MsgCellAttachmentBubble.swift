@@ -9,14 +9,14 @@ import Database
 import Services
 
 struct MsgCellAttachmentBubble: View, @MainActor Equatable {
-    
+
     static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.state.attachments == rhs.state.attachments
     }
 
     let state: MsgCellViewModel.State
     let theme: ChatTheme
-    
+
     var body: some View {
         VStack(alignment: alignment, spacing: .zero) {
             MsgAttachmentsView(state: state)
@@ -26,8 +26,6 @@ struct MsgCellAttachmentBubble: View, @MainActor Equatable {
                     .padding(theme.bubblePading)
             }
         }
-        .background(theme.bubbleColor(for: state.isSender))
-        .clipShape(bubbleShape)
     }
     private var alignment: HorizontalAlignment {
         state.isSender ? state.horizontalAlignment.inverted : state.horizontalAlignment

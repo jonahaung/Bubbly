@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import Shared
 
 public enum ConversationKind: Codable, Sendable, Hashable {
     case contact(_ contact: Contact)

@@ -8,7 +8,7 @@ import Core
 import SwiftUI
 import Database
 import Services
-
+import Shared
 public struct ContactList: View {
 
     @State private var viewModel: ContactListViewModel
@@ -48,11 +48,7 @@ public struct ContactList: View {
         )
         .toolbar {
             ContactListToolbar(
-                mode: displayMode,
-                isLoading: viewModel.isLoading,
-                syncContacts: syncContacts,
-                syncGroups: syncGroups,
-                createGroup: presentCreateGroup
+                coordinator: coordinator, viewModel: viewModel, displayMode: displayMode
             )
         }
         .task {
@@ -81,25 +77,5 @@ public struct ContactList: View {
 
         }
 
-    }
-
-    private func syncContacts() async {
-        await viewModel.perform(.syncContacts)
-    }
-
-    private func syncGroups() async {
-        await viewModel.perform(.syncGroups)
-    }
-
-    private func presentCreateGroup() {
-        coordinator.router.presentModel(
-            .view(
-                node: NavigationStack {
-                    CreateGroupScene()
-                }
-                .interactiveDismissDisabled()
-                .opaqueView()
-            )
-        )
     }
 }

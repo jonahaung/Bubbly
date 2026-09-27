@@ -4,7 +4,7 @@ import Database
 import Foundation
 import Services
 import XUI
-
+import Shared
 // MARK: - InboxItem
 
 struct InboxItem: Sendable, Identifiable, Equatable {

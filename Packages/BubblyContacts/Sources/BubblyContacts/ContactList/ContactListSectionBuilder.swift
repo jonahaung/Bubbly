@@ -5,14 +5,15 @@
 
 import Database
 import Foundation
-
+import Shared
 enum ContactListSectionBuilder {
     static func sections(
         from contacts: [Contact],
         matching searchText: String
     ) -> [ContactListSection] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let filteredContacts = query.isEmpty
+        let filteredContacts =
+            query.isEmpty
             ? contacts
             : contacts.filter {
                 $0.name.localizedStandardContains(query)

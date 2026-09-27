@@ -4,7 +4,6 @@
 
 import BackgroundTasks
 import Core
-import MsgRoomMain
 import SwiftUI
 import NetCheckerTraffic
 import XUI

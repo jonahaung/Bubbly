@@ -7,8 +7,8 @@ struct BackendBaseURLSettingsView: View {
     @State private var validationMessage: String?
 
     init() {
-        let override = BackendAPIConfiguration.applicationBaseURLOverride
-        let configuredBaseURL = try? BackendAPIConfiguration.application().baseURL.absoluteString
+        let override = HTTPClientConfiguration.applicationBaseURLOverride
+        let configuredBaseURL = try? HTTPClientConfiguration.application().baseURL.absoluteString
         _baseURL = State(initialValue: override ?? configuredBaseURL ?? "")
         _hasOverride = State(initialValue: override != nil)
     }
@@ -35,14 +35,16 @@ struct BackendBaseURLSettingsView: View {
         } header: {
             Text("Backend")
         } footer: {
-            Text("Changes apply to new network requests immediately. Reset to use the URL configured by the active Xcode scheme or build settings.")
+            Text(
+                "Changes apply to new network requests immediately. Reset to use the URL configured by the active Xcode scheme or build settings."
+            )
         }
     }
 
     private func save() {
         do {
-            try BackendAPIConfiguration.setApplicationBaseURLOverride(baseURL)
-            baseURL = BackendAPIConfiguration.applicationBaseURLOverride ?? ""
+            try HTTPClientConfiguration.setApplicationBaseURLOverride(baseURL)
+            baseURL = HTTPClientConfiguration.applicationBaseURLOverride ?? ""
             hasOverride = true
             validationMessage = nil
         } catch {
@@ -51,8 +53,8 @@ struct BackendBaseURLSettingsView: View {
     }
 
     private func reset() {
-        try? BackendAPIConfiguration.setApplicationBaseURLOverride(nil)
-        baseURL = (try? BackendAPIConfiguration.application().baseURL.absoluteString) ?? ""
+        try? HTTPClientConfiguration.setApplicationBaseURLOverride(nil)
+        baseURL = (try? HTTPClientConfiguration.application().baseURL.absoluteString) ?? ""
         hasOverride = false
         validationMessage = nil
     }

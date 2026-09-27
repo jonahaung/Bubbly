@@ -9,12 +9,11 @@ import SwiftUI
 import Database
 import Services
 import ImageLoader
-import VideoLoader
 
 struct ImageUploadingLayer: View {
 
     let attachment: Attachment
-    let url: URL
+    let image: UIImage
     let conversationID: String
     let onCompleteUpload: ((_ newValue: Attachment) -> Void)?
 
@@ -43,15 +42,25 @@ struct ImageUploadingLayer: View {
                         .accessibilityLabel("Uploading photo")
                 }
             case .failed(let error):
-                Button {
-                    retryCount += 1
-                } label: {
-                    Image(systemName: "arrow.clockwise.circle.fill")
-                        .font(.system(size: 30))
-                        .foregroundStyle(.red)
+                VStack {
+                    Text(error.localizedDescription)
+                        .font(.caption)
+                        .padding(Padding.sm)
+                        .lineHeight(.tight)
+                        .background(
+                            .regularMaterial,
+                            in: RoundedRectangle(cornerRadius: Radius.sm)
+                        )
+                    Button {
+                        retryCount += 1
+                    } label: {
+                        Image(systemName: "arrow.clockwise.circle.fill")
+                            .font(.system(size: 30))
+                            .foregroundStyle(.red)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Retry photo upload")
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Retry photo upload")
                 .accessibilityHint(error.localizedDescription)
             case .completed:
                 EmptyView()
@@ -73,7 +82,7 @@ struct ImageUploadingLayer: View {
     private let uploader: ImageUploadingService = .init()
 
     private var inputID: String {
-        "\(conversationID):\(attachment.uid):\(url.absoluteString)"
+        "\(conversationID):\(attachment.uid)"
     }
 
     private var uploadID: String {
@@ -86,9 +95,14 @@ struct ImageUploadingLayer: View {
         state = .uploading
         progress = nil
         do {
-            let uploadedURL = try await uploader.uploadFile(
-                url,
-                to: .conversation(conID: conversationID, attachmentID: attachment.uid)
+            let uploadedURL = try await uploader.uploadImage(
+                image,
+                size: nil,
+                to:
+                    .conversation(
+                        conID: conversationID,
+                        attachmentID: attachment
+                            .uid)
             ) { progress in
                 let fraction = progress.flatMap { value -> Double? in
                     guard value.totalUnitCount > 0 else { return nil }
@@ -99,6 +113,19 @@ struct ImageUploadingLayer: View {
                     self.progress = fraction
                 }
             }
+            //            let uploadedURL = try await uploader.uploadFile(
+            //                data,
+            //                to: .conversation(conID: conversationID, attachmentID: attachment.uid)
+            //            ) { progress in
+            //                let fraction = progress.flatMap { value -> Double? in
+            //                    guard value.totalUnitCount > 0 else { return nil }
+            //                    return min(max(Double(value.completedUnitCount) / Double(value.totalUnitCount), 0), 1)
+            //                }
+            //                Task { @MainActor in
+            //                    guard !Task.isCancelled else { return }
+            //                    self.progress = fraction
+            //                }
+            //            }
             try Task.checkCancellation()
             var newValue = attachment
             newValue.url = uploadedURL.absoluteString

@@ -1,6 +1,6 @@
 import Observation
 import Database
-
+import Shared
 @MainActor
 @Observable
 final class ContactProfileViewModel {

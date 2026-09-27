@@ -6,7 +6,7 @@
 import Database
 import Foundation
 import Observation
-
+import Shared
 @MainActor
 @Observable
 final class ContactListViewModel {

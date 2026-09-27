@@ -4,6 +4,7 @@ import Database
 import Services
 import UIKit
 import XUI
+import Shared
 
 @MainActor
 @Observable
@@ -14,7 +15,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
     var pickedPhoto: PickedPhoto? = nil
     var isLoading = false
     var properties: ConversationProperties
-    
+
     init(group: Database.Group) {
         self.group = group
         originalGroup = group
@@ -31,9 +32,11 @@ public final class GroupDetailsViewModel: ErrorPresenter {
     }
 
     var hasChanges: Bool {
-        group != originalGroup || pickedPhoto != nil || group.members.sorted() != originalGroup
-            .members
-            .sorted()
+        group != originalGroup || pickedPhoto != nil
+            || group.members.sorted()
+                != originalGroup
+                .members
+                .sorted()
     }
 
     func reset() {

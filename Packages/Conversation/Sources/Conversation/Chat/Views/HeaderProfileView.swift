@@ -22,12 +22,14 @@ struct HeaderProfileView: View {
                         .bold()
                     Text(conversation.prettyPrinted)
                         .font(.system(.footnote, design: .serif))
+                        .textSelection(.enabled)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(Padding.md)
                 .background(.windowBackground)
                 .containerShape(RoundedRectangle(cornerRadius: Radius.card))
                 .padding(.vertical, Padding.md)
+
             }
         }
         .frame(height: ChatLayoutConstants.topBarHeight)

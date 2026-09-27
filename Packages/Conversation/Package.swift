@@ -14,24 +14,13 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(name: "Core", path: "../Core"),
-        .package(name: "Database", path: "../Database"),
-        .package(name: "Services", path: "../Services"),
-        .package(name: "XUI", path: "../XUI"),
-        .package(name: "ImageLoader", path: "../ImageLoader"),
-//        .package(name: "MediaPicker", path: "../MediaPicker")
+        .package(name: "Services", path: "../Services")
     ],
     targets: [
         .target(
             name: "Conversation",
             dependencies: [
-                .product(name: "Core", package: "Core"),
-                .product(name: "Database", package: "Database"),
-                .product(name: "Services", package: "Services"),
-                .product(name: "XUI", package: "XUI"),
-                .product(name: "ImageLoader", package: "ImageLoader"),
-                .product(name: "VideoLoader", package: "ImageLoader"),
-//                .product(name: "MediaPicker", package: "MediaPicker")
+                .product(name: "Services", package: "Services")
             ]
         ),
         .testTarget(
@@ -39,6 +28,6 @@ let package = Package(
             dependencies: [
                 "Conversation"
             ]
-        )
+        ),
     ]
 )

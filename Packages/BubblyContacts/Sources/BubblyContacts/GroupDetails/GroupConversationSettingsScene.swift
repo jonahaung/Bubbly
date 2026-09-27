@@ -6,9 +6,10 @@ import ImageLoader
 import Services
 import SwiftUI
 import XUI
+import Shared
 
 public struct GroupConversationSettingsScene: View {
-    
+
     @State private var viewModel: GroupDetailsViewModel
     @Environment(\.currentUser) private var currentUser
     @FocusState private var isFocused: Bool
@@ -69,8 +70,9 @@ public struct GroupConversationSettingsScene: View {
                     value: viewModel.group.createdDate,
                     format: .dateTime,
                 )
-                if let admin: (any ContactRepresentable) = viewModel.group
-                    .createdBy == currentUser.uid
+                if let admin: (any ContactRepresentable) =
+                    viewModel.group
+                        .createdBy == currentUser.uid
                     ? currentUser
                     : nil
                 {
@@ -136,7 +138,7 @@ public struct GroupConversationSettingsScene: View {
         .scrollDismissesKeyboard(.immediately)
         .navigationBarBackButtonHidden(viewModel.hasChanges)
         .onTask {
-           try? await viewModel.task()
+            try? await viewModel.task()
         }
         .onChange(of: viewModel.properties) { _, _ in
             Task {

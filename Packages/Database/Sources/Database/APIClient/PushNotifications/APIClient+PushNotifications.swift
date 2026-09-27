@@ -1,6 +1,6 @@
 import Foundation
 
-public extension APIClient {
+public extension HTTPClient {
     @discardableResult
     func sendPushNotifications(
         messagesByRecipientUserID: [String: String],
@@ -15,13 +15,13 @@ public extension APIClient {
             body?.count ?? 0 <= 4_096,
             deepLink?.count ?? 0 <= 2_048
         else {
-            throw BackendAPIError.invalidRequest("The push notification contains invalid values.")
+            throw HTTPError.invalidRequest("The push notification contains invalid values.")
         }
         let recipients = try messagesByRecipientUserID.map { userID, messageContent in
             let userID = try validatedIdentifier(userID, name: "recipient user")
             let messageContent = messageContent.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !messageContent.isEmpty, messageContent.utf8.count <= 32_768 else {
-                throw BackendAPIError.invalidRequest("The push notification contains invalid values.")
+                throw HTTPError.invalidRequest("The push notification contains invalid values.")
             }
             return PushNotificationRequest.Recipient(userID: userID, messageContent: messageContent)
         }.sorted { $0.userID < $1.userID }
@@ -45,7 +45,7 @@ public extension APIClient {
     private func validatedIdentifier(_ value: String, name: String) throws -> String {
         let value = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty, value.count <= 128 else {
-            throw BackendAPIError.invalidRequest("The \(name) identifier is invalid.")
+            throw HTTPError.invalidRequest("The \(name) identifier is invalid.")
         }
         return value
     }

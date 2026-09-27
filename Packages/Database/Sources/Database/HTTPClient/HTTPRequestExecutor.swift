@@ -1,25 +1,41 @@
 import Foundation
 
-struct BackendRequestExecutor: Sendable {
+struct HTTPRequestExecutor: Sendable {
     enum Body: Sendable {
         case data(Data)
         case file(URL)
     }
 
-    private let configurationProvider: @Sendable () throws -> BackendAPIConfiguration
-    private let accessTokenProvider: APIAccessTokenProvider
-    private let transport: any BackendHTTPTransport
+    private let configurationProvider: @Sendable () throws -> HTTPClientConfiguration
+    private let accessTokenProvider: HTTPAccessTokenProvider
+    private let transport: any HTTPTransport
 
     init(
-        configurationProvider: @escaping @Sendable () throws -> BackendAPIConfiguration,
-        accessTokenProvider: @escaping APIAccessTokenProvider,
-        transport: any BackendHTTPTransport
+        configurationProvider: @escaping @Sendable () throws -> HTTPClientConfiguration,
+        accessTokenProvider: @escaping HTTPAccessTokenProvider,
+        transport: any HTTPTransport
     ) {
         self.configurationProvider = configurationProvider
         self.accessTokenProvider = accessTokenProvider
         self.transport = transport
     }
 
+    func send<R: APIRequest>(_ request: R) async throws -> R.Response {
+        let body: Body?
+        if let model = request.body {
+            let data = try encode(model)
+            body = .data(data)
+        } else {
+            body = nil
+        }
+        let data = try await requiredResponse(
+            method: request.method.rawValue,
+            path: request.paths,
+            body: body,
+            contentType: request.contentType
+        )
+        return try decode(R.Response.self, from: data)
+    }
     func requiredResponse(
         method: String,
         path: [String],
@@ -36,7 +52,7 @@ struct BackendRequestExecutor: Sendable {
                 contentType: contentType
             )
         else {
-            throw BackendAPIError.invalidResponse
+            throw HTTPError.invalidResponse
         }
         return data
     }
@@ -65,7 +81,7 @@ struct BackendRequestExecutor: Sendable {
                 forceTokenRefresh: forceTokenRefresh
             )
 
-            let response: BackendHTTPResponse
+            let response: HTTPResponse
             do {
                 response = try await perform(request: request, body: body)
             } catch is CancellationError {
@@ -77,15 +93,15 @@ struct BackendRequestExecutor: Sendable {
                 guard retry < configuration.retryPolicy.maximumRetryCount,
                     Self.isRetryable(error.code)
                 else {
-                    throw BackendAPIError.network(error.code)
+                    throw HTTPError.network(error.code)
                 }
                 try await sleepBeforeRetry(retry, policy: configuration.retryPolicy)
                 retry += 1
                 continue
-            } catch let error as BackendAPIError {
+            } catch let error as HTTPError {
                 throw error
             } catch {
-                throw BackendAPIError.transportFailure
+                throw HTTPError.transportFailure
             }
 
             switch response.statusCode {
@@ -104,7 +120,7 @@ struct BackendRequestExecutor: Sendable {
                 retry += 1
             default:
                 let errorResponse = try? JSONDecoder().decode(BackendErrorResponse.self, from: response.data)
-                throw BackendAPIError.rejected(
+                throw HTTPError.rejected(
                     statusCode: response.statusCode,
                     message: errorResponse?.reason ?? ""
                 )
@@ -118,7 +134,7 @@ struct BackendRequestExecutor: Sendable {
             encoder.dateEncodingStrategy = .iso8601
             return try encoder.encode(value)
         } catch {
-            throw BackendAPIError.invalidRequest("The request could not be encoded.")
+            throw HTTPError.invalidRequest("The request could not be encoded.")
         }
     }
 
@@ -128,12 +144,12 @@ struct BackendRequestExecutor: Sendable {
             decoder.dateDecodingStrategy = .iso8601
             return try decoder.decode(type, from: data)
         } catch {
-            throw BackendAPIError.invalidResponse
+            throw HTTPError.invalidResponse
         }
     }
 
     private func makeRequest(
-        configuration: BackendAPIConfiguration,
+        configuration: HTTPClientConfiguration,
         method: String,
         path: [String],
         queryItems: [URLQueryItem],
@@ -143,7 +159,7 @@ struct BackendRequestExecutor: Sendable {
     ) async throws -> URLRequest {
         let token = try await accessTokenProvider(forceTokenRefresh)
         guard !token.isEmpty else {
-            throw BackendAPIError.notAuthenticated
+            throw HTTPError.notAuthenticated
         }
         let url = try makeURL(baseURL: configuration.baseURL, path: path, queryItems: queryItems)
         var request = URLRequest(url: url, timeoutInterval: configuration.requestTimeout)
@@ -154,13 +170,19 @@ struct BackendRequestExecutor: Sendable {
         if let contentType {
             request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         }
-        if case let .data(data) = body {
-            request.httpBody = data
+        if let body {
+            switch body {
+            case .data(let data):
+                request.httpBody = data
+            case .file(let uRL):
+                let data = try Data.init(contentsOf: uRL)
+                request.httpBody = data
+            }
         }
         return request
     }
 
-    private func perform(request: URLRequest, body: Body?) async throws -> BackendHTTPResponse {
+    private func perform(request: URLRequest, body: Body?) async throws -> HTTPResponse {
         if case let .file(fileURL) = body {
             return try await transport.upload(for: request, fromFile: fileURL)
         }
@@ -169,13 +191,13 @@ struct BackendRequestExecutor: Sendable {
 
     private func makeURL(baseURL: URL, path: [String], queryItems: [URLQueryItem]) throws -> URL {
         guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
-            throw BackendAPIError.invalidConfiguration
+            throw HTTPError.invalidConfiguration
         }
         var allowed = CharacterSet.urlPathAllowed
         allowed.remove(charactersIn: "/?#%")
         let encodedPath = try path.map { component in
             guard let encoded = component.addingPercentEncoding(withAllowedCharacters: allowed) else {
-                throw BackendAPIError.invalidRequest("The request path is invalid.")
+                throw HTTPError.invalidRequest("The request path is invalid.")
             }
             return encoded
         }
@@ -187,14 +209,14 @@ struct BackendRequestExecutor: Sendable {
             .joined(separator: "/")
         components.queryItems = queryItems.isEmpty ? nil : queryItems
         guard let url = components.url else {
-            throw BackendAPIError.invalidRequest("The request URL is invalid.")
+            throw HTTPError.invalidRequest("The request URL is invalid.")
         }
         return url
     }
 
     private func sleepBeforeRetry(
         _ retry: Int,
-        policy: BackendRetryPolicy,
+        policy: HTTPRetryPolicy,
         retryAfter: Duration? = nil
     ) async throws {
         let delay = min(retryAfter ?? policy.delay(forRetry: retry), policy.maximumDelay)

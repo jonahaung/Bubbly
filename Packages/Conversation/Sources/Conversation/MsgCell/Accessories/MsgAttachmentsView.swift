@@ -26,7 +26,8 @@ struct MsgAttachmentsView: View {
                     onUploaded(attachment: $0)
                 }
                 .matchedTransitionSource(id: attachment.uid, in: namespace) { source in
-                    source.background(.background)
+                    source
+                        .background(.background)
                 }
             }
             .fullScreenCover(item: $selection) { attachment in

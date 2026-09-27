@@ -14,7 +14,7 @@ protocol ScrollCoordinatorDelegate: AnyObject {
     )
     func scrollCoordinator(
         _ coordinator: ScrollCoordinator,
-        finalizeScrollViewUpdatesWith state: ScrollCoordinator.State
+        isScrolling newValue: Bool
     )
     @discardableResult
     func scrollCoordinator(

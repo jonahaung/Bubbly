@@ -33,12 +33,17 @@ public struct AttachmentGalleryView: View {
                         .opacity(showControls ? 1 : 0)
                 }
         }
-        .background(.bar, ignoresSafeAreaEdges: .all)
+        .background(
+            .thickMaterial,
+            ignoresSafeAreaEdges: .all
+        )
         .statusBarHidden()
         .animation(.default, value: showControls)
         .onAppear(after: 1) {
             showControls = true
         }
+        .colorScheme(.dark)
+        .presentationBackground(.clear)
     }
 
     private var topBar: some View {
@@ -48,7 +53,7 @@ public struct AttachmentGalleryView: View {
             shareButton
         }
         .padding()
-        .buttonStyle(.borderless)
+        .buttonStyle(.glass)
     }
 
     private var bottomBar: some View {
@@ -63,8 +68,8 @@ public struct AttachmentGalleryView: View {
     @ViewBuilder private var shareButton: some View {
         let currentItem = attachments.first(where: { $0.id == selection })
         if let item = currentItem,
-           item.attachmentType == .image,
-           let url = item.galleryURL
+            item.attachmentType == .image,
+            let url = item.galleryURL
         {
             ShareLink(
                 item: url,

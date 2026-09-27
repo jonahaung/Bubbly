@@ -5,7 +5,7 @@ import Database
 import Services
 import SwiftUI
 import XUI
-
+import Shared
 public struct ContactCell: View {
     let contact: Contact
     var onTap: (() async throws -> Void)?

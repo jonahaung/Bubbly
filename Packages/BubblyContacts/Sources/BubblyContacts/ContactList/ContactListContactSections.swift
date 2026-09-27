@@ -7,7 +7,7 @@ import XUI
 import Core
 import SwiftUI
 import Database
-
+import Shared
 struct ContactListContactSections: View {
     let sections: [ContactListSection]
     let selection: (Contact) async -> Void

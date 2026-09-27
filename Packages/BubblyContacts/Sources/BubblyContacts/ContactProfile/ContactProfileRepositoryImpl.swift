@@ -1,5 +1,5 @@
 import Database
-
+import Shared
 @MainActor
 struct ContactProfileRepositoryImpl: ContactProfileRepository {
     private let manager: ContactProfileManager

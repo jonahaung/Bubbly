@@ -9,8 +9,8 @@ import SwiftUI
 struct MsgsScrollViewLayoutConfiguration {
     let spacing: CGFloat
     let contentInsets: EdgeInsets
-    let screenBounds: CGRect
-    var screenSize: CGSize { screenBounds.size }
+    var screenSize: CGSize
+
     var boundsWidth: CGFloat {
         screenSize.width
     }

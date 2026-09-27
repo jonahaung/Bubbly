@@ -16,16 +16,12 @@ public actor PushNotificationStore {
         let storage: GroupStorage
         let notificationCenter: NotificationCenterProxy
         let authProvider: @Sendable () -> User?
-        let updatePushToken: @Sendable (_ token: String, _ userID: String) async throws -> Void
 
         static var live: Dependencies {
             Dependencies(
                 storage: .shared,
                 notificationCenter: .init(center: .default),
-                authProvider: { Auth.auth().currentUser },
-                updatePushToken: { token, _ in
-                    try await APIClient.shared.updatePushToken(token)
-                },
+                authProvider: { Auth.auth().currentUser }
             )
         }
     }
@@ -90,18 +86,18 @@ public actor PushNotificationStore {
 
     public func uploadTokenIfNeeded(_ fcmToken: String?) async {
         let storedToken = deps.storage.string(for: .device(.deviceToken))
+
         guard
             let fcmToken,
-            !fcmToken.isEmpty,
             storedToken != fcmToken,
             let user = deps.authProvider()
         else {
             return
         }
-
+        deps.storage.save(fcmToken, for: .device(.deviceToken))
+        let model = CurrentUserModel(user)
         do {
-            try await deps.updatePushToken(fcmToken, user.uid)
-            deps.storage.save(fcmToken, for: .device(.deviceToken))
+            try await HTTPClient.shared.updateContact(model)
         } catch {
             log(error)
         }

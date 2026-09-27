@@ -3,6 +3,7 @@ import Services
 import SwiftUI
 import XUI
 import Core
+import Shared
 
 public struct ContactProfile: View {
 
@@ -54,7 +55,8 @@ public struct ContactProfile: View {
                         .foregroundStyle(.red)
                 }
             }
-            Section {} footer: {
+            Section {
+            } footer: {
                 Text(contact.prettyPrinted)
                     .textSelection(.enabled)
             }

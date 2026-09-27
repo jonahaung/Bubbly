@@ -7,6 +7,7 @@ import XUI
 import Core
 import SwiftData
 import Foundation
+import Shared
 
 public enum ContactRepo {
     enum XError: Error {
@@ -21,7 +22,9 @@ public enum ContactRepo {
         if let localValue, !refetch {
             return localValue
         }
-        let serverValue = try await APIClient.shared.contact(userID: uid)
+        let serverValue: Contact? = try await HTTPClient.shared.contact(
+            uid: uid
+        )
         guard let serverValue else {
             if let localValue {
                 return localValue

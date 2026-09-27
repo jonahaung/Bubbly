@@ -19,8 +19,10 @@ final class Messages {
     private var indexMap: [String: Int] = [:]
     private var modelCache = LRUCache<MsgCellViewModel.ID, MsgCellViewModel>()
 
+    @ObservationIgnored
     private var visibleIDs: [String] = []
-    private var newVisibleIDs: [String] = []
+    @ObservationIgnored
+    private var stableVisibleIDs: [String] = []
 
     var wrappedValue: [MsgCellViewModel] = []
     var selectedMsg: SelectedMsg?
@@ -109,8 +111,21 @@ extension Messages {
 
 extension Messages {
 
-    func onScrollTargetVisibilityChange(_ ids: [String]) {
-        newVisibleIDs = ids
+    func onScrollTargetVisibilityChange(_ newValue: [String]) {
+        visibleIDs = newValue
+
+    }
+    func displayVisibleCellsIfNeeded() {
+        let differences = visibleIDs.difference(from: stableVisibleIDs)
+        for change in differences {
+            switch change {
+            case .insert(_, let id, _):
+                element(withID: id)?.setVisibility(true)
+            case .remove(_, let id, _):
+                element(withID: id)?.setVisibility(false)
+            }
+        }
+        stableVisibleIDs = visibleIDs
     }
 
     func refreshMsg(uid: String) async throws {
@@ -239,19 +254,6 @@ extension Messages {
         shouldShowHeader = state.canLoadOlder == false
         return state
     }
-    func displayVisibleMsgsIfNeeded() {
-        let differences = newVisibleIDs.difference(from: visibleIDs)
-        visibleIDs = newVisibleIDs
-
-        for change in differences {
-            switch change {
-            case .insert(_, let id, _):
-                element(withID: id)?.setVisibility(true)
-            case .remove(_, let id, _):
-                element(withID: id)?.setVisibility(false)
-            }
-        }
-    }
 }
 
 // MARK: - Private Helpers
@@ -259,16 +261,15 @@ extension Messages {
 private extension Messages {
 
     func model(for msg: Message, previous: Message? = nil, next: Message? = nil) -> MsgCellViewModel {
-        let layout = makeLayout(for: msg, previous: previous, next: next)
-
-        if let cached = modelCache.get(msg.uid) {
-            cached.update(layout: layout)
+        if let cached = modelCache.get(msg.uid), previous != nil && next != nil {
             return cached
         }
-
+        let layout = makeLayout(for: msg, previous: previous, next: next)
         let attributedText = makeAttributedText(for: msg)
         let model = MsgCellViewModel(.init(msg: msg, attributedText: attributedText, layout: layout))
-        modelCache.set(model, for: msg.uid)
+        if previous != nil && next != nil {
+            modelCache.set(model, for: msg.uid)
+        }
         return model
     }
 

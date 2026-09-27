@@ -19,15 +19,15 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     }
 
     func applicationDidBecomeActive(_ application: UIApplication) {
-        runtime.didBecomeActive()
+        runtime.scenePhaseChange(.active)
     }
 
     func applicationWillResignActive(_ application: UIApplication) {
-        runtime.willResignActive()
+        runtime.scenePhaseChange(.inactive)
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-        runtime.didEnterBackground()
+        runtime.scenePhaseChange(.background)
     }
 
     func application(

@@ -10,7 +10,6 @@ import Database
 import Services
 import QuickLook
 import ImageLoader
-import VideoLoader
 
 struct AttachmentPreview: View {
 
@@ -20,7 +19,7 @@ struct AttachmentPreview: View {
     @Environment(\.attachmentFetcher) private var attachmentFetcher
     @Environment(\.conversation) private var conversation
     @Environment(MsgCellViewModel.self) private var viewModel
-    @State private var model: AttachmentPreviewViewModel
+    @LazilyState private var model: AttachmentPreviewViewModel
 
     init(
         attachment: Attachment,
@@ -36,6 +35,9 @@ struct AttachmentPreview: View {
         switch model.attachment.attachmentType {
         case .image, .imageUploading, .video, .videoUploading:
             content
+                .onTapGesture {
+                    onSelect(model.attachment)
+                }
         case .link:
             VStack(alignment: .center, spacing: 0) {
                 content
@@ -57,42 +59,42 @@ struct AttachmentPreview: View {
                 }
             }
             .background(Color.background)
+            .onTapGesture {
+                onSelect(model.attachment)
+            }
         }
     }
 
     private var content: some View {
         ZStack {
-            Color.clear
-            if let data = model.attachmentData {
+            Color.background
+                .flexible(.all)
+                .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
+                .layoutPriority(1)
+            switch model.state {
+            case .initial:
+                ProgressView()
+                    .controlSize(.mini)
+            case let .attachMentData(data):
                 attachmentView(for: data)
-            } else if let error = model.error {
+            case let .error(error):
                 SystemImage(.exclamationmarkTriangleFill)
                     .foregroundStyle(.red)
                     .presentSheet {
-                        Text(error.localizedDescription)
+                        Text(error)
                             .padding()
                     }
-            } else {
-
-                ProgressView()
-                    .controlSize(.mini)
             }
         }
-        .aspectRatio(model.attachment.aspectRatio, contentMode: .fit)
+        .equatable(by: model.state)
         .task(id: viewModel.isVisible) {
+            guard let attachmentFetcher else {
+                return
+            }
             if viewModel.isVisible {
-                guard let attachmentFetcher else {
-                    return
-                }
                 await model.loadAttachment(attachmentFetcher: attachmentFetcher)
             } else {
-                guard let attachmentFetcher else {
-                    return
-                }
-                Task {
-                    await attachmentFetcher.cancel(model.attachment)
-                }
-                model.error = nil
+                await attachmentFetcher.cancel(model.attachment)
             }
         }
     }
@@ -106,14 +108,19 @@ struct AttachmentPreview: View {
             imageView(for: thumbnail)
         case let .imageUpload(url, thumbnail):
             imageView(for: thumbnail)
-                .if_let(onCompleteUpload) { _, view in
+                .if_let(onCompleteUpload) {
+                    completion,
+                    view in
                     view
                         .overlay {
                             ImageUploadingLayer(
-                                attachment: model.attachment, url: url,
+                                attachment: model.attachment,
+                                image: UIImage(
+                                    contentsOfFile: url.absoluteString
+                                )?.resized(toWidth: 1080) ?? thumbnail,
                                 conversationID: conversation.uid
                             ) {
-                                onCompleteUpload?($0)
+                                completion($0)
                             }
                         }
                 }
@@ -127,16 +134,16 @@ struct AttachmentPreview: View {
     }
 
     private func imageView(for uiImage: UIImage) -> some View {
-        Button {
-            onSelect(model.attachment)
-        } label: {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFit()
-                .clipShape(.rect(cornerRadius: Radius.card))
-        }
-        .accessibilityLabel("Open attachment")
-        .buttonStyle(.plain)
-        .frame(minWidth: 44, minHeight: 44)
+        Image(uiImage: uiImage)
+            .resizable()
+            .scaledToFit()
+            .clipShape(RoundedRectangle(cornerRadius: Radius.sm))
+            .transition(
+                .asymmetric(
+                    insertion: .opacity.animation(.default),
+                    removal: .identity
+                )
+            )
+            .accessibilityLabel("Open attachment")
     }
 }

@@ -3,7 +3,7 @@
 import Database
 import Services
 import SwiftUI
-
+import Shared
 public struct ContactDetailsScene: View {
     let contact: Contact
     public init(contact: Contact, coordinator _: AppCoordinator) {

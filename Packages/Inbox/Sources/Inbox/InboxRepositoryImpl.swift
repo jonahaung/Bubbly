@@ -5,10 +5,10 @@ import Database
 import Services
 import SwiftData
 import XUI
-
+import Shared
 @MainActor
 struct InboxRepositoryImpl: InboxRepository {
-    
+
     private let manager: InboxManager
 
     init(manager: InboxManager) {
@@ -41,7 +41,8 @@ struct InboxRepositoryImpl: InboxRepository {
         _ conversations: [Conversation],
         currentUser: CurrentUserModel,
     ) async throws -> [InboxItem] {
-        let items: [InboxItem?] = try await AsyncOrderedStream
+        let items: [InboxItem?] =
+            try await AsyncOrderedStream
             .mapOrdered(inputs: conversations) { conversation in
                 if let msg = try await MsgRepo.lastMsg(conID: conversation.uid) {
                     let sender: any ContactRepresentableSendable =
@@ -51,7 +52,7 @@ struct InboxRepositoryImpl: InboxRepository {
                             currentUser
                         }
                     let unreadMsgsCount = try await MsgRepo.incomingUnreadMsgsCount(conID: conversation.uid)
-                    
+
                     return InboxItem(
                         conversation: conversation,
                         msg: msg,

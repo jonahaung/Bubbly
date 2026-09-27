@@ -5,6 +5,7 @@ import Database
 import Foundation
 @preconcurrency import PhoneNumberKit
 import XUI
+import Shared
 
 public enum ContactError: Error {
     case permissionDenied
@@ -68,20 +69,13 @@ public actor PhoneContactsService {
             let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
             return (phoneContact, formattedNumber)
         }
-        let remoteContacts = try await APIClient.shared.lookupContacts(
+        let remoteContacts = try await HTTPClient.shared.lookupContacts(
             mobileNumbers: normalizedContacts.map(\.1)
         )
-        let contactsByMobile = Dictionary(uniqueKeysWithValues: remoteContacts.map { ($0.mobile, $0) })
-        var contacts: [Contact] = []
-        contacts.reserveCapacity(normalizedContacts.count)
-        for (phoneContact, mobile) in normalizedContacts {
-            guard var remoteContact = contactsByMobile[mobile] else {
-                continue
-            }
-            remoteContact.name = phoneContact.name
+
+        for remoteContact in remoteContacts {
             try await dbContact?.insert(remoteContact)
-            contacts.append(remoteContact)
         }
-        return contacts
+        return remoteContacts
     }
 }

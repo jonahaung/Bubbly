@@ -1,6 +1,6 @@
 import Foundation
 
-public enum BackendAPIError: Error, LocalizedError, Sendable, Equatable {
+public enum HTTPError: Error, LocalizedError, Sendable, Equatable {
     case missingConfiguration
     case invalidConfiguration
     case insecureConfiguration

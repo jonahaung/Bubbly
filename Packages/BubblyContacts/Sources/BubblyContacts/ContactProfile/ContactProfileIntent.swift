@@ -1,5 +1,5 @@
 import Database
-
+import Shared
 enum ContactProfileIntent {
     case appear
     case refresh
