@@ -1,12 +1,15 @@
-// © 2026 Aung Ko Min
+//  GroupConversationSettingsScene.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Core
-import Database
-import ImageLoader
-import Services
-import SwiftUI
 import XUI
+import Core
 import Shared
+import SwiftUI
+import Database
+import Services
+import ImageLoader
 
 public struct GroupConversationSettingsScene: View {
 
@@ -35,7 +38,7 @@ public struct GroupConversationSettingsScene: View {
                     PhotoPickerButton(
                         pickedPhoto: $viewModel.pickedPhoto,
                         size: 150,
-                        clipShape: Circle(),
+                        clipShape: Circle()
                     ) {
                         ResizableImage(viewModel.group.photoURL)
                     }
@@ -48,12 +51,12 @@ public struct GroupConversationSettingsScene: View {
                 XNavPickerBar<BubbleColor>(
                     "Bubble Color",
                     BubbleColor.allCases,
-                    $viewModel.properties.theme.bubbleColor,
+                    $viewModel.properties.theme.bubbleColor
                 )
                 XNavPickerBar<ChatBackground>(
                     "Chat Background",
                     ChatBackground.allCases,
-                    $viewModel.properties.theme.background,
+                    $viewModel.properties.theme.background
                 )
             }
             Section {
@@ -68,17 +71,17 @@ public struct GroupConversationSettingsScene: View {
                 LabeledContent(
                     "Created",
                     value: viewModel.group.createdDate,
-                    format: .dateTime,
+                    format: .dateTime
                 )
                 if let admin: (any ContactRepresentable) =
                     viewModel.group
                         .createdBy == currentUser.uid
-                    ? currentUser
-                    : nil
+                        ? currentUser
+                        : nil
                 {
                     LabeledContent(
                         "Admin",
-                        value: admin.name,
+                        value: admin.name
                     )
                 }
             }

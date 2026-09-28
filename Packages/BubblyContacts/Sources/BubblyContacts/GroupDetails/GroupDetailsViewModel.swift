@@ -1,10 +1,13 @@
-// © 2026 Aung Ko Min
+//  GroupDetailsViewModel.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
+import XUI
+import UIKit
+import Shared
 import Database
 import Services
-import UIKit
-import XUI
-import Shared
 
 @MainActor
 @Observable
@@ -12,7 +15,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
     var group: Database.Group
     var contacts: [Contact] = []
     var originalGroup: Database.Group
-    var pickedPhoto: PickedPhoto? = nil
+    var pickedPhoto: PickedPhoto?
     var isLoading = false
     var properties: ConversationProperties
 
@@ -34,9 +37,9 @@ public final class GroupDetailsViewModel: ErrorPresenter {
     var hasChanges: Bool {
         group != originalGroup || pickedPhoto != nil
             || group.members.sorted()
-                != originalGroup
-                .members
-                .sorted()
+            != originalGroup
+            .members
+            .sorted()
     }
 
     func reset() {
@@ -53,7 +56,7 @@ public final class GroupDetailsViewModel: ErrorPresenter {
         return try await imageUploader.uploadImage(
             image,
             size: .init(width: 100, height: 100),
-            to: .group(groupID: uid),
+            to: .group(groupID: uid)
         )
     }
 

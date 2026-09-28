@@ -1,10 +1,15 @@
-import FirebaseAuth
+//  HTTPClient.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Foundation
+import FirebaseAuth
 
 public typealias HTTPAccessTokenProvider = @Sendable (_ forceRefresh: Bool) async throws -> String
 
 public struct HTTPClient: Sendable {
-    public static let shared = HTTPClient()
+    public static let shared: HTTPClient = .init()
 
     let executor: HTTPRequestExecutor
 

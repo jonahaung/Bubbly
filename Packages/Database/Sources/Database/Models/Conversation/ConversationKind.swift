@@ -3,8 +3,8 @@
 //  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import Shared
+import Foundation
 
 public enum ConversationKind: Codable, Sendable, Hashable {
     case contact(_ contact: Contact)

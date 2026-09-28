@@ -1,11 +1,15 @@
-// © 2026 Aung Ko Min
+//  SelectableContactCell.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
+import XUI
 import Core
+import Shared
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
-import Shared
+
 struct SelectableContactCell: View {
     let contact: Contact
     let isSelected: Bool

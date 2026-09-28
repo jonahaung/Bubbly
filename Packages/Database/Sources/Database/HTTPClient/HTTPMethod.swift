@@ -1,8 +1,6 @@
-//
 //  HTTPMethod.swift
-//  Database
 //
-//  Created by Aung Ko Min on 27/9/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation

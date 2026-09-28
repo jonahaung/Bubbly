@@ -1,6 +1,12 @@
+//  ContactProfileManager.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
+import Shared
 import Database
 import Observation
-import Shared
+
 @MainActor
 @Observable
 final class ContactProfileManager {

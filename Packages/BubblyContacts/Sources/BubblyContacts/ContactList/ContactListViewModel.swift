@@ -3,10 +3,11 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
+import Shared
 import Database
 import Foundation
 import Observation
-import Shared
+
 @MainActor
 @Observable
 final class ContactListViewModel {
@@ -22,13 +23,33 @@ final class ContactListViewModel {
             guard searchText != oldValue else {
                 return
             }
-            rebuildSections()
         }
     }
 
-    private(set) var chatSections: [ContactListSection] = []
-    private(set) var phoneSections: [ContactListSection] = []
-    private(set) var groups: [Group] = []
+    var chatSections: [ContactListSection] {
+        ContactListSectionBuilder.sections(
+            from: content.chatContacts,
+            matching: searchText
+        )
+    }
+
+    var phoneSections: [ContactListSection] {
+        ContactListSectionBuilder.sections(
+            from: content.phoneContacts,
+            matching: searchText
+        )
+    }
+
+    var groups: [Group] {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return
+            query.isEmpty
+                ? content.groups
+                : content.groups.filter {
+                    $0.name.localizedStandardContains(query)
+                }
+    }
+
     private(set) var activeOperation: Operation?
     private(set) var errorMessage: String?
 
@@ -58,17 +79,21 @@ final class ContactListViewModel {
             do {
                 switch operation {
                 case .load,
-                    .refresh:
-                    break
+                     .refresh:
+                    try Task.checkCancellation()
+                    let content = try await client.load()
+                    try Task.checkCancellation()
+                    self?.finish(id: id, result: .success(content))
                 case .syncContacts:
                     try await client.syncContacts()
                 case .syncGroups:
-                    try await client.syncGroups()
+                    let groups = try await GroupRepo.sync()
+                    let memberIDs = groups.flatMap(\.members).removeDuplicates()
+                    try await ContactRepo.getOrCreate(for: memberIDs, refatch: false)
+                    Task { @MainActor in
+                        self?.content.groups = groups
+                    }
                 }
-                try Task.checkCancellation()
-                let content = try await client.load()
-                try Task.checkCancellation()
-                self?.finish(id: id, result: .success(content))
             } catch is CancellationError {
                 self?.finishCancellation(id: id)
             } catch {
@@ -114,7 +139,6 @@ final class ContactListViewModel {
         switch result {
         case let .success(content):
             self.content = content
-            rebuildSections()
         case let .failure(error):
             errorMessage = error.localizedDescription
         }
@@ -127,23 +151,5 @@ final class ContactListViewModel {
         operationTask = nil
         operationID = nil
         activeOperation = nil
-    }
-
-    private func rebuildSections() {
-        chatSections = ContactListSectionBuilder.sections(
-            from: content.chatContacts,
-            matching: searchText
-        )
-        phoneSections = ContactListSectionBuilder.sections(
-            from: content.phoneContacts,
-            matching: searchText
-        )
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        groups =
-            query.isEmpty
-            ? content.groups
-            : content.groups.filter {
-                $0.name.localizedStandardContains(query)
-            }
     }
 }

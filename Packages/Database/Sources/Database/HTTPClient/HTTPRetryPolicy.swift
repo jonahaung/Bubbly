@@ -1,8 +1,6 @@
+//  HTTPRetryPolicy.swift
 //
-//  APIRetryPolicy.swift
-//  Database
-//
-//  Created by Aung Ko Min on 27/9/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
@@ -23,8 +21,8 @@ public struct HTTPRetryPolicy: Sendable, Equatable {
         self.maximumDelay = max(initialDelay, maximumDelay, .zero)
     }
 
-    public static let `default` = HTTPRetryPolicy()
-    public static let disabled = HTTPRetryPolicy(maximumRetryCount: 0)
+    public static let `default`: HTTPRetryPolicy = .init()
+    public static let disabled: HTTPRetryPolicy = .init(maximumRetryCount: 0)
 
     func delay(forRetry retry: Int) -> Duration {
         min(initialDelay * (1 << min(retry, 20)), maximumDelay)

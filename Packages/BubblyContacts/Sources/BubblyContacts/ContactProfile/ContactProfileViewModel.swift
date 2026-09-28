@@ -1,13 +1,19 @@
-import Observation
-import Database
+//  ContactProfileViewModel.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Shared
+import Database
+import Observation
+
 @MainActor
 @Observable
 final class ContactProfileViewModel {
     private(set) var state: ContactProfileViewState
 
     private let reducer: ContactProfileReducer
-    private let taskRegistry = ContactProfileTaskRegistry()
+    private let taskRegistry: ContactProfileTaskRegistry = .init()
     private let loadUseCase: LoadContactProfileUseCase
     private let refreshUseCase: RefreshContactProfileUseCase
     private let updateContactUseCase: UpdateContactProfileContactUseCase
@@ -19,12 +25,12 @@ final class ContactProfileViewModel {
         let properties = ConversationProperties(uid: Conversation(.contact(contact)).uid)
         let manager = ContactProfileManager(contact: contact, properties: properties)
         let repository = ContactProfileRepositoryImpl(manager: manager)
-        self.loadUseCase = LoadContactProfileUseCaseImpl(repository: repository)
-        self.refreshUseCase = RefreshContactProfileUseCaseImpl(repository: repository)
-        self.updateContactUseCase = UpdateContactProfileContactUseCaseImpl(repository: repository)
-        self.updatePropertiesUseCase = UpdateContactProfilePropertiesUseCaseImpl(repository: repository)
-        self.deleteMessagesUseCase = DeleteContactProfileMessagesUseCaseImpl(repository: repository)
-        self.state = .init(
+        loadUseCase = LoadContactProfileUseCaseImpl(repository: repository)
+        refreshUseCase = RefreshContactProfileUseCaseImpl(repository: repository)
+        updateContactUseCase = UpdateContactProfileContactUseCaseImpl(repository: repository)
+        updatePropertiesUseCase = UpdateContactProfilePropertiesUseCaseImpl(repository: repository)
+        deleteMessagesUseCase = DeleteContactProfileMessagesUseCaseImpl(repository: repository)
+        state = .init(
             contact: contact,
             properties: properties,
             isLoading: false,
@@ -38,27 +44,27 @@ final class ContactProfileViewModel {
         case .appear:
             await taskRegistry.run(key: .appear) { [weak self] in
                 guard let self else { return }
-                await self.load()
+                await load()
             }
         case .refresh:
             await taskRegistry.run(key: .refresh) { [weak self] in
                 guard let self else { return }
-                await self.refresh()
+                await refresh()
             }
-        case .updateContact(let contact):
+        case let .updateContact(contact):
             await taskRegistry.run(key: .updateContact) { [weak self] in
                 guard let self else { return }
-                await self.updateContact(contact)
+                await updateContact(contact)
             }
-        case .updateProperties(let properties):
+        case let .updateProperties(properties):
             await taskRegistry.run(key: .updateProperties) { [weak self] in
                 guard let self else { return }
-                await self.updateProperties(properties)
+                await updateProperties(properties)
             }
         case .deleteMessages:
             await taskRegistry.run(key: .deleteMessages) { [weak self] in
                 guard let self else { return }
-                await self.deleteMessages()
+                await deleteMessages()
             }
         }
     }

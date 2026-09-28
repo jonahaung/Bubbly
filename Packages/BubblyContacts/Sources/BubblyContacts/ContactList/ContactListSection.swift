@@ -3,8 +3,9 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
-import Database
 import Shared
+import Database
+
 struct ContactListSection: Identifiable, Sendable {
     let id: String
     let contacts: [Contact]

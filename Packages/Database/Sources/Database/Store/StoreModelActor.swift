@@ -6,7 +6,9 @@
 import SwiftData
 import Foundation
 
-public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID == String,
+public actor StoreModelActor<T: PersistentCodableModel>: ModelActor
+where
+    T.UID == String,
     T.SendableType.UID == String
 {
     public let modelExecutor: any ModelExecutor
@@ -88,7 +90,8 @@ public actor StoreModelActor<T: SendableTransformable>: ModelActor where T.UID =
 
     public func updateAndSaveDebounced<Result: Sendable>(
         uid: String,
-        _ update: @escaping (inout T) throws
+        _ update:
+            @escaping (inout T) throws
             -> Result
     ) throws -> Result? {
         guard var model = try getModel(for: uid) else {

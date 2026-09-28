@@ -1,12 +1,10 @@
-//
 //  BubbleCorner.swift
-//  Database
 //
-//  Created by Aung Ko Min on 20/5/26.
+//  Copyright © 2025 Aung Ko Min.
 //
 
-import Foundation
 import SwiftUI
+import Foundation
 
 public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
 
@@ -162,8 +160,8 @@ public enum BubbleCorner: Int, Hashable, Sendable, Codable, Identifiable {
     }
 }
 
-extension BubbleCorner {
-    public var uiRectCorner: UIRectCorner {
+public extension BubbleCorner {
+    var uiRectCorner: UIRectCorner {
         switch self {
         case .all:
             .allCorners

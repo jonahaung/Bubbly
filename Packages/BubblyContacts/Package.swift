@@ -9,7 +9,7 @@ let package = Package(
     products: [
         .library(
             name: "BubblyContacts",
-            targets: ["BubblyContacts"],
+            targets: ["BubblyContacts"]
         )
     ],
     dependencies: [
@@ -20,13 +20,13 @@ let package = Package(
             name: "BubblyContacts",
             dependencies: [
                 .product(name: "Services", package: "Services")
-            ],
+            ]
         ),
         .testTarget(
             name: "BubblyContactsTests",
             dependencies: [
                 "BubblyContacts"
-            ],
+            ]
         ),
-    ],
+    ]
 )

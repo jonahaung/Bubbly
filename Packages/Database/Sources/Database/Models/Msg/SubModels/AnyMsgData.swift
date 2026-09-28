@@ -49,6 +49,7 @@ public extension AnyMsgData {
             self.conID = conID
         }
     }
+
     struct MsgRecipientReceiptPayload: Sendable, Codable, Hashable {
         public let msgID: String
         public let conID: String
@@ -65,8 +66,8 @@ public extension AnyMsgData {
     var conID: String {
         switch self {
         case let .deleteMsg(rMsg),
-             let .newMsg(rMsg),
-             let .updatedMsg(rMsg):
+            let .newMsg(rMsg),
+            let .updatedMsg(rMsg):
             rMsg.conID
         case let .typingStatus(payload):
             payload.conID
@@ -80,7 +81,7 @@ public extension AnyMsgData {
     var subtitle: String {
         switch self {
         case let .newMsg(rMsg),
-             let .updatedMsg(rMsg):
+            let .updatedMsg(rMsg):
             rMsg.text ?? rMsg.attachments?.first?.displayText ?? "New Message"
         case let .deleteMsg(rMsg):
             "Deleted: \(rMsg.uid)"
@@ -88,7 +89,7 @@ public extension AnyMsgData {
             typingStatus.conID
         case let .reaction(reaction):
             reaction.reaction.rawValue
-        case .msgRecipientReceipt(_):
+        case .msgRecipientReceipt:
             "Receipt"
         }
     }
@@ -109,7 +110,7 @@ public extension AnyMsgData {
         case .deleteMsg: "Deleted"
         case .reaction: "Reacted"
         case .typingStatus: "Typing Status"
-//        case let .seenStatus(payload): "Has seen the \(payload.msgID)"
+        //        case let .seenStatus(payload): "Has seen the \(payload.msgID)"
         case let .msgRecipientReceipt(payload):
             "Has seen the \(payload.recipientReceipt.status.localizedName)"
         }
@@ -118,7 +119,7 @@ public extension AnyMsgData {
     var pushNotificationBody: String {
         switch self {
         case let .newMsg(msg),
-             let .updatedMsg(msg):
+            let .updatedMsg(msg):
             msg.text ?? msg.attachments?.first?.displayText ?? "New Message"
         case .deleteMsg:
             "Message Deleted"
@@ -126,8 +127,8 @@ public extension AnyMsgData {
             "Reacted with \(reaction.reaction)"
         case let .typingStatus(typingStatus):
             typingStatus.isTyping ? "is typing..." : "stopped typing"
-//        case let .seenStatus(status):
-//            status.msgID
+        //        case let .seenStatus(status):
+        //            status.msgID
         case let .msgRecipientReceipt(payload):
             payload.prettyPrinted
         }

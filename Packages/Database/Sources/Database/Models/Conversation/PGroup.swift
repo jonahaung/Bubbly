@@ -17,7 +17,7 @@ public final class PGroup {
     public var photoURL: String
     public var members: [String]
     public var createdBy: String
-//    public var theme: ConversationTheme
+    //    public var theme: ConversationTheme
 
     public init(
         uid: String,
@@ -35,15 +35,15 @@ public final class PGroup {
         self.members = members
         self.createdBy = createdBy
     }
-    
+
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.uid = try container.decode(String.self, forKey: .uid)
-        self.name = try container.decode(String.self, forKey: .name)
-        self.createdDate = try container.decode(Date.self, forKey: .createdDate)
-        self.photoURL = try container.decode(String.self, forKey: .photoURL)
-        self.members = try container.decode([String].self, forKey: .members)
-        self.createdBy = try container.decode(String.self, forKey: .createdBy)
+        uid = try container.decode(String.self, forKey: .uid)
+        name = try container.decode(String.self, forKey: .name)
+        createdDate = try container.decode(Date.self, forKey: .createdDate)
+        photoURL = try container.decode(String.self, forKey: .photoURL)
+        members = try container.decode([String].self, forKey: .members)
+        createdBy = try container.decode(String.self, forKey: .createdBy)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -98,7 +98,7 @@ extension PGroup: UIdentifiable {
 
 // MARK: SendableTransformable
 
-extension PGroup: SendableTransformable {
+extension PGroup: PersistentCodableModel {
     public typealias SendableType = Group
 
     public convenience init(from snapshot: SendableType) {

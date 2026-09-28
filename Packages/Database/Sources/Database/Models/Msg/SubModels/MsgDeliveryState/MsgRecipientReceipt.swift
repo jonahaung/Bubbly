@@ -1,8 +1,6 @@
+//  MsgRecipientReceipt.swift
 //
-//  RecipientReceipt.swift
-//  Database
-//
-//  Created by Aung Ko Min on 25/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
@@ -12,16 +10,16 @@ public struct MsgRecipientReceipt: Sendable, Equatable, Hashable, Codable {
     public var status: DeliveryStatus
     public let date: Date
     public let failure: DeliveryFailure?
-    
+
     public init(
         memberID: String,
         state: DeliveryStatus,
         updatedAt: Date,
         failure: DeliveryFailure? = nil
     ) {
-        self.userID = memberID
-        self.status = state
-        self.date = updatedAt
+        userID = memberID
+        status = state
+        date = updatedAt
         self.failure = failure
     }
 }

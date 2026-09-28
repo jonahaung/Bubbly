@@ -22,7 +22,7 @@ public enum ContactRepo {
         if let localValue, !refetch {
             return localValue
         }
-        let serverValue: Contact? = try await HTTPClient.shared.contact(
+        let serverValue: Contact? = try await ContactHttpClient.shared.contact(
             uid: uid
         )
         guard let serverValue else {

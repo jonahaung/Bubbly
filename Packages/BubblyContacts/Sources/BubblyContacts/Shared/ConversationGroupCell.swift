@@ -1,9 +1,12 @@
-// © 2026 Aung Ko Min
+//  ConversationGroupCell.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
+import XUI
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
 
 struct ConversationGroupCell: View {
     let group: Database.Group
@@ -14,7 +17,7 @@ struct ConversationGroupCell: View {
         } label: {
             HStack(spacing: 20) {
                 ProfilePhoto(
-                    group,
+                    group
                 )
                 .padding(.vertical, 2)
                 Text(group.name)

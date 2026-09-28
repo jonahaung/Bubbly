@@ -23,11 +23,11 @@ public final class PConversationProperties: Codable {
 
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.uid = try container.decode(String.self, forKey: .uid)
-        self.theme = try container.decode(ConversationTheme.self, forKey: .theme)
-        self.seenMembers = try container.decode([SeenMember].self, forKey: .seenMembers)
+        uid = try container.decode(String.self, forKey: .uid)
+        theme = try container.decode(ConversationTheme.self, forKey: .theme)
+        seenMembers = try container.decode([SeenMember].self, forKey: .seenMembers)
         // Do not decode `lastPage` (ephemeral)
-        self.lastPage = nil
+        lastPage = nil
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -53,10 +53,10 @@ public final class PConversationProperties: Codable {
 
 // MARK: SendableTransformable
 
-extension PConversationProperties: SendableTransformable {
+extension PConversationProperties: PersistentCodableModel {
     public typealias SendableType = ConversationProperties
 
-    public func update(from item: SendableType) throws -> Self {
+    public func update(from item: SendableType) -> Self {
         if theme != item.theme {
             theme = item.theme
         }

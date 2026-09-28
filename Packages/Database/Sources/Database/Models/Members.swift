@@ -1,8 +1,6 @@
-//
 //  Members.swift
-//  Database
 //
-//  Created by Aung Ko Min on 20/5/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Core
@@ -13,6 +11,7 @@ public struct Members: Sendable, Hashable {
     public init(members: [Contact]) {
         self.members = members
     }
+
     public func contact(for uid: String) -> Contact? {
         members.first(where: { $0.uid == uid })
     }

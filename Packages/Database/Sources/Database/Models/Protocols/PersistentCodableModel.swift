@@ -1,14 +1,14 @@
-//  SendableTransformable.swift
+//  PersistentCodableModel.swift
 //
 //  Copyright © 2025 Aung Ko Min.
 //
 
-import SwiftData
-import Foundation
 import XUI
 import Shared
+import SwiftData
+import Foundation
 
-public protocol SendableTransformable: PersistentModel, UIdentifiable, Codable {
+public protocol PersistentCodableModel: PersistentModel, UIdentifiable, Codable {
     associatedtype SendableType: Sendable & Hashable & UIdentifiable & Encodable
 
     init(from sendable: SendableType)
@@ -16,8 +16,8 @@ public protocol SendableTransformable: PersistentModel, UIdentifiable, Codable {
     func update(from item: Self.SendableType) throws -> Self
 }
 
-public extension SendableTransformable {
+public extension PersistentCodableModel {
     func update(from item: Self.SendableType) throws -> Self {
-        try self.copyMatchingProperties(from: item)
+        try copyMatchingProperties(from: item)
     }
 }

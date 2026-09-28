@@ -1,8 +1,6 @@
+//  DeliveryStatus.swift
 //
-//  AggregateDeliveryStatus.swift
-//  Database
-//
-//  Created by Aung Ko Min on 25/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import XUI
@@ -14,12 +12,14 @@ public enum DeliveryStatus: Int, Sendable, Equatable, Hashable, Codable {
     case delivered
     case read
 }
+
 extension DeliveryStatus: CaseNameReflectable {}
 extension DeliveryStatus: Comparable {
     public static func < (lhs: Self, rhs: Self) -> Bool {
         lhs.rawValue < rhs.rawValue
     }
 }
+
 public extension DeliveryStatus {
 
     var isFinal: Bool {

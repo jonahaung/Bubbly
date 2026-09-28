@@ -46,16 +46,16 @@ public final class PMsg {
 
     public required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.uid = try container.decode(String.self, forKey: .uid)
-        self.senderID = try container.decode(String.self, forKey: .senderID)
-        self.conID = try container.decode(String.self, forKey: .conID)
-        self.text = try container.decodeIfPresent(String.self, forKey: .text)
-        self.date = try container.decode(Date.self, forKey: .date)
-        self.incomingStatus = try container.decode(Int.self, forKey: .incomingStatus)
-        self.outgoingStatus = try container.decodeIfPresent(MsgDeliveryState.self, forKey: .outgoingStatus)
-        self.deliveryStatusAggregateRaw = try container.decode(Int.self, forKey: .deliveryStatusAggregateRaw)
-        self.attachments = try container.decodeIfPresent([Attachment].self, forKey: .attachments)
-        self.reactions = try container.decode([Reaction].self, forKey: .reactions)
+        uid = try container.decode(String.self, forKey: .uid)
+        senderID = try container.decode(String.self, forKey: .senderID)
+        conID = try container.decode(String.self, forKey: .conID)
+        text = try container.decodeIfPresent(String.self, forKey: .text)
+        date = try container.decode(Date.self, forKey: .date)
+        incomingStatus = try container.decode(Int.self, forKey: .incomingStatus)
+        outgoingStatus = try container.decodeIfPresent(MsgDeliveryState.self, forKey: .outgoingStatus)
+        deliveryStatusAggregateRaw = try container.decode(Int.self, forKey: .deliveryStatusAggregateRaw)
+        attachments = try container.decodeIfPresent([Attachment].self, forKey: .attachments)
+        reactions = try container.decode([Reaction].self, forKey: .reactions)
     }
 
     public func encode(to encoder: any Encoder) throws {
@@ -114,7 +114,7 @@ public extension PMsg {
 
 // MARK: SendableTransformable
 
-extension PMsg: SendableTransformable {
+extension PMsg: PersistentCodableModel {
     public typealias SendableType = Message
 
     public convenience init(from snapshot: SendableType) {

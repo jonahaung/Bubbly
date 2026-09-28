@@ -1,19 +1,23 @@
-// © 2026 Aung Ko Min
+//  CreateGroupViewModel.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Foundation
+import XUI
 import Core
+import Shared
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import XUI
-import Shared
+import Foundation
+
 @MainActor
 @Observable
 final class CreateGroupViewModel {
     var groupName: String = ""
     var selection: [Contact] = []
-    var pickedPhoto: PickedPhoto? = nil
-    var uploadedURL: URL? = nil
+    var pickedPhoto: PickedPhoto?
+    var uploadedURL: URL?
     var isLoading: Bool = false
 
     var canCreateGroup: Bool {
@@ -41,7 +45,7 @@ final class CreateGroupViewModel {
         let url = try await imageUploader.uploadImage(
             image,
             size: .init(width: 100, height: 100),
-            to: .group(groupID: groupID),
+            to: .group(groupID: groupID)
         )
         let memberIDs = [currentUserID] + selection.map(\.uid)
         let group = Group(
@@ -50,7 +54,7 @@ final class CreateGroupViewModel {
             createdDate: .now,
             photoURL: url.absoluteString,
             members: memberIDs,
-            createdBy: currentUserID,
+            createdBy: currentUserID
         )
         try await GroupRepo.save(group)
     }

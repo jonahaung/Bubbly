@@ -1,8 +1,6 @@
-//
 //  MsgLayoutValue.swift
-//  Database
 //
-//  Created by Aung Ko Min on 20/5/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import SwiftUI

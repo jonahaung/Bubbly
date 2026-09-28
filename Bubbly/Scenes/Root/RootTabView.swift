@@ -19,9 +19,14 @@ struct RootTabView: View {
         TabView(selection: router.tabPathBinding()) {
             ForEach(TabPath.allCases) { tabPath in
                 Tab(value: tabPath, role: role(for: tabPath)) {
-                    MainNavView(tabPath: tabPath, coordinator: coordinator) {
+                    MainNavView(
+                        tabPath: tabPath,
+                        coordinator: coordinator
+                    ) {
                         coordinator.view(for: tabPath)
-                            .navigationDestination(for: NavPath.self) { navPath in
+                            .navigationDestination(
+                                for: NavPath.self
+                            ) { navPath in
                                 coordinator.view(for: navPath)
                             }
                     }
@@ -31,18 +36,16 @@ struct RootTabView: View {
                 }
             }
         }
-        .tabViewSearchActivation(.automatic)
-        .searchToolbarBehavior(.minimize)
-        .searchPresentationToolbarBehavior(.avoidHidingContent)
-        .tabBarMinimizeBehavior(.onScrollDown)
         .toastPresentable()
         .fullScreenCover(item: fullScreenCover) { coordinator.view(for: $0) }
+        .tabViewSearchActivation(.automatic)
+        .tabBarMinimizeBehavior(.onScrollDown)
     }
 }
 
 extension RootTabView {
     private func role(for tabPath: TabPath) -> TabRole? {
-        tabPath == .contacts ? .search : nil
+        tabPath == .search ? .search : nil
     }
 }
 
@@ -64,14 +67,14 @@ private extension RootTabView {
 public extension AppCoordinator {
     @ViewBuilder func view(for tabPath: TabPath) -> some View {
         switch tabPath {
-        case .test:
-            PlaygroundView()
         case .inbox:
             InboxScene(coordinator: self)
         case .contacts:
             ContactList(coordinator: self)
         case .settings:
             SettingsScene(coordinator: self)
+        case .search:
+            PlaygroundView()
         }
     }
 }

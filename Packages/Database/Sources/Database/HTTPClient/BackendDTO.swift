@@ -1,49 +1,10 @@
-import Foundation
+//  BackendDTO.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Shared
-
-extension Request {
-
-    struct ContactLookup: APIRequest {
-        typealias Response = [Contact]
-        struct Body: Encodable {
-            let mobileNumbers: [String]
-        }
-        let subPath: Shared.APIPath.SubPath = .contacts
-        let endPoint: Shared.APIEndPoint = .lookup
-        let method: HTTPMethod = .post
-        let body: Encodable?
-
-        init(mobileNumbers: [String]) {
-            body = Body(mobileNumbers: mobileNumbers)
-        }
-    }
-
-    struct ContactUpdate<T: ContactRepresentableSendable>: APIRequest {
-        typealias Response = T
-        let method: HTTPMethod = .put
-        let subPath: Shared.APIPath.SubPath = .contacts
-        let endPoint: Shared.APIEndPoint = .put
-        let body: Encodable?
-
-        init(modal: T) {
-            body = modal
-        }
-    }
-    struct ContactGet<T: ContactRepresentableSendable>: APIRequest {
-        typealias Response = T
-        let method: HTTPMethod = .get
-        let subPath: Shared.APIPath.SubPath = .contacts
-        let endPoint: Shared.APIEndPoint
-
-        init(uid: String) {
-            endPoint = .custom(uid)
-        }
-    }
-}
-
-struct PushTokenUpdateRequest: Encodable, Sendable {
-    let pushToken: String
-}
+import Foundation
 
 struct PushNotificationRequest: Encodable, Sendable {
     let recipients: [Recipient]

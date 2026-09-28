@@ -11,8 +11,8 @@ public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, 
 
     case inbox
     case contacts
-    case test
     case settings
+    case search
 
     public var systemName: String {
         switch self {
@@ -20,10 +20,10 @@ public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, 
             "message"
         case .contacts:
             "book.pages.fill"
-        case .test:
-            "apple.logo"
         case .settings:
             "person.crop.circle.fill"
+        case .search:
+            "magnifyingglass"
         }
     }
 
@@ -31,8 +31,9 @@ public enum TabPath: Int, Codable, Sendable, CaseIterable, CaseNameReflectable, 
         switch self {
         case .inbox: String(localized: "Inbox", comment: "Tab title")
         case .contacts: String(localized: "Contact", comment: "Tab title")
-        case .test: String(localized: "Tests", comment: "Tab title")
         case .settings: String(localized: "Settings", comment: "Tab title")
+        case .search:
+            String(localized: "Search", comment: "Tab title")
         }
     }
 

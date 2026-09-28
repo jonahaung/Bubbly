@@ -152,7 +152,7 @@ struct APIClientTests {
         ])
         let client = try makeClient(transport: transport)
 
-        let groups = try await client.groups(pageSize: 25)
+        let groups = try await GroupHttpClient(client: client).groups(pageSize: 25)
         let requests = await transport.requests
 
         #expect(groups.map(\.uid) == ["group-one"])
@@ -171,7 +171,7 @@ struct APIClientTests {
         let client = try makeClient(transport: transport)
 
         await #expect(throws: HTTPError.invalidResponse) {
-            try await client.groups()
+            try await GroupHttpClient(client: client).groups()
         }
         #expect(await transport.requests.count == 2)
     }
@@ -195,7 +195,7 @@ struct APIClientTests {
             createdBy: "untrusted-client-value"
         )
 
-        let saved = try await client.upsertGroup(group)
+        let saved = try await GroupHttpClient(client: client).upsertGroup(group)
         let request = try #require(await transport.requests.first)
         let body = try #require(request.httpBody)
         let object = try #require(JSONSerialization.jsonObject(with: body) as? [String: Any])

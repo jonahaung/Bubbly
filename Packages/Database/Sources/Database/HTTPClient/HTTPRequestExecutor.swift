@@ -1,10 +1,11 @@
+//  HTTPRequestExecutor.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Foundation
 
 struct HTTPRequestExecutor: Sendable {
-    enum Body: Sendable {
-        case data(Data)
-        case file(URL)
-    }
 
     private let configurationProvider: @Sendable () throws -> HTTPClientConfiguration
     private let accessTokenProvider: HTTPAccessTokenProvider
@@ -21,26 +22,29 @@ struct HTTPRequestExecutor: Sendable {
     }
 
     func send<R: APIRequest>(_ request: R) async throws -> R.Response {
-        let body: Body?
-        if let model = request.body {
-            let data = try encode(model)
-            body = .data(data)
-        } else {
-            body = nil
+        guard
+            let data = try await send(
+                method: request.method.rawValue,
+                path: request.paths,
+                queryItems: request.queryItems,
+                body: request.body,
+                contentType: request.contentType,
+                allowsNotFound: request.allowsNotFound || request.acceptsEmptyResponse
+            )
+        else {
+            return try request.responseWhenNotFound()
         }
-        let data = try await requiredResponse(
-            method: request.method.rawValue,
-            path: request.paths,
-            body: body,
-            contentType: request.contentType
-        )
+        if data.isEmpty, request.acceptsEmptyResponse {
+            return try request.responseWhenNotFound()
+        }
         return try decode(R.Response.self, from: data)
     }
+
     func requiredResponse(
         method: String,
         path: [String],
         queryItems: [URLQueryItem] = [],
-        body: Body? = nil,
+        body: HTTPRequestBody? = nil,
         contentType: String? = nil
     ) async throws -> Data {
         guard
@@ -61,7 +65,7 @@ struct HTTPRequestExecutor: Sendable {
         method: String,
         path: [String],
         queryItems: [URLQueryItem] = [],
-        body: Body? = nil,
+        body: HTTPRequestBody? = nil,
         contentType: String? = nil,
         allowsNotFound: Bool = false
     ) async throws -> Data? {
@@ -128,7 +132,7 @@ struct HTTPRequestExecutor: Sendable {
         }
     }
 
-    func encode<T: Encodable>(_ value: T) throws -> Data {
+    func encode(_ value: some Encodable) throws -> Data {
         do {
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
@@ -153,7 +157,7 @@ struct HTTPRequestExecutor: Sendable {
         method: String,
         path: [String],
         queryItems: [URLQueryItem],
-        body: Body?,
+        body: HTTPRequestBody?,
         contentType: String?,
         forceTokenRefresh: Bool
     ) async throws -> URLRequest {
@@ -172,17 +176,20 @@ struct HTTPRequestExecutor: Sendable {
         }
         if let body {
             switch body {
-            case .data(let data):
+            case let .data(data):
                 request.httpBody = data
-            case .file(let uRL):
-                let data = try Data.init(contentsOf: uRL)
+            case let .file(uRL):
+                let data = try Data(contentsOf: uRL)
+                request.httpBody = data
+            case let .encodable(model):
+                let data = try encode(model)
                 request.httpBody = data
             }
         }
         return request
     }
 
-    private func perform(request: URLRequest, body: Body?) async throws -> HTTPResponse {
+    private func perform(request: URLRequest, body: HTTPRequestBody?) async throws -> HTTPResponse {
         if case let .file(fileURL) = body {
             return try await transport.upload(for: request, fromFile: fileURL)
         }
@@ -227,9 +234,16 @@ struct HTTPRequestExecutor: Sendable {
 
     private static func isRetryable(_ code: URLError.Code) -> Bool {
         switch code {
-        case .timedOut, .cannotFindHost, .cannotConnectToHost, .networkConnectionLost,
-            .dnsLookupFailed, .notConnectedToInternet, .internationalRoamingOff,
-            .callIsActive, .dataNotAllowed, .secureConnectionFailed:
+        case .callIsActive,
+            .cannotConnectToHost,
+            .cannotFindHost,
+            .dataNotAllowed,
+            .dnsLookupFailed,
+            .internationalRoamingOff,
+            .networkConnectionLost,
+            .notConnectedToInternet,
+            .secureConnectionFailed,
+            .timedOut:
             true
         default:
             false

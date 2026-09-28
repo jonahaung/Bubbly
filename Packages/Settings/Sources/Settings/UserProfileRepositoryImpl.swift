@@ -20,7 +20,7 @@ struct UserProfileRepositoryImpl: UserProfileRepository {
     }
 
     func refreshRemote() async throws -> UserProfileSnapshot {
-        if let remote: CurrentUserModel = try await HTTPClient.shared.contact(
+        if let remote: CurrentUserModel = try await ContactHttpClient.shared.contact(
             uid: manager.currentUserRepository
                 .model.uid)
         {
@@ -89,12 +89,17 @@ struct UserProfileRepositoryImpl: UserProfileRepository {
         guard let authUser = Auth.auth().currentUser else {
             throw URLError(.userAuthenticationRequired)
         }
-        let imageUploader = ImageUploadingService()
-        let url = try await imageUploader.uploadImage(
-            image,
-            size: .init(width: 100, height: 100),
-            to: .contact(uid: authUser.uid)
+        guard let resized = image.resizedToFill(.init(width: 100, height: 100)) else {
+            throw URLError(.userAuthenticationRequired)
+        }
+        let data = try MediaManager.shared.createData(
+            from: resized
         )
+        let model: CurrentUserModel = try await ContactHttpClient.shared
+            .uploadProfilePhoto(data: data, contentType: "image/png")
+        guard let url = URL(string: model.photoURL) else {
+            throw URLError(.badURL)
+        }
         let request = authUser.createProfileChangeRequest()
         request.photoURL = url
         try await request.commitChanges()

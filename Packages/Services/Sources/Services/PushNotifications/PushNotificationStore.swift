@@ -97,7 +97,7 @@ public actor PushNotificationStore {
         deps.storage.save(fcmToken, for: .device(.deviceToken))
         let model = CurrentUserModel(user)
         do {
-            try await HTTPClient.shared.updateContact(model)
+            try await ContactHttpClient.shared.updateContact(model)
         } catch {
             log(error)
         }

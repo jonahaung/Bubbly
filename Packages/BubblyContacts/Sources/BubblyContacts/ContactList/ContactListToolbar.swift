@@ -16,7 +16,8 @@ struct ContactListToolbar: ToolbarContent {
     @State private var isLoading: Bool = false
 
     var body: some ToolbarContent {
-        ToolbarItemGroup(placement: .topBarTrailing) {
+
+        ToolbarItemGroup(placement: .primaryAction) {
             switch displayMode {
             case .chat:
                 AsyncButton(action: syncContacts) {
@@ -60,6 +61,7 @@ struct ContactListToolbar: ToolbarContent {
     private func syncGroups() async {
         await viewModel.perform(.syncGroups)
     }
+
     private func presentCreateGroup() {
         coordinator.router.presentModel(
             .view(
@@ -80,9 +82,9 @@ struct ContactListToolbar: ToolbarContent {
         do {
             try await AsyncOrderedStream
                 .mapOrdered(
-                    inputs: viewModel.phoneSections.flatMap { $0.contacts }
+                    inputs: viewModel.phoneSections.flatMap(\.contacts)
                 ) { contact in
-                    try await HTTPClient.shared.updateContact(contact)
+                    try await ContactHttpClient.shared.updateContact(contact)
                 }
         } catch {
             log(error)

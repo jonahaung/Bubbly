@@ -1,3 +1,8 @@
+//  CreateGroupError.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Foundation
 
 enum CreateGroupError: Error, LocalizedError {

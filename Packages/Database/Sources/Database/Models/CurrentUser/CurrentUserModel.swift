@@ -5,10 +5,11 @@
 
 import XUI
 import Core
+import Shared
 import Foundation
 import FirebaseAuth
 import FirebaseMessaging
-import Shared
+
 // MARK: - CurrentUserModel
 
 public struct CurrentUserModel: ContactRepresentableSendable, Codable, Hashable, Equatable {
@@ -57,8 +58,9 @@ public extension CurrentUserModel {
         publicKeyString: ""
     )
 }
-extension String {
-    public init?(deviceToken: Data?) {
+
+public extension String {
+    init?(deviceToken: Data?) {
         guard let deviceToken else { return nil }
         self = deviceToken.map { String(format: "%.2hhx", $0) }.joined()
     }

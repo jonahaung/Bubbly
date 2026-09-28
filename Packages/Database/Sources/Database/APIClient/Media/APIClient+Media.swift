@@ -1,3 +1,8 @@
+//  APIClient+Media.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Foundation
 
 public extension HTTPClient {
@@ -12,7 +17,7 @@ public extension HTTPClient {
                 ["groups", groupID, "photo"]
             case let .conversation(conversationID, attachmentID):
                 ["conversations", conversationID, attachmentID]
-            case .contact(uid: let uid):
+            case let .contact(uid: uid):
                 ["contacts", uid, "photo"]
             }
         }
@@ -57,7 +62,7 @@ public extension HTTPClient {
     }
 
     private func validateMedia(data: Data, contentType: String) throws {
-        guard !data.isEmpty, data.count <= 10 * 1_024 * 1_024 else {
+        guard !data.isEmpty, data.count <= 10 * 1024 * 1024 else {
             throw HTTPError.invalidRequest("The image must be between 1 byte and 10 MB.")
         }
         guard Self.isSupportedMediaImage(data: data, contentType: contentType) else {
@@ -73,7 +78,7 @@ public extension HTTPClient {
         guard values.isRegularFile == true,
             let size = values.fileSize,
             size > 0,
-            size <= 10 * 1_024 * 1_024
+            size <= 10 * 1024 * 1024
         else {
             throw HTTPError.invalidRequest("The image must be between 1 byte and 10 MB.")
         }

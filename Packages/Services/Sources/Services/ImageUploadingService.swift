@@ -44,12 +44,12 @@ public struct ImageUploadingService: Sendable {
             }
         let data = try mediaManager.createData(from: uploadingImage)
 
-        if case .contact = path {
-            return try await HTTPClient.shared.uploadProfilePhoto(
-                data: data,
-                contentType: "image/png"
-            )
-        }
+        //        if case .contact = path {
+        //            return try await ContactHttpClient.shared.uploadProfilePhoto(
+        //                data: data,
+        //                contentType: "image/png"
+        //            )
+        //        }
 
         guard let backendPath = path.backendPath else {
             throw ImageUploadingError.invalidPath
@@ -71,12 +71,12 @@ public struct ImageUploadingService: Sendable {
         to path: Path,
         onProgress: (@Sendable (Progress?) -> Void)? = nil,
     ) async throws -> URL {
-        if case .contact = path {
-            return try await HTTPClient.shared.uploadProfilePhoto(
-                fileURL: url,
-                contentType: "image/png"
-            )
-        }
+        //        if case .contact = path {
+        //            return try await ContactHttpClient.shared.uploadProfilePhoto(
+        //                fileURL: url,
+        //                contentType: "image/png"
+        //            )
+        //        }
         guard let backendPath = path.backendPath else {
             throw ImageUploadingError.invalidPath
         }

@@ -1,5 +1,11 @@
-import Database
+//  ContactProfileUseCases.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Shared
+import Database
+
 @MainActor
 protocol LoadContactProfileUseCase {
     func execute() async throws -> ContactProfileSnapshot

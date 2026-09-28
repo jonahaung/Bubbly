@@ -1,3 +1,8 @@
+//  ContactProfileReducer.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 protocol ContactProfileReducer {
     func reduce(state: inout ContactProfileViewState, action: ContactProfileAction)
 }
@@ -5,13 +10,13 @@ protocol ContactProfileReducer {
 struct ContactProfileReducerImpl: ContactProfileReducer {
     func reduce(state: inout ContactProfileViewState, action: ContactProfileAction) {
         switch action {
-        case .setLoading(let value):
+        case let .setLoading(value):
             state.isLoading = value
-        case .setDeletingMessages(let value):
+        case let .setDeletingMessages(value):
             state.isDeletingMessages = value
-        case .setError(let value):
+        case let .setError(value):
             state.error = value
-        case .applySnapshot(let snapshot):
+        case let .applySnapshot(snapshot):
             state = .init(
                 contact: snapshot.contact,
                 properties: snapshot.properties,

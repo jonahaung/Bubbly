@@ -1,8 +1,6 @@
-//
 //  PaginationState.swift
-//  Database
 //
-//  Created by Aung Ko Min on 20/5/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 public struct PaginationState: Hashable, Sendable {
@@ -11,7 +9,7 @@ public struct PaginationState: Hashable, Sendable {
     public var lastMsgID: String?
     public let firstMsgID: String?
     public var totalMsgsCount: Int
-    
+
     public init(conID: String, pageSize: Int, lastMsgID: String? = nil, firstMsgID: String?, totalMsgsCount: Int) {
         self.conID = conID
         self.pageSize = pageSize

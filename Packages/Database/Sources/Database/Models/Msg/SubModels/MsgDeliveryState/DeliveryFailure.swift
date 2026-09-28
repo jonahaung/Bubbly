@@ -1,4 +1,10 @@
+//  DeliveryFailure.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Foundation
+
 public struct DeliveryFailure: Sendable, Equatable, Hashable, Codable {
     public let code: String
     public let isRetryable: Bool

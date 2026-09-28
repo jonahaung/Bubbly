@@ -3,9 +3,10 @@
 //  Copyright © 2026 Aung Ko Min.
 //
 
+import Shared
 import Database
 import Foundation
-import Shared
+
 enum ContactListSectionBuilder {
     static func sections(
         from contacts: [Contact],
@@ -14,11 +15,11 @@ enum ContactListSectionBuilder {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
         let filteredContacts =
             query.isEmpty
-            ? contacts
-            : contacts.filter {
-                $0.name.localizedStandardContains(query)
-                    || $0.mobile.localizedStandardContains(query)
-            }
+                ? contacts
+                : contacts.filter {
+                    $0.name.localizedStandardContains(query)
+                        || $0.mobile.localizedStandardContains(query)
+                }
 
         return Dictionary(grouping: filteredContacts, by: sectionID)
             .map {

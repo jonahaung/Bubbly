@@ -1,3 +1,8 @@
+//  ContactProfileTaskRegistry.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 enum ContactProfileTaskKey: Hashable {
     case appear
     case refresh
@@ -7,7 +12,7 @@ enum ContactProfileTaskKey: Hashable {
 }
 
 actor ContactProfileTaskRegistry {
-    private var tasks = [ContactProfileTaskKey: Task<Void, Never>]()
+    private var tasks: [ContactProfileTaskKey: Task<Void, Never>] = [:]
 
     func run(key: ContactProfileTaskKey, operation: @escaping @Sendable () async -> Void) {
         tasks[key]?.cancel()

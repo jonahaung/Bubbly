@@ -1,9 +1,13 @@
-// © 2026 Aung Ko Min
+//  ContactDetailsScene.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
+import Shared
+import SwiftUI
 import Database
 import Services
-import SwiftUI
-import Shared
+
 public struct ContactDetailsScene: View {
     let contact: Contact
     public init(contact: Contact, coordinator _: AppCoordinator) {

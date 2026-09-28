@@ -68,7 +68,7 @@ extension ChatManager: @preconcurrency ScrollCoordinatorDelegate {
         isScrolling newValue: Bool
     ) {
         if newValue {
-            presentation.send(.bottomAccessory(.scrollDownButton))
+            //            presentation.send(.bottomAccessory(.scrollDownButton))
         } else {
             let isScrolledAtBottom = messages.isAbsoluteScrolled(
                 at: .bottom

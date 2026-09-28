@@ -1,5 +1,6 @@
 import Database
 import SwiftUI
+import Core
 
 struct BackendBaseURLSettingsView: View {
     @State private var baseURL: String
@@ -14,7 +15,7 @@ struct BackendBaseURLSettingsView: View {
     }
 
     var body: some View {
-        Section {
+        ScrollSectionContent {
             TextField("https://api.example.com", text: $baseURL)
                 .keyboardType(.URL)
                 .textInputAutocapitalization(.never)

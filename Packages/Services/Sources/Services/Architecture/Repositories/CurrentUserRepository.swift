@@ -40,13 +40,13 @@ public actor CurrentUserRepository {
         storage.save(firUser.uid, for: .auth(.currentUserID))
         storage.save(publicKeyString, for: .security(.publicKey(id: firUser.uid)))
 
-        if let remoteModel: CurrentUserModel = try await HTTPClient.shared.contact(uid: firUser.uid) {
+        if let remoteModel: CurrentUserModel = try await ContactHttpClient.shared.contact(uid: firUser.uid) {
             if newModel != remoteModel {
-                try await HTTPClient.shared.updateContact(newModel)
+                try await ContactHttpClient.shared.updateContact(newModel)
                 await ToastPresenter.show("Profile Updated")
             }
         } else {
-            try await HTTPClient.shared.updateContact(newModel)
+            try await ContactHttpClient.shared.updateContact(newModel)
         }
         await update(newModel)
     }

@@ -1,21 +1,24 @@
-//  Contact.swift
+//  Contact++.swift
 //
 //  Copyright © 2025 Aung Ko Min.
 //
 
 import XUI
+import Core
+import Shared
 import Contacts
 import Foundation
 import PhoneNumberKit
-import Core
-import Shared
 
-extension Contact {
-    public var isChatAvailable: Bool {
+extension Contact: @retroactive Identifiable {}
+extension Contact: UIdentifiable {}
+
+public extension Contact {
+    var isChatAvailable: Bool {
         !uid.hasPrefix("+")
     }
 
-    public init?(cnContact: CNContact) {
+    init?(cnContact: CNContact) {
         let name =
             cnContact.givenName.isEmpty
             ? [

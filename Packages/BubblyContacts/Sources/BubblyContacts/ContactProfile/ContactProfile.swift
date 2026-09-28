@@ -1,9 +1,14 @@
-import Database
-import Services
-import SwiftUI
+//  ContactProfile.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import XUI
 import Core
 import Shared
+import SwiftUI
+import Database
+import Services
 
 public struct ContactProfile: View {
 
@@ -55,8 +60,7 @@ public struct ContactProfile: View {
                         .foregroundStyle(.red)
                 }
             }
-            Section {
-            } footer: {
+            Section {} footer: {
                 Text(contact.prettyPrinted)
                     .textSelection(.enabled)
             }

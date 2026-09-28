@@ -1,10 +1,9 @@
-//  ServerTime.swift
+//  Date.swift
 //
-//  Copyright © 2025 Aung Ko Min.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
-
 
 //@frozen
 //public struct ServerTime: Codable, Hashable, Sendable, Comparable {

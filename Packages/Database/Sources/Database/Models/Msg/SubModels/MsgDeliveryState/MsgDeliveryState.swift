@@ -1,8 +1,6 @@
-//
 //  MsgDeliveryState.swift
-//  Database
 //
-//  Created by Aung Ko Min on 25/4/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
 import Foundation
@@ -55,8 +53,8 @@ public struct MsgDeliveryState: Sendable, Equatable, Hashable, Codable {
     }
 }
 
-extension MsgDeliveryState {
-    public mutating func updatingReceipt(
+public extension MsgDeliveryState {
+    mutating func updatingReceipt(
         memberID: String,
         state: DeliveryStatus,
         updatedAt: Date = .now,
@@ -85,7 +83,7 @@ extension MsgDeliveryState {
         self = Self(msgID: msgID, receipts: receipts)
     }
 
-    public func updatingAllReceipts(
+    func updatingAllReceipts(
         to state: DeliveryStatus,
         updatedAt: Date = .now,
         failure: DeliveryFailure? = nil
@@ -103,18 +101,18 @@ extension MsgDeliveryState {
         )
     }
 
-    public var localizedName: String { aggregateStatus.localizedName }
-    public func replacingReceipts(_ receipts: [MsgRecipientReceipt]) -> Self {
+    var localizedName: String { aggregateStatus.localizedName }
+    func replacingReceipts(_ receipts: [MsgRecipientReceipt]) -> Self {
         Self(msgID: msgID, receipts: receipts)
     }
 
-    public func state(for recipientID: String) -> DeliveryStatus? {
+    func state(for recipientID: String) -> DeliveryStatus? {
         receipts.first(where: { $0.userID == recipientID })?.status
     }
 }
 
-extension MsgDeliveryState {
-    public var aggregateStatus: DeliveryStatus {
+public extension MsgDeliveryState {
+    var aggregateStatus: DeliveryStatus {
         guard !receipts.isEmpty else { return .sending }
         if receipts.allSatisfy({
             $0.status == .sending
@@ -133,7 +131,7 @@ extension MsgDeliveryState {
         return .sending
     }
 
-    public static let empty: MsgDeliveryState = .init(
+    static let empty: MsgDeliveryState = .init(
         msgID: String(),
         receipts: []
     )

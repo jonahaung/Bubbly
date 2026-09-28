@@ -12,7 +12,7 @@ public struct ProfileBackgroundShape: Shape {
         let height = rect.height
         return Path { path in
             path.move(to: CGPoint(x: 0, y: 0))
-            path.addLine(to: CGPoint(x: 0, y: height / 2))
+            path.addLine(to: CGPoint(x: 0, y: height * 0.9))
             path
                 .addCurve(
                     to: CGPoint(x: width, y: height / 1.7),

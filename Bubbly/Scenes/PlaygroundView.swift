@@ -3,6 +3,7 @@
 import Services
 import SwiftUI
 import XUI
+import Core
 
 struct PlaygroundView: View {
 
@@ -11,69 +12,75 @@ struct PlaygroundView: View {
     @State private var fontName = ""
 
     var body: some View {
-        List {
-
-            Section {
-                Button("Font Picker : \(fontName)") {
-                    Router.shared.presentModel(
-                        .view(node: NavigationStack { FontPicker(selection: $fontName) }.opaqueView()))
-                }
-                Button("Show Toast") {
-                    ToastPresenter.show(Lorem.random())
-                }
-            }
-            Section("Rich Text") {
-                let rich = MarkdownFormatter().richText(for: markdownTestData)
-                Text(rich)
-                    .onTapGesture {
-                        print("tap")
+        ScrollView {
+            LazyVStack {
+                ScrollSectionContent {
+                    Button("Font Picker : \(fontName)") {
+                        Router.shared.presentModel(
+                            .view(node: NavigationStack { FontPicker(selection: $fontName) }.opaqueView()))
                     }
-            }
-            Section("Markdown Text") {
-                let rich = MarkdownFormatter().markdownText(for: markdownTestData)
-                Text(rich)
-            }
-            Section("Custom Markdown") {
-                VStack(alignment: .leading, spacing: 0) {
-                    ForEach(MarkdownParser.parse(markdownTestData), id: \.self) { item in
-                        switch item {
-                        case let .heading(level, text):
-                            Text(text)
-                                .font(.system(size: 18 + CGFloat((6 - min(level, 6)) * 2), weight: .bold))
-                                .padding(.vertical, 4)
-                        case let .paragraph(text):
-                            Text(.init(text))
-                        case let .codeBlock(_, content):
-                            Text(content)
-                                .font(.system(.body, design: .monospaced))
-                                .padding(6)
-                                .background(Color(.secondarySystemBackground))
-                                .cornerRadius(5)
-                        case let .listItem(_, text):
-                            Text(.init("• " + text))
-                        case let .orderedListItem(_, idx, text):
-                            Text(.init("\(idx). " + text))
-                        case let .blockquote(text):
-                            Text(text)
-                                .italic()
-                                .padding(.leading, 16)
-                                .border(.gray.opacity(0.4))
-                        case .horizontalRule:
-                            Divider()
-                        case let .mention(username):
-                            Text("@" + username)
-                                .foregroundColor(.red)
-                        case let .hashtag(topic):
-                            Text("#" + topic)
-                                .foregroundColor(.blue)
-                        case let .unknown(text):
-                            Text(text)
+                    Button("Show Toast") {
+                        ToastPresenter.show(Lorem.random())
+                    }
+                }
+
+                ScrollSectionContent("Rich Text") {
+                    let rich = MarkdownFormatter().richText(for: markdownTestData)
+                    Text(rich)
+                        .onTapGesture {
+                            print("tap")
                         }
-                    }
-
                 }
+
+                ScrollSectionContent("Markdown Text") {
+                    let rich = MarkdownFormatter().markdownText(for: markdownTestData)
+                    Text(rich)
+                }
+
+                ScrollSectionContent("Custom Markdown") {
+                    VStack(alignment: .leading, spacing: 0) {
+                        ForEach(MarkdownParser.parse(markdownTestData), id: \.self) { item in
+                            switch item {
+                            case let .heading(level, text):
+                                Text(text)
+                                    .font(.system(size: 18 + CGFloat((6 - min(level, 6)) * 2), weight: .bold))
+                                    .padding(.vertical, 4)
+                            case let .paragraph(text):
+                                Text(.init(text))
+                            case let .codeBlock(_, content):
+                                Text(content)
+                                    .font(.system(.body, design: .monospaced))
+                                    .padding(6)
+                                    .background(Color(.secondarySystemBackground))
+                                    .cornerRadius(5)
+                            case let .listItem(_, text):
+                                Text(.init("• " + text))
+                            case let .orderedListItem(_, idx, text):
+                                Text(.init("\(idx). " + text))
+                            case let .blockquote(text):
+                                Text(text)
+                                    .italic()
+                                    .padding(.leading, 16)
+                                    .border(.gray.opacity(0.4))
+                            case .horizontalRule:
+                                Divider()
+                            case let .mention(username):
+                                Text("@" + username)
+                                    .foregroundColor(.red)
+                            case let .hashtag(topic):
+                                Text("#" + topic)
+                                    .foregroundColor(.blue)
+                            case let .unknown(text):
+                                Text(text)
+                            }
+                        }
+
+                    }
+                }
+
             }
         }
+        .groupScrollViewStyle()
         .textSelection(.enabled)
         .navigationTitle(Self.defaultTitle)
         .searchable(text: $searchText)

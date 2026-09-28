@@ -1,12 +1,10 @@
+//  MsgCellDecoration.swift
 //
-//  MsgCellLayout.swift
-//  Database
-//
-//  Created by Aung Ko Min on 20/5/26.
+//  Copyright © 2026 Aung Ko Min.
 //
 
-import Core
 import XUI
+import Core
 
 public struct MsgCellDecoration: Hashable, Conformable {
 
@@ -24,7 +22,7 @@ public struct MsgCellDecoration: Hashable, Conformable {
     public init(
         showTimeSeparator: Bool,
         showBottomSpacer: Bool,
-        bubbleCorner: BubbleCorner,
+        bubbleCorner: BubbleCorner
     ) {
         self.showTimeSeparator = showTimeSeparator
         self.showBottomSpacer = showBottomSpacer

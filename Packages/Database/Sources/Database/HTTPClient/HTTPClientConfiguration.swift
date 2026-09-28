@@ -1,3 +1,8 @@
+//  HTTPClientConfiguration.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Foundation
 
 public struct HTTPClientConfiguration: Sendable, Equatable {
@@ -33,8 +38,8 @@ public struct HTTPClientConfiguration: Sendable, Equatable {
     }
 }
 
-extension HTTPClientConfiguration {
-    public static func application() throws -> Self {
+public extension HTTPClientConfiguration {
+    static func application() throws -> Self {
         try application(
             userDefaults: .standard,
             environment: ProcessInfo.processInfo.environment,
@@ -42,11 +47,11 @@ extension HTTPClientConfiguration {
         )
     }
 
-    public static var applicationBaseURLOverride: String? {
+    static var applicationBaseURLOverride: String? {
         normalized(UserDefaults.standard.string(forKey: applicationBaseURLOverrideKey))
     }
 
-    public static func setApplicationBaseURLOverride(_ value: String?) throws {
+    static func setApplicationBaseURLOverride(_ value: String?) throws {
         guard let value = normalized(value) else {
             UserDefaults.standard.removeObject(forKey: applicationBaseURLOverrideKey)
             return
@@ -55,7 +60,7 @@ extension HTTPClientConfiguration {
         UserDefaults.standard.set(value, forKey: applicationBaseURLOverrideKey)
     }
 
-    static func application(
+    internal static func application(
         userDefaults: UserDefaults,
         environment: [String: String],
         infoDictionaryValue: String?

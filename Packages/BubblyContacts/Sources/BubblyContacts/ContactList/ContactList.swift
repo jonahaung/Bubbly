@@ -5,10 +5,11 @@
 
 import XUI
 import Core
+import Shared
 import SwiftUI
 import Database
 import Services
-import Shared
+
 public struct ContactList: View {
 
     @State private var viewModel: ContactListViewModel
@@ -23,19 +24,26 @@ public struct ContactList: View {
 
     public var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: Spacing.md) {
-                ContactListModePicker(selection: $displayMode)
-                ContactListContentView(
-                    mode: displayMode,
-                    searchText: viewModel.searchText,
-                    chatSections: viewModel.chatSections,
-                    phoneSections: viewModel.phoneSections,
-                    groups: viewModel.groups,
-                    isLoading: viewModel.isLoading,
-                    errorMessage: viewModel.errorMessage,
-                    openConversation: openConversation,
-                    retry: viewModel.retry
-                )
+            LazyVStack(
+                alignment: .leading,
+                spacing: Spacing.md,
+                pinnedViews: .sectionHeaders
+            ) {
+                Section {
+                    ContactListContentView(
+                        mode: displayMode,
+                        searchText: viewModel.searchText,
+                        chatSections: viewModel.chatSections,
+                        phoneSections: viewModel.phoneSections,
+                        groups: viewModel.groups,
+                        isLoading: viewModel.isLoading,
+                        errorMessage: viewModel.errorMessage,
+                        openConversation: openConversation,
+                        retry: viewModel.retry
+                    )
+                } header: {
+                    ContactListModePicker(selection: $displayMode)
+                }
             }
         }
         .groupScrollViewStyle()
@@ -43,7 +51,7 @@ public struct ContactList: View {
         .navigationSubtitle(TabPath.contacts.systemName)
         .searchable(
             text: $viewModel.searchText,
-            placement: .toolbarPrincipal,
+            placement: .navigationBarDrawer(displayMode: .automatic),
             prompt: "Search Contacts"
         )
         .toolbar {
@@ -56,9 +64,6 @@ public struct ContactList: View {
         }
         .refreshable {
             await viewModel.perform(.refresh)
-        }
-        .onDisappear {
-            viewModel.cancel()
         }
     }
 
@@ -74,7 +79,6 @@ public struct ContactList: View {
             }
             await UIApplication.shared.open(url)
         } else {
-
         }
 
     }

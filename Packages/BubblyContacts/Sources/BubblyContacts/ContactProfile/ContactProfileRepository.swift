@@ -1,5 +1,11 @@
-import Database
+//  ContactProfileRepository.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Shared
+import Database
+
 struct ContactProfileSnapshot {
     let contact: Contact
     let properties: ConversationProperties

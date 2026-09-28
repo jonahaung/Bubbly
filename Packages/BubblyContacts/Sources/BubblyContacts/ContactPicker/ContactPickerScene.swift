@@ -1,11 +1,15 @@
-// © 2026 Aung Ko Min
+//  ContactPickerScene.swift
+//
+//  Copyright © 2025 Aung Ko Min.
+//
 
-import Database
-import Services
-import SwiftUI
 import XUI
 import Core
 import Shared
+import SwiftUI
+import Database
+import Services
+
 public struct ContactPickerScene: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selection: [Contact]
@@ -26,7 +30,7 @@ public struct ContactPickerScene: View {
                         let isSelected = selection.contains { $0.uid == contact.uid }
                         SelectableContactCell(
                             contact: contact,
-                            isSelected: isSelected,
+                            isSelected: isSelected
                         ) { _ in
                             toggleSelection(for: contact)
                         }
@@ -52,7 +56,7 @@ public struct ContactPickerScene: View {
             .searchable(
                 text: $searchText,
                 placement: .automatic,
-                prompt: "Search contacts",
+                prompt: "Search contacts"
             )
             .onTask {
                 await fetchContacts()
@@ -71,7 +75,7 @@ public struct ContactPickerScene: View {
         }
     }
 
-    @State private var allContacts = [Contact]()
+    @State private var allContacts: [Contact] = []
 
     private func toggleSelection(for contact: Contact) {
         if let index = selection.firstIndex(where: { $0.uid == contact.uid }) {

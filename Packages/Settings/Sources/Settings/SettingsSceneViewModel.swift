@@ -43,15 +43,12 @@ final class SettingsSceneViewModel: ErrorPresenter {
                 defaultValue: 15
             )
         )
-        Task { @MainActor [weak self] in
-            guard let self else {
-                return
-            }
-            let currentUser = await self.currentUserRepository.model
-            self.dispatch(.applyCurrentUser(currentUser))
-        }
     }
 
+    func onAppear() async {
+        let currentUser = await self.currentUserRepository.model
+        dispatch(.applyCurrentUser(currentUser))
+    }
     func send(_ intent: SettingsIntent) async {
         switch intent {
         case .openUserProfile:
@@ -229,6 +226,9 @@ final class SettingsSceneViewModel: ErrorPresenter {
 }
 
 extension CurrentUserModel: @retroactive PhotoGalleryItem {
+    public var id: String {
+        uid
+    }
     public var galleryURL: URL? {
         .init(string: photoURL)
     }

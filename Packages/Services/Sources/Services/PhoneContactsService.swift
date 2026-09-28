@@ -69,7 +69,7 @@ public actor PhoneContactsService {
             let formattedNumber = phoneNumberKit.format(parsedNumber, toType: .e164)
             return (phoneContact, formattedNumber)
         }
-        let remoteContacts = try await HTTPClient.shared.lookupContacts(
+        let remoteContacts = try await ContactHttpClient.shared.lookupContacts(
             mobileNumbers: normalizedContacts.map(\.1)
         )
 

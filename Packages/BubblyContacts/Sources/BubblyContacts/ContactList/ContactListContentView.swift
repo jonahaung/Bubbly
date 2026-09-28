@@ -4,9 +4,10 @@
 //
 
 import XUI
+import Shared
 import SwiftUI
 import Database
-import Shared
+
 struct ContactListContentView: View {
     let mode: ContactListDisplayMode
     let searchText: String

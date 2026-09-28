@@ -3,14 +3,12 @@
 //  Copyright © 2025 Aung Ko Min.
 //
 
+import Shared
 import SwiftData
 import Foundation
-import Shared
-
-extension Contact: UIdentifiable {}
 
 @Model
-public final class PContact: ContactRepresentable, SendableTransformable, Codable {
+public final class PContact: ContactRepresentable, PersistentCodableModel {
 
     @Attribute(.unique)
     public var uid: String
@@ -20,7 +18,7 @@ public final class PContact: ContactRepresentable, SendableTransformable, Codabl
     public var pushToken: String
     public var publicKeyString: String
 
-    init(
+    public init(
         uid: String,
         name: String,
         mobile: String,

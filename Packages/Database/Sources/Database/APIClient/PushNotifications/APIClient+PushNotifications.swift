@@ -1,3 +1,8 @@
+//  APIClient+PushNotifications.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Foundation
 
 public extension HTTPClient {
@@ -12,15 +17,15 @@ public extension HTTPClient {
         let conversationID = try validatedIdentifier(conversationID, name: "conversation")
         guard !messagesByRecipientUserID.isEmpty, messagesByRecipientUserID.count <= 256,
             title?.count ?? 0 <= 100,
-            body?.count ?? 0 <= 4_096,
-            deepLink?.count ?? 0 <= 2_048
+            body?.count ?? 0 <= 4096,
+            deepLink?.count ?? 0 <= 2048
         else {
             throw HTTPError.invalidRequest("The push notification contains invalid values.")
         }
         let recipients = try messagesByRecipientUserID.map { userID, messageContent in
             let userID = try validatedIdentifier(userID, name: "recipient user")
             let messageContent = messageContent.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !messageContent.isEmpty, messageContent.utf8.count <= 32_768 else {
+            guard !messageContent.isEmpty, messageContent.utf8.count <= 32768 else {
                 throw HTTPError.invalidRequest("The push notification contains invalid values.")
             }
             return PushNotificationRequest.Recipient(userID: userID, messageContent: messageContent)
@@ -35,7 +40,7 @@ public extension HTTPClient {
         let data = try await executor.requiredResponse(
             method: "POST",
             path: ["v1", "push-notifications"],
-            body: .data(try executor.encode(request)),
+            body: .data(executor.encode(request)),
             contentType: "application/json"
         )
         let response = try executor.decode(PushNotificationResponse.self, from: data)

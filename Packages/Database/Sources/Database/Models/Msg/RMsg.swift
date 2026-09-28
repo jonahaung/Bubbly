@@ -52,7 +52,7 @@ public struct RMsg: Codable, Sendable, Hashable {
             reactions: msg.reactions
         )
     }
-    
+
     public func outgoing() -> RMsg {
         var copy = self
         copy.outgoingStatus = nil

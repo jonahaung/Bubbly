@@ -5,10 +5,10 @@
 
 import XUI
 import Core
+import Shared
 import SwiftUI
 import Database
 import Services
-import Shared
 
 struct ContactListPhoneRow: View {
     let contact: Contact

@@ -1,5 +1,11 @@
-import Database
+//  ContactProfileRepositoryImpl.swift
+//
+//  Copyright © 2026 Aung Ko Min.
+//
+
 import Shared
+import Database
+
 @MainActor
 struct ContactProfileRepositoryImpl: ContactProfileRepository {
     private let manager: ContactProfileManager
@@ -65,7 +71,7 @@ struct ContactProfileRepositoryImpl: ContactProfileRepository {
         return snapshot()
     }
 
-    func latestSnapshot() async -> ContactProfileSnapshot {
+    func latestSnapshot() -> ContactProfileSnapshot {
         snapshot()
     }
 

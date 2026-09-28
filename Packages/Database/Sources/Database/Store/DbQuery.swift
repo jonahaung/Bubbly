@@ -6,7 +6,7 @@
 import SwiftUI
 import SwiftData
 
-public struct DbQuery<T: PersistentModel & SendableTransformable>: View {
+public struct DbQuery<T: PersistentModel & PersistentCodableModel>: View {
     @Query private var items: [T]
     private let content: (_ items: [T]) -> AnyView
 

@@ -4,14 +4,15 @@
 //
 
 import XUI
-import Database
-import Foundation
-import Services
 import Shared
+import Database
+import Services
+import Foundation
+
 struct ContactListContent: Sendable {
-    let chatContacts: [Contact]
-    let phoneContacts: [Contact]
-    let groups: [Group]
+    var chatContacts: [Contact]
+    var phoneContacts: [Contact]
+    var groups: [Group]
 
     static let empty: ContactListContent = .init(
         chatContacts: [],
@@ -44,11 +45,11 @@ extension ContactListClient {
             let contactStore = await Store.shared.contactStore
             let groupStore = await Store.shared.groupStore
             let chatContacts = try await contactStore?.fetchAll() ?? []
-            let phoneContacts = try await PhoneContactsService.shared.fetchContacts()
+            //            let phoneContacts = try await PhoneContactsService.shared.fetchContacts()
             let groups = try await groupStore?.fetchAll() ?? []
             return ContactListContent(
                 chatContacts: chatContacts,
-                phoneContacts: phoneContacts,
+                phoneContacts: [],
                 groups: groups.sorted {
                     $0.name.localizedStandardCompare($1.name) == .orderedAscending
                 }
@@ -59,10 +60,9 @@ extension ContactListClient {
                 return contact
             }
             guard
-                var resolvedContact = try await HTTPClient.shared.lookupContacts(
+                var resolvedContact = try await ContactHttpClient.shared.lookupContacts(
                     mobileNumbers: [contact.mobile]
-                ).first(where: { $0.mobile == contact.mobile })
-            else {
+                ).first(where: { $0.mobile == contact.mobile }) else {
                 throw ContactListClientError.contactIsNotRegistered
             }
             resolvedContact.name = contact.name
