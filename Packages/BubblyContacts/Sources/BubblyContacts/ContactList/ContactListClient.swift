@@ -62,7 +62,8 @@ extension ContactListClient {
             guard
                 var resolvedContact = try await ContactHttpClient.shared.lookupContacts(
                     mobileNumbers: [contact.mobile]
-                ).first(where: { $0.mobile == contact.mobile }) else {
+                ).first(where: { $0.mobile == contact.mobile })
+            else {
                 throw ContactListClientError.contactIsNotRegistered
             }
             resolvedContact.name = contact.name
